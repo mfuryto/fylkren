@@ -10,13 +10,16 @@ Status: **not ready to make public**. This is a gate and evidence record, not pe
 - Only verification code and public keys belong in this repository. The bundled production public key is not a secret. Production license signing, private keys, customer/commercial records and payment logic belong in the separate private `thunold-olsen-licensing` repository. The documented signed JSON envelope is the trust boundary; compare the bundled key fingerprint with the issuer before public release.
 - GitHub Issues may accept public bugs, feature requests and discussion after opening. There is no invitation for external patches or pull requests. Confidential vulnerability reports require a private channel first.
 
-## Suggested GitHub presentation
+## GitHub presentation
 
 **Description:** Self-hosted operational task management for hierarchical assignments, planning, execution and reporting. Source-available; Community and offline-licensed Enterprise.
 
-**Topics:** `operational-task-management`, `mission-management`, `task-management`, `workflow`, `planning`, `execution`, `reporting`, `preparedness`, `self-hosted`, `offline-first`, `air-gapped`, `docker`, `dotnet`, `react`, `postgresql`, `source-available`, `enterprise-software`.
+**Topics:** `operational-task-management`, `mission-management`, `workflow-management`, `operations-management`, `preparedness`, `emergency-management`, `public-sector`, `self-hosted`, `offline-first`, `air-gapped`, `docker`, `dotnet`, `react`, `postgresql`, `source-available`, `enterprise-software`, `federation`, `identity-management`, `audit-log`, `reporting`.
 
-These are proposed metadata, not a claim that GitHub settings, Discussions or a security channel have been configured. Confirm actual GitHub metadata and public visibility only at the release gate.
+The description and topics above were applied to the private GitHub repository
+on 2026-09-27. They do not imply public visibility, enabled Discussions or a
+configured confidential-security channel. Confirm all presentation and security
+settings again at the release gate.
 
 ## Current checks and findings
 

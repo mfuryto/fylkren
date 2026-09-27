@@ -1,56 +1,157 @@
 <p align="center">
-  <img src="assets/branding/fylkren-logo-web-256.png" width="112" alt="Fylkren logo">
+  <img src="assets/branding/fylkren-logo-web-256.png" width="120" alt="Fylkren logo">
 </p>
 
-# Fylkren
+<h1 align="center">Fylkren</h1>
 
-<p align="center"><strong>Operational task and mission management, from assignment to documented result.</strong></p>
+<p align="center"><strong>Operational task and mission management—from assignment to documented result.</strong></p>
 
-<p align="center">Self-hosted · Source-available · Offline-first · One Community/Enterprise product</p>
+<p align="center">
+  <code>SELF-HOSTED</code> · <code>OFFLINE-FIRST</code> · <code>AIR-GAPPED READY</code> · <code>WINDOWS-FAMILIAR WEB UI</code>
+</p>
 
-Fylkren helps organizations receive, assess, plan, delegate, execute and report formal assignments across clear levels of responsibility. It is built for operational and preparedness work—including civil preparedness, emergency-response and public-sector organizations—and is also useful wherever work must be assigned, followed up and documented. These examples do not imply certification for safety-critical or classified use.
+<p align="center">
+  <a href="#why-fylkren">Why Fylkren</a> ·
+  <a href="#capabilities">Capabilities</a> ·
+  <a href="#community-and-enterprise">Editions</a> ·
+  <a href="#deployment">Deployment</a> ·
+  <a href="docs/README.md">Documentation</a>
+</p>
 
-> **Pre-1.0 status:** Fylkren is being prepared for public release. The release acceptance and security verification are not complete. Do not treat this repository as a certified or production-approved system.
+Fylkren gives organizations one controlled chain for receiving, assessing,
+planning, delegating, executing and reporting formal assignments. It is designed
+for operational and preparedness work with clear responsibility, durable
+history and strict boundaries between organizational levels.
 
-## The work chain
+| **Direct the work** | **Retain local control** | **Document the result** |
+|:---|:---|:---|
+| Route tasks, requests and decisions through the right level | Keep each site, role and work level within its authorization boundary | Preserve execution history, approvals, audit events and final reports |
+| Delegate without taking over subordinate processing | Run locally, offline or in an isolated network | Print or export reports with customer-defined classification markings |
+
+> [!IMPORTANT]
+> **Pre-1.0:** Fylkren is being prepared for public release. Final release
+> acceptance and independent security verification are not complete. The
+> repository must not be treated as a certified, accredited or production-
+> approved system.
+
+## Why Fylkren
+
+Many tools can store tasks. Fylkren is built to preserve the **command,
+responsibility and reporting chain** around operational work.
+
+- ◆ **Clear ownership** — each responsible level processes and reports its own
+  part of an assignment.
+- ◆ **Controlled delegation** — leaders can delegate and receive results without
+  gaining automatic edit access to subordinate casework.
+- ◆ **Real organizational boundaries** — sites remain separate administration
+  and authorization domains, even when arranged in a hierarchy.
+- ◆ **Traceability by default** — decisions, status changes, approvals and final
+  reports remain understandable over time.
+- ◆ **Offline independence** — core operation, authentication, documentation and
+  licensing do not require a vendor cloud or continuous Internet access.
+- ◆ **One product, not two forks** — Community and Enterprise use the same
+  database, containers, schema, migrations and upgrade path.
+
+## The operational chain
 
 ```text
-Task or request → assessment → optional planning → execution → final report
-                        │                   │                  │
-                        └── delegation ────┴── status ────────┘
+Task or request
+      │
+      ▼
+Assessment ──► optional planning ──► execution ──► final report
+      │                 │                 │               │
+      └──── priority ───┴── delegation ───┴── status ─────┘
 ```
 
-Each organizational level owns its work and writes its own final report. Leaders delegate and receive results without automatically editing subordinate processing. A site is an independent administration and access boundary; parent/child site relationships route work and reporting without merging permissions. Cross-site requests reveal an official response, not the receiver's internal casework.
+New work follows the current organization. Work already in progress retains its
+original routing and reporting path, even if sites or units are reorganized.
+Cross-site requests expose the official response—not the receiving site's
+internal processing.
 
-## What Fylkren includes
+## Capabilities
 
-| Operational work | Management and assurance | Integration and deployment |
-| --- | --- | --- |
-| Hierarchical tasks, internal delegation and cross-site requests | Level-specific workload and history | Local accounts, MFA and passkeys |
-| Reusable planning and execution workflows, templates and timelines | Decisions, dependencies, risks and mitigations | Optional AD/LDAP, OIDC and SAML links |
-| Final reports, approvals, PDF/print presentation and report archives | Audit trails and immutable approval versions | Versioned APIs, signed webhooks and portable site export |
-| Rich text, document references and internal notifications | Site-managed roles and classification markings | Docker Compose, PostgreSQL and air-gapped operation |
+| Area | What Fylkren provides |
+| --- | --- |
+| **Tasks and requests** | Registration, receipt, assessment, priority, deadlines, hold, rejection, reopening, cancellation, internal delegation and cross-site requests |
+| **Planning and execution** | Optional planning, reusable workflows, step templates, timelines, rich text, decisions, dependencies, risks, mitigations and external follow-up |
+| **Organization and access** | Independent and hierarchical sites, internal units, personnel, local roles, work-level permissions and server-enforced authorization |
+| **Reports and records** | Level-owned final reports, approval versions, searchable archives, permanent request responses and print/PDF presentation |
+| **Identity** | Local accounts, password policy, recovery, TOTP MFA, WebAuthn/passkeys and optional enterprise identity links |
+| **Administration** | Platform and site administration, customer-defined classifications, appearance, notifications, audit, health and technical status |
+| **Integration** | Versioned administration/report APIs, signed webhooks, portable customer-data export and trusted Fylkren-to-Fylkren federation |
+| **Deployment** | Docker Compose, PostgreSQL, persistent cryptographic keys, offline operation, backup/restore and documented upgrades |
 
-Fylkren is not a document archive, general-purpose BPM/BI suite or formal security-classification system. Document references are links; Fylkren does not store the original files.
+### Designed boundaries
+
+Fylkren is deliberately focused. It is **not** a document archive, unrestricted
+process engine, chat suite, general BI platform or automatic security-
+classification authority. Document references remain links; the original files
+stay in the organization's approved document system.
 
 ## Community and Enterprise
 
-There is **one repository, codebase, database schema and upgrade path**. The API and web images are the same in both editions; there is no Enterprise fork or separate install. Community starts without an Enterprise entitlement file or Internet access. A valid offline signed entitlement activates selected Enterprise capabilities in that same installation.
+**Community is a complete operational foundation**, not a time-limited trial.
+**Enterprise is the professional edition** for larger installations, external
+identity, system integrations and federation. The signed license and product UI
+use the name `Enterprise`; there is no separate “Pro” build.
 
-| Community — ready without an entitlement file | Enterprise — enabled by offline entitlement |
-| --- | --- |
-| Up to 3 active sites (including child sites), unlimited internal units and people, local identity, MFA and passkeys | Additional active sites; new AD/LDAP, OIDC and SAML links and directory import |
-| Tasks, planning, execution, reporting, templates and audit | Machine administration and report APIs |
-| Notifications and portable customer-data export | Webhook subscriptions and delivery |
-| Offline operation and the full customer-owned data model | Trusted independent-instance federation and signed cross-installation request routing |
+**Legend:** ● included · ◈ requires a valid Enterprise license · — not included
 
-Entitlements and the Community site limit are enforced by the API, not merely by hiding buttons. Removing or losing an Enterprise entitlement does not delete customer data or disable existing sites, even if there are more than three; only additional site creation or reactivation is blocked. Existing external identity links can still authenticate to avoid lockout. See the [edition and license architecture](docs/architecture/EDITION_ENTITLEMENTS.md) for the exact 1.0 allocation and transition rules.
+| Capability | Community | Enterprise |
+| --- |:---:|:---:|
+| Same application, database and upgrade path | ● | ● |
+| Fully offline operation; no online activation | ● | ● |
+| Active sites | ● Up to 3 | ● Additional sites |
+| Internal units and personnel | ● Unlimited | ● Unlimited |
+| Tasks, requests, planning and execution | ● | ● |
+| Workflows, templates and timelines | ● | ● |
+| Final reports, approvals, archive and PDF/print | ● | ● |
+| Local identity, recovery, TOTP and passkeys | ● | ● |
+| Audit, notifications and portable customer-data export | ● | ● |
+| New AD/LDAP, OIDC and SAML links; directory import | — | ◈ |
+| Machine administration and report APIs | — | ◈ |
+| Signed webhook subscriptions and delivery | — | ◈ |
+| Trusted independent-instance federation | — | ◈ |
 
-To order and import an Enterprise license, including for fully air-gapped installations, follow the [license guide](docs/operations/GET_ENTERPRISE_LICENSE.md). Each independent installation has a stable Instance ID; a signed file activates its licensed capabilities without online activation.
+### Safe edition transitions
 
-## Start and explore
+A valid signed offline license activates Enterprise capabilities in the running
+installation—without reinstalling, replacing images or migrating data.
 
-Once the repository is public, a new self-hosted test installation can use Docker Engine, Docker Compose v2 and Git:
+- **Community → Enterprise:** import the signed license in Platform Manager.
+- **Enterprise → Community:** expiry or license removal stops new Enterprise-
+  only actions, but does not delete customer data.
+- **No lockout:** existing external identities may still authenticate after a
+  downgrade.
+- **No site loss:** sites created under Enterprise remain usable; Community only
+  blocks creating or reactivating another site above its three-site limit.
+- **Server-enforced:** the API validates entitlements; hiding a button is never
+  the security boundary.
+
+See the exact [edition and entitlement contract](docs/architecture/EDITION_ENTITLEMENTS.md)
+and the [Enterprise license guide](docs/operations/GET_ENTERPRISE_LICENSE.md).
+
+## Security and trust
+
+- ◇ Server-side authorization across site, role, work level and object.
+- ◇ Local MFA and passkeys, with optional external identity providers.
+- ◇ Audit history separated from technical diagnostics and security events.
+- ◇ Signed offline Enterprise licenses bound to the installation identity.
+- ◇ Signed federation messages and explicit mutual instance trust.
+- ◇ Customer-owned data export and documented backup/restore procedures.
+
+Security features reduce risk; they do not constitute accreditation. Review the
+[security policy](SECURITY.md), [security test plan](docs/security/SECURITY_TEST_PLAN.md),
+[OWASP ASVS matrix](docs/security/ASVS_5.0.0_L2_MATRIX.md) and
+[federation threat model](docs/security/FEDERATION_THREAT_MODEL.md) before any
+production decision.
+
+## Deployment
+
+### Self-hosted installation
+
+Once the repository is public, a test installation can use Docker Engine,
+Docker Compose v2 and Git:
 
 ```bash
 git clone https://github.com/mfuryto/fylkren.git
@@ -60,9 +161,19 @@ docker compose up -d --build
 docker compose ps
 ```
 
-The installer creates a local `.env` with a random database password. Review the public URL, TLS/reverse-proxy settings, authentication and backup plan before exposing an installation. Complete the one-time Platform Manager setup in the browser, then verify `/health`. For upgrades, **back up PostgreSQL, `.env` and Data Protection keys first**; follow [installation and upgrades](docs/operations/INSTALLATION_AND_UPGRADES.md). For isolated networks, see [offline deployment](docs/operations/DEPLOYMENT_AND_OFFLINE.md).
+The installer creates a local `.env` with a random database password. Before
+exposing an installation, configure its public URL, TLS reverse proxy,
+authentication, backups and persistent Data Protection keys. Complete the
+one-time Platform Manager setup and verify `/health`.
 
-Local development uses .NET 10, Node.js 24 and pnpm 11:
+Follow [installation and upgrades](docs/operations/INSTALLATION_AND_UPGRADES.md)
+for production procedures and [offline deployment](docs/operations/DEPLOYMENT_AND_OFFLINE.md)
+for isolated networks. Docker Compose single-node deployment is the currently
+supported production topology.
+
+### Local development
+
+Development uses .NET 10, Node.js 24 and pnpm 11:
 
 ```bash
 pnpm install
@@ -71,23 +182,35 @@ pnpm dev:demo
 dotnet run --project apps/api/Fylkren.Api.csproj
 ```
 
-The read-only demo has no production API or persistence. The production client runs in a modern browser on Windows, Linux and macOS. Docker Compose is the supported single-node deployment model for the current product.
+The read-only demo has no production API or persistence. The production web
+client supports modern browsers on Windows, Linux and macOS.
 
 ## Documentation
 
-The [documentation portal](docs/README.md) is the maintained entry point. Useful starting places:
+The [documentation portal](docs/README.md) is the maintained entry point.
 
-- [User manual](docs/administration/USER_MANUAL.md) and [task flow](docs/administration/WORKFLOW_AND_TASKS.md)
-- [Federation administration](docs/administration/FEDERATION.md), [federation architecture](docs/architecture/INSTANCE_FEDERATION.md) and [independent review brief](docs/security/FEDERATION_SECURITY_REVIEW_BRIEF.md)
-- [Technical architecture](docs/architecture/TECHNICAL_ARCHITECTURE.md) and [site model](docs/product/SITE_MODEL.md)
-- [Administration API](docs/api/ADMINISTRATION_API.md), [Report API](docs/api/REPORT_API.md) and [webhooks](docs/api/WEBHOOKS.md)
-- [Installation and upgrades](docs/operations/INSTALLATION_AND_UPGRADES.md), [system requirements](docs/operations/SYSTEM_REQUIREMENTS.md) and [security](SECURITY.md)
-- [Roadmap](docs/project/ROADMAP.md), [decisions](docs/project/DECISIONS.md) and [changelog](CHANGELOG.md)
+| Start here | Administration and operations | Architecture and assurance |
+| --- | --- | --- |
+| [User manual](docs/administration/USER_MANUAL.md) | [Installation and upgrades](docs/operations/INSTALLATION_AND_UPGRADES.md) | [Technical architecture](docs/architecture/TECHNICAL_ARCHITECTURE.md) |
+| [Task workflow](docs/administration/WORKFLOW_AND_TASKS.md) | [Federation administration](docs/administration/FEDERATION.md) | [Federation architecture](docs/architecture/INSTANCE_FEDERATION.md) |
+| [Get Enterprise](docs/operations/GET_ENTERPRISE_LICENSE.md) | [System requirements](docs/operations/SYSTEM_REQUIREMENTS.md) | [Roadmap](docs/project/ROADMAP.md) |
+| [API overview](docs/api/API.md) | [Backup and offline deployment](docs/operations/DEPLOYMENT_AND_OFFLINE.md) | [Security verification](docs/security/SECURITY_VERIFICATION.md) |
 
-Repository-facing documentation is in English. Norwegian Bokmål is the current user-interface language; English UI localization is planned. API identifiers and permalinks are language-neutral.
+Repository-facing documentation is English. Norwegian Bokmål is the current UI
+language; English UI localization is planned. Routes, API contracts, persistent
+identifiers and permalinks remain language-neutral.
 
-## Issues, license and brand
+## Issues, contributions, license and brand
 
-GitHub Issues are intended for public bug reports, feature requests and product discussion once the repository opens. Please do not post credentials, customer information or security vulnerabilities in a public issue; follow [SECURITY.md](SECURITY.md). Pull requests are disabled; Fylkren does not accept external code contributions through GitHub.
+GitHub Issues may be used for non-confidential bug reports, feature requests and
+product discussion once the repository opens. Never post credentials, customer
+information or vulnerabilities in a public issue; follow [SECURITY.md](SECURITY.md).
+Pull requests are disabled, and Fylkren does not accept external code
+contributions through GitHub.
 
-Fylkren is **source-available under PolyForm Perimeter 1.0.0**. Use of the source is governed by the complete [LICENSE](LICENSE); software access and Enterprise feature entitlements are separate. Copyright © 2026 THUNOLD-OLSEN (Norwegian organization number 996871126); see [NOTICE.md](NOTICE.md). The Fylkren name and logo are addressed separately in [TRADEMARKS.md](TRADEMARKS.md). Third-party components retain their own terms; see [third-party notices](docs/project/THIRD_PARTY_NOTICES.md).
+Fylkren is **source-available under PolyForm Perimeter 1.0.0**. The complete
+[LICENSE](LICENSE) governs source use; Enterprise feature entitlement is a
+separate commercial mechanism. Copyright © 2026 THUNOLD-OLSEN (Norwegian
+organization number 996871126). See [NOTICE.md](NOTICE.md),
+[TRADEMARKS.md](TRADEMARKS.md) and the
+[third-party notices](docs/project/THIRD_PARTY_NOTICES.md).
