@@ -73,6 +73,7 @@ Before public publication, run `bash tools/security/verify-repository-safety.sh 
 ## Project maintenance
 
 - [Publication readiness and repository audit](project/PUBLICATION_READINESS.md)
+- [GitHub repository security](operations/GITHUB_REPOSITORY_SECURITY.md)
 - [Development stack](architecture/DEVELOPMENT_STACK.md)
 - [Roadmap](project/ROADMAP.md)
 - [Product and architecture decisions](project/DECISIONS.md)
