@@ -9,7 +9,7 @@ This decision must be in place before the final Fylkren 1.0 functional, integrat
 | Capability | 1.0 allocation | Behavior without entitlement |
 | --- | --- | --- |
 | Up to three active sites (including child sites), unlimited internal units and personnel, local identity, MFA and passkeys/WebAuthn, task/plan/execution/report flow, templates, audit, notifications, and portable customer export | Community | Fully operational offline within the active-site limit. |
-| Additional active sites | Enterprise | Creating or reactivating a site above the Community limit returns `409` with `community_site_limit`. Existing sites remain usable. |
+| Unlimited active sites | Enterprise | Creating or reactivating a fourth active site requires Enterprise. Existing sites remain usable after a downgrade. |
 | Machine administration and report APIs (`machine-api`) | Enterprise | New clients/grants and machine API requests return `403`; existing client/grant metadata can be viewed and removed. Ordinary user access to sites and reports remains. |
 | Webhook subscriptions and delivery (`webhooks`) | Enterprise | New subscriptions return `403`; delivery worker stops without deleting queued events, subscriptions or history. Existing subscriptions can be viewed and deactivated. |
 | New AD/LDAP, OIDC and SAML identity linking and AD/LDAP personnel import (`external-identity`) | Enterprise | New links/search/import return `403`. Existing linked identities may still authenticate so license loss does not strand users or customer data. Existing links remain visible and can be removed. Local identity and MFA remain Community. |

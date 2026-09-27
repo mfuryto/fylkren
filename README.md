@@ -39,17 +39,17 @@ history and strict boundaries between organizational levels.
 Many tools can store tasks. Fylkren is built to preserve the **command,
 responsibility and reporting chain** around operational work.
 
-- ◆ **Clear ownership** — each responsible level processes and reports its own
+- **Clear ownership** — each responsible level processes and reports its own
   part of an assignment.
-- ◆ **Controlled delegation** — leaders can delegate and receive results without
+- **Controlled delegation** — leaders can delegate and receive results without
   gaining automatic edit access to subordinate casework.
-- ◆ **Real organizational boundaries** — sites remain separate administration
+- **Real organizational boundaries** — sites remain separate administration
   and authorization domains, even when arranged in a hierarchy.
-- ◆ **Traceability by default** — decisions, status changes, approvals and final
+- **Traceability by default** — decisions, status changes, approvals and final
   reports remain understandable over time.
-- ◆ **Offline independence** — core operation, authentication, documentation and
+- **Offline independence** — core operation, authentication, documentation and
   licensing do not require a vendor cloud or continuous Internet access.
-- ◆ **One product, not two forks** — Community and Enterprise use the same
+- **One product, not two forks** — Community and Enterprise use the same
   database, containers, schema, migrations and upgrade path.
 
 ## The operational chain
@@ -101,7 +101,7 @@ use the name `Enterprise`; there is no separate “Pro” build.
 | --- |:---:|:---:|
 | Same application, database and upgrade path | ● | ● |
 | Fully offline operation; no online activation | ● | ● |
-| Active sites | ● Up to 3 | ● Additional sites |
+| Active sites | ● Up to 3 | ● Unlimited |
 | Internal units and personnel | ● Unlimited | ● Unlimited |
 | Tasks, requests, planning and execution | ● | ● |
 | Workflows, templates and timelines | ● | ● |
@@ -133,12 +133,12 @@ and the [Enterprise license guide](docs/operations/GET_ENTERPRISE_LICENSE.md).
 
 ## Security and trust
 
-- ◇ Server-side authorization across site, role, work level and object.
-- ◇ Local MFA and passkeys, with optional external identity providers.
-- ◇ Audit history separated from technical diagnostics and security events.
-- ◇ Signed offline Enterprise licenses bound to the installation identity.
-- ◇ Signed federation messages and explicit mutual instance trust.
-- ◇ Customer-owned data export and documented backup/restore procedures.
+- Server-side authorization across site, role, work level and object.
+- Local MFA and passkeys, with optional external identity providers.
+- Audit history separated from technical diagnostics and security events.
+- Signed offline Enterprise licenses bound to the installation identity.
+- Signed federation messages and explicit mutual instance trust.
+- Customer-owned data export and documented backup/restore procedures.
 
 Security features reduce risk; they do not constitute accreditation. Review the
 [security policy](SECURITY.md), [security test plan](docs/security/SECURITY_TEST_PLAN.md),
