@@ -9,6 +9,7 @@ Fylkren supports local identities and configured AD, LDAP, OIDC, and SAML adapte
 - AD and LDAP require LDAPS or StartTLS. The lookup account must be read-only and limited to required attributes. Filter values are escaped, lookup must resolve exactly one entry, and a user's password is used only for a separate bind to that resolved DN.
 - SAML trusts only the configured identity provider, exact Entity ID, and HTTPS metadata. A permanent NameID must be explicitly linked to an active internal person.
 - External identities are denied while unknown, disabled, or unlinked. Linking and unlinking are audited.
+- Active AD/LDAP links are checked by stable ID in the background. Authoritative disabled/expired results suspend immediately; missing entries require repeated successful confirmation; unavailable or ambiguous directory results fail safe without suspending access. Suspension and restoration are durably audited by the `directory-lifecycle` system actor.
 - Keep local authentication available during an external-provider rollout until at least one Platform Manager path has been verified.
 - A directory-managed identity cannot bypass directory policy through local password, TOTP, or passkey authentication.
 
@@ -26,7 +27,7 @@ MFA is enabled by default. `FYLKREN_MFA_ENABLED=false` hides and disables TOTP, 
 
 Local and linked external sign-in use `HttpOnly`, `SameSite=Strict` cookies with an eight-hour sliding lifetime and a twelve-hour absolute lifetime. With `FYLKREN_REQUIRE_HTTPS=true`, cookies are `Secure` and use the `__Host-` prefix. A bounded internal HTTP deployment uses a separate non-Secure cookie name.
 
-Sessions are revalidated against identity, person, site access, and Platform Manager state at least every two minutes. Deactivation or removal of final access therefore invalidates an existing session. Data Protection keys live in a dedicated persistent volume so sessions and protected data survive normal container replacement.
+Sessions are revalidated against identity, person, site access, and Platform Manager state at least every two minutes. AD/LDAP sessions are revalidated on every request so a directory-lifecycle suspension rejects the next request after the background check. Other deactivation or removal of final access invalidates an existing session within the ordinary validation interval. Data Protection keys live in a dedicated persistent volume so sessions and protected data survive normal container replacement.
 
 All browser mutations, including sign-out, require an antiforgery token. The API and gateway set content-type, framing, referrer, permissions, Content Security Policy, cache, and HSTS protections as applicable. An external TLS terminator must reject weak protocols and cipher configurations.
 

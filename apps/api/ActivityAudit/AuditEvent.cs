@@ -44,12 +44,25 @@ public sealed class AuditEvent
         };
     }
 
+    public static AuditEvent FromSystem(Guid id, string actorSystem, string eventType,
+        string entityType, Guid entityId, DateTimeOffset occurredAt)
+    {
+        if (string.IsNullOrWhiteSpace(actorSystem) || actorSystem.Length > 100)
+            throw new ArgumentException("A system audit actor is required.", nameof(actorSystem));
+        return new AuditEvent
+        {
+            Id = id, ActorSystem = actorSystem.Trim(), EventType = eventType,
+            EntityType = entityType, EntityId = entityId, OccurredAt = occurredAt
+        };
+    }
+
     public Guid Id { get; private set; }
     public Guid? SiteId { get; private set; }
     public Guid? ActorPersonId { get; private set; }
     public Guid? ActorInstanceId { get; private set; }
     public Guid? ActorSiteId { get; private set; }
     public string? ActorSiteName { get; private set; }
+    public string? ActorSystem { get; private set; }
     public string EventType { get; private set; } = string.Empty;
     public string EntityType { get; private set; } = string.Empty;
     public Guid EntityId { get; private set; }

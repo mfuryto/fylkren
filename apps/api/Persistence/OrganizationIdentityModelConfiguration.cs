@@ -134,6 +134,12 @@ internal static class OrganizationIdentityModelConfiguration
         externalIdentity.Property(value => value.Username).HasColumnName("username").HasMaxLength(256);
         externalIdentity.Property(value => value.IsActive).HasColumnName("is_active");
         externalIdentity.Property(value => value.CreatedAt).HasColumnName("created_at");
+        externalIdentity.Property(value => value.DirectoryAccessEnabled).HasColumnName("directory_access_enabled").HasDefaultValue(true);
+        externalIdentity.Property(value => value.DirectoryLifecycleStatus).HasColumnName("directory_lifecycle_status").HasMaxLength(30).HasDefaultValue("pending").IsRequired();
+        externalIdentity.Property(value => value.DirectoryMissingCount).HasColumnName("directory_missing_count").HasDefaultValue(0);
+        externalIdentity.Property(value => value.DirectoryLastCheckedAt).HasColumnName("directory_last_checked_at");
+        externalIdentity.Property(value => value.DirectoryLastSuccessfulSyncAt).HasColumnName("directory_last_successful_sync_at");
+        externalIdentity.Property(value => value.DirectorySuspendedAt).HasColumnName("directory_suspended_at");
         externalIdentity.HasIndex(value => new { value.Provider, value.SubjectId }).IsUnique();
         externalIdentity.HasOne(value => value.Person).WithMany(value => value.ExternalIdentityLinks).HasForeignKey(value => value.PersonId).OnDelete(DeleteBehavior.Restrict);
 

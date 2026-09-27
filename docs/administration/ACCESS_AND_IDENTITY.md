@@ -47,6 +47,25 @@ Unknown stable identifiers are rejected. Username is never the permanent link ke
 
 AD/LDAP uses encrypted transport, a least-privileged lookup bind and a separate end-user credential bind. User passwords are never stored. Active directory-managed identities synchronize valid name/email attributes at login; local password, TOTP and WebAuthn login are disabled for that person, while the profile image remains locally editable.
 
+Active AD/LDAP links are also checked automatically in the background. The
+default interval is 15 minutes. An explicitly disabled AD account or an account
+that no longer matches the configured LDAP active-account filter is suspended
+after the first authoritative response. A directory entry that is no longer
+present must be absent in three successful checks before suspension. Connection,
+TLS, bind and ambiguous-result failures never suspend a user. Suspension keeps
+the person, memberships, roles and history, but blocks new directory sign-in and
+advances the internal security version so existing directory sessions are
+rejected on their next request. A later authoritative active result restores the
+link without recreating the person. Platform Manager can see each link's state
+and last check and can select **Synkroniser nå** on **Identitet**.
+
+AD account status uses `userAccountControl`, `accountExpires` and the configured
+active-account filter. Generic LDAP has no universal disabled-account attribute;
+the operator must set `FYLKREN_LDAP_LIFECYCLE_ACTIVE_FILTER` to the server's
+schema if disabled entries remain searchable. The safe default treats an
+existing LDAP entry as active and still detects confirmed deletion by
+`entryUUID`.
+
 ## MFA and passkeys
 
 Local accounts may enable TOTP from Profile. Activation requires a valid code and displays eight recovery codes once. Login challenges expire after five minutes, and recovery codes are single-use.
@@ -78,6 +97,6 @@ Normal/restricted task access controls who may see information. Classification m
 
 ## Session and security controls
 
-After login, users land on Overview unless a first-password-change flow requires Profile. Browser sessions use inactivity and absolute-lifetime limits and are invalidated by relevant security changes. Authenticated mutations require antiforgery validation; external authentication origin, callback and authority configuration is validated at startup.
+After login, users land on Overview unless a first-password-change flow requires Profile. Browser sessions use inactivity and absolute-lifetime limits and are invalidated by relevant security changes. AD/LDAP sessions revalidate their security version on every request so lifecycle suspension takes effect without the ordinary two-minute session cache. Authenticated mutations require antiforgery validation; external authentication origin, callback and authority configuration is validated at startup.
 
 Identity mapping elevation is justified, time-limited and audited and exposes only the identity data needed for linking. It never grants task, plan, execution or report access.

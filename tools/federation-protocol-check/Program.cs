@@ -2,8 +2,42 @@ using System.Security.Cryptography;
 using System.Net.Http.Json;
 using Fylkren.Api.Federation;
 using Fylkren.Api.ActivityAudit;
+using Fylkren.Api.Identity;
 
 var assertions = 0;
+var lifecycleNow = DateTimeOffset.UtcNow;
+var lifecycleLink = new ExternalIdentityLink(Guid.NewGuid(), Guid.NewGuid(), "ad",
+    Guid.NewGuid().ToString("D"), "synthetic.user", lifecycleNow);
+Check(lifecycleLink.DirectoryAccessEnabled && lifecycleLink.DirectoryLifecycleStatus == "active",
+    "directory link starts active after authoritative linking");
+Check(!lifecycleLink.RecordDirectoryMissing(lifecycleNow.AddMinutes(1), 3) &&
+    lifecycleLink.DirectoryMissingCount == 1 && lifecycleLink.DirectoryAccessEnabled,
+    "single missing directory result does not suspend access");
+lifecycleLink.RecordDirectoryUnavailable(lifecycleNow.AddMinutes(2));
+Check(lifecycleLink.DirectoryMissingCount == 0 && lifecycleLink.DirectoryAccessEnabled,
+    "directory outage resets missing confirmation without suspending access");
+Check(!lifecycleLink.RecordDirectoryMissing(lifecycleNow.AddMinutes(3), 3) &&
+    !lifecycleLink.RecordDirectoryMissing(lifecycleNow.AddMinutes(4), 3) &&
+    lifecycleLink.RecordDirectoryMissing(lifecycleNow.AddMinutes(5), 3) &&
+    !lifecycleLink.DirectoryAccessEnabled && lifecycleLink.DirectoryLifecycleStatus == "missing" &&
+    lifecycleLink.DirectoryMissingCount == 3 && lifecycleLink.DirectorySuspendedAt == lifecycleNow.AddMinutes(5),
+    "confirmed missing directory account suspends access");
+Check(!lifecycleLink.RecordDirectoryMissing(lifecycleNow.AddMinutes(5.5), 3) &&
+    lifecycleLink.DirectoryMissingCount == 3,
+    "repeated missing result remains capped and does not repeat the suspension transition");
+Check(lifecycleLink.RecordDirectoryActive("renamed.user", lifecycleNow.AddMinutes(6)) &&
+    lifecycleLink.DirectoryAccessEnabled && lifecycleLink.Username == "renamed.user" &&
+    lifecycleLink.DirectorySuspendedAt is null &&
+    lifecycleLink.DirectoryLastSuccessfulSyncAt == lifecycleNow.AddMinutes(6),
+    "authoritative active result resumes the same link");
+Check(lifecycleLink.RecordDirectoryDisabled("disabled", lifecycleNow.AddMinutes(7)) &&
+    !lifecycleLink.DirectoryAccessEnabled && lifecycleLink.DirectoryLifecycleStatus == "disabled",
+    "explicit disabled result suspends immediately");
+var lifecycleAudit = AuditEvent.FromSystem(Guid.NewGuid(), "directory-lifecycle",
+    "identity.directory.account-suspended", "external-identity-link", lifecycleLink.Id,
+    lifecycleNow.AddMinutes(7));
+Check(lifecycleAudit.ActorSystem == "directory-lifecycle" && lifecycleAudit.ActorPersonId is null,
+    "directory lifecycle transition has a durable system audit actor");
 using var signingKey = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 var publicKey = signingKey.ExportSubjectPublicKeyInfo();
 var encoded = Convert.ToBase64String(publicKey);

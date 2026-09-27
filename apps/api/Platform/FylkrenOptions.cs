@@ -36,6 +36,10 @@ public sealed class FylkrenOptions
         ValidateSaml();
         ValidateDirectory("Active Directory", Authentication.ActiveDirectory);
         ValidateDirectory("LDAP", Authentication.Ldap);
+        if (Authentication.DirectoryLifecycle.IntervalMinutes is < 1 or > 1440)
+            throw new InvalidOperationException("Directory lifecycle interval must be between 1 and 1440 minutes.");
+        if (Authentication.DirectoryLifecycle.MissingConfirmationCount is < 1 or > 10)
+            throw new InvalidOperationException("Directory lifecycle missing confirmation count must be between 1 and 10.");
         if (!Authentication.LocalEnabled && !Authentication.Oidc.Enabled && !Authentication.Saml.Enabled && !Authentication.ActiveDirectory.Enabled && !Authentication.Ldap.Enabled)
             throw new InvalidOperationException("At least one operational authentication method must be enabled.");
         if (Federation.RetentionDays is < 365 or > 3650)
@@ -77,6 +81,11 @@ public sealed class FylkrenOptions
         foreach (var attribute in new[] { options.UsernameAttribute, options.DisplayNameAttribute, options.EmailAttribute, options.StableIdAttribute })
             if (string.IsNullOrWhiteSpace(attribute) || !Regex.IsMatch(attribute, "^[A-Za-z][A-Za-z0-9-]*$"))
                 throw new InvalidOperationException($"{name} contains an invalid LDAP attribute name.");
+        if (options.LifecycleActiveFilter.Length is < 3 or > 512 ||
+            options.LifecycleActiveFilter.Any(char.IsControl) ||
+            options.LifecycleActiveFilter[0] != '(' || options.LifecycleActiveFilter[^1] != ')' ||
+            options.LifecycleActiveFilter.Count(character => character == '(') != options.LifecycleActiveFilter.Count(character => character == ')'))
+            throw new InvalidOperationException($"{name} contains an invalid lifecycle active-account filter.");
     }
     private void ValidateOidc()
     {
@@ -127,6 +136,7 @@ public sealed class AuthenticationOptions
     public SamlOptions Saml { get; set; } = new();
     public ActiveDirectoryOptions ActiveDirectory { get; set; } = new();
     public LdapOptions Ldap { get; set; } = new();
+    public DirectoryLifecycleOptions DirectoryLifecycle { get; set; } = new();
     public WebAuthnOptions WebAuthn { get; set; } = new();
 }
 
@@ -147,11 +157,23 @@ public abstract class DirectoryOptionsBase
     public string DisplayNameAttribute { get; set; } = "displayName";
     public string EmailAttribute { get; set; } = "mail";
     public string StableIdAttribute { get; set; } = "entryUUID";
+    public string LifecycleActiveFilter { get; set; } = "(objectClass=*)";
 }
 public sealed class ActiveDirectoryOptions : DirectoryOptionsBase
 {
     public string? Domain { get; set; }
-    public ActiveDirectoryOptions() { UsernameAttribute = "sAMAccountName"; StableIdAttribute = "objectGUID"; }
+    public ActiveDirectoryOptions()
+    {
+        UsernameAttribute = "sAMAccountName";
+        StableIdAttribute = "objectGUID";
+        LifecycleActiveFilter = "(!(userAccountControl:1.2.840.113556.1.4.803:=2))";
+    }
 }
 public sealed class LdapOptions : DirectoryOptionsBase { }
+public sealed class DirectoryLifecycleOptions
+{
+    public bool Enabled { get; set; } = true;
+    public int IntervalMinutes { get; set; } = 15;
+    public int MissingConfirmationCount { get; set; } = 3;
+}
 public sealed class WebAuthnOptions { public bool Enabled { get; set; } public string RpId { get; set; } = "localhost"; public string DisplayName { get; set; } = "Lokal installasjon"; public HashSet<string> Origins { get; set; } = ["http://localhost:8080"]; }

@@ -173,6 +173,7 @@ internal static class ServiceRegistration
         builder.Services.AddSingleton<TotpService>();
         builder.Services.AddSingleton<WebAuthnFlowService>();
         builder.Services.AddSingleton<DirectoryAuthenticationService>();
+        builder.Services.AddSingleton<DirectoryLifecycleSynchronizer>();
         builder.Services.AddFido2(options =>
         {
             options.ServerDomain = fylkrenOptions.Authentication.WebAuthn.RpId;
@@ -214,6 +215,7 @@ internal static class ServiceRegistration
         builder.Services.AddHostedService<FederationOutboundDeliveryWorker>();
         builder.Services.AddHostedService<WebhookDeliveryWorker>();
         builder.Services.AddHostedService<ApiMaintenanceWorker>();
+        builder.Services.AddHostedService<DirectoryLifecycleWorker>();
         return new FylkrenStartupSettings(fylkrenOptions, trustForwardedHeaders, requireHttps);
     }
 
@@ -245,7 +247,8 @@ internal static class ServiceRegistration
             }
 
             var validatedAtValue = context.Principal.FindFirst("fylkren:validated_at")?.Value;
-            if (long.TryParse(validatedAtValue, out var validatedAt) &&
+            var directoryManaged = context.Principal.FindFirst("fylkren:directory_managed")?.Value == "true";
+            if (!directoryManaged && long.TryParse(validatedAtValue, out var validatedAt) &&
                 now - DateTimeOffset.FromUnixTimeSeconds(validatedAt) < TimeSpan.FromMinutes(2))
                 return;
 
@@ -273,7 +276,8 @@ internal static class ServiceRegistration
                 return;
             }
 
-            context.ReplacePrincipal(IdentityEndpoints.CreatePrincipal(sessionIdentity, sessionStartedAt));
+            context.ReplacePrincipal(IdentityEndpoints.CreatePrincipal(
+                sessionIdentity, sessionStartedAt, directoryManaged));
             context.ShouldRenew = true;
             return;
         }

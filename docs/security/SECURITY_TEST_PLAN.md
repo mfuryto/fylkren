@@ -94,7 +94,7 @@ Run all applicable unit, integration, frontend, Compose, and image checks docume
 - exact administration/report API scopes, grants, ETags, idempotency, and concealed resources;
 - log, audit, email, browser-storage, and URL leakage;
 - restore of a matched database and Data Protection key set;
-- AD/LDAP, OIDC, SAML, SMTP, TOTP, and WebAuthn in the closed integration environment;
+- AD/LDAP authentication and automatic deprovisioning—including disabled, expired, deleted, restored and unavailable-directory states—plus OIDC, SAML, SMTP, TOTP, and WebAuthn in the closed integration environment;
 - air-gapped startup and operation without runtime internet dependency.
 
 ## Completion criteria

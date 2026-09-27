@@ -188,6 +188,15 @@ People transferred into a site by Platform Manager appear under **No active unit
 
 Directory users are added selectively through search; AD/LDAP never populates the site automatically. Person searches show both name and email to distinguish similar names. Role/person pickers use search rather than loading a large dropdown.
 
+AD/LDAP remains the source for username, name, email, password and directory
+account state. Fylkren remains the source for site membership, internal unit,
+roles and operational authority. Platform Manager can review automatic lifecycle
+status and last-check time under **Identitet** and select **Synkroniser nå**.
+When the directory confirms that an account is disabled, expired or repeatedly
+missing, Fylkren suspends its directory link and invalidates its active sessions
+without deleting memberships, roles or history. An unavailable directory does
+not suspend users.
+
 Child sites appear as read-only site nodes in Organization but never as internal Personnel groups.
 
 ## 12. Site Manager administration

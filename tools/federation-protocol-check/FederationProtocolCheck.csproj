@@ -25,5 +25,6 @@
     <Compile Include="../../apps/api/Federation/FederationCancellationContract.cs" Link="FederationCancellationContract.cs" />
     <Compile Include="../../apps/api/Federation/FederationWorkLink.cs" Link="FederationWorkLink.cs" />
     <Compile Include="../../apps/api/ActivityAudit/AuditEvent.cs" Link="AuditEvent.cs" />
+    <Compile Include="../../apps/api/Identity/ExternalIdentityLink.cs" Link="ExternalIdentityLink.cs" />
   </ItemGroup>
 </Project>

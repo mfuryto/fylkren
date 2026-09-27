@@ -163,6 +163,21 @@ For the administration API, test every scope separately; create, read, edit, mov
 
 For the report API, test missing credentials, missing scope, missing grant, the exact granted top and deep levels, `organizationPath`, incomplete and unapproved reports, and classified reports with and without `includeClassified`. Disable the client and verify immediate rejection. Platform machine events must appear only in Platform Audit. Follow the formal contracts in [API conventions](../api/API.md), [Administration API](../api/ADMINISTRATION_API.md), and [Report API](../api/REPORT_API.md).
 
+### E2E-14 — AD/LDAP directory lifecycle
+
+Link synthetic users through AD and LDAP and establish authenticated sessions.
+Verify scheduled and manual synchronization by stable ID, managed name/email
+updates and visible last-check status. Disable and expire an AD account and make
+an LDAP entry fail its configured active-account filter; each link must suspend
+on the first authoritative check and its existing session must fail on the next
+request. Delete an entry and confirm that access remains through the configured
+missing-confirmation threshold, then suspends. Restore every entry and verify
+the same internal person, memberships, roles and history are retained while the
+link resumes. During TLS failure, directory outage, invalid lookup bind,
+ambiguous stable ID and malformed attributes, no user may be suspended. Confirm
+transition audit events use the `directory-lifecycle` system actor and that no
+password, bind secret or sensitive attribute is logged.
+
 ### E2E-15 — Dependencies and blocked progress
 
 Create a task with two finish-to-start predecessors. Verify it remains blocked until both are completed; one completion alone must not release it. Check blocked state in Tasks and the API, and reject direct API progress while blocked. Reject self-dependency, duplicates, cross-site references and cycles. Add a dependency while assessing a task, place it on hold for that reason, and verify that an approved plan cannot be released while the dependency remains active. Remove a dependency and confirm that the change is audited and the derived blocked state updates.

@@ -47,6 +47,13 @@ public sealed class Person
         SetEmail(email);
     }
 
+    public void UpdateDirectoryProfile(string displayName, string? email)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(displayName);
+        DisplayName = displayName.Trim();
+        SetEmail(email);
+    }
+
     private void SetEmail(string? email)
     {
         Email = string.IsNullOrWhiteSpace(email) ? null : email.Trim();

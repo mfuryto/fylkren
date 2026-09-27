@@ -15,7 +15,8 @@ namespace Fylkren.Api.Identity;
 
 public static partial class IdentityEndpoints
 {
-    internal static ClaimsPrincipal CreatePrincipal(LoginIdentity identity, DateTimeOffset? sessionStartedAt = null)
+    internal static ClaimsPrincipal CreatePrincipal(LoginIdentity identity, DateTimeOffset? sessionStartedAt = null,
+        bool directoryManaged = false)
     {
         var now = DateTimeOffset.UtcNow;
         var claims = new List<Claim>
@@ -29,6 +30,7 @@ public static partial class IdentityEndpoints
             new("fylkren:validated_at", now.ToUnixTimeSeconds().ToString()),
             new("fylkren:session_started_at", (sessionStartedAt ?? now).ToUnixTimeSeconds().ToString())
         };
+        if (directoryManaged) claims.Add(new Claim("fylkren:directory_managed", "true"));
         if (identity.IsPlatformManager) claims.Add(new Claim(ClaimTypes.Role, "PlatformManager"));
 
         return new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));

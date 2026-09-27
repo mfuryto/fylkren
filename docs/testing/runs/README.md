@@ -6,6 +6,8 @@ The [2026-09-27 Community/Enterprise API regression](2026-09-27-community-enterp
 
 The [authorization and cross-site GUID-substitution run](2026-09-27-authorization-guid-substitution.md) records the later expanded role/object boundary suite, the `SV-047` function-level authorization finding, its correction and the final clean full-suite rerun.
 
+The [directory lifecycle deprovisioning run](2026-09-27-directory-lifecycle-deprovisioning.md) records the implementation-level state, migration, GUI-build and full-regression evidence for automatic AD/LDAP suspension and resumption. Live Samba/Active Directory and OpenLDAP acceptance remains an explicit release gate.
+
 For each run, record:
 
 1. Run ID, date/time, test tool, application commit and version, test-code revision or hash, environment and fixture reset.

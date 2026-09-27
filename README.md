@@ -76,7 +76,7 @@ internal processing.
 | **Planning and execution** | Optional planning, reusable workflows, step templates, timelines, rich text, decisions, dependencies, risks, mitigations and external follow-up |
 | **Organization and access** | Independent and hierarchical sites, internal units, personnel, local roles, work-level permissions and server-enforced authorization |
 | **Reports and records** | Level-owned final reports, approval versions, searchable archives, permanent request responses and print/PDF presentation |
-| **Identity** | Local accounts, password policy, recovery, TOTP MFA, WebAuthn/passkeys and optional enterprise identity links |
+| **Identity** | Local accounts, password policy, recovery, TOTP MFA, WebAuthn/passkeys, optional enterprise identity links and automatic AD/LDAP deprovisioning |
 | **Administration** | Platform and site administration, customer-defined classifications, appearance, notifications, audit, health and technical status |
 | **Integration** | Versioned administration/report APIs, signed webhooks, portable customer-data export and trusted Fylkren-to-Fylkren federation |
 | **Deployment** | Docker Compose, PostgreSQL, persistent cryptographic keys, offline operation, backup/restore and documented upgrades |

@@ -41,6 +41,11 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("actor_site_id");
 
+                    b.Property<string>("ActorSystem")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("actor_system");
+
                     b.Property<string>("ActorSiteName")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
@@ -82,7 +87,7 @@ namespace Fylkren.Api.Persistence.Migrations
 
                     b.ToTable("audit_events", (string)null, t =>
                         {
-                            t.HasCheckConstraint("CK_audit_events_actor_origin", "(actor_person_id IS NOT NULL AND actor_instance_id IS NULL AND actor_site_id IS NULL AND actor_site_name IS NULL) OR (actor_person_id IS NULL AND actor_instance_id IS NOT NULL AND actor_site_id IS NOT NULL AND NULLIF(BTRIM(actor_site_name), '') IS NOT NULL) OR (actor_person_id IS NULL AND actor_instance_id IS NOT NULL AND actor_site_id IS NULL AND actor_site_name IS NULL)");
+                            t.HasCheckConstraint("CK_audit_events_actor_origin", "(actor_person_id IS NOT NULL AND actor_instance_id IS NULL AND actor_site_id IS NULL AND actor_site_name IS NULL AND actor_system IS NULL) OR (actor_person_id IS NULL AND actor_instance_id IS NOT NULL AND actor_site_id IS NOT NULL AND NULLIF(BTRIM(actor_site_name), '') IS NOT NULL AND actor_system IS NULL) OR (actor_person_id IS NULL AND actor_instance_id IS NOT NULL AND actor_site_id IS NULL AND actor_site_name IS NULL AND actor_system IS NULL) OR (actor_person_id IS NULL AND actor_instance_id IS NULL AND actor_site_id IS NULL AND actor_site_name IS NULL AND NULLIF(BTRIM(actor_system), '') IS NOT NULL)");
                         });
                 });
 
@@ -582,6 +587,38 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<bool>("DirectoryAccessEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("directory_access_enabled");
+
+                    b.Property<DateTimeOffset?>("DirectoryLastCheckedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("directory_last_checked_at");
+
+                    b.Property<DateTimeOffset?>("DirectoryLastSuccessfulSyncAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("directory_last_successful_sync_at");
+
+                    b.Property<string>("DirectoryLifecycleStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasDefaultValue("pending")
+                        .HasColumnName("directory_lifecycle_status");
+
+                    b.Property<int>("DirectoryMissingCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("directory_missing_count");
+
+                    b.Property<DateTimeOffset?>("DirectorySuspendedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("directory_suspended_at");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")

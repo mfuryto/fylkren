@@ -15,9 +15,10 @@ internal static class AuditModelConfiguration
         var auditEvent = modelBuilder.Entity<AuditEvent>();
         auditEvent.ToTable("audit_events", table => table.HasCheckConstraint(
             "CK_audit_events_actor_origin",
-            "(actor_person_id IS NOT NULL AND actor_instance_id IS NULL AND actor_site_id IS NULL AND actor_site_name IS NULL) OR " +
-            "(actor_person_id IS NULL AND actor_instance_id IS NOT NULL AND actor_site_id IS NOT NULL AND NULLIF(BTRIM(actor_site_name), '') IS NOT NULL) OR " +
-            "(actor_person_id IS NULL AND actor_instance_id IS NOT NULL AND actor_site_id IS NULL AND actor_site_name IS NULL)"));
+            "(actor_person_id IS NOT NULL AND actor_instance_id IS NULL AND actor_site_id IS NULL AND actor_site_name IS NULL AND actor_system IS NULL) OR " +
+            "(actor_person_id IS NULL AND actor_instance_id IS NOT NULL AND actor_site_id IS NOT NULL AND NULLIF(BTRIM(actor_site_name), '') IS NOT NULL AND actor_system IS NULL) OR " +
+            "(actor_person_id IS NULL AND actor_instance_id IS NOT NULL AND actor_site_id IS NULL AND actor_site_name IS NULL AND actor_system IS NULL) OR " +
+            "(actor_person_id IS NULL AND actor_instance_id IS NULL AND actor_site_id IS NULL AND actor_site_name IS NULL AND NULLIF(BTRIM(actor_system), '') IS NOT NULL)"));
         auditEvent.HasKey(value => value.Id);
         auditEvent.Property(value => value.Id).HasColumnName("id");
         auditEvent.Property(value => value.SiteId).HasColumnName("site_id");
@@ -25,6 +26,7 @@ internal static class AuditModelConfiguration
         auditEvent.Property(value => value.ActorInstanceId).HasColumnName("actor_instance_id");
         auditEvent.Property(value => value.ActorSiteId).HasColumnName("actor_site_id");
         auditEvent.Property(value => value.ActorSiteName).HasColumnName("actor_site_name").HasMaxLength(200);
+        auditEvent.Property(value => value.ActorSystem).HasColumnName("actor_system").HasMaxLength(100);
         auditEvent.Property(value => value.EventType).HasColumnName("event_type").HasMaxLength(100).IsRequired();
         auditEvent.Property(value => value.EntityType).HasColumnName("entity_type").HasMaxLength(100).IsRequired();
         auditEvent.Property(value => value.EntityId).HasColumnName("entity_id");

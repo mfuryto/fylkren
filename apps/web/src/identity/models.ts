@@ -8,5 +8,13 @@ export type GlobalUser = {
 };
 export type UserSite = { id: string; name: string };
 export type FederatedIdentityLink = { id: string; username: string; displayName: string; subjectId: string };
-export type DirectoryIdentityLink = { id: string; provider: string; displayName: string; directoryUsername: string; subjectId: string };
+export type DirectoryIdentityLink = {
+  id: string; provider: string; displayName: string; directoryUsername: string; subjectId: string;
+  accessEnabled: boolean; lifecycleStatus: string; missingCount: number;
+  lastCheckedAt: string | null; lastSuccessfulSyncAt: string | null; suspendedAt: string | null;
+};
+export type DirectoryLifecycleSummary = {
+  checked: number; active: number; suspended: number; resumed: number;
+  missingPending: number; unavailable: number;
+};
 export type GlobalUserPage = { items: GlobalUser[]; total: number; page: number; sites: UserSite[] };

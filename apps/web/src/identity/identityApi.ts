@@ -1,5 +1,5 @@
 import { apiGet, apiMutate } from "../api/client";
-import type { DirectoryIdentityLink, FederatedIdentityLink, GlobalUserPage, IdentityConfiguration } from "./models";
+import type { DirectoryIdentityLink, DirectoryLifecycleSummary, FederatedIdentityLink, GlobalUserPage, IdentityConfiguration } from "./models";
 
 const root = "/api/platform/identity";
 export const loadIdentityConfiguration = () => apiGet<IdentityConfiguration>(root, "Identitetskonfigurasjonen kunne ikke lastes.");
@@ -17,6 +17,7 @@ export const addSamlIdentity = (body: object) => apiMutate(`${root}/saml-links`,
 export const addDirectoryIdentity = (body: object) => apiMutate(`${root}/directory-links`, "POST", body, "Katalogkoblingen kunne ikke lagres. Kontroller lokal bruker, katalogbruker og katalogforbindelse.");
 export const removeDirectoryIdentity = (id: string) => apiMutate(`${root}/directory-links/${id}`, "DELETE", undefined, "Katalogkoblingen kunne ikke fjernes.");
 export const testDirectoryConnection = (provider: string) => apiMutate(`${root}/directories/${provider}/test`, "POST", undefined, `${provider === "ad" ? "Active Directory" : "LDAP"}-forbindelsen kunne ikke opprettes.`);
+export const synchronizeDirectoryLifecycle = () => apiMutate<DirectoryLifecycleSummary>(`${root}/directories/lifecycle/sync`, "POST", undefined, "Katalogbrukerne kunne ikke synkroniseres.");
 export const moveGlobalUser = (id: string, sourceSiteId: string, targetSiteId: string) => apiMutate(`${root}/users/${id}/move`, "POST", { sourceSiteId, targetSiteId }, "Brukeren kunne ikke flyttes.");
 export type PasswordResetCode = { personId: string; displayName: string; resetCode: string; expiresAt: string };
 export const resetGlobalPasswords = (personIds: string[]) => apiMutate<{ resetCodes: PasswordResetCode[] }>(`${root}/users/password`, "POST", { personIds }, "Engangskodene kunne ikke opprettes.");

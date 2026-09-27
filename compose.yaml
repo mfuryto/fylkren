@@ -58,6 +58,7 @@ services:
       Fylkren__Authentication__ActiveDirectory__BindDn: ${FYLKREN_AD_BIND_DN:-}
       Fylkren__Authentication__ActiveDirectory__BindPassword: ${FYLKREN_AD_BIND_PASSWORD:-}
       Fylkren__Authentication__ActiveDirectory__UsernameAttribute: ${FYLKREN_AD_USERNAME_ATTRIBUTE:-sAMAccountName}
+      Fylkren__Authentication__ActiveDirectory__LifecycleActiveFilter: ${FYLKREN_AD_LIFECYCLE_ACTIVE_FILTER:-(!(userAccountControl:1.2.840.113556.1.4.803:=2))}
       Fylkren__Authentication__Ldap__Enabled: ${FYLKREN_LDAP_ENABLED:-false}
       Fylkren__Authentication__Ldap__Server: ${FYLKREN_LDAP_SERVER:-}
       Fylkren__Authentication__Ldap__BaseDn: ${FYLKREN_LDAP_BASE_DN:-}
@@ -71,6 +72,10 @@ services:
       Fylkren__Authentication__Ldap__DisplayNameAttribute: ${FYLKREN_LDAP_DISPLAY_NAME_ATTRIBUTE:-displayName}
       Fylkren__Authentication__Ldap__EmailAttribute: ${FYLKREN_LDAP_EMAIL_ATTRIBUTE:-mail}
       Fylkren__Authentication__Ldap__StableIdAttribute: ${FYLKREN_LDAP_STABLE_ID_ATTRIBUTE:-entryUUID}
+      Fylkren__Authentication__Ldap__LifecycleActiveFilter: ${FYLKREN_LDAP_LIFECYCLE_ACTIVE_FILTER:-(objectClass=*)}
+      Fylkren__Authentication__DirectoryLifecycle__Enabled: ${FYLKREN_DIRECTORY_LIFECYCLE_ENABLED:-true}
+      Fylkren__Authentication__DirectoryLifecycle__IntervalMinutes: ${FYLKREN_DIRECTORY_LIFECYCLE_INTERVAL_MINUTES:-15}
+      Fylkren__Authentication__DirectoryLifecycle__MissingConfirmationCount: ${FYLKREN_DIRECTORY_LIFECYCLE_MISSING_CONFIRMATIONS:-3}
       Fylkren__Authentication__WebAuthn__Enabled: ${FYLKREN_WEBAUTHN_ENABLED:-false}
       Fylkren__Authentication__WebAuthn__RpId: ${FYLKREN_WEBAUTHN_RP_ID:-localhost}
       Fylkren__Authentication__WebAuthn__DisplayName: ${FYLKREN_WEBAUTHN_DISPLAY_NAME:-Lokal installasjon}

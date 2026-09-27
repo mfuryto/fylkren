@@ -134,10 +134,23 @@ Use the canonical [Access and identity](../administration/ACCESS_AND_IDENTITY.md
 - LDAPS or StartTLS for AD/LDAP;
 - a read-only lookup identity limited to required attributes;
 - stable `objectGUID` or `entryUUID` links;
+- automatic lifecycle checks for disabled, expired and deleted directory accounts;
 - no automatic matching by email, name, or username;
 - safe local administrative recovery during rollout.
 
 Secrets remain only in the protected local environment. Restart/recreate the affected API service after configuration changes and inspect sanitized startup logs.
+
+Directory lifecycle checking is enabled by default every 15 minutes. Configure
+`FYLKREN_DIRECTORY_LIFECYCLE_INTERVAL_MINUTES` from 1 to 1440 and
+`FYLKREN_DIRECTORY_LIFECYCLE_MISSING_CONFIRMATIONS` from 1 to 10. The latter
+protects users from a single replication or search anomaly; transport or bind
+failure is never counted as a missing account. AD has a secure default filter
+for the `ACCOUNTDISABLE` flag and also checks account expiry. For another AD
+schema, override `FYLKREN_AD_LIFECYCLE_ACTIVE_FILTER`. Generic LDAP deployments
+must set `FYLKREN_LDAP_LIFECYCLE_ACTIVE_FILTER` when their directory retains
+disabled entries; for example, use the directory product's documented lock or
+status attribute rather than copying an AD filter. Keep the filter static—no
+user input is interpolated into it.
 
 ## SMTP and notifications
 

@@ -15,7 +15,8 @@ public static class PlatformAuditEndpoints
             const int pageSize = 50;
             var personEvents = database.AuditEvents.AsNoTracking()
                 .Where(value => value.ActorWasPlatformManager ||
-                    (value.ActorInstanceId != null && value.SiteId == null));
+                    (value.ActorInstanceId != null && value.SiteId == null) ||
+                    value.ActorSystem != null);
             var machineEvents = database.ApiMachineAuditEvents.AsNoTracking();
             if (!string.IsNullOrWhiteSpace(eventType))
             {
@@ -47,6 +48,7 @@ public static class PlatformAuditEndpoints
                 value.EntityId,
                 ActorPersonId = (Guid?)value.ActorPersonId,
                 ActorInstanceId = (Guid?)value.ActorInstanceId,
+                value.ActorSystem,
                 MachineIdentityId = (Guid?)null,
                 value.SiteId,
                 CorrelationId = (string?)null,
@@ -60,6 +62,7 @@ public static class PlatformAuditEndpoints
                 value.EntityId,
                 ActorPersonId = (Guid?)null,
                 ActorInstanceId = (Guid?)null,
+                ActorSystem = (string?)null,
                 MachineIdentityId = (Guid?)value.MachineIdentityId,
                 value.SiteId,
                 CorrelationId = (string?)value.CorrelationId,
@@ -107,6 +110,8 @@ public static class PlatformAuditEndpoints
                     ? people.GetValueOrDefault(personId, "Ukjent bruker")
                     : value.ActorInstanceId is Guid instanceId
                         ? $"Federert instans: {instanceId}"
+                    : value.ActorSystem is not null
+                        ? $"System: {value.ActorSystem}"
                     : value.MachineIdentityId is Guid machineId
                         ? $"API: {machines.GetValueOrDefault(machineId, "Ukjent klient")}"
                         : "Ukjent aktør",

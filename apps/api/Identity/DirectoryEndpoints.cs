@@ -21,6 +21,7 @@ public static class DirectoryEndpoints
         platform.MapPost("/directory-links", LinkIdentity).RequireFeature(FeatureCatalog.ExternalIdentity);
         platform.MapDelete("/directory-links/{id:guid}", UnlinkIdentity);
         platform.MapPost("/directories/{provider}/test", TestConnection).RequireFeature(FeatureCatalog.ExternalIdentity);
+        platform.MapPost("/directories/lifecycle/sync", SynchronizeLifecycle);
         return endpoints;
     }
 
@@ -39,7 +40,8 @@ public static class DirectoryEndpoints
             return Results.Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Invalid username or password");
 
         var link = await database.ExternalIdentityLinks
-            .SingleOrDefaultAsync(value => value.Provider == provider && value.SubjectId == directoryUser.StableId && value.IsActive, cancellationToken);
+            .SingleOrDefaultAsync(value => value.Provider == provider && value.SubjectId == directoryUser.StableId &&
+                value.IsActive && value.DirectoryAccessEnabled, cancellationToken);
         if (link is null)
             return Results.Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Directory identity is not linked");
 
@@ -53,12 +55,12 @@ public static class DirectoryEndpoints
         var email = NormalizeEmail(directoryUser.Email);
         if (email is not null && await database.People.AnyAsync(value => value.Id != identity.PersonId && value.NormalizedEmail == email.ToUpperInvariant(), cancellationToken))
             return Results.Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Invalid username or password");
-        if (email is not null) identity.Person.UpdateWithEmail(displayName, true, email);
-        else identity.Person.Update(displayName, true);
+        identity.Person.UpdateDirectoryProfile(displayName, email);
         link.UpdateUsername(directoryUser.Username);
         identity.RecordSignIn(DateTimeOffset.UtcNow);
         await database.SaveChangesAsync(cancellationToken);
-        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, IdentityEndpoints.CreatePrincipal(identity));
+        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+            IdentityEndpoints.CreatePrincipal(identity, directoryManaged: true));
         return Results.NoContent();
     }
 
@@ -66,7 +68,18 @@ public static class DirectoryEndpoints
         Results.Ok(await database.ExternalIdentityLinks.AsNoTracking()
             .Where(value => (value.Provider == "ad" || value.Provider == "ldap") && value.IsActive)
             .OrderBy(value => value.Provider).ThenBy(value => value.Username)
-            .Select(value => new { value.Id, value.Provider, value.SubjectId, directoryUsername = value.Username, displayName = value.Person.DisplayName })
+            .Select(value => new
+            {
+                value.Id, value.Provider, value.SubjectId,
+                directoryUsername = value.Username,
+                displayName = value.Person.DisplayName,
+                accessEnabled = value.DirectoryAccessEnabled,
+                lifecycleStatus = value.DirectoryLifecycleStatus,
+                missingCount = value.DirectoryMissingCount,
+                lastCheckedAt = value.DirectoryLastCheckedAt,
+                lastSuccessfulSyncAt = value.DirectoryLastSuccessfulSyncAt,
+                suspendedAt = value.DirectorySuspendedAt
+            })
             .ToListAsync(cancellationToken));
 
     private static async Task<IResult> LinkIdentity(DirectoryLinkRequest request, ClaimsPrincipal actor,
@@ -97,7 +110,7 @@ public static class DirectoryEndpoints
         var now = DateTimeOffset.UtcNow;
         var link = existingLink ?? new ExternalIdentityLink(Guid.NewGuid(), identity.PersonId, provider, directoryUser.StableId, directoryUser.Username, now);
         if (existingLink is null) database.ExternalIdentityLinks.Add(link);
-        else link.Reactivate(identity.PersonId, directoryUser.Username);
+        else link.Reactivate(identity.PersonId, directoryUser.Username, now);
         identity.DisableTotp();
         var credentials = await database.WebAuthnCredentials.Where(value => value.PersonId == identity.PersonId && value.IsActive).ToListAsync(cancellationToken);
         foreach (var credential in credentials) credential.Deactivate();
@@ -137,6 +150,20 @@ public static class DirectoryEndpoints
         if (!IsEnabled(provider, options)) return Results.NotFound();
         try { return await directory.TestConnectionAsync(provider, cancellationToken) ? Results.NoContent() : Results.Problem(statusCode: 502, title: "Katalogforbindelsen mislyktes."); }
         catch (InvalidOperationException) { return Results.NotFound(); }
+    }
+
+    private static async Task<IResult> SynchronizeLifecycle(IAntiforgery antiforgery,
+        HttpContext context, DirectoryLifecycleSynchronizer synchronizer, CancellationToken cancellationToken)
+    {
+        await antiforgery.ValidateRequestAsync(context);
+        try
+        {
+            return Results.Ok(await synchronizer.RunOnceAsync(cancellationToken));
+        }
+        catch (InvalidOperationException)
+        {
+            return Results.Conflict(new { error = "En katalogsynkronisering kjører allerede." });
+        }
     }
 
     private static string? NormalizeProvider(string? provider) => provider?.Trim().ToLowerInvariant() is "ad" or "ldap" ? provider.Trim().ToLowerInvariant() : null;
