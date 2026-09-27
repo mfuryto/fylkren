@@ -8,11 +8,13 @@ complete.
 
 ## Current private state
 
-The publishable repository is private. Dependabot vulnerability alerts and
-automated security fixes are enabled. Squash is the only merge method, merged
-branches are deleted, web commits require sign-off, and GitHub Actions is
-disabled because there are no reviewed workflows. `CODEOWNERS` assigns the
-repository to `@mfuryto`.
+The publishable repository is private. Pull requests are disabled at repository
+level. Dependency-graph vulnerability alerts remain enabled, while Dependabot
+version updates and automated security fixes are disabled because both create
+pull requests. Dependency updates must therefore be reviewed and committed by
+the owner. Squash is the only configured merge method if pull requests are ever
+re-enabled, merged branches are deleted, web commits require sign-off, and
+GitHub Actions is disabled because there are no reviewed workflows.
 
 The current personal private-repository plan does not expose branch protection,
 GitHub secret scanning or push protection. These are therefore publication
@@ -50,16 +52,11 @@ does not change settings or visibility.
 
 The apply command deliberately refuses to operate while the repository is
 private and never changes visibility. It enables GitHub Advanced Security,
-secret scanning, push protection, the dependency/vulnerability alerts used by
-Dependabot, automated security fixes and private vulnerability reporting. It
-protects `main` against direct pushes—including administrator bypass—requires a
-pull request, linear history and resolved conversations, and prohibits force
-pushes and deletion.
-
-The initial single-owner policy requires a pull request but zero approving
-reviews. A repository owner cannot approve their own pull request, so requiring
-one approval would lock out the only maintainer. When another trusted maintainer
-is established, increase the count to one and require code-owner review.
+secret scanning, push protection, dependency/vulnerability alerts and private
+vulnerability reporting. It disables pull requests and PR-based automated
+security fixes. It protects `main` against force pushes and deletion while
+retaining direct owner pushes, because requiring pull requests would contradict
+the repository's contribution policy.
 
 ## GitHub Actions and status checks
 
@@ -67,9 +64,8 @@ Actions remain disabled until maintained workflows exist. Before enabling
 Actions, review every workflow, pin each third-party action to a complete commit
 SHA, set the default workflow token to read-only, prevent Actions from creating
 or approving pull requests, and explicitly grant only the permissions each job
-needs. Then add the stable security and test jobs as required status checks on
-`main`; never require a check that cannot run for the repository's normal pull
-requests.
+needs. Stable security and test jobs may then become required status checks on
+`main`; never require a check that cannot run for direct owner pushes.
 
 ## Operational cautions
 

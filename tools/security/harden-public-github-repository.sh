@@ -49,7 +49,8 @@ git_dir=".git"
 [[ -f .git/HEAD ]] || git_dir=".git-local"
 git_repo=(git --git-dir="$git_dir" --work-tree=.)
 
-visibility="$(gh api "repos/$repo" --jq '.visibility')"
+api_version_header=(--header 'X-GitHub-Api-Version: 2026-03-10')
+visibility="$(gh api "${api_version_header[@]}" "repos/$repo" --jq '.visibility')"
 printf 'Repository: %s (%s)\n' "$repo" "$visibility"
 
 if [[ "$mode" == "apply" ]]; then
@@ -64,12 +65,13 @@ if [[ "$mode" == "apply" ]]; then
 
   bash tools/security/verify-repository-safety.sh --history
 
-  gh api --method PATCH "repos/$repo" --input - <<'JSON'
+  gh api "${api_version_header[@]}" --method PATCH "repos/$repo" --input - <<'JSON'
 {
   "allow_merge_commit": false,
   "allow_rebase_merge": false,
   "allow_squash_merge": true,
   "delete_branch_on_merge": true,
+  "has_pull_requests": false,
   "web_commit_signoff_required": true,
   "security_and_analysis": {
     "advanced_security": {"status": "enabled"},
@@ -79,27 +81,22 @@ if [[ "$mode" == "apply" ]]; then
 }
 JSON
   gh api --method PUT "repos/$repo/vulnerability-alerts"
-  gh api --method PUT "repos/$repo/automated-security-fixes"
+  gh api --method DELETE "repos/$repo/automated-security-fixes"
   gh api --method PUT "repos/$repo/private-vulnerability-reporting"
 
   # Keep Actions off until reviewed workflows exist and every third-party action
-  # is pinned to a full commit SHA. Dependabot does not require Actions here.
+  # is pinned to a full commit SHA.
   gh api --method PUT "repos/$repo/actions/permissions" --input - <<'JSON'
 {"enabled": false}
 JSON
 
-  # A pull request is required, but zero approving reviews keeps a single-owner
-  # repository operable. Add required status checks only after trusted CI exists.
+  # Pull requests are disabled. Protect main against destructive history changes
+  # while retaining direct pushes by the repository owner.
   gh api --method PUT "repos/$repo/branches/main/protection" --input - <<'JSON'
 {
   "required_status_checks": null,
   "enforce_admins": true,
-  "required_pull_request_reviews": {
-    "dismiss_stale_reviews": true,
-    "require_code_owner_reviews": false,
-    "required_approving_review_count": 0,
-    "require_last_push_approval": false
-  },
+  "required_pull_request_reviews": null,
   "restrictions": null,
   "required_linear_history": true,
   "allow_force_pushes": false,
@@ -113,12 +110,13 @@ JSON
 fi
 
 printf '\nRepository security settings\n'
-gh api "repos/$repo" --jq '{
+gh api "${api_version_header[@]}" "repos/$repo" --jq '{
   visibility,
   allow_merge_commit,
   allow_rebase_merge,
   allow_squash_merge,
   delete_branch_on_merge,
+  has_pull_requests,
   web_commit_signoff_required,
   security_and_analysis
 }'
@@ -127,7 +125,6 @@ printf '\nBranch protection\n'
 if ! gh api "repos/$repo/branches/main/protection" --jq '{
   enforce_admins: .enforce_admins.enabled,
   pull_request_required: (.required_pull_request_reviews != null),
-  approving_reviews: .required_pull_request_reviews.required_approving_review_count,
   linear_history: .required_linear_history.enabled,
   conversation_resolution: .required_conversation_resolution.enabled,
   force_pushes: .allow_force_pushes.enabled,
@@ -154,12 +151,13 @@ else
 fi
 
 if [[ "$mode" == "apply" ]]; then
-  gh api "repos/$repo" --jq '
+  gh api "${api_version_header[@]}" "repos/$repo" --jq '
     if .visibility == "public"
        and .allow_merge_commit == false
        and .allow_rebase_merge == false
        and .allow_squash_merge == true
        and .delete_branch_on_merge == true
+       and .has_pull_requests == false
        and .web_commit_signoff_required == true
        and .security_and_analysis.secret_scanning.status == "enabled"
        and .security_and_analysis.secret_scanning_push_protection.status == "enabled"
@@ -167,8 +165,7 @@ if [[ "$mode" == "apply" ]]; then
     else error("repository security settings do not match the required state") end'
   gh api "repos/$repo/branches/main/protection" --jq '
     if .enforce_admins.enabled == true
-       and .required_pull_request_reviews != null
-       and .required_pull_request_reviews.required_approving_review_count == 0
+       and .required_pull_request_reviews == null
        and .required_linear_history.enabled == true
        and .required_conversation_resolution.enabled == true
        and .allow_force_pushes.enabled == false
@@ -179,8 +176,8 @@ if [[ "$mode" == "apply" ]]; then
     if .enabled == false then "PASS  GitHub Actions remains disabled"
     else error("GitHub Actions is unexpectedly enabled") end'
   gh api "repos/$repo/automated-security-fixes" --jq '
-    if .enabled == true and .paused == false then "PASS  automated security fixes"
-    else error("automated security fixes are not active") end'
+    if .enabled == false then "PASS  PR-based automated security fixes are disabled"
+    else error("automated security fixes could still create pull requests") end'
   gh api "repos/$repo/private-vulnerability-reporting" --jq '
     if .enabled == true then "PASS  private vulnerability reporting"
     else error("private vulnerability reporting is not enabled") end'

@@ -88,6 +88,6 @@ Repository-facing documentation is in English. Norwegian Bokmål is the current 
 
 ## Issues, license and brand
 
-GitHub Issues are intended for public bug reports, feature requests and product discussion once the repository opens. Please do not post credentials, customer information or security vulnerabilities in a public issue; follow [SECURITY.md](SECURITY.md). An external code-contribution or pull-request program is not in place at this stage.
+GitHub Issues are intended for public bug reports, feature requests and product discussion once the repository opens. Please do not post credentials, customer information or security vulnerabilities in a public issue; follow [SECURITY.md](SECURITY.md). Pull requests are disabled; Fylkren does not accept external code contributions through GitHub.
 
 Fylkren is **source-available under PolyForm Perimeter 1.0.0**. Use of the source is governed by the complete [LICENSE](LICENSE); software access and Enterprise feature entitlements are separate. Copyright © 2026 THUNOLD-OLSEN (Norwegian organization number 996871126); see [NOTICE.md](NOTICE.md). The Fylkren name and logo are addressed separately in [TRADEMARKS.md](TRADEMARKS.md). Third-party components retain their own terms; see [third-party notices](docs/project/THIRD_PARTY_NOTICES.md).
