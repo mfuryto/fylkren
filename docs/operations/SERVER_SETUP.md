@@ -1,0 +1,205 @@
+# Single-host server setup
+
+This guide describes the supported Docker Compose profile for a single Fylkren host. Use synthetic data until the deployment has completed the organization's security, backup, identity, and acceptance checks.
+
+For the authoritative install, backup, upgrade, rollback, and recovery procedure, use [Installation and upgrades](INSTALLATION_AND_UPGRADES.md). This page explains the deployment shape and the configuration decisions around it.
+
+## Supported topology
+
+```text
+Browser
+   │ HTTPS
+External reverse proxy (optional)
+   │ HTTP on trusted internal path
+Fylkren web gateway
+   ├── static web application
+   └── reverse proxy to API
+          └── PostgreSQL
+```
+
+Only the web gateway is published on the host. The API and PostgreSQL stay on internal Compose networks. The current profile is not highly available; no clustered high-availability deployment is currently planned or supported.
+
+## Files and persistent data
+
+A conventional installation path is:
+
+```text
+/data/docker/fylkren/
+├── repository files
+├── .env
+└── backups/
+```
+
+The `.env` file and `backups/` directory are local and must never be committed. PostgreSQL and ASP.NET Data Protection keys live in named Docker volumes, not in the repository or container image.
+
+Protect these as one recovery set:
+
+- PostgreSQL backup;
+- the exact matching Data Protection key volume;
+- `.env` and deployment configuration;
+- a record of the deployed commit/version and image provenance.
+
+Losing the key ring can make protected TOTP and SMTP data unavailable even when the database is intact.
+
+## First installation
+
+Example installation into the conventional path:
+
+```bash
+cd /data/docker
+git clone <authorized-repository-url> fylkren
+cd /data/docker/fylkren
+./deploy/compose/install.sh
+docker compose build
+docker compose up -d
+```
+
+The install script creates `.env` only when it does not exist, generates a random 64-character database password with OpenSSL, and sets file mode `600`. It never replaces an existing `.env` or database password.
+
+Do not rerun first-install logic as an upgrade shortcut. Follow [Installation and upgrades](INSTALLATION_AND_UPGRADES.md), including backup and post-deployment verification.
+
+## Core environment
+
+For direct HTTP on a bounded trusted network:
+
+```dotenv
+FYLKREN_TRUST_FORWARDED_HEADERS=false
+FYLKREN_FORWARDED_HEADER_LIMIT=1
+FYLKREN_REQUIRE_HTTPS=false
+FYLKREN_PUBLIC_URL=http://server-name:8080
+```
+
+For HTTPS behind a reverse proxy:
+
+```dotenv
+FYLKREN_TRUST_FORWARDED_HEADERS=true
+FYLKREN_FORWARDED_HEADER_LIMIT=2
+FYLKREN_REQUIRE_HTTPS=true
+FYLKREN_PUBLIC_URL=https://fylkren.example
+```
+
+`FYLKREN_PUBLIC_URL` is the canonical public origin: scheme, host, and optional port only. Paths, user information, query strings, and fragments are invalid. The public host and port must match what users open, and the proxy must preserve the original `Host` value.
+
+Base installation settings:
+
+```dotenv
+FYLKREN_DEFAULT_LANGUAGE=nb-NO
+FYLKREN_TIME_ZONE=Europe/Oslo
+FYLKREN_LOCAL_AUTH_ENABLED=true
+FYLKREN_MFA_ENABLED=true
+```
+
+The language must be a supported culture code and the timezone an IANA identifier available in the container.
+
+`FYLKREN_LOCAL_AUTH_ENABLED=false` disables local sign-in and creation of new local users. It does not delete existing people or history. Keep local authentication until an external administrative recovery route has been verified.
+
+`FYLKREN_MFA_ENABLED=false` hides and disables TOTP, passkeys, security keys, and WebAuthn endpoints without deleting existing credentials. Use it only after a documented risk assessment; an internal network alone is not an authentication control.
+
+## Reverse proxy
+
+Configure one HTTPS virtual host that forwards to the web gateway's host port (default `8080`). Preserve the original host and the trusted forwarded scheme. Do not expose API or PostgreSQL ports and do not forward the gateway's internal HTTP port directly from the internet.
+
+A typical proxy definition uses:
+
+- public domain: the host in `FYLKREN_PUBLIC_URL`;
+- upstream scheme: `http`;
+- upstream address: the Fylkren host's trusted network address;
+- upstream port: `8080`;
+- public certificate for the configured domain;
+- HTTP-to-HTTPS redirect after certificate validation.
+
+WebSocket support can remain enabled at the proxy but Fylkren does not currently depend on WebSockets.
+
+## First Platform Manager
+
+After first startup, open the configured public URL. If no Platform Manager exists, the sign-in page shows a first-run setup form for display name, email, username, and password.
+
+Creation is atomic and protected against parallel requests. After success:
+
+- the new Platform Manager is signed in;
+- first-run setup becomes permanently unavailable while that account exists;
+- the public setup endpoint behaves as an unknown resource;
+- no `FYLKREN_BOOTSTRAP_TOKEN` is required or supported.
+
+Platform Manager is a system identity and does not belong to a site.
+
+## Identity providers
+
+OIDC, SAML, Active Directory, and LDAP are optional. They do not automatically create operational people or populate a site's Personnel list. External identities must be explicitly linked to an internal person, and site membership, unit placement, roles, and authority remain local.
+
+Use the canonical [Access and identity](../administration/ACCESS_AND_IDENTITY.md) manual for configuration, mapping, migration, MFA, passkeys, and recovery. Security requirements include:
+
+- HTTPS metadata and exact issuer/entity validation for OIDC and SAML;
+- a permanent subject/NameID, never display name or email, as the external identity key;
+- LDAPS or StartTLS for AD/LDAP;
+- a read-only lookup identity limited to required attributes;
+- stable `objectGUID` or `entryUUID` links;
+- no automatic matching by email, name, or username;
+- safe local administrative recovery during rollout.
+
+Secrets remain only in the protected local environment. Restart/recreate the affected API service after configuration changes and inspect sanitized startup logs.
+
+## SMTP and notifications
+
+Platform Manager configures SMTP on the **Email** page, not in `.env`. Settings include host, port, STARTTLS, optional credentials, sender address, and sender name. STARTTLS is the normal choice; unencrypted SMTP is only for an explicitly trusted internal relay.
+
+The SMTP password is protected with the persistent Data Protection key ring and is never returned to the browser or written to logs. Send a test message after configuration. Then configure site event categories as Site Manager and personal muting in each user's profile.
+
+See [Notifications](NOTIFICATIONS.md) for recipient rules, templates, queueing, retries, status, failure diagnosis, and audit.
+
+## Production federation prerequisites
+
+Federation is disabled by default and is activated by Platform Manager in the application, not through `.env`. Before the GUI will permit activation, each independent installation must have:
+
+- `FYLKREN_PUBLIC_URL` set to its final HTTPS origin;
+- `FYLKREN_TRUST_FORWARDED_HEADERS=true` and `FYLKREN_REQUIRE_HTTPS=true` in the supported reverse-proxy topology;
+- a certificate chain trusted by the other API container and outbound TCP/DNS reachability to the peer;
+- clocks kept within five minutes by customer-controlled time infrastructure;
+- its own PostgreSQL database, Data Protection key volume, Instance ID and Enterprise license;
+- a rehearsed combined database/key-volume backup and recovery procedure.
+
+Do not clone a live installation to create a peer: a clone retains the same identity and signing key. Follow the [complete bilateral GUI procedure](../administration/FEDERATION.md). Activation requires no container restart. Keep it disabled until both Platform Managers have independently compared fingerprints and passed the connection test. That test also retrieves the signed catalog of active top-level sites; no site publication, site-pair or direction approval is required.
+
+## Start and verify
+
+```bash
+docker compose up -d
+docker compose ps
+docker compose logs --tail=100 api
+```
+
+Verify through the same public route users will use:
+
+```bash
+curl --fail --silent --show-error https://fylkren.example/health
+curl --fail --silent --show-error \
+  https://fylkren.example/api/configuration/public
+```
+
+Confirm that:
+
+- PostgreSQL and API report healthy;
+- after signing in, the version displayed in the application matches the deployed release (the anonymous configuration endpoint intentionally omits it);
+- the public URL and HTTPS state are correct;
+- API and PostgreSQL are unreachable directly from untrusted networks;
+- first-run setup disappears after Platform Manager creation;
+- the configured sign-in methods work in separate sessions;
+- no real operational data was entered before acceptance and backup checks.
+
+## Air-gapped installation
+
+Fylkren has no mandatory runtime internet lookup. For an air-gapped environment, transfer and verify all required source archives or container images, package caches, signatures/checksums, and documentation through the organization's approved media process.
+
+External OIDC/SAML, directory, SMTP, DNS, time, certificate, and update services must either exist inside the boundary or remain disabled. Time synchronization is particularly important for TLS, TOTP, audit chronology, and distributed identity protocols.
+
+## Troubleshooting order
+
+1. Check `docker compose ps` and container health.
+2. Read the API startup log for a concrete, sanitized error.
+3. Verify `.env` syntax, file permissions, public URL, and proxy headers.
+4. Verify database and key volumes still exist and belong to the expected Compose project.
+5. Test DNS, certificate trust, firewall, and connectivity from the API container for enabled integrations.
+6. Use Platform Manager's technical status and provider test functions.
+7. Do not reset volumes, regenerate `.env`, or remove keys as a troubleshooting shortcut.
+
+For rollback and failed migration handling, follow [Installation and upgrades](INSTALLATION_AND_UPGRADES.md).

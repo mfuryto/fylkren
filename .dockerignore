@@ -1,0 +1,14 @@
+.git
+.git-local
+.pnpm-global
+.pnpm-store
+**/bin
+**/dist
+**/node_modules
+**/obj
+**/*.tsbuildinfo
+.env
+backups
+data
+test-results
+TestResults

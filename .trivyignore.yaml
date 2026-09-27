@@ -1,0 +1,9 @@
+misconfigurations:
+  - id: AVD-DS-0002
+    paths:
+      - "apps/postgres/Dockerfile"
+    expired_at: 2027-09-20
+    statement: >-
+      PostgreSQL's official entrypoint must begin as root to fix ownership of
+      new or restored volumes, then drops permanently to postgres via su-exec
+      before the database server starts. Runtime verification is mandatory.

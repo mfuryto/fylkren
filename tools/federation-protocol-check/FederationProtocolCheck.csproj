@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../apps/api/Federation/FederationProbeProtocol.cs" Link="FederationProbeProtocol.cs" />
+    <Compile Include="../../apps/api/Federation/FederationPublicKey.cs" Link="FederationPublicKey.cs" />
+    <Compile Include="../../apps/api/Federation/FederationProbeContracts.cs" Link="FederationProbeContracts.cs" />
+    <Compile Include="../../apps/api/Federation/FederationKeyRotationProtocol.cs" Link="FederationKeyRotationProtocol.cs" />
+    <Compile Include="../../apps/api/Federation/FederationIdentityDiscoveryProtocol.cs" Link="FederationIdentityDiscoveryProtocol.cs" />
+    <Compile Include="../../apps/api/Federation/FederationCapabilityProtocol.cs" Link="FederationCapabilityProtocol.cs" />
+    <Compile Include="../../apps/api/Federation/FederationCatalogProtocol.cs" Link="FederationCatalogProtocol.cs" />
+    <Compile Include="../../apps/api/Federation/FederationRemoteSite.cs" Link="FederationRemoteSite.cs" />
+    <Compile Include="../../apps/api/Federation/FederationSiteGrant.cs" Link="FederationSiteGrant.cs" />
+    <Compile Include="../../apps/api/Federation/FederationGrantCheckProtocol.cs" Link="FederationGrantCheckProtocol.cs" />
+    <Compile Include="../../apps/api/Federation/FederationWorkProtocol.cs" Link="FederationWorkProtocol.cs" />
+    <Compile Include="../../apps/api/Federation/FederationAssignmentContract.cs" Link="FederationAssignmentContract.cs" />
+    <Compile Include="../../apps/api/Federation/FederationInboundReceipt.cs" Link="FederationInboundReceipt.cs" />
+    <Compile Include="../../apps/api/Federation/FederationWorkReceiptProtocol.cs" Link="FederationWorkReceiptProtocol.cs" />
+    <Compile Include="../../apps/api/Federation/FederationOfficialAnswerContract.cs" Link="FederationOfficialAnswerContract.cs" />
+    <Compile Include="../../apps/api/Federation/FederationProgressContract.cs" Link="FederationProgressContract.cs" />
+    <Compile Include="../../apps/api/Federation/FederationCancellationContract.cs" Link="FederationCancellationContract.cs" />
+    <Compile Include="../../apps/api/Federation/FederationWorkLink.cs" Link="FederationWorkLink.cs" />
+    <Compile Include="../../apps/api/ActivityAudit/AuditEvent.cs" Link="AuditEvent.cs" />
+  </ItemGroup>
+</Project>

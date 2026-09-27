@@ -1,0 +1,9 @@
+packages:
+  - apps/web
+  - apps/demo
+  - shared/frontend
+
+onlyBuiltDependencies:
+  - esbuild
+allowBuilds:
+  esbuild: true

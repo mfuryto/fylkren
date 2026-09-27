@@ -1,0 +1,20 @@
+# E2E-01 multi-page classified report - 2026-09-27
+
+Run ID: `e2e-01-multi-page-classified-report-2026-09-27`. The application base was clean commit `3db4b2b`; the product print implementation (SHA-256 `a345e0084334ed0fa43eaade8e4e4c8d7b389cead3496c2143968582c630e49d`), maintained Chromium script (`1a986d8a84b1b4d5d364aeb70c60fd08053fba95b549fef376a6e388301eb655`), PDF capture helper (`61c47e7f3c1b6dbd3170f02bc656c4602322e280e5fd23e00626a15a27723b92`) and verifier (`02337f2ec82afe15be35866b81d67d1dc3a584b4935ff57c47722ec7f9a1023c`) were the uncommitted revision under verification. Chrome 151.0.7922.109 ran against fresh Community application, PostgreSQL and Data Protection volumes in the isolated `fylkren-browser-acceptance` project.
+
+The clean command was `node tools/e2e/community-browser-smoke.mjs --task-flow --classified-pdf`. The report author entered deterministic long-form content through the rendered final-report editor, selected `CONFIDENTIAL (CONF)`, and saved it. A separate authenticated leader approved and completed the report. The archive rendered both identities before **Eksporter som PDF** supplied the product print document. The final retained artifact is [the four-page classified E2E-01 report](../../../output/pdf/e2e-01-classified-report.pdf), SHA-256 `b6349b4974323577e66ee783e2c858f6dddd947ce208a668e5b2a354b761c9aa`.
+
+| Control | Expected | Observed | Result / evidence |
+| --- | --- | --- | --- |
+| Multi-page flow | Report content spans at least three substantive pages | Four A4 pages contained report text; no marking-only trailing page | Pass; automated verifier and Poppler render |
+| Per-page classification | Full marking appears at both page edges without covering content | `CONFIDENTIAL` appeared in the top-right and bottom-right margin on all four pages | Pass; text count and visual page inspection |
+| Page layout | Content remains legible across natural page breaks | No clipped text, overlap, broken metadata, black blocks or accidental gray fill | Pass; all four 130-DPI PNG renders inspected |
+| First/final content | Pagination preserves both ends of the report | `Task completed.` appeared on page 1 and `Final verification marker.` on page 4 | Pass; extracted text and visual inspection |
+| Actor identity | Formal document distinguishes authorship and approval | Page 1 rendered `Synthetic Report Author` and `Synthetic Report Approver` | Pass; verifier and visual inspection |
+| PDF structure | Output is stable passive A4 | Four A4 pages, 40,119 bytes, PDF 1.4, tagged, unencrypted, no form or JavaScript | Pass; `pdfinfo` |
+| Adjacent E2E-01 chain | Longer content and pagination do not break task lifecycle | Every task, archive, overview, workload, audit, notification, classification and separate-approver flag passed; zero browser errors | Pass; final JSON result |
+| Disposable cleanup | No synthetic installation or render scratch remains | Browser, application, PostgreSQL, networks, volumes and rendered PNGs were removed after inspection | Pass; cleanup output |
+
+The first exploratory multi-page export exposed an extra marking-only fifth page and missing visual markings on alternating content pages. Replacing the table/spacer layout with fixed elements removed the trailing page but clipped first/last markings; moving those elements inside the page repeated them but overlapped text. None of those attempts is acceptance evidence. The final implementation uses Chromium paged-media `@top-right` and `@bottom-right` margin boxes, reserves normal A4 margins, and explicitly forces a white print canvas. The complete scenario was then repeated from empty volumes and all four final pages were inspected.
+
+This closes the multi-page local classified-report control for the automated E2E-01 subset. A later [closed-laboratory SMTP follow-up](2026-09-27-e2e-01-smtp-retry-mailbox.md) covers handoff, transient-failure retry and synthetic mailbox receipt; production relay/mailbox behavior, keyboard/screen-reader behavior and multiple browser engines remain outside this run. E2E-01 and roadmap gate 3 remain open.

@@ -1,0 +1,13 @@
+name: Question or discussion
+description: Ask a product or deployment question that is safe to discuss publicly.
+title: "[Question] "
+body:
+  - type: markdown
+    attributes:
+      value: "Do not disclose private deployment details, secrets or vulnerabilities. See SECURITY.md for confidential reports."
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+    validations:
+      required: true

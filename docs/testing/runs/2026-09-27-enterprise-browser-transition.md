@@ -1,0 +1,21 @@
+# Enterprise browser transition - 2026-09-27
+
+Run ID: `enterprise-browser-transition-2026-09-27`. The application base was clean commit `03df488`; the maintained Chromium script (SHA-256 `61d38d85af3f40343510bf3327b2c20f5e34b1e78aaac6f5e478a58024665f20`) and upload fixture (SHA-256 `0be847e11a8a6cc9b33656211ba94ab8aa66178ffc0d7b6fe036d99404e4c988`) were the uncommitted test revision under verification. A fresh installation used PostgreSQL 18, a new Data Protection volume, the reserved synthetic instance ID `f1f1f1f1-0000-4000-8000-000000000001` and the public synthetic issuer key in the isolated `fylkren-browser-acceptance` Compose project. The built web/Nginx gateway and API were reached with Chrome 151.0.7922.109 from `chromedp/headless-shell:stable`, resolved to image digest `sha256:2d349b544a1ea6b5b5fd7c0fe99215ff662339c57407ee2e8c0a11af93516b04`.
+
+The clean browser command was `node tools/e2e/community-browser-smoke.mjs --enterprise` against the isolated internal target `http://web:8080/`. Chromium received only `tools/e2e/license-upload-fixture.json` as a read-only mounted file. The test generated Platform Manager credentials in memory, entered them through the rendered first-run form and never printed them. It exited zero with `enterpriseBrowserTransition: passed`, `licenseFileInput: true`, `enterpriseControls: true`, `communityDowngrade: true`, `sitePreserved: true` and `browserErrors: 0`.
+
+| Control | Expected | Observed | Result / evidence |
+| --- | --- | --- | --- |
+| Initial Community state | Fresh installation has no Enterprise rights | Community license state and read-only federation boundary rendered | Pass; positive and negative DOM assertions |
+| Existing Community data | A site can exist before activation | `Synthetic Browser Site` was created and the counter showed 1/3 | Pass; rendered form submission and DOM assertions |
+| Offline file import | Selecting a signed JSON file through the license file control activates Enterprise without reinstalling | Chromium assigned the read-only fixture to `#enterprise-license-file`; the page reported valid Enterprise activation without reinstall | Pass; DevTools file-input operation and status assertions |
+| Enterprise federation controls | Licensed Platform Manager can start federation setup | `Opprett federeringsnøkkel` and `Legg til motpart` rendered | Pass; DOM assertions |
+| Enterprise API controls | Machine API creation is available while entitled | `Ny API-klient` rendered on the API page | Pass; DOM assertion |
+| License removal | Confirmed removal returns the same installation to Community | Removal dialog completed; page reported that Enterprise rights were disabled | Pass; rendered button/dialog interaction and status assertions |
+| Data preservation | Downgrade does not remove existing Community data | The pre-activation site remained and the Community counter still showed 1/3 | Pass; post-removal navigation and DOM assertions |
+| Restored Community boundary | New Enterprise actions disappear after removal | Federation requirement returned; create-key and add-peer controls were absent | Pass; positive and negative DOM assertions |
+| Responsive layout | Transition pages do not introduce horizontal overflow | Enterprise federation desktop view and Community license mobile view stayed within their viewports | Pass; Chromium layout measurements |
+| Browser stability | No uncaught runtime exception or error-level browser log entry | Zero captured errors | Pass; DevTools Runtime and Log events |
+| Disposable cleanup | No synthetic installation remains | Chromium, web/API/PostgreSQL, networks and volumes removed after verification | Pass; cleanup output |
+
+No failed application or test attempts preceded the clean result. The fixture is public and synthetic; its matching private key was discarded and it cannot issue new licenses. This run does not verify the production issuer, live expiry or clock changes, external identity providers, actual federation with a second instance, operational workflows, accessibility, other browser engines, print/PDF, performance or independent security testing. It supplements the API edition baseline and Community browser smoke, but does not complete the manual release-candidate matrix. Roadmap gate 3 remains open.

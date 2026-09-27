@@ -1,0 +1,5 @@
+.task-list { padding: 0; overflow: hidden; }
+.task-list .section-heading { padding: 18px 18px 2px; }
+.task-row { display: grid; grid-template-columns: 90px 2fr 1fr 120px; gap: 16px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+.task-row:last-child { border-bottom: 0; }
+@media (max-width: 720px) { .task-row { grid-template-columns: 80px 1fr; } }

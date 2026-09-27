@@ -1,0 +1,114 @@
+import assert from 'node:assert/strict';
+
+export async function testDecisionsRisksVersions({ leader, sibling, unrelated, siteId, otherSiteId, personId, taskId, planId, executionId, sectionTaskId, approvedReportTaskId, suffix }) {
+  const decisionPath = `/api/decisions/sites/${siteId}/tasks/${taskId}`;
+  const decisionBody = {
+    title: `Synthetic decision ${suffix}`, decision: 'Proceed with documented execution',
+    rationale: 'Synthetic rationale for version and history verification', status: 'recorded',
+    decisionMakerIds: [personId],
+    references: [
+      { objectType: 'plan', objectId: planId },
+      { objectType: 'execution', objectId: executionId },
+    ],
+  };
+  const created = await leader.post(decisionPath, decisionBody);
+  assert.equal(created.status, 201, `Decision create: ${JSON.stringify(created.body)}`);
+  const decisionId = created.body.id;
+  const initial = await leader.request(decisionPath);
+  assert.equal(initial.status, 200);
+  const decision = initial.body.find(value => value.id === decisionId);
+  assert.ok(decision);
+  assert.equal(decision.current.revisionNumber, 1);
+  assert.equal(decision.current.decision, decisionBody.decision);
+  assert.ok(decision.current.decisionMakers.some(value => value.personId === personId));
+  for (const type of ['work_item', 'plan', 'execution']) {
+    assert.ok(decision.current.references.some(value => value.objectType === type), `Missing ${type} reference`);
+  }
+  const revisedBody = { ...decisionBody, expectedRevision: 1, rationale: 'Revised synthetic rationale', decision: 'Proceed after review' };
+  assert.equal((await leader.put(`/api/decisions/${decisionId}`, revisedBody)).status, 200);
+  assert.equal((await leader.put(`/api/decisions/${decisionId}`, revisedBody)).status, 409, 'Stale decision revision accepted');
+  const revised = await leader.request(decisionPath);
+  const currentDecision = revised.body.find(value => value.id === decisionId);
+  assert.equal(currentDecision.revisions.length, 2);
+  assert.equal(currentDecision.current.revisionNumber, 2);
+  assert.equal(currentDecision.revisions.find(value => value.revisionNumber === 1).decision, decisionBody.decision,
+    'Earlier decision was overwritten');
+  assert.ok([403, 404].includes((await unrelated.request(`/api/decisions/sites/${siteId}/tasks/${taskId}`)).status),
+    'Unrelated site read decision');
+  assert.ok([403, 404].includes((await sibling.request(`/api/decisions/sites/${siteId}/tasks/${taskId}`)).status),
+    'Sibling unit read top-level decision');
+  assert.equal((await leader.post(`/api/decisions/sites/${otherSiteId}/tasks/${taskId}`, decisionBody)).status, 404,
+    'Cross-site decision creation accepted');
+
+  const riskPath = `/api/risks/sites/${siteId}/task/${taskId}`;
+  const riskBody = {
+    title: `Synthetic risk ${suffix}`, description: 'Synthetic operational risk',
+    probability: 4, impact: 5, ownerPersonId: personId, status: 'identified',
+    dueDate: '2026-12-31', residualProbability: null, residualImpact: null,
+  };
+  const riskCreated = await leader.post(riskPath, riskBody);
+  assert.equal(riskCreated.status, 201, `Risk create: ${JSON.stringify(riskCreated.body)}`);
+  const riskId = riskCreated.body.id;
+  const riskInitial = await leader.request(riskPath);
+  assert.equal(riskInitial.status, 200);
+  assert.equal(riskInitial.body.find(value => value.id === riskId)?.current.score, 20);
+  const action = await leader.post(`/api/risks/${riskId}/mitigations`, {
+    action: 'Install synthetic containment', ownerPersonId: personId, status: 'planned', dueDate: '2026-12-15',
+  });
+  assert.equal(action.status, 201, `Mitigation: ${JSON.stringify(action.body)}`);
+  const secondAction = await leader.post(`/api/risks/${riskId}/mitigations`, {
+    action: 'Run synthetic verification', ownerPersonId: personId, status: 'planned', dueDate: '2026-12-20',
+  });
+  assert.equal(secondAction.status, 201);
+  const actionUpdate = await leader.put(`/api/risks/mitigations/${action.body.id}`, {
+    expectedVersion: 1, action: 'Install synthetic containment', ownerPersonId: personId,
+    status: 'completed', dueDate: '2026-12-15',
+  });
+  assert.equal(actionUpdate.status, 200);
+  assert.equal((await leader.put(`/api/risks/mitigations/${action.body.id}`, {
+    expectedVersion: 1, action: 'Install synthetic containment', ownerPersonId: personId,
+    status: 'completed', dueDate: '2026-12-15',
+  })).status, 409, 'Stale mitigation version accepted');
+  const riskRevised = await leader.put(`/api/risks/${riskId}`, {
+    ...riskBody, expectedVersion: 1, status: 'mitigating', residualProbability: 2, residualImpact: 3,
+  });
+  assert.equal(riskRevised.status, 200);
+  const riskRead = await leader.request(riskPath);
+  const risk = riskRead.body.find(value => value.id === riskId);
+  assert.equal(risk.current.version, 2);
+  assert.equal(risk.current.residualScore, 6);
+  assert.equal(risk.history.find(value => value.version === 1)?.score, 20);
+  assert.equal(risk.mitigations.length, 2);
+  assert.equal(risk.mitigations.find(value => value.id === action.body.id)?.status, 'completed');
+  assert.ok([403, 404].includes((await unrelated.request(riskPath)).status), 'Unrelated site read risk');
+  assert.ok([403, 404].includes((await sibling.request(riskPath)).status), 'Sibling unit read top-level risk');
+  assert.equal((await leader.request(`/api/risks/sites/${otherSiteId}/task/${taskId}`)).status, 404,
+    'Risk crossed site boundary');
+
+  const versionsPath = `/api/approvals/sites/${siteId}/items/${taskId}/versions`;
+  const versions = await leader.request(versionsPath);
+  assert.equal(versions.status, 200);
+  const types = versions.body.map(value => value.objectType);
+  assert.ok(types.includes('plan') && types.includes('final_report') && types.includes('decision'),
+    `Formal versions missing: ${JSON.stringify(types)}`);
+  for (const version of versions.body) {
+    assert.match(version.contentHash, /^[0-9a-f]{64}$/i);
+    assert.ok(version.signoffs.some(value => value.approverPersonId === personId && value.signedAt),
+      `Version ${version.id} lacks recorded sign-off`);
+    assert.ok(version.content && typeof version.content === 'object');
+  }
+  const decisionVersions = versions.body.filter(value => value.objectType === 'decision' && value.objectId === decisionId)
+    .sort((a, b) => a.versionNumber - b.versionNumber);
+  assert.equal(decisionVersions.length, 2);
+  assert.notEqual(decisionVersions[0].contentHash, decisionVersions[1].contentHash);
+  assert.equal(decisionVersions[0].content.decision, decisionBody.decision);
+  assert.equal(decisionVersions[1].content.decision, revisedBody.decision);
+  assert.ok([403, 404].includes((await unrelated.request(versionsPath)).status), 'Unrelated site read formal versions');
+  assert.ok([403, 404].includes((await sibling.request(versionsPath)).status), 'Sibling unit read formal versions');
+  const subordinateVersions = await leader.request(`/api/approvals/sites/${siteId}/items/${sectionTaskId}/versions`);
+  assert.equal(subordinateVersions.status, 200, 'Superior could not read subordinate formal approval history');
+  const reportVersions = await leader.request(`/api/approvals/sites/${siteId}/items/${approvedReportTaskId}/versions`);
+  assert.equal(reportVersions.status, 200);
+  assert.ok(reportVersions.body.some(value => value.objectType === 'final_report'));
+  return { decisionId, riskId, mitigationId: action.body.id };
+}

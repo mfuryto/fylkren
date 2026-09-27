@@ -1,0 +1,13 @@
+namespace Fylkren.Api.WorkManagement;
+
+internal sealed record CreateRequest(string? Title, string? Description, string? Recommendation, string? ReferenceUrl, DateTimeOffset? DueAt, Guid? WorkItemTypeId, Guid? SourceTypeId, Guid? SenderId, Guid? TargetSiteId, Guid? TargetUnitId, Guid? AssignedUnitId, Guid? TargetInstanceId = null);
+internal sealed record CreateSideRequest(Guid? TargetSiteId, Guid? TargetUnitId, string Title, string Description, Guid? TargetInstanceId = null);
+internal sealed record StatusRequest(string Status, Guid? AssignedUnitId, string? DecisionNote, string? Priority);
+internal sealed record DelegateRequest(Guid AssignedUnitId, string Instruction);
+internal sealed record ReassignRequest(Guid AssignedUnitId);
+internal sealed record CancelRequest(string? DecisionNote);
+internal sealed record FinalReportRequest(string? Content, string? Classification);
+internal sealed record WorkTreeNode(Guid Id, Guid? ParentWorkItemId);
+internal sealed record CreateDependencyRequest(Guid PredecessorWorkItemId, string? Type);
+internal sealed record WorkItemDependencySummary(Guid Id, string Type, Guid PredecessorWorkItemId, string PredecessorTitle, string PredecessorStatus, bool IsSatisfied, DateTimeOffset CreatedAt);
+internal sealed record WorkItemSummary(Guid Id, Guid SiteId, Guid? ParentWorkItemId, string? ParentTitle, Guid? WorkItemTypeId, string? WorkItemTypeName, Guid? SourceTypeId, string? SourceTypeName, Guid? SenderId, string? SenderName, string? SenderSiteName, string? SenderPersonName, string? RequestBasisSnapshot, bool IsCrossSiteView, string Title, string Description, string? Recommendation, string? ReferenceUrl, string Priority, string Status, DateTimeOffset? DueAt, Guid? AssignedUnitId, string? UnitName, bool IsAssignedToMe, bool HasPlan, int? WorkflowCurrentStep, int WorkflowStepCount, string? WorkflowStepName, string? ExecutionStatus, string? ExecutionWorkflowName, int? ExecutionCurrentStep, int ExecutionStepCount, string? ExecutionStepName, int AwaitingExternalResponses, int DependencyCount, bool IsBlocked, int BlockingDependencyCount, int DecisionCount, string? DecisionNote, string? FinalReport, string? FinalReportClassification, DateTimeOffset? FinalReportCreatedAt, DateTimeOffset? FinalReportUpdatedAt, string? FinalReportWrittenBy, DateTimeOffset? FinalReportApprovedAt, string? FinalReportApprovedBy, string CreatedBy, DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt, bool IsOutgoingRequest, string? RequestRecipientSiteName, bool RequestRecipientIsExternal, string? RequestProgressStatus, string? RequestResponse);

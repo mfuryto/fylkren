@@ -1,0 +1,45 @@
+# .NET
+**/bin/
+**/obj/
+
+# Node
+node_modules/
+dist/
+.vite/
+.pnpm-store/
+.pnpm-global/
+*.tsbuildinfo
+
+# Local configuration and data
+.env
+.env.*
+!.env.example
+*.local
+data/
+backups/
+secrets/
+licenses/
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.bak
+*.sql.gz
+
+# Editors and operating systems
+.git-local/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Test output
+TestResults/
+playwright-report/
+test-results/

@@ -1,0 +1,129 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m,mode=1777
+      - /var/cache/nginx:rw,noexec,nosuid,size=16m,mode=1777
+    ports:
+      - "${FYLKREN_HTTP_PORT:-8080}:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - frontend
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      ConnectionStrings__Fylkren: Host=postgres;Port=5432;Database=fylkren;Username=fylkren;Password=${FYLKREN_DB_PASSWORD:?Run ./deploy/compose/install.sh before starting Fylkren}
+      Fylkren__DataProtection__KeyPath: /var/lib/fylkren/keys
+      Fylkren__PublicUrl: ${FYLKREN_PUBLIC_URL:-http://localhost:8080}
+      Fylkren__Http__TrustForwardedHeaders: ${FYLKREN_TRUST_FORWARDED_HEADERS:-false}
+      Fylkren__Http__ForwardedHeaderLimit: ${FYLKREN_FORWARDED_HEADER_LIMIT:-1}
+      Fylkren__Http__RequireHttps: ${FYLKREN_REQUIRE_HTTPS:-false}
+      Fylkren__Federation__RetentionDays: ${FYLKREN_FEDERATION_RETENTION_DAYS:-2555}
+      Fylkren__Localization__DefaultLanguage: ${FYLKREN_DEFAULT_LANGUAGE:-nb-NO}
+      Fylkren__Localization__TimeZone: ${FYLKREN_TIME_ZONE:-Europe/Oslo}
+      Fylkren__License__PublicKeySpki: ${FYLKREN_LICENSE_PUBLIC_KEY_SPKI:-}
+      Fylkren__Authentication__LocalEnabled: ${FYLKREN_LOCAL_AUTH_ENABLED:-true}
+      Fylkren__Authentication__MfaEnabled: ${FYLKREN_MFA_ENABLED:-true}
+      Fylkren__Authentication__Oidc__Enabled: ${FYLKREN_OIDC_ENABLED:-false}
+      Fylkren__Authentication__Oidc__Authority: ${FYLKREN_OIDC_AUTHORITY:-}
+      Fylkren__Authentication__Oidc__ClientId: ${FYLKREN_OIDC_CLIENT_ID:-}
+      Fylkren__Authentication__Oidc__ClientSecret: ${FYLKREN_OIDC_CLIENT_SECRET:-}
+      Fylkren__Authentication__Oidc__CallbackPath: ${FYLKREN_OIDC_CALLBACK_PATH:-/signin-oidc}
+      Fylkren__Authentication__Saml__Enabled: ${FYLKREN_SAML_ENABLED:-false}
+      Fylkren__Authentication__Saml__MetadataUrl: ${FYLKREN_SAML_METADATA_URL:-}
+      Fylkren__Authentication__Saml__EntityId: ${FYLKREN_SAML_ENTITY_ID:-}
+      Fylkren__Authentication__Saml__IdentityProviderEntityId: ${FYLKREN_SAML_IDP_ENTITY_ID:-}
+      Fylkren__Authentication__Saml__ModulePath: ${FYLKREN_SAML_MODULE_PATH:-/api/auth/saml2}
+      Fylkren__Authentication__ActiveDirectory__Enabled: ${FYLKREN_AD_ENABLED:-false}
+      Fylkren__Authentication__ActiveDirectory__Server: ${FYLKREN_AD_SERVER:-}
+      Fylkren__Authentication__ActiveDirectory__Domain: ${FYLKREN_AD_DOMAIN:-}
+      Fylkren__Authentication__ActiveDirectory__BaseDn: ${FYLKREN_AD_BASE_DN:-}
+      Fylkren__Authentication__ActiveDirectory__UserSearchBase: ${FYLKREN_AD_USER_SEARCH_BASE:-}
+      Fylkren__Authentication__ActiveDirectory__Port: ${FYLKREN_AD_PORT:-636}
+      Fylkren__Authentication__ActiveDirectory__UseSsl: ${FYLKREN_AD_USE_SSL:-true}
+      Fylkren__Authentication__ActiveDirectory__UseStartTls: ${FYLKREN_AD_USE_STARTTLS:-false}
+      Fylkren__Authentication__ActiveDirectory__BindDn: ${FYLKREN_AD_BIND_DN:-}
+      Fylkren__Authentication__ActiveDirectory__BindPassword: ${FYLKREN_AD_BIND_PASSWORD:-}
+      Fylkren__Authentication__ActiveDirectory__UsernameAttribute: ${FYLKREN_AD_USERNAME_ATTRIBUTE:-sAMAccountName}
+      Fylkren__Authentication__Ldap__Enabled: ${FYLKREN_LDAP_ENABLED:-false}
+      Fylkren__Authentication__Ldap__Server: ${FYLKREN_LDAP_SERVER:-}
+      Fylkren__Authentication__Ldap__BaseDn: ${FYLKREN_LDAP_BASE_DN:-}
+      Fylkren__Authentication__Ldap__UserSearchBase: ${FYLKREN_LDAP_USER_SEARCH_BASE:-}
+      Fylkren__Authentication__Ldap__Port: ${FYLKREN_LDAP_PORT:-636}
+      Fylkren__Authentication__Ldap__UseSsl: ${FYLKREN_LDAP_USE_SSL:-true}
+      Fylkren__Authentication__Ldap__UseStartTls: ${FYLKREN_LDAP_USE_STARTTLS:-false}
+      Fylkren__Authentication__Ldap__BindDn: ${FYLKREN_LDAP_BIND_DN:-}
+      Fylkren__Authentication__Ldap__BindPassword: ${FYLKREN_LDAP_BIND_PASSWORD:-}
+      Fylkren__Authentication__Ldap__UsernameAttribute: ${FYLKREN_LDAP_USERNAME_ATTRIBUTE:-uid}
+      Fylkren__Authentication__Ldap__DisplayNameAttribute: ${FYLKREN_LDAP_DISPLAY_NAME_ATTRIBUTE:-displayName}
+      Fylkren__Authentication__Ldap__EmailAttribute: ${FYLKREN_LDAP_EMAIL_ATTRIBUTE:-mail}
+      Fylkren__Authentication__Ldap__StableIdAttribute: ${FYLKREN_LDAP_STABLE_ID_ATTRIBUTE:-entryUUID}
+      Fylkren__Authentication__WebAuthn__Enabled: ${FYLKREN_WEBAUTHN_ENABLED:-false}
+      Fylkren__Authentication__WebAuthn__RpId: ${FYLKREN_WEBAUTHN_RP_ID:-localhost}
+      Fylkren__Authentication__WebAuthn__DisplayName: ${FYLKREN_WEBAUTHN_DISPLAY_NAME:-Lokal installasjon}
+      Fylkren__Authentication__WebAuthn__Origins__0: ${FYLKREN_WEBAUTHN_ORIGIN:-http://localhost:8080}
+    restart: unless-stopped
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m,mode=1777
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    volumes:
+      - fylkren-keys:/var/lib/fylkren/keys
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - frontend
+      - backend
+  postgres:
+    image: fylkren-postgres
+    build:
+      context: .
+      dockerfile: apps/postgres/Dockerfile
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: fylkren
+      POSTGRES_USER: fylkren
+      POSTGRES_PASSWORD: ${FYLKREN_DB_PASSWORD:?Run ./deploy/compose/install.sh before starting Fylkren}
+    volumes:
+      - fylkren-postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fylkren -d fylkren"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - backend
+
+volumes:
+  fylkren-postgres:
+  fylkren-keys:
+
+networks:
+  frontend:
+  backend:
+    internal: true
