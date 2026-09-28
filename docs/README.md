@@ -74,6 +74,7 @@ Before public publication, run `bash tools/security/verify-repository-safety.sh 
 
 ## Project maintenance
 
+- [Release versioning and update discovery](project/RELEASE_VERSIONING.md)
 - [Publication readiness and repository audit](project/PUBLICATION_READINESS.md)
 - [GitHub repository security](operations/GITHUB_REPOSITORY_SECURITY.md)
 - [Development stack](architecture/DEVELOPMENT_STACK.md)

@@ -8,6 +8,7 @@ Status: **not ready to make public**. This is a gate and evidence record, not pe
 - THUNOLD-OLSEN (Norwegian organization number 996871126) is identified in `NOTICE.md` and `TRADEMARKS.md`; legal ownership and trademark wording still require review.
 - One codebase, one schema, one upgrade path, and the same API/web images for both editions. The official runtime enforces Enterprise entitlements server-side; Community works offline with no entitlement file.
 - Only verification code and public keys belong in this repository. The bundled production public key is not a secret. Production license signing, private keys, customer/commercial records and payment logic belong in the separate private `thunold-olsen-licensing` repository. The documented signed JSON envelope is the trust boundary; compare the bundled key fingerprint with the issuer before public release.
+- The version and release process is defined in [Release versioning and update discovery](RELEASE_VERSIONING.md). Before publication, replace the pre-1.0 development identifier with `1.0.0`, create the signed `v1.0.0` tag only after acceptance, and publish one matching GitHub Release with artifact digests.
 - GitHub Issues may accept public bugs, feature requests and discussion after opening. There is no invitation for external patches or pull requests. Confidential vulnerability reports require a private channel first.
 
 ## GitHub presentation
@@ -42,6 +43,7 @@ The current personal private-repository plan does not provide branch protection,
 - [ ] Security contact/private reporting and supported-version policy are published.
 - [ ] Third-party notices and dependency/license scan are reviewed.
 - [ ] Repository safety, docs, builds and isolated E2E checks pass on the exact release candidate.
+- [ ] `VERSION`, application version, `CHANGELOG.md`, signed `v1.0.0` tag, GitHub Release and published artifact digests identify the same accepted commit.
 - [ ] Final Community/Enterprise acceptance and independent security verification are evidenced.
 - [ ] GitHub description/topics, issue templates, branch protection and visibility are reviewed by the owner.
 

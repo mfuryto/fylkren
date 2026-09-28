@@ -9,6 +9,7 @@
     "build": "pnpm -r build",
     "check:docs": "node tools/check-documentation-links.mjs",
     "check:structure": "node tools/check-source-structure.mjs",
+    "check:version": "node tools/check-version-consistency.mjs",
     "dev:web": "pnpm --filter @fylkren/web dev",
     "dev:demo": "pnpm --filter @fylkren/demo dev",
     "test": "pnpm -r test",

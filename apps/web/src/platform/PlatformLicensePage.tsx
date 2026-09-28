@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { apiGet, apiMutate } from "../api/client";
 import { errorMessage } from "../api/errors";
 import { Modal } from "../components/Modal";
+import issuerMark from "../assets/thunold-olsen-licensing-mark.png";
 
 type LicenseStatus = {
   edition: "community" | "enterprise";
@@ -15,7 +16,7 @@ type LicenseStatus = {
 type LicenseResponse = { status: LicenseStatus; trustedIssuerConfigured: boolean };
 const licensePortal = "https://license.thunold-olsen.no/";
 const statusLabels: Record<string, string> = {
-  none: "Ingen lisens installert",
+  none: "Ingen signert lisens installert",
   valid: "Gyldig",
   expired: "Utløpt",
   invalid: "Ugyldig",
@@ -28,6 +29,53 @@ const entitlementLabels: Record<string, string> = {
   "external-identity": "Ekstern identitet (AD/LDAP, OIDC og SAML)",
   "instance-federation": "Instansfederering og oppdragsrouting",
 };
+
+function licenseDate(value: string | null) {
+  return value ? new Date(value).toLocaleDateString("nb-NO", { year: "numeric", month: "long", day: "numeric" }) : "Ubegrenset";
+}
+
+export function LicenseCertificate({ response }: { response: LicenseResponse | null }) {
+  const status = response?.status;
+  const enterprise = status?.edition === "enterprise";
+  const state = status?.state ?? "loading";
+  const rights = status?.entitlements ?? [];
+  const verification = state === "valid"
+    ? "Signatur og instansbinding verifisert"
+    : state === "loading" ? "Kontrollerer lisensen …" : statusLabels[state] ?? state;
+
+  return <section className={`license-certificate ${enterprise ? "license-certificate-enterprise" : "license-certificate-community"}`} aria-label="Lisenssertifikat">
+    <div className="license-certificate-frame">
+      <header className="license-certificate-issuer">
+        <img src={issuerMark} alt="" />
+        <div><strong>THUNOLD-OLSEN</strong><span>Licensing Authority</span></div>
+        <span className={`license-certificate-state license-certificate-state-${state === "valid" ? "valid" : "inactive"}`}>{verification}</span>
+      </header>
+      <div className="license-certificate-title">
+        <span>{enterprise ? "Digitalt lisenssertifikat" : "Lisensstatus"}</span>
+        <h2>Fylkren {enterprise ? "Enterprise" : "Community"}</h2>
+        <p>{enterprise ? "Denne installasjonen er lisensiert til" : "Community kan brukes uten kommersiell lisens"}</p>
+        <strong>{status?.customer ?? (state === "loading" ? "Laster …" : "Denne installasjonen")}</strong>
+      </div>
+      <dl className="license-certificate-details">
+        <div><dt>Status</dt><dd>{status ? statusLabels[status.state] ?? status.state : "Laster …"}</dd></div>
+        <div><dt>Gyldig til</dt><dd>{enterprise ? licenseDate(status?.expiresAt ?? null) : "Ingen utløpsdato"}</dd></div>
+        <div><dt>Lisens-ID</dt><dd><code>{status?.licenseId ?? "Ikke tildelt"}</code></dd></div>
+        <div><dt>Instans-ID</dt><dd><code>{status?.instanceId ?? "Laster …"}</code></dd></div>
+      </dl>
+      <div className="license-certificate-rights">
+        <span>Lisensierte rettigheter</span>
+        {rights.length > 0
+          ? <ul>{rights.map(value => <li key={value}>{entitlementLabels[value] ?? value}</li>)}</ul>
+          : <p>Community-funksjoner uten Enterprise-tillegg.</p>}
+      </div>
+      <footer className="license-certificate-footer">
+        <span aria-hidden="true">✦</span>
+        <p><strong>Autentisitet</strong><small>{enterprise ? "Verifisert lokalt med THUNOLD-OLSENs offentlige signeringsnøkkel. Ingen nettilkobling kreves." : "Importer en signert Enterprise-lisens for å aktivere utvidede rettigheter."}</small></p>
+        <span aria-hidden="true">✦</span>
+      </footer>
+    </div>
+  </section>;
+}
 
 export function PlatformLicensePage({ onChanged }: { onChanged: () => Promise<void> }) {
   const [license, setLicense] = useState<LicenseResponse | null>(null);
@@ -76,13 +124,10 @@ export function PlatformLicensePage({ onChanged }: { onChanged: () => Promise<vo
   return <div className="page platform-admin-page">
     <header className="page-header"><div><h1>Lisens</h1><p className="muted">Én installasjon, ett datasett og samme programvare for Community og Enterprise.</p></div></header>
     {message && <p className="status-message" role="status">{message}</p>}
-    <section className="panel stacked-form">
-      <h2>{license?.status.edition === "enterprise" ? "Enterprise" : "Community"}</h2>
-      <div className="field"><span className="field-label">Instans-ID for denne installasjonen</span><code>{license?.status.instanceId ?? "Laster …"}</code><button className="secondary-button" type="button" disabled={!license?.status.instanceId} onClick={() => void copyInstanceId()}>Kopier instans-ID</button></div>
-      <p>Status: {license ? (statusLabels[license.status.state] ?? license.status.state) : "Laster …"}{license?.status.expiresAt ? ` · Utløper ${new Date(license.status.expiresAt).toLocaleString("nb-NO")}` : ""}</p>
-      {license?.status.customer && <p>Kunde: {license.status.customer}</p>}
-      {license?.status.licenseId && <p>Lisens-ID: <code>{license.status.licenseId}</code></p>}
-      {license?.status.entitlements.length ? <p>Aktive rettigheter: {license.status.entitlements.map(value => entitlementLabels[value] ?? value).join(", ")}</p> : <p>Ingen Enterprise-rettigheter er aktive. Community-funksjonene er tilgjengelige uten lisens.</p>}
+    <LicenseCertificate response={license} />
+    <section className="panel stacked-form license-management-panel">
+      <div><h2>Administrer lisensen</h2><p className="muted">Bestill, importer eller fjern lisensen for denne installasjonen.</p></div>
+      <div className="field"><span className="field-label">Instans-ID for denne installasjonen</span><div className="license-instance-row"><code>{license?.status.instanceId ?? "Laster …"}</code><button className="secondary-button" type="button" disabled={!license?.status.instanceId} onClick={() => void copyInstanceId()}>Kopier instans-ID</button></div></div>
       <div className="field"><span className="field-label">Bestill eller forny Enterprise</span><p>Kopier instans-ID-en og oppgi den i bestillingen. Hver selvstendige Fylkren-installasjon trenger sin egen lisensfil. Serveren trenger ikke internett; bestillingen kan gjøres fra en annen enhet.</p><a className="secondary-button" href={licensePortal} target="_blank" rel="noopener noreferrer">Åpne lisensportalen ↗</a></div>
       <div className="field"><label htmlFor="enterprise-license-file">Importer signert lisensfil</label><input id="enterprise-license-file" type="file" accept=".json,application/json" disabled={busy} onChange={event => { void importFile(event.target.files?.[0]); event.target.value = ""; }} /></div>
       {license?.status.state !== "none" && <div><button className="secondary-button danger" type="button" disabled={busy} onClick={() => setConfirmRemoval(true)}>Fjern lisens</button></div>}

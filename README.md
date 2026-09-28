@@ -7,7 +7,7 @@
 <p align="center"><strong>Operational task and mission management—from assignment to documented result.</strong></p>
 
 <p align="center">
-  <code>SELF-HOSTED</code> · <code>OFFLINE-FIRST</code> · <code>AIR-GAPPED READY</code> · <code>WINDOWS-FAMILIAR WEB UI</code>
+  <code>VERSION 0.70.0-dev.1</code> · <code>SELF-HOSTED</code> · <code>OFFLINE-FIRST</code> · <code>AIR-GAPPED READY</code> · <code>WINDOWS-FAMILIAR WEB UI</code>
 </p>
 
 <p align="center">
@@ -15,6 +15,7 @@
   <a href="#capabilities">Capabilities</a> ·
   <a href="#community-and-enterprise">Editions</a> ·
   <a href="#deployment">Deployment</a> ·
+  <a href="docs/project/RELEASE_VERSIONING.md">Releases</a> ·
   <a href="docs/README.md">Documentation</a>
 </p>
 
@@ -32,7 +33,8 @@ history and strict boundaries between organizational levels.
 > **Pre-1.0:** Fylkren is being prepared for public release. Final release
 > acceptance and independent security verification are not complete. The
 > repository must not be treated as a certified, accredited or production-
-> approved system.
+> approved system. The current development version is read from [`VERSION`](VERSION).
+> Public release history begins with `v1.0.0`.
 
 ## Why Fylkren
 
