@@ -41,7 +41,6 @@ try {
   }
   if (existsSync(join(backupSet, 'INCOMPLETE'))) throw new Error('Completed backup retained its INCOMPLETE marker');
   run('sha256sum', ['-c', 'SHA256SUMS'], { cwd: backupSet });
-  run('./deploy/host-status/collect-host-status.sh', [process.cwd(), project]);
   run(process.execPath, ['tools/test-e2e-local.mjs']);
 } finally {
   try {

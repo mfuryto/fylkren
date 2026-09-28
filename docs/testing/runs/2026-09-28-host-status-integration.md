@@ -14,7 +14,7 @@ runtime-host disk, recorded backup time, container health and restart counts.
 | Oversized snapshot | A file larger than 64 KiB was rejected with `invalid-file` and no host data was returned | Pass; full local E2E assertion |
 | Invalid numeric range | Available bytes greater than total bytes was rejected with `invalid-content` | Pass; full local E2E assertion |
 | Docker isolation | `/var/run/docker.sock` was absent inside the API container | Pass; Compose execution assertion |
-| Complete backup | The maintained command created a PostgreSQL custom dump, protected environment copy, matching key archive, manifest, SHA-256 file and `COMPLETE` marker, then published its UTC completion time | Pass; disposable Compose run and full local E2E assertion |
+| Complete backup | The maintained command created a PostgreSQL custom dump, protected environment copy, matching key archive, manifest, SHA-256 file and `COMPLETE` marker, then collected and published its UTC completion time immediately | Pass; disposable Compose run and full local E2E assertion |
 | External registration validation | An empty externally supplied artifact was rejected | Pass; direct script check |
 | API and web | API compiled with zero warnings/errors; typecheck, production web build and all web tests passed | Pass |
 | Full regression | All reported edition, workflow, authorization, API, webhook, portability and federation-candidate scenarios passed | Pass; `pnpm test:e2e:local`, exit zero |

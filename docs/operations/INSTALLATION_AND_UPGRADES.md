@@ -67,8 +67,8 @@ path is hardcoded. It creates `<Fylkren root>/backups/fylkren-<UTC timestamp>/`
 with the PostgreSQL custom-format dump, protected `.env` copy, matching Data
 Protection key archive, manifest and SHA-256 checksums. It marks the directory
 `COMPLETE` only after all artifacts have been created, then updates Platform
-Manager's System status. The `backups/` directory is excluded from both Git and
-Docker build contexts and is restricted to root.
+Manager's System status immediately. The `backups/` directory is excluded from
+both Git and Docker build contexts and is restricted to root.
 
 To use another location, supply one absolute directory:
 
@@ -80,6 +80,14 @@ The local backup directory is not sufficient disaster recovery if the Fylkren
 host or its storage fails. Transfer the complete timestamped directory to
 approved off-host storage, apply retention policy and perform the isolated
 restore rehearsal below. A backup remains unverified until it has been restored.
+
+Fylkren deliberately does not schedule or delete backup sets. The intended
+production flow is that the organization's external backup scheduler first runs
+`sudo ./deploy/compose/backup.sh`, continues only when it exits successfully,
+then copies the newly completed `backups/fylkren-<UTC timestamp>/` directory to
+off-host storage. The external system owns scheduling, retention, monitoring and
+deletion of both local and remote copies. Never copy a directory that still has
+an `INCOMPLETE` marker.
 
 ## Isolated restore rehearsal
 

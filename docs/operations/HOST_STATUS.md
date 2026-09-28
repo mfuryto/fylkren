@@ -68,6 +68,11 @@ Backup status is reduced when no complete set is recorded or the latest set is
 older than `FYLKREN_BACKUP_WARNING_HOURS`, which defaults to 36 hours. Recording
 a set proves only that three nonempty artifacts existed and their SHA-256 hashes
 were calculated. It does not prove off-host transfer, retention or restore.
+Consequently, System status becomes reduced after 36 hours if the external
+scheduler has not successfully run the Fylkren backup command, even when that
+external system has separately copied other files. The external system must
+monitor its own transfer and retention jobs; those results are outside the
+Fylkren status signal.
 
 Restart counts come from Docker and reset if the container is deleted and
 recreated. They identify repeated restarts within the current container
@@ -87,9 +92,16 @@ sudo ./deploy/compose/backup.sh
 The command creates the database dump, `.env` copy, matching Data Protection
 keys, manifest and checksums under one timestamped directory. It rejects partial
 sets and records the completion time automatically. Copy the complete directory
-to approved off-host storage. A restore rehearsal remains mandatory and is
-recorded in the organization's durable operations log rather than inferred by
-Fylkren.
+to approved off-host storage. The command also collects a fresh host-status
+snapshot, so the new backup state is visible immediately rather than after the
+next timer interval. A restore rehearsal remains mandatory and is recorded in
+the organization's durable operations log rather than inferred by Fylkren.
+
+The host-status timer only measures state; it does not create backups. Fylkren
+does not include an internal backup schedule or retention deletion. An external
+backup system should invoke the command, require a successful exit status,
+transfer only the resulting directory with a `COMPLETE` marker and then apply
+the organization's retention policy.
 
 `deploy/host-status/record-backup.sh` is retained only for backup sets created by
 an approved external backup system. Pass that command the three existing,

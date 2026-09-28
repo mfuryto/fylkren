@@ -113,6 +113,8 @@ printf 'Backup set completed successfully.\n' >"$target/COMPLETE"
 rm -f "$target/INCOMPLETE"
 "$project_dir/deploy/host-status/record-backup.sh" \
     "$target/fylkren.dump" "$target/env.backup" "$target/data-protection-keys.tar.gz"
+"$project_dir/deploy/host-status/collect-host-status.sh" \
+    "$project_dir" "${FYLKREN_COMPOSE_PROJECT:-}"
 
 echo "Backup completed: $target"
 echo "Copy this directory to approved off-host storage and perform a restore rehearsal."

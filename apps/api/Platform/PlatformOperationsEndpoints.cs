@@ -51,11 +51,16 @@ public static class PlatformOperationsEndpoints
                     stale ? "Vertsmålingen er for gammel." : $"{freePercent:F0} % ledig kapasitet.", null));
                 var lastBackup = snapshot.Backup?.LastCompletedAt;
                 var backupDegraded = lastBackup is null || checkedAt - lastBackup > TimeSpan.FromHours(options.Operations.BackupWarningHours);
+                var backupDetail = stale
+                    ? "Vertsmålingen er for gammel."
+                    : lastBackup is null
+                        ? $"Ingen fullført Fylkren-backup er registrert. Status er redusert etter {options.Operations.BackupWarningHours} timer uten registrert backup."
+                        : backupDegraded
+                            ? $"Sist fullført {lastBackup.Value:yyyy-MM-dd HH:mm} UTC. Mer enn {options.Operations.BackupWarningHours} timer har gått; ekstern kopiering overvåkes ikke av Fylkren."
+                            : $"Sist fullført {lastBackup.Value:yyyy-MM-dd HH:mm} UTC. Grensen for redusert status er {options.Operations.BackupWarningHours} timer; ekstern kopiering overvåkes ikke av Fylkren.";
                 services.Add(new("host-backup", "Backup",
                     stale ? "unknown" : backupDegraded ? "degraded" : "healthy",
-                    stale ? "Vertsmålingen er for gammel." : lastBackup is null
-                        ? "Ingen fullført Fylkren-backup er registrert."
-                        : $"Sist fullført {lastBackup.Value:yyyy-MM-dd HH:mm} UTC.", null));
+                    backupDetail, null));
             }
             return Results.Ok(new
             {
@@ -76,7 +81,8 @@ public static class PlatformOperationsEndpoints
                     snapshot?.Platform,
                     snapshot?.Hostname,
                     disk = snapshot?.Disk,
-                    backup = snapshot?.Backup
+                    backup = snapshot?.Backup,
+                    backupWarningHours = options.Operations.BackupWarningHours
                 }
             });
         });
