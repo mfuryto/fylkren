@@ -2,6 +2,10 @@
 
 This guide describes the supported Docker Compose profile for a single Fylkren host. Use synthetic data until the deployment has completed the organization's security, backup, identity, and acceptance checks.
 
+On Windows Server, the host runs Hyper-V and Fylkren runs inside a dedicated
+Linux VM. Complete [Windows Server installation](WINDOWS_SERVER_INSTALLATION.md)
+before applying the configuration in this guide.
+
 For the authoritative install, backup, upgrade, rollback, and recovery procedure, use [Installation and upgrades](INSTALLATION_AND_UPGRADES.md). This page explains the deployment shape and the configuration decisions around it.
 
 ## Supported topology

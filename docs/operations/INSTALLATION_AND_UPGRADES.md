@@ -2,6 +2,11 @@
 
 This is the canonical container installation and upgrade procedure. Examples use `/data/docker/fylkren`; adapt paths, release references and backup targets to the environment.
 
+For a Windows Server host, first create the dedicated Hyper-V Linux VM described
+in [Windows Server installation](WINDOWS_SERVER_INSTALLATION.md), then run this
+procedure inside that VM. Do not install Docker Desktop on Windows Server and do
+not attempt to run the repository's Linux images as Windows containers.
+
 Installation backup/restore and customer-data export/import are separate capabilities. Backups restore this installation and require PostgreSQL, configuration and the matching Data Protection keys. Portable exports support migration, archival and customer exit, exclude authentication secrets and cannot replace a tested disaster-recovery backup. See [Portable export and customer exit](../api/PORTABLE_EXPORT_FORMAT.md).
 
 ## Rules

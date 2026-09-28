@@ -171,6 +171,12 @@ for production procedures and [offline deployment](docs/operations/DEPLOYMENT_AN
 for isolated networks. Docker Compose single-node deployment is the currently
 supported production topology.
 
+On Windows Server 2022 or 2025, use the documented
+[Hyper-V installation](docs/operations/WINDOWS_SERVER_INSTALLATION.md): Windows
+Server hosts a dedicated Linux VM, and that VM runs the same Fylkren Compose
+stack. Docker Desktop and native Windows containers are not part of the server
+deployment.
+
 ### Local development
 
 Development uses .NET 10, Node.js 24 and pnpm 11:

@@ -37,7 +37,9 @@ Backups must use a separate storage target and follow the retention policy. A ba
 
 ## Requirements for every profile
 
-- 64-bit Linux or Windows with a supported container platform, or a documented direct installation;
+- a supported 64-bit Linux host, or Windows Server 2022/2025 with Hyper-V and a
+  dedicated supported 64-bit Linux VM as documented in
+  [Windows Server installation](WINDOWS_SERVER_INSTALLATION.md);
 - SSD-backed active storage;
 - a stable clock and correct timezone;
 - daily automated backup and regular restore tests;

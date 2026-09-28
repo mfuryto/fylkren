@@ -6,7 +6,7 @@ This is the canonical documentation index. Each subject should have one maintain
 
 - **End users and leaders:** [Complete user manual](administration/USER_MANUAL.md), followed by [tasks and operational flow](administration/WORKFLOW_AND_TASKS.md) and [risk and mitigation management](administration/RISK_MANAGEMENT.md).
 - **Site Managers:** user manual, [access and identity](administration/ACCESS_AND_IDENTITY.md), [workflows and templates](administration/WORKFLOWS_AND_TEMPLATES.md) and [notifications](operations/NOTIFICATIONS.md).
-- **Platform Managers and operators:** [installation and upgrades](operations/INSTALLATION_AND_UPGRADES.md), [server setup](operations/SERVER_SETUP.md), [federation administration](administration/FEDERATION.md), [deployment/offline operation](operations/DEPLOYMENT_AND_OFFLINE.md) and [security and retention](security/SECURITY_AND_RETENTION.md).
+- **Platform Managers and operators:** [installation and upgrades](operations/INSTALLATION_AND_UPGRADES.md), [Windows Server installation](operations/WINDOWS_SERVER_INSTALLATION.md), [server setup](operations/SERVER_SETUP.md), [federation administration](administration/FEDERATION.md), [deployment/offline operation](operations/DEPLOYMENT_AND_OFFLINE.md) and [security and retention](security/SECURITY_AND_RETENTION.md).
 - **Integrators:** [API conventions](api/API.md), then the [Administration API](api/ADMINISTRATION_API.md) or [Report API](api/REPORT_API.md).
 - **Developers and reviewers:** [technical architecture](architecture/TECHNICAL_ARCHITECTURE.md), [repository structure](architecture/REPOSITORY_STRUCTURE.md), test evidence, [security verification](security/SECURITY_VERIFICATION.md) and the [independent federation review brief](security/FEDERATION_SECURITY_REVIEW_BRIEF.md).
 
@@ -28,6 +28,7 @@ Before public publication, run `bash tools/security/verify-repository-safety.sh 
 ## Installation and operations
 
 - [Installation and upgrades](operations/INSTALLATION_AND_UPGRADES.md)
+- [Windows Server installation with Hyper-V](operations/WINDOWS_SERVER_INSTALLATION.md)
 - [Get and import an Enterprise license, including air-gapped installations](operations/GET_ENTERPRISE_LICENSE.md)
 - [Deployment, backup and offline operation](operations/DEPLOYMENT_AND_OFFLINE.md)
 - [Server setup](operations/SERVER_SETUP.md)

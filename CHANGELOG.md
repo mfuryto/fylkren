@@ -4,6 +4,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Added a complete Windows Server 2022/2025 installation guide using a dedicated Hyper-V Linux VM, including host preparation, VM creation, Docker installation, networking, TLS, persistence, backup, maintenance and acceptance checks. Clarified that Docker Desktop and native Windows containers are not supported deployment paths.
 - Completed default-off Enterprise federation for ordinary cross-installation requests, signed progress/cancellation/official responses, automatic active top-level-site catalogs, GUI activation, delivery monitoring, planned key rotation and controlled lost-key recovery. No site-pair or directional permissions are required after bilateral peer approval and connection testing.
 - Added a complete Platform Manager federation guide and reconciled the README, user, site, domain, architecture, operations, security and test documentation with the implemented behavior.
 - Enforced the documented separation between Site Manager administration and operational queues, and expanded dynamic authorization tests for role, site, object and direct GUID-substitution boundaries.

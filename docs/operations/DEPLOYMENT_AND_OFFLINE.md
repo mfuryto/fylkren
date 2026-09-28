@@ -12,7 +12,13 @@ Web and API run without Linux capabilities, with read-only root filesystems, exp
 
 The gateway becomes available only after the API health check succeeds. API and PostgreSQL ports are not published as public application endpoints.
 
-Linux and Windows hosts may run the same Linux-container stack. Users access it through a modern browser on Windows, Linux or macOS. Direct non-container deployment is architecturally possible but is not the primary maintained installation path.
+The stack runs directly on a supported 64-bit Linux host. On Windows Server,
+run the unchanged Linux-container stack inside a dedicated Hyper-V Linux VM by
+following [Windows Server installation](WINDOWS_SERVER_INSTALLATION.md). Docker
+Desktop is not supported on Windows Server, and the current images are not
+Windows containers. Users access Fylkren through a modern browser on Windows,
+Linux or macOS. Direct non-container deployment is architecturally possible but
+is not a maintained installation path.
 
 The current Compose profile is not redundant. Customers requiring high availability need a separately assessed deployment architecture; no multi-node Fylkren profile is currently planned or supported. Instance federation connects independent installations and does not provide automatic failover or database replication.
 
