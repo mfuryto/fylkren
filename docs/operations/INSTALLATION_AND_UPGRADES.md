@@ -81,24 +81,52 @@ host or its storage fails. Transfer the complete timestamped directory to
 approved off-host storage, apply retention policy and perform the isolated
 restore rehearsal below. A backup remains unverified until it has been restored.
 
-Fylkren deliberately does not schedule or delete backup sets. The intended
-production flow is that the organization's external backup scheduler first runs
+Fylkren deliberately does not schedule backups. The intended production flow is
+that the organization's external backup scheduler first runs
 `sudo ./deploy/compose/backup.sh`, continues only when it exits successfully,
 then copies the newly completed `backups/fylkren-<UTC timestamp>/` directory to
-off-host storage. The external system owns scheduling, retention, monitoring and
-deletion of both local and remote copies. Never copy a directory that still has
-an `INCOMPLETE` marker.
+off-host storage. Fylkren retains the 14 newest complete local sets by default
+and removes older complete sets immediately before creating another. Configure
+`FYLKREN_LOCAL_BACKUP_RETENTION_COUNT` from 2 to 365 in `.env`. Unknown folders,
+symbolic links and sets marked `INCOMPLETE` are never removed automatically.
+The external system independently owns remote retention, monitoring and
+deletion. Never copy a directory that still has an `INCOMPLETE` marker.
 
-## Isolated restore rehearsal
+## Restore and isolated rehearsal
 
-Restore only onto an isolated replacement host or network where the original installation cannot receive federation or user traffic. Never connect the original and a restored copy simultaneously: they share the same Instance ID and signing identity. Verify backup checksums, custody record, application version and PostgreSQL compatibility before starting.
+An actual recovery can restore in place on the original server. A rehearsal must
+use an isolated environment. A replacement server must remain isolated until the
+original is stopped or fenced; never run two copies simultaneously because they
+share the same Instance ID and signing identity. Verify custody, application
+version and PostgreSQL compatibility before starting.
 
-1. Restore the matching `.env` securely and keep the API stopped.
-2. Start PostgreSQL alone, create an empty `fylkren` database and feed the custom-format dump to `pg_restore --exit-on-error --no-owner`.
-3. Restore the exact Data Protection volume from the same recovery point before starting any API container. Do not allow an empty replacement volume to become the accepted recovery state.
-4. Start the complete stack and verify health, login, Instance ID, protected settings and federation identity. The federation fingerprint must equal the pre-disaster value and `keyUsable` must be true.
-5. From an existing peer, perform a signed probe. A matched disaster-recovery replacement retains its pin and must not require lost-key approval. Then exercise one authorized delivery and confirm one signed receipt/counterpart.
-6. Prove the restore point by checking that a recorded post-backup marker is absent. Record durations, checksums, versions, operator, target isolation and results, then destroy the rehearsal environment securely.
+On the target installation, check out a compatible Fylkren version, build the
+images and place the complete backup directory on the host. Then run:
+
+```bash
+cd /path/to/fylkren
+sudo ./deploy/compose/restore.sh \
+  /absolute/path/to/fylkren-YYYYMMDDTHHMMSSZ \
+  --confirm-destructive-restore
+```
+
+The confirmation is deliberately verbose because the command permanently stops
+the current stack, replaces its PostgreSQL and Data Protection volumes and
+overwrites `.env`. Before changing anything, it requires a `COMPLETE` set,
+verifies every SHA-256 checksum, validates the database dump and rejects unsafe
+key-archive paths. It restores the database and matching keys before starting
+the API, waits for container health and refreshes host status.
+
+After the command succeeds, verify health, login, Instance ID, protected
+settings and federation identity. The federation fingerprint must equal the
+pre-disaster value and `keyUsable` must be true. From an existing peer, perform a
+signed probe; a matched replacement retains its pin and must not require
+lost-key approval. Exercise one authorized delivery and confirm its signed
+receipt. Prove the recovery point with a known post-backup marker, and record
+durations, checksums, versions, operator, isolation and results. Destroy a
+rehearsal environment securely when testing is complete. Before a restored
+replacement receives traffic, prove that the original installation is stopped
+or fenced.
 
 If the database is restored without its matching key ring, protected federation, SMTP and TOTP material may remain present but unusable. Stop and correct the restore; do not invoke federation lost-key recovery merely to compensate for an available but omitted key-volume backup. Use the controlled recovery flow only after the original key is confirmed lost. Production failover additionally requires fencing the original host, changing DNS/routing as approved and verifying there is exactly one live installation identity.
 

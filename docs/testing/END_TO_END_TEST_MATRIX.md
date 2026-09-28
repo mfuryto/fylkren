@@ -220,10 +220,15 @@ confirm the displayed restart count follows Docker's current-container scope.
 Verify the maintained backup command creates a PostgreSQL custom dump, protected
 environment copy, matching key archive, manifest, checksums and `COMPLETE`
 marker in one timestamped directory and automatically publishes the completion
-time. Reject missing and empty externally supplied artifacts. Verify the API
-container has no Docker socket and only a read-only snapshot mount. Repeat
-collection inside the Hyper-V Linux VM during the maintained Windows Server
-acceptance run.
+time. With local retention set to two, create older complete and incomplete
+fixtures; remove only the oldest complete set and preserve the incomplete set.
+Reject missing and empty externally supplied artifacts. Destructively restore
+the generated set into fresh database and key volumes, verify checksums before
+replacement and confirm the recovered installation returns to its pre-backup
+setup state.
+Verify the API container has no Docker socket and only a read-only snapshot
+mount. Repeat collection inside the Hyper-V Linux VM during the maintained
+Windows Server acceptance run.
 
 ## Cross-cutting regression
 

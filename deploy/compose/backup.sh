@@ -30,15 +30,22 @@ if ! command -v docker >/dev/null 2>&1; then
     exit 1
 fi
 
+retention_count=${FYLKREN_LOCAL_BACKUP_RETENTION_COUNT:-}
+if [ -z "$retention_count" ]; then
+    retention_count=$(sed -n 's/^FYLKREN_LOCAL_BACKUP_RETENTION_COUNT=\([0-9][0-9]*\)$/\1/p' "$env_file" | tail -n 1)
+fi
+retention_count=${retention_count:-14}
+case "$retention_count" in
+    ''|*[!0-9]*) echo "FYLKREN_LOCAL_BACKUP_RETENTION_COUNT must be an integer from 2 to 365." >&2; exit 1 ;;
+esac
+if [ "$retention_count" -lt 2 ] || [ "$retention_count" -gt 365 ]; then
+    echo "FYLKREN_LOCAL_BACKUP_RETENTION_COUNT must be from 2 to 365." >&2
+    exit 1
+fi
+
 umask 077
 mkdir -p -m 0700 "$backup_root"
 chmod 0700 "$backup_root"
-if [ -e "$target" ]; then
-    echo "Backup target already exists: $target" >&2
-    exit 1
-fi
-mkdir -m 0700 "$target"
-printf 'Backup is incomplete. Do not restore from this directory.\n' >"$target/INCOMPLETE"
 
 compose() {
     if [ -n "${FYLKREN_COMPOSE_PROJECT:-}" ]; then
@@ -69,6 +76,15 @@ case "$api_user" in
         exit 1
         ;;
 esac
+
+maximum_existing_sets=$((retention_count - 1))
+"$script_dir/prune-backups.sh" "$backup_root" "$maximum_existing_sets"
+if [ -e "$target" ]; then
+    echo "Backup target already exists: $target" >&2
+    exit 1
+fi
+mkdir -m 0700 "$target"
+printf 'Backup is incomplete. Do not restore from this directory.\n' >"$target/INCOMPLETE"
 
 echo "Creating PostgreSQL backup ..."
 compose exec -T postgres pg_dump -U fylkren -d fylkren -Fc >"$target/fylkren.dump"

@@ -97,11 +97,18 @@ snapshot, so the new backup state is visible immediately rather than after the
 next timer interval. A restore rehearsal remains mandatory and is recorded in
 the organization's durable operations log rather than inferred by Fylkren.
 
-The host-status timer only measures state; it does not create backups. Fylkren
-does not include an internal backup schedule or retention deletion. An external
-backup system should invoke the command, require a successful exit status,
-transfer only the resulting directory with a `COMPLETE` marker and then apply
-the organization's retention policy.
+The host-status timer only measures state; it does not create backups. An
+external backup system should invoke the command and require a successful exit
+status. Fylkren keeps the newest 14 complete local sets by default; configure
+`FYLKREN_LOCAL_BACKUP_RETENTION_COUNT` from 2 to 365 in `.env`. Cleanup removes
+only older timestamped directories with a `COMPLETE` marker and never removes
+unknown, symbolic-link or `INCOMPLETE` directories. The external system must
+transfer only complete sets and apply its own independent remote retention.
+
+Restore is intentionally unavailable inside the running GUI. Use the validated
+`deploy/compose/restore.sh` command for an in-place recovery, or on a replacement
+that remains isolated until the original is fenced, as described in
+[Installation and upgrades](INSTALLATION_AND_UPGRADES.md#restore-and-isolated-rehearsal).
 
 `deploy/host-status/record-backup.sh` is retained only for backup sets created by
 an approved external backup system. Pass that command the three existing,
