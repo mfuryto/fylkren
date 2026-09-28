@@ -17,6 +17,15 @@ the OWASP ASVS L2 matrix and the Fylkren security test plan.
 | Full application regression | Editions, roles, site/GUID isolation, workflows, APIs, reports, webhooks, portability and federation candidates | Pass; `pnpm test:e2e:local` exited zero |
 | Cleanup | Disposable containers, networks and volumes | Pass; suite cleanup completed |
 
+After commit `1141bc0` was pushed, a third fresh Compose project ran the
+standalone anonymous-boundary script: 6/6 checks passed. The public-surface
+script passed 26/27 checks. Its sole failure was the HTTPS redirect assertion,
+because this deliberately local target used the documented HTTP development
+mode on loopback. Header, cache, anonymous-metadata, protected-route,
+foreign-Host, safe-error, static-asset and TRACE checks all passed. This result
+does not satisfy or weaken the remaining release-deployment HTTPS gate. The
+third project's containers, networks and volumes were then removed.
+
 ## Finding SV-048
 
 An ASP.NET authentication cookie is protected against modification but is
