@@ -56,34 +56,30 @@ docker compose images
 
 Stop if the working tree contains unexplained local changes.
 
-Create a database dump outside the database volume:
+Create and register one complete, timestamped backup set:
 
 ```bash
-mkdir -p /data/docker/fylkren/backups
-docker compose exec -T postgres pg_dump -U fylkren -d fylkren -Fc > /data/docker/fylkren/backups/fylkren-YYYYMMDD-HHMM.dump
-ls -lh /data/docker/fylkren/backups/fylkren-YYYYMMDD-HHMM.dump
+sudo ./deploy/compose/backup.sh
 ```
 
-Back up configuration securely:
+The script derives the actual Fylkren root from its own location; no installation
+path is hardcoded. It creates `<Fylkren root>/backups/fylkren-<UTC timestamp>/`
+with the PostgreSQL custom-format dump, protected `.env` copy, matching Data
+Protection key archive, manifest and SHA-256 checksums. It marks the directory
+`COMPLETE` only after all artifacts have been created, then updates Platform
+Manager's System status. The `backups/` directory is excluded from both Git and
+Docker build contexts and is restricted to root.
+
+To use another location, supply one absolute directory:
 
 ```bash
-cp -p .env /data/docker/fylkren/backups/env-YYYYMMDD-HHMM.backup
-chmod 600 /data/docker/fylkren/backups/env-YYYYMMDD-HHMM.backup
+sudo ./deploy/compose/backup.sh /approved/backup
 ```
 
-Back up the exact Data Protection volume through the organization's approved volume/host backup method. Database, `.env` and keys must represent one restore point. A backup is unverified until restored in an isolated environment.
-
-After all three nonempty artifacts have been transferred to the approved backup
-target, record the complete set for Platform Manager's System status view:
-
-```bash
-sudo ./deploy/host-status/record-backup.sh \
-  /approved/backup/fylkren-YYYYMMDD-HHMM.dump \
-  /approved/backup/env-YYYYMMDD-HHMM.backup \
-  /approved/backup/data-protection-keys-YYYYMMDD-HHMM.tar.gz
-```
-
-This records hashes and completion time; it does not replace the restore test.
+The local backup directory is not sufficient disaster recovery if the Fylkren
+host or its storage fails. Transfer the complete timestamped directory to
+approved off-host storage, apply retention policy and perform the isolated
+restore rehearsal below. A backup remains unverified until it has been restored.
 
 ## Isolated restore rehearsal
 

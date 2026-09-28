@@ -1,9 +1,10 @@
 # Host status integration - 2026-09-28
 
-Run ID: `host-status-integration-2026-09-28`. The implementation was verified
-as an uncommitted revision based on commit `0230c02`. It replaces the Platform
-Manager placeholder with a bounded read-only snapshot for runtime-host disk,
-recorded backup time, container health and restart counts.
+Run ID: `host-status-integration-2026-09-28`. The host integration was first
+verified as an uncommitted revision based on commit `0230c02`; the complete
+backup extension was verified against its successor `4c23d8e`. Together they
+replace the Platform Manager placeholder with a bounded read-only snapshot for
+runtime-host disk, recorded backup time, container health and restart counts.
 
 | Control | Observed result | Result / evidence |
 | --- | --- | --- |
@@ -13,7 +14,8 @@ recorded backup time, container health and restart counts.
 | Oversized snapshot | A file larger than 64 KiB was rejected with `invalid-file` and no host data was returned | Pass; full local E2E assertion |
 | Invalid numeric range | Available bytes greater than total bytes was rejected with `invalid-content` | Pass; full local E2E assertion |
 | Docker isolation | `/var/run/docker.sock` was absent inside the API container | Pass; Compose execution assertion |
-| Backup registration | Three nonempty synthetic artifacts produced SHA-256 records and a UTC completion marker; an empty artifact was rejected | Pass; direct script checks |
+| Complete backup | The maintained command created a PostgreSQL custom dump, protected environment copy, matching key archive, manifest, SHA-256 file and `COMPLETE` marker, then published its UTC completion time | Pass; disposable Compose run and full local E2E assertion |
+| External registration validation | An empty externally supplied artifact was rejected | Pass; direct script check |
 | API and web | API compiled with zero warnings/errors; typecheck, production web build and all web tests passed | Pass |
 | Full regression | All reported edition, workflow, authorization, API, webhook, portability and federation-candidate scenarios passed | Pass; `pnpm test:e2e:local`, exit zero |
 | Cleanup | Disposable containers, networks and volumes were removed | Pass; suite cleanup output |
@@ -21,8 +23,10 @@ recorded backup time, container health and restart counts.
 The first full test attempt sampled the web container while its health check was
 still `starting` and correctly rendered that state as degraded. The harness was
 corrected to wait for all Compose health checks before collecting the positive
-baseline. The final clean run above used that deterministic boundary. No product
-status was weakened to obtain the pass.
+baseline. A later backup-harness run correctly rejected the absent production
+`.env`; the harness was supplied a dedicated synthetic configuration file. The
+final clean run above used both deterministic boundaries. No product status or
+backup precondition was weakened to obtain the pass.
 
 This run did not install the systemd unit on a production Linux host and did not
 execute the Windows Server/Hyper-V acceptance checklist. Those remain deployment

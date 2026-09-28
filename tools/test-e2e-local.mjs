@@ -92,6 +92,7 @@ assert.equal(platformOperations.status, 200, JSON.stringify(platformOperations.b
 assert.equal(platformOperations.body.hostIntegration.available, true, 'Host status snapshot must be available');
 assert.equal(platformOperations.body.hostIntegration.stale, false, 'Fresh host status must not be stale');
 assert.ok(platformOperations.body.hostIntegration.disk.availableBytes > 0, 'Host disk capacity must be reported');
+assert.ok(!Number.isNaN(Date.parse(platformOperations.body.hostIntegration.backup.lastCompletedAt)), 'Completed backup time must be reported');
 for (const service of ['host-web', 'host-api', 'host-postgres']) {
   const observed = platformOperations.body.services.find(value => value.key === service);
   assert.ok(observed, `Missing ${service} status`);

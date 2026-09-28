@@ -75,23 +75,25 @@ lifetime; they are not a durable incident history.
 
 ## Record a complete backup set
 
-Create the PostgreSQL dump, `.env` backup and matching Data Protection key
-archive using [Installation and upgrades](INSTALLATION_AND_UPGRADES.md). Only
-after all three artifacts exist and have been transferred according to policy,
-record the set:
+From the Fylkren repository, create and register the entire set in the
+Git-ignored `<Fylkren root>/backups/` directory. The root is detected from the
+script location and is not hardcoded:
 
 ```bash
 cd /data/docker/fylkren
-sudo ./deploy/host-status/record-backup.sh \
-  /approved/backup/fylkren-YYYYMMDD-HHMM.dump \
-  /approved/backup/env-YYYYMMDD-HHMM.backup \
-  /approved/backup/data-protection-keys-YYYYMMDD-HHMM.tar.gz
+sudo ./deploy/compose/backup.sh
 ```
 
-The command rejects missing or empty artifacts, calculates a SHA-256 digest for
-each and records the completion time. It does not copy, delete or modify the
-backup artifacts. A restore rehearsal remains mandatory and is recorded in the
-organization's durable operations log rather than inferred by Fylkren.
+The command creates the database dump, `.env` copy, matching Data Protection
+keys, manifest and checksums under one timestamped directory. It rejects partial
+sets and records the completion time automatically. Copy the complete directory
+to approved off-host storage. A restore rehearsal remains mandatory and is
+recorded in the organization's durable operations log rather than inferred by
+Fylkren.
+
+`deploy/host-status/record-backup.sh` is retained only for backup sets created by
+an approved external backup system. Pass that command the three existing,
+nonempty artifact paths; do not use placeholder filenames.
 
 ## Troubleshooting
 

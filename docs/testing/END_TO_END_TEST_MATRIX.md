@@ -217,9 +217,13 @@ rejected or marked unavailable without content entering logs. Record a complete
 synthetic database, environment and key archive set and verify the completion
 time appears; reject missing and empty artifacts. Recreate a container and
 confirm the displayed restart count follows Docker's current-container scope.
-Verify the API container has no Docker socket and only a read-only snapshot
-mount. Repeat collection inside the Hyper-V Linux VM during the maintained
-Windows Server acceptance run.
+Verify the maintained backup command creates a PostgreSQL custom dump, protected
+environment copy, matching key archive, manifest, checksums and `COMPLETE`
+marker in one timestamped directory and automatically publishes the completion
+time. Reject missing and empty externally supplied artifacts. Verify the API
+container has no Docker socket and only a read-only snapshot mount. Repeat
+collection inside the Hyper-V Linux VM during the maintained Windows Server
+acceptance run.
 
 ## Cross-cutting regression
 
