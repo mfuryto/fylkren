@@ -31,9 +31,9 @@ No control is promoted from **Implemented** to **Verified** solely because code 
 | Administration and report APIs | Implemented | Complete scope/grant/BOLA, ETag, idempotency, pagination, rate, and concurrency suite |
 | Audit, technical logs, and notifications | Implemented | Leakage, isolation, delivery failure, retry, retention, and tamper-boundary evidence |
 | Database, concurrency, and performance | Implemented | Transaction-race suite, query measurements, representative load, and recovery behavior |
-| Backups and cryptographic keys | Not assessed | Restore a matched database and Data Protection key set and verify protected data |
+| Backups and cryptographic keys | Implemented | Matched database/key backup and destructive restore passed in a disposable topology; verify protected production data in the formal restore rehearsal |
 | Dependencies, images, and repository | Implemented | Repeat locked dependency, image, secret, history, and configuration scans for release artifacts |
-| Retention and sanitization | Not assessed | Authorized sanitization, immutable neutral audit, export, backup-retention, and restore tests |
+| Retention and sanitization | Implemented | Bounded local backup retention and restore passed; authorized application-data sanitization and immutable-audit coverage remain |
 
 ## Implemented control inventory
 
@@ -126,6 +126,7 @@ Historical hardening changes before this maintained register remain traceable in
 | ID | Requirement and severity | Finding and impact | Remediation and retest | Status |
 | --- | --- | --- | --- | --- |
 | SV-047 | ASVS 8.2.1/8.3.1; Low | A Site Manager with no operational placement or role received `200` and an empty task queue instead of `403`. No task rows or operational content were disclosed, but function-level access did not match the documented separation of administration and operations. | Task overview/list and execution queue entry now require active organizational placement or operational role. The clean disposable 2026-09-27 direct-HTTP rerun passed Site Manager, Platform Manager, sibling, unrelated-site and GUID-substitution negatives while all positive flows passed. See the [run record](../testing/runs/2026-09-27-authorization-guid-substitution.md). | Closed in the next commit after `b3e7c2d`; retested 2026-09-27 |
+| SV-048 | ASVS 7.4.1/7.4.2; High | Explicit sign-out removed the browser cookie but did not revoke a copied self-contained authentication cookie. Local identity/security-version changes could also take up to two minutes to be observed. | Sign-out now advances the identity security version and every authenticated request revalidates identity activity, access and version. A negative regression preserves and replays the old cookie and receives an unauthenticated session. See the [run record](../testing/runs/2026-09-28-authentication-session-security.md). | Closed and retested 2026-09-28 |
 
 ## Release decision
 

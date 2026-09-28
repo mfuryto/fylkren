@@ -186,6 +186,16 @@ internal static class ServiceRegistration
         builder.Services.AddRateLimiter(options =>
         {
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+            options.OnRejected = (context, _) =>
+            {
+                if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+                {
+                    var seconds = Math.Max(1, (int)Math.Ceiling(retryAfter.TotalSeconds));
+                    context.HttpContext.Response.Headers.RetryAfter = seconds.ToString(
+                        System.Globalization.CultureInfo.InvariantCulture);
+                }
+                return ValueTask.CompletedTask;
+            };
             options.AddPolicy("authentication", context =>
                 RateLimitPartition.GetFixedWindowLimiter(
                     AuthenticationRatePartition(context, trustForwardedHeaders),
@@ -251,12 +261,7 @@ internal static class ServiceRegistration
                 return;
             }
 
-            var validatedAtValue = context.Principal.FindFirst("fylkren:validated_at")?.Value;
             var directoryManaged = context.Principal.FindFirst("fylkren:directory_managed")?.Value == "true";
-            if (!directoryManaged && long.TryParse(validatedAtValue, out var validatedAt) &&
-                now - DateTimeOffset.FromUnixTimeSeconds(validatedAt) < TimeSpan.FromMinutes(2))
-                return;
-
             if (!Guid.TryParse(context.Principal.FindFirstValue(ClaimTypes.NameIdentifier), out var identityId))
             {
                 context.RejectPrincipal();

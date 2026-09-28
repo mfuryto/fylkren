@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Fylkren.Api.Persistence;
 using Microsoft.AspNetCore.Antiforgery;
 
 namespace Fylkren.Api.Identity;
@@ -17,10 +19,11 @@ public static partial class IdentityEndpoints
         group.MapPost("/session", SignIn).AllowAnonymous().RequireRateLimiting("authentication");
         group.MapPost("/password-reset/complete", CompletePasswordReset).AllowAnonymous().RequireRateLimiting("authentication");
         group.MapPost("/session/2fa", CompleteTwoFactorSignIn).AllowAnonymous().RequireRateLimiting("authentication");
-        group.MapDelete("/session", async (IAntiforgery antiforgery, HttpContext context) =>
+        group.MapDelete("/session", async (ClaimsPrincipal user, IAntiforgery antiforgery, HttpContext context,
+            FylkrenDbContext database, CancellationToken cancellationToken) =>
             {
                 await antiforgery.ValidateRequestAsync(context);
-                return await SignOut(context);
+                return await SignOut(user, context, database, cancellationToken);
             })
             .RequireAuthorization();
         group.MapGet("/profile", GetProfile).RequireAuthorization();

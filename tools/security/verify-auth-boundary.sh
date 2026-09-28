@@ -65,6 +65,10 @@ if $rate_limited; then
   [[ "${cache_control,,}" == *"no-store"* ]] &&
     pass "rate-limit response is not cacheable" ||
     fail "rate-limit response lacks Cache-Control no-store"
+  retry_after="$(awk -F: 'tolower($1)=="retry-after" { sub(/^[^:]*:[[:space:]]*/, ""); sub(/\r$/, ""); print }' "$temp_dir/rate-$attempt.headers")"
+  [[ "$retry_after" =~ ^[0-9]+$ ]] &&
+    pass "rate-limit response provides numeric Retry-After" ||
+    fail "rate-limit response lacks numeric Retry-After"
 else
   fail "authentication rate limit was not reached within 12 attempts"
 fi

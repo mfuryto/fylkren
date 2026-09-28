@@ -68,6 +68,16 @@ bash tools/security/verify-auth-boundary.sh https://fylkren.example
 
 This must produce generic responses for unknown and oversized identities and eventually return `429`. The test client can remain rate-limited for one configured window.
 
+All browser authentication endpoints share a client-address partition with eight
+requests per fixed one-minute window. Rejections include a numeric `Retry-After`
+value and cannot be cached. This outer limit reduces online guessing before
+password hashing. For known local identities, twenty failed password or MFA
+attempts additionally lock that identity for 15 minutes. Successful
+authentication clears its failure count. The address limit is intentionally
+below the account threshold so a single client cannot cheaply lock accounts;
+the account threshold still limits distributed attempts. Authentication errors
+remain generic so the response does not reveal whether an identity exists.
+
 TLS protocol, certificate chain, host name, and minimum remaining lifetime:
 
 ```bash

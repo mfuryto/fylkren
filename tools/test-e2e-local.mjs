@@ -12,6 +12,7 @@ import { testWebhookFailureIsolation } from './e2e/webhooks.mjs';
 import { testPortability } from './e2e/portability.mjs';
 import { testLookupSorting } from './e2e/lookup-sorting.mjs';
 import { testFederationCandidates } from './e2e/federation-candidates.mjs';
+import { testAuthenticationBoundary, testAuthSessionSecurity } from './e2e/auth-session-security.mjs';
 
 const base = process.env.FYLKREN_E2E_BASE_URL ?? 'http://localhost:18080';
 function client() {
@@ -59,13 +60,23 @@ const unauthenticatedDetails = await platform.request('/api/configuration');
 assert.equal(unauthenticatedDetails.status, 401, 'Detailed configuration requires a session');
 
 const suffix = randomBytes(6).toString('hex');
+const managerUsername = `e2e-${suffix}`;
+const managerPassword = `V7!${randomBytes(22).toString('base64url')}#z`;
 const manager = await platform.post('/api/bootstrap/platform-manager', {
-    username: `e2e-${suffix}`,
+    username: managerUsername,
     displayName: 'Synthetic Test Manager',
     email: `e2e-${suffix}@example.invalid`,
-    password: `V7!${randomBytes(22).toString('base64url')}#z`,
+    password: managerPassword,
 });
 assert.equal(manager.status, 201, JSON.stringify(manager.body));
+
+const authSessionSecurity = await testAuthSessionSecurity({
+  base, username: managerUsername, password: managerPassword,
+});
+const refreshedManagerSession = await platform.post('/api/session', {
+  username: managerUsername, password: managerPassword,
+});
+assert.equal(refreshedManagerSession.status, 204, JSON.stringify(refreshedManagerSession.body));
 
 const session = await platform.request('/api/session');
 assert.equal(session.status, 200, JSON.stringify(session.body));
@@ -797,5 +808,6 @@ const blockedRoutingAfterRemoval = await platform.put('/api/platform/federation/
 assert.equal(blockedRoutingAfterRemoval.status, 403);
 const taskAfterRemoval = await leader.account.request(`/api/work/sites/${siteId}/items/${task.body.id}/details`);
 assert.equal(taskAfterRemoval.status, 200, 'Customer-owned work must remain readable after license removal');
+const authenticationBoundary = await testAuthenticationBoundary({ base });
 
-console.log(JSON.stringify({ editionsAndTransitions: 'passed', bootstrap: 'passed', roleSetup: 'passed', lookupSorting: 'passed', operationalIsolation: 'passed', localPlanningExecutionReport: 'passed', threeLevelDistribution: 'passed', parentChildReporting: 'passed', crossSiteIsolation: 'passed', reportArchives: 'passed', activeSiteMoveRouting: 'passed', detachedSiteRouting: 'passed', placementValidation: 'passed', senderSnapshots: 'passed', threeSiteReporting: 'passed', recursiveSiteWorkload: 'passed', crossSiteRequestResponse: 'passed', crossSiteRequestCancellation: 'passed', combinedBranches: 'passed', transitionChains: 'passed', ...authorizationBoundaries, administrationReportApis: 'passed', dependencies: 'passed', decisionsRisksVersions: 'passed', webhookFailureIsolation: 'passed', portability: 'passed', federationCandidates: 'passed', [process.env.FYLKREN_E2E_SMTP_HOST ? 'requestNotificationsDelivered' : 'requestNotificationsQueued']: 'passed', siteId, childSiteId, grandchildSiteId, newParentId, answeredRequestId: requests.answeredTrackingId, directMixedTaskId: combinedBranches.directSourceId, plannedMixedTaskId: combinedBranches.plannedSourceId, ...transitionChains, ...administrationReportApis, ...dependencies, ...decisionsRisksVersions, ...webhooks, ...portability, taskId: task.body.id, hierarchyTaskId: mainTask.body.id, parentTaskId: parentTask.body.id }));
+console.log(JSON.stringify({ editionsAndTransitions: 'passed', bootstrap: 'passed', ...authSessionSecurity, ...authenticationBoundary, roleSetup: 'passed', lookupSorting: 'passed', operationalIsolation: 'passed', localPlanningExecutionReport: 'passed', threeLevelDistribution: 'passed', parentChildReporting: 'passed', crossSiteIsolation: 'passed', reportArchives: 'passed', activeSiteMoveRouting: 'passed', detachedSiteRouting: 'passed', placementValidation: 'passed', senderSnapshots: 'passed', threeSiteReporting: 'passed', recursiveSiteWorkload: 'passed', crossSiteRequestResponse: 'passed', crossSiteRequestCancellation: 'passed', combinedBranches: 'passed', transitionChains: 'passed', ...authorizationBoundaries, administrationReportApis: 'passed', dependencies: 'passed', decisionsRisksVersions: 'passed', webhookFailureIsolation: 'passed', portability: 'passed', federationCandidates: 'passed', [process.env.FYLKREN_E2E_SMTP_HOST ? 'requestNotificationsDelivered' : 'requestNotificationsQueued']: 'passed', siteId, childSiteId, grandchildSiteId, newParentId, answeredRequestId: requests.answeredTrackingId, directMixedTaskId: combinedBranches.directSourceId, plannedMixedTaskId: combinedBranches.plannedSourceId, ...transitionChains, ...administrationReportApis, ...dependencies, ...decisionsRisksVersions, ...webhooks, ...portability, taskId: task.body.id, hierarchyTaskId: mainTask.body.id, parentTaskId: parentTask.body.id }));

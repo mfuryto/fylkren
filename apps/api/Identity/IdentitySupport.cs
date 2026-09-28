@@ -54,8 +54,25 @@ public static partial class IdentityEndpoints
         !string.IsNullOrEmpty(password) && password.Length <= 128 &&
         passwordHasher.VerifyHashedPassword(identity, identity.PasswordHash, password) != PasswordVerificationResult.Failed;
 
-    private static async Task<IResult> SignOut(HttpContext context)
+    private static async Task<IResult> SignOut(
+        ClaimsPrincipal user,
+        HttpContext context,
+        FylkrenDbContext database,
+        CancellationToken cancellationToken)
     {
+        if (Guid.TryParse(user.FindFirstValue(ClaimTypes.NameIdentifier), out var identityId))
+        {
+            var identity = await database.LoginIdentities.SingleOrDefaultAsync(
+                value => value.Id == identityId,
+                cancellationToken);
+            if (identity is not null)
+            {
+                // ASP.NET authentication cookies are protected but self-contained. Advancing the
+                // version ensures that a copied cookie cannot be replayed after explicit sign-out.
+                identity.AdvanceSecurityVersion();
+                await database.SaveChangesAsync(cancellationToken);
+            }
+        }
         await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return Results.NoContent();
     }
