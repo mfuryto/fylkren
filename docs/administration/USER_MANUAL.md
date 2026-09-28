@@ -249,7 +249,7 @@ The maintained [Federation administration guide](FEDERATION.md) is the complete 
 
 Activation and deactivation are immediate and audited; no server restart is required. Deactivation removes remote recipients, pauses queued delivery and closes work-message receipt without deleting peers, tasks, reports or audit history. A site move, peer change, key recovery or catalog withdrawal can stop new routing until identity and catalog state are valid again. Planned key rotation is automatic; confirmed key loss requires independent fingerprint approval and a new connection test at every peer.
 
-Platform Audit contains only platform-administration events. Technical warnings/errors are shown separately in the operations view.
+Platform Audit contains only platform-administration events. Technical warnings/errors are shown separately in the operations view. Under **Platform → System status**, the maintained host collector shows available disk capacity, the last explicitly registered complete backup, web/API/PostgreSQL container health and restart counts. A missing or stale measurement is shown clearly and never guessed by the application.
 
 ## 14. Notifications
 
@@ -261,6 +261,6 @@ Platform Manager configures SMTP, templates and sees paginated delivery status, 
 
 Contextual Help buttons on operational and administration pages explain the local process. When an action fails, the UI should display the safe reason returned by the API, such as duplicate email or invalid state, rather than only a generic failure.
 
-For an unavailable service, Platform Manager checks Operations and technical logs; operators then use [Installation and upgrades](../operations/INSTALLATION_AND_UPGRADES.md) and [Server setup](../operations/SERVER_SETUP.md). Never delete volumes or edit database migration history as general troubleshooting.
+For an unavailable service, Platform Manager checks Operations and technical logs; operators then use [Host status integration](../operations/HOST_STATUS.md), [Installation and upgrades](../operations/INSTALLATION_AND_UPGRADES.md) and [Server setup](../operations/SERVER_SETUP.md). Never delete volumes or edit database migration history as general troubleshooting.
 
 Identity/provider details are in [Access and identity](ACCESS_AND_IDENTITY.md). Machine integrations are documented under [API conventions](../api/API.md).

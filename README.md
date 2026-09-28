@@ -158,6 +158,7 @@ git clone https://github.com/mfuryto/fylkren.git
 cd fylkren
 ./deploy/compose/install.sh
 docker compose up -d --build
+sudo ./deploy/host-status/install.sh
 docker compose ps
 ```
 

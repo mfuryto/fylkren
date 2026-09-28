@@ -206,6 +206,21 @@ Subscribe a synthetic HTTPS receiver to selected versioned events for one site. 
 
 Export one synthetic site with tasks, relationships, reports, approval versions, decisions, risks, audit/history and available attachments. Verify authorization, site isolation, audit of the export, manifest/schema version and integrity metadata. Inspect structured data independently of a running installation. Validate a valid package without changing application data; reject tampered files, incompatible versions, malformed identifiers, missing relationships and attempts to cross a site boundary. Confirm that the current API exposes validation only and cannot apply an import. A future import-apply operation requires its own acceptance scenario before release. Keep installation backup/restore tests separate from portable export/import. Follow the [portable format](../api/PORTABLE_EXPORT_FORMAT.md).
 
+### E2E-19 — Host status and backup registration
+
+Run the maintained collector against a fresh Compose installation. Verify that
+Platform Manager shows filesystem capacity and healthy web, API and PostgreSQL
+containers with their actual restart counts. Stop one container and confirm the
+next snapshot reports it down without affecting the application-level checks.
+Inject a stale, oversized and structurally invalid snapshot and confirm each is
+rejected or marked unavailable without content entering logs. Record a complete
+synthetic database, environment and key archive set and verify the completion
+time appears; reject missing and empty artifacts. Recreate a container and
+confirm the displayed restart count follows Docker's current-container scope.
+Verify the API container has no Docker socket and only a read-only snapshot
+mount. Repeat collection inside the Hyper-V Linux VM during the maintained
+Windows Server acceptance run.
+
 ## Cross-cutting regression
 
 - server-side pagination with more than 20 items in Tasks, Planning, Execution, and Reports;

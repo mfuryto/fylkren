@@ -9,8 +9,13 @@ type Operations = {
   startedAt: string;
   uptimeSeconds: number;
   processMemoryBytes: number;
-  services: Array<{ key: string; name: string; status: string; detail: string }>;
-  unavailableSignals: string[];
+  services: Array<{ key: string; name: string; status: "healthy" | "degraded" | "down" | "unknown"; detail: string; restartCount: number | null }>;
+  hostIntegration: {
+    configured: boolean; available: boolean; stale: boolean; problem: string | null;
+    collectedAt: string | null; platform: string | null; hostname: string | null;
+    disk: { name: string; totalBytes: number; availableBytes: number } | null;
+    backup: { lastCompletedAt: string | null } | null;
+  };
 };
 
 type LogEntry = {
@@ -28,6 +33,19 @@ function formatUptime(seconds: number) {
   const hours = Math.floor(seconds % 86400 / 3600);
   const minutes = Math.floor(seconds % 3600 / 60);
   return [days ? `${days} d` : "", hours ? `${hours} t` : "", `${minutes} min`].filter(Boolean).join(" ");
+}
+
+function formatBytes(bytes: number) {
+  const gibibytes = bytes / 1024 / 1024 / 1024;
+  return `${gibibytes >= 10 ? gibibytes.toFixed(0) : gibibytes.toFixed(1)} GB`;
+}
+
+function hostStatusMessage(operations: Operations) {
+  const host = operations.hostIntegration;
+  if (!host.configured) return "Vertsovervåking er ikke konfigurert.";
+  if (host.problem === "stale") return "Vertsmålingen er for gammel. Kontroller fylkren-host-status.timer på serveren.";
+  if (!host.available) return "Ingen gyldig vertsmåling er mottatt. Kjør sudo ./deploy/host-status/install.sh på serveren.";
+  return `Vertsmåling fra ${host.hostname ?? "serveren"}${host.collectedAt ? ` · ${new Date(host.collectedAt).toLocaleString()}` : ""}.`;
 }
 
 export function PlatformPage() {
@@ -66,11 +84,13 @@ export function PlatformPage() {
       <div className="summary-card"><span>Miljø</span><strong>{operations?.environment ?? "Laster …"}</strong></div>
       <div className="summary-card"><span>Oppetid</span><strong>{operations ? formatUptime(operations.uptimeSeconds) : "Laster …"}</strong></div>
       <div className="summary-card"><span>API-minne</span><strong>{operations ? `${(operations.processMemoryBytes / 1024 / 1024).toFixed(0)} MB` : "Laster …"}</strong></div>
+      <div className="summary-card"><span>Ledig disk</span><strong>{operations?.hostIntegration.disk ? formatBytes(operations.hostIntegration.disk.availableBytes) : "Ikke rapportert"}</strong></div>
+      <div className="summary-card"><span>Siste backup</span><strong>{operations?.hostIntegration.backup?.lastCompletedAt ? new Date(operations.hostIntegration.backup.lastCompletedAt).toLocaleString() : "Ikke registrert"}</strong></div>
     </div>
     <section className="panel platform-health">
       <div className="section-heading"><div><h2>Systemstatus</h2><p className="muted">Kontrollert {operations ? new Date(operations.checkedAt).toLocaleString() : "–"}</p></div></div>
-      <div className="health-service-list">{operations?.services.map(service => <article className="health-service" key={service.key}><span className={`health-indicator ${service.status}`} aria-hidden="true"/><span><strong>{service.name}</strong><small>{service.detail}</small></span><b>{service.status === "healthy" ? "Klar" : service.status === "degraded" ? "Redusert" : "Nede"}</b></article>)}</div>
-      {operations?.unavailableSignals.length ? <p className="muted platform-signal-note">Krever senere vertsintegrasjon: {operations.unavailableSignals.join(", ")}.</p> : null}
+      <div className="health-service-list">{operations?.services.map(service => <article className="health-service" key={service.key}><span className={`health-indicator ${service.status}`} aria-hidden="true"/><span><strong>{service.name}</strong><small>{service.detail}{service.restartCount !== null ? ` · ${service.restartCount} omstarter` : ""}</small></span><b>{service.status === "healthy" ? "Klar" : service.status === "degraded" ? "Redusert" : service.status === "unknown" ? "Ukjent" : "Nede"}</b></article>)}</div>
+      {operations ? <p className={operations.hostIntegration.available && !operations.hostIntegration.stale ? "muted platform-signal-note" : "status-message warning-message platform-signal-note"}>{hostStatusMessage(operations)}</p> : null}
     </section>
     <section className="panel platform-logs">
       <div className="section-heading"><div><h2>Tekniske logger</h2><p className="muted">Filtrerte advarsler og feil fra gjeldende API-prosess. Faglig innhold og hemmeligheter skal ikke vises her.</p></div></div>

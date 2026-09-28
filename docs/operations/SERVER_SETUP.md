@@ -182,6 +182,7 @@ Do not clone a live installation to create a peer: a clone retains the same iden
 
 ```bash
 docker compose up -d
+sudo ./deploy/host-status/install.sh
 docker compose ps
 docker compose logs --tail=100 api
 ```
@@ -203,6 +204,11 @@ Confirm that:
 - first-run setup disappears after Platform Manager creation;
 - the configured sign-in methods work in separate sessions;
 - no real operational data was entered before acceptance and backup checks.
+
+The host-status collector supplies disk capacity, explicitly recorded backup
+time, container health and restart counts to Platform Manager without exposing
+the Docker socket to the API. Install and verify it using
+[Host status integration](HOST_STATUS.md).
 
 ## Air-gapped installation
 

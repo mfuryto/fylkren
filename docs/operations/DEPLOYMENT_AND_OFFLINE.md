@@ -52,9 +52,9 @@ Connected automatic updaters such as Watchtower are not part of the supported Fy
 
 ## Operational visibility
 
-Platform Manager sees API version, environment, uptime, process memory and database connectivity. A bounded in-memory window retains the latest 300 warnings/errors from the current process and supports safe filtering. It resets on restart and is not a durable log store.
+Platform Manager sees API version, environment, uptime, process memory and database connectivity. The optional, maintained [host-status integration](HOST_STATUS.md) adds disk capacity, the last explicitly recorded complete backup set, container health and restart counts through a bounded read-only snapshot; the API never receives the Docker socket. A bounded in-memory window retains the latest 300 warnings/errors from the current process and supports safe filtering. It resets on restart and is not a durable log store.
 
-Technical logs must not contain credentials, tokens, cookies, configuration secrets or operational document content. Host disk, backup age, container restart count and service-manager data require an explicitly authorized future host integration and are not inferred by the application.
+Technical logs must not contain credentials, tokens, cookies, configuration secrets or operational document content. A missing or stale host snapshot is shown as unavailable rather than inferred. Windows Server and Hyper-V capacity remain the responsibility of the host monitoring system outside the Linux VM.
 
 ## Backup and restore
 

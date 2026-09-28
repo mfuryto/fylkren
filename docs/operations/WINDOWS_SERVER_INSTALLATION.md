@@ -226,6 +226,7 @@ Start and inspect the stack:
 cd /data/docker/fylkren
 sudo docker compose build
 sudo docker compose up -d
+sudo ./deploy/host-status/install.sh
 sudo docker compose ps
 sudo docker compose logs --tail=100 api
 curl --fail --silent --show-error http://localhost:8080/health
@@ -234,6 +235,11 @@ curl --fail --silent --show-error http://localhost:8080/health
 Open Fylkren through the VM's approved address and complete the one-time
 Platform Manager setup. Follow [Server setup](SERVER_SETUP.md) for public URL,
 TLS, identity, notifications and federation configuration.
+
+The collector reports VM disk capacity, container status, restart count and
+recorded backup time to Platform Manager. Windows Server's physical storage and
+Hyper-V state remain in the Windows monitoring boundary; see
+[Host status integration](HOST_STATUS.md).
 
 ## 6. Network and TLS boundary
 

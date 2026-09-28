@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { randomBytes, randomUUID } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { testCrossSiteRequests } from './e2e/cross-site-requests.mjs';
 import { testCombinedBranches } from './e2e/combined-branches.mjs';
 import { testTransitionChains } from './e2e/transition-chains.mjs';
@@ -87,6 +87,41 @@ assert.deepEqual(communityConfig.body.entitlements, []);
 const initialBranding = await platform.request('/api/branding');
 assert.equal(initialBranding.status, 200);
 assert.equal(initialBranding.body.customCss, '');
+const platformOperations = await platform.request('/api/platform/operations');
+assert.equal(platformOperations.status, 200, JSON.stringify(platformOperations.body));
+assert.equal(platformOperations.body.hostIntegration.available, true, 'Host status snapshot must be available');
+assert.equal(platformOperations.body.hostIntegration.stale, false, 'Fresh host status must not be stale');
+assert.ok(platformOperations.body.hostIntegration.disk.availableBytes > 0, 'Host disk capacity must be reported');
+for (const service of ['host-web', 'host-api', 'host-postgres']) {
+  const observed = platformOperations.body.services.find(value => value.key === service);
+  assert.ok(observed, `Missing ${service} status`);
+  assert.equal(observed.status, 'healthy', `${service}: ${JSON.stringify(observed)}`);
+  assert.ok(Number.isInteger(observed.restartCount) && observed.restartCount >= 0, `${service} restart count`);
+}
+const hostStatusPath = 'runtime/host-status.json';
+const validHostStatus = readFileSync(hostStatusPath);
+try {
+  const staleHostStatus = JSON.parse(validHostStatus.toString('utf8'));
+  staleHostStatus.collectedAt = '2000-01-01T00:00:00Z';
+  writeFileSync(hostStatusPath, JSON.stringify(staleHostStatus));
+  const staleOperations = await platform.request('/api/platform/operations');
+  assert.equal(staleOperations.body.hostIntegration.available, true);
+  assert.equal(staleOperations.body.hostIntegration.stale, true, 'Old host snapshots must be marked stale');
+  assert.ok(staleOperations.body.services.filter(value => value.key.startsWith('host-')).every(value => value.status === 'unknown'));
+
+  writeFileSync(hostStatusPath, Buffer.alloc(65 * 1024, 0x78));
+  const oversizedOperations = await platform.request('/api/platform/operations');
+  assert.equal(oversizedOperations.body.hostIntegration.available, false, 'Oversized host snapshot must be rejected');
+  assert.equal(oversizedOperations.body.hostIntegration.problem, 'invalid-file');
+
+  const invalidHostStatus = { ...JSON.parse(validHostStatus.toString('utf8')), disk: { name: 'Fylkren-disk', totalBytes: 1, availableBytes: 2 } };
+  writeFileSync(hostStatusPath, JSON.stringify(invalidHostStatus));
+  const invalidOperations = await platform.request('/api/platform/operations');
+  assert.equal(invalidOperations.body.hostIntegration.available, false, 'Invalid host snapshot must be rejected');
+  assert.equal(invalidOperations.body.hostIntegration.problem, 'invalid-content');
+} finally {
+  writeFileSync(hostStatusPath, validHostStatus);
+}
 const customCss = '.e2e-css-marker { border-radius: 7px; }';
 const branded = await platform.put('/api/platform/branding/', {
   ...initialBranding.body, customCss,

@@ -29,6 +29,7 @@ Before public publication, run `bash tools/security/verify-repository-safety.sh 
 
 - [Installation and upgrades](operations/INSTALLATION_AND_UPGRADES.md)
 - [Windows Server installation with Hyper-V](operations/WINDOWS_SERVER_INSTALLATION.md)
+- [Host status integration](operations/HOST_STATUS.md)
 - [Get and import an Enterprise license, including air-gapped installations](operations/GET_ENTERPRISE_LICENSE.md)
 - [Deployment, backup and offline operation](operations/DEPLOYMENT_AND_OFFLINE.md)
 - [Server setup](operations/SERVER_SETUP.md)

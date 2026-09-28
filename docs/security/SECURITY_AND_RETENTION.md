@@ -54,6 +54,12 @@ Audit is append-only for ordinary users and administrators. Site Manager reads a
 
 The built-in technical log is a bounded in-process buffer, not a SIEM. It retains only `Warning` and higher, at most 300 entries and 2,000 characters per entry, and is lost at process restart. Password, token, API-key, Authorization, cookie, URI-credential, and sensitive query patterns are sanitized before storage.
 
+Host status uses an external least-privilege collector rather than exposing the
+Docker control socket to the API. The collector writes a bounded snapshot into a
+directory mounted read-only in the API container. The API validates the schema,
+age, lengths, numeric ranges and fixed status vocabulary. The snapshot excludes
+environment values, logs, network addresses, volume paths and credentials.
+
 ## Authorization and restricted tasks
 
 Authorization normally follows site, work level, role, and task relationship. A main task can be marked restricted to explicit units or roles, and child tasks normally inherit that restriction. Classification labels are not authorization decisions.

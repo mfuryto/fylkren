@@ -34,6 +34,9 @@ services:
       Fylkren__Federation__RetentionDays: ${FYLKREN_FEDERATION_RETENTION_DAYS:-2555}
       Fylkren__Localization__DefaultLanguage: ${FYLKREN_DEFAULT_LANGUAGE:-nb-NO}
       Fylkren__Localization__TimeZone: ${FYLKREN_TIME_ZONE:-Europe/Oslo}
+      Fylkren__Operations__HostStatusPath: /run/fylkren-host-status/host-status.json
+      Fylkren__Operations__HostStatusMaximumAgeMinutes: ${FYLKREN_HOST_STATUS_MAXIMUM_AGE_MINUTES:-15}
+      Fylkren__Operations__BackupWarningHours: ${FYLKREN_BACKUP_WARNING_HOURS:-36}
       Fylkren__License__PublicKeySpki: ${FYLKREN_LICENSE_PUBLIC_KEY_SPKI:-}
       Fylkren__Authentication__LocalEnabled: ${FYLKREN_LOCAL_AUTH_ENABLED:-true}
       Fylkren__Authentication__MfaEnabled: ${FYLKREN_MFA_ENABLED:-true}
@@ -98,6 +101,7 @@ services:
       start_period: 10s
     volumes:
       - fylkren-keys:/var/lib/fylkren/keys
+      - ./runtime:/run/fylkren-host-status:ro
     depends_on:
       postgres:
         condition: service_healthy

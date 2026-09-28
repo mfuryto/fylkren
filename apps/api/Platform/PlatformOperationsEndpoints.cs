@@ -13,7 +13,8 @@ public static class PlatformOperationsEndpoints
         var group = endpoints.MapGroup("/api/platform/operations")
             .RequireAuthorization(policy => policy.RequireRole("PlatformManager"));
 
-        group.MapGet("", async (FylkrenDbContext database, IWebHostEnvironment environment, CancellationToken cancellationToken) =>
+        group.MapGet("", async (FylkrenDbContext database, IWebHostEnvironment environment,
+            FylkrenOptions options, HostStatusReader hostStatusReader, CancellationToken cancellationToken) =>
         {
             var checkedAt = DateTimeOffset.UtcNow;
             var databaseHealthy = false;
@@ -28,6 +29,34 @@ public static class PlatformOperationsEndpoints
             }
 
             var version = Assembly.GetExecutingAssembly().GetName().Version;
+            var hostStatus = hostStatusReader.Read(checkedAt);
+            var snapshot = hostStatus.Snapshot;
+            var stale = hostStatus.Problem == "stale";
+            var services = new List<OperationServiceStatus>
+            {
+                new("api", "API", "healthy", "Applikasjonen svarer.", null),
+                new("database", "Database", databaseHealthy ? "healthy" : "down",
+                    databaseHealthy ? "Tilkoblingen fungerer." : $"Tilkoblingen feilet{(databaseError is null ? "." : $" ({databaseError}).")}", null),
+                new("authentication", "Autentisering", "healthy", "Sesjon og tilgangskontroll er aktiv.", null)
+            };
+            if (snapshot is not null)
+            {
+                services.AddRange(snapshot.Services.Select(service => new OperationServiceStatus(
+                    $"host-{service.Key}", service.Name, stale ? "unknown" : service.Status,
+                    stale ? "Vertsmålingen er for gammel." : service.Detail, service.RestartCount)));
+                var freePercent = snapshot.Disk!.AvailableBytes * 100d / snapshot.Disk.TotalBytes;
+                var diskDegraded = snapshot.Disk.AvailableBytes < 5L * 1024 * 1024 * 1024 || freePercent < 15;
+                services.Add(new("host-disk", snapshot.Disk.Name,
+                    stale ? "unknown" : diskDegraded ? "degraded" : "healthy",
+                    stale ? "Vertsmålingen er for gammel." : $"{freePercent:F0} % ledig kapasitet.", null));
+                var lastBackup = snapshot.Backup?.LastCompletedAt;
+                var backupDegraded = lastBackup is null || checkedAt - lastBackup > TimeSpan.FromHours(options.Operations.BackupWarningHours);
+                services.Add(new("host-backup", "Backup",
+                    stale ? "unknown" : backupDegraded ? "degraded" : "healthy",
+                    stale ? "Vertsmålingen er for gammel." : lastBackup is null
+                        ? "Ingen fullført Fylkren-backup er registrert."
+                        : $"Sist fullført {lastBackup.Value:yyyy-MM-dd HH:mm} UTC.", null));
+            }
             return Results.Ok(new
             {
                 checkedAt,
@@ -36,13 +65,19 @@ public static class PlatformOperationsEndpoints
                 startedAt = StartedAt,
                 uptimeSeconds = Math.Max(0, (long)(checkedAt - StartedAt).TotalSeconds),
                 processMemoryBytes = Environment.WorkingSet,
-                services = new[]
+                services,
+                hostIntegration = new
                 {
-                    new { key = "api", name = "API", status = "healthy", detail = "Applikasjonen svarer." },
-                    new { key = "database", name = "Database", status = databaseHealthy ? "healthy" : "down", detail = databaseHealthy ? "Tilkoblingen fungerer." : $"Tilkoblingen feilet{(databaseError is null ? "." : $" ({databaseError}).")}" },
-                    new { key = "authentication", name = "Autentisering", status = "healthy", detail = "Sesjon og tilgangskontroll er aktiv." }
-                },
-                unavailableSignals = new[] { "Diskplass", "Siste backup", "Containerstatus og omstarter" }
+                    hostStatus.Configured,
+                    available = snapshot is not null,
+                    stale,
+                    hostStatus.Problem,
+                    snapshot?.CollectedAt,
+                    snapshot?.Platform,
+                    snapshot?.Hostname,
+                    disk = snapshot?.Disk,
+                    backup = snapshot?.Backup
+                }
             });
         });
 
@@ -60,4 +95,7 @@ public static class PlatformOperationsEndpoints
 
         return endpoints;
     }
+
+    private sealed record OperationServiceStatus(string Key, string Name, string Status,
+        string Detail, int? RestartCount);
 }

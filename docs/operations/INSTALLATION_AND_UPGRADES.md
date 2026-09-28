@@ -29,6 +29,7 @@ cd /data/docker/fylkren
 ./deploy/compose/install.sh
 docker compose build
 docker compose up -d
+sudo ./deploy/host-status/install.sh
 docker compose ps
 docker compose logs --tail=100 api
 ```
@@ -72,6 +73,18 @@ chmod 600 /data/docker/fylkren/backups/env-YYYYMMDD-HHMM.backup
 
 Back up the exact Data Protection volume through the organization's approved volume/host backup method. Database, `.env` and keys must represent one restore point. A backup is unverified until restored in an isolated environment.
 
+After all three nonempty artifacts have been transferred to the approved backup
+target, record the complete set for Platform Manager's System status view:
+
+```bash
+sudo ./deploy/host-status/record-backup.sh \
+  /approved/backup/fylkren-YYYYMMDD-HHMM.dump \
+  /approved/backup/env-YYYYMMDD-HHMM.backup \
+  /approved/backup/data-protection-keys-YYYYMMDD-HHMM.tar.gz
+```
+
+This records hashes and completion time; it does not replace the restore test.
+
 ## Isolated restore rehearsal
 
 Restore only onto an isolated replacement host or network where the original installation cannot receive federation or user traffic. Never connect the original and a restored copy simultaneously: they share the same Instance ID and signing identity. Verify backup checksums, custody record, application version and PostgreSQL compatibility before starting.
@@ -93,6 +106,7 @@ git pull --ff-only
 git diff HEAD@{1} -- deploy/compose/.env.example compose.yaml
 docker compose build
 docker compose up -d --force-recreate
+sudo ./deploy/host-status/install.sh
 ```
 
 Merge required new variables without replacing existing secrets. Do not interrupt API startup while migrations are running.

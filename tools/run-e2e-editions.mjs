@@ -18,10 +18,12 @@ function run(command, args) {
   if (result.status !== 0) throw new Error(`${command} exited with ${result.status}`);
 }
 try {
-  run('docker', ['compose', '-p', project, 'up', '-d', '--build']);
+  run('docker', ['compose', '-p', project, 'up', '-d', '--build', '--wait']);
   // A disposable, empty database only: bind the public test fixture to a reserved identity.
   run('docker', ['compose', '-p', project, 'exec', '-T', 'postgres', 'psql', '-U', 'fylkren', '-d', 'fylkren',
     '-c', `UPDATE instance_identity SET instance_id = '${fixture.instanceId}' WHERE key = 1`]);
+  run('docker', ['compose', '-p', project, 'exec', '-T', 'api', 'sh', '-c', 'test ! -e /var/run/docker.sock']);
+  run('./deploy/host-status/collect-host-status.sh', [process.cwd(), project]);
   run(process.execPath, ['tools/test-e2e-local.mjs']);
 } finally {
   run('docker', ['compose', '-p', project, 'down', '-v']);

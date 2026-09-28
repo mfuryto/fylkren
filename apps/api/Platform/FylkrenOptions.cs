@@ -10,6 +10,7 @@ public sealed class FylkrenOptions
     public FeatureOptions Features { get; set; } = new();
     public AuthenticationOptions Authentication { get; set; } = new();
     public FederationOptions Federation { get; set; } = new();
+    public OperationsOptions Operations { get; set; } = new();
 
     public void Validate()
     {
@@ -44,6 +45,12 @@ public sealed class FylkrenOptions
             throw new InvalidOperationException("At least one operational authentication method must be enabled.");
         if (Federation.RetentionDays is < 365 or > 3650)
             throw new InvalidOperationException("Fylkren:Federation:RetentionDays must be between 365 and 3650 days.");
+        if (!string.IsNullOrWhiteSpace(Operations.HostStatusPath) && !Path.IsPathFullyQualified(Operations.HostStatusPath))
+            throw new InvalidOperationException("Fylkren:Operations:HostStatusPath must be an absolute path.");
+        if (Operations.HostStatusMaximumAgeMinutes is < 1 or > 1440)
+            throw new InvalidOperationException("Fylkren:Operations:HostStatusMaximumAgeMinutes must be between 1 and 1440.");
+        if (Operations.BackupWarningHours is < 1 or > 720)
+            throw new InvalidOperationException("Fylkren:Operations:BackupWarningHours must be between 1 and 720.");
         if (Authentication.MfaEnabled && Authentication.WebAuthn.Enabled)
         {
             if (string.IsNullOrWhiteSpace(Authentication.WebAuthn.RpId) || Authentication.WebAuthn.Origins.Count == 0)
@@ -126,6 +133,13 @@ public sealed class FeatureOptions { }
 public sealed class FederationOptions
 {
     public int RetentionDays { get; set; } = 2555;
+}
+
+public sealed class OperationsOptions
+{
+    public string? HostStatusPath { get; set; }
+    public int HostStatusMaximumAgeMinutes { get; set; } = 15;
+    public int BackupWarningHours { get; set; } = 36;
 }
 
 public sealed class AuthenticationOptions

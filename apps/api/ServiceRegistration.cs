@@ -176,6 +176,7 @@ internal static class ServiceRegistration
         builder.Services.AddSingleton<DirectoryAuthenticationService>();
         builder.Services.AddSingleton<DirectoryLifecycleSynchronizer>();
         builder.Services.AddSingleton<IdentityProviderConfigurationService>();
+        builder.Services.AddSingleton<HostStatusReader>();
         builder.Services.AddFido2(options =>
         {
             options.ServerDomain = fylkrenOptions.Authentication.WebAuthn.RpId;

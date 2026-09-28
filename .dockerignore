@@ -10,5 +10,6 @@
 .env
 backups
 data
+runtime
 test-results
 TestResults
