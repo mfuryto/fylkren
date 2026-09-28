@@ -18,7 +18,7 @@ Administrators never choose a user's permanent password. Creation or reset issue
 
 Local passwords are checked against length, context-specific terms and the bundled offline breached/common-password fingerprints. Password hashes use the configured current work factor and are upgraded after successful legacy verification.
 
-`FYLKREN_LOCAL_AUTH_ENABLED=false` hides and rejects local login and local-user creation. Keep it enabled until a tested external method can preserve administrative access.
+Platform Manager controls local login on **Identitet**. Keep one local Platform Manager as emergency access until a tested external method preserves administrative access. Direct SSO may hide the ordinary login form and redirect to OIDC or SAML while `/?local=1` remains the documented emergency address. Fylkren refuses to disable local login unless an active Platform Manager is linked to an active external provider that has passed its connection test.
 
 ## Platform and site administration
 
@@ -35,6 +35,10 @@ Deletion ends active access and responsibility, removes email, profile image, pa
 Site Manager administers memberships, placements and role assignments in assigned sites. A person transferred in by Platform Manager remains visible under “No active unit” until placed. A receiving Site Manager may add an existing person from another site; the receiving site initiates the action, and each site's placement and roles remain independent.
 
 ## External identity
+
+Platform Manager selects **Konfigurer** on the AD, LDAP, OIDC or SAML card under **Identitet**, enters the connection values, saves the provider while deactivated, runs **Test lagret oppsett**, then activates it. Fylkren rejects activation until the current configuration has passed the test. Changes take effect without editing `.env` or restarting containers. Bind passwords and client secrets are encrypted with the persistent Data Protection key ring and are never returned to the browser. Configuration changes and tests are audited.
+
+On the first upgraded startup only, an existing `.env` provider configuration is imported into the protected database settings. The database is authoritative afterwards; later `.env` changes do not overwrite GUI configuration.
 
 External authentication establishes the same local browser session after resolving an explicitly linked internal person:
 
@@ -61,7 +65,7 @@ and last check and can select **Synkroniser nå** on **Identitet**.
 
 AD account status uses `userAccountControl`, `accountExpires` and the configured
 active-account filter. Generic LDAP has no universal disabled-account attribute;
-the operator must set `FYLKREN_LDAP_LIFECYCLE_ACTIVE_FILTER` to the server's
+the operator must set the **Filter for aktiv konto** field to the server's
 schema if disabled entries remain searchable. The safe default treats an
 existing LDAP entry as active and still detects confirmed deletion by
 `entryUUID`.

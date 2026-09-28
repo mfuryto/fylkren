@@ -29,6 +29,7 @@ export type PublicConfiguration = {
     samlConfigurationEnabled: boolean;
     activeDirectoryConfigurationEnabled: boolean;
     ldapConfigurationEnabled: boolean;
+    ssoAutoRedirectProvider?: "oidc" | "saml" | null;
     webAuthnEnabled?: boolean;
   };
 };

@@ -197,7 +197,7 @@ internal static class PortableExportPackage
                 "SHA-256",
                 descriptors,
                 attachments.Select(value => value.Descriptor).ToArray(),
-                ["Password hashes, MFA/TOTP secrets, recovery codes, passkeys, active sessions, reset grants, webhook signing secrets and SMTP credentials are never exported."]);
+                ["Password hashes, MFA/TOTP secrets, recovery codes, passkeys, active sessions, reset grants, identity-provider configuration and secrets, webhook signing secrets and SMTP credentials are never exported."]);
             WriteEntry(archive, "manifest.json", JsonSerializer.SerializeToUtf8Bytes(manifest, JsonOptions));
             WriteEntry(archive, "README.txt", Encoding.UTF8.GetBytes(Readme));
         }

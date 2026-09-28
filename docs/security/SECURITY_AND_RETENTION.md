@@ -10,6 +10,7 @@ Fylkren supports local identities and configured AD, LDAP, OIDC, and SAML adapte
 - SAML trusts only the configured identity provider, exact Entity ID, and HTTPS metadata. A permanent NameID must be explicitly linked to an active internal person.
 - External identities are denied while unknown, disabled, or unlinked. Linking and unlinking are audited.
 - Active AD/LDAP links are checked by stable ID in the background. Authoritative disabled/expired results suspend immediately; missing entries require repeated successful confirmation; unavailable or ambiguous directory results fail safe without suspending access. Suspension and restoration are durably audited by the `directory-lifecycle` system actor.
+- Provider configuration is managed in Platform Manager and stored in PostgreSQL. Bind passwords, OIDC client secrets and the rest of each provider configuration are encrypted with the persistent Data Protection key ring; secrets are never returned to the browser. External providers cannot be activated until the current saved configuration passes its connection test. Disabling local login or enabling direct SSO is guarded by tested-provider and Platform Manager linkage checks to reduce administrative lockout risk. `/?local=1` is the documented emergency local-login presentation when direct SSO is enabled.
 - Keep local authentication available during an external-provider rollout until at least one Platform Manager path has been verified.
 - A directory-managed identity cannot bypass directory policy through local password, TOTP, or passkey authentication.
 

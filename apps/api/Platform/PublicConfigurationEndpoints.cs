@@ -67,6 +67,7 @@ internal static class PublicConfigurationEndpoints
         samlConfigurationEnabled = options.Authentication.Saml.Enabled,
         activeDirectoryConfigurationEnabled = options.Authentication.ActiveDirectory.Enabled,
         ldapConfigurationEnabled = options.Authentication.Ldap.Enabled,
+        ssoAutoRedirectProvider = options.Authentication.SsoAutoRedirectProvider,
         webAuthnEnabled = options.Authentication.MfaEnabled && options.Authentication.WebAuthn.Enabled
     };
 

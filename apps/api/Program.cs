@@ -85,6 +85,8 @@ await using (var scope = app.Services.CreateAsyncScope())
     var database = scope.ServiceProvider.GetRequiredService<FylkrenDbContext>();
     await database.Database.MigrateAsync();
     await DatabaseDefaults.EnsureCreatedAsync(database);
+    await scope.ServiceProvider.GetRequiredService<IdentityProviderConfigurationService>()
+        .InitializeAsync(database);
 }
 
 PublicConfigurationEndpoints.Map(app);

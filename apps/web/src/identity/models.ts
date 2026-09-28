@@ -1,4 +1,4 @@
-export type IdentityProvider = { name: string; key: string; enabledRequested: boolean; configurationPresent: boolean; operational: boolean; stableIdentifier: string };
+export type IdentityProvider = { name: string; key: string; enabledRequested: boolean; configurationPresent: boolean; operational: boolean; stableIdentifier: string; lastTestedAt: string | null; lastTestSucceeded: boolean | null };
 export type IdentityConfiguration = { local: { enabled: boolean; operational: boolean }; providers: IdentityProvider[]; migration: { status: string; principle: string; usernameMatching: string } };
 export type GlobalUser = {
   id: string; displayName: string; email: string | null; isActive: boolean; createdAt: string; isCurrentUser: boolean;
@@ -16,5 +16,17 @@ export type DirectoryIdentityLink = {
 export type DirectoryLifecycleSummary = {
   checked: number; active: number; suspended: number; resumed: number;
   missingPending: number; unavailable: number;
+};
+export type IdentityProviderConfiguration = {
+  server: string | null; port: number; security: "ldaps" | "starttls"; baseDn: string | null;
+  userSearchBase: string | null; bindDn: string | null; secret?: string | null; domain: string | null;
+  usernameAttribute: string; displayNameAttribute: string; emailAttribute: string; stableIdAttribute: string;
+  lifecycleActiveFilter: string; authority: string | null; clientId: string | null; callbackPath: string;
+  metadataUrl: string | null; entityId: string | null; identityProviderEntityId: string | null; modulePath: string;
+  ssoAutoRedirectProvider: string | null;
+};
+export type IdentityProviderSettings = {
+  provider: string; enabled: boolean; configuration: IdentityProviderConfiguration; hasSecret: boolean;
+  updatedAt: string; lastTestedAt: string | null; lastTestSucceeded: boolean | null; lastTestError: string | null;
 };
 export type GlobalUserPage = { items: GlobalUser[]; total: number; page: number; sites: UserSite[] };

@@ -224,5 +224,16 @@ internal static class PlatformModelConfiguration
         smtp.Property(value => value.LastTestedAt).HasColumnName("last_tested_at");
         smtp.Property(value => value.LastTestSucceeded).HasColumnName("last_test_succeeded");
         smtp.Property(value => value.LastTestError).HasColumnName("last_test_error").HasMaxLength(300);
+
+        var identityProvider = modelBuilder.Entity<IdentityProviderSettings>();
+        identityProvider.ToTable("identity_provider_settings");
+        identityProvider.HasKey(value => value.Provider);
+        identityProvider.Property(value => value.Provider).HasColumnName("provider").HasMaxLength(10).ValueGeneratedNever();
+        identityProvider.Property(value => value.Enabled).HasColumnName("enabled");
+        identityProvider.Property(value => value.ProtectedConfiguration).HasColumnName("protected_configuration").IsRequired();
+        identityProvider.Property(value => value.UpdatedAt).HasColumnName("updated_at");
+        identityProvider.Property(value => value.LastTestedAt).HasColumnName("last_tested_at");
+        identityProvider.Property(value => value.LastTestSucceeded).HasColumnName("last_test_succeeded");
+        identityProvider.Property(value => value.LastTestError).HasColumnName("last_test_error").HasMaxLength(300);
     }
 }

@@ -5,6 +5,8 @@ import { addDirectoryIdentity, addOidcIdentity, addSamlIdentity, loadDirectoryLi
 import { GlobalUserAdministration } from "./GlobalUserAdministration";
 import { errorMessage } from "../api/errors";
 import { EnterpriseRequiredNotice } from "../components/EnterpriseRequiredNotice";
+import { IdentityProviderSettingsDialog } from "./IdentityProviderSettingsDialog";
+import type { IdentityProvider } from "./models";
 
 export function IdentityProvidersPage({ language: displayLanguage, timeZone: displayTimeZone, canManageExternalIdentity }: { language: string; timeZone: string; canManageExternalIdentity: boolean }) {
   const [data, setData] = useState<IdentityConfiguration | null>(null);
@@ -19,6 +21,9 @@ export function IdentityProvidersPage({ language: displayLanguage, timeZone: dis
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [userRefreshToken, setUserRefreshToken] = useState(0);
+  const [providerEditor,setProviderEditor]=useState<IdentityProvider|null>(null);
+
+  async function reloadConfiguration(){setData(await loadIdentityConfiguration());}
 
   useEffect(() => {
     loadIdentityConfiguration()
@@ -69,6 +74,7 @@ export function IdentityProvidersPage({ language: displayLanguage, timeZone: dis
               <strong>
                 {data.local.operational ? "Operativ" : "Ikke operativ"}
               </strong>
+              <button className="secondary-button" type="button" onClick={()=>setProviderEditor({name:"Lokal konto",key:"local",enabledRequested:data.local.enabled,configurationPresent:true,operational:data.local.operational,stableIdentifier:"intern person-ID",lastTestedAt:null,lastTestSucceeded:null})}>Konfigurer</button>
             </article>
             {data.providers.map((provider) => (
               <article
@@ -92,6 +98,7 @@ export function IdentityProvidersPage({ language: displayLanguage, timeZone: dis
                     <dd>{provider.enabledRequested ? "Ja" : "Nei"}</dd>
                   </div>
                 </dl>
+                <button className="secondary-button" type="button" disabled={!canManageExternalIdentity} onClick={()=>setProviderEditor(provider)}>Konfigurer</button>
               </article>
             ))}
           </section>
@@ -114,6 +121,8 @@ export function IdentityProvidersPage({ language: displayLanguage, timeZone: dis
           </section>
         </>
       )}
+
+      {providerEditor&&<IdentityProviderSettingsDialog provider={providerEditor} onClose={()=>setProviderEditor(null)} onSaved={reloadConfiguration}/>}
 
     </div>
   );

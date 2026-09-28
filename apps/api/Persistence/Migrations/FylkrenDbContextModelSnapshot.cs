@@ -2437,6 +2437,44 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.ToTable("classification_settings", (string)null);
                 });
 
+            modelBuilder.Entity("Fylkren.Api.Platform.IdentityProviderSettings", b =>
+                {
+                    b.Property<string>("Provider")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("provider");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("enabled");
+
+                    b.Property<string>("LastTestError")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("last_test_error");
+
+                    b.Property<bool?>("LastTestSucceeded")
+                        .HasColumnType("boolean")
+                        .HasColumnName("last_test_succeeded");
+
+                    b.Property<DateTimeOffset?>("LastTestedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_tested_at");
+
+                    b.Property<string>("ProtectedConfiguration")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("protected_configuration");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Provider");
+
+                    b.ToTable("identity_provider_settings", (string)null);
+                });
+
             modelBuilder.Entity("Fylkren.Api.Platform.SmtpSettings", b =>
                 {
                     b.Property<Guid>("Id")

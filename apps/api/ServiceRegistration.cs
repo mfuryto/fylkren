@@ -102,13 +102,12 @@ internal static class ServiceRegistration
                 };
                 options.Events.OnValidatePrincipal = ValidateSessionPrincipal;
             });
-        if (fylkrenOptions.Authentication.Oidc.Enabled)
-        {
-            authentication.AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
+        authentication.AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
             {
-                options.Authority = fylkrenOptions.Authentication.Oidc.Authority;
-                options.ClientId = fylkrenOptions.Authentication.Oidc.ClientId;
-                options.ClientSecret = fylkrenOptions.Authentication.Oidc.ClientSecret;
+                var oidc = fylkrenOptions.Authentication.Oidc;
+                options.Authority = oidc.Enabled ? oidc.Authority : "https://disabled.invalid";
+                options.ClientId = oidc.Enabled ? oidc.ClientId : "disabled";
+                options.ClientSecret = oidc.Enabled ? oidc.ClientSecret : "disabled";
                 options.CallbackPath = fylkrenOptions.Authentication.Oidc.CallbackPath;
                 options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.ResponseType = "code";
@@ -134,23 +133,25 @@ internal static class ServiceRegistration
                     context.Principal = IdentityEndpoints.CreatePrincipal(identity);
                 };
             });
-        }
-        if (fylkrenOptions.Authentication.Saml.Enabled)
-        {
-            authentication.AddSaml2(Saml2Defaults.Scheme, options =>
+        authentication.AddSaml2(Saml2Defaults.Scheme, options =>
             {
                 var saml = fylkrenOptions.Authentication.Saml;
                 options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.SPOptions.EntityId = new EntityId(saml.EntityId!);
+                options.SPOptions.EntityId = new EntityId(saml.Enabled ? saml.EntityId! : "https://disabled.invalid/fylkren");
                 options.SPOptions.ModulePath = saml.ModulePath;
                 options.SPOptions.NameIdPolicy = new Saml2NameIdPolicy(null, NameIdFormat.Persistent);
-                options.IdentityProviders.Add(new IdentityProvider(new EntityId(saml.IdentityProviderEntityId!), options.SPOptions)
+                var identityProvider = new IdentityProvider(new EntityId(saml.Enabled ? saml.IdentityProviderEntityId! : "https://disabled.invalid/idp"), options.SPOptions);
+                if (saml.Enabled)
                 {
-                    LoadMetadata = true,
-                    MetadataLocation = saml.MetadataUrl
-                });
+                    identityProvider.MetadataLocation = saml.MetadataUrl;
+                    identityProvider.LoadMetadata = true;
+                }
+                else
+                {
+                    identityProvider.SingleSignOnServiceUrl = new Uri("https://disabled.invalid/sso");
+                }
+                options.IdentityProviders.Add(identityProvider);
             });
-        }
         builder.Services.AddAuthorization(options =>
         {
             options.FallbackPolicy = new AuthorizationPolicyBuilder()
@@ -174,6 +175,7 @@ internal static class ServiceRegistration
         builder.Services.AddSingleton<WebAuthnFlowService>();
         builder.Services.AddSingleton<DirectoryAuthenticationService>();
         builder.Services.AddSingleton<DirectoryLifecycleSynchronizer>();
+        builder.Services.AddSingleton<IdentityProviderConfigurationService>();
         builder.Services.AddFido2(options =>
         {
             options.ServerDomain = fylkrenOptions.Authentication.WebAuthn.RpId;
@@ -210,6 +212,8 @@ internal static class ServiceRegistration
         builder.Services.AddHttpClient("webhooks", client => client.Timeout = TimeSpan.FromSeconds(10))
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
         builder.Services.AddHttpClient("federation-probe", client => client.Timeout = TimeSpan.FromSeconds(10))
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+        builder.Services.AddHttpClient("identity-provider-test", client => client.Timeout = TimeSpan.FromSeconds(10))
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
         builder.Services.AddHostedService<FederationKeyRotationWorker>();
         builder.Services.AddHostedService<FederationOutboundDeliveryWorker>();

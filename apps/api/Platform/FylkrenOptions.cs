@@ -131,6 +131,7 @@ public sealed class FederationOptions
 public sealed class AuthenticationOptions
 {
     public bool LocalEnabled { get; set; } = true;
+    public string? SsoAutoRedirectProvider { get; set; }
     public bool MfaEnabled { get; set; } = true;
     public OidcOptions Oidc { get; set; } = new();
     public SamlOptions Saml { get; set; } = new();

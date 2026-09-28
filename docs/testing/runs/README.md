@@ -8,6 +8,8 @@ The [authorization and cross-site GUID-substitution run](2026-09-27-authorizatio
 
 The [directory lifecycle deprovisioning run](2026-09-27-directory-lifecycle-deprovisioning.md) records the implementation-level state, migration, GUI-build and full-regression evidence for automatic AD/LDAP suspension and resumption. Live Samba/Active Directory and OpenLDAP acceptance remains an explicit release gate.
 
+The [GUI identity-provider settings run](2026-09-28-gui-identity-provider-settings.md) records protected database configuration, Community/Enterprise boundaries, local lockout prevention, dynamic remote-handler registration and the clean full regression. It also retains the initial disabled-handler startup failure and its correction.
+
 For each run, record:
 
 1. Run ID, date/time, test tool, application commit and version, test-code revision or hash, environment and fixture reset.

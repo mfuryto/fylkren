@@ -26,6 +26,9 @@ public sealed class DirectoryAuthenticationService(FylkrenOptions options)
     public Task<bool> TestConnectionAsync(string provider, CancellationToken cancellationToken) =>
         RunBoundedAsync(() => TestConnection(provider), cancellationToken);
 
+    public Task<bool> TestConfiguredConnectionAsync(string provider, CancellationToken cancellationToken) =>
+        RunBoundedAsync(() => TestConnection(GetSettings(provider, requireEnabled: false)), cancellationToken);
+
     public Task<DirectoryLifecycleResult> LookupLifecycleAsync(string provider, string stableId,
         CancellationToken cancellationToken) =>
         RunBoundedAsync(() => LookupLifecycle(provider, stableId), cancellationToken);
@@ -129,7 +132,15 @@ public sealed class DirectoryAuthenticationService(FylkrenOptions options)
     {
         try
         {
-            var settings = GetSettings(provider);
+            return TestConnection(GetSettings(provider));
+        }
+        catch (InvalidOperationException) { return false; }
+    }
+
+    private static bool TestConnection(Settings settings)
+    {
+        try
+        {
             using var connection = CreateConnection(settings, new NetworkCredential(settings.BindDn, settings.BindPassword));
             connection.Bind();
             var request = new SearchRequest(settings.BaseDn, "(objectClass=*)", SearchScope.Base, "dn");
@@ -217,12 +228,12 @@ public sealed class DirectoryAuthenticationService(FylkrenOptions options)
         return long.TryParse(value?.ToString(), out result);
     }
 
-    private Settings GetSettings(string provider)
+    private Settings GetSettings(string provider, bool requireEnabled = true)
     {
         DirectoryOptionsBase source = provider.ToLowerInvariant() switch
         {
-            "ad" when options.Authentication.ActiveDirectory.Enabled => options.Authentication.ActiveDirectory,
-            "ldap" when options.Authentication.Ldap.Enabled => options.Authentication.Ldap,
+            "ad" when !requireEnabled || options.Authentication.ActiveDirectory.Enabled => options.Authentication.ActiveDirectory,
+            "ldap" when !requireEnabled || options.Authentication.Ldap.Enabled => options.Authentication.Ldap,
             _ => throw new InvalidOperationException("Directory provider is not enabled.")
         };
         return new Settings(provider.ToLowerInvariant(), source.Server!, source.Port, source.UseSsl, source.UseStartTls,

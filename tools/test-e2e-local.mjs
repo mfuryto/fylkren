@@ -101,6 +101,17 @@ const blockedClient = await platform.post('/api/platform/api-clients/', { name: 
 assert.equal(blockedClient.status, 403, 'Community must reject Enterprise API-client creation');
 const blockedExternalLink = await platform.post('/api/platform/identity/oidc-links', { username: 'missing-user', subjectId: 'synthetic-subject' });
 assert.equal(blockedExternalLink.status, 403, 'Community must reject new external identity links');
+const localIdentitySettings = await platform.request('/api/platform/identity/local');
+assert.equal(localIdentitySettings.status, 200, JSON.stringify(localIdentitySettings.body));
+assert.equal(localIdentitySettings.body.enabled, true);
+const unsafeLocalDisable = await platform.put('/api/platform/identity/local', {
+  enabled: false, clearSecret: false, configuration: localIdentitySettings.body.configuration,
+});
+assert.equal(unsafeLocalDisable.status, 409, 'Local login cannot be disabled without a tested external Platform Manager path');
+const blockedProviderConfiguration = await platform.put('/api/platform/identity/providers/oidc', {
+  enabled: false, clearSecret: false, configuration: localIdentitySettings.body.configuration,
+});
+assert.equal(blockedProviderConfiguration.status, 403, 'Community must reject external provider configuration');
 const blockedWebhook = await platform.post(`/api/platform/webhooks/sites/${randomUUID()}`, { name: 'Blocked synthetic hook', endpointUrl: 'https://example.invalid/hook', eventTypes: ['task.created'] });
 assert.equal(blockedWebhook.status, 403, 'Community must reject new webhook subscriptions');
 const blockedFederation = await platform.post('/api/platform/federation/peers', {
@@ -123,6 +134,29 @@ assert.equal(enabledLicense.body.status.edition, 'enterprise');
 const enterpriseConfig = await platform.request('/api/configuration');
 assert.equal(enterpriseConfig.body.edition, 'enterprise');
 assert.ok(enterpriseConfig.body.entitlements.includes('external-identity'));
+const oidcSettings = await platform.request('/api/platform/identity/providers/oidc');
+assert.equal(oidcSettings.status, 200, JSON.stringify(oidcSettings.body));
+const savedOidcSettings = await platform.put('/api/platform/identity/providers/oidc', {
+  enabled: false,
+  clearSecret: false,
+  configuration: {
+    ...oidcSettings.body.configuration,
+    authority: 'https://identity.example.invalid',
+    clientId: 'synthetic-client',
+    secret: 'synthetic-e2e-secret',
+  },
+});
+assert.equal(savedOidcSettings.status, 204, JSON.stringify(savedOidcSettings.body));
+const protectedOidcSettings = await platform.request('/api/platform/identity/providers/oidc');
+assert.equal(protectedOidcSettings.body.hasSecret, true);
+assert.equal(protectedOidcSettings.body.configuration.secret, null, 'Stored client secret must never be returned');
+assert.equal(JSON.stringify(protectedOidcSettings.body).includes('synthetic-e2e-secret'), false);
+const untestedOidcActivation = await platform.put('/api/platform/identity/providers/oidc', {
+  enabled: true,
+  clearSecret: false,
+  configuration: protectedOidcSettings.body.configuration,
+});
+assert.equal(untestedOidcActivation.status, 409, 'An external provider cannot be activated before its saved configuration passes a connection test');
 const enabledExternalLink = await platform.post('/api/platform/identity/oidc-links', { username: 'missing-user', subjectId: 'synthetic-subject' });
 assert.equal(enabledExternalLink.status, 404, 'Entitled identity endpoint must proceed to ordinary user validation');
 

@@ -178,6 +178,18 @@ ambiguous stable ID and malformed attributes, no user may be suspended. Confirm
 transition audit events use the `directory-lifecycle` system actor and that no
 password, bind secret or sensitive attribute is logged.
 
+Configure Local, AD, LDAP, OIDC and SAML from Platform Manager rather than by
+editing environment variables. Verify secrets never return to the browser,
+configuration and test actions are audited, saved changes take effect without a
+restart and the first upgrade imports existing environment values exactly once.
+Reject external provider writes in Community. Reject local-login deactivation
+without a tested external Platform Manager path. Reject activation of an
+external provider until its current saved configuration has passed the
+connection test. Enable direct OIDC/SAML and
+verify normal visits bypass the login form while `/?local=1` retains documented
+emergency local presentation. Changing or disabling the selected SSO provider
+must automatically cancel direct redirect until it is tested and selected again.
+
 ### E2E-15 — Dependencies and blocked progress
 
 Create a task with two finish-to-start predecessors. Verify it remains blocked until both are completed; one completion alone must not release it. Check blocked state in Tasks and the API, and reject direct API progress while blocked. Reject self-dependency, duplicates, cross-site references and cycles. Add a dependency while assessing a task, place it on hold for that reason, and verify that an approved plan cannot be released while the dependency remains active. Remove a dependency and confirm that the change is audited and the derived blocked state updates.

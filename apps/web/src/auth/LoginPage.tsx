@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type React from "react";
 import type { Branding, LoginConfiguration } from "../app/models";
 import { bootstrapPlatformManager, completePasswordReset, signIn, signInWithPasskey } from "../api/authClient";
@@ -36,6 +36,12 @@ export function LoginPage({
     ...(configuration.authentication.activeDirectoryConfigurationEnabled ? [{ value: "ad", label: "Active Directory" }] : []),
     ...(configuration.authentication.ldapConfigurationEnabled ? [{ value: "ldap", label: "LDAP" }] : []),
   ];
+  const breakGlassLogin = new URLSearchParams(window.location.search).get("local") === "1";
+  const automaticSso = configuration.authentication.ssoAutoRedirectProvider;
+  useEffect(()=>{
+    if(!configuration.setupRequired&&automaticSso&&!breakGlassLogin)
+      window.location.replace(`/api/auth/${automaticSso}/login`);
+  },[automaticSso,breakGlassLogin,configuration.setupRequired]);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -117,6 +123,8 @@ export function LoginPage({
       </main>
     </div>
   );
+
+  if(automaticSso&&!breakGlassLogin)return <div className="product-shell"><main className="login-page"><section className="panel login-panel"><h1>Single sign-on</h1><p className="status-message">Sender deg til organisasjonens innlogging …</p></section></main></div>;
 
   return (
     <div className="product-shell">

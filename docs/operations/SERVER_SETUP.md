@@ -85,13 +85,12 @@ Base installation settings:
 ```dotenv
 FYLKREN_DEFAULT_LANGUAGE=nb-NO
 FYLKREN_TIME_ZONE=Europe/Oslo
-FYLKREN_LOCAL_AUTH_ENABLED=true
 FYLKREN_MFA_ENABLED=true
 ```
 
 The language must be a supported culture code and the timezone an IANA identifier available in the container.
 
-`FYLKREN_LOCAL_AUTH_ENABLED=false` disables local sign-in and creation of new local users. It does not delete existing people or history. Keep local authentication until an external administrative recovery route has been verified.
+Local login is controlled in **Platform Manager → Identitet**. An existing `FYLKREN_LOCAL_AUTH_ENABLED` value is imported only when the database setting is first created.
 
 `FYLKREN_MFA_ENABLED=false` hides and disables TOTP, passkeys, security keys, and WebAuthn endpoints without deleting existing credentials. Use it only after a documented risk assessment; an internal network alone is not an authentication control.
 
@@ -127,6 +126,8 @@ Platform Manager is a system identity and does not belong to a site.
 
 OIDC, SAML, Active Directory, and LDAP are optional. They do not automatically create operational people or populate a site's Personnel list. External identities must be explicitly linked to an internal person, and site membership, unit placement, roles, and authority remain local.
 
+Configure, test and activate these providers in **Platform Manager → Identitet**. Provider configuration is stored in PostgreSQL; bind passwords and client secrets are protected with the persistent Data Protection key ring. No restart is required. Existing provider values from `.env` are imported once when this database-backed configuration is first introduced, then the GUI becomes authoritative.
+
 Use the canonical [Access and identity](../administration/ACCESS_AND_IDENTITY.md) manual for configuration, mapping, migration, MFA, passkeys, and recovery. Security requirements include:
 
 - HTTPS metadata and exact issuer/entity validation for OIDC and SAML;
@@ -138,7 +139,7 @@ Use the canonical [Access and identity](../administration/ACCESS_AND_IDENTITY.md
 - no automatic matching by email, name, or username;
 - safe local administrative recovery during rollout.
 
-Secrets remain only in the protected local environment. Restart/recreate the affected API service after configuration changes and inspect sanitized startup logs.
+Keep the database and Data Protection key volume in the same backup/restore set. Without the matching keys, protected provider secrets cannot be recovered.
 
 Directory lifecycle checking is enabled by default every 15 minutes. Configure
 `FYLKREN_DIRECTORY_LIFECYCLE_INTERVAL_MINUTES` from 1 to 1440 and
@@ -146,8 +147,8 @@ Directory lifecycle checking is enabled by default every 15 minutes. Configure
 protects users from a single replication or search anomaly; transport or bind
 failure is never counted as a missing account. AD has a secure default filter
 for the `ACCOUNTDISABLE` flag and also checks account expiry. For another AD
-schema, override `FYLKREN_AD_LIFECYCLE_ACTIVE_FILTER`. Generic LDAP deployments
-must set `FYLKREN_LDAP_LIFECYCLE_ACTIVE_FILTER` when their directory retains
+schema, edit **Filter for aktiv konto** in the AD dialog. Generic LDAP deployments
+must edit the corresponding field when their directory retains
 disabled entries; for example, use the directory product's documented lock or
 status attribute rather than copying an AD filter. Keep the filter static—no
 user input is interpolated into it.

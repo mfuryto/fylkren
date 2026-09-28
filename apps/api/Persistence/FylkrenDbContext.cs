@@ -62,6 +62,7 @@ public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options)
     public DbSet<ClassificationSettings> ClassificationSettings => Set<ClassificationSettings>();
     public DbSet<ClassificationDefinition> ClassificationDefinitions => Set<ClassificationDefinition>();
     public DbSet<SmtpSettings> SmtpSettings => Set<SmtpSettings>();
+    public DbSet<IdentityProviderSettings> IdentityProviderSettings => Set<IdentityProviderSettings>();
     public DbSet<SiteNotificationSettings> SiteNotificationSettings => Set<SiteNotificationSettings>();
     public DbSet<NotificationTemplate> NotificationTemplates => Set<NotificationTemplate>();
     public DbSet<NotificationOutboxMessage> NotificationOutboxMessages => Set<NotificationOutboxMessage>();

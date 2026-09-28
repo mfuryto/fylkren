@@ -17,7 +17,11 @@ public sealed class SecurityEventMiddleware(RequestDelegate next, ILogger<Securi
 
         if (statusCode is StatusCodes.Status401Unauthorized or StatusCodes.Status403Forbidden)
         {
-            logger.LogWarning(
+            var routineExpiredConfigurationRefresh = statusCode == StatusCodes.Status401Unauthorized &&
+                actorPersonId == "anonymous" && route == "/api/configuration";
+            var level = routineExpiredConfigurationRefresh ? LogLevel.Information : LogLevel.Warning;
+            logger.Log(
+                level,
                 new EventId(4101, "AccessRejected"),
                 "Security event {SecurityEvent}; method={Method}; route={Route}; status={StatusCode}; actorPersonId={ActorPersonId}; traceId={TraceId}",
                 "access-rejected",
