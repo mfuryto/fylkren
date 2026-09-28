@@ -2,6 +2,8 @@
 
 This is the maintained status record for Fylkren's security release gate. It does not replace an independent penetration test. The requirement baseline and evidence rules are defined in the [security test plan](SECURITY_TEST_PLAN.md), while individual ASVS requirements are tracked in the [ASVS matrix](ASVS_5.0.0_L2_MATRIX.md).
 
+Requirements excluded by architecture are justified separately in the [ASVS applicability record](ASVS_APPLICABILITY.md), including the condition that would make each group applicable again.
+
 ## Status meaning
 
 | Status | Meaning |
