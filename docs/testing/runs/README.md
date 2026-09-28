@@ -14,6 +14,8 @@ The [host status integration run](2026-09-28-host-status-integration.md) records
 
 The [authentication and session security run](2026-09-28-authentication-session-security.md) records generic authentication failures, rate limiting with backoff, sign-out CSRF enforcement, the `SV-048` copied-cookie replay finding, its correction and the clean full regression.
 
+The [production public security run](2026-09-28-production-public-security.md) records the post-deployment TLS, HTTP-to-HTTPS, public-header, anonymous-disclosure, protected-route, Host, TRACE, safe-error and authentication-rate boundaries for `fylkren.hostima.no`.
+
 For each run, record:
 
 1. Run ID, date/time, test tool, application commit and version, test-code revision or hash, environment and fixture reset.

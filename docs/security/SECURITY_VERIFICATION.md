@@ -18,7 +18,7 @@ No control is promoted from **Implemented** to **Verified** solely because code 
 
 | Area | Current status | Required completion evidence |
 | --- | --- | --- |
-| Public surface, proxy, TLS, and headers | Implemented | Repeat public-surface and TLS scripts against the release deployment, including wrong host and port |
+| Public surface, proxy, TLS, and headers | Implemented | The 2026-09-28 production run passed TLS 6/6 and public surface 28/28, including wrong Host; retain this evidence per release and complete the explicit wrong-port deployment check |
 | Sessions, cookies, and CSRF | Implemented | Dynamic lifecycle, absolute/sliding expiry, mutation matrix, and parallel-session invalidation |
 | Local passwords and recovery | Implemented | Blocklist, lockout, reset expiry, concurrent reset, and session-revocation tests |
 | TOTP and recovery codes | Implemented | Setup-token replay, time-window boundary, parallel code consumption, and clock-skew tests |
