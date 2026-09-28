@@ -47,9 +47,14 @@ public sealed class LoginIdentity
     public void Update(string username, bool isActive)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(username);
-        Username = username.Trim();
-        NormalizedUsername = Username.ToUpperInvariant();
+        var updatedUsername = username.Trim();
+        var updatedNormalizedUsername = updatedUsername.ToUpperInvariant();
+        var securityRelevantChange = IsActive != isActive ||
+            !string.Equals(NormalizedUsername, updatedNormalizedUsername, StringComparison.Ordinal);
+        Username = updatedUsername;
+        NormalizedUsername = updatedNormalizedUsername;
         IsActive = isActive;
+        if (securityRelevantChange) SecurityVersion++;
     }
 
     public void Delete()

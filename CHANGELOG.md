@@ -4,6 +4,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Prevented pre-deactivation login cookies from becoming valid again after an account is reactivated. Password changes, password resets and administrative identity transitions now have maintained negative session-replay and concurrent reset-code tests.
 - Replaced the Platform status placeholders with a bounded host-status integration for disk capacity, complete-backup time, web/API/PostgreSQL health and restart counts. The root-owned collector writes a sanitized snapshot through a read-only API mount and never exposes the Docker socket to the application. Added one-command creation, automatic registration, immediate status refresh and conservative configurable local retention for complete PostgreSQL, configuration and Data Protection key backup sets under the Git-ignored installation backup directory.
 - Added a guarded one-command disaster-recovery restore that validates completion markers, checksums, database format and key-archive paths before replacing the database, configuration and Data Protection volumes after explicit destructive confirmation.
 - Added a complete Windows Server 2022/2025 installation guide using a dedicated Hyper-V Linux VM, including host preparation, VM creation, Docker installation, networking, TLS, persistence, backup, maintenance and acceptance checks. Clarified that Docker Desktop and native Windows containers are not supported deployment paths.
