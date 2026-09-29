@@ -18,6 +18,8 @@ The [identity and session lifecycle run](2026-09-28-identity-session-lifecycle.m
 
 The [production public security run](2026-09-28-production-public-security.md) records the post-deployment TLS, HTTP-to-HTTPS, public-header, anonymous-disclosure, protected-route, Host, TRACE, safe-error and authentication-rate boundaries for `fylkren.hostima.no`.
 
+The [live Enterprise license-expiry run](2026-09-29-live-enterprise-license-expiry.md) records a real wall-clock transition to Community without restart, immediate closure of Enterprise boundaries, preservation of customer data and protected configuration, background-worker pause, and renewal/resumption. Production issuer custody and an exact release-candidate repeat remain separate gates.
+
 For each run, record:
 
 1. Run ID, date/time, test tool, application commit and version, test-code revision or hash, environment and fixture reset.

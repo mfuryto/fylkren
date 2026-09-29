@@ -26,6 +26,7 @@ No control is promoted from **Implemented** to **Verified** solely because code 
 | TOTP and recovery codes | Implemented | Setup-token replay, time-window boundary, parallel code consumption, and clock-skew tests |
 | WebAuthn and passkeys | Implemented | Registration/sign-in challenge replay, origin/RP validation, counter behavior, and authenticator coverage |
 | OIDC, SAML, AD, and LDAP | Implemented | Closed-environment positive/negative tests, TLS requirements, mapping, unlinking, and fail-closed behavior |
+| Enterprise license lifecycle | Implemented | Real-time expiry, immediate entitlement closure, retained state and renewal without restart passed on 2026-09-29; repeat against the exact release candidate and verify production issuer/key custody |
 | Platform/site/level authorization | Implemented | Full role/object matrix through UI and direct HTTP calls, including cross-site and sibling isolation |
 | Cross-site assignments and requests | Implemented | Clean E2E rerun proving snapshots, filtered response, return route, workload, and report receipts |
 | Independent-instance federation | Implemented in isolated test environment; reviewer handoff defined | Execute the [independent federation review brief](FEDERATION_SECURITY_REVIEW_BRIEF.md), close or accept findings, and complete the remaining threat-model production gates before enabling ordinary routing |
