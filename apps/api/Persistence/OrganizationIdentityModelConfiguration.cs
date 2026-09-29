@@ -130,6 +130,7 @@ internal static class OrganizationIdentityModelConfiguration
         externalIdentity.Property(value => value.Id).HasColumnName("id");
         externalIdentity.Property(value => value.PersonId).HasColumnName("person_id");
         externalIdentity.Property(value => value.Provider).HasColumnName("provider").HasMaxLength(30).IsRequired();
+        externalIdentity.Property(value => value.ProviderInstanceId).HasColumnName("provider_instance_id").HasMaxLength(1000).HasDefaultValue("").IsRequired();
         externalIdentity.Property(value => value.SubjectId).HasColumnName("subject_id").HasMaxLength(256).IsRequired();
         externalIdentity.Property(value => value.Username).HasColumnName("username").HasMaxLength(256);
         externalIdentity.Property(value => value.IsActive).HasColumnName("is_active");
@@ -140,7 +141,7 @@ internal static class OrganizationIdentityModelConfiguration
         externalIdentity.Property(value => value.DirectoryLastCheckedAt).HasColumnName("directory_last_checked_at");
         externalIdentity.Property(value => value.DirectoryLastSuccessfulSyncAt).HasColumnName("directory_last_successful_sync_at");
         externalIdentity.Property(value => value.DirectorySuspendedAt).HasColumnName("directory_suspended_at");
-        externalIdentity.HasIndex(value => new { value.Provider, value.SubjectId }).IsUnique();
+        externalIdentity.HasIndex(value => new { value.Provider, value.ProviderInstanceId, value.SubjectId }).IsUnique();
         externalIdentity.HasOne(value => value.Person).WithMany(value => value.ExternalIdentityLinks).HasForeignKey(value => value.PersonId).OnDelete(DeleteBehavior.Restrict);
 
         var webAuthn = modelBuilder.Entity<WebAuthnCredential>();

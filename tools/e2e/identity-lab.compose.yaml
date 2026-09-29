@@ -4,8 +4,22 @@ services:
       SSL_CERT_FILE: /run/fylkren-identity-lab/ca.crt
       LDAPTLS_CACERT: /run/fylkren-identity-lab/ca.crt
       LDAPTLS_REQCERT: demand
-      Fylkren__Authentication__DirectoryLifecycle__IntervalMinutes: 1440
+      Fylkren__Authentication__DirectoryLifecycle__IntervalMinutes: 1
       Fylkren__Authentication__DirectoryLifecycle__MissingConfirmationCount: 3
+      Fylkren__Authentication__Ldap__Enabled: "false"
+      Fylkren__Authentication__Ldap__Server: ${FYLKREN_IDENTITY_LAB_IMPORTED_LDAP_SERVER:?Set imported LDAP server}
+      Fylkren__Authentication__Ldap__Port: 636
+      Fylkren__Authentication__Ldap__UseSsl: "true"
+      Fylkren__Authentication__Ldap__UseStartTls: "false"
+      Fylkren__Authentication__Ldap__BaseDn: dc=example,dc=test
+      Fylkren__Authentication__Ldap__UserSearchBase: ou=people,dc=example,dc=test
+      Fylkren__Authentication__Ldap__BindDn: cn=admin,dc=example,dc=test
+      Fylkren__Authentication__Ldap__BindPassword: ${FYLKREN_IDENTITY_LAB_LDAP_ADMIN_PASSWORD:?Set LDAP administrator password}
+      Fylkren__Authentication__Ldap__UsernameAttribute: uid
+      Fylkren__Authentication__Ldap__DisplayNameAttribute: displayName
+      Fylkren__Authentication__Ldap__EmailAttribute: mail
+      Fylkren__Authentication__Ldap__StableIdAttribute: employeeNumber
+      Fylkren__Authentication__Ldap__LifecycleActiveFilter: (employeeType=active)
     volumes:
       - ${FYLKREN_IDENTITY_LAB_DIR:?Set FYLKREN_IDENTITY_LAB_DIR}/ca.crt:/run/fylkren-identity-lab/ca.crt:ro
 

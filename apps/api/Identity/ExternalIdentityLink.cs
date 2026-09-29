@@ -4,8 +4,11 @@ public sealed class ExternalIdentityLink
 {
     private ExternalIdentityLink() { }
     public ExternalIdentityLink(Guid id, Guid personId, string provider, string subjectId, string? username, DateTimeOffset createdAt)
+        : this(id, personId, provider, "", subjectId, username, createdAt) { }
+    public ExternalIdentityLink(Guid id, Guid personId, string provider, string providerInstanceId, string subjectId, string? username, DateTimeOffset createdAt)
     {
-        Id = id; PersonId = personId; Provider = provider.Trim().ToLowerInvariant(); SubjectId = subjectId.Trim();
+        Id = id; PersonId = personId; Provider = provider.Trim().ToLowerInvariant();
+        ProviderInstanceId = providerInstanceId.Trim(); SubjectId = subjectId.Trim();
         Username = string.IsNullOrWhiteSpace(username) ? null : username.Trim(); CreatedAt = createdAt; IsActive = true;
         DirectoryAccessEnabled = true; DirectoryLifecycleStatus = "active"; DirectoryLastCheckedAt = createdAt;
         DirectoryLastSuccessfulSyncAt = createdAt;
@@ -13,6 +16,7 @@ public sealed class ExternalIdentityLink
     public Guid Id { get; private set; }
     public Guid PersonId { get; private set; }
     public string Provider { get; private set; } = "";
+    public string ProviderInstanceId { get; private set; } = "";
     public string SubjectId { get; private set; } = "";
     public string? Username { get; private set; }
     public bool IsActive { get; private set; }
@@ -25,6 +29,12 @@ public sealed class ExternalIdentityLink
     public DateTimeOffset? DirectorySuspendedAt { get; private set; }
     public Person Person { get; private set; } = null!;
     public void UpdateUsername(string? username) => Username = string.IsNullOrWhiteSpace(username) ? null : username.Trim();
+    public void BindLegacyProviderInstance(string providerInstanceId)
+    {
+        if (Provider is not ("oidc" or "saml") || ProviderInstanceId.Length > 0)
+            throw new InvalidOperationException("Only an unbound legacy OIDC or SAML link can be bound.");
+        ProviderInstanceId = providerInstanceId.Trim();
+    }
     public void Reactivate(Guid personId, string? username, DateTimeOffset now)
     {
         PersonId = personId;

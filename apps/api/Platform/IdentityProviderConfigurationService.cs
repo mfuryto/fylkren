@@ -27,14 +27,37 @@ public sealed class IdentityProviderConfigurationService(
             database.IdentityProviderSettings.Add(new IdentityProviderSettings(provider, enabled, Protect(configuration), DateTimeOffset.UtcNow));
         }
         await database.SaveChangesAsync(cancellationToken);
-        foreach (var value in await database.IdentityProviderSettings.AsNoTracking().ToListAsync(cancellationToken))
+        var settings = await database.IdentityProviderSettings.AsNoTracking().ToListAsync(cancellationToken);
+        foreach (var value in settings)
             Apply(value.Provider, value.Enabled, Unprotect(value.ProtectedConfiguration));
+
+        // The provider-instance column was introduced after external links existed. Bind each
+        // legacy SSO link exactly once to the provider configured during the upgrade. If no
+        // complete provider identity exists, permanently leave it fail-closed for manual relinking.
+        foreach (var provider in new[] { "oidc", "saml" })
+        {
+            var setting = settings.Single(value => value.Provider == provider);
+            var configuration = Unprotect(setting.ProtectedConfiguration);
+            var instanceId = ProviderInstanceId(provider, configuration) ?? "legacy-unbound";
+            var legacyLinks = await database.ExternalIdentityLinks
+                .Where(value => value.Provider == provider && value.ProviderInstanceId == "")
+                .ToListAsync(cancellationToken);
+            foreach (var link in legacyLinks) link.BindLegacyProviderInstance(instanceId);
+        }
+        await database.SaveChangesAsync(cancellationToken);
     }
 
     public IdentityProviderConfiguration Unprotect(string value) =>
         JsonSerializer.Deserialize<IdentityProviderConfiguration>(protector.Unprotect(value))
         ?? throw new InvalidOperationException("Identity provider configuration is invalid.");
     public string Protect(IdentityProviderConfiguration value) => protector.Protect(JsonSerializer.Serialize(value));
+
+    public static string? ProviderInstanceId(string provider, IdentityProviderConfiguration value) => provider switch
+    {
+        "oidc" when Uri.TryCreate(value.Authority, UriKind.Absolute, out var authority) => authority.AbsoluteUri.TrimEnd('/'),
+        "saml" when !string.IsNullOrWhiteSpace(value.IdentityProviderEntityId) => value.IdentityProviderEntityId.Trim(),
+        _ => null
+    };
 
     public void Apply(string provider, bool enabled, IdentityProviderConfiguration value)
     {

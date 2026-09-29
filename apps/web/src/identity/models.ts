@@ -7,7 +7,7 @@ export type GlobalUser = {
   siteMemberships: Array<{ siteId: string; siteName: string; isActive: boolean; isSiteManager: boolean }>;
 };
 export type UserSite = { id: string; name: string };
-export type FederatedIdentityLink = { id: string; username: string; displayName: string; subjectId: string };
+export type FederatedIdentityLink = { id: string; username: string; displayName: string; subjectId: string; providerInstanceId: string };
 export type DirectoryIdentityLink = {
   id: string; provider: string; displayName: string; directoryUsername: string; subjectId: string;
   accessEnabled: boolean; lifecycleStatus: string; missingCount: number;

@@ -15,8 +15,14 @@ chmodSync(labDirectory, 0o755);
 const keycloakAdminPassword = `A9!${randomBytes(18).toString('base64url')}#a`;
 const keycloakUserPassword = `U7!${randomBytes(18).toString('base64url')}#u`;
 const oidcClientSecret = `O6!${randomBytes(24).toString('base64url')}#o`;
+const negativeClientSecret = `N8!${randomBytes(24).toString('base64url')}#n`;
 const externalSubject = '11111111-1111-4111-8111-111111111111';
+const managerExternalSubject = '22222222-2222-4222-8222-222222222222';
+const secondIssuerSubject = '33333333-3333-4333-8333-333333333333';
 const authority = 'https://keycloak.test:18443/realms/fylkren-lab';
+const secondAuthority = 'https://keycloak.test:18443/realms/fylkren-other';
+const negativeAuthority = 'https://oidc-invalid.test:18445';
+const negativeSubject = '44444444-4444-4444-8444-444444444444';
 const env = {
   ...process.env,
   FYLKREN_DB_PASSWORD: 'synthetic-identity-sso-lab-only',
@@ -28,6 +34,7 @@ const env = {
   FYLKREN_LICENSE_PUBLIC_KEY_SPKI: fixture.publicKeySpki,
   FYLKREN_IDENTITY_LAB_DIR: labDirectory,
   FYLKREN_IDENTITY_LAB_KEYCLOAK_ADMIN_PASSWORD: keycloakAdminPassword,
+  FYLKREN_IDENTITY_LAB_NEGATIVE_SECRET: negativeClientSecret,
 };
 const composeFiles = ['-f', 'compose.yaml', '-f', 'tools/e2e/identity-sso-lab.compose.yaml'];
 
@@ -56,6 +63,10 @@ function createCertificates() {
   const gatewayRequest = join(labDirectory, 'gateway.csr');
   const gatewayCertificate = join(labDirectory, 'gateway.crt');
   const gatewayExtensions = join(labDirectory, 'gateway.ext');
+  const negativeKey = join(labDirectory, 'oidc-negative.key');
+  const negativeRequest = join(labDirectory, 'oidc-negative.csr');
+  const negativeCertificate = join(labDirectory, 'oidc-negative.crt');
+  const negativeExtensions = join(labDirectory, 'oidc-negative.ext');
   openssl(['genpkey', '-algorithm', 'EC', '-pkeyopt', 'ec_paramgen_curve:prime256v1', '-out', caKey]);
   openssl(['req', '-x509', '-new', '-key', caKey, '-sha256', '-days', '2', '-subj', '/CN=Fylkren SSO lab CA', '-out', caCertificate]);
   openssl(['genpkey', '-algorithm', 'EC', '-pkeyopt', 'ec_paramgen_curve:prime256v1', '-out', key]);
@@ -66,16 +77,64 @@ function createCertificates() {
   openssl(['req', '-new', '-key', gatewayKey, '-subj', '/CN=localhost', '-out', gatewayRequest]);
   writeFileSync(gatewayExtensions, 'subjectAltName=DNS:localhost,DNS:metadata.test,IP:127.0.0.1\nextendedKeyUsage=serverAuth\nkeyUsage=digitalSignature,keyAgreement\n');
   openssl(['x509', '-req', '-in', gatewayRequest, '-CA', caCertificate, '-CAkey', caKey, '-CAserial', join(labDirectory, 'ca.srl'), '-days', '2', '-sha256', '-extfile', gatewayExtensions, '-out', gatewayCertificate]);
-  writeFileSync(join(labDirectory, 'gateway.conf'), `events {}\nhttp {\n  server {\n    listen 18444 ssl;\n    server_name localhost metadata.test;\n    ssl_certificate /run/fylkren-identity-lab/gateway.crt;\n    ssl_certificate_key /run/fylkren-identity-lab/gateway.key;\n    location = /oidc-mismatch/.well-known/openid-configuration {\n      default_type application/json;\n      return 200 '{"issuer":"https://issuer-mismatch.example.invalid","authorization_endpoint":"https://issuer-mismatch.example.invalid/auth","token_endpoint":"https://issuer-mismatch.example.invalid/token","jwks_uri":"https://issuer-mismatch.example.invalid/keys"}';\n    }\n    location / {\n      proxy_pass http://web:8080;\n      proxy_set_header Host $http_host;\n      proxy_set_header X-Forwarded-Host $http_host;\n      proxy_set_header X-Forwarded-Proto https;\n      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n    }\n  }\n  server {\n    listen 18090;\n    server_name localhost;\n    location / {\n      proxy_pass http://web:8080;\n      proxy_set_header Host localhost:18444;\n      proxy_set_header X-Forwarded-Host localhost:18444;\n      proxy_set_header X-Forwarded-Proto https;\n      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n    }\n  }\n}\n`);
+  openssl(['genpkey', '-algorithm', 'EC', '-pkeyopt', 'ec_paramgen_curve:prime256v1', '-out', negativeKey]);
+  openssl(['req', '-new', '-key', negativeKey, '-subj', '/CN=oidc-invalid.test', '-out', negativeRequest]);
+  writeFileSync(negativeExtensions, 'subjectAltName=DNS:oidc-invalid.test\nextendedKeyUsage=serverAuth\nkeyUsage=digitalSignature,keyAgreement\n');
+  openssl(['x509', '-req', '-in', negativeRequest, '-CA', caCertificate, '-CAkey', caKey, '-CAserial', join(labDirectory, 'ca.srl'), '-days', '2', '-sha256', '-extfile', negativeExtensions, '-out', negativeCertificate]);
+  writeFileSync(join(labDirectory, 'gateway.conf'), `events {}
+http {
+  server {
+    listen 18444 ssl;
+    server_name localhost metadata.test;
+    ssl_certificate /run/fylkren-identity-lab/gateway.crt;
+    ssl_certificate_key /run/fylkren-identity-lab/gateway.key;
+    location = /oidc-mismatch/.well-known/openid-configuration {
+      default_type application/json;
+      return 200 '{"issuer":"https://issuer-mismatch.example.invalid","authorization_endpoint":"https://issuer-mismatch.example.invalid/auth","token_endpoint":"https://issuer-mismatch.example.invalid/token","jwks_uri":"https://issuer-mismatch.example.invalid/keys"}';
+    }
+    location / {
+      proxy_pass http://web:8080;
+      proxy_set_header Host $http_host;
+      proxy_set_header X-Forwarded-Host $http_host;
+      proxy_set_header X-Forwarded-Proto https;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+  }
+  server {
+    listen 18090;
+    server_name localhost;
+    location / {
+      proxy_pass http://web:8080;
+      proxy_set_header Host localhost:18444;
+      proxy_set_header X-Forwarded-Host localhost:18444;
+      proxy_set_header X-Forwarded-Proto https;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+  }
+  server {
+    listen 18445 ssl;
+    server_name oidc-invalid.test;
+    ssl_certificate /run/fylkren-identity-lab/oidc-negative.crt;
+    ssl_certificate_key /run/fylkren-identity-lab/oidc-negative.key;
+    location / {
+      proxy_pass https://oidc-negative-provider:18445;
+      proxy_ssl_verify off;
+      proxy_set_header Host $http_host;
+    }
+  }
+}
+`);
   chmodSync(caCertificate, 0o644);
   chmodSync(certificate, 0o644);
   chmodSync(key, 0o600);
   chmodSync(gatewayCertificate, 0o644);
   chmodSync(gatewayKey, 0o600);
+  chmodSync(negativeCertificate, 0o644);
+  chmodSync(negativeKey, 0o600);
 }
 
 function createRealm() {
-  writeFileSync(join(labDirectory, 'realm.json'), JSON.stringify({
+  const realm = {
     realm: 'fylkren-lab',
     enabled: true,
     sslRequired: 'all',
@@ -122,6 +181,37 @@ function createRealm() {
         'saml.encrypt': 'false',
       },
     }],
+  };
+  writeFileSync(join(labDirectory, 'realm.json'), JSON.stringify(realm, null, 2));
+  writeFileSync(join(labDirectory, 'realm-other.json'), JSON.stringify({
+    realm: 'fylkren-other',
+    enabled: true,
+    sslRequired: 'all',
+    registrationAllowed: false,
+    loginWithEmailAllowed: false,
+    users: [{
+      id: secondIssuerSubject,
+      username: 'live-sso',
+      enabled: true,
+      emailVerified: true,
+      email: 'live-sso-other@example.invalid',
+      firstName: 'Live',
+      lastName: 'Other Issuer Person',
+      credentials: [{ type: 'password', value: keycloakUserPassword, temporary: false }],
+    }],
+    clients: [{
+      clientId: 'fylkren-oidc',
+      name: 'Fylkren second-issuer laboratory',
+      enabled: true,
+      protocol: 'openid-connect',
+      publicClient: false,
+      secret: oidcClientSecret,
+      standardFlowEnabled: true,
+      directAccessGrantsEnabled: false,
+      redirectUris: [`${browserBase}/signin-oidc`],
+      webOrigins: [browserBase],
+      defaultClientScopes: ['profile', 'email', 'roles', 'web-origins'],
+    }],
   }, null, 2));
 }
 
@@ -134,6 +224,17 @@ async function waitForKeycloak() {
     await pause(1000);
   }
   throw new Error('Keycloak did not become ready.');
+}
+
+async function waitForNegativeProvider() {
+  for (let attempt = 0; attempt < 40; attempt++) {
+    const result = spawnSync('docker', ['compose', ...composeFiles, '-p', project, 'exec', '-T', 'api',
+      'curl', '--fail', '--silent', '--show-error', '--cacert', '/run/fylkren-identity-lab/ca.crt',
+      `${negativeAuthority}/health`], { env, encoding: 'utf8' });
+    if (result.status === 0) return;
+    await pause(500);
+  }
+  throw new Error('The negative OIDC provider did not become ready.');
 }
 
 function browserClient() {
@@ -158,6 +259,7 @@ function browserClient() {
     request,
     post(path, body) { return request(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); },
     put(path, body) { return request(path, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); },
+    delete(path) { return request(path, { method: 'DELETE' }); },
     async csrf() {
       const response = await request('/api/security/antiforgery');
       assert.equal(response.status, 200, JSON.stringify(response.body));
@@ -253,7 +355,9 @@ async function createCdpSession(url) {
   return {
     call, evaluate, waitFor, waitForResponse, navigate, clearCookies, on,
     networkRequests, networkResponses,
-    close: () => socket.close(),
+    close: async () => {
+      try { await fetch(`${cdpEndpoint}/json/close/${target.id}`); } finally { socket.close(); }
+    },
   };
 }
 
@@ -265,6 +369,7 @@ try {
   started = true;
   compose(['up', '-d', '--build', '--wait'], { stdio: 'inherit' });
   await waitForKeycloak();
+  await waitForNegativeProvider();
   compose(['exec', '-T', 'postgres', 'psql', '-U', 'fylkren', '-d', 'fylkren', '-v', 'ON_ERROR_STOP=1', '-c',
     `UPDATE instance_identity SET instance_id = '${fixture.instanceId}' WHERE key = 1`], { stdio: 'inherit' });
 
@@ -335,7 +440,7 @@ try {
   assert.equal(forgedResponse.status, 400);
   const forgedSession = await forgedOidcBrowser.evaluate(`fetch('/api/session').then(value => value.json())`);
   assert.equal(forgedSession.authenticated, false, 'A forged OIDC callback must not establish a session');
-  forgedOidcBrowser.close();
+  await forgedOidcBrowser.close();
 
   const browser = await createCdpSession('about:blank');
   await browser.clearCookies(browserBase);
@@ -367,7 +472,179 @@ try {
   assert.equal(oidcReplay.status, 400, `Replayed OIDC callback returned ${JSON.stringify(oidcReplay)}`);
   const replaySession = await browser.evaluate(`fetch('/api/session').then(value => value.json())`);
   assert.equal(replaySession.authenticated, false, 'A replayed OIDC callback must not establish a session');
-  browser.close();
+  await browser.close();
+
+  const negativeConfiguration = {
+    ...oidcConfiguration,
+    authority: negativeAuthority,
+    clientId: 'fylkren-negative-oidc',
+    secret: negativeClientSecret,
+  };
+  assert.equal((await manager.put('/api/platform/identity/providers/oidc', {
+    enabled: false, clearSecret: false, configuration: negativeConfiguration,
+  })).status, 204);
+  assert.equal((await manager.post('/api/platform/identity/providers/oidc/test', {})).status, 204);
+  const negativeStored = await manager.request('/api/platform/identity/providers/oidc');
+  assert.equal((await manager.put('/api/platform/identity/providers/oidc', {
+    enabled: true, clearSecret: false, configuration: negativeStored.body.configuration,
+  })).status, 204);
+  const negativeLink = await manager.post('/api/platform/identity/oidc-links', {
+    username: anchorUsername, subjectId: negativeSubject,
+  });
+  assert.equal(negativeLink.status, 201, JSON.stringify(negativeLink.body));
+  for (const [mode, label] of [['nonce', 'nonce mismatch'], ['audience', 'audience mismatch']]) {
+    compose(['exec', '-T', 'api', 'curl', '--fail', '--silent', '--show-error',
+      '--cacert', '/run/fylkren-identity-lab/ca.crt', '-X', 'POST', '-d', `value=${mode}`,
+      `${negativeAuthority}/mode`]);
+    const negativeBrowser = await createCdpSession('about:blank');
+    await negativeBrowser.clearCookies(browserBase);
+    const responseStart = negativeBrowser.networkResponses.length;
+    await negativeBrowser.navigate(`${browserBase}/api/auth/oidc/login`);
+    const rejected = await negativeBrowser.waitForResponse(
+      response => response.url.includes('/signin-oidc') && response.status >= 400,
+      `OIDC ${label} rejection`, responseStart);
+    assert.equal(rejected.status, 400);
+    const rejectedSession = await negativeBrowser.evaluate(`fetch('/api/session').then(value => value.json())`);
+    assert.equal(rejectedSession.authenticated, false, `An OIDC ${label} must not establish a session`);
+    await negativeBrowser.close();
+  }
+  assert.equal((await manager.delete(`/api/platform/identity/oidc-links/${negativeLink.body.id}`)).status, 204);
+  assert.equal((await manager.put('/api/platform/identity/providers/oidc', {
+    enabled: false, clearSecret: false, configuration: oidcConfiguration,
+  })).status, 204);
+  assert.equal((await manager.post('/api/platform/identity/providers/oidc/test', {})).status, 204);
+  const restoredOriginal = await manager.request('/api/platform/identity/providers/oidc');
+  assert.equal((await manager.put('/api/platform/identity/providers/oidc', {
+    enabled: true, clearSecret: false, configuration: restoredOriginal.body.configuration,
+  })).status, 204);
+
+  const oidcLinks = await manager.request('/api/platform/identity/oidc-links');
+  assert.equal(oidcLinks.status, 200);
+  assert.equal(oidcLinks.body.length, 1);
+  assert.equal(oidcLinks.body[0].providerInstanceId, authority,
+    'OIDC links must retain their exact canonical issuer');
+
+  const secondIssuerConfiguration = { ...oidcConfiguration, authority: secondAuthority };
+  compose(['exec', '-T', 'postgres', 'psql', '-U', 'fylkren', '-d', 'fylkren', '-v', 'ON_ERROR_STOP=1', '-c',
+    `UPDATE external_identity_links SET subject_id = '${secondIssuerSubject}' WHERE id = '${linked.body.id}'`], { stdio: 'inherit' });
+  const secondIssuerSaved = await manager.put('/api/platform/identity/providers/oidc', {
+    enabled: false, clearSecret: false, configuration: secondIssuerConfiguration,
+  });
+  assert.equal(secondIssuerSaved.status, 204, JSON.stringify(secondIssuerSaved.body));
+  const secondIssuerTested = await manager.post('/api/platform/identity/providers/oidc/test', {});
+  assert.equal(secondIssuerTested.status, 204, JSON.stringify(secondIssuerTested.body));
+  const secondIssuerStored = await manager.request('/api/platform/identity/providers/oidc');
+  const secondIssuerActivated = await manager.put('/api/platform/identity/providers/oidc', {
+    enabled: true, clearSecret: false, configuration: secondIssuerStored.body.configuration,
+  });
+  assert.equal(secondIssuerActivated.status, 204, JSON.stringify(secondIssuerActivated.body));
+
+  const collisionBrowser = await createCdpSession('about:blank');
+  await collisionBrowser.clearCookies(browserBase);
+  await collisionBrowser.navigate(`${browserBase}/api/auth/oidc/login`);
+  await collisionBrowser.waitFor('document.querySelector("#username") !== null', 'second-issuer Keycloak username form');
+  const collisionStart = collisionBrowser.networkResponses.length;
+  await collisionBrowser.evaluate(`document.querySelector('#username').value = 'live-sso'; document.querySelector('#password').value = ${JSON.stringify(keycloakUserPassword)}; document.querySelector('#kc-login').click();`);
+  const collisionResponse = await collisionBrowser.waitForResponse(
+    response => response.url.includes('/signin-oidc') && response.status >= 400,
+    'unlinked second-issuer rejection', collisionStart);
+  assert.equal(collisionResponse.status, 400);
+  const collisionSession = await collisionBrowser.evaluate(`fetch('/api/session').then(value => value.json())`);
+  assert.equal(collisionSession.authenticated, false,
+    'The same subject from a different issuer must not match the existing link');
+  await collisionBrowser.close();
+
+  const secondIssuerLinked = await manager.post('/api/platform/identity/oidc-links', {
+    username: anchorUsername, subjectId: secondIssuerSubject,
+  });
+  assert.equal(secondIssuerLinked.status, 201, JSON.stringify(secondIssuerLinked.body));
+  const linksAcrossIssuers = await manager.request('/api/platform/identity/oidc-links');
+  assert.deepEqual(new Set(linksAcrossIssuers.body.map(value => value.providerInstanceId)),
+    new Set([authority, secondAuthority]));
+  const secondIssuerUnlinked = await manager.delete(`/api/platform/identity/oidc-links/${secondIssuerLinked.body.id}`);
+  assert.equal(secondIssuerUnlinked.status, 204, JSON.stringify(secondIssuerUnlinked.body));
+  const secondIssuerRelinked = await manager.post('/api/platform/identity/oidc-links', {
+    username: anchorUsername, subjectId: secondIssuerSubject,
+  });
+  assert.equal(secondIssuerRelinked.status, 201, JSON.stringify(secondIssuerRelinked.body));
+
+  compose(['exec', '-T', 'postgres', 'psql', '-U', 'fylkren', '-d', 'fylkren', '-v', 'ON_ERROR_STOP=1', '-c',
+    `UPDATE external_identity_links SET subject_id = '${externalSubject}' WHERE id = '${linked.body.id}'`], { stdio: 'inherit' });
+
+  const originalIssuerSaved = await manager.put('/api/platform/identity/providers/oidc', {
+    enabled: false, clearSecret: false, configuration: oidcConfiguration,
+  });
+  assert.equal(originalIssuerSaved.status, 204, JSON.stringify(originalIssuerSaved.body));
+  assert.equal((await manager.post('/api/platform/identity/providers/oidc/test', {})).status, 204);
+  const originalIssuerStored = await manager.request('/api/platform/identity/providers/oidc');
+  assert.equal((await manager.put('/api/platform/identity/providers/oidc', {
+    enabled: true, clearSecret: false, configuration: originalIssuerStored.body.configuration,
+  })).status, 204);
+
+  const originalUnlinked = await manager.delete(`/api/platform/identity/oidc-links/${linked.body.id}`);
+  assert.equal(originalUnlinked.status, 204, JSON.stringify(originalUnlinked.body));
+  const originalRelinked = await manager.post('/api/platform/identity/oidc-links', {
+    username: anchorUsername, subjectId: externalSubject,
+  });
+  assert.equal(originalRelinked.status, 201, JSON.stringify(originalRelinked.body));
+
+  const managerLink = await manager.post('/api/platform/identity/oidc-links', {
+    username: managerUsername, subjectId: managerExternalSubject,
+  });
+  assert.equal(managerLink.status, 201, JSON.stringify(managerLink.body));
+  const localSettings = await manager.request('/api/platform/identity/local');
+  const directSsoPresentation = await manager.put('/api/platform/identity/local', {
+    enabled: true,
+    clearSecret: false,
+    configuration: { ...localSettings.body.configuration, ssoAutoRedirectProvider: 'oidc' },
+  });
+  assert.equal(directSsoPresentation.status, 204, JSON.stringify(directSsoPresentation.body));
+  const directSsoBrowser = await createCdpSession('about:blank');
+  await directSsoBrowser.clearCookies(browserBase);
+  await directSsoBrowser.navigate(`${browserBase}/`);
+  await directSsoBrowser.waitFor(`location.hostname === 'keycloak.test'`, 'automatic OIDC redirect');
+  await directSsoBrowser.close();
+  const emergencyLocalBrowser = await createCdpSession('about:blank');
+  await emergencyLocalBrowser.clearCookies(browserBase);
+  await emergencyLocalBrowser.navigate(`${browserBase}/?local=1`);
+  await emergencyLocalBrowser.waitFor(`location.hostname === 'localhost' && document.querySelector('#username') !== null`,
+    'emergency local login presentation');
+  assert.equal(await emergencyLocalBrowser.evaluate(`document.body.innerText.includes('Lokal konto') || document.body.innerText.includes('Brukernavn eller e-postadresse')`), true);
+  await emergencyLocalBrowser.close();
+  const oidcDisabledWithDirectSso = await manager.put('/api/platform/identity/providers/oidc', {
+    enabled: false, clearSecret: false, configuration: oidcConfiguration,
+  });
+  assert.equal(oidcDisabledWithDirectSso.status, 204, JSON.stringify(oidcDisabledWithDirectSso.body));
+  const directSsoCancelled = await manager.request('/api/configuration/public');
+  assert.equal(directSsoCancelled.body.authentication.ssoAutoRedirectProvider, null,
+    'Disabling the selected provider must cancel direct SSO');
+  assert.equal((await manager.put('/api/platform/identity/providers/oidc', {
+    enabled: true, clearSecret: false, configuration: oidcConfiguration,
+  })).status, 204);
+  assert.equal((await manager.put('/api/platform/identity/local', {
+    enabled: true,
+    clearSecret: false,
+    configuration: { ...localSettings.body.configuration, ssoAutoRedirectProvider: 'oidc' },
+  })).status, 204);
+  const directSsoEnabled = await manager.put('/api/platform/identity/local', {
+    enabled: false,
+    clearSecret: false,
+    configuration: { ...localSettings.body.configuration, ssoAutoRedirectProvider: 'oidc' },
+  });
+  assert.equal(directSsoEnabled.status, 204, JSON.stringify(directSsoEnabled.body));
+  const publicDirectSso = await manager.request('/api/configuration/public');
+  assert.equal(publicDirectSso.body.authentication.localEnabled, false);
+  assert.equal(publicDirectSso.body.authentication.ssoAutoRedirectProvider, 'oidc');
+  const blockedLastManagerUnlink = await manager.delete(`/api/platform/identity/oidc-links/${managerLink.body.id}`);
+  assert.equal(blockedLastManagerUnlink.status, 409,
+    'The final external Platform Manager path must not be removable while local login is disabled');
+  const localRestored = await manager.put('/api/platform/identity/local', {
+    enabled: true,
+    clearSecret: false,
+    configuration: { ...localSettings.body.configuration, ssoAutoRedirectProvider: null },
+  });
+  assert.equal(localRestored.status, 204, JSON.stringify(localRestored.body));
+  assert.equal((await manager.delete(`/api/platform/identity/oidc-links/${managerLink.body.id}`)).status, 204);
 
   const samlAnchorUsername = `saml-anchor-${randomBytes(4).toString('hex')}`;
   const samlAnchor = await manager.post(`/api/sites/${site.body.id}/access/local-users`, {
@@ -395,6 +672,10 @@ try {
   assert.equal(samlActivated.status, 204, JSON.stringify(samlActivated.body));
   const samlLinked = await manager.post('/api/platform/identity/saml-links', { username: samlAnchorUsername, nameId: externalSubject });
   assert.equal(samlLinked.status, 201, JSON.stringify(samlLinked.body));
+  const samlLinks = await manager.request('/api/platform/identity/saml-links');
+  assert.equal(samlLinks.status, 200);
+  assert.equal(samlLinks.body[0].providerInstanceId, authority,
+    'SAML links must retain the exact IdP entity ID');
   const samlChallenge = await manager.request('/api/auth/saml/login');
   assert.ok([302, 303].includes(samlChallenge.status), `SAML challenge: ${JSON.stringify(samlChallenge)}`);
 
@@ -429,8 +710,44 @@ try {
   assert.equal(tamperedResponse.status, 400);
   const tamperedSession = await tamperedSamlBrowser.evaluate(`fetch('/api/session').then(value => value.json())`);
   assert.equal(tamperedSession.authenticated, false, 'A signature-invalid SAML assertion must not establish a session');
-  tamperedSamlBrowser.close();
+  await tamperedSamlBrowser.close();
 
+  process.stdout.write('Checking rejection of a deliberately unsigned SAML response...\n');
+  const unsignedSamlBrowser = await createCdpSession('about:blank');
+  await unsignedSamlBrowser.clearCookies(browserBase);
+  await unsignedSamlBrowser.navigate(`${browserBase}/api/auth/saml/login`);
+  await unsignedSamlBrowser.waitFor('document.querySelector("#username") !== null', 'Keycloak SAML username form for unsigned assertion test');
+  let signaturesRemoved = 0;
+  unsignedSamlBrowser.on('Fetch.requestPaused', async parameters => {
+    const form = new URLSearchParams(parameters.request.postData ?? '');
+    const encodedResponse = form.get('SAMLResponse');
+    assert.ok(encodedResponse, 'Intercepted SAML callback did not contain SAMLResponse');
+    const xml = Buffer.from(encodedResponse, 'base64').toString('utf8');
+    const unsignedXml = xml.replace(/<(?:\w+:)?Signature\b[\s\S]*?<\/(?:\w+:)?Signature>/g, () => {
+      signaturesRemoved += 1;
+      return '';
+    });
+    form.set('SAMLResponse', Buffer.from(unsignedXml).toString('base64'));
+    await unsignedSamlBrowser.call('Fetch.continueRequest', {
+      requestId: parameters.requestId,
+      postData: Buffer.from(form.toString()).toString('base64'),
+    });
+  });
+  await unsignedSamlBrowser.call('Fetch.enable', {
+    patterns: [{ urlPattern: '*://localhost:18444/api/auth/saml2/Acs*', requestStage: 'Request' }],
+  });
+  const unsignedResponseStart = unsignedSamlBrowser.networkResponses.length;
+  await unsignedSamlBrowser.evaluate(`document.querySelector('#username').value = 'live-sso'; document.querySelector('#password').value = ${JSON.stringify(keycloakUserPassword)}; document.querySelector('#kc-login').click();`);
+  const unsignedResponse = await unsignedSamlBrowser.waitForResponse(
+    response => response.url.includes('/api/auth/saml2/Acs'),
+    'unsigned SAML assertion callback', unsignedResponseStart);
+  assert.ok(signaturesRemoved > 0, 'The SAML fixture did not contain a signature to remove');
+  assert.equal(unsignedResponse.status, 400);
+  const unsignedSession = await unsignedSamlBrowser.evaluate(`fetch('/api/session').then(value => value.json())`);
+  assert.equal(unsignedSession.authenticated, false, 'An unsigned SAML assertion must not establish a session');
+  await unsignedSamlBrowser.close();
+
+  process.stdout.write('Checking accepted signed SAML response and replay rejection...\n');
   const samlBrowser = await createCdpSession('about:blank');
   await samlBrowser.clearCookies(browserBase);
   await samlBrowser.navigate(`${browserBase}/api/auth/saml/login`);
@@ -454,7 +771,14 @@ try {
   assert.equal(samlReplay.status, 400, `Replayed SAML response returned ${JSON.stringify(samlReplay)}`);
   const samlReplaySession = await samlBrowser.evaluate(`fetch('/api/session').then(value => value.json())`);
   assert.equal(samlReplaySession.authenticated, false, 'A replayed SAML response must not establish a session');
-  samlBrowser.close();
+  await samlBrowser.close();
+
+  const samlUnlinked = await manager.delete(`/api/platform/identity/saml-links/${samlLinked.body.id}`);
+  assert.equal(samlUnlinked.status, 204, JSON.stringify(samlUnlinked.body));
+  const samlRelinked = await manager.post('/api/platform/identity/saml-links', {
+    username: samlAnchorUsername, nameId: externalSubject,
+  });
+  assert.equal(samlRelinked.status, 201, JSON.stringify(samlRelinked.body));
 
   process.stdout.write(`${JSON.stringify({
     liveOidcHttpsMetadata: 'passed',
@@ -462,16 +786,21 @@ try {
     oidcAuthorizationCodeSignIn: 'passed',
     oidcIssuerMismatchRejection: 'passed',
     oidcForgedStateAndReplayRejection: 'passed',
-    stableIssuerAndSubjectLink: 'passed',
+    oidcNonceMismatchRejection: 'passed',
+    oidcAudienceMismatchRejection: 'passed',
+    exactIssuerAndSubjectLink: 'passed',
+    oidcUnlinkAndRelink: 'passed',
+    directSsoAndLocalLockoutGuards: 'passed',
     serverSideSessionWithoutBrowserTokens: 'passed',
     liveSamlSignedAssertion: 'passed',
-    samlTamperedAssertionAndReplayRejection: 'passed',
-    persistentSamlNameIdLink: 'passed',
+    samlTamperedUnsignedAndReplayRejection: 'passed',
+    exactSamlEntityAndPersistentNameIdLink: 'passed',
+    samlUnlinkAndRelink: 'passed',
     samlServerSideSession: 'passed',
   }, null, 2)}\n`);
 } catch (error) {
   if (started) {
-    try { compose(['logs', '--no-color', '--tail', '200', 'api', 'keycloak'], { stdio: 'inherit' }); }
+    try { compose(['logs', '--no-color', '--tail', '200', 'api', 'keycloak', 'oidc-negative-provider'], { stdio: 'inherit' }); }
     catch (logError) { process.stderr.write(`Could not collect identity-lab logs: ${logError.message}\n`); }
   }
   throw error;

@@ -129,12 +129,14 @@ public static class DirectoryEndpoints
     }
 
     private static async Task<IResult> UnlinkIdentity(Guid id, ClaimsPrincipal actor, IAntiforgery antiforgery,
-        HttpContext context, FylkrenDbContext database, CancellationToken cancellationToken)
+        HttpContext context, FylkrenDbContext database, FylkrenOptions options, CancellationToken cancellationToken)
     {
         await antiforgery.ValidateRequestAsync(context);
         var link = await database.ExternalIdentityLinks.SingleOrDefaultAsync(value => value.Id == id &&
             (value.Provider == "ad" || value.Provider == "ldap") && value.IsActive, cancellationToken);
         if (link is null) return Results.NotFound();
+        if (!await ExternalIdentityLinkSafety.CanDeactivateAsync(link, database, options, cancellationToken))
+            return Results.Conflict(new { error = "Koblingen kan ikke fjernes fordi den er siste aktive eksterne innlogging for en Platform Manager mens lokal innlogging er deaktivert." });
         link.Deactivate();
         if (Guid.TryParse(actor.FindFirstValue("fylkren:person_id"), out var actorPersonId))
             database.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), null, actorPersonId, $"identity.{link.Provider}.unlinked", "external-identity-link", link.Id, DateTimeOffset.UtcNow));

@@ -14,6 +14,8 @@ export const loadGlobalUsers = (page: number, pageSize: number, query: string, s
 };
 export const addOidcIdentity = (body: object) => apiMutate(`${root}/oidc-links`, "POST", body, "OIDC-koblingen kunne ikke lagres. Kontroller brukernavn og unik subject-ID.");
 export const addSamlIdentity = (body: object) => apiMutate(`${root}/saml-links`, "POST", body, "SAML-koblingen kunne ikke lagres. Kontroller brukernavn og unik persistent NameID.");
+export const removeOidcIdentity = (id: string) => apiMutate(`${root}/oidc-links/${id}`, "DELETE", undefined, "OIDC-koblingen kunne ikke fjernes.");
+export const removeSamlIdentity = (id: string) => apiMutate(`${root}/saml-links/${id}`, "DELETE", undefined, "SAML-koblingen kunne ikke fjernes.");
 export const addDirectoryIdentity = (body: object) => apiMutate(`${root}/directory-links`, "POST", body, "Katalogkoblingen kunne ikke lagres. Kontroller lokal bruker, katalogbruker og katalogforbindelse.");
 export const removeDirectoryIdentity = (id: string) => apiMutate(`${root}/directory-links/${id}`, "DELETE", undefined, "Katalogkoblingen kunne ikke fjernes.");
 export const testDirectoryConnection = (provider: string) => apiMutate(`${root}/directories/${provider}/test`, "POST", undefined, `${provider === "ad" ? "Active Directory" : "LDAP"}-forbindelsen kunne ikke opprettes.`);

@@ -90,6 +90,27 @@ Repository and secret safety:
 bash tools/security/verify-repository-safety.sh
 ```
 
+Enterprise identity laboratories:
+
+```bash
+pnpm test:e2e:identity-directory
+pnpm test:e2e:identity-ad
+pnpm test:e2e:identity-sso
+```
+
+These disposable Compose laboratories build the production application and use
+live OpenLDAP over trusted LDAPS, Samba Active Directory over trusted LDAPS,
+two Keycloak issuer realms, an isolated negative OIDC provider and headless
+Chromium. They cover one-time environment import, protected GUI configuration,
+stable and exact provider namespaces, scheduled/manual deprovisioning,
+disabled/expired/missing/restored identities, ambiguous and malformed LDAP
+data, invalid binds and outages, LDAP filter injection, unlink/relink and
+preserved internal identity, Platform Manager lockout guards, direct-SSO
+presentation/cancellation, wrong issuer/state/nonce/audience, unsigned or
+tampered SAML and OIDC/SAML replay. Every rejected callback must return a
+controlled error and leave no authenticated Fylkren session. Dated evidence is
+retained under `docs/testing/runs/` without generated credentials or tokens.
+
 Run all applicable unit, integration, frontend, Compose, and image checks documented in the development and operations manuals before recording a release result.
 
 ## Required manual and dynamic coverage

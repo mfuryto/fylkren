@@ -24,8 +24,10 @@ const env = {
   FYLKREN_IDENTITY_LAB_DIR: labDirectory,
   FYLKREN_IDENTITY_LAB_LDAP_ADMIN_PASSWORD: ldapAdminPassword,
   FYLKREN_IDENTITY_LAB_LDAP_CONFIG_PASSWORD: ldapConfigPassword,
+  FYLKREN_IDENTITY_LAB_IMPORTED_LDAP_SERVER: 'ldap',
 };
 const composeFiles = ['-f', 'compose.yaml', '-f', 'tools/e2e/identity-lab.compose.yaml'];
+const pause = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
 
 function command(program, args, options = {}) {
   const result = spawnSync(program, args, { env, encoding: 'utf8', ...options });
@@ -69,6 +71,10 @@ function createLdif() {
 objectClass: organizationalUnit
 ou: people
 
+dn: ou=quarantine,dc=example,dc=test
+objectClass: organizationalUnit
+ou: quarantine
+
 dn: uid=live-ldap,ou=people,dc=example,dc=test
 objectClass: inetOrgPerson
 uid: live-ldap
@@ -76,6 +82,7 @@ cn: Live LDAP Person
 sn: Person
 displayName: Live LDAP Person
 mail: live-ldap@example.invalid
+employeeNumber: stable-001
 employeeType: active
 userPassword: ${ldapUserPassword}
 `);
@@ -125,6 +132,25 @@ function ldapModify(lines) {
   }
 }
 
+function databaseScalar(sql) {
+  return compose(['exec', '-T', 'postgres', 'psql', '-U', 'fylkren', '-d', 'fylkren', '-tA', '-v', 'ON_ERROR_STOP=1', '-c', sql]);
+}
+
+function rotateDirectoryAdminPassword(password) {
+  const databaseSearch = compose(['exec', '-T', '-e', 'LDAPTLS_CACERT=/container/service/slapd/assets/certs/ca.crt',
+    '-e', 'LDAPTLS_REQCERT=demand', 'ldap', 'ldapsearch', '-LLL', '-x', '-H', 'ldaps://ldap:636',
+    '-D', 'cn=admin,cn=config', '-w', ldapConfigPassword, '-b', 'cn=config',
+    '(olcSuffix=dc=example,dc=test)', 'dn']);
+  const databaseDn = databaseSearch.match(/^dn: (.+)$/m)?.[1];
+  assert.ok(databaseDn, `Could not find the OpenLDAP database DN: ${databaseSearch}`);
+  const passwordHash = compose(['exec', '-T', 'ldap', 'slappasswd', '-s', password]);
+  const result = spawnSync('docker', ['compose', ...composeFiles, '-p', project, 'exec', '-T',
+    '-e', 'LDAPTLS_CACERT=/container/service/slapd/assets/certs/ca.crt', '-e', 'LDAPTLS_REQCERT=demand', 'ldap',
+    'ldapmodify', '-x', '-H', 'ldaps://ldap:636', '-D', 'cn=admin,cn=config', '-w', ldapConfigPassword],
+  { env, encoding: 'utf8', input: `dn: ${databaseDn}\nchangetype: modify\nreplace: olcRootPW\nolcRootPW: ${passwordHash}\n` });
+  if (result.status !== 0) throw new Error(`OpenLDAP root-password rotation failed: ${result.stderr || result.stdout}`);
+}
+
 let started = false;
 try {
   createCertificates();
@@ -172,7 +198,7 @@ try {
     usernameAttribute: 'uid',
     displayNameAttribute: 'displayName',
     emailAttribute: 'mail',
-    stableIdAttribute: 'entryUUID',
+    stableIdAttribute: 'employeeNumber',
     lifecycleActiveFilter: '(employeeType=active)',
     authority: null,
     clientId: null,
@@ -183,6 +209,13 @@ try {
     modulePath: '/api/auth/saml2',
     ssoAutoRedirectProvider: null,
   };
+  const imported = await manager.request('/api/platform/identity/providers/ldap');
+  assert.equal(imported.status, 200, JSON.stringify(imported.body));
+  assert.equal(imported.body.enabled, false);
+  assert.equal(imported.body.configuration.server, 'ldap');
+  assert.equal(imported.body.configuration.stableIdAttribute, 'employeeNumber');
+  assert.equal(imported.body.hasSecret, true);
+  assert.equal(imported.body.configuration.secret, null);
   const saved = await manager.put('/api/platform/identity/providers/ldap', { enabled: false, clearSecret: false, configuration });
   assert.equal(saved.status, 204, JSON.stringify(saved.body));
   const connectionTest = await manager.post('/api/platform/identity/providers/ldap/test', {});
@@ -195,12 +228,29 @@ try {
   const activated = await manager.put('/api/platform/identity/providers/ldap', { enabled: true, clearSecret: false, configuration: stored.body.configuration });
   assert.equal(activated.status, 204, JSON.stringify(activated.body));
 
+  env.FYLKREN_IDENTITY_LAB_IMPORTED_LDAP_SERVER = 'environment-change-must-not-overwrite';
+  compose(['up', '-d', '--force-recreate', '--wait', 'api'], { stdio: 'inherit' });
+  const afterRestart = await manager.request('/api/platform/identity/providers/ldap');
+  assert.equal(afterRestart.status, 200, JSON.stringify(afterRestart.body));
+  assert.equal(afterRestart.body.enabled, true);
+  assert.equal(afterRestart.body.configuration.server, 'ldap',
+    'Environment values must be imported only once and never overwrite stored GUI configuration');
+  assert.equal(afterRestart.body.lastTestSucceeded, true);
+
   const linked = await manager.post('/api/platform/identity/directory-links', {
     provider: 'ldap', localUsername: anchorUsername, directoryUsername: 'live-ldap',
   });
   assert.equal(linked.status, 201, JSON.stringify(linked.body));
   assert.equal(linked.body.provider, 'ldap');
   assert.ok(linked.body.subjectId);
+  const injectionLogin = await browserClient().post('/api/session/directory', {
+    provider: 'ldap', username: 'live-ldap)(|(uid=*)', password: ldapUserPassword,
+  });
+  assert.equal(injectionLogin.status, 401, 'LDAP filter metacharacters must be treated as literal username data');
+  const injectionLink = await manager.post('/api/platform/identity/directory-links', {
+    provider: 'ldap', localUsername: anchorUsername, directoryUsername: '*)(|(uid=*)',
+  });
+  assert.equal(injectionLink.status, 404, 'LDAP link lookup must escape filter metacharacters');
 
   const directoryUser = browserClient();
   const signedIn = await directoryUser.post('/api/session/directory', {
@@ -212,6 +262,16 @@ try {
   assert.equal(directorySession.body.authenticated, true);
   assert.equal(directorySession.body.isPlatformManager, false);
   assert.equal(directorySession.body.isDirectoryManaged, true);
+  const linkedPersonId = directorySession.body.personId;
+  const initialMembershipCount = databaseScalar(`SELECT COUNT(*) FROM site_memberships WHERE person_id = '${linkedPersonId}' AND is_active`);
+  assert.equal(initialMembershipCount, '1');
+  let scheduledChecked = false;
+  for (let attempt = 0; attempt < 75; attempt += 1) {
+    const scheduledLinks = await manager.request('/api/platform/identity/directory-links');
+    if (scheduledLinks.body[0]?.lastCheckedAt) { scheduledChecked = true; break; }
+    await pause(1_000);
+  }
+  assert.equal(scheduledChecked, true, 'The scheduled directory lifecycle worker did not check the active link');
 
   ldapModify(`dn: uid=live-ldap,ou=people,dc=example,dc=test
 changetype: modify
@@ -245,6 +305,107 @@ displayName: Restored LDAP Person`);
   assert.equal(restoredLogin.status, 204, JSON.stringify(restoredLogin.body));
   const restoredSession = await restoredUser.request('/api/session');
   assert.equal(restoredSession.body.displayName, 'Restored LDAP Person');
+  assert.equal(restoredSession.body.personId, linkedPersonId);
+
+  ldapModify(`dn: uid=duplicate-ldap,ou=people,dc=example,dc=test
+changetype: add
+objectClass: inetOrgPerson
+uid: duplicate-ldap
+cn: Duplicate LDAP Person
+sn: Person
+displayName: Duplicate LDAP Person
+mail: duplicate-ldap@example.invalid
+employeeNumber: stable-001
+employeeType: active
+userPassword: ${ldapUserPassword}`);
+  const ambiguous = await manager.post('/api/platform/identity/directories/lifecycle/sync', {});
+  assert.equal(ambiguous.status, 200, JSON.stringify(ambiguous.body));
+  assert.equal(ambiguous.body.unavailable, 1);
+  let currentLinks = await manager.request('/api/platform/identity/directory-links');
+  assert.equal(currentLinks.body[0].accessEnabled, true, 'An ambiguous stable ID must not suspend access');
+  assert.equal(currentLinks.body[0].lifecycleStatus, 'unavailable');
+  ldapModify(`dn: uid=duplicate-ldap,ou=people,dc=example,dc=test
+changetype: delete`);
+
+  const malformedDisplayName = 'X'.repeat(201);
+  ldapModify(`dn: uid=live-ldap,ou=people,dc=example,dc=test
+changetype: modify
+replace: displayName
+displayName: ${malformedDisplayName}`);
+  const malformed = await manager.post('/api/platform/identity/directories/lifecycle/sync', {});
+  assert.equal(malformed.status, 200, JSON.stringify(malformed.body));
+  assert.equal(malformed.body.unavailable, 1);
+  currentLinks = await manager.request('/api/platform/identity/directory-links');
+  assert.equal(currentLinks.body[0].accessEnabled, true, 'Malformed directory data must fail safe');
+  ldapModify(`dn: uid=live-ldap,ou=people,dc=example,dc=test
+changetype: modify
+replace: displayName
+displayName: Restored LDAP Person`);
+  const validAgain = await manager.post('/api/platform/identity/directories/lifecycle/sync', {});
+  assert.equal(validAgain.body.active, 1, JSON.stringify(validAgain.body));
+
+  const rotatedBindPassword = `R8!${randomBytes(18).toString('base64url')}#r`;
+  rotateDirectoryAdminPassword(rotatedBindPassword);
+  const invalidBind = await manager.post('/api/platform/identity/directories/lifecycle/sync', {});
+  assert.equal(invalidBind.status, 200, JSON.stringify(invalidBind.body));
+  assert.equal(invalidBind.body.unavailable, 1);
+  currentLinks = await manager.request('/api/platform/identity/directory-links');
+  assert.equal(currentLinks.body[0].accessEnabled, true, 'An invalid lookup bind must not suspend access');
+  rotateDirectoryAdminPassword(ldapAdminPassword);
+  const healthyAfterBindRestore = await manager.post('/api/platform/identity/directories/lifecycle/sync', {});
+  assert.equal(healthyAfterBindRestore.body.active, 1, JSON.stringify(healthyAfterBindRestore.body));
+
+  ldapModify(`dn: uid=live-ldap,ou=people,dc=example,dc=test
+changetype: modrdn
+newrdn: uid=live-ldap
+deleteoldrdn: 1
+newsuperior: ou=quarantine,dc=example,dc=test`);
+  for (let confirmation = 1; confirmation <= 2; confirmation += 1) {
+    const pending = await manager.post('/api/platform/identity/directories/lifecycle/sync', {});
+    assert.equal(pending.status, 200, JSON.stringify(pending.body));
+    assert.equal(pending.body.missingPending, 1, `Missing confirmation ${confirmation} must remain pending`);
+    currentLinks = await manager.request('/api/platform/identity/directory-links');
+    assert.equal(currentLinks.body[0].accessEnabled, true);
+    assert.equal(currentLinks.body[0].missingCount, confirmation);
+  }
+  const missingConfirmed = await manager.post('/api/platform/identity/directories/lifecycle/sync', {});
+  assert.equal(missingConfirmed.body.suspended, 1, JSON.stringify(missingConfirmed.body));
+  const missingRevokedSession = await restoredUser.request('/api/session');
+  assert.equal(missingRevokedSession.body.authenticated, false, 'The session must be revoked after confirmed deletion');
+  ldapModify(`dn: uid=live-ldap,ou=quarantine,dc=example,dc=test
+changetype: modrdn
+newrdn: uid=live-ldap
+deleteoldrdn: 1
+newsuperior: ou=people,dc=example,dc=test`);
+  const resumedAfterMissing = await manager.post('/api/platform/identity/directories/lifecycle/sync', {});
+  assert.equal(resumedAfterMissing.body.resumed, 1, JSON.stringify(resumedAfterMissing.body));
+  const samePersonAfterMissing = browserClient();
+  assert.equal((await samePersonAfterMissing.post('/api/session/directory', {
+    provider: 'ldap', username: 'live-ldap', password: ldapUserPassword,
+  })).status, 204);
+  assert.equal((await samePersonAfterMissing.request('/api/session')).body.personId, linkedPersonId);
+
+  const removed = await manager.delete(`/api/platform/identity/directory-links/${linked.body.id}`);
+  assert.equal(removed.status, 204, JSON.stringify(removed.body));
+  assert.equal((await browserClient().post('/api/session/directory', {
+    provider: 'ldap', username: 'live-ldap', password: ldapUserPassword,
+  })).status, 401);
+  const relinked = await manager.post('/api/platform/identity/directory-links', {
+    provider: 'ldap', localUsername: anchorUsername, directoryUsername: 'live-ldap',
+  });
+  assert.equal(relinked.status, 201, JSON.stringify(relinked.body));
+  assert.equal(relinked.body.id, linked.body.id, 'Relinking must reactivate the same external identity record');
+  const relinkedUser = browserClient();
+  assert.equal((await relinkedUser.post('/api/session/directory', {
+    provider: 'ldap', username: 'live-ldap', password: ldapUserPassword,
+  })).status, 204);
+  assert.equal((await relinkedUser.request('/api/session')).body.personId, linkedPersonId);
+  assert.equal(databaseScalar(`SELECT COUNT(*) FROM site_memberships WHERE person_id = '${linkedPersonId}' AND is_active`), initialMembershipCount);
+
+  const lifecycleAudit = databaseScalar(`SELECT COUNT(*) FROM audit_events WHERE actor_system = 'directory-lifecycle' AND entity_id = '${linked.body.id}' AND event_type IN ('identity.directory.account-suspended', 'identity.directory.account-resumed')`);
+  assert.ok(Number(lifecycleAudit) >= 4, `Expected lifecycle system audit events, got ${lifecycleAudit}`);
+  const linkAudit = databaseScalar(`SELECT COUNT(*) FROM audit_events WHERE entity_id = '${linked.body.id}' AND event_type IN ('identity.ldap.linked', 'identity.ldap.unlinked')`);
+  assert.ok(Number(linkAudit) >= 3, `Expected link/unlink audit events, got ${linkAudit}`);
 
   compose(['stop', 'ldap'], { stdio: 'inherit' });
   const unavailable = await manager.post('/api/platform/identity/directories/lifecycle/sync', {});
@@ -255,12 +416,27 @@ displayName: Restored LDAP Person`);
   assert.equal(linksDuringOutage.body[0].accessEnabled, true, 'Directory outage must fail safe without suspension');
   assert.equal(linksDuringOutage.body[0].lifecycleStatus, 'unavailable');
 
+  const apiLogs = compose(['logs', '--no-color', 'api']);
+  assert.equal(apiLogs.includes(ldapAdminPassword), false, 'LDAP bind secret must not appear in API logs');
+  assert.equal(apiLogs.includes(rotatedBindPassword), false, 'Rotated LDAP service-account secret must not appear in API logs');
+  assert.equal(apiLogs.includes(ldapUserPassword), false, 'LDAP user secret must not appear in API logs');
+
   process.stdout.write(`${JSON.stringify({
     liveOpenLdapTls: 'passed',
     providerConfigurationAndSecretProtection: 'passed',
+    oneTimeEnvironmentImport: 'passed',
     directoryLinkAndAuthentication: 'passed',
+    scheduledAndManualLifecycleSync: 'passed',
+    ldapFilterInjectionRejection: 'passed',
     authoritativeSuspensionAndSessionRevocation: 'passed',
     restorationAndProfileSync: 'passed',
+    ambiguousStableIdFailSafe: 'passed',
+    malformedDirectoryDataFailSafe: 'passed',
+    invalidLookupBindFailSafe: 'passed',
+    missingAccountConfirmationAndSessionRevocation: 'passed',
+    unlinkRelinkAndAccessPreservation: 'passed',
+    lifecycleAndActorAudit: 'passed',
+    secretSafeLogging: 'passed',
     outageFailSafe: 'passed',
   }, null, 2)}\n`);
 } finally {

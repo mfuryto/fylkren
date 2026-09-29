@@ -140,6 +140,24 @@ try {
   const restoredLogin = await browserClient().post('/api/session/directory', { provider: 'ad', username: 'live-ad', password: adUserPassword });
   assert.equal(restoredLogin.status, 204, JSON.stringify(restoredLogin.body));
 
+  const expirySession = browserClient();
+  assert.equal((await expirySession.post('/api/session/directory', {
+    provider: 'ad', username: 'live-ad', password: adUserPassword,
+  })).status, 204);
+  compose(['exec', '-T', 'ad', 'samba-tool', 'user', 'setexpiry', 'live-ad', '--days=0', '-s', '/samba/etc/smb.conf'], { stdio: 'inherit' });
+  const expired = await manager.post('/api/platform/identity/directories/lifecycle/sync', {});
+  assert.equal(expired.status, 200, JSON.stringify(expired.body));
+  assert.equal(expired.body.suspended, 1, JSON.stringify(expired.body));
+  assert.equal((await expirySession.request('/api/session')).body.authenticated, false,
+    'An existing AD session must be revoked when accountExpires is reached');
+  compose(['exec', '-T', 'ad', 'samba-tool', 'user', 'setexpiry', 'live-ad', '--noexpiry', '-s', '/samba/etc/smb.conf'], { stdio: 'inherit' });
+  const resumedAfterExpiry = await manager.post('/api/platform/identity/directories/lifecycle/sync', {});
+  assert.equal(resumedAfterExpiry.status, 200, JSON.stringify(resumedAfterExpiry.body));
+  assert.equal(resumedAfterExpiry.body.resumed, 1, JSON.stringify(resumedAfterExpiry.body));
+  assert.equal((await browserClient().post('/api/session/directory', {
+    provider: 'ad', username: 'live-ad', password: adUserPassword,
+  })).status, 204);
+
   compose(['stop', 'ad'], { stdio: 'inherit' });
   const unavailable = await manager.post('/api/platform/identity/directories/lifecycle/sync', {});
   assert.equal(unavailable.status, 200, JSON.stringify(unavailable.body));
@@ -148,11 +166,17 @@ try {
   assert.equal(linksDuringOutage.body[0].accessEnabled, true, 'AD outage must fail safe without suspension');
   assert.equal(linksDuringOutage.body[0].lifecycleStatus, 'unavailable');
 
+  const apiLogs = compose(['logs', '--no-color', 'api']);
+  assert.equal(apiLogs.includes(adAdminPassword), false, 'AD bind secret must not appear in API logs');
+  assert.equal(apiLogs.includes(adUserPassword), false, 'AD user secret must not appear in API logs');
+
   process.stdout.write(`${JSON.stringify({
     liveSambaActiveDirectoryTls: 'passed',
     adObjectGuidLinkAndPasswordAuthentication: 'passed',
     userAccountControlSuspensionAndSessionRevocation: 'passed',
+    accountExpirySuspensionAndSessionRevocation: 'passed',
     activeDirectoryRestoration: 'passed',
+    activeDirectorySecretSafeLogging: 'passed',
     activeDirectoryOutageFailSafe: 'passed',
   }, null, 2)}\n`);
 } finally {

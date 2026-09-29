@@ -58,6 +58,7 @@ app.Use(async (context, next) =>
 });
 
 app.UseExceptionHandler();
+app.UseMiddleware<ExternalAuthenticationFailureCookieMiddleware>();
 app.UseAuthentication();
 app.UseMiddleware<ApiMachineAuthenticationMiddleware>();
 app.UseMiddleware<SecurityEventMiddleware>();

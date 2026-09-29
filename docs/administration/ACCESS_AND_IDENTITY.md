@@ -42,12 +42,14 @@ On the first upgraded startup only, an existing `.env` provider configuration is
 
 External authentication establishes the same local browser session after resolving an explicitly linked internal person:
 
-- OIDC uses authorization code flow and stable `sub`;
-- SAML 2.0 uses SP-initiated login, signed metadata and permanent NameID;
+- OIDC uses authorization code flow and the exact configured issuer plus stable `sub`;
+- SAML 2.0 uses SP-initiated login, signed metadata and the exact IdP Entity ID plus permanent NameID;
 - Active Directory uses `objectGUID`;
 - LDAP uses `entryUUID` or the configured stable-ID attribute.
 
 Unknown stable identifiers are rejected. Username is never the permanent link key. Directory search and linking are explicit; AD/LDAP never populate site personnel automatically.
+
+Each external link is visible under its provider card and can be removed there. Removing a link blocks that external sign-in without deleting the internal person, memberships, roles or history; relinking the same provider identity reactivates the retained link. Fylkren refuses to remove the final active external Platform Manager path while local login is disabled. An OIDC `sub` or SAML NameID from a replacement issuer is a different identity even when its text is identical.
 
 AD/LDAP uses encrypted transport, a least-privileged lookup bind and a separate end-user credential bind. User passwords are never stored. Active directory-managed identities synchronize valid name/email attributes at login; local password, TOTP and WebAuthn login are disabled for that person, while the profile image remains locally editable.
 
@@ -68,7 +70,9 @@ active-account filter. Generic LDAP has no universal disabled-account attribute;
 the operator must set the **Filter for aktiv konto** field to the server's
 schema if disabled entries remain searchable. The safe default treats an
 existing LDAP entry as active and still detects confirmed deletion by
-`entryUUID`.
+the configured stable-ID attribute. An ambiguous stable ID, malformed entry,
+invalid bind, TLS failure or outage is recorded as unavailable and cannot
+trigger suspension.
 
 ## MFA and passkeys
 

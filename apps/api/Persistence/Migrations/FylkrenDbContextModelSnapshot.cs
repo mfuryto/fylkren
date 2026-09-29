@@ -634,6 +634,14 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("character varying(30)")
                         .HasColumnName("provider");
 
+                    b.Property<string>("ProviderInstanceId")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("provider_instance_id");
+
                     b.Property<string>("SubjectId")
                         .IsRequired()
                         .HasMaxLength(256)
@@ -649,7 +657,7 @@ namespace Fylkren.Api.Persistence.Migrations
 
                     b.HasIndex("PersonId");
 
-                    b.HasIndex("Provider", "SubjectId")
+                    b.HasIndex("Provider", "ProviderInstanceId", "SubjectId")
                         .IsUnique();
 
                     b.ToTable("external_identity_links", (string)null);

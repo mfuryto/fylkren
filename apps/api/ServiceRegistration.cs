@@ -145,9 +145,13 @@ internal static class ServiceRegistration
                 {
                     var subject = context.Principal?.FindFirst("sub")?.Value;
                     if (string.IsNullOrWhiteSpace(subject)) { context.Fail("OIDC subject is missing."); return; }
+                    var providerInstanceId = fylkrenOptions.Authentication.Oidc.Authority?.TrimEnd('/');
+                    if (string.IsNullOrWhiteSpace(providerInstanceId)) { context.Fail("OIDC provider identity is missing."); return; }
                     await using var scope = context.HttpContext.RequestServices.CreateAsyncScope();
                     var database = scope.ServiceProvider.GetRequiredService<FylkrenDbContext>();
-                    var link = await database.ExternalIdentityLinks.AsNoTracking().SingleOrDefaultAsync(value => value.Provider == "oidc" && value.SubjectId == subject && value.IsActive);
+                    var link = await database.ExternalIdentityLinks.AsNoTracking().SingleOrDefaultAsync(value =>
+                        value.Provider == "oidc" && value.ProviderInstanceId == providerInstanceId &&
+                        value.SubjectId == subject && value.IsActive);
                     if (link is null) { context.Fail("OIDC identity is not linked to a Fylkren person."); return; }
                     var identity = await database.LoginIdentities.Include(value => value.Person).SingleOrDefaultAsync(value => value.PersonId == link.PersonId && value.IsActive && value.Person.IsActive);
                     if (identity is null || !identity.IsPlatformManager &&
@@ -329,8 +333,16 @@ internal static class ServiceRegistration
         }
 
         var database = context.HttpContext.RequestServices.GetRequiredService<FylkrenDbContext>();
+        var runtimeOptions = context.HttpContext.RequestServices.GetRequiredService<FylkrenOptions>();
+        var providerInstanceId = runtimeOptions.Authentication.Saml.IdentityProviderEntityId?.Trim();
+        if (string.IsNullOrWhiteSpace(providerInstanceId))
+        {
+            context.RejectPrincipal();
+            return;
+        }
         var link = await database.ExternalIdentityLinks.AsNoTracking()
-            .SingleOrDefaultAsync(value => value.Provider == "saml" && value.SubjectId == subject && value.IsActive);
+            .SingleOrDefaultAsync(value => value.Provider == "saml" && value.ProviderInstanceId == providerInstanceId &&
+                value.SubjectId == subject && value.IsActive);
         if (link is null)
         {
             context.RejectPrincipal();

@@ -26,15 +26,21 @@ public static class IdentityProviderEndpoints
         group.MapGet("/oidc-links", (FylkrenDbContext database, CancellationToken cancellationToken) =>
             GetLinks("oidc", database, cancellationToken));
         group.MapPost("/oidc-links", (OidcLinkRequest request, IAntiforgery antiforgery,
-            HttpContext context, FylkrenDbContext database, CancellationToken cancellationToken) =>
+            HttpContext context, FylkrenDbContext database, IdentityProviderConfigurationService service, CancellationToken cancellationToken) =>
             CreateLink("oidc", request.Username, request.SubjectId, antiforgery, context,
-                database, cancellationToken)).RequireFeature(FeatureCatalog.ExternalIdentity);
+                database, service, cancellationToken)).RequireFeature(FeatureCatalog.ExternalIdentity);
+        group.MapDelete("/oidc-links/{id:guid}", (Guid id, IAntiforgery antiforgery,
+            HttpContext context, FylkrenDbContext database, FylkrenOptions options, CancellationToken cancellationToken) =>
+            DeleteLink(id, "oidc", antiforgery, context, database, options, cancellationToken));
         group.MapGet("/saml-links", (FylkrenDbContext database, CancellationToken cancellationToken) =>
             GetLinks("saml", database, cancellationToken));
         group.MapPost("/saml-links", (SamlLinkRequest request, IAntiforgery antiforgery,
-            HttpContext context, FylkrenDbContext database, CancellationToken cancellationToken) =>
+            HttpContext context, FylkrenDbContext database, IdentityProviderConfigurationService service, CancellationToken cancellationToken) =>
             CreateLink("saml", request.Username, request.NameId, antiforgery, context,
-                database, cancellationToken)).RequireFeature(FeatureCatalog.ExternalIdentity);
+                database, service, cancellationToken)).RequireFeature(FeatureCatalog.ExternalIdentity);
+        group.MapDelete("/saml-links/{id:guid}", (Guid id, IAntiforgery antiforgery,
+            HttpContext context, FylkrenDbContext database, FylkrenOptions options, CancellationToken cancellationToken) =>
+            DeleteLink(id, "saml", antiforgery, context, database, options, cancellationToken));
         return endpoints;
     }
 
@@ -281,6 +287,7 @@ public static class IdentityProviderEndpoints
             {
                 link.Id,
                 link.SubjectId,
+                providerInstanceId = link.ProviderInstanceId,
                 link.Username,
                 displayName = link.Person.DisplayName
             })
@@ -293,6 +300,7 @@ public static class IdentityProviderEndpoints
         IAntiforgery antiforgery,
         HttpContext context,
         FylkrenDbContext database,
+        IdentityProviderConfigurationService service,
         CancellationToken cancellationToken)
     {
         if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest();
@@ -309,16 +317,41 @@ public static class IdentityProviderEndpoints
             value.NormalizedUsername == normalizedUsername && value.IsActive, cancellationToken);
         if (identity is null)
             return Results.NotFound(new { error = "Den lokale brukeren finnes ikke eller er deaktivert." });
-        if (await database.ExternalIdentityLinks.AnyAsync(link =>
-                link.Provider == provider && link.SubjectId == subject && link.IsActive, cancellationToken))
+        var setting = await database.IdentityProviderSettings.AsNoTracking()
+            .SingleAsync(value => value.Provider == provider, cancellationToken);
+        var providerInstanceId = IdentityProviderConfigurationService.ProviderInstanceId(
+            provider, service.Unprotect(setting.ProtectedConfiguration));
+        if (providerInstanceId is null)
+            return Results.Conflict(new { error = $"{provider.ToUpperInvariant()} må konfigureres før identiteten kan kobles." });
+        var existingLink = await database.ExternalIdentityLinks.SingleOrDefaultAsync(link =>
+            link.Provider == provider && link.ProviderInstanceId == providerInstanceId && link.SubjectId == subject,
+            cancellationToken);
+        if (existingLink?.IsActive == true)
             return Results.Conflict(new { error = $"{provider.ToUpperInvariant()}-identiteten er allerede koblet." });
 
-        var link = new ExternalIdentityLink(Guid.NewGuid(), identity.PersonId, provider,
-            subject, identity.Username, DateTimeOffset.UtcNow);
-        database.Add(link);
+        var now = DateTimeOffset.UtcNow;
+        var link = existingLink ?? new ExternalIdentityLink(Guid.NewGuid(), identity.PersonId, provider,
+            providerInstanceId, subject, identity.Username, now);
+        if (existingLink is null) database.Add(link);
+        else link.Reactivate(identity.PersonId, identity.Username, now);
         Record(database, context, $"identity.{provider}.linked", link.Id);
         await database.SaveChangesAsync(cancellationToken);
         return Results.Created($"/api/platform/identity/{provider}-links/{link.Id}", new { link.Id });
+    }
+
+    private static async Task<IResult> DeleteLink(Guid id, string provider, IAntiforgery antiforgery,
+        HttpContext context, FylkrenDbContext database, FylkrenOptions options, CancellationToken cancellationToken)
+    {
+        if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest();
+        var link = await database.ExternalIdentityLinks.SingleOrDefaultAsync(value =>
+            value.Id == id && value.Provider == provider && value.IsActive, cancellationToken);
+        if (link is null) return Results.NotFound();
+        if (!await ExternalIdentityLinkSafety.CanDeactivateAsync(link, database, options, cancellationToken))
+            return Results.Conflict(new { error = "Koblingen kan ikke fjernes fordi den er siste aktive eksterne innlogging for en Platform Manager mens lokal innlogging er deaktivert." });
+        link.Deactivate();
+        Record(database, context, $"identity.{provider}.unlinked", link.Id);
+        await database.SaveChangesAsync(cancellationToken);
+        return Results.NoContent();
     }
 
     private static object Provider(string name, string key, bool enabled, IdentityProviderSettings? stored, bool configurationPresent, string stableIdentifier) => new { name, key, enabledRequested = enabled, configurationPresent, operational = enabled && configurationPresent, stableIdentifier, stored?.LastTestedAt, stored?.LastTestSucceeded };
