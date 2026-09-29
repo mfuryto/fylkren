@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Recorded the pre-publication legal gap between PolyForm Perimeter's granted distribution rights and Fylkren-specific commercial requirements for Enterprise entitlements, modified builds and circumvention; public release now has explicit source-license and customer-terms gates.
+
 These changes target the first public `v1.0.0` release. Pre-1.0 development
 build identifiers are not public releases.
 
