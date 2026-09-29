@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Sustainsys.Saml2;
 using Sustainsys.Saml2.AspNetCore2;
+using Sustainsys.Saml2.Configuration;
 using Sustainsys.Saml2.Metadata;
 using Sustainsys.Saml2.Saml2P;
 
@@ -140,6 +141,10 @@ internal static class ServiceRegistration
                 options.SPOptions.EntityId = new EntityId(saml.Enabled ? saml.EntityId! : "https://disabled.invalid/fylkren");
                 options.SPOptions.ModulePath = saml.ModulePath;
                 options.SPOptions.NameIdPolicy = new Saml2NameIdPolicy(null, NameIdFormat.Persistent);
+                // Fylkren does not currently provision a private SP signing certificate. Explicitly
+                // send unsigned AuthnRequests while continuing to require the IdP metadata-backed
+                // signature validation performed by Sustainsys for SAML responses and assertions.
+                options.SPOptions.AuthenticateRequestSigningBehavior = SigningBehavior.Never;
                 var identityProvider = new IdentityProvider(new EntityId(saml.Enabled ? saml.IdentityProviderEntityId! : "https://disabled.invalid/idp"), options.SPOptions);
                 if (saml.Enabled)
                 {

@@ -6,6 +6,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 - Replaced the pre-release PolyForm Perimeter terms with the project-specific Fylkren Source Available License 1.0: compliant redistribution remains permitted, while Enterprise bypass and passing Fylkren or a substantially derived product off as independently created are prohibited. Legal verification remains a public-release gate.
 - Added a maintained isolated real-time license-expiry test that proves immediate Enterprise-to-Community downgrade, server-side entitlement closure, retained customer state, paused webhook processing and renewal without restart.
+- Added maintained live OpenLDAP, Samba Active Directory, OIDC and SAML laboratories covering trusted TLS, protected provider configuration, stable identity linking, real sign-in, directory suspension/restoration, session rejection and outage behavior. Corrected SAML service-provider configuration so unsigned AuthnRequests interoperate while signed identity-provider assertions remain validated.
 
 These changes target the first public `v1.0.0` release. Pre-1.0 development
 build identifiers are not public releases.

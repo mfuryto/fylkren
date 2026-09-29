@@ -25,7 +25,7 @@ No control is promoted from **Implemented** to **Verified** solely because code 
 | Local passwords and recovery | Implemented | Concurrent reset and session revocation passed; complete blocklist, reset-expiry and remaining boundary evidence |
 | TOTP and recovery codes | Implemented | Setup-token replay, time-window boundary, parallel code consumption, and clock-skew tests |
 | WebAuthn and passkeys | Implemented | Registration/sign-in challenge replay, origin/RP validation, counter behavior, and authenticator coverage |
-| OIDC, SAML, AD, and LDAP | Implemented | Closed-environment positive/negative tests, TLS requirements, mapping, unlinking, and fail-closed behavior |
+| OIDC, SAML, AD, and LDAP | Implemented | Live closed-laboratory AD/LDAP authentication, lifecycle and outage tests plus OIDC/SAML browser sign-in passed on 2026-09-29; complete replay/forgery, malformed-directory, unlink and exact release-candidate cases |
 | Enterprise license lifecycle | Implemented | Real-time expiry, immediate entitlement closure, retained state and renewal without restart passed on 2026-09-29; repeat against the exact release candidate and verify production issuer/key custody |
 | Platform/site/level authorization | Implemented | Full role/object matrix through UI and direct HTTP calls, including cross-site and sibling isolation |
 | Cross-site assignments and requests | Implemented | Clean E2E rerun proving snapshots, filtered response, return route, workload, and report receipts |
@@ -105,7 +105,7 @@ The current blocking work is verification, not an assumption that the inventory 
 2. Execute the maintained [E2E acceptance matrix](../testing/END_TO_END_TEST_MATRIX.md) from reset synthetic fixtures.
 3. Run all automated security scripts against the same release candidate and retain safe evidence.
 4. Exercise the remaining TOTP, WebAuthn, API authentication, ETag, and idempotency races.
-5. Test AD/LDAP, OIDC, SAML, SMTP, and WebAuthn in the closed integration environment.
+5. Complete the still-open identity negatives (OIDC replay/forgery, SAML tampering, malformed/ambiguous directories and unlinking), then test WebAuthn in the closed integration environment. Live AD, LDAP, OIDC, SAML and SMTP positive/lifecycle subsets now have dated records.
 6. Repeat the passed coordinated database/key-ring restore against the formal release environment and retain protected evidence.
 7. Measure authorization-sensitive queries and representative workload at supported deployment sizes.
 8. Perform an independent penetration test using the [federation review brief](FEDERATION_SECURITY_REVIEW_BRIEF.md) where applicable, then remediate or formally accept every finding.

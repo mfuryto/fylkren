@@ -190,6 +190,8 @@ verify normal visits bypass the login form while `/?local=1` retains documented
 emergency local presentation. Changing or disabling the selected SSO provider
 must automatically cancel direct redirect until it is tested and selected again.
 
+Evidence status on 2026-09-29: the maintained [OpenLDAP](runs/2026-09-29-live-openldap-identity.md), [Samba Active Directory](runs/2026-09-29-live-active-directory-identity.md), and [OIDC/SAML](runs/2026-09-29-live-oidc-saml-identity.md) laboratories passed their recorded TLS, configuration, linking, authentication, lifecycle, outage and browser-session subsets. E2E-14 remains incomplete: deletion/missing thresholds, account expiry, ambiguous or malformed directory data, secret-safe audit verification, unlinking, environment import, Community write rejection, local lockout prevention and direct-SSO bypass/cancellation still require one complete release-candidate evidence chain.
+
 ### E2E-15 — Dependencies and blocked progress
 
 Create a task with two finish-to-start predecessors. Verify it remains blocked until both are completed; one completion alone must not release it. Check blocked state in Tasks and the API, and reject direct API progress while blocked. Reject self-dependency, duplicates, cross-site references and cycles. Add a dependency while assessing a task, place it on hold for that reason, and verify that an approved plan cannot be released while the dependency remains active. Remove a dependency and confirm that the change is audited and the derived blocked state updates.

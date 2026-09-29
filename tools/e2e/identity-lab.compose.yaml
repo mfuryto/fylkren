@@ -1,0 +1,40 @@
+services:
+  api:
+    environment:
+      SSL_CERT_FILE: /run/fylkren-identity-lab/ca.crt
+      LDAPTLS_CACERT: /run/fylkren-identity-lab/ca.crt
+      LDAPTLS_REQCERT: demand
+      Fylkren__Authentication__DirectoryLifecycle__IntervalMinutes: 1440
+      Fylkren__Authentication__DirectoryLifecycle__MissingConfirmationCount: 3
+    volumes:
+      - ${FYLKREN_IDENTITY_LAB_DIR:?Set FYLKREN_IDENTITY_LAB_DIR}/ca.crt:/run/fylkren-identity-lab/ca.crt:ro
+
+  ldap:
+    image: osixia/openldap:1.5.0@sha256:18742e9c449c9c1afe129d3f2f3ee15fb34cc43e5f940a20f3399728f41d7c28
+    command: ["--copy-service", "--loglevel", "warning"]
+    environment:
+      LDAP_ORGANISATION: Fylkren Identity Lab
+      LDAP_DOMAIN: example.test
+      LDAP_ADMIN_PASSWORD: ${FYLKREN_IDENTITY_LAB_LDAP_ADMIN_PASSWORD:?Set the disposable LDAP administrator password}
+      LDAP_CONFIG_PASSWORD: ${FYLKREN_IDENTITY_LAB_LDAP_CONFIG_PASSWORD:?Set the disposable LDAP configuration password}
+      LDAP_TLS: "true"
+      LDAP_TLS_ENFORCE: "true"
+      LDAP_TLS_VERIFY_CLIENT: never
+      LDAP_TLS_CA_CRT_FILENAME: ca.crt
+      LDAP_TLS_CRT_FILENAME: ldap.crt
+      LDAP_TLS_KEY_FILENAME: ldap.key
+    volumes:
+      - ${FYLKREN_IDENTITY_LAB_DIR}/ca.crt:/container/service/slapd/assets/certs/ca.crt:ro
+      - ${FYLKREN_IDENTITY_LAB_DIR}/ldap.crt:/container/service/slapd/assets/certs/ldap.crt:ro
+      - ${FYLKREN_IDENTITY_LAB_DIR}/ldap.key:/container/service/slapd/assets/certs/ldap.key:ro
+      - ${FYLKREN_IDENTITY_LAB_DIR}/bootstrap.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/50-fylkren-lab.ldif:ro
+    expose:
+      - "636"
+    healthcheck:
+      test: ["CMD-SHELL", "LDAPTLS_REQCERT=never ldapsearch -x -H ldaps://ldap:636 -D cn=admin,dc=example,dc=test -w $$LDAP_ADMIN_PASSWORD -b dc=example,dc=test -s base dn >/dev/null"]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+    networks:
+      - backend

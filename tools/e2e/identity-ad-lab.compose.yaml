@@ -1,0 +1,42 @@
+services:
+  api:
+    environment:
+      SSL_CERT_FILE: /run/fylkren-identity-ad/private/tls/ca.pem
+      LDAPTLS_CACERT: /run/fylkren-identity-ad/private/tls/ca.pem
+      LDAPTLS_REQCERT: demand
+      Fylkren__Authentication__DirectoryLifecycle__IntervalMinutes: 1440
+      Fylkren__Authentication__DirectoryLifecycle__MissingConfirmationCount: 3
+    volumes:
+      - fylkren-identity-ad-data:/run/fylkren-identity-ad:ro
+
+  ad:
+    image: linuxcrafts/samba-ad-dc:v0.11@sha256:26ce92b631916731fa70218db9ce8374597d6d83f0653fc6615d9859e5245f80
+    entrypoint: ["/bin/sh", "/run/fylkren-identity-ad-entrypoint.sh"]
+    hostname: ad
+    cap_add:
+      - SYS_ADMIN
+    environment:
+      DNS_DOMAIN: example.test
+      WORKGROUP: EXAMPLE
+      REALM: EXAMPLE.TEST
+      NETBIOS_NAME: AD
+      ROLE: dc
+      ADMIN_PASSWORD: ${FYLKREN_IDENTITY_AD_LAB_ADMIN_PASSWORD:?Set the disposable AD administrator password}
+    volumes:
+      - fylkren-identity-ad-data:/samba
+      - ./tools/e2e/samba-ad-entrypoint.sh:/run/fylkren-identity-ad-entrypoint.sh:ro
+    expose:
+      - "636"
+    healthcheck:
+      test: ["CMD-SHELL", "samba-tool user list -s /samba/etc/smb.conf | grep -q '^Administrator$'"]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+      start_period: 15s
+    networks:
+      backend:
+        aliases:
+          - ad.example.test
+
+volumes:
+  fylkren-identity-ad-data:

@@ -6,9 +6,11 @@ The [2026-09-27 Community/Enterprise API regression](2026-09-27-community-enterp
 
 The [authorization and cross-site GUID-substitution run](2026-09-27-authorization-guid-substitution.md) records the later expanded role/object boundary suite, the `SV-047` function-level authorization finding, its correction and the final clean full-suite rerun.
 
-The [directory lifecycle deprovisioning run](2026-09-27-directory-lifecycle-deprovisioning.md) records the implementation-level state, migration, GUI-build and full-regression evidence for automatic AD/LDAP suspension and resumption. Live Samba/Active Directory and OpenLDAP acceptance remains an explicit release gate.
+The [directory lifecycle deprovisioning run](2026-09-27-directory-lifecycle-deprovisioning.md) records the implementation-level state, migration, GUI-build and full-regression evidence for automatic AD/LDAP suspension and resumption. The later [live OpenLDAP run](2026-09-29-live-openldap-identity.md) and [live Samba Active Directory run](2026-09-29-live-active-directory-identity.md) add real TLS, password-bind, stable-ID, suspension, session-rejection, restoration and outage evidence. Deletion thresholds, malformed/ambiguous directory data and the other exclusions in those records remain release work.
 
 The [GUI identity-provider settings run](2026-09-28-gui-identity-provider-settings.md) records protected database configuration, Community/Enterprise boundaries, local lockout prevention, dynamic remote-handler registration and the clean full regression. It also retains the initial disabled-handler startup failure and its correction.
+
+The [live OIDC/SAML run](2026-09-29-live-oidc-saml-identity.md) records real HTTPS discovery, authorization-code and signed-assertion browser flows, stable identity linking, secret protection and the server-side token boundary. It also records the SAML AuthnRequest signing mismatch found and corrected during the run. Forged/replayed callback and token/assertion negative cases remain open and are not implied by the successful flows.
 
 The [host status integration run](2026-09-28-host-status-integration.md) records disk/container/restart reporting, backup-set registration, stale and malformed snapshot rejection, Docker-socket isolation and the clean full regression.
 

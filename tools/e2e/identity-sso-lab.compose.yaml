@@ -1,0 +1,62 @@
+services:
+  api:
+    environment:
+      SSL_CERT_FILE: /run/fylkren-identity-lab/ca.crt
+    volumes:
+      - ${FYLKREN_IDENTITY_LAB_DIR:?Set FYLKREN_IDENTITY_LAB_DIR}/ca.crt:/run/fylkren-identity-lab/ca.crt:ro
+  identity-gateway:
+    image: nginx:1.29-alpine@sha256:5616878291a2eed594aee8db4dade5878cf7edcb475e59193904b198d9b830de
+    read_only: true
+    volumes:
+      - ${FYLKREN_IDENTITY_LAB_DIR}/gateway.conf:/etc/nginx/nginx.conf:ro
+      - ${FYLKREN_IDENTITY_LAB_DIR}/gateway.crt:/run/fylkren-identity-lab/gateway.crt:ro
+      - ${FYLKREN_IDENTITY_LAB_DIR}/gateway.key:/run/fylkren-identity-lab/gateway.key:ro
+    tmpfs:
+      - /var/cache/nginx:rw,noexec,nosuid,size=8m,mode=1777
+      - /var/run:rw,noexec,nosuid,size=2m,mode=1777
+    ports:
+      - "127.0.0.1:18444:18444"
+      - "127.0.0.1:18090:18090"
+    depends_on:
+      web:
+        condition: service_healthy
+    networks:
+      - frontend
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.3.3@sha256:6a7217a100bd3e5de4063a27a538ef999a3c5a88c4b4ec0ffc0a642aee7b2597
+    command:
+      - start-dev
+      - --import-realm
+      - --http-enabled=false
+      - --https-port=18443
+      - --https-certificate-file=/run/fylkren-identity-lab/keycloak.crt
+      - --https-certificate-key-file=/run/fylkren-identity-lab/keycloak.key
+      - --hostname=https://keycloak.test:18443
+      - --health-enabled=true
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: lab-admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${FYLKREN_IDENTITY_LAB_KEYCLOAK_ADMIN_PASSWORD:?Set the disposable Keycloak administrator password}
+    volumes:
+      - ${FYLKREN_IDENTITY_LAB_DIR}/keycloak.crt:/run/fylkren-identity-lab/keycloak.crt:ro
+      - ${FYLKREN_IDENTITY_LAB_DIR}/keycloak.key:/run/fylkren-identity-lab/keycloak.key:ro
+      - ${FYLKREN_IDENTITY_LAB_DIR}/realm.json:/opt/keycloak/data/import/fylkren-lab-realm.json:ro
+    ports:
+      - "127.0.0.1:18443:18443"
+    networks:
+      frontend:
+        aliases:
+          - keycloak.test
+      backend:
+        aliases:
+          - keycloak.test
+
+  identity-browser:
+    image: chromedp/headless-shell:stable@sha256:2d349b544a1ea6b5b5fd7c0fe99215ff662339c57407ee2e8c0a11af93516b04
+    command:
+      - --no-sandbox
+      - --disable-gpu
+      - --ignore-certificate-errors
+    network_mode: host
+    extra_hosts:
+      - "keycloak.test:127.0.0.1"
