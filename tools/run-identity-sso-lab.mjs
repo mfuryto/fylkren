@@ -64,9 +64,9 @@ function createCertificates() {
   openssl(['x509', '-req', '-in', request, '-CA', caCertificate, '-CAkey', caKey, '-CAcreateserial', '-days', '2', '-sha256', '-extfile', extensions, '-out', certificate]);
   openssl(['genpkey', '-algorithm', 'EC', '-pkeyopt', 'ec_paramgen_curve:prime256v1', '-out', gatewayKey]);
   openssl(['req', '-new', '-key', gatewayKey, '-subj', '/CN=localhost', '-out', gatewayRequest]);
-  writeFileSync(gatewayExtensions, 'subjectAltName=DNS:localhost,IP:127.0.0.1\nextendedKeyUsage=serverAuth\nkeyUsage=digitalSignature,keyAgreement\n');
+  writeFileSync(gatewayExtensions, 'subjectAltName=DNS:localhost,DNS:metadata.test,IP:127.0.0.1\nextendedKeyUsage=serverAuth\nkeyUsage=digitalSignature,keyAgreement\n');
   openssl(['x509', '-req', '-in', gatewayRequest, '-CA', caCertificate, '-CAkey', caKey, '-CAserial', join(labDirectory, 'ca.srl'), '-days', '2', '-sha256', '-extfile', gatewayExtensions, '-out', gatewayCertificate]);
-  writeFileSync(join(labDirectory, 'gateway.conf'), `events {}\nhttp {\n  server {\n    listen 18444 ssl;\n    server_name localhost;\n    ssl_certificate /run/fylkren-identity-lab/gateway.crt;\n    ssl_certificate_key /run/fylkren-identity-lab/gateway.key;\n    location / {\n      proxy_pass http://web:8080;\n      proxy_set_header Host $http_host;\n      proxy_set_header X-Forwarded-Host $http_host;\n      proxy_set_header X-Forwarded-Proto https;\n      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n    }\n  }\n  server {\n    listen 18090;\n    server_name localhost;\n    location / {\n      proxy_pass http://web:8080;\n      proxy_set_header Host localhost:18444;\n      proxy_set_header X-Forwarded-Host localhost:18444;\n      proxy_set_header X-Forwarded-Proto https;\n      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n    }\n  }\n}\n`);
+  writeFileSync(join(labDirectory, 'gateway.conf'), `events {}\nhttp {\n  server {\n    listen 18444 ssl;\n    server_name localhost metadata.test;\n    ssl_certificate /run/fylkren-identity-lab/gateway.crt;\n    ssl_certificate_key /run/fylkren-identity-lab/gateway.key;\n    location = /oidc-mismatch/.well-known/openid-configuration {\n      default_type application/json;\n      return 200 '{"issuer":"https://issuer-mismatch.example.invalid","authorization_endpoint":"https://issuer-mismatch.example.invalid/auth","token_endpoint":"https://issuer-mismatch.example.invalid/token","jwks_uri":"https://issuer-mismatch.example.invalid/keys"}';\n    }\n    location / {\n      proxy_pass http://web:8080;\n      proxy_set_header Host $http_host;\n      proxy_set_header X-Forwarded-Host $http_host;\n      proxy_set_header X-Forwarded-Proto https;\n      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n    }\n  }\n  server {\n    listen 18090;\n    server_name localhost;\n    location / {\n      proxy_pass http://web:8080;\n      proxy_set_header Host localhost:18444;\n      proxy_set_header X-Forwarded-Host localhost:18444;\n      proxy_set_header X-Forwarded-Proto https;\n      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n    }\n  }\n}\n`);
   chmodSync(caCertificate, 0o644);
   chmodSync(certificate, 0o644);
   chmodSync(key, 0o600);
@@ -180,9 +180,19 @@ async function createCdpSession(url) {
   await new Promise((resolve, reject) => { socket.addEventListener('open', resolve); socket.addEventListener('error', reject); });
   let sequence = 0;
   const pending = new Map();
+  const listeners = new Map();
+  const eventErrors = [];
+  const networkRequests = [];
+  const networkResponses = [];
   socket.addEventListener('message', event => {
     const value = JSON.parse(event.data);
-    if (!value.id) return;
+    if (!value.id) {
+      if (value.method === 'Network.requestWillBeSent') networkRequests.push(value.params.request);
+      if (value.method === 'Network.responseReceived') networkResponses.push(value.params.response);
+      for (const listener of listeners.get(value.method) ?? [])
+        Promise.resolve(listener(value.params)).catch(error => eventErrors.push(error));
+      return;
+    }
     const waiter = pending.get(value.id);
     if (!waiter) return;
     pending.delete(value.id);
@@ -195,22 +205,56 @@ async function createCdpSession(url) {
     return new Promise((resolve, reject) => pending.set(id, { resolve, reject }));
   }
   async function evaluate(expression) {
+    if (eventErrors.length) throw eventErrors.shift();
     const result = await call('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true });
     if (result.exceptionDetails) throw new Error(result.exceptionDetails.text);
     return result.result.value;
   }
   async function waitFor(expression, label) {
     for (let attempt = 0; attempt < 120; attempt++) {
+      if (eventErrors.length) throw eventErrors.shift();
       if (await evaluate(expression)) return;
       await pause(250);
     }
     throw new Error(`Timed out waiting for ${label}: ${JSON.stringify(await evaluate(`({ url: location.href, body: document.body?.innerText ?? '', html: document.documentElement?.outerHTML?.slice(0, 2000) ?? '' })`))}`);
   }
+  async function waitForResponse(predicate, label, startIndex = 0) {
+    for (let attempt = 0; attempt < 120; attempt++) {
+      if (eventErrors.length) throw eventErrors.shift();
+      const response = networkResponses.slice(startIndex).find(predicate);
+      if (response) return response;
+      await pause(250);
+    }
+    throw new Error(`Timed out waiting for ${label}.`);
+  }
+  function on(method, listener) {
+    const values = listeners.get(method) ?? [];
+    values.push(listener);
+    listeners.set(method, values);
+  }
+  async function navigate(targetUrl) {
+    const result = await call('Page.navigate', { url: targetUrl });
+    assert.equal(result.errorText, undefined, `Browser navigation failed: ${JSON.stringify(result)}`);
+  }
+  async function clearCookies(origin) {
+    await call('Network.clearBrowserCookies');
+    await call('Storage.clearDataForOrigin', { origin, storageTypes: 'cookies' });
+    const { cookies } = await call('Network.getAllCookies');
+    for (const cookie of cookies.filter(value => value.domain === new URL(origin).hostname))
+      await call('Network.deleteCookies', { name: cookie.name, domain: cookie.domain, path: cookie.path });
+    const remaining = (await call('Network.getAllCookies')).cookies;
+    assert.equal(remaining.some(cookie => cookie.name === '__Host-Fylkren' || cookie.name === 'Fylkren.Session'), false,
+      'The browser retained a Fylkren authentication cookie after cleanup');
+  }
   await call('Page.enable');
   await call('Runtime.enable');
-  const navigation = await call('Page.navigate', { url });
-  assert.equal(navigation.errorText, undefined, `Browser navigation failed: ${JSON.stringify(navigation)}`);
-  return { call, evaluate, waitFor, close: () => socket.close() };
+  await call('Network.enable');
+  await navigate(url);
+  return {
+    call, evaluate, waitFor, waitForResponse, navigate, clearCookies, on,
+    networkRequests, networkResponses,
+    close: () => socket.close(),
+  };
 }
 
 let started = false;
@@ -252,6 +296,17 @@ try {
     callbackPath: '/signin-oidc', metadataUrl: null, entityId: null,
     identityProviderEntityId: null, modulePath: '/api/auth/saml2', ssoAutoRedirectProvider: null,
   };
+  const mismatchedIssuerConfiguration = {
+    ...oidcConfiguration,
+    authority: 'https://metadata.test:18444/oidc-mismatch',
+  };
+  const mismatchedIssuerSaved = await manager.put('/api/platform/identity/providers/oidc', {
+    enabled: false, clearSecret: false, configuration: mismatchedIssuerConfiguration,
+  });
+  assert.equal(mismatchedIssuerSaved.status, 204, JSON.stringify(mismatchedIssuerSaved.body));
+  const mismatchedIssuerTest = await manager.post('/api/platform/identity/providers/oidc/test', {});
+  assert.equal(mismatchedIssuerTest.status, 502, 'OIDC metadata with an issuer different from the configured authority must be rejected');
+
   const saved = await manager.put('/api/platform/identity/providers/oidc', { enabled: false, clearSecret: false, configuration: oidcConfiguration });
   assert.equal(saved.status, 204, JSON.stringify(saved.body));
   const tested = await manager.post('/api/platform/identity/providers/oidc/test', {});
@@ -268,7 +323,23 @@ try {
   assert.equal(challenge.status, 302, `OIDC challenge: ${JSON.stringify(challenge)}`);
   assert.ok(challenge.location?.startsWith(`${authority}/protocol/openid-connect/auth?`), challenge.location);
 
-  const browser = await createCdpSession(`${browserBase}/api/auth/oidc/login`);
+  const forgedOidcBrowser = await createCdpSession('about:blank');
+  await forgedOidcBrowser.clearCookies(browserBase);
+  await forgedOidcBrowser.navigate(`${browserBase}/api/auth/oidc/login`);
+  await forgedOidcBrowser.waitFor('document.querySelector("#username") !== null', 'Keycloak username form for forged callback test');
+  const forgedResponseStart = forgedOidcBrowser.networkResponses.length;
+  await forgedOidcBrowser.navigate(`${browserBase}/signin-oidc?code=synthetic-invalid-code&state=synthetic-forged-state`);
+  const forgedResponse = await forgedOidcBrowser.waitForResponse(
+    response => response.url.includes('/signin-oidc?') && response.status >= 400,
+    'forged OIDC callback rejection', forgedResponseStart);
+  assert.equal(forgedResponse.status, 400);
+  const forgedSession = await forgedOidcBrowser.evaluate(`fetch('/api/session').then(value => value.json())`);
+  assert.equal(forgedSession.authenticated, false, 'A forged OIDC callback must not establish a session');
+  forgedOidcBrowser.close();
+
+  const browser = await createCdpSession('about:blank');
+  await browser.clearCookies(browserBase);
+  await browser.navigate(`${browserBase}/api/auth/oidc/login`);
   await browser.waitFor('document.querySelector("#username") !== null', 'Keycloak username form');
   await browser.evaluate(`document.querySelector('#username').value = 'live-sso'; document.querySelector('#password').value = ${JSON.stringify(keycloakUserPassword)}; document.querySelector('#kc-login').click();`);
   await browser.waitFor(`location.origin === ${JSON.stringify(browserBase)} && location.pathname === '/'`, 'OIDC callback and application redirect');
@@ -279,8 +350,23 @@ try {
   assert.equal(await browser.evaluate(`document.cookie.includes('Fylkren.Auth')`), false, 'Authentication cookie must be HttpOnly');
   assert.equal(await browser.evaluate(`Object.keys(localStorage).some(key => /token/i.test(key)) || Object.keys(sessionStorage).some(key => /token/i.test(key))`), false,
     'OIDC tokens must not be stored in browser storage');
-  await browser.call('Network.enable');
-  await browser.call('Network.clearBrowserCookies');
+  const oidcCallback = browser.networkRequests.find(request =>
+    request.url.startsWith(`${browserBase}/signin-oidc`) &&
+    (request.url.includes('code=') || request.postData?.includes('code=')));
+  assert.ok(oidcCallback,
+    `The successful OIDC callback request was not observed: ${JSON.stringify(browser.networkRequests.map(request => ({ method: request.method, url: request.url, hasPostData: Boolean(request.postData) })))}`);
+  await browser.clearCookies(browserBase);
+  const clearedOidcSession = await browser.evaluate(`fetch('/api/session').then(value => value.json())`);
+  assert.equal(clearedOidcSession.authenticated, false, 'The OIDC browser session cookie was not cleared before replay');
+  const oidcReplay = await browser.evaluate(`fetch(${JSON.stringify(oidcCallback.url)}, {
+    method: ${JSON.stringify(oidcCallback.method)},
+    headers: ${JSON.stringify(oidcCallback.method === 'POST' ? { 'Content-Type': 'application/x-www-form-urlencoded' } : {})},
+    body: ${oidcCallback.method === 'POST' ? JSON.stringify(oidcCallback.postData) : 'undefined'},
+    redirect: 'manual'
+  }).then(value => ({ status: value.status, type: value.type }))`);
+  assert.equal(oidcReplay.status, 400, `Replayed OIDC callback returned ${JSON.stringify(oidcReplay)}`);
+  const replaySession = await browser.evaluate(`fetch('/api/session').then(value => value.json())`);
+  assert.equal(replaySession.authenticated, false, 'A replayed OIDC callback must not establish a session');
   browser.close();
 
   const samlAnchorUsername = `saml-anchor-${randomBytes(4).toString('hex')}`;
@@ -312,7 +398,42 @@ try {
   const samlChallenge = await manager.request('/api/auth/saml/login');
   assert.ok([302, 303].includes(samlChallenge.status), `SAML challenge: ${JSON.stringify(samlChallenge)}`);
 
-  const samlBrowser = await createCdpSession(`${browserBase}/api/auth/saml/login`);
+  const tamperedSamlBrowser = await createCdpSession('about:blank');
+  await tamperedSamlBrowser.clearCookies(browserBase);
+  await tamperedSamlBrowser.navigate(`${browserBase}/api/auth/saml/login`);
+  await tamperedSamlBrowser.waitFor('document.querySelector("#username") !== null', 'Keycloak SAML username form for tampering test');
+  let assertionTampered = false;
+  tamperedSamlBrowser.on('Fetch.requestPaused', async parameters => {
+    const form = new URLSearchParams(parameters.request.postData ?? '');
+    const encodedResponse = form.get('SAMLResponse');
+    assert.ok(encodedResponse, 'Intercepted SAML callback did not contain SAMLResponse');
+    const xml = Buffer.from(encodedResponse, 'base64').toString('utf8');
+    assert.ok(xml.includes(externalSubject), 'Signed SAML assertion did not contain the persistent NameID');
+    const alteredSubject = `${externalSubject.slice(0, -1)}2`;
+    form.set('SAMLResponse', Buffer.from(xml.replace(externalSubject, alteredSubject)).toString('base64'));
+    assertionTampered = true;
+    await tamperedSamlBrowser.call('Fetch.continueRequest', {
+      requestId: parameters.requestId,
+      postData: Buffer.from(form.toString()).toString('base64'),
+    });
+  });
+  await tamperedSamlBrowser.call('Fetch.enable', {
+    patterns: [{ urlPattern: '*://localhost:18444/api/auth/saml2/Acs*', requestStage: 'Request' }],
+  });
+  const tamperedResponseStart = tamperedSamlBrowser.networkResponses.length;
+  await tamperedSamlBrowser.evaluate(`document.querySelector('#username').value = 'live-sso'; document.querySelector('#password').value = ${JSON.stringify(keycloakUserPassword)}; document.querySelector('#kc-login').click();`);
+  const tamperedResponse = await tamperedSamlBrowser.waitForResponse(
+    response => response.url.includes('/api/auth/saml2/Acs') && response.status >= 400,
+    'tampered SAML assertion rejection', tamperedResponseStart);
+  assert.ok(assertionTampered, 'The SAML assertion was not intercepted and altered');
+  assert.equal(tamperedResponse.status, 400);
+  const tamperedSession = await tamperedSamlBrowser.evaluate(`fetch('/api/session').then(value => value.json())`);
+  assert.equal(tamperedSession.authenticated, false, 'A signature-invalid SAML assertion must not establish a session');
+  tamperedSamlBrowser.close();
+
+  const samlBrowser = await createCdpSession('about:blank');
+  await samlBrowser.clearCookies(browserBase);
+  await samlBrowser.navigate(`${browserBase}/api/auth/saml/login`);
   await samlBrowser.waitFor('document.querySelector("#username") !== null', 'Keycloak SAML username form');
   await samlBrowser.evaluate(`document.querySelector('#username').value = 'live-sso'; document.querySelector('#password').value = ${JSON.stringify(keycloakUserPassword)}; document.querySelector('#kc-login').click();`);
   await samlBrowser.waitFor(`location.origin === ${JSON.stringify(browserBase)} && location.pathname === '/'`, 'SAML callback and application redirect');
@@ -320,15 +441,31 @@ try {
   assert.equal(samlSession.authenticated, true, JSON.stringify(samlSession));
   assert.equal(samlSession.username, samlAnchorUsername);
   assert.equal(await samlBrowser.evaluate(`document.cookie.includes('Fylkren.Auth')`), false, 'SAML authentication cookie must be HttpOnly');
+  const samlCallback = samlBrowser.networkRequests.find(request =>
+    request.url.includes('/api/auth/saml2/Acs') && request.method === 'POST' && request.postData);
+  assert.ok(samlCallback, 'The successful SAML callback request was not observed');
+  await samlBrowser.clearCookies(browserBase);
+  const clearedSamlSession = await samlBrowser.evaluate(`fetch('/api/session').then(value => value.json())`);
+  assert.equal(clearedSamlSession.authenticated, false, 'The SAML browser session cookie was not cleared before replay');
+  const samlReplay = await samlBrowser.evaluate(`fetch(${JSON.stringify(samlCallback.url)}, {
+    method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: ${JSON.stringify(samlCallback.postData)}, redirect: 'manual'
+  }).then(value => ({ status: value.status, type: value.type }))`);
+  assert.equal(samlReplay.status, 400, `Replayed SAML response returned ${JSON.stringify(samlReplay)}`);
+  const samlReplaySession = await samlBrowser.evaluate(`fetch('/api/session').then(value => value.json())`);
+  assert.equal(samlReplaySession.authenticated, false, 'A replayed SAML response must not establish a session');
   samlBrowser.close();
 
   process.stdout.write(`${JSON.stringify({
     liveOidcHttpsMetadata: 'passed',
     oidcSecretProtection: 'passed',
     oidcAuthorizationCodeSignIn: 'passed',
+    oidcIssuerMismatchRejection: 'passed',
+    oidcForgedStateAndReplayRejection: 'passed',
     stableIssuerAndSubjectLink: 'passed',
     serverSideSessionWithoutBrowserTokens: 'passed',
     liveSamlSignedAssertion: 'passed',
+    samlTamperedAssertionAndReplayRejection: 'passed',
     persistentSamlNameIdLink: 'passed',
     samlServerSideSession: 'passed',
   }, null, 2)}\n`);

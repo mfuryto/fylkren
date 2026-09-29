@@ -10,7 +10,7 @@ The [directory lifecycle deprovisioning run](2026-09-27-directory-lifecycle-depr
 
 The [GUI identity-provider settings run](2026-09-28-gui-identity-provider-settings.md) records protected database configuration, Community/Enterprise boundaries, local lockout prevention, dynamic remote-handler registration and the clean full regression. It also retains the initial disabled-handler startup failure and its correction.
 
-The [live OIDC/SAML run](2026-09-29-live-oidc-saml-identity.md) records real HTTPS discovery, authorization-code and signed-assertion browser flows, stable identity linking, secret protection and the server-side token boundary. It also records the SAML AuthnRequest signing mismatch found and corrected during the run. Forged/replayed callback and token/assertion negative cases remain open and are not implied by the successful flows.
+The [live OIDC/SAML run](2026-09-29-live-oidc-saml-identity.md) records real HTTPS discovery, authorization-code and signed-assertion browser flows, stable identity linking, secret protection and the server-side token boundary. It also records the SAML AuthnRequest interoperability correction, `SV-050` issuer-metadata binding and `SV-051` rejected-callback session cleanup. Forged-state, callback/assertion replay and signature-tampering negatives passed; mismatched nonce, wrong audience and unsigned-assertion cases remain open.
 
 The [host status integration run](2026-09-28-host-status-integration.md) records disk/container/restart reporting, backup-set registration, stale and malformed snapshot rejection, Docker-socket isolation and the clean full regression.
 

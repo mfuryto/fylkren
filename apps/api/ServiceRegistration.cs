@@ -65,6 +65,7 @@ internal static class ServiceRegistration
 
         builder.Services.AddSingleton(new ApiMachineAuthenticationLimiter(trustForwardedHeaders));
 
+        builder.Services.AddExceptionHandler<ExternalAuthenticationExceptionHandler>();
         builder.Services.AddExceptionHandler<ConcurrencyExceptionHandler>();
         builder.Services.AddProblemDetails();
         builder.WebHost.ConfigureKestrel(options =>
@@ -117,6 +118,29 @@ internal static class ServiceRegistration
                 options.GetClaimsFromUserInfoEndpoint = true;
                 options.Scope.Clear(); options.Scope.Add("openid"); options.Scope.Add("profile"); options.Scope.Add("email");
                 options.TokenValidationParameters.NameClaimType = "name";
+                options.Events.OnRemoteFailure = async context =>
+                {
+                    var logger = context.HttpContext.RequestServices
+                        .GetRequiredService<ILoggerFactory>()
+                        .CreateLogger("Fylkren.Security.Authentication");
+                    logger.LogWarning(
+                        new EventId(4101, "ExternalAuthenticationRejected"),
+                        "Security event {SecurityEvent}; authenticationScheme={AuthenticationScheme}; traceId={TraceId}",
+                        "external-authentication-rejected",
+                        OpenIdConnectDefaults.AuthenticationScheme,
+                        context.HttpContext.TraceIdentifier);
+                    context.HandleResponse();
+                    // A provider can fail after parts of the remote flow have completed. Never let
+                    // a rejected callback retain or create a local application session.
+                    await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                    context.Response.ContentType = "application/problem+json";
+                    context.Response.Headers.CacheControl = "no-store";
+                    await context.Response.WriteAsJsonAsync(new
+                    {
+                        error = "external_authentication_failed"
+                    });
+                };
                 options.Events.OnTokenValidated = async context =>
                 {
                     var subject = context.Principal?.FindFirst("sub")?.Value;

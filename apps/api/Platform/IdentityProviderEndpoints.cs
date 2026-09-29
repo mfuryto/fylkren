@@ -178,10 +178,15 @@ public static class IdentityProviderEndpoints
         if (body is null) return false;
         using var document = JsonDocument.Parse(body);
         var root = document.RootElement;
-        return root.TryGetProperty("issuer", out var issuer) && Uri.TryCreate(issuer.GetString(), UriKind.Absolute, out _) &&
-            root.TryGetProperty("authorization_endpoint", out var authorization) && Uri.TryCreate(authorization.GetString(), UriKind.Absolute, out _) &&
-            root.TryGetProperty("token_endpoint", out var token) && Uri.TryCreate(token.GetString(), UriKind.Absolute, out _) &&
-            root.TryGetProperty("jwks_uri", out var keys) && Uri.TryCreate(keys.GetString(), UriKind.Absolute, out _);
+        static bool HttpsUri(JsonElement element, out Uri? uri) =>
+            Uri.TryCreate(element.GetString(), UriKind.Absolute, out uri) && uri.Scheme == Uri.UriSchemeHttps;
+        static string CanonicalIssuer(Uri uri) => uri.AbsoluteUri.TrimEnd('/');
+
+        return root.TryGetProperty("issuer", out var issuer) && HttpsUri(issuer, out var issuerUri) &&
+            CanonicalIssuer(issuerUri!) == CanonicalIssuer(new Uri(configuration.Authority)) &&
+            root.TryGetProperty("authorization_endpoint", out var authorization) && HttpsUri(authorization, out _) &&
+            root.TryGetProperty("token_endpoint", out var token) && HttpsUri(token, out _) &&
+            root.TryGetProperty("jwks_uri", out var keys) && HttpsUri(keys, out _);
     }
 
     private static async Task<bool> TestSaml(IHttpClientFactory clients, IdentityProviderConfiguration configuration,
