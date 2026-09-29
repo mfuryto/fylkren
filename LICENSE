@@ -1,71 +1,168 @@
-# PolyForm Perimeter License 1.0.0
+# Fylkren Source Available License 1.0
 
-<https://polyformproject.org/licenses/perimeter/1.0.0>
+Copyright © 2026 THUNOLD-OLSEN, Norwegian organization number 996 871 126.
 
 ## Acceptance
 
-In order to get any license under these terms, you must agree to them as both strict obligations and conditions to all your licenses.
+To receive any license under these terms, you must agree to them as strict
+obligations and as conditions to every license granted below.
 
 ## Copyright License
 
-The licensor grants you a copyright license for the software to do everything you might do with the software that would otherwise infringe the licensor's copyright in it for any permitted purpose.  However, you may only distribute the software according to [Distribution License](#distribution-license) and make changes or new works based on the software according to [Changes and New Works License](#changes-and-new-works-license).
+The licensor grants you a worldwide, non-exclusive, royalty-free copyright
+license to use the software for any permitted purpose. You may distribute the
+software only under the Distribution License and make changes or new works
+based on the software only under the Changes and New Works License.
 
 ## Distribution License
 
-The licensor grants you an additional copyright license to distribute copies of the software.  Your license to distribute covers distributing the software with changes and new works permitted by [Changes and New Works License](#changes-and-new-works-license).
+The licensor grants you an additional copyright license to distribute copies of
+the software, including changes and new works permitted below. You must provide
+every recipient with these terms, the copyright notice above, and all
+attribution and third-party notices supplied with the software. You may not
+remove, conceal, or misrepresent those notices.
 
-## Notices
-
-You must ensure that anyone who gets a copy of any part of the software from you also gets a copy of these terms or the URL for them above, as well as copies of any plain-text lines beginning with `Required Notice:` that the licensor provided with the software.  For example:
-
-> Required Notice: Copyright Yoyodyne, Inc. (http://example.com)
+Redistribution does not transfer authorship or ownership. You may not rename,
+rebrand, market, or present the software or a work substantially based on it as
+your own independent product. An allowed changed copy must be described
+prominently as an unofficial modified version based on Fylkren by
+THUNOLD-OLSEN, must identify the distributor and the material changes, and must
+not imply that the licensor made, certified, sponsored, or supports those
+changes.
 
 ## Changes and New Works License
 
-The licensor grants you an additional copyright license to make changes and new works based on the software for any permitted purpose.
+The licensor grants you an additional copyright license to make changes and new
+works based on the software for any permitted purpose. This includes inspection,
+testing, integration, localization, and adaptation, subject to the Enterprise
+Feature Restriction and Attribution and Product Identity requirements.
 
-## Patent License
+## Enterprise Feature Restriction
 
-The licensor grants you a patent license for the software that covers patent claims the licensor can license, or becomes able to license, that you would infringe by using the software.
+You may access, enable, use, or provide an Enterprise Capability only while a
+Valid Enterprise Entitlement authorizes that capability for the relevant
+installation, scope, and time period.
+
+You may not, for the purpose of accessing, enabling, using, or providing an
+Enterprise Capability without a Valid Enterprise Entitlement:
+
+- remove, disable, bypass, replace, interfere with, or falsify a license,
+  signature, verification key, entitlement state, capacity limit, feature gate,
+  or other Enterprise control;
+- alter the software or its data so that it treats an unauthorized capability
+  as authorized; or
+- create, publish, or distribute a change, key, license file, tool, instruction,
+  or service primarily intended to enable either of the actions above.
+
+Good-faith security research and interoperability testing in a controlled,
+non-production environment do not violate this restriction when they do not
+provide operational Enterprise use, harm another party, or publish a practical
+Enterprise bypass. Rights that cannot lawfully be restricted remain unaffected.
+
+## Attribution and Product Identity
+
+The Fylkren name, the THUNOLD-OLSEN attribution, copyright notices, license
+notices, and source provenance must remain clearly visible in the source and in
+the documentation supplied with every copy. A user-facing redistributed build
+must provide a reasonably prominent legal or about view stating whether it is
+an official release or an unofficial modified build.
+
+You may not claim or imply that you created the original Fylkren product or its
+project-authored source, remove its provenance, or use a different primary name
+to pass the software or a substantially derived product off as independently
+created. This does not prevent truthful identification of your own changes,
+plug-ins, integrations, services, or independent code.
 
 ## Noncompete
 
-Any purpose is a permitted purpose, except for providing to others any product that competes with the software.
+Any purpose is a permitted purpose except providing to others a product that
+competes with the software. A product competes with the software if it is
+marketed as a substitute for the functionality or value of Fylkren, regardless
+of whether it is provided as software, a service, a library, a plug-in, through
+another interface, in another language, or free of charge.
 
-## Competition
+Distribution that complies with these terms is not by itself prohibited merely
+because copies are redistributed. Independent consulting, deployment,
+integration, training, and support for authorized Fylkren installations are not
+by themselves competing products.
 
-If you use this software to market a product as a substitute for the functionality or value of the software, it competes with the software. A product may compete regardless how it is designed or deployed. For example, a product may compete even if it provides its functionality via any kind of interface (including services, libraries or plug-ins), even if it is ported to a different platforms or programming languages, and even if it is provided free of charge.
+## Patent License
 
-## Fair Use
+The licensor grants you a patent license for the software covering patent
+claims the licensor can license, or later becomes able to license, that you
+would otherwise infringe through a permitted use of the software.
 
-You may have "fair use" rights for the software under the law. These terms do not limit them.
+## Trademarks
+
+These terms grant no trademark ownership or general trademark license. You may
+use the Fylkren name only as reasonably necessary for the truthful attribution,
+provenance, and identification required by these terms. You may not imply that
+an unofficial, changed, or third-party distribution is official, certified,
+sponsored, or supported by the licensor. The repository's trademark policy
+provides additional guidance without expanding this license.
+
+## Third-Party Material
+
+These terms apply only to material for which the licensor has authority to
+grant them. Third-party components and data remain subject to their own notices
+and license terms.
 
 ## No Other Rights
 
-These terms do not allow you to sublicense or transfer any of your licenses to anyone else, or prevent the licensor from granting licenses to anyone else.  These terms do not imply any other licenses.
+These terms do not permit you to sublicense or transfer the licenses granted to
+you, and do not prevent the licensor from granting licenses to others. No rights
+are implied except those required by applicable law.
 
-## Patent Defense
+## Violations and Termination
 
-If you make any written claim that the software infringes or contributes to infringement of any patent, your patent license for the software granted under these terms ends immediately. If your company makes such a claim, your patent license ends immediately for work on behalf of your company.
-
-## Violations
-
-The first time you are notified in writing that you have violated any of these terms, or done anything with the software not covered by your licenses, your licenses can nonetheless continue if you come into full compliance with these terms, and take practical steps to correct past violations, within 32 days of receiving notice.  Otherwise, all your licenses end immediately.
+Your licenses end automatically if you deliberately violate the Enterprise
+Feature Restriction or intentionally pass the software off as an independently
+created product. For another first violation, your licenses may continue if,
+within 30 days after written notice, you fully remedy the violation and take
+practical steps to correct its effects. Otherwise, your licenses end
+immediately. Termination does not limit claims or remedies arising from the
+violation.
 
 ## No Liability
 
-***As far as the law allows, the software comes as is, without any warranty or condition, and the licensor will not be liable to you for any damages arising out of these terms or the use or nature of the software, under any kind of legal claim.***
+As far as the law allows, the software is provided as is, without warranty or
+condition, and the licensor is not liable for damages arising from these terms
+or the use or nature of the software under any legal theory.
+
+## Mandatory Law
+
+Nothing in these terms excludes or restricts a right, defense, exception,
+limitation, or obligation that applicable law does not allow the parties to
+exclude or restrict.
 
 ## Definitions
 
-The **licensor** is the individual or entity offering these terms, and the **software** is the software the licensor makes available under these terms.
+**Enterprise Capability** means a capability identified as Enterprise in the
+Fylkren product documentation supplied with the version of the software being
+used. Reclassification in a later version does not retroactively change the
+classification supplied with an earlier version.
 
-A **product** can be a good or service, or a combination of them.
+**Valid Enterprise Entitlement** means an authentic entitlement issued or
+expressly approved by THUNOLD-OLSEN that is valid for the relevant capability,
+installation, scope, and time period. A fabricated, altered, copied from another
+installation, expired, or otherwise out-of-scope entitlement is not valid.
 
-**You** refers to the individual or entity agreeing to these terms.
+**Official Fylkren release** means an artifact that the licensor has identified
+as official through its release process. A fork, rebuild, or changed copy is not
+official merely because it uses compatible source code or protocols.
 
-**Your company** is any legal entity, sole proprietorship, or other kind of organization that you work for, plus all organizations that have control over, are under the control of, or are under common control with that organization.  **Control** means ownership of substantially all the assets of an entity, or the power to direct its management and policies by vote, contract, or otherwise.  Control can be direct or indirect.
+**Software** means the Fylkren software and documentation made available under
+these terms.
 
-**Your licenses** are all the licenses granted to you for the software under these terms.
+**Product** includes a good, service, or combination of them.
 
-**Use** means anything you do with the software requiring one of your licenses.
+**You** means the individual or legal entity accepting these terms.
+
+**Your company** means an organization you work for and organizations that
+control, are controlled by, or are under common control with it. Control means
+the power to direct management and policies by ownership, vote, contract, or
+otherwise.
+
+**Use** means any act requiring permission under copyright or patent law.
+
+**Licensor** means THUNOLD-OLSEN, Norwegian organization number 996 871 126.

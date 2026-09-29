@@ -196,7 +196,7 @@ Superseded by ADR-040. This temporary deferral no longer applies to the 1.0 rele
 
 ### ADR-040 — One product with offline feature entitlements
 
-Community and Enterprise share one source tree, set of API/web images, schema and upgrade path. Community works offline without a license. A signed offline license activates centralized Enterprise entitlements on the same installation. The server enforces every protected capability; a downgrade stops new Enterprise actions without deleting or hiding customer-owned data. Existing external identity links remain usable for authentication to prevent lockout. This decision supersedes ADR-039 and must be exercised before final 1.0 functional, integration and security testing. The PolyForm Perimeter 1.0.0 software license and runtime entitlements remain distinct and require pre-release legal/commercial review.
+Community and Enterprise share one source tree, set of API/web images, schema and upgrade path. Community works offline without a license. A signed offline license activates centralized Enterprise entitlements on the same installation. The server enforces every protected capability; a downgrade stops new Enterprise actions without deleting or hiding customer-owned data. Existing external identity links remain usable for authentication to prevent lockout. This decision supersedes ADR-039 and must be exercised before final 1.0 functional, integration and security testing. The Fylkren Source Available License 1.0 permits compliant redistribution while restricting Enterprise bypass and misrepresentation of product authorship; the source license and runtime entitlements remain distinct and require pre-release legal/commercial review.
 
 ## Superseding a decision
 

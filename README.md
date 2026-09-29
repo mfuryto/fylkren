@@ -217,9 +217,10 @@ information or vulnerabilities in a public issue; follow [SECURITY.md](SECURITY.
 Pull requests are disabled, and Fylkren does not accept external code
 contributions through GitHub.
 
-Fylkren is **source-available under PolyForm Perimeter 1.0.0**. The complete
-[LICENSE](LICENSE) governs source use; Enterprise feature entitlement is a
-separate commercial mechanism. Copyright © 2026 THUNOLD-OLSEN (Norwegian
+Fylkren is **source-available under the Fylkren Source Available License 1.0**.
+The complete [LICENSE](LICENSE) permits compliant redistribution while
+prohibiting Enterprise bypass and removal or misrepresentation of Fylkren's
+authorship and provenance. Copyright © 2026 THUNOLD-OLSEN (Norwegian
 organization number 996871126). See [NOTICE.md](NOTICE.md),
 [TRADEMARKS.md](TRADEMARKS.md) and the
 [third-party notices](docs/project/THIRD_PARTY_NOTICES.md).

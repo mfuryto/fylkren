@@ -37,7 +37,7 @@ Edition status and supported entitlements are exposed only to authenticated sess
 
 ## Software license is distinct
 
-The repository's [PolyForm Perimeter 1.0.0 license](../../LICENSE) governs use of the current project-authored source; an Enterprise entitlement governs features enabled in an official running installation. Entitlement checks do not amend the software license. PolyForm Perimeter expressly grants distribution under its conditions and does not itself state Fylkren-specific Enterprise-purchase or entitlement-circumvention restrictions; the precise implications and required customer terms are recorded in the [licensing review](../project/LICENSING.md#recorded-scope-review). Before public distribution, obtain legal/commercial approval of the source-license strategy, customer agreement, feature-entitlement policy, copyright ownership and earlier MPL-2.0 history. Do not describe a runtime feature gate as a replacement for, or amendment to, the actual software-license terms.
+The repository's [Fylkren Source Available License 1.0](../../LICENSE) governs use of the current project-authored source. It permits compliant redistribution but prohibits using or providing Enterprise capabilities without a valid entitlement, distributing a practical Enterprise bypass, and passing the product off as independently created. Runtime entitlement checks enforce the official product behavior; they do not replace the software terms. Before public distribution, obtain legal/commercial approval of the source license, customer agreement, feature-entitlement policy, copyright ownership and earlier MPL-2.0 history. The [licensing review](../project/LICENSING.md) records the intended boundary.
 
 ## Release verification
 
