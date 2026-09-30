@@ -7,7 +7,7 @@ const item = (values: Partial<WorkItem>): WorkItem => ({
   id: "item", siteId: "site", parentWorkItemId: null, parentTitle: null, workItemTypeId: null,
   workItemTypeName: null, sourceTypeId: null, sourceTypeName: null, senderId: null, senderName: null,
   senderSiteName: null, senderPersonName: null, requestBasisSnapshot: null, isCrossSiteView: false,
-  title: "Oppdrag", description: "", recommendation: null, referenceUrl: null, priority: "normal",
+  title: "Work item", description: "", recommendation: null, referenceUrl: null, priority: "normal",
   status: "assigned", dueAt: null, assignedUnitId: null, unitName: null, isAssignedToMe: true,
   hasPlan: false, workflowCurrentStep: null, workflowStepCount: 0, workflowStepName: null,
   executionStatus: null, executionWorkflowName: null, executionCurrentStep: null, executionStepCount: 0,
@@ -20,7 +20,7 @@ const item = (values: Partial<WorkItem>): WorkItem => ({
 });
 
 describe("overviewModel", () => {
-  it("laster bare underordnet belastning for ledertilgang i valgt kontekst", () => {
+  it("loads subordinate workload only for leadership access in the selected context", () => {
     const site: TaskSite = {
       siteId: "site", name: "Site", isSiteManager: false, isTopLevelLeader: false,
       hasTopLevelAccess: false, isManager: false,
@@ -39,21 +39,21 @@ describe("overviewModel", () => {
     expect(canLoadDescendantWorkload({ ...site, hasTopLevelAccess: true }, units, "")).toBe(true);
   });
 
-  it("teller aktivt blad i stedet for både hovedoppdrag og aktivt underoppdrag", () => {
+  it("counts the active leaf instead of both parent and active child work", () => {
     const parent = item({ id: "parent" });
     const child = item({ id: "child", parentWorkItemId: "parent", assignedUnitId: "section" });
     const metrics = buildOverviewMetrics([parent, child], "", new Date("2026-01-01").getTime());
     expect(metrics.active.map(value => value.id)).toEqual(["child"]);
   });
 
-  it("dedupliserer mottatt anmodning i krever handling", () => {
-    const request = item({ id: "request", workItemTypeName: "Anmodning", senderSiteName: "Avsender", status: "registered" });
+  it("deduplicates a received request in the action queue", () => {
+    const request = item({ id: "request", workItemTypeName: "Anmodning", senderSiteName: "Sender", status: "registered" });
     const metrics = buildOverviewMetrics([request], "", new Date("2026-01-01").getTime());
     expect(metrics.needsAction.map(value => value.id)).toEqual(["request"]);
     expect(isReceivedRequest(request)).toBe(true);
   });
 
-  it("beholder hovedoppdraget som aktivt når en sideanmodning sendes", () => {
+  it("keeps the parent work item active when a side request is sent", () => {
     const source = item({ id: "source", status: "in_progress" });
     const sent = item({ id: "sent", parentWorkItemId: "source", parentTitle: source.title,
       workItemTypeName: "Anmodning", isOutgoingRequest: true, status: "in_progress",
@@ -73,7 +73,7 @@ describe("overviewModel", () => {
     expect(closed.needsAction.map(value => value.id)).toEqual(["source"]);
   });
 
-  it("teller intern fordeling og sideanmodning hver for seg uten dobbelt hovedoppdrag", () => {
+  it("counts internal allocation and side requests separately without duplicating the parent", () => {
     const source = item({ id: "source", status: "in_progress" });
     const internal = item({ id: "internal", parentWorkItemId: "source", assignedUnitId: "section", status: "assigned" });
     const sent = item({ id: "sent", parentWorkItemId: "source", parentTitle: source.title,
@@ -83,8 +83,8 @@ describe("overviewModel", () => {
     expect(metrics.sentRequests.map(value => value.id)).toEqual(["sent"]);
   });
 
-  it("teller mottatt anmodning én gang og lar kvittert kansellering forlate aktiv kø", () => {
-    const received = item({ id: "received", workItemTypeName: "Anmodning", senderSiteName: "Avsender", status: "registered" });
+  it("counts a received request once and removes an acknowledged cancellation from the active queue", () => {
+    const received = item({ id: "received", workItemTypeName: "Anmodning", senderSiteName: "Sender", status: "registered" });
     const active = buildOverviewMetrics([received], "", new Date("2026-01-01").getTime());
     expect(active.active.map(value => value.id)).toEqual(["received"]);
     expect(active.statisticsScope.filter(isReceivedRequest).map(value => value.id)).toEqual(["received"]);
@@ -96,7 +96,7 @@ describe("overviewModel", () => {
     expect(acknowledged.needsAction).toEqual([]);
   });
 
-  it("gjør ikke et aktivt underoppdrag til et handlingskrav på overordnet nivå", () => {
+  it("does not turn active child work into an action requirement at the parent level", () => {
     const parent = item({ id: "parent", status: "in_progress" });
     const child = item({ id: "child", parentWorkItemId: "parent", assignedUnitId: "section", status: "assigned" });
     const metrics = buildOverviewMetrics([parent, child], "", new Date("2026-01-01").getTime());
@@ -104,20 +104,20 @@ describe("overviewModel", () => {
     expect(metrics.needsAction).toEqual([]);
   });
 
-  it("viser underoppdraget som handlingskrav på mottakende nivå", () => {
+  it("shows child work as an action requirement at the receiving level", () => {
     const parent = item({ id: "parent", status: "in_progress" });
     const child = item({ id: "child", parentWorkItemId: "parent", assignedUnitId: "section", status: "assigned" });
     const metrics = buildOverviewMetrics([parent, child], "section", new Date("2026-01-01").getTime());
     expect(metrics.needsAction.map(value => value.id)).toEqual(["child"]);
   });
 
-  it("ruter planlegging og utførelse til riktig arbeidsflate", () => {
+  it("routes planning and execution to the correct workspace", () => {
     expect(overviewWorkspaceFor(item({ status: "planning_approval" }))).toBe("Tasks");
     expect(overviewWorkspaceFor(item({ status: "planning_approved" }))).toBe("Tasks");
     expect(overviewWorkspaceFor(item({ status: "execution" }))).toBe("Execution");
   });
 
-  it("holder en godkjent, men ikke utsendt plan synlig som handlingskrav", () => {
+  it("keeps an approved but uninitiated plan visible as an action requirement", () => {
     const work = item({ status: "planning_approved" });
     const metrics = buildOverviewMetrics([work], "", new Date("2026-01-01").getTime());
     expect(metrics.needsAction.map(value => value.id)).toEqual(["item"]);

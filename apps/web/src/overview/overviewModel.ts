@@ -1,15 +1,16 @@
 import type { WorkItem } from "../work/WorkItemModels";
 import type { TaskSite, TaskUnit } from "../work/WorkContextModels";
 import type { AppPage } from "../navigation/permalinks";
+import type { MessageKey } from "../localization/en";
 
 const terminalStatuses = ["completed", "rejected", "cancelled", "reassigned"];
 const actionStatuses = ["registered", "assigned", "under_review", "planning_approval", "planning_approved", "in_review"];
 
-export const overviewStatusLabels: Record<string, string> = {
-  registered: "Registrert", under_review: "Til vurdering", on_hold: "Avventer",
-  planning: "Planlegging", planning_approval: "Plan til godkjenning", planning_approved: "Plan godkjent · avventer iverksetting", execution: "Utførelse",
-  assigned: "Fordelt", in_progress: "Pågår", in_review: "Til kontroll", completed: "Fullført",
-  rejected: "Avvist", cancelled: "Kansellert", request_cancelled: "Trukket av avsender",
+export const overviewStatusLabelKeys: Record<string, MessageKey> = {
+  registered: "overviewStatusRegistered", under_review: "overviewStatusUnderReview", on_hold: "overviewStatusOnHold",
+  planning: "overviewStatusPlanning", planning_approval: "overviewStatusPlanningApproval", planning_approved: "overviewStatusPlanningApproved", execution: "overviewStatusExecution",
+  assigned: "overviewStatusAssigned", in_progress: "overviewStatusInProgress", in_review: "overviewStatusInReview", completed: "overviewStatusCompleted",
+  rejected: "overviewStatusRejected", cancelled: "overviewStatusCancelled", request_cancelled: "overviewStatusRequestCancelled",
 };
 
 export function isReceivedRequest(item: WorkItem) {

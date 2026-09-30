@@ -5,8 +5,10 @@ import { notificationsEn } from "./notifications.en";
 import { sitesEn } from "./sites.en";
 import { siteAuditEn } from "./siteAudit.en";
 import { profileEn } from "./profile.en";
+import { overviewEn } from "./overview.en";
 
 export const en = {
+  ...overviewEn,
   ...profileEn,
   ...siteAuditEn,
   ...sitesEn,
