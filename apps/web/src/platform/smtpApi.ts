@@ -1,8 +1,9 @@
 import { apiGet, apiMutate } from "../api/client";
 import type { NotificationDeliveryPage, NotificationTemplate, SmtpConfiguration } from "./platformModels";
+import { translateActive as t } from "../localization";
 
 export function loadSmtpConfiguration() {
-  return apiGet<SmtpConfiguration>("/api/platform/smtp/", "E-postoppsettet kunne ikke lastes.");
+  return apiGet<SmtpConfiguration>("/api/platform/smtp/", t("emailSetupLoadFailed"));
 }
 
 export function saveSmtpConfiguration(configuration: SmtpConfiguration, password: string, clearPassword: boolean) {
@@ -10,16 +11,16 @@ export function saveSmtpConfiguration(configuration: SmtpConfiguration, password
     "/api/platform/smtp/",
     "PUT",
     { ...configuration, password: password || null, clearPassword },
-    "SMTP-oppsettet kunne ikke lagres.",
+    t("smtpSaveFailed"),
   );
 }
 
 export function sendSmtpTest(recipient: string) {
-  return apiMutate("/api/platform/smtp/test", "POST", { recipient }, "Testmeldingen kunne ikke sendes.");
+  return apiMutate("/api/platform/smtp/test", "POST", { recipient }, t("testMessageSendFailed"));
 }
 
 export function loadNotificationTemplates() {
-  return apiGet<NotificationTemplate[]>("/api/platform/smtp/templates", "Varslingsmalene kunne ikke lastes.");
+  return apiGet<NotificationTemplate[]>("/api/platform/smtp/templates", t("templatesLoadFailed"));
 }
 
 export function saveNotificationTemplate(template: NotificationTemplate) {
@@ -27,7 +28,7 @@ export function saveNotificationTemplate(template: NotificationTemplate) {
     `/api/platform/smtp/templates/${template.key}`,
     "PUT",
     { subject: template.subject, body: template.body },
-    "Varslingsmalen kunne ikke lagres.",
+    t("templateSaveFailed"),
   );
 }
 
@@ -36,6 +37,6 @@ export function loadNotificationDeliveries(status: string, page: number) {
   if (status) query.set("status", status);
   return apiGet<NotificationDeliveryPage>(
     `/api/platform/smtp/deliveries?${query}`,
-    "Leveringsstatus for e-postvarsler kunne ikke lastes.",
+    t("emailDeliveryStatusLoadFailed"),
   );
 }

@@ -65,13 +65,13 @@ export type ApiClient = {
 
 export type ApiClientStatusFilter = "active" | "inactive" | "all";
 
-export const notificationTemplateNames: Record<string, string> = {
-  "new-work-item": "Nytt oppdrag",
-  "work-item-changed": "Oppdrag endret",
-  "decision-required": "Handling kreves",
-  "child-work-completed": "Deloppdrag eller sluttrapport fullført",
-  "planning-completed": "Plan ferdig",
-  "execution-completed": "Utførelse ferdig",
+export const notificationTemplateNameKeys: Record<string, MessageKey> = {
+  "new-work-item": "templateNewWork",
+  "work-item-changed": "templateWorkChanged",
+  "decision-required": "templateDecisionRequired",
+  "child-work-completed": "templateChildCompleted",
+  "planning-completed": "templatePlanningCompleted",
+  "execution-completed": "templateExecutionCompleted",
 };
 
 export const commonNotificationTemplateFields = [
@@ -87,34 +87,34 @@ export const notificationTemplateFields: Record<string, string[]> = {
   "execution-completed": [...commonNotificationTemplateFields, "status", "reportingUnit"],
 };
 
-export const notificationTemplateFieldDescriptions: Record<string, string> = {
-  recipientName: "mottakerens visningsnavn",
-  siteName: "aktuell site",
-  levelName: "aktuelt arbeidsnivå",
-  title: "oppdragets tittel",
-  taskType: "oppgavetype",
-  priority: "prioritet",
-  status: "gjeldende status",
-  deadline: "frist i installasjonens tidssone",
-  actionRequired: "handlingen mottakeren må utføre",
-  actorName: "personen som utløste hendelsen",
-  reportingUnit: "enheten som leverte",
-  link: "direkte lenke til riktig visning",
-  classification: "full klassifiseringsbetegnelse",
+export const notificationTemplateFieldDescriptionKeys: Record<string, MessageKey> = {
+  recipientName: "fieldRecipientName",
+  siteName: "fieldSiteName",
+  levelName: "fieldLevelName",
+  title: "fieldTitle",
+  taskType: "fieldTaskType",
+  priority: "fieldPriority",
+  status: "fieldStatus",
+  deadline: "fieldDeadline",
+  actionRequired: "fieldActionRequired",
+  actorName: "fieldActorName",
+  reportingUnit: "fieldReportingUnit",
+  link: "fieldLink",
+  classification: "fieldClassification",
 };
 
 export const apiClientScopes = [
-  { key: "sites:read", label: "Lese sites" },
-  { key: "sites:write", label: "Opprette og redigere sites" },
-  { key: "sites:move", label: "Flytte sites" },
-  { key: "sites:deactivate", label: "Deaktivere sites" },
-  { key: "users:read", label: "Søke og lese brukere" },
-  { key: "users:assign", label: "Tildele brukere til site" },
-  { key: "users:move", label: "Flytte brukere mellom sites" },
-  { key: "users:deactivate", label: "Deaktivere brukere uten aktiv site" },
-  { key: "classifications:read", label: "Lese klassifiseringer" },
-  { key: "classifications:write", label: "Forvalte klassifiseringer og aktivering" },
-  { key: "reports:read", label: "Lese godkjente rapporter etter separat site- og nivåtildeling" },
+  { key: "sites:read", labelKey: "scopeSitesRead" },
+  { key: "sites:write", labelKey: "scopeSitesWrite" },
+  { key: "sites:move", labelKey: "scopeSitesMove" },
+  { key: "sites:deactivate", labelKey: "scopeSitesDeactivate" },
+  { key: "users:read", labelKey: "scopeUsersRead" },
+  { key: "users:assign", labelKey: "scopeUsersAssign" },
+  { key: "users:move", labelKey: "scopeUsersMove" },
+  { key: "users:deactivate", labelKey: "scopeUsersDeactivate" },
+  { key: "classifications:read", labelKey: "scopeClassificationsRead" },
+  { key: "classifications:write", labelKey: "scopeClassificationsWrite" },
+  { key: "reports:read", labelKey: "scopeReportsRead" },
 ] as const;
 
 export function filterApiClients(clients: ApiClient[], filter: ApiClientStatusFilter) {
@@ -125,6 +125,7 @@ export function apiClientExpiryDate(days = 90) {
   return new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
-export function formatPlatformDateTime(value: string | null, language: string, timeZone: string) {
-  return value ? new Date(value).toLocaleString(language, { timeZone }) : "Aldri";
+export function formatPlatformDateTime(value: string | null, language: string, timeZone: string, emptyValue = "Never") {
+  return value ? new Date(value).toLocaleString(language, { timeZone }) : emptyValue;
 }
+import type { MessageKey } from "../localization/en";
