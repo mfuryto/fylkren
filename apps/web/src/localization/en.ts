@@ -4,8 +4,10 @@ import { identityEn } from "./identity.en";
 import { notificationsEn } from "./notifications.en";
 import { sitesEn } from "./sites.en";
 import { siteAuditEn } from "./siteAudit.en";
+import { profileEn } from "./profile.en";
 
 export const en = {
+  ...profileEn,
   ...siteAuditEn,
   ...sitesEn,
   ...notificationsEn,

@@ -7,6 +7,7 @@ import { beginTotpSetup, changeProfilePassword, confirmTotpSetup, deleteProfileI
 import type { Session } from "../work/WorkContextModels";
 import { PasskeysPanel } from "./PasskeysPanel";
 import { PersonalNotificationsPanel } from "./PersonalNotificationsPanel";
+import { useTranslation } from "../localization/LocalizationProvider";
 
 export function ProfilePage({
   session,
@@ -19,6 +20,7 @@ export function ProfilePage({
   onSessionChanged: (session: Session) => void;
   onSignOut: () => void;
 }) {
+  const t = useTranslation();
   const [displayName, setDisplayName] = useState(session.displayName ?? "");
   const [email, setEmail] = useState(session.email ?? "");
   const [passwords, setPasswords] = useState({
@@ -50,9 +52,9 @@ export function ProfilePage({
       await persistProfile(displayName, email, profilePassword);
       setProfilePassword("");
       await refreshSession();
-      setMessage("Profilen er oppdatert.");
+      setMessage(t("profileUpdated"));
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Profilen kunne ikke oppdateres.");
+      setError(problem instanceof Error ? problem.message : t("profileUpdateFailed"));
     }
     setBusy(false);
   }
@@ -61,7 +63,7 @@ export function ProfilePage({
     setError("");
     setMessage("");
     if (passwords.newPassword !== passwords.confirmation) {
-      setError("De nye passordene er ikke like.");
+      setError(t("newPasswordsMismatch"));
       return;
     }
     setBusy(true);
@@ -69,9 +71,9 @@ export function ProfilePage({
       await changeProfilePassword(passwords.currentPassword, passwords.newPassword);
       setPasswords({ currentPassword: "", newPassword: "", confirmation: "" });
       await refreshSession();
-      setMessage("Passordet er endret.");
+      setMessage(t("passwordChanged"));
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Passordet kunne ikke endres.");
+      setError(problem instanceof Error ? problem.message : t("passwordChangeFailed"));
     }
     setBusy(false);
   }
@@ -85,9 +87,9 @@ export function ProfilePage({
       await uploadProfileImage(image);
       setImageVersion(Date.now());
       await refreshSession();
-      setMessage("Profilbildet er oppdatert.");
+      setMessage(t("profileImageUpdated"));
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Bildet kunne ikke lagres. Bruk JPEG, PNG eller WebP på maksimalt 2 MB.");
+      setError(problem instanceof Error ? problem.message : t("profileImageSaveFailed"));
     }
     setBusy(false);
     event.target.value = "";
@@ -99,9 +101,9 @@ export function ProfilePage({
     try {
       await deleteProfileImage();
       await refreshSession();
-      setMessage("Profilbildet er fjernet.");
+      setMessage(t("profileImageRemoved"));
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Profilbildet kunne ikke fjernes.");
+      setError(problem instanceof Error ? problem.message : t("profileImageRemoveFailed"));
     }
     setBusy(false);
   }
@@ -120,7 +122,7 @@ export function ProfilePage({
         }),
       );
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Tofaktoroppsettet kunne ikke startes.");
+      setError(problem instanceof Error ? problem.message : t("twoFactorSetupFailed"));
     }
     setBusy(false);
   }
@@ -135,11 +137,9 @@ export function ProfilePage({
       setTotpSetup(null);
       setTotpCode("");
       await refreshSession();
-      setMessage(
-        "Tofaktorautentisering er aktivert. Lagre gjenopprettingskodene nå.",
-      );
+      setMessage(t("twoFactorEnabled"));
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Koden kunne ikke bekreftes.");
+      setError(problem instanceof Error ? problem.message : t("twoFactorCodeFailed"));
     }
     setBusy(false);
   }
@@ -151,9 +151,9 @@ export function ProfilePage({
       await disableTotpAuthentication(disablePassword);
       setDisablePassword("");
       await refreshSession();
-      setMessage("Tofaktorautentisering er deaktivert.");
+      setMessage(t("twoFactorDisabled"));
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Tofaktor kunne ikke deaktiveres.");
+      setError(problem instanceof Error ? problem.message : t("twoFactorDisableFailed"));
     }
     setBusy(false);
   }
@@ -162,25 +162,22 @@ export function ProfilePage({
     <div className="page profile-page">
       <header className="page-header">
         <div>
-          <h1>Min profil</h1>
-          <p className="muted">Kontoinformasjon, profilbilde og passord.</p>
+          <h1>{t("myProfile")}</h1>
+          <p className="muted">{t("profileIntro")}</p>
         </div>
         <button className="secondary-button" type="button" onClick={onSignOut}>
-          Logg ut
+          {t("signOut")}
         </button>
       </header>
       {session.mustChangePassword && (
         <div className="password-required" role="alert">
-          <strong>Du må velge et nytt passord før du fortsetter.</strong>
-          <span>
-            Startpassordet er midlertidig og kan ikke brukes videre i systemet.
-          </span>
+          <strong>{t("passwordChangeRequired")}</strong>
+          <span>{t("temporaryPasswordNotice")}</span>
         </div>
       )}
       {session.isDirectoryManaged && (
         <div className="status-message">
-          <strong>Katalogstyrt profil.</strong> Navn og innloggingsinformasjon
-          forvaltes i AD eller LDAP. Du kan fortsatt endre profilbildet her.
+          <strong>{t("directoryManagedProfile")}</strong> {t("directoryManagedProfileHelp")}
         </div>
       )}
       {error && (
@@ -198,7 +195,7 @@ export function ProfilePage({
           <div className="profile-image-large">
             {session.hasProfileImage ? (
               <img
-                alt={`Profilbilde for ${session.displayName ?? session.username}`}
+                alt={t("profileImageAlt", { name: session.displayName ?? session.username ?? "" })}
                 src={`/api/profile/image?v=${imageVersion}`}
               />
             ) : (
@@ -210,7 +207,7 @@ export function ProfilePage({
             <p className="muted">{session.username}</p>
           </div>
           <label className="secondary-button file-button">
-            Velg bilde
+            {t("chooseImage")}
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp"
@@ -225,18 +222,18 @@ export function ProfilePage({
               disabled={busy || session.mustChangePassword}
               onClick={deleteImage}
             >
-              Fjern bilde
+              {t("removeImage")}
             </button>
           )}
           <p className="muted modal-note">
-            JPEG, PNG eller WebP. Maksimalt 2 MB.
+            {t("imageRequirements")}
           </p>
         </section>
         <div className="profile-forms">
           <form className="panel stacked-form" onSubmit={saveProfile}>
-            <h2>Profilinformasjon</h2>
+            <h2>{t("profileInformation")}</h2>
             <div className="field">
-              <label htmlFor="profile-display-name">Navn</label>
+              <label htmlFor="profile-display-name">{t("name")}</label>
               <input
                 id="profile-display-name"
                 required
@@ -250,7 +247,7 @@ export function ProfilePage({
               />
             </div>
             <div className="field">
-              <label htmlFor="profile-email">E-postadresse</label>
+              <label htmlFor="profile-email">{t("emailAddress")}</label>
               <input
                 id="profile-email"
                 type="email"
@@ -261,7 +258,7 @@ export function ProfilePage({
               />
             </div>
             <div className="field">
-              <label htmlFor="profile-username">Brukernavn</label>
+              <label htmlFor="profile-username">{t("username")}</label>
               <input
                 id="profile-username"
                 disabled
@@ -270,7 +267,7 @@ export function ProfilePage({
             </div>
             {!session.isDirectoryManaged && email.trim().toLocaleLowerCase() !== (session.email ?? "").trim().toLocaleLowerCase() && (
               <div className="field">
-                <label htmlFor="profile-current-password">Gjeldende passord for å endre e-post</label>
+                <label htmlFor="profile-current-password">{t("currentPasswordForEmail")}</label>
                 <input
                   id="profile-current-password"
                   type="password"
@@ -284,23 +281,23 @@ export function ProfilePage({
             )}
             <p className="muted modal-note">
               {session.isDirectoryManaged
-                ? "Navn og brukernavn synkroniseres fra katalogtjenesten."
-                : "Brukernavn endres av en administrator."}
+                ? t("directoryProfileSync")
+                : t("usernameAdminManaged")}
             </p>
             {!session.isDirectoryManaged && (
               <button
                 className="primary-button"
                 disabled={busy || session.mustChangePassword}
               >
-                Lagre profil
+                {t("saveProfile")}
               </button>
             )}
           </form>
           {!session.isDirectoryManaged && (
             <form className="panel stacked-form" onSubmit={changePassword}>
-              <h2>Endre passord</h2>
+              <h2>{t("changePassword")}</h2>
               <div className="field">
-                <label htmlFor="current-password">Gjeldende passord</label>
+                <label htmlFor="current-password">{t("currentPassword")}</label>
                 <input
                   id="current-password"
                   type="password"
@@ -316,7 +313,7 @@ export function ProfilePage({
                 />
               </div>
               <div className="field">
-                <label htmlFor="new-password">Nytt passord</label>
+                <label htmlFor="new-password">{t("newPassword")}</label>
                 <input
                   id="new-password"
                   type="password"
@@ -334,7 +331,7 @@ export function ProfilePage({
                 />
               </div>
               <div className="field">
-                <label htmlFor="confirm-password">Gjenta nytt passord</label>
+                <label htmlFor="confirm-password">{t("repeatNewPassword")}</label>
                 <input
                   id="confirm-password"
                   type="password"
@@ -352,11 +349,10 @@ export function ProfilePage({
                 />
               </div>
               <p className="muted modal-note">
-                Passordet må være minst 14 tegn og forskjellig fra
-                startpassordet.
+                {t("passwordRequirements")}
               </p>
               <button className="primary-button" disabled={busy}>
-                Endre passord
+                {t("changePassword")}
               </button>
             </form>
           )}
@@ -366,14 +362,14 @@ export function ProfilePage({
       <div className="profile-authentication-grid">
       {!session.isDirectoryManaged && configuration.authentication.mfaEnabled !== false && (
         <section className="panel stacked-form two-factor-panel">
-          <h2>Tofaktorautentisering</h2>
+          <h2>{t("twoFactorAuthentication")}</h2>
           {session.twoFactorEnabled ? (
             <>
-              <p>Autentiseringsapp er aktivert for kontoen.</p>
+              <p>{t("authenticatorActive")}</p>
               <form className="stacked-form" onSubmit={disableTotp}>
                 <div className="field">
                   <label htmlFor="disable-2fa-password">
-                    Passord for å deaktivere
+                    {t("passwordToDisable")}
                   </label>
                   <input
                     id="disable-2fa-password"
@@ -384,27 +380,27 @@ export function ProfilePage({
                   />
                 </div>
                 <button className="danger-button" disabled={busy}>
-                  Deaktiver tofaktor
+                  {t("disableTwoFactor")}
                 </button>
               </form>
             </>
           ) : totpSetup ? (
             <form className="stacked-form" onSubmit={confirmTotp}>
-              <p>Skann QR-koden med autentiseringsappen.</p>
+              <p>{t("scanQrCode")}</p>
               {totpQrCode && (
                 <img
                   className="totp-qr-code"
                   src={totpQrCode}
-                  alt="QR-kode for oppsett av autentiseringsapp"
+                  alt={t("qrCodeAlt")}
                 />
               )}
               <details>
-                <summary>Kan du ikke skanne? Vis manuell nøkkel</summary>
+                <summary>{t("manualKeyHelp")}</summary>
                 <code className="totp-secret">{totpSetup.secret}</code>
                 <code className="totp-uri">{totpSetup.provisioningUri}</code>
               </details>
               <div className="field">
-                <label htmlFor="confirm-totp">Sekssifret kode</label>
+                <label htmlFor="confirm-totp">{t("sixDigitCode")}</label>
                 <input
                   id="confirm-totp"
                   inputMode="numeric"
@@ -415,17 +411,14 @@ export function ProfilePage({
                 />
               </div>
               <button className="primary-button" disabled={busy}>
-                Bekreft og aktiver
+                {t("confirmAndEnable")}
               </button>
             </form>
           ) : (
             <>
-              <p>
-                Bruk en TOTP-kompatibel autentiseringsapp som ekstra kontroll
-                ved lokal innlogging.
-              </p>
+              <p>{t("totpIntro")}</p>
               <div className="field">
-                <label htmlFor="setup-2fa-password">Gjeldende passord</label>
+                <label htmlFor="setup-2fa-password">{t("currentPassword")}</label>
                 <input
                   id="setup-2fa-password"
                   type="password"
@@ -442,14 +435,14 @@ export function ProfilePage({
                 disabled={busy || session.mustChangePassword || totpSetupPassword.length === 0}
                 onClick={beginTotp}
               >
-                Sett opp autentiseringsapp
+                {t("setupAuthenticator")}
               </button>
             </>
           )}
           {recoveryCodes.length > 0 && (
             <div className="recovery-codes" role="status">
-              <strong>Gjenopprettingskoder – vises bare nå</strong>
-              <p>Lagre dem sikkert. Hver kode kan brukes én gang.</p>
+              <strong>{t("recoveryCodesTitle")}</strong>
+              <p>{t("recoveryCodesHelp")}</p>
               <code>{recoveryCodes.join("\n")}</code>
             </div>
           )}

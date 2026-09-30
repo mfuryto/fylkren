@@ -6,17 +6,20 @@ import {
   type PersonalNotificationSite,
 } from "../notifications/notificationApi";
 import { errorMessage } from "../api/errors";
+import { useTranslation } from "../localization/LocalizationProvider";
+import type { MessageKey } from "../localization/en";
 
-const notificationLabels: Record<keyof NotificationSettings, string> = {
-  newWorkItems: "Nye oppdrag",
-  workItemChanges: "Endringer i oppdrag",
-  decisionsRequired: "Lederhandling kreves",
-  childWorkCompleted: "Leveranser fra underenheter",
-  planningCompleted: "Planlegging ferdig",
-  executionCompleted: "Utførelse ferdig",
+const notificationLabels: Record<keyof NotificationSettings, MessageKey> = {
+  newWorkItems: "personalNotificationNewWork",
+  workItemChanges: "personalNotificationChanges",
+  decisionsRequired: "personalNotificationDecision",
+  childWorkCompleted: "personalNotificationChild",
+  planningCompleted: "personalNotificationPlanning",
+  executionCompleted: "personalNotificationExecution",
 };
 
 export function PersonalNotificationsPanel({ disabled }: { disabled: boolean }) {
+  const t = useTranslation();
   const [sites, setSites] = useState<PersonalNotificationSite[]>([]);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -49,9 +52,9 @@ export function PersonalNotificationsPanel({ disabled }: { disabled: boolean }) 
         planningCompleted: next.planningCompleted,
         executionCompleted: next.executionCompleted,
       });
-      setMessage("Varslingsvalgene er lagret.");
+      setMessage(t("notificationSettingsSaved"));
     } catch (problem) {
-      setMessage(errorMessage(problem,"Varslingsvalgene kunne ikke lagres."));
+      setMessage(errorMessage(problem,t("notificationSettingsSaveFailed")));
       await load();
     } finally {
       setBusy(false);
@@ -63,11 +66,8 @@ export function PersonalNotificationsPanel({ disabled }: { disabled: boolean }) 
   return (
     <section className="panel stacked-form profile-notifications">
       <div>
-        <h2>Personlige varslinger</h2>
-        <p className="muted">
-          Utgangspunktet er sitens varslingsvalg. Du kan dempe e-postvarsler for
-          deg selv uten å påvirke andre.
-        </p>
+        <h2>{t("personalNotifications")}</h2>
+        <p className="muted">{t("personalNotificationsIntro")}</p>
       </div>
       {sites.map((site) => (
         <div className="notification-profile-site" key={site.siteId}>
@@ -84,9 +84,9 @@ export function PersonalNotificationsPanel({ disabled }: { disabled: boolean }) 
                     onChange={(event) => void toggle(site, key, event.target.checked)}
                   />
                   <span>
-                    {label}
+                    {t(label)}
                     {!site.available[key] && (
-                      <small className="muted"> Ikke aktivert for siten</small>
+                      <small className="muted"> {t("notificationUnavailable")}</small>
                     )}
                   </span>
                 </label>

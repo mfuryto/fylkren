@@ -5,10 +5,12 @@ import {
   removePasskey,
   type PasskeySummary,
 } from "../api/authClient";
+import { useTranslation } from "../localization/LocalizationProvider";
 
 export function PasskeysPanel() {
+  const t = useTranslation();
   const [keys, setKeys] = useState<PasskeySummary[]>([]);
-  const [name, setName] = useState("Min passkey");
+  const [name, setName] = useState(() => t("defaultPasskeyName"));
   const [currentPassword, setCurrentPassword] = useState("");
   const [error, setError] = useState("");
 
@@ -30,7 +32,7 @@ export function PasskeysPanel() {
       setError(
         problem instanceof Error
           ? problem.message
-          : "Passkey eller sikkerhetsnøkkel kunne ikke registreres. Kontroller HTTPS og domeneinnstillingene.",
+          : t("passkeyRegisterFailed"),
       );
     }
   }
@@ -44,18 +46,18 @@ export function PasskeysPanel() {
       setError(
         problem instanceof Error
           ? problem.message
-          : "Passkey eller sikkerhetsnøkkel kunne ikke fjernes.",
+          : t("passkeyRemoveFailed"),
       );
     }
   }
 
   return (
     <section className="panel stacked-form two-factor-panel">
-      <h2>Passkeys og sikkerhetsnøkler</h2>
-      <p>WebAuthn krever HTTPS, bortsett fra lokal utvikling på localhost.</p>
+      <h2>{t("passkeys")}</h2>
+      <p>{t("passkeysIntro")}</p>
       {error && <p className="error-message">{error}</p>}
       <div className="field">
-        <label htmlFor="passkey-name">Navn på nøkkelen</label>
+        <label htmlFor="passkey-name">{t("passkeyName")}</label>
         <input
           id="passkey-name"
           maxLength={100}
@@ -64,7 +66,7 @@ export function PasskeysPanel() {
         />
       </div>
       <div className="field">
-        <label htmlFor="passkey-current-password">Gjeldende passord</label>
+        <label htmlFor="passkey-current-password">{t("currentPassword")}</label>
         <input
           id="passkey-current-password"
           type="password"
@@ -81,14 +83,14 @@ export function PasskeysPanel() {
         disabled={name.trim().length < 2 || currentPassword.length === 0 || !window.isSecureContext}
         onClick={register}
       >
-        Legg til passkey eller sikkerhetsnøkkel
+        {t("addPasskey")}
       </button>
       {keys.map((key) => (
         <div className="type-row" key={key.id}>
           <span>
             <strong>{key.name}</strong>
             <small className="muted">
-              Opprettet {new Date(key.createdAt).toLocaleDateString()}
+              {t("passkeyCreated", { date: new Date(key.createdAt).toLocaleDateString() })}
             </small>
           </span>
           <button
@@ -97,7 +99,7 @@ export function PasskeysPanel() {
             disabled={currentPassword.length === 0}
             onClick={() => remove(key.id)}
           >
-            Fjern
+            {t("remove")}
           </button>
         </div>
       ))}
