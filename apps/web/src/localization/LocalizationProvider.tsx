@@ -3,17 +3,26 @@ import { setActiveLanguage, translate, type MessageVariables } from ".";
 import type { MessageKey } from "./en";
 
 type Translator = (key: MessageKey, variables?: MessageVariables) => string;
+type LocalizationValue = { language: string; translate: Translator };
 
-const LocalizationContext = createContext<Translator>((key, variables) =>
-  translate("en", key, variables));
+const LocalizationContext = createContext<LocalizationValue>({
+  language: "en",
+  translate: (key, variables) => translate("en", key, variables),
+});
 
 export function LocalizationProvider({ language, children }: PropsWithChildren<{ language: string }>) {
   setActiveLanguage(language);
-  const translator = useMemo<Translator>(() =>
-    (key, variables) => translate(language, key, variables), [language]);
-  return <LocalizationContext.Provider value={translator}>{children}</LocalizationContext.Provider>;
+  const value = useMemo<LocalizationValue>(() => ({
+    language,
+    translate: (key, variables) => translate(language, key, variables),
+  }), [language]);
+  return <LocalizationContext.Provider value={value}>{children}</LocalizationContext.Provider>;
 }
 
 export function useTranslation(): Translator {
-  return useContext(LocalizationContext);
+  return useContext(LocalizationContext).translate;
+}
+
+export function useLanguage(): string {
+  return useContext(LocalizationContext).language;
 }
