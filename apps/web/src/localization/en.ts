@@ -1,7 +1,9 @@
 import { platformApiEn } from "./platformApi.en";
 import { federationEn } from "./federation.en";
+import { identityEn } from "./identity.en";
 
 export const en = {
+  ...identityEn,
   ...federationEn,
   ...platformApiEn,
   loading: "Loading…",
