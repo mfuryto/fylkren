@@ -3,8 +3,10 @@ import { federationEn } from "./federation.en";
 import { identityEn } from "./identity.en";
 import { notificationsEn } from "./notifications.en";
 import { sitesEn } from "./sites.en";
+import { siteAuditEn } from "./siteAudit.en";
 
 export const en = {
+  ...siteAuditEn,
   ...sitesEn,
   ...notificationsEn,
   ...identityEn,

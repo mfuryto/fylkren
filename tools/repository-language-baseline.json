@@ -79,8 +79,6 @@
   "apps/demo/src/fixtures.ts": 4,
   "apps/demo/src/main.tsx": 2,
   "apps/web/src/api/client.test.ts": 4,
-  "apps/web/src/audit/SiteAuditPage.tsx": 67,
-  "apps/web/src/audit/siteAuditApi.ts": 2,
   "apps/web/src/components/RichText.test.ts": 6,
   "apps/web/src/organization/OrganizationPage.tsx": 56,
   "apps/web/src/organization/OrganizationRoles.tsx": 5,
