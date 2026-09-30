@@ -3,7 +3,7 @@ namespace Fylkren.Api.Platform;
 public sealed class BrandingSettings
 {
     private BrandingSettings() { }
-    public BrandingSettings(Guid id) { Id = id; ProductName = "Fylkren"; InstanceName = "Lokal installasjon"; Theme = "light"; PrimaryColor = "#315c53"; AccentColor = "#174d43"; TopBarColor = "#202020"; TopBarTextColor = "#ffffff"; CustomCss = ""; }
+    public BrandingSettings(Guid id) { Id = id; ProductName = "Fylkren"; InstanceName = "Local installation"; Theme = "light"; PrimaryColor = "#315c53"; AccentColor = "#174d43"; TopBarColor = "#202020"; TopBarTextColor = "#ffffff"; CustomCss = ""; }
     public Guid Id { get; private set; }
     public string ProductName { get; private set; } = string.Empty;
     public string InstanceName { get; private set; } = string.Empty;

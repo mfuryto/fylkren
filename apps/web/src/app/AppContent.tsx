@@ -93,7 +93,7 @@ export function AppContent({
   if (effectiveItem === "Federering" && session.isPlatformManager)
     return <FederationPage canManage={configuration.entitlements.includes("instance-federation")} />;
   if (effectiveItem === "Lisens" && session.isPlatformManager)
-    return <PlatformLicensePage onChanged={async () => onConfigurationChanged(await apiGet<PublicConfiguration>("/api/configuration", "Lisensstatus kunne ikke oppdateres."))} />;
+    return <PlatformLicensePage onChanged={async () => onConfigurationChanged(await apiGet<PublicConfiguration>("/api/configuration", "License status could not be refreshed."))} />;
   if (effectiveItem === "Klassifisering" && session.isPlatformManager)
     return (
       <PlatformClassificationsPage
@@ -101,7 +101,7 @@ export function AppContent({
           onConfigurationChanged(
             await apiGet<PublicConfiguration>(
               "/api/configuration",
-              "Konfigurasjonen kunne ikke oppdateres.",
+              "Configuration could not be refreshed.",
             ),
           )
         }
@@ -109,7 +109,17 @@ export function AppContent({
     );
   if (effectiveItem === "E-post" && session.isPlatformManager) return <SmtpPage />;
   if (effectiveItem === "Utseende" && session.isPlatformManager)
-    return <BrandingPage branding={branding} onChanged={onBrandingChanged} />;
+    return <BrandingPage
+      branding={branding}
+      regionalSettings={{
+        defaultLanguage: configuration.defaultLanguage,
+        timeZone: configuration.timeZone,
+        clockFormat: configuration.clockFormat,
+        measurementSystem: configuration.measurementSystem,
+      }}
+      onChanged={onBrandingChanged}
+      onRegionalChanged={(value) => onConfigurationChanged({ ...configuration, ...value })}
+    />;
   if (effectiveItem === "Revisjon" && session.isPlatformManager)
     return <PlatformAuditPage language={language} timeZone={timeZone} />;
   if (effectiveItem === "Oppgaver")

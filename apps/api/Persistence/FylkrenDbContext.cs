@@ -59,6 +59,7 @@ public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options)
     public DbSet<WorkItemType> WorkItemTypes => Set<WorkItemType>();
     public DbSet<WorkItemLookup> WorkItemLookups => Set<WorkItemLookup>();
     public DbSet<BrandingSettings> BrandingSettings => Set<BrandingSettings>();
+    public DbSet<RegionalSettings> RegionalSettings => Set<RegionalSettings>();
     public DbSet<ClassificationSettings> ClassificationSettings => Set<ClassificationSettings>();
     public DbSet<ClassificationDefinition> ClassificationDefinitions => Set<ClassificationDefinition>();
     public DbSet<SmtpSettings> SmtpSettings => Set<SmtpSettings>();

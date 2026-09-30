@@ -58,6 +58,12 @@ assert.equal(configuration.body.version, undefined, 'Public login configuration 
 assert.equal(configuration.body.edition, undefined, 'Public login configuration must not disclose license state');
 assert.equal(configuration.body.entitlements, undefined, 'Public login configuration must not disclose entitlements');
 assert.equal(configuration.body.classificationMarkings, undefined, 'Public login configuration must not disclose classifications');
+assert.deepEqual({
+  defaultLanguage: configuration.body.defaultLanguage,
+  timeZone: configuration.body.timeZone,
+  clockFormat: configuration.body.clockFormat,
+  measurementSystem: configuration.body.measurementSystem,
+}, { defaultLanguage: 'en', timeZone: 'UTC', clockFormat: '24-hour', measurementSystem: 'metric' });
 const unauthenticatedDetails = await platform.request('/api/configuration');
 assert.equal(unauthenticatedDetails.status, 401, 'Detailed configuration requires a session');
 
@@ -100,6 +106,27 @@ assert.deepEqual(communityConfig.body.entitlements, []);
 const initialBranding = await platform.request('/api/branding');
 assert.equal(initialBranding.status, 200);
 assert.equal(initialBranding.body.customCss, '');
+const initialRegional = await platform.request('/api/platform/regional-settings');
+assert.equal(initialRegional.status, 200, JSON.stringify(initialRegional.body));
+assert.equal((await platform.put('/api/platform/regional-settings', {
+  ...initialRegional.body, timeZone: 'Invalid/Zone',
+})).status, 400, 'Invalid time zones must not replace regional settings');
+const changedRegional = await platform.put('/api/platform/regional-settings', {
+  defaultLanguage: 'nb-NO', timeZone: 'Europe/Oslo',
+  clockFormat: '12-hour', measurementSystem: 'imperial',
+});
+assert.equal(changedRegional.status, 200, JSON.stringify(changedRegional.body));
+assert.deepEqual(changedRegional.body, {
+  defaultLanguage: 'nb-NO', timeZone: 'Europe/Oslo',
+  clockFormat: '12-hour', measurementSystem: 'imperial',
+});
+const changedPublicRegional = await platform.request('/api/configuration/public');
+assert.equal(changedPublicRegional.body.defaultLanguage, 'nb-NO');
+assert.equal(changedPublicRegional.body.clockFormat, '12-hour');
+assert.equal((await platform.put('/api/platform/regional-settings', {
+  defaultLanguage: 'en', timeZone: 'UTC',
+  clockFormat: '24-hour', measurementSystem: 'metric',
+})).status, 200);
 const platformOperations = await platform.request('/api/platform/operations');
 assert.equal(platformOperations.status, 200, JSON.stringify(platformOperations.body));
 assert.equal(platformOperations.body.hostIntegration.available, true, 'Host status snapshot must be available');

@@ -11,8 +11,9 @@ internal static class DatabaseDefaults
     private static readonly Guid SmtpId = Guid.Parse("00000000-0000-0000-0000-000000000002");
     private static readonly Guid NotificationCursorId = Guid.Parse("00000000-0000-0000-0000-000000000003");
     private static readonly Guid ClassificationId = Guid.Parse("00000000-0000-0000-0000-000000000006");
+    internal static readonly Guid RegionalSettingsId = Guid.Parse("00000000-0000-0000-0000-000000000007");
 
-    public static async Task EnsureCreatedAsync(FylkrenDbContext database, CancellationToken cancellationToken = default)
+    public static async Task EnsureCreatedAsync(FylkrenDbContext database, FylkrenOptions options, CancellationToken cancellationToken = default)
     {
         if (!await database.BrandingSettings.AnyAsync(cancellationToken))
         {
@@ -21,11 +22,19 @@ internal static class DatabaseDefaults
             database.BrandingSettings.Add(branding);
         }
 
+        if (!await database.RegionalSettings.AnyAsync(cancellationToken))
+        {
+            database.RegionalSettings.Add(new RegionalSettings(
+                RegionalSettingsId,
+                options.Localization.DefaultLanguage,
+                options.Localization.TimeZone));
+        }
+
         if (!await database.SmtpSettings.AnyAsync(cancellationToken))
         {
             var smtp = new SmtpSettings(SmtpId);
             smtp.Update(false, "smtp.example.invalid", 587, "starttls", null, null,
-                "notifications@example.invalid", "Varslinger");
+                "notifications@example.invalid", "Notifications");
             database.SmtpSettings.Add(smtp);
         }
 
@@ -65,113 +74,113 @@ internal static class NotificationDefaults
     public static IReadOnlyList<NotificationTemplate> All { get; } =
     [
         new(Guid.Parse("10000000-0000-0000-0000-000000000001"), "new-work-item",
-            "[{{siteName}}] Nytt oppdrag: {{title}}",
+            "[{{siteName}}] New work item: {{title}}",
             """
-Hei {{recipientName}},
+Hello {{recipientName}},
 
-Et nytt oppdrag er mottatt.
+A new work item has been received.
 
 Site: {{siteName}}
-Arbeidsnivå: {{levelName}}
-Oppdrag: {{title}}
+Work level: {{levelName}}
+Work item: {{title}}
 Type: {{taskType}}
-Prioritet: {{priority}}
-Frist: {{deadline}}
-Klassifisering: {{classification}}
+Priority: {{priority}}
+Deadline: {{deadline}}
+Classification: {{classification}}
 
-Handling: {{actionRequired}}
+Action: {{actionRequired}}
 
-Åpne oppdraget: {{link}}
+Open the work item: {{link}}
 """),
         new(Guid.Parse("10000000-0000-0000-0000-000000000002"), "work-item-changed",
-            "[{{siteName}}] Oppdrag endret: {{title}}",
+            "[{{siteName}}] Work item changed: {{title}}",
             """
-Hei {{recipientName}},
+Hello {{recipientName}},
 
-Et oppdrag er endret av {{actorName}}.
+A work item was changed by {{actorName}}.
 
 Site: {{siteName}}
-Arbeidsnivå: {{levelName}}
-Oppdrag: {{title}}
+Work level: {{levelName}}
+Work item: {{title}}
 Status: {{status}}
-Prioritet: {{priority}}
-Frist: {{deadline}}
-Klassifisering: {{classification}}
+Priority: {{priority}}
+Deadline: {{deadline}}
+Classification: {{classification}}
 
-Handling: {{actionRequired}}
+Action: {{actionRequired}}
 
-Åpne oppdraget: {{link}}
+Open the work item: {{link}}
 """),
         new(Guid.Parse("10000000-0000-0000-0000-000000000003"), "decision-required",
-            "[{{siteName}}] Handling kreves: {{title}}",
+            "[{{siteName}}] Action required: {{title}}",
             """
-Hei {{recipientName}},
+Hello {{recipientName}},
 
-En lederbeslutning kreves.
+A management decision is required.
 
 Site: {{siteName}}
-Arbeidsnivå: {{levelName}}
-Oppdrag: {{title}}
+Work level: {{levelName}}
+Work item: {{title}}
 Status: {{status}}
-Utløst av: {{actorName}}
-Klassifisering: {{classification}}
+Triggered by: {{actorName}}
+Classification: {{classification}}
 
-Handling: {{actionRequired}}
+Action: {{actionRequired}}
 
-Åpne beslutningsgrunnlaget: {{link}}
+Open the decision context: {{link}}
 """),
         new(Guid.Parse("10000000-0000-0000-0000-000000000004"), "child-work-completed",
-            "[{{siteName}}] Leveranse mottatt: {{title}}",
+            "[{{siteName}}] Delivery received: {{title}}",
             """
-Hei {{recipientName}},
+Hello {{recipientName}},
 
-En underenhet har levert på et oppdrag.
+A subordinate unit has completed a work item.
 
 Site: {{siteName}}
-Mottakende arbeidsnivå: {{levelName}}
-Rapporterende enhet: {{reportingUnit}}
-Oppdrag: {{title}}
+Receiving work level: {{levelName}}
+Reporting unit: {{reportingUnit}}
+Work item: {{title}}
 Status: {{status}}
-Klassifisering: {{classification}}
+Classification: {{classification}}
 
-Handling: {{actionRequired}}
+Action: {{actionRequired}}
 
-Åpne leveransen: {{link}}
+Open the delivery: {{link}}
 """),
         new(Guid.Parse("10000000-0000-0000-0000-000000000005"), "planning-completed",
-            "[{{siteName}}] Plan klar til godkjenning: {{title}}",
+            "[{{siteName}}] Plan ready for approval: {{title}}",
             """
-Hei {{recipientName}},
+Hello {{recipientName}},
 
-En plan er klar til godkjenning.
+A plan is ready for approval.
 
 Site: {{siteName}}
-Arbeidsnivå: {{levelName}}
-Planlagt av: {{reportingUnit}}
-Oppdrag: {{title}}
-Klassifisering: {{classification}}
+Work level: {{levelName}}
+Planned by: {{reportingUnit}}
+Work item: {{title}}
+Classification: {{classification}}
 
-Handling: {{actionRequired}}
+Action: {{actionRequired}}
 
-Åpne planen: {{link}}
+Open the plan: {{link}}
 """),
         new(Guid.Parse("10000000-0000-0000-0000-000000000006"), "execution-completed",
-            "[{{siteName}}] Utførelse klar til kontroll: {{title}}",
+            "[{{siteName}}] Execution ready for review: {{title}}",
             """
-Hei {{recipientName}},
+Hello {{recipientName}},
 
-Utførelsen er klar til kontroll.
+Execution is ready for review.
 
 Site: {{siteName}}
-Arbeidsnivå: {{levelName}}
-Utført av enhet: {{reportingUnit}}
-Oppdrag: {{title}}
+Work level: {{levelName}}
+Executed by unit: {{reportingUnit}}
+Work item: {{title}}
 Status: {{status}}
-Klassifisering: {{classification}}
+Classification: {{classification}}
 
-Handling: {{actionRequired}}
+Action: {{actionRequired}}
 
-Åpne utførelsen: {{link}}
+Open the execution: {{link}}
 """)
     ];
 }

@@ -40,9 +40,9 @@ HTTPS mode uses Secure `__Host-` cookies, HSTS and redirect behavior. Changing m
 
 `deploy/compose/install.sh` creates `.env` once and generates `FYLKREN_DB_PASSWORD`; it never changes an existing environment. Compose refuses an empty database password.
 
-Core environment settings include public origin, proxy/HTTPS mode, default language, IANA timezone and authentication switches. Classifications, SMTP, notification templates, appearance and identity-provider settings managed in Platform Manager are stored through the application rather than maintained as repeated `.env` lists.
+Core environment settings include public origin, proxy/HTTPS mode and the remaining startup-only security switches. Language, IANA time zone, clock format, measurement system, classifications, SMTP, notification templates, appearance and identity-provider settings are managed in Platform Manager and stored in the database rather than maintained as repeated `.env` lists. Legacy language and time-zone values are imported only when the regional-settings record is first created.
 
-Local authentication stays enabled until an external provider has been configured, identities linked and an administrative login tested. Invalid startup-critical origins, language/timezone or authentication settings stop startup with a clear error.
+Local authentication stays enabled until an external provider has been configured, identities linked and an administrative login tested. Invalid startup-critical origins or authentication settings stop startup with a clear error. Invalid regional changes are rejected by the administration API without replacing the current settings.
 
 ## Offline operation
 

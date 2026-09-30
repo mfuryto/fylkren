@@ -84,17 +84,19 @@ FYLKREN_PUBLIC_URL=https://fylkren.example
 
 `FYLKREN_PUBLIC_URL` is the canonical public origin: scheme, host, and optional port only. Paths, user information, query strings, and fragments are invalid. The public host and port must match what users open, and the proxy must preserve the original `Host` value.
 
-Base installation settings:
+Base installation setting:
 
 ```dotenv
-FYLKREN_DEFAULT_LANGUAGE=nb-NO
-FYLKREN_TIME_ZONE=Europe/Oslo
 FYLKREN_MFA_ENABLED=true
 ```
 
-The language must be a supported culture code and the timezone an IANA identifier available in the container.
+Language, IANA time zone, 12/24-hour clock and measurement system are stored in
+the database and managed under **Platform Manager → Appearance**. Changes take
+effect immediately without restarting the API. Older `FYLKREN_DEFAULT_LANGUAGE`
+and `FYLKREN_TIME_ZONE` values are imported once when an upgraded database does
+not yet contain regional settings; they are not the ongoing source of truth.
 
-Local login is controlled in **Platform Manager → Identitet**. An existing `FYLKREN_LOCAL_AUTH_ENABLED` value is imported only when the database setting is first created.
+Local login is controlled in **Platform Manager → Identity**. An existing `FYLKREN_LOCAL_AUTH_ENABLED` value is imported only when the database setting is first created.
 
 `FYLKREN_MFA_ENABLED=false` hides and disables TOTP, passkeys, security keys, and WebAuthn endpoints without deleting existing credentials. Use it only after a documented risk assessment; an internal network alone is not an authentication control.
 

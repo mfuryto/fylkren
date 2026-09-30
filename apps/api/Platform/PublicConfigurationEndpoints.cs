@@ -11,14 +11,20 @@ internal static class PublicConfigurationEndpoints
     {
         app.MapGet("/api/configuration/public", async (FylkrenOptions options,
             FylkrenDbContext database, CancellationToken cancellationToken) =>
-            Results.Ok(new
+        {
+            var regional = await database.RegionalSettings.AsNoTracking()
+                .SingleAsync(value => value.Id == DatabaseDefaults.RegionalSettingsId, cancellationToken);
+            return Results.Ok(new
             {
-                defaultLanguage = options.Localization.DefaultLanguage,
-                timeZone = options.Localization.TimeZone,
+                regional.DefaultLanguage,
+                regional.TimeZone,
+                regional.ClockFormat,
+                regional.MeasurementSystem,
                 setupRequired = !await database.LoginIdentities.AnyAsync(
                     value => value.IsPlatformManager, cancellationToken),
                 authentication = LoginMethods(options)
-            })).AllowAnonymous();
+            });
+        }).AllowAnonymous();
 
         app.MapGet("/api/configuration", async (
             FylkrenOptions options,
@@ -41,14 +47,18 @@ internal static class PublicConfigurationEndpoints
                     .ToListAsync(cancellationToken)
                 : [];
             var licenseStatus = await license.Current(database, cancellationToken);
+            var regional = await database.RegionalSettings.AsNoTracking()
+                .SingleAsync(value => value.Id == DatabaseDefaults.RegionalSettingsId, cancellationToken);
             return Results.Ok(new
             {
                 version = ProductVersion(),
                 edition = licenseStatus.Edition,
                 communitySiteLimit = SiteCapacityPolicy.CommunityActiveSiteLimit,
                 entitlements = licenseStatus.Entitlements.Order(StringComparer.Ordinal).ToArray(),
-                defaultLanguage = options.Localization.DefaultLanguage,
-                timeZone = options.Localization.TimeZone,
+                regional.DefaultLanguage,
+                regional.TimeZone,
+                regional.ClockFormat,
+                regional.MeasurementSystem,
                 classificationEnabled,
                 classificationMarkings,
                 setupRequired = !await database.LoginIdentities.AnyAsync(

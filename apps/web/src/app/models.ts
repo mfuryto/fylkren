@@ -12,14 +12,19 @@ export type Branding = {
   hasLogo: boolean;
 };
 
-export type PublicConfiguration = {
+export type RegionalSettings = {
+  defaultLanguage: "en" | "nb-NO";
+  timeZone: string;
+  clockFormat: "12-hour" | "24-hour";
+  measurementSystem: "metric" | "imperial";
+};
+
+export type PublicConfiguration = RegionalSettings & {
   version: string;
   edition: "community" | "enterprise";
   communitySiteLimit: number;
   entitlements: string[];
   setupRequired: boolean;
-  defaultLanguage: string;
-  timeZone: string;
   classificationEnabled: boolean;
   classificationMarkings: ClassificationMarking[];
   authentication: {
@@ -34,4 +39,4 @@ export type PublicConfiguration = {
   };
 };
 
-export type LoginConfiguration = Pick<PublicConfiguration, "setupRequired" | "defaultLanguage" | "timeZone" | "authentication">;
+export type LoginConfiguration = Pick<PublicConfiguration, "setupRequired" | "defaultLanguage" | "timeZone" | "clockFormat" | "measurementSystem" | "authentication">;

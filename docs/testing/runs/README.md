@@ -22,6 +22,8 @@ The [production public security run](2026-09-28-production-public-security.md) r
 
 The [live Enterprise license-expiry run](2026-09-29-live-enterprise-license-expiry.md) records a real wall-clock transition to Community without restart, immediate closure of Enterprise boundaries, preservation of customer data and protected configuration, background-worker pause, and renewal/resumption. Production issuer custody and an exact release-candidate repeat remain separate gates.
 
+The [regional settings and repository language run](2026-09-30-regional-settings-and-language-boundary.md) records database-managed language, time zone, clock and measurement defaults, English fallback behavior, the first localized Platform Manager page, and the non-regression gate that prevents additional Norwegian prose outside the dedicated locale resource.
+
 For each run, record:
 
 1. Run ID, date/time, test tool, application commit and version, test-code revision or hash, environment and fixture reset.

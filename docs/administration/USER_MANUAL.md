@@ -234,7 +234,9 @@ The global user directory defaults to users without an active site and supports 
 
 Classification definitions are created, ordered, edited, deleted and activated centrally and then appear as dropdown choices where operational marking is supported. New installations contain no predefined classification types; the customer owns and creates the complete register. Documentation and synthetic tests may use **PUBLIC → INTERNAL → CONFIDENTIAL → SENSITIVE → SECRET** as examples only. Deleting a type removes it from new choices while historical tasks and reports retain their stored marking.
 
-Under **Utseende**, Platform Manager configures names, theme colors and logo. The **Egne CSS-overstyringer** box below Logo accepts up to 20,000 characters and applies the saved rules after Fylkren's standard theme on every page, including sign-in. External resources through `url()` and `@import` are rejected so a style override cannot introduce an additional network dependency. Clearing the box and saving restores the standard CSS without changing the other appearance settings.
+Under **Appearance**, Platform Manager configures names, theme colors and logo. The **Custom CSS overrides** box below Logo accepts up to 20,000 characters and applies the saved rules after Fylkren's standard theme on every page, including sign-in. External resources through `url()` and `@import` are rejected so a style override cannot introduce an additional network dependency. Clearing the box and saving restores the standard CSS without changing the other appearance settings.
+
+The **Language and regional settings** box stores the platform defaults for UI language, IANA time zone, 12/24-hour clock and metric/imperial measurements. Changes apply immediately without restarting the server. English is the source language and fallback. Timestamps remain stored in UTC, and changing presentation units never reinterprets stored values.
 
 ### Federering mellom installasjoner
 

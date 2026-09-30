@@ -34,7 +34,7 @@ docker compose ps
 docker compose logs --tail=100 api
 ```
 
-`install.sh` creates `.env` only when absent, generates a random database password and applies mode `600`. Review public origin, proxy/HTTPS mode, language, timezone and authentication before starting.
+`install.sh` creates `.env` only when absent, generates a random database password and applies mode `600`. Review public origin, proxy/HTTPS mode and authentication before starting. After the first Platform Manager signs in, configure language, IANA time zone, clock format and measurement system under **Appearance**; these values are stored in the database and do not require a restart.
 
 `FYLKREN_FEDERATION_RETENTION_DAYS` controls federation-history retention and defaults to 2,555 days (seven years); supported values are 365–3,650. Once per day, including shortly after API startup, maintenance removes bounded batches of delivered outbound messages and inbound receipts older than the cutoff only when their local work is terminal, and federation audit events older than the same cutoff. Pending, retrying and failed messages and active-work correlation records are retained. Archive evidence required beyond the configured period before lowering it; deleted history is not restored by later increasing the value.
 

@@ -69,19 +69,19 @@ Use the [security test plan](../security/SECURITY_TEST_PLAN.md), [threat model](
 
 ## Internationalization
 
-Internationalization starts after repository and security gates are stable. Move all user-visible text from source code into language resources and provide complete Norwegian Bokmål and English catalogs.
+Internationalization is an active pre-release gate. Move all user-visible text from source code into language resources. English is the complete source catalog and mandatory fallback; Norwegian Bokmål is a separate complete catalog.
 
 Requirements include:
 
 - stable, language-neutral routes, permalinks, API contracts, database identifiers, and audit event types;
 - locale-aware dates, times, numbers, plural forms, sorting, and search behavior;
-- configured default language and timezone with documented fallback;
+- database-backed language, IANA time zone, clock-format and measurement-system defaults managed by Platform Manager, with documented English fallback;
 - translated navigation, validation, help, templates, email notifications, reports, print/PDF, bootstrap, and authentication;
 - accessibility labels and error messages included in translation coverage;
-- automated checks for missing and unused keys and layout regression with longer English text;
+- automated checks for missing and unused keys, repository-language violations and layout regression with longer localized text;
 - no translation of tenant/site names, user content, historical snapshots, or managed classification definitions.
 
-Existing `nb-NO` behavior must remain compatible during migration.
+Existing `nb-NO` behavior must remain compatible during migration. Norwegian text is permitted only inside the dedicated `nb-NO` language resources; source, comments, tests, examples and documentation remain English.
 
 ## Community and Enterprise release gate
 

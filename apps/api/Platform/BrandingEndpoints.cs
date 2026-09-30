@@ -24,15 +24,15 @@ public static partial class BrandingEndpoints
             var instanceName = (request.InstanceName ?? "").Trim();
             var theme = request.Theme ?? ""; var primaryColor = request.PrimaryColor ?? ""; var accentColor = request.AccentColor ?? ""; var topBarColor = request.TopBarColor ?? ""; var topBarTextColor = request.TopBarTextColor ?? "";
             var customCss = request.CustomCss ?? "";
-            if (name.Length is < 2 or > 80 || instanceName.Length is < 2 or > 80 || theme is not ("light" or "dark" or "system") || !HexColor().IsMatch(primaryColor) || !HexColor().IsMatch(accentColor) || !HexColor().IsMatch(topBarColor) || !HexColor().IsMatch(topBarTextColor)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["branding"] = ["Kontroller produktnavn, installasjonsnavn, tema og farger."] });
-            if (customCss.Length > 20_000 || UnsafeCss().IsMatch(customCss)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["customCss"] = ["CSS kan være maksimalt 20 000 tegn og kan ikke hente eksterne ressurser med url() eller @import."] });
+            if (name.Length is < 2 or > 80 || instanceName.Length is < 2 or > 80 || theme is not ("light" or "dark" or "system") || !HexColor().IsMatch(primaryColor) || !HexColor().IsMatch(accentColor) || !HexColor().IsMatch(topBarColor) || !HexColor().IsMatch(topBarTextColor)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["branding"] = ["Check the product name, installation name, theme and colors."] });
+            if (customCss.Length > 20_000 || UnsafeCss().IsMatch(customCss)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["customCss"] = ["CSS may contain at most 20,000 characters and cannot load external resources through url() or @import."] });
             var value = await db.BrandingSettings.SingleAsync(x => x.Id == SettingsId, ct); value.Update(name, instanceName, theme, primaryColor.ToLowerInvariant(), accentColor.ToLowerInvariant(), topBarColor.ToLowerInvariant(), topBarTextColor.ToLowerInvariant(), customCss); Record(db, context, "branding.updated"); await db.SaveChangesAsync(ct); return Results.NoContent();
         });
         admin.MapPut("/logo", async (IAntiforgery antiforgery, HttpContext context, FylkrenDbContext db, CancellationToken ct) =>
         {
             if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest(); var form = await context.Request.ReadFormAsync(ct); var logo = form.Files.GetFile("logo");
             var validatedLogo = await SafeImageUpload.ReadAsync(logo, ct);
-            if (validatedLogo is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["logo"] = ["Bruk et gyldig PNG-, JPEG- eller WebP-bilde på maksimalt 2 MB. Filinnholdet må samsvare med filtypen."] });
+            if (validatedLogo is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["logo"] = ["Use a valid PNG, JPEG or WebP image up to 2 MB. File content must match its declared type."] });
             var value = await db.BrandingSettings.SingleAsync(x => x.Id == SettingsId, ct); value.SetLogo(validatedLogo.Bytes, validatedLogo.ContentType); Record(db, context, "branding.logo-updated"); await db.SaveChangesAsync(ct); return Results.NoContent();
         });
         admin.MapDelete("/logo", async (IAntiforgery antiforgery, HttpContext context, FylkrenDbContext db, CancellationToken ct) => { if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest(); var value = await db.BrandingSettings.SingleAsync(x => x.Id == SettingsId, ct); value.SetLogo(null, null); Record(db, context, "branding.logo-removed"); await db.SaveChangesAsync(ct); return Results.NoContent(); });

@@ -85,7 +85,7 @@ await using (var scope = app.Services.CreateAsyncScope())
 {
     var database = scope.ServiceProvider.GetRequiredService<FylkrenDbContext>();
     await database.Database.MigrateAsync();
-    await DatabaseDefaults.EnsureCreatedAsync(database);
+    await DatabaseDefaults.EnsureCreatedAsync(database, fylkrenOptions);
     await scope.ServiceProvider.GetRequiredService<IdentityProviderConfigurationService>()
         .InitializeAsync(database);
 }
@@ -111,6 +111,7 @@ app.MapDecisionEndpoints();
 app.MapWorkflowEndpoints();
 app.MapExecutionEndpoints();
 app.MapBrandingEndpoints();
+app.MapRegionalSettingsEndpoints();
 app.MapClassificationEndpoints();
 app.MapIdentityProviderEndpoints();
 app.MapWebAuthnEndpoints();

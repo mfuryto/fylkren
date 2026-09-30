@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace Fylkren.Api.Platform;
@@ -22,17 +21,6 @@ public sealed class FylkrenOptions
             !string.IsNullOrEmpty(publicUri.Fragment))
             throw new InvalidOperationException("Fylkren:PublicUrl must be an origin-only HTTP(S) URL without credentials, path, query or fragment.");
         PublicUrl = PublicUrl.TrimEnd('/');
-        if (string.IsNullOrWhiteSpace(Localization.DefaultLanguage))
-            throw new InvalidOperationException("Fylkren:Localization:DefaultLanguage must not be empty.");
-        try { _ = CultureInfo.GetCultureInfo(Localization.DefaultLanguage); }
-        catch (CultureNotFoundException) { throw new InvalidOperationException($"Fylkren:Localization:DefaultLanguage '{Localization.DefaultLanguage}' is not a valid culture."); }
-
-        if (string.IsNullOrWhiteSpace(Localization.TimeZone))
-            throw new InvalidOperationException("Fylkren:Localization:TimeZone must not be empty.");
-        try { _ = TimeZoneInfo.FindSystemTimeZoneById(Localization.TimeZone); }
-        catch (TimeZoneNotFoundException) { throw new InvalidOperationException($"Fylkren:Localization:TimeZone '{Localization.TimeZone}' is not available in this runtime."); }
-        catch (InvalidTimeZoneException) { throw new InvalidOperationException($"Fylkren:Localization:TimeZone '{Localization.TimeZone}' is invalid."); }
-
         ValidateOidc();
         ValidateSaml();
         ValidateDirectory("Active Directory", Authentication.ActiveDirectory);
@@ -124,8 +112,8 @@ public sealed class FylkrenOptions
 
 public sealed class LocalizationOptions
 {
-    public string DefaultLanguage { get; set; } = "nb-NO";
-    public string TimeZone { get; set; } = "Europe/Oslo";
+    public string DefaultLanguage { get; set; } = "en";
+    public string TimeZone { get; set; } = "UTC";
 }
 
 public sealed class FeatureOptions { }
@@ -191,4 +179,4 @@ public sealed class DirectoryLifecycleOptions
     public int IntervalMinutes { get; set; } = 15;
     public int MissingConfirmationCount { get; set; } = 3;
 }
-public sealed class WebAuthnOptions { public bool Enabled { get; set; } public string RpId { get; set; } = "localhost"; public string DisplayName { get; set; } = "Lokal installasjon"; public HashSet<string> Origins { get; set; } = ["http://localhost:8080"]; }
+public sealed class WebAuthnOptions { public bool Enabled { get; set; } public string RpId { get; set; } = "localhost"; public string DisplayName { get; set; } = "Local installation"; public HashSet<string> Origins { get; set; } = ["http://localhost:8080"]; }

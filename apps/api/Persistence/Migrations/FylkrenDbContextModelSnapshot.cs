@@ -2394,6 +2394,42 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.ToTable("branding_settings", (string)null);
                 });
 
+            modelBuilder.Entity("Fylkren.Api.Platform.RegionalSettings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ClockFormat")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("clock_format");
+
+                    b.Property<string>("DefaultLanguage")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("default_language");
+
+                    b.Property<string>("MeasurementSystem")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("measurement_system");
+
+                    b.Property<string>("TimeZone")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("time_zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("regional_settings", (string)null);
+                });
+
             modelBuilder.Entity("Fylkren.Api.Platform.ClassificationDefinition", b =>
                 {
                     b.Property<Guid>("Id")

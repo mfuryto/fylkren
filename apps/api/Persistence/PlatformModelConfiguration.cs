@@ -210,6 +210,14 @@ internal static class PlatformModelConfiguration
         branding.Property(value => value.CustomCss).HasColumnName("custom_css").HasMaxLength(20_000).IsRequired();
         branding.Property(value => value.Logo).HasColumnName("logo"); branding.Property(value => value.LogoContentType).HasColumnName("logo_content_type").HasMaxLength(50);
 
+        var regional = modelBuilder.Entity<RegionalSettings>();
+        regional.ToTable("regional_settings"); regional.HasKey(value => value.Id);
+        regional.Property(value => value.Id).HasColumnName("id");
+        regional.Property(value => value.DefaultLanguage).HasColumnName("default_language").HasMaxLength(16).IsRequired();
+        regional.Property(value => value.TimeZone).HasColumnName("time_zone").HasMaxLength(100).IsRequired();
+        regional.Property(value => value.ClockFormat).HasColumnName("clock_format").HasMaxLength(16).IsRequired();
+        regional.Property(value => value.MeasurementSystem).HasColumnName("measurement_system").HasMaxLength(16).IsRequired();
+
         var smtp = modelBuilder.Entity<SmtpSettings>();
         smtp.ToTable("smtp_settings"); smtp.HasKey(value => value.Id);
         smtp.Property(value => value.Id).HasColumnName("id");

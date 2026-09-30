@@ -2,7 +2,7 @@
 
 ## Scope
 
-The deployed 0.69.0 `GET /api/configuration/public` response exposed the exact version, edition, Enterprise entitlement IDs, Community site limit and active classification labels to unauthenticated callers. The response held no credentials, but this metadata was unnecessary for the sign-in page and aided installation fingerprinting. The 0.69.1 change narrows the anonymous response to language, time zone, setup state and configured sign-in methods. The previous detailed response moves to authenticated `GET /api/configuration`.
+The deployed 0.69.0 `GET /api/configuration/public` response exposed the exact version, edition, Enterprise entitlement IDs, Community site limit and active classification labels to unauthenticated callers. The response held no credentials, but this metadata was unnecessary for the sign-in page and aided installation fingerprinting. The 0.69.1 change narrowed the anonymous response to presentation defaults, setup state and configured sign-in methods. Presentation defaults now include language, time zone, clock format and measurement system. The detailed response remains authenticated at `GET /api/configuration`.
 
 The anonymous endpoint remains reachable from remote browsers. Binding it to 127.0.0.1 would break normal browser login; the loopback binding belongs to the API deployment behind its reverse proxy, while authentication and response minimization protect this application endpoint.
 

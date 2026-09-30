@@ -12,9 +12,6 @@ import { AppContent, preloadOperationalPages } from "./app/AppContent";
 import { getDescendantWorkload, getOverviewWorkItems, getTaskContext } from "./tasks/taskApi";
 import { applyBrandingFavicon } from "./branding/favicon";
 
-let displayLanguage = "nb-NO";
-let displayTimeZone = "Europe/Oslo";
-
 function warmAuthenticatedExperience(session: Session, location = currentAppLocation()) {
   if (!session.authenticated) return;
   preloadOperationalPages();
@@ -38,7 +35,7 @@ function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [branding, setBranding] = useState<Branding>({
     productName: "Fylkren",
-    instanceName: "Lokal installasjon",
+    instanceName: "Local installation",
     theme: "light",
     primaryColor: "#315c53",
     accentColor: "#174d43",
@@ -57,25 +54,25 @@ function App() {
     if (!window.location.hash) navigateToLocation({ page: "Oversikt" }, true);
     const locationChanged = () => setAppLocation(currentAppLocation());
     window.addEventListener("hashchange", locationChanged);
-    apiGet<Branding>("/api/branding", "Profileringen kunne ikke lastes.")
+    apiGet<Branding>("/api/branding", "Branding could not be loaded.")
       .then((value) => {
         setBranding(value);
         setBrandingReady(true);
         document.title = value.productName;
       })
       .catch(() => setBrandingReady(true));
-    apiGet<LoginConfiguration>("/api/configuration/public", "Innloggingsvalgene kunne ikke lastes.")
+    apiGet<LoginConfiguration>("/api/configuration/public", "Sign-in options could not be loaded.")
       .then((value) => {
-        displayLanguage = value.defaultLanguage;
-        displayTimeZone = value.timeZone;
         setLoginConfiguration(value);
         document.documentElement.lang = value.defaultLanguage;
       })
       .catch(() =>
         setLoginConfiguration({
           setupRequired: false,
-          defaultLanguage: "nb-NO",
-          timeZone: "Europe/Oslo",
+          defaultLanguage: "en",
+          timeZone: "UTC",
+          clockFormat: "24-hour",
+          measurementSystem: "metric",
           authentication: {
             localEnabled: true,
             mfaEnabled: true,
@@ -87,12 +84,12 @@ function App() {
           },
         }),
       );
-    apiGet<Session>("/api/session", "Økten kunne ikke lastes.")
+    apiGet<Session>("/api/session", "The session could not be loaded.")
       .then((value) => {
         warmAuthenticatedExperience(value);
         setSession(value);
         if (value.authenticated)
-          void apiGet<PublicConfiguration>("/api/configuration", "Konfigurasjonen kunne ikke lastes.")
+          void apiGet<PublicConfiguration>("/api/configuration", "Configuration could not be loaded.")
             .then(setConfiguration)
             .catch(() => setConfigurationError(true));
       })
@@ -110,15 +107,26 @@ function App() {
   useEffect(() => {
     const refresh = window.setInterval(() => {
       if (session?.authenticated)
-        void apiGet<PublicConfiguration>("/api/configuration", "Lisensstatus kunne ikke oppdateres.")
+        void apiGet<PublicConfiguration>("/api/configuration", "License status could not be refreshed.")
           .then(setConfiguration)
           .catch(() => undefined);
     }, 60_000);
     return () => window.clearInterval(refresh);
   }, [session?.authenticated]);
 
+  const activeRegionalSettings = configuration ?? loginConfiguration;
+  const displayTimeZone = activeRegionalSettings?.timeZone ?? "UTC";
+  const baseLanguage = activeRegionalSettings?.defaultLanguage ?? "en";
+  const displayLanguage = new Intl.Locale(baseLanguage, {
+    hourCycle: activeRegionalSettings?.clockFormat === "12-hour" ? "h12" : "h23",
+  }).toString();
+
+  useEffect(() => {
+    document.documentElement.lang = baseLanguage;
+  }, [baseLanguage]);
+
   if (session === null || loginConfiguration === null)
-    return <div className="login-page">Laster …</div>;
+    return <div className="login-page">Loading…</div>;
   const brandedStyle = {
     "--brand": branding.primaryColor,
     "--accent": branding.accentColor,
@@ -137,7 +145,7 @@ function App() {
         {branding.customCss && <style id="customer-css-overrides">{branding.customCss}</style>}
         <LoginPage
           onSignedIn={(nextSession) => {
-            void apiGet<PublicConfiguration>("/api/configuration", "Konfigurasjonen kunne ikke lastes.")
+            void apiGet<PublicConfiguration>("/api/configuration", "Configuration could not be loaded.")
               .then(setConfiguration)
               .catch(() => setConfigurationError(true));
             warmAuthenticatedExperience(nextSession);
@@ -173,12 +181,12 @@ function App() {
 
   if (configuration === null)
     return <div className="login-page">{configurationError
-      ? <div><p>Konfigurasjonen kunne ikke lastes.</p><button type="button" onClick={() => {
+      ? <div><p>Configuration could not be loaded.</p><button type="button" onClick={() => {
           setConfigurationError(false);
-          void apiGet<PublicConfiguration>("/api/configuration", "Konfigurasjonen kunne ikke lastes.")
+          void apiGet<PublicConfiguration>("/api/configuration", "Configuration could not be loaded.")
             .then(setConfiguration).catch(() => setConfigurationError(true));
-        }}>Prøv igjen</button></div>
-      : "Laster konfigurasjon …"}</div>;
+        }}>Try again</button></div>
+      : "Loading configuration…"}</div>;
 
   function navigateTo(item: string) {
     if (item === activeItem && !appLocation.siteId && !appLocation.itemId && !appLocation.runId && !appLocation.reportId) return;
@@ -225,7 +233,7 @@ function App() {
         version={configuration.version}
         edition={configuration.edition}
       >
-        <Suspense fallback={<div className="page"><p className="status-message">Laster side …</p></div>}>
+        <Suspense fallback={<div className="page"><p className="status-message">Loading page…</p></div>}>
         <AppContent
           effectiveItem={effectiveItem}
           session={session}
@@ -241,7 +249,16 @@ function App() {
             setBranding(value);
             document.title = value.productName;
           }}
-          onConfigurationChanged={setConfiguration}
+          onConfigurationChanged={(value) => {
+            setConfiguration(value);
+            setLoginConfiguration((current) => current ? {
+              ...current,
+              defaultLanguage: value.defaultLanguage,
+              timeZone: value.timeZone,
+              clockFormat: value.clockFormat,
+              measurementSystem: value.measurementSystem,
+            } : current);
+          }}
         />
         </Suspense>
       </ProductShell>

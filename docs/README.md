@@ -21,6 +21,7 @@ Before public publication, run `bash tools/security/verify-repository-safety.sh 
 - [Independent-instance federation foundation](architecture/INSTANCE_FEDERATION.md)
 - [Community and Enterprise entitlements](architecture/EDITION_ENTITLEMENTS.md)
 - [Platform license API](api/PLATFORM_LICENSE_API.md)
+- [Regional settings API](api/REGIONAL_SETTINGS_API.md)
 - [Versioning and formal approvals](architecture/FORMAL_APPROVALS.md)
 - [User interface and white-label design](product/UI_AND_WHITE_LABEL.md)
 - [Repository structure](architecture/REPOSITORY_STRUCTURE.md)
@@ -88,7 +89,8 @@ Before public publication, run `bash tools/security/verify-repository-safety.sh 
 ## Documentation rules
 
 - Repository documentation, source comments, test descriptions and examples are written in English.
-- UI localization is separate from repository language. Norwegian Bokmål remains `nb-NO`; English will be an additional complete locale.
+- `pnpm check:language` rejects Norwegian added outside the dedicated `nb-NO` catalog. `pnpm check:language:full` is the final migration gate and must pass before the release candidate is frozen.
+- UI localization is separate from repository language. English is the source catalog and mandatory fallback; Norwegian Bokmål is a separate complete `nb-NO` language pack.
 - Routes, API contracts, persistent identifiers and permalinks remain language-neutral.
 - Documentation must describe current behavior. Planned behavior belongs in the roadmap, and released changes belong in the changelog.
 - Air-gapped operation must never depend on external documentation, fonts, scripts or runtime lookups.
