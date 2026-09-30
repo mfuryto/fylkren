@@ -1,4 +1,5 @@
 import { responseErrorMessage } from "./errors";
+import { translateActive as t } from "../localization";
 
 const getCache = new Map<string, { expiresAt: number; promise: Promise<unknown> }>();
 
@@ -15,7 +16,7 @@ export async function apiRequest(path: string, fallback: string, init?: RequestI
 }
 
 export async function getAntiforgeryToken() {
-  const response = await apiRequest("/api/security/antiforgery", "Sikkerhetstoken kunne ikke hentes.");
+  const response = await apiRequest("/api/security/antiforgery", t("securityTokenLoadFailed"));
   return ((await response.json()) as { token: string }).token;
 }
 

@@ -94,8 +94,8 @@ export function ReportsPage({ language, timeZone, classificationMarkings, permal
         onYearChange={value => { setYear(value); setPage(1); }} onSearchChange={setSearch}
         onSubmit={event => { event.preventDefault(); setPage(1); setAppliedSearch(search.trim()); }}
       />
-      <ReportArchiveList reports={reports} loading={loading} total={total} page={page} language={language} timeZone={timeZone} onSelect={report => { setSelected(report); navigateToLocation({ page: "Rapporter", siteId: selectedSiteId, unitId: selectedUnitId || undefined, reportId: report.id, year }); }} onPageChange={setPage}/>
+      <ReportArchiveList reports={reports} loading={loading} total={total} page={page} language={language} timeZone={timeZone} onSelect={report => { setSelected(report); navigateToLocation({ page: "Reports", siteId: selectedSiteId, unitId: selectedUnitId || undefined, reportId: report.id, year }); }} onPageChange={setPage}/>
     </>}
-    {selected && <ReportViewer report={selected} language={language} timeZone={timeZone} classificationMarkings={classificationMarkings} onCopyLink={() => { void copyPermalink({ page: "Rapporter", siteId: selectedSiteId, unitId: selectedUnitId || undefined, reportId: selected.id, year }).then(() => setLinkMessage("Lenken til rapporten er kopiert.")).catch(() => setError("Lenken kunne ikke kopieres.")); }} onClose={() => setSelected(null)}/>}
+    {selected && <ReportViewer report={selected} language={language} timeZone={timeZone} classificationMarkings={classificationMarkings} onCopyLink={() => { void copyPermalink({ page: "Reports", siteId: selectedSiteId, unitId: selectedUnitId || undefined, reportId: selected.id, year }).then(() => setLinkMessage("Lenken til rapporten er kopiert.")).catch(() => setError("Lenken kunne ikke kopieres.")); }} onClose={() => setSelected(null)}/>}
   </div>;
 }

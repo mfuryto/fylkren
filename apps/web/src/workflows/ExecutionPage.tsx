@@ -165,15 +165,15 @@ export function ExecutionPage({ session, language, classificationMarkings, perma
       managedItemIds={managedItemIds}
       planContextIds={planContextIds}
       childUnits={childUnits}
-      onToggle={itemId => { setOpenItemId(current => current === itemId ? null : itemId); navigateToLocation({ page: "Utførelse", siteId, itemId }); }}
-      onCopyLink={itemId => { void copyPermalink({ page: "Utførelse", siteId, itemId }).then(() => setLinkMessage("Lenken til utførelsen er kopiert.")).catch(() => setError("Lenken kunne ikke kopieres.")); }}
+      onToggle={itemId => { setOpenItemId(current => current === itemId ? null : itemId); navigateToLocation({ page: "Execution", siteId, itemId }); }}
+      onCopyLink={itemId => { void copyPermalink({ page: "Execution", siteId, itemId }).then(() => setLinkMessage("Lenken til utførelsen er kopiert.")).catch(() => setError("Lenken kunne ikke kopieres.")); }}
       onToggleDetails={itemId => setExpandedItemId(current => current === itemId ? null : itemId)}
       onShowPlan={item => { void showPlan(item); }}
       onClaim={item => { void mutate(`/api/execution/items/${item.id}/claim`).catch(problem => setError(problem.message)); }}
       onRelease={item => { if (item.run) void mutate(`/api/execution/${item.run.id}/release`).catch(problem => setError(problem.message)); }}
       onReassign={item => { void openExecutionReassignment(item); }}
       onAllocateDownward={(item, availableUnits) => setDownwardAllocation({ item, unitId: availableUnits[0].id, instruction: item.description })}
-      onPageChange={value => { setQueuePage(value); setOpenItemId(null); navigateToLocation({ page: "Utførelse", siteId }, true); }}
+      onPageChange={value => { setQueuePage(value); setOpenItemId(null); navigateToLocation({ page: "Execution", siteId }, true); }}
       renderEditor={item => item.run?.claimedByPersonId === session.personId ? <ExecutionWorkflowEditor
         item={item} language={language} definitions={definitionOptions(item)} selectedDefinitions={selectedDefinitions}
         setSelectedDefinitions={setSelectedDefinitions} drafts={drafts} setDrafts={setDrafts}

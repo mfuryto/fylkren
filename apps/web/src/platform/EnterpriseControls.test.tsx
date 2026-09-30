@@ -11,7 +11,7 @@ describe("Enterprise controls in the platform UI", () => {
     expect(html).toContain("API-klienter");
     expect(html).toContain("Tildelte rapporttilganger");
     expect(html).toContain("Leveringshistorikk");
-    expect(html.match(/Krever Enterpriselisens/g)).toHaveLength(2);
+    expect(html.match(/Requires an Enterprise license/g)).toHaveLength(2);
   });
 
   it("removes only the notice for each entitled capability", () => {
@@ -19,9 +19,9 @@ describe("Enterprise controls in the platform UI", () => {
     expect(machineOnly).toContain("Ny API-klient");
     expect(machineOnly).toContain("Ny rapporttilgang");
     expect(machineOnly).toContain("Ny webhook");
-    expect(machineOnly.match(/Krever Enterpriselisens/g)).toHaveLength(1);
+    expect(machineOnly.match(/Requires an Enterprise license/g)).toHaveLength(1);
     const all = renderToStaticMarkup(<PlatformApiPage language="nb-NO" timeZone="Europe/Oslo" entitlements={["machine-api", "webhooks"]} />);
     expect(all).toContain("Ny webhook");
-    expect(all).not.toContain("Krever Enterpriselisens");
+    expect(all).not.toContain("Requires an Enterprise license");
   });
 });

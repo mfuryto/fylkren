@@ -12,6 +12,7 @@ export function ClassificationControls({
   onChange: (value: string) => void;
   markings: ClassificationMarking[];
 }) {
+  const t = useTranslation();
   if (markings.length === 0) return null;
 
   const selected = markings.find((marking) =>
@@ -22,14 +23,14 @@ export function ClassificationControls({
     : value;
 
   return (
-    <div className="classification-controls" aria-label="Klassifiseringsmerking">
-      <span>Merking:</span>
+    <div className="classification-controls" aria-label={t("classificationMarking")}>
+      <span>{t("marking")}</span>
       <button
         className={!selected ? "selected" : ""}
         type="button"
         onClick={() => onChange(unmarked)}
       >
-        Ingen
+        {t("none")}
       </button>
       {markings.map((marking) => (
         <button
@@ -47,3 +48,4 @@ export function ClassificationControls({
     </div>
   );
 }
+import { useTranslation } from "../localization/LocalizationProvider";

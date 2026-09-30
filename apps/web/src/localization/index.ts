@@ -9,6 +9,19 @@ export function normalizeLanguage(value: string): SupportedLanguage {
   return normalized.startsWith("nb") || normalized.startsWith("no") ? "nb-NO" : "en";
 }
 
-export function translate(language: string, key: MessageKey): string {
-  return normalizeLanguage(language) === "nb-NO" ? nbNO[key] ?? en[key] : en[key];
+export type MessageVariables = Record<string, string | number>;
+let activeLanguage: SupportedLanguage = "en";
+
+export function setActiveLanguage(language: string) {
+  activeLanguage = normalizeLanguage(language);
+}
+
+export function translate(language: string, key: MessageKey, variables: MessageVariables = {}): string {
+  const message = normalizeLanguage(language) === "nb-NO" ? nbNO[key] ?? en[key] : en[key];
+  return message.replace(/\{([A-Za-z][A-Za-z0-9]*)\}/g, (match, name: string) =>
+    Object.hasOwn(variables, name) ? String(variables[name]) : match);
+}
+
+export function translateActive(key: MessageKey, variables: MessageVariables = {}) {
+  return translate(activeLanguage, key, variables);
 }

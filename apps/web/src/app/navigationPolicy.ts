@@ -1,58 +1,59 @@
 import type { Session } from "../work/WorkContextModels";
+import type { AppPage } from "../navigation/permalinks";
 
-const platformNavigation = [
-  "Plattform",
+const platformNavigation: AppPage[] = [
+  "Platform",
   "Sites",
-  "Identitet",
-  "Klassifisering",
+  "Identity",
+  "Classifications",
   "API",
-  "Federering",
-  "Lisens",
-  "E-post",
-  "Utseende",
-  "Revisjon",
+  "Federation",
+  "License",
+  "Email",
+  "Appearance",
+  "Audit",
 ];
-const siteAdministrationNavigation = ["Organisasjon", "Personell"];
-const siteManagerNavigation = [
+const siteAdministrationNavigation: AppPage[] = ["Organization", "Personnel"];
+const siteManagerNavigation: AppPage[] = [
   ...siteAdministrationNavigation,
-  "Arbeidsflyter",
-  "Maler",
-  "Varslinger",
-  "Revisjon",
+  "Workflows",
+  "Templates",
+  "Notifications",
+  "Audit",
 ];
 
-export function buildNavigation(session: Session, activeItem: string) {
+export function buildNavigation(session: Session, activeItem: AppPage) {
   const operationalAdministrationNavigation =
     session.administersSite || session.canApproveWork
       ? siteAdministrationNavigation
       : [];
   const effectiveItem = session.mustChangePassword
-    ? "Profil"
+    ? "Profile"
     : session.isPlatformManager &&
-        activeItem !== "Profil" &&
+        activeItem !== "Profile" &&
         !platformNavigation.includes(activeItem)
-      ? "Plattform"
+      ? "Platform"
       : session.canExecute &&
           !session.hasOperationalRole &&
-          activeItem !== "Profil" &&
-          activeItem !== "Utførelse" &&
+          activeItem !== "Profile" &&
+          activeItem !== "Execution" &&
           !siteManagerNavigation.includes(activeItem)
-        ? "Utførelse"
+        ? "Execution"
         : session.managesSites &&
             !session.hasOperationalRole &&
             !session.canExecute &&
-            activeItem !== "Profil" &&
+            activeItem !== "Profile" &&
             !siteManagerNavigation.includes(activeItem)
-          ? "Organisasjon"
+          ? "Organization"
           : activeItem;
   const primaryNavigation = session.isPlatformManager
     ? []
     : [
-        ...(session.hasOperationalRole ? ["Oversikt", "Oppgaver"] : []),
-        ...(session.isTopLevelLeader ? ["Belastning"] : []),
-        ...(session.canPlan || session.canApproveWork ? ["Planlegging"] : []),
-        ...(session.canExecute ? ["Utførelse"] : []),
-        ...(session.hasOperationalRole ? ["Rapporter"] : []),
+        ...(session.hasOperationalRole ? ["Overview", "Tasks"] as AppPage[] : []),
+        ...(session.isTopLevelLeader ? ["Workload"] as AppPage[] : []),
+        ...(session.canPlan || session.canApproveWork ? ["Planning"] as AppPage[] : []),
+        ...(session.canExecute ? ["Execution"] as AppPage[] : []),
+        ...(session.hasOperationalRole ? ["Reports"] as AppPage[] : []),
       ];
   const administrationNavigation = session.isPlatformManager
     ? platformNavigation

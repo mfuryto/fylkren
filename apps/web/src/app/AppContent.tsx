@@ -1,7 +1,7 @@
 import { lazy } from "react";
 import { apiGet } from "../api/client";
 import type { Branding, PublicConfiguration } from "./models";
-import type { AppLocation } from "../navigation/permalinks";
+import type { AppLocation, AppPage } from "../navigation/permalinks";
 import type { Session } from "../work/WorkContextModels";
 
 const loadWorkOverview = () => import("../overview/OverviewPages");
@@ -58,14 +58,14 @@ export function AppContent({
   onBrandingChanged,
   onConfigurationChanged,
 }: {
-  effectiveItem: string;
+  effectiveItem: AppPage;
   session: Session;
   configuration: PublicConfiguration;
   branding: Branding;
   location: AppLocation;
   language: string;
   timeZone: string;
-  onNavigate: (item: string) => void;
+  onNavigate: (item: AppPage) => void;
   onSessionChanged: (session: Session) => void;
   onSignOut: () => void;
   onBrandingChanged: (branding: Branding) => void;
@@ -75,26 +75,26 @@ export function AppContent({
     ? configuration.classificationMarkings
     : [];
 
-  if (effectiveItem === "Profil")
+  if (effectiveItem === "Profile")
     return <ProfilePage session={session} configuration={configuration} onSessionChanged={onSessionChanged} onSignOut={onSignOut} />;
-  if (effectiveItem === "Plattform" && session.isPlatformManager) return <PlatformPage />;
-  if (effectiveItem === "Planlegging")
+  if (effectiveItem === "Platform" && session.isPlatformManager) return <PlatformPage />;
+  if (effectiveItem === "Planning")
     return <PlanningPage session={session} language={language} timeZone={timeZone} classificationMarkings={classificationMarkings} permalink={location} />;
-  if (effectiveItem === "Utførelse") return <ExecutionPage session={session} language={language} classificationMarkings={classificationMarkings} permalink={location} />;
-  if (effectiveItem === "Rapporter")
+  if (effectiveItem === "Execution") return <ExecutionPage session={session} language={language} classificationMarkings={classificationMarkings} permalink={location} />;
+  if (effectiveItem === "Reports")
     return <ReportsPage language={language} timeZone={timeZone} classificationMarkings={classificationMarkings} permalink={location} />;
-  if (effectiveItem === "Belastning") return <WorkloadHistoryPage personId={session.personId} language={language} timeZone={timeZone} />;
-  if (effectiveItem === "Arbeidsflyter" && session.managesSites) return <WorkflowsPage />;
-  if (effectiveItem === "Maler" && session.managesSites) return <TemplatesPage />;
-  if (effectiveItem === "Identitet" && session.isPlatformManager)
+  if (effectiveItem === "Workload") return <WorkloadHistoryPage personId={session.personId} language={language} timeZone={timeZone} />;
+  if (effectiveItem === "Workflows" && session.managesSites) return <WorkflowsPage />;
+  if (effectiveItem === "Templates" && session.managesSites) return <TemplatesPage />;
+  if (effectiveItem === "Identity" && session.isPlatformManager)
     return <IdentityProvidersPage language={language} timeZone={timeZone} canManageExternalIdentity={configuration.entitlements.includes("external-identity")} />;
   if (effectiveItem === "API" && session.isPlatformManager)
     return <PlatformApiPage language={language} timeZone={timeZone} entitlements={configuration.entitlements} />;
-  if (effectiveItem === "Federering" && session.isPlatformManager)
+  if (effectiveItem === "Federation" && session.isPlatformManager)
     return <FederationPage canManage={configuration.entitlements.includes("instance-federation")} />;
-  if (effectiveItem === "Lisens" && session.isPlatformManager)
+  if (effectiveItem === "License" && session.isPlatformManager)
     return <PlatformLicensePage onChanged={async () => onConfigurationChanged(await apiGet<PublicConfiguration>("/api/configuration", "License status could not be refreshed."))} />;
-  if (effectiveItem === "Klassifisering" && session.isPlatformManager)
+  if (effectiveItem === "Classifications" && session.isPlatformManager)
     return (
       <PlatformClassificationsPage
         onChanged={async () =>
@@ -107,8 +107,8 @@ export function AppContent({
         }
       />
     );
-  if (effectiveItem === "E-post" && session.isPlatformManager) return <SmtpPage />;
-  if (effectiveItem === "Utseende" && session.isPlatformManager)
+  if (effectiveItem === "Email" && session.isPlatformManager) return <SmtpPage />;
+  if (effectiveItem === "Appearance" && session.isPlatformManager)
     return <BrandingPage
       branding={branding}
       regionalSettings={{
@@ -120,16 +120,16 @@ export function AppContent({
       onChanged={onBrandingChanged}
       onRegionalChanged={(value) => onConfigurationChanged({ ...configuration, ...value })}
     />;
-  if (effectiveItem === "Revisjon" && session.isPlatformManager)
+  if (effectiveItem === "Audit" && session.isPlatformManager)
     return <PlatformAuditPage language={language} timeZone={timeZone} />;
-  if (effectiveItem === "Oppgaver")
+  if (effectiveItem === "Tasks")
     return <TasksPage personId={session.personId} language={language} timeZone={timeZone} classificationMarkings={classificationMarkings} permalink={location} />;
   if (effectiveItem === "Sites" && session.isPlatformManager)
     return <SitesPage configuration={configuration} />;
-  if (effectiveItem === "Organisasjon") return <OrganizationPage session={session} />;
-  if (effectiveItem === "Personell") return <PersonnelPage session={session} configuration={configuration} />;
-  if (effectiveItem === "Varslinger" && session.managesSites) return <NotificationSettingsPage />;
-  if (effectiveItem === "Revisjon" && session.managesSites)
+  if (effectiveItem === "Organization") return <OrganizationPage session={session} />;
+  if (effectiveItem === "Personnel") return <PersonnelPage session={session} configuration={configuration} />;
+  if (effectiveItem === "Notifications" && session.managesSites) return <NotificationSettingsPage />;
+  if (effectiveItem === "Audit" && session.managesSites)
     return <SiteAuditPage language={language} timeZone={timeZone} />;
   return <WorkOverview onNavigate={onNavigate} language={language} timeZone={timeZone} personId={session.personId} />;
 }

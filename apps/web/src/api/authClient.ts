@@ -1,5 +1,6 @@
 import { apiGet, apiRequest, clearApiGetCache, getAntiforgeryToken } from "./client";
 import type { Session } from "../work/WorkContextModels";
+import { translateActive as t } from "../localization";
 
 export type PasskeySummary = { id: string; name: string; createdAt: string };
 export type SignInResult = { challengeToken?: string; session?: Session };
@@ -39,7 +40,7 @@ function webAuthnCredential(value: PublicKeyCredential) {
 }
 
 async function session() {
-  return apiGet<Session>("/api/session", "Økten kunne ikke lastes.");
+  return apiGet<Session>("/api/session", t("sessionLoadFailed"));
 }
 
 async function postJson(path: string, body: object, fallback: string, csrf?: string) {
@@ -63,31 +64,31 @@ export async function signIn(provider: string, username: string, password: strin
 }
 
 export async function bootstrapPlatformManager(value: { displayName: string; email: string; username: string; password: string }) {
-  await postJson("/api/bootstrap/platform-manager", value, "Førstegangsoppsettet kunne ikke fullføres.");
+  await postJson("/api/bootstrap/platform-manager", value, t("setupFailed"));
   clearApiGetCache();
   return session();
 }
 
 export async function completePasswordReset(resetCode: string, newPassword: string) {
-  await postJson("/api/password-reset/complete", { resetCode, newPassword }, "Passordet kunne ikke lagres.");
+  await postJson("/api/password-reset/complete", { resetCode, newPassword }, t("passwordUpdateFailed"));
 }
 
 export async function listPasskeys() {
-  return apiGet<PasskeySummary[]>("/api/webauthn/credentials", "Passkeys kunne ikke lastes.");
+  return apiGet<PasskeySummary[]>("/api/webauthn/credentials", t("passkeysLoadFailed"));
 }
 
 export async function registerPasskey(name: string, currentPassword: string) {
   const csrf = await getAntiforgeryToken();
-  const start = await postJson("/api/webauthn/register/options", { name, currentPassword }, "Registreringen kunne ikke startes.", csrf);
+  const start = await postJson("/api/webauthn/register/options", { name, currentPassword }, t("passkeyRegistrationStartFailed"), csrf);
   const data = await start.json();
   const credential = await navigator.credentials.create({ publicKey: webAuthnOptions(data.options) }) as PublicKeyCredential | null;
-  if (!credential) throw new Error("Ingen passkey eller sikkerhetsnøkkel ble valgt.");
-  await postJson("/api/webauthn/register/complete", { token: data.token, credential: webAuthnCredential(credential) }, "Nøkkelen kunne ikke bekreftes.", csrf);
+  if (!credential) throw new Error(t("noPasskeySelected"));
+  await postJson("/api/webauthn/register/complete", { token: data.token, credential: webAuthnCredential(credential) }, t("passkeyVerificationFailed"), csrf);
 }
 
 export async function removePasskey(id: string, currentPassword: string) {
   const csrf = await getAntiforgeryToken();
-  await apiRequest(`/api/webauthn/credentials/${id}`, "Passkey eller sikkerhetsnøkkel kunne ikke fjernes.", {
+  await apiRequest(`/api/webauthn/credentials/${id}`, t("passkeyRemovalFailed"), {
     method: "DELETE",
     headers: { "X-Fylkren-CSRF": csrf, "Content-Type": "application/json" },
     body: JSON.stringify({ currentPassword }),
@@ -96,10 +97,10 @@ export async function removePasskey(id: string, currentPassword: string) {
 }
 
 export async function signInWithPasskey(username: string) {
-  const start = await postJson("/api/webauthn/login/options", { name: username }, "Passkey-innloggingen kunne ikke startes.");
+  const start = await postJson("/api/webauthn/login/options", { name: username }, t("passkeySignInStartFailed"));
   const data = await start.json();
   const credential = await navigator.credentials.get({ publicKey: webAuthnOptions(data.options) }) as PublicKeyCredential | null;
-  if (!credential) throw new Error("Ingen passkey eller sikkerhetsnøkkel ble valgt.");
+  if (!credential) throw new Error(t("noPasskeySelected"));
   await postJson("/api/webauthn/login/complete", { token: data.token, credential: webAuthnCredential(credential) }, "Passkey-innloggingen mislyktes.");
   clearApiGetCache();
   return session();
@@ -107,7 +108,7 @@ export async function signInWithPasskey(username: string) {
 
 export async function signOut() {
   const csrf = await getAntiforgeryToken();
-  await apiRequest("/api/session", "Utloggingen kunne ikke fullføres.", {
+  await apiRequest("/api/session", t("signOutFailed"), {
     method: "DELETE",
     headers: { "X-Fylkren-CSRF": csrf },
   });

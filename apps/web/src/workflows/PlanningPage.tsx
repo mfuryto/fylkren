@@ -209,15 +209,15 @@ export function PlanningPage({
         language={language}
         timeZone={timeZone}
         allocationUnits={allocationUnits}
-        onToggle={runId => { setOpenRunId(current => current === runId ? null : runId); navigateToLocation({ page: "Planlegging", siteId, runId }); }}
-        onCopyLink={runId => { void copyPermalink({ page: "Planlegging", siteId, runId }).then(() => setLinkMessage("Lenken til planleggingen er kopiert.")).catch(() => setError("Lenken kunne ikke kopieres.")); }}
+        onToggle={runId => { setOpenRunId(current => current === runId ? null : runId); navigateToLocation({ page: "Planning", siteId, runId }); }}
+        onCopyLink={runId => { void copyPermalink({ page: "Planning", siteId, runId }).then(() => setLinkMessage("Lenken til planleggingen er kopiert.")).catch(() => setError("Lenken kunne ikke kopieres.")); }}
         onTogglePreview={runId => setPreview(current => current === runId ? null : runId)}
         onRelease={run => { void flushAllocations(run).then(() => mutate(`/api/workflows/planning/${run.id}/release`)).catch(problem => setError(errorMessage(problem,"Planleggingsansvaret kunne ikke frigjøres."))); }}
         onReassign={run => { void openReassignment(run); }}
         onAllocateDownward={(run, childUnits) => setDownwardAllocation({ run, unitId: childUnits[0].id, instruction: run.item.description })}
         onShowAncestor={itemId => { void showParentContext(itemId); }}
         onClaim={run => { void mutate(`/api/workflows/planning/${run.id}/claim`).catch(problem => setError(errorMessage(problem,"Oppgaven kunne ikke tas."))); }}
-        onPageChange={value => { setQueuePage(value); setOpenRunId(null); navigateToLocation({ page: "Planlegging", siteId }, true); }}
+        onPageChange={value => { setQueuePage(value); setOpenRunId(null); navigateToLocation({ page: "Planning", siteId }, true); }}
         renderEditor={run => run.status === "in_progress" && run.claimedByPersonId === session.personId ? (
                 <PlanningStepEditor
                   run={run}

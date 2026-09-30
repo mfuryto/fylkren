@@ -4,11 +4,14 @@ import type { WorkItem } from "../work/WorkItemModels";
 import { getDescendantWorkload, getOverviewWorkItems, getTaskContext } from "../tasks/taskApi";
 import { buildTaskScope } from "../tasks/taskScope";
 import { buildOverviewMetrics, canLoadDescendantWorkload, isReceivedRequest, overviewStatusLabels as statusLabels, overviewWorkspaceFor as workspaceFor } from "./overviewModel";
+import type { AppPage } from "../navigation/permalinks";
+import { useTranslation } from "../localization/LocalizationProvider";
 import { errorMessage } from "../api/errors";
 
 const emptyDescendantWorkload = { active: 0, nearDeadline: 0, overdue: 0, unitSummaries: [], siteSummaries: [] };
 
-export function WorkOverview({ onNavigate, language: displayLanguage, timeZone: displayTimeZone, personId }: { onNavigate: (item: string) => void; language: string; timeZone: string; personId?: string }) {
+export function WorkOverview({ onNavigate, language: displayLanguage, timeZone: displayTimeZone, personId }: { onNavigate: (item: AppPage) => void; language: string; timeZone: string; personId?: string }) {
+  const t = useTranslation();
   const [items, setItems] = useState<WorkItem[]>([]);
   const [sites, setSites] = useState<TaskSite[]>([]);
   const [units, setUnits] = useState<TaskUnit[]>([]);
@@ -141,7 +144,7 @@ export function WorkOverview({ onNavigate, language: displayLanguage, timeZone: 
         <div className="section-heading"><div><h2>Krever handling</h2><p className="muted">Nyeste først</p></div></div>
         <div className="admin-list">{needsAction.slice(0, 8).map((item) => <div className="admin-list-row overview-work-row" key={item.id}>
           <span><strong>{item.title}</strong><small className="muted"><b className={`overview-status-dot overview-status-${item.status}`} aria-hidden="true" />{item.isOutgoingRequest ? `Sendt anmodning · ${item.requestProgressStatus === "completed" ? "Besvart" : ["rejected", "cancelled"].includes(item.requestProgressStatus ?? "") ? "Avsluttet" : "Under behandling"}` : isReceivedRequest(item) ? `Mottatt anmodning · ${statusLabels[item.status] ?? item.status}` : statusLabels[item.status] ?? item.status}{item.dueAt ? ` · frist ${new Date(item.dueAt).toLocaleDateString(displayLanguage, { timeZone: displayTimeZone })}` : ""}{item.unitName ? ` · ${item.unitName}` : ""}</small></span>
-          <button className="secondary-button" type="button" onClick={() => onNavigate(workspaceFor(item))}>Åpne i {workspaceFor(item)}</button>
+          <button className="secondary-button" type="button" onClick={() => onNavigate(workspaceFor(item))}>{t("openInWorkspace", { workspace: t(workspaceFor(item) === "Planning" ? "navPlanning" : workspaceFor(item) === "Execution" ? "navExecution" : "navTasks") })}</button>
         </div>)}</div>
       </section>}
       {!loading && subordinateSummary.length > 0 && <section className="panel overview-section overview-units-section">

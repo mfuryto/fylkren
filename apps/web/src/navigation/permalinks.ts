@@ -1,28 +1,33 @@
-const pagePaths: Record<string, string> = {
-  Oversikt: "overview", Oppgaver: "tasks", Belastning: "workload", Planlegging: "planning",
-  Utførelse: "execution", Rapporter: "reports", Profil: "profile", Plattform: "platform",
-  Sites: "sites", Identitet: "identity", Klassifisering: "classifications", API: "api", Federering: "federation", Lisens: "license",
-  "E-post": "email", Utseende: "appearance", Organisasjon: "organization", Personell: "personnel",
-  Arbeidsflyter: "workflows", Maler: "templates", Varslinger: "notifications", Revisjon: "audit",
+export const appPages = [
+  "Overview", "Tasks", "Workload", "Planning", "Execution", "Reports", "Profile",
+  "Platform", "Sites", "Identity", "Classifications", "API", "Federation", "License",
+  "Email", "Appearance", "Organization", "Personnel", "Workflows", "Templates",
+  "Notifications", "Audit",
+] as const;
+
+export type AppPage = (typeof appPages)[number];
+
+const pagePaths: Record<AppPage, string> = {
+  Overview: "overview", Tasks: "tasks", Workload: "workload", Planning: "planning",
+  Execution: "execution", Reports: "reports", Profile: "profile", Platform: "platform",
+  Sites: "sites", Identity: "identity", Classifications: "classifications", API: "api",
+  Federation: "federation", License: "license", Email: "email", Appearance: "appearance",
+  Organization: "organization", Personnel: "personnel", Workflows: "workflows",
+  Templates: "templates", Notifications: "notifications", Audit: "audit",
 };
 
-const pagesByPath: Record<string, string> = {
-  ...Object.fromEntries(Object.entries(pagePaths).map(([page, path]) => [path, page])),
-  oversikt: "Oversikt", oppgaver: "Oppgaver", belastning: "Belastning", planlegging: "Planlegging",
-  utforelse: "Utførelse", rapporter: "Rapporter", profil: "Profil", plattform: "Plattform",
-  identitet: "Identitet", klassifisering: "Klassifisering", "e-post": "E-post", utseende: "Utseende",
-  organisasjon: "Organisasjon", personell: "Personell", arbeidsflyter: "Arbeidsflyter",
-  maler: "Maler", varslinger: "Varslinger", revisjon: "Revisjon",
+const pagesByPath: Record<string, AppPage> = {
+  ...Object.fromEntries(Object.entries(pagePaths).map(([page, path]) => [path, page as AppPage])),
 };
 
-export type AppLocation = { page: string; siteId?: string; unitId?: string; itemId?: string; runId?: string; reportId?: string; year?: string; taskFilter?: string; taskSearch?: string };
+export type AppLocation = { page: AppPage; siteId?: string; unitId?: string; itemId?: string; runId?: string; reportId?: string; year?: string; taskFilter?: string; taskSearch?: string };
 
 export function parseAppLocation(hash: string): AppLocation {
   const raw = hash.replace(/^#\/?/, "");
   const [path = "", query = ""] = raw.split("?", 2);
   const parameters = new URLSearchParams(query);
   return {
-    page: pagesByPath[path.toLocaleLowerCase()] ?? "Oversikt",
+    page: pagesByPath[path.toLocaleLowerCase()] ?? "Overview",
     siteId: parameters.get("site") ?? undefined,
     unitId: parameters.get("unit") ?? undefined,
     itemId: parameters.get("item") ?? undefined,
@@ -45,7 +50,7 @@ export function buildAppHash(location: AppLocation) {
   if (location.taskFilter) parameters.set("view", location.taskFilter);
   if (location.taskSearch) parameters.set("q", location.taskSearch);
   const query = parameters.toString();
-  return `#/${pagePaths[location.page] ?? pagePaths.Oversikt}${query ? `?${query}` : ""}`;
+  return `#/${pagePaths[location.page]}${query ? `?${query}` : ""}`;
 }
 
 export function currentAppLocation() {

@@ -6,16 +6,18 @@ import { apiGet } from "./api/client";
 import { signOut as endSession } from "./api/authClient";
 import type { Session } from "./work/WorkContextModels";
 import type { Branding, LoginConfiguration, PublicConfiguration } from "./app/models";
-import { currentAppLocation, navigateToLocation } from "./navigation/permalinks";
+import { currentAppLocation, navigateToLocation, type AppPage } from "./navigation/permalinks";
 import { buildNavigation } from "./app/navigationPolicy";
 import { AppContent, preloadOperationalPages } from "./app/AppContent";
 import { getDescendantWorkload, getOverviewWorkItems, getTaskContext } from "./tasks/taskApi";
 import { applyBrandingFavicon } from "./branding/favicon";
+import { LocalizationProvider } from "./localization/LocalizationProvider";
+import { translate } from "./localization";
 
 function warmAuthenticatedExperience(session: Session, location = currentAppLocation()) {
   if (!session.authenticated) return;
   preloadOperationalPages();
-  if (!session.personId || location.page !== "Oversikt") return;
+  if (!session.personId || location.page !== "Overview") return;
   void getTaskContext(session.personId).then((context) => {
     const site = context.sites.find((value) => value.hasOperationalAccess);
     if (!site) return;
@@ -29,8 +31,8 @@ function warmAuthenticatedExperience(session: Session, location = currentAppLoca
 function App() {
   const [appLocation, setAppLocation] = useState(currentAppLocation);
   const activeItem = appLocation.page;
-  const setActiveItem = (page: string) => setAppLocation(current => ({ ...current, page }));
-  const navigationHistory = useRef<string[]>(["Oversikt"]);
+  const setActiveItem = (page: AppPage) => setAppLocation(current => ({ ...current, page }));
+  const navigationHistory = useRef<AppPage[]>(["Overview"]);
   const [navigationIndex, setNavigationIndex] = useState(0);
   const [session, setSession] = useState<Session | null>(null);
   const [branding, setBranding] = useState<Branding>({
@@ -51,7 +53,7 @@ function App() {
   const [loginConfiguration, setLoginConfiguration] = useState<LoginConfiguration | null>(null);
 
   useEffect(() => {
-    if (!window.location.hash) navigateToLocation({ page: "Oversikt" }, true);
+    if (!window.location.hash) navigateToLocation({ page: "Overview" }, true);
     const locationChanged = () => setAppLocation(currentAppLocation());
     window.addEventListener("hashchange", locationChanged);
     apiGet<Branding>("/api/branding", "Branding could not be loaded.")
@@ -126,7 +128,7 @@ function App() {
   }, [baseLanguage]);
 
   if (session === null || loginConfiguration === null)
-    return <div className="login-page">Loading…</div>;
+    return <LocalizationProvider language={baseLanguage}><div className="login-page">Loading…</div></LocalizationProvider>;
   const brandedStyle = {
     "--brand": branding.primaryColor,
     "--accent": branding.accentColor,
@@ -141,7 +143,7 @@ function App() {
         : "";
   if (!session.authenticated)
     return (
-      <div className={themeClass} style={brandedStyle}>
+      <LocalizationProvider language={baseLanguage}><div className={themeClass} style={brandedStyle}>
         {branding.customCss && <style id="customer-css-overrides">{branding.customCss}</style>}
         <LoginPage
           onSignedIn={(nextSession) => {
@@ -150,7 +152,7 @@ function App() {
               .catch(() => setConfigurationError(true));
             warmAuthenticatedExperience(nextSession);
             setSession(nextSession);
-            if (nextSession.mustChangePassword) resetNavigation("Profil");
+            if (nextSession.mustChangePassword) resetNavigation("Profile");
             else {
               const requested = currentAppLocation();
               navigationHistory.current = [requested.page];
@@ -161,18 +163,18 @@ function App() {
           branding={branding}
           configuration={loginConfiguration}
         />
-      </div>
+      </div></LocalizationProvider>
     );
 
   async function signOut() {
     await endSession();
-    resetNavigation("Oversikt");
+    resetNavigation("Overview");
     setConfiguration(null);
     setConfigurationError(false);
     setSession({ authenticated: false, isPlatformManager: false });
   }
 
-  function resetNavigation(item: string) {
+  function resetNavigation(item: AppPage) {
     navigationHistory.current = [item];
     setNavigationIndex(0);
     setActiveItem(item);
@@ -180,15 +182,15 @@ function App() {
   }
 
   if (configuration === null)
-    return <div className="login-page">{configurationError
+    return <LocalizationProvider language={baseLanguage}><div className="login-page">{configurationError
       ? <div><p>Configuration could not be loaded.</p><button type="button" onClick={() => {
           setConfigurationError(false);
           void apiGet<PublicConfiguration>("/api/configuration", "Configuration could not be loaded.")
             .then(setConfiguration).catch(() => setConfigurationError(true));
         }}>Try again</button></div>
-      : "Loading configuration…"}</div>;
+      : "Loading configuration…"}</div></LocalizationProvider>;
 
-  function navigateTo(item: string) {
+  function navigateTo(item: AppPage) {
     if (item === activeItem && !appLocation.siteId && !appLocation.itemId && !appLocation.runId && !appLocation.reportId) return;
     const nextHistory = navigationHistory.current.slice(0, navigationIndex + 1);
     nextHistory.push(item);
@@ -209,20 +211,45 @@ function App() {
 
   const { effectiveItem, administrationNavigation, navigationItems } =
     buildNavigation(session, activeItem);
+  const navigationLabels: Record<AppPage, Parameters<typeof translate>[1]> = {
+    Overview: "navOverview", Tasks: "navTasks", Workload: "navWorkload",
+    Planning: "navPlanning", Execution: "navExecution", Reports: "navReports",
+    Platform: "navPlatform", Sites: "navSites", Identity: "navIdentity",
+    Classifications: "navClassification", API: "navApi", Federation: "navFederation",
+    License: "navLicense", Email: "navEmail", Appearance: "navAppearance",
+    Audit: "navAudit", Organization: "navOrganization", Personnel: "navPersonnel",
+    Workflows: "navWorkflows", Templates: "navTemplates", Notifications: "navNotifications",
+    Profile: "profile",
+  };
 
   return (
-    <div className={themeClass} style={brandedStyle}>
+    <LocalizationProvider language={baseLanguage}><div className={themeClass} style={brandedStyle}>
       {branding.customCss && <style id="customer-css-overrides">{branding.customCss}</style>}
       <ProductShell
         activeItem={effectiveItem}
-        onNavigate={navigateTo}
+        onNavigate={(item) => navigateTo(item as AppPage)}
         navigationItems={navigationItems}
         navigationDividerBefore={administrationNavigation[0]}
+        navigationLabel={(item) => translate(baseLanguage, navigationLabels[item as AppPage] ?? "navOverview")}
+        labels={{
+          demoReadOnly: translate(baseLanguage, "demoReadOnly"),
+          visitedViews: translate(baseLanguage, "visitedViews"),
+          previousView: translate(baseLanguage, "previousView"),
+          nextView: translate(baseLanguage, "nextView"),
+          openMainMenu: translate(baseLanguage, "openMainMenu"),
+          openUserMenu: translate(baseLanguage, "openUserMenu"),
+          userMenu: translate(baseLanguage, "userMenu"),
+          profile: translate(baseLanguage, "profile"),
+          signOut: translate(baseLanguage, "signOut"),
+          closeMainMenu: translate(baseLanguage, "closeMainMenu"),
+          mainNavigation: translate(baseLanguage, "mainNavigation"),
+          menu: translate(baseLanguage, "navigationMenu"),
+        }}
         userLabel={session.displayName ?? session.username ?? "FU"}
         profileImageUrl={
           session.hasProfileImage ? "/api/profile/image" : undefined
         }
-        onProfile={() => navigateTo("Profil")}
+        onProfile={() => navigateTo("Profile")}
         onSignOut={signOut}
         onPrevious={() => navigateInHistory(-1)}
         onNext={() => navigateInHistory(1)}
@@ -262,7 +289,7 @@ function App() {
         />
         </Suspense>
       </ProductShell>
-    </div>
+    </div></LocalizationProvider>
   );
 }
 

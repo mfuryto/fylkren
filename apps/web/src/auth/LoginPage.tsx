@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type React from "react";
 import type { Branding, LoginConfiguration } from "../app/models";
 import { bootstrapPlatformManager, completePasswordReset, signIn, signInWithPasskey } from "../api/authClient";
+import { useTranslation } from "../localization/LocalizationProvider";
 import type { Session } from "../work/WorkContextModels";
 
 export function LoginPage({
@@ -13,6 +14,7 @@ export function LoginPage({
   branding: Branding;
   configuration: LoginConfiguration;
 }) {
+  const t = useTranslation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -32,7 +34,7 @@ export function LoginPage({
         : "ldap",
   );
   const credentialProviders = [
-    ...(configuration.authentication.localEnabled ? [{ value: "local", label: "Lokal konto" }] : []),
+    ...(configuration.authentication.localEnabled ? [{ value: "local", label: t("localAccount") }] : []),
     ...(configuration.authentication.activeDirectoryConfigurationEnabled ? [{ value: "ad", label: "Active Directory" }] : []),
     ...(configuration.authentication.ldapConfigurationEnabled ? [{ value: "ldap", label: "LDAP" }] : []),
   ];
@@ -73,12 +75,12 @@ export function LoginPage({
 
   async function completeSetup(event: React.FormEvent) {
     event.preventDefault();
-    if (setup.password !== setup.confirmPassword) { setSetupError("Passordene er ikke like."); return; }
+    if (setup.password !== setup.confirmPassword) { setSetupError(t("passwordsDoNotMatch")); return; }
     setSubmitting(true); setSetupError("");
     try {
       onSignedIn(await bootstrapPlatformManager({ displayName: setup.displayName, email: setup.email, username: setup.username, password: setup.password }));
     } catch (problem) {
-      setSetupError(problem instanceof Error ? problem.message : "Førstegangsoppsettet kunne ikke fullføres.");
+      setSetupError(problem instanceof Error ? problem.message : t("setupFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -86,15 +88,15 @@ export function LoginPage({
 
   async function submitPasswordReset(event: React.FormEvent) {
     event.preventDefault();
-    if (reset.password !== reset.confirmPassword) { setResetMessage("Passordene er ikke like."); return; }
+    if (reset.password !== reset.confirmPassword) { setResetMessage(t("passwordsDoNotMatch")); return; }
     setSubmitting(true); setResetMessage("");
     try {
       await completePasswordReset(reset.code, reset.password);
       setReset({ code: "", password: "", confirmPassword: "" });
       setResetOpen(false);
-      setResetMessage("Passordet er lagret. Du kan nå logge inn.");
+      setResetMessage(t("passwordSaved"));
     } catch (problem) {
-      setResetMessage(problem instanceof Error ? problem.message : "Passordet kunne ikke lagres.");
+      setResetMessage(problem instanceof Error ? problem.message : t("passwordSaveFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -108,23 +110,23 @@ export function LoginPage({
       </header>
       <main className="login-page">
         <section className="panel login-panel">
-          <h1>Førstegangsoppsett</h1>
-          <p className="muted">Opprett installasjonens første Platform Manager. Veiviseren lukkes permanent når kontoen er opprettet.</p>
+          <h1>{t("firstRunSetup")}</h1>
+          <p className="muted">{t("firstRunIntro")}</p>
           <form className="login-form" onSubmit={completeSetup}>
-            <div className="field"><label htmlFor="setup-display-name">Navn</label><input id="setup-display-name" required minLength={2} maxLength={200} autoComplete="name" value={setup.displayName} onChange={(event) => setSetup({ ...setup, displayName: event.target.value })} /></div>
-            <div className="field"><label htmlFor="setup-email">E-postadresse</label><input id="setup-email" required type="email" maxLength={320} autoComplete="email" value={setup.email} onChange={(event) => setSetup({ ...setup, email: event.target.value })} /></div>
-            <div className="field"><label htmlFor="setup-username">Brukernavn</label><input id="setup-username" required minLength={3} maxLength={100} autoComplete="username" value={setup.username} onChange={(event) => setSetup({ ...setup, username: event.target.value })} /></div>
-            <div className="field"><label htmlFor="setup-password">Passord</label><input id="setup-password" required type="password" minLength={14} maxLength={128} autoComplete="new-password" value={setup.password} onChange={(event) => setSetup({ ...setup, password: event.target.value })} /></div>
-            <div className="field"><label htmlFor="setup-confirm-password">Gjenta passord</label><input id="setup-confirm-password" required type="password" minLength={14} maxLength={128} autoComplete="new-password" value={setup.confirmPassword} onChange={(event) => setSetup({ ...setup, confirmPassword: event.target.value })} /></div>
+            <div className="field"><label htmlFor="setup-display-name">{t("name")}</label><input id="setup-display-name" required minLength={2} maxLength={200} autoComplete="name" value={setup.displayName} onChange={(event) => setSetup({ ...setup, displayName: event.target.value })} /></div>
+            <div className="field"><label htmlFor="setup-email">{t("emailAddress")}</label><input id="setup-email" required type="email" maxLength={320} autoComplete="email" value={setup.email} onChange={(event) => setSetup({ ...setup, email: event.target.value })} /></div>
+            <div className="field"><label htmlFor="setup-username">{t("username")}</label><input id="setup-username" required minLength={3} maxLength={100} autoComplete="username" value={setup.username} onChange={(event) => setSetup({ ...setup, username: event.target.value })} /></div>
+            <div className="field"><label htmlFor="setup-password">{t("password")}</label><input id="setup-password" required type="password" minLength={14} maxLength={128} autoComplete="new-password" value={setup.password} onChange={(event) => setSetup({ ...setup, password: event.target.value })} /></div>
+            <div className="field"><label htmlFor="setup-confirm-password">{t("repeatPassword")}</label><input id="setup-confirm-password" required type="password" minLength={14} maxLength={128} autoComplete="new-password" value={setup.confirmPassword} onChange={(event) => setSetup({ ...setup, confirmPassword: event.target.value })} /></div>
             {setupError && <p className="error-message" role="alert">{setupError}</p>}
-            <button className="primary-button" disabled={submitting}>{submitting ? "Oppretter …" : "Opprett Platform Manager"}</button>
+            <button className="primary-button" disabled={submitting}>{submitting ? t("creating") : t("createPlatformManager")}</button>
           </form>
         </section>
       </main>
     </div>
   );
 
-  if(automaticSso&&!breakGlassLogin)return <div className="product-shell"><main className="login-page"><section className="panel login-panel"><h1>Single sign-on</h1><p className="status-message">Sender deg til organisasjonens innlogging …</p></section></main></div>;
+  if(automaticSso&&!breakGlassLogin)return <div className="product-shell"><main className="login-page"><section className="panel login-panel"><h1>Single sign-on</h1><p className="status-message">{t("redirectingToOrganization")}</p></section></main></div>;
 
   return (
     <div className="product-shell">
@@ -145,15 +147,15 @@ export function LoginPage({
       </header>
       <main className="login-page">
         <section className="panel login-panel">
-          <h1>Logg inn</h1>
-          <p className="muted">Velg en tilgjengelig innloggingsmetode.</p>
+          <h1>{t("signIn")}</h1>
+          <p className="muted">{t("signInIntro")}</p>
           {credentialProviders.length > 0 ? (
             <form className="login-form" onSubmit={submit}>
               {!challengeToken ? (
                 <>
                   {credentialProviders.length > 1 && (
                     <div className="field">
-                      <label htmlFor="credential-provider">Innloggingskilde</label>
+                      <label htmlFor="credential-provider">{t("signInSource")}</label>
                       <select
                         id="credential-provider"
                         value={credentialProvider}
@@ -163,9 +165,9 @@ export function LoginPage({
                       </select>
                     </div>
                   )}
-                  {credentialProviders.length === 1 && credentialProvider !== "local" && <p className="muted">Innlogging med {credentialProviders[0].label}</p>}
+                  {credentialProviders.length === 1 && credentialProvider !== "local" && <p className="muted">{t("signInWithProvider", { provider: credentialProviders[0].label })}</p>}
                   <div className="field">
-                    <label htmlFor="username">{credentialProvider === "local" ? "Brukernavn eller e-postadresse" : "Katalogbrukernavn"}</label>
+                    <label htmlFor="username">{credentialProvider === "local" ? t("usernameOrEmail") : t("directoryUsername")}</label>
                     <input
                       id="username"
                       autoComplete="username"
@@ -175,7 +177,7 @@ export function LoginPage({
                     />
                   </div>
                   <div className="field">
-                    <label htmlFor="password">Passord</label>
+                    <label htmlFor="password">{t("password")}</label>
                     <input
                       id="password"
                       type="password"
@@ -188,12 +190,9 @@ export function LoginPage({
                 </>
               ) : (
                 <>
-                  <p>
-                    Skriv inn sekssifret kode fra autentiseringsappen, eller en
-                    ubrukt gjenopprettingskode.
-                  </p>
+                  <p>{t("securityCodeHelp")}</p>
                   <div className="field">
-                    <label htmlFor="two-factor-code">Sikkerhetskode</label>
+                    <label htmlFor="two-factor-code">{t("securityCode")}</label>
                     <input
                       id="two-factor-code"
                       inputMode="numeric"
@@ -209,8 +208,8 @@ export function LoginPage({
               {error && (
                 <p className="error-message" role="alert">
                   {challengeToken
-                    ? "Ugyldig eller utløpt sikkerhetskode."
-                    : "Ugyldig brukernavn eller passord."}
+                    ? t("invalidSecurityCode")
+                    : t("invalidCredentials")}
                 </p>
               )}
               <button
@@ -219,10 +218,10 @@ export function LoginPage({
                 type="submit"
               >
                 {submitting
-                  ? "Logger inn …"
+                  ? t("signingIn")
                   : challengeToken
-                    ? "Bekreft og logg inn"
-                    : "Logg inn"}
+                    ? t("confirmAndSignIn")
+                    : t("signIn")}
               </button>
               {!challengeToken && credentialProvider === "local" &&
                 configuration.authentication.mfaEnabled !== false &&
@@ -233,12 +232,12 @@ export function LoginPage({
                     type="button"
                     onClick={passkeyLogin}
                   >
-                    Logg inn med passkey eller sikkerhetsnøkkel
+                    {t("passkeySignIn")}
                   </button>
                 )}
               {!challengeToken && credentialProvider === "local" && (
                 <button className="link-button" type="button" onClick={() => { setResetOpen((value) => !value); setResetMessage(""); }}>
-                  Bruk engangskode for passordbytte
+                  {t("usePasswordResetCode")}
                 </button>
               )}
               {challengeToken && (
@@ -251,29 +250,26 @@ export function LoginPage({
                     setError(false);
                   }}
                 >
-                  Tilbake
+                  {t("back")}
                 </button>
               )}
             </form>
           ) : (
-            <p className="status-message">
-              Passordbasert innlogging er deaktivert for denne installasjonen.
-              Bruk en av organisasjonens innloggingsmetoder nedenfor.
-            </p>
+            <p className="status-message">{t("passwordSignInDisabled")}</p>
           )}
           {resetOpen && configuration.authentication.localEnabled && (
             <form className="login-form" onSubmit={submitPasswordReset}>
-              <h2>Velg nytt passord</h2>
-              <p className="muted">Engangskoden utstedes av administrator, vises bare én gang og er gyldig i 30 minutter.</p>
-              <div className="field"><label htmlFor="password-reset-code">Engangskode</label><input id="password-reset-code" required autoComplete="one-time-code" value={reset.code} onChange={(event) => setReset({ ...reset, code: event.target.value })} /></div>
-              <div className="field"><label htmlFor="password-reset-new">Nytt passord</label><input id="password-reset-new" type="password" required minLength={14} maxLength={128} autoComplete="new-password" value={reset.password} onChange={(event) => setReset({ ...reset, password: event.target.value })} /></div>
-              <div className="field"><label htmlFor="password-reset-confirm">Gjenta passord</label><input id="password-reset-confirm" type="password" required minLength={14} maxLength={128} autoComplete="new-password" value={reset.confirmPassword} onChange={(event) => setReset({ ...reset, confirmPassword: event.target.value })} /></div>
-              <button className="primary-button" disabled={submitting}>{submitting ? "Lagrer …" : "Lagre nytt passord"}</button>
+              <h2>{t("chooseNewPassword")}</h2>
+              <p className="muted">{t("passwordResetCodeHelp")}</p>
+              <div className="field"><label htmlFor="password-reset-code">{t("oneTimeCode")}</label><input id="password-reset-code" required autoComplete="one-time-code" value={reset.code} onChange={(event) => setReset({ ...reset, code: event.target.value })} /></div>
+              <div className="field"><label htmlFor="password-reset-new">{t("newPassword")}</label><input id="password-reset-new" type="password" required minLength={14} maxLength={128} autoComplete="new-password" value={reset.password} onChange={(event) => setReset({ ...reset, password: event.target.value })} /></div>
+              <div className="field"><label htmlFor="password-reset-confirm">{t("repeatPassword")}</label><input id="password-reset-confirm" type="password" required minLength={14} maxLength={128} autoComplete="new-password" value={reset.confirmPassword} onChange={(event) => setReset({ ...reset, confirmPassword: event.target.value })} /></div>
+              <button className="primary-button" disabled={submitting}>{submitting ? t("saving") : t("saveNewPassword")}</button>
             </form>
           )}
           {resetMessage && <p className={resetOpen ? "error-message" : "status-message"} role="status">{resetMessage}</p>}
-          {configuration.authentication.oidcConfigurationEnabled && <a className="primary-button external-login" href="/api/auth/oidc/login">Logg inn med organisasjonskonto (OIDC)</a>}
-          {configuration.authentication.samlConfigurationEnabled && <a className="primary-button external-login" href="/api/auth/saml/login">Logg inn med organisasjonskonto (SAML)</a>}
+          {configuration.authentication.oidcConfigurationEnabled && <a className="primary-button external-login" href="/api/auth/oidc/login">{t("oidcSignIn")}</a>}
+          {configuration.authentication.samlConfigurationEnabled && <a className="primary-button external-login" href="/api/auth/saml/login">{t("samlSignIn")}</a>}
         </section>
       </main>
     </div>

@@ -1,9 +1,12 @@
+import { useTranslation } from "../localization/LocalizationProvider";
+
 export function EnterpriseRequiredNotice({ children }: { children: string }) {
+  const t = useTranslation();
   return <section className="enterprise-required-notice" role="note">
     <div>
-      <h2>Krever Enterpriselisens</h2>
+      <h2>{t("enterpriseRequired")}</h2>
       <p>{children}</p>
     </div>
-    <a className="primary-button" href="#/license">Åpne Lisens</a>
+    <a className="primary-button" href="#/license">{t("openLicense")}</a>
   </section>;
 }

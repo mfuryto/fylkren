@@ -18,10 +18,10 @@ describe("federation administration", () => {
 
   it("keeps federation visible behind one Enterprise notice", () => {
     const html = renderToStaticMarkup(<FederationPage canManage={false} />);
-    expect(html).toContain("Krever Enterpriselisens");
+    expect(html).toContain("Requires an Enterprise license");
     expect(html).toContain("Opprett federeringsnøkkel");
     expect(html).toContain("Hent signert identitet");
     expect(html).toContain("Oppdragsrouting");
-    expect(html.match(/Krever Enterpriselisens/g)).toHaveLength(1);
+    expect(html.match(/Requires an Enterprise license/g)).toHaveLength(1);
   });
 });

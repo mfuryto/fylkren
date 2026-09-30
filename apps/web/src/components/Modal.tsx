@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, type KeyboardEvent, type PropsWithChildren } from "react";
+import { useTranslation } from "../localization/LocalizationProvider";
 
 type ModalProps = PropsWithChildren<{
   title: string;
@@ -7,6 +8,7 @@ type ModalProps = PropsWithChildren<{
 }>;
 
 export function Modal({ title, children, onClose, dismissible = true }: ModalProps) {
+  const t = useTranslation();
   const card = useRef<HTMLElement>(null);
   const titleId = useId();
 
@@ -70,7 +72,7 @@ export function Modal({ title, children, onClose, dismissible = true }: ModalPro
             <button
               className="icon-button"
               type="button"
-              aria-label="Lukk"
+              aria-label={t("close")}
               onClick={onClose}
             >
               ×

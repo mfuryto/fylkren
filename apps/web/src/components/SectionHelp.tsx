@@ -1,4 +1,5 @@
 import { Modal } from "./Modal";
+import { useTranslation } from "../localization/LocalizationProvider";
 
 type HelpStep = {
   title: string;
@@ -14,6 +15,7 @@ type SectionHelpProps = {
 };
 
 export function SectionHelp({ title, intro, steps, note, onClose }: SectionHelpProps) {
+  const t = useTranslation();
   return (
     <Modal title={title} onClose={onClose}>
       <div className="process-help">
@@ -29,7 +31,7 @@ export function SectionHelp({ title, intro, steps, note, onClose }: SectionHelpP
         {note && <p className="muted">{note}</p>}
       </div>
       <div className="modal-actions">
-        <button className="primary-button" type="button" onClick={onClose}>Lukk</button>
+        <button className="primary-button" type="button" onClick={onClose}>{t("close")}</button>
       </div>
     </Modal>
   );

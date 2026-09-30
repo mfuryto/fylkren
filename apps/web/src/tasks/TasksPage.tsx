@@ -371,7 +371,7 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
               const opening = openItemId !== itemId;
               toggleItem(itemId);
               navigateToLocation({
-                page: "Oppgaver",
+                page: "Tasks",
                 siteId: selectedSiteId,
                 unitId: selectedUnitId || undefined,
                 itemId: opening ? itemId : undefined,
@@ -379,7 +379,7 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
                 taskSearch: search || undefined,
               });
             }}
-            onCopyLink={itemId => { void copyPermalink({ page: "Oppgaver", siteId: selectedSiteId, itemId }).then(() => setLinkMessage("Lenken til oppdraget er kopiert.")).catch(() => setError("Lenken kunne ikke kopieres. Kopier adressen fra nettleseren.")); }}
+            onCopyLink={itemId => { void copyPermalink({ page: "Tasks", siteId: selectedSiteId, itemId }).then(() => setLinkMessage("Lenken til oppdraget er kopiert.")).catch(() => setError("Lenken kunne ikke kopieres. Kopier adressen fra nettleseren.")); }}
             onShowContext={setWorkContextItem} onShowPlan={item => { void showPlan(item); }}
             onDependencies={setDependencyItem}
             onDecisions={setDomainDecisionItem}
@@ -396,7 +396,7 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
             onReleasePlan={item => { void releaseApprovedPlan(item); }}
             onReassign={item => setReassignment({ item, assignedUnitId: item.assignedUnitId ?? directChildUnits[0].id })}
             onCancel={item => { setDecision({ item, status: "cancelled" }); setDecisionNote(""); }}
-            onPageChange={value => { setQueuePage(value); setOpenItemId(null); navigateToLocation({ page: "Oppgaver", siteId: selectedSiteId, unitId: selectedUnitId || undefined, taskFilter: filter, taskSearch: appliedSearch || undefined }, true); }} reportDate={reportDate}
+            onPageChange={value => { setQueuePage(value); setOpenItemId(null); navigateToLocation({ page: "Tasks", siteId: selectedSiteId, unitId: selectedUnitId || undefined, taskFilter: filter, taskSearch: appliedSearch || undefined }, true); }} reportDate={reportDate}
           />
         </>
       )}

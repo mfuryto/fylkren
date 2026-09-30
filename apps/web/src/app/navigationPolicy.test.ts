@@ -12,30 +12,30 @@ describe("navigation policy", () => {
   it("isolates Platform Manager navigation from operational pages", () => {
     const result = buildNavigation(
       session({ isPlatformManager: true }),
-      "Oppgaver",
+      "Tasks",
     );
-    expect(result.effectiveItem).toBe("Plattform");
+    expect(result.effectiveItem).toBe("Platform");
     expect(result.navigationItems).toContain("Sites");
-    expect(result.navigationItems).toContain("Federering");
-    expect(result.navigationItems).not.toContain("Oppgaver");
+    expect(result.navigationItems).toContain("Federation");
+    expect(result.navigationItems).not.toContain("Tasks");
   });
 
   it("keeps site administration separate from operational navigation", () => {
     const result = buildNavigation(
       session({ managesSites: true }),
-      "Organisasjon",
+      "Organization",
     );
-    expect(result.navigationItems).toContain("Personell");
-    expect(result.navigationItems).toContain("Arbeidsflyter");
-    expect(result.navigationItems).not.toContain("Oppgaver");
+    expect(result.navigationItems).toContain("Personnel");
+    expect(result.navigationItems).toContain("Workflows");
+    expect(result.navigationItems).not.toContain("Tasks");
   });
 
   it("forces password changes through the profile", () => {
     const result = buildNavigation(
       session({ mustChangePassword: true, hasOperationalRole: true }),
-      "Oversikt",
+      "Overview",
     );
-    expect(result.effectiveItem).toBe("Profil");
+    expect(result.effectiveItem).toBe("Profile");
     expect(result.navigationItems).toEqual([]);
   });
 });

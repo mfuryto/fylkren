@@ -1,5 +1,6 @@
 import type { WorkItem } from "../work/WorkItemModels";
 import type { TaskSite, TaskUnit } from "../work/WorkContextModels";
+import type { AppPage } from "../navigation/permalinks";
 
 const terminalStatuses = ["completed", "rejected", "cancelled", "reassigned"];
 const actionStatuses = ["registered", "assigned", "under_review", "planning_approval", "planning_approved", "in_review"];
@@ -15,11 +16,11 @@ export function isReceivedRequest(item: WorkItem) {
   return !item.isOutgoingRequest && item.workItemTypeName === "Anmodning" && Boolean(item.senderSiteName);
 }
 
-export function overviewWorkspaceFor(item: WorkItem) {
-  if (item.status === "planning") return "Planlegging";
-  if (item.status === "planning_approval" || item.status === "planning_approved") return "Oppgaver";
-  if (item.status === "execution") return "Utførelse";
-  return "Oppgaver";
+export function overviewWorkspaceFor(item: WorkItem): AppPage {
+  if (item.status === "planning") return "Planning";
+  if (item.status === "planning_approval" || item.status === "planning_approved") return "Tasks";
+  if (item.status === "execution") return "Execution";
+  return "Tasks";
 }
 
 export function canLoadDescendantWorkload(site: TaskSite | undefined, units: TaskUnit[], selectedUnitId: string) {

@@ -1,8 +1,10 @@
 import { useEffect, useRef, type ReactNode } from "react";
+import { useTranslation } from "../localization/LocalizationProvider";
 
 export function RichTextContent({ value, empty }: { value: string | null | undefined; empty?: string }) {
+  const t = useTranslation();
   const source = value?.trim() ?? "";
-  if (!source) return <div className="document-content"><span className="muted">{empty ?? "Ikke dokumentert"}</span></div>;
+  if (!source) return <div className="document-content"><span className="muted">{empty ?? t("notDocumented")}</span></div>;
   const lines = source.replace(/\r\n/g, "\n").split("\n");
   const blocks: ReactNode[] = [];
   let index = 0;
@@ -70,6 +72,7 @@ export function editorHtmlToMarkdown(element: HTMLElement) {
 }
 
 export function RichTextEditor({ value, onChange, maxLength = 20000, rows = 12 }: { value: string; onChange: (value: string) => void; maxLength?: number; rows?: number }) {
+  const t = useTranslation();
   const editor = useRef<HTMLDivElement>(null);
   const selection = useRef<Range | null>(null);
   const lastValue = useRef("");
@@ -89,5 +92,5 @@ export function RichTextEditor({ value, onChange, maxLength = 20000, rows = 12 }
     emitChange();
   }
   function format(kind: "normal" | "h1" | "h2" | "h3" | "h4" | "ul" | "ol") { editor.current?.focus(); restoreSelection(); if (kind === "ul") document.execCommand("insertUnorderedList"); else if (kind === "ol") document.execCommand("insertOrderedList"); else document.execCommand("formatBlock", false, kind === "normal" ? "p" : kind); emitChange(); }
-  return <div className="rich-text-editor"><div className="rich-text-toolbar" role="toolbar" aria-label="Tekstformatering"><button className="secondary-button" type="button" onMouseDown={(event) => { event.preventDefault(); format("normal"); }}>Normal</button><label><span className="sr-only">Overskriftsnivå</span><select aria-label="Overskriftsnivå" value="" onChange={(event) => format(event.target.value as "h1" | "h2" | "h3" | "h4")}><option value="" disabled>Overskrift</option><option value="h1">H1</option><option value="h2">H2</option><option value="h3">H3</option><option value="h4">H4</option></select></label><button className="secondary-button" type="button" onMouseDown={(event) => { event.preventDefault(); format("ul"); }} aria-label="Punktmerket liste">• Liste</button><button className="secondary-button" type="button" onMouseDown={(event) => { event.preventDefault(); format("ol"); }} aria-label="Nummerert liste">1. Liste</button></div><div ref={editor} className="workflow-document-editor" contentEditable role="textbox" aria-multiline="true" data-placeholder="Skriv her …" style={{ minHeight: `${Math.max(180, rows * 24)}px` }} onInput={emitChange} onPaste={(event) => { event.preventDefault(); insertPlainText(event.clipboardData.getData("text/plain")); }} onDrop={(event) => { event.preventDefault(); insertPlainText(event.dataTransfer.getData("text/plain")); }} onDragOver={(event) => event.preventDefault()} onKeyUp={rememberSelection} onMouseUp={rememberSelection} onFocus={(event) => { if (!event.currentTarget.innerHTML) event.currentTarget.innerHTML = markdownToEditorHtml(value); rememberSelection(); }} /></div>;
+  return <div className="rich-text-editor"><div className="rich-text-toolbar" role="toolbar" aria-label={t("textFormatting")}><button className="secondary-button" type="button" onMouseDown={(event) => { event.preventDefault(); format("normal"); }}>{t("normalText")}</button><label><span className="sr-only">{t("headingLevel")}</span><select aria-label={t("headingLevel")} value="" onChange={(event) => format(event.target.value as "h1" | "h2" | "h3" | "h4")}><option value="" disabled>{t("heading")}</option><option value="h1">H1</option><option value="h2">H2</option><option value="h3">H3</option><option value="h4">H4</option></select></label><button className="secondary-button" type="button" onMouseDown={(event) => { event.preventDefault(); format("ul"); }} aria-label={t("bulletedList")}>• {t("list")}</button><button className="secondary-button" type="button" onMouseDown={(event) => { event.preventDefault(); format("ol"); }} aria-label={t("numberedList")}>1. {t("list")}</button></div><div ref={editor} className="workflow-document-editor" contentEditable role="textbox" aria-multiline="true" data-placeholder={t("writeHere")} style={{ minHeight: `${Math.max(180, rows * 24)}px` }} onInput={emitChange} onPaste={(event) => { event.preventDefault(); insertPlainText(event.clipboardData.getData("text/plain")); }} onDrop={(event) => { event.preventDefault(); insertPlainText(event.dataTransfer.getData("text/plain")); }} onDragOver={(event) => event.preventDefault()} onKeyUp={rememberSelection} onMouseUp={rememberSelection} onFocus={(event) => { if (!event.currentTarget.innerHTML) event.currentTarget.innerHTML = markdownToEditorHtml(value); rememberSelection(); }} /></div>;
 }

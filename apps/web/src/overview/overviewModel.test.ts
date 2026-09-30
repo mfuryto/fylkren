@@ -112,9 +112,9 @@ describe("overviewModel", () => {
   });
 
   it("ruter planlegging og utførelse til riktig arbeidsflate", () => {
-    expect(overviewWorkspaceFor(item({ status: "planning_approval" }))).toBe("Oppgaver");
-    expect(overviewWorkspaceFor(item({ status: "planning_approved" }))).toBe("Oppgaver");
-    expect(overviewWorkspaceFor(item({ status: "execution" }))).toBe("Utførelse");
+    expect(overviewWorkspaceFor(item({ status: "planning_approval" }))).toBe("Tasks");
+    expect(overviewWorkspaceFor(item({ status: "planning_approved" }))).toBe("Tasks");
+    expect(overviewWorkspaceFor(item({ status: "execution" }))).toBe("Execution");
   });
 
   it("holder en godkjent, men ikke utsendt plan synlig som handlingskrav", () => {
