@@ -2,6 +2,7 @@ import type React from "react";
 import type { PublicConfiguration } from "../app/models";
 import { Modal } from "../components/Modal";
 import type { PersonSummary, PlacementOption, SiteSummary } from "../siteAdmin/models";
+import { useTranslation } from "../localization/LocalizationProvider";
 
 export type ManagerUserForm = {
   displayName: string;
@@ -75,6 +76,7 @@ export function SiteDialogs({
   removeSiteManager: (person: PersonSummary) => Promise<void>;
   createManagerUser: (event: React.FormEvent) => Promise<void>;
 }) {
+  const t = useTranslation();
   return (
     <>
       {siteViewerOpen && selectedSite && (
@@ -87,21 +89,20 @@ export function SiteDialogs({
                       selectedSite.isActive ? "status-active" : "muted"
                     }
                   >
-                    {selectedSite.isActive ? "Aktiv site" : "Deaktivert site"}
+                    {selectedSite.isActive ? t("activeSite") : t("inactiveSite")}
                   </span>
                 </div>
               </div>
               <div className="site-detail-block">
-                <span className="field-label">Plassering</span>
+                <span className="field-label">{t("placement")}</span>
                 <p>{placementLabel}</p>
                 <p className="muted">
-                  Plasseringen styrer hvor oppdrag kommer fra og hvor
-                  rapportering går. Den gir ikke administrativ tilgang.
+                  {t("placementHelp")}
                 </p>
               </div>
               <div className="site-detail-block">
-                <span className="field-label">Oversiktsdesign</span>
-                <p>{selectedSite.overviewDesign === "classic" ? "Klassisk" : "Minimal"}</p>
+                <span className="field-label">{t("overviewDesign")}</span>
+                <p>{selectedSite.overviewDesign === "classic" ? t("classic") : t("minimal")}</p>
               </div>
               <div className="site-detail-block">
                 <span className="field-label">Site Managers</span>
@@ -114,20 +115,20 @@ export function SiteDialogs({
                     ))}
                   </div>
                 ) : (
-                  <p className="site-warning">Ingen Site Manager er tildelt.</p>
+                  <p className="site-warning">{t("noSiteManager")}</p>
                 )}
               </div>
             </div>
             <div className="modal-actions">
-              <button className="secondary-button" type="button" onClick={() => setSiteViewerOpen(false)}>Lukk</button>
+              <button className="secondary-button" type="button" onClick={() => setSiteViewerOpen(false)}>{t("close")}</button>
             </div>
         </Modal>
       )}
       {siteCreatorOpen && (
-        <Modal title="Ny site" onClose={() => setSiteCreatorOpen(false)}>
+        <Modal title={t("newSite")} onClose={() => setSiteCreatorOpen(false)}>
           <form className="stacked-form" onSubmit={createSite}>
             <div className="field">
-              <label htmlFor="new-site-name">Navn</label>
+              <label htmlFor="new-site-name">{t("name")}</label>
               <input
                 id="new-site-name"
                 required
@@ -138,14 +139,13 @@ export function SiteDialogs({
               />
             </div>
             <p className="muted modal-note">
-              Siten opprettes som et selvstendig toppnivå. Den kan plasseres
-              under en annen site etterpå.
+              {t("newSiteIntro")}
             </p>
             <div className="field">
-              <label htmlFor="new-site-overview-design">Oversiktsdesign</label>
+              <label htmlFor="new-site-overview-design">{t("overviewDesign")}</label>
               <select id="new-site-overview-design" value={newSiteOverviewDesign} onChange={(event)=>setNewSiteOverviewDesign(event.target.value as SiteSummary["overviewDesign"])}>
-                <option value="classic">Klassisk</option>
-                <option value="minimal">Minimal</option>
+                <option value="classic">{t("classic")}</option>
+                <option value="minimal">{t("minimal")}</option>
               </select>
             </div>
             <div className="modal-actions">
@@ -154,20 +154,20 @@ export function SiteDialogs({
                 type="button"
                 onClick={() => setSiteCreatorOpen(false)}
               >
-                Avbryt
+                {t("cancel")}
               </button>
               <button className="primary-button" disabled={busy}>
-                Opprett site
+                {t("createSite")}
               </button>
             </div>
           </form>
         </Modal>
       )}
       {siteEditor && (
-        <Modal title="Rediger site" onClose={() => setSiteEditor(null)}>
+        <Modal title={t("editSite")} onClose={() => setSiteEditor(null)}>
           <form className="stacked-form" onSubmit={saveSite}>
             <div className="field">
-              <label htmlFor="edit-site-name">Navn</label>
+              <label htmlFor="edit-site-name">{t("name")}</label>
               <input
                 id="edit-site-name"
                 required
@@ -178,7 +178,7 @@ export function SiteDialogs({
               />
             </div>
             <div className="field">
-              <label htmlFor="edit-site-placement">Plassering</label>
+              <label htmlFor="edit-site-placement">{t("placement")}</label>
               <select
                 id="edit-site-placement"
                 value={siteEditor.parentOrganizationUnitId ?? ""}
@@ -189,7 +189,7 @@ export function SiteDialogs({
                   })
                 }
               >
-                <option value="">Ingen – selvstendig toppnivå</option>
+                <option value="">{t("noPlacement")}</option>
                 {placements
                   .filter((option) => option.siteId !== siteEditor.id)
                   .map((option) => (
@@ -202,14 +202,13 @@ export function SiteDialogs({
               </select>
             </div>
             <p className="muted modal-note">
-              Flytting endrer styrings- og rapporteringslinjen. Sitens interne
-              struktur og tilgangsgrense beholdes.
+              {t("moveSiteHelp")}
             </p>
             <div className="field">
-              <label htmlFor="edit-site-overview-design">Oversiktsdesign</label>
+              <label htmlFor="edit-site-overview-design">{t("overviewDesign")}</label>
               <select id="edit-site-overview-design" value={siteEditor.overviewDesign} onChange={(event)=>setSiteEditor({...siteEditor,overviewDesign:event.target.value as SiteSummary["overviewDesign"]})}>
-                <option value="classic">Klassisk</option>
-                <option value="minimal">Minimal</option>
+                <option value="classic">{t("classic")}</option>
+                <option value="minimal">{t("minimal")}</option>
               </select>
             </div>
             <label className="checkbox-field">
@@ -223,7 +222,7 @@ export function SiteDialogs({
                   })
                 }
               />{" "}
-              Aktiv site
+              {t("activeSite")}
             </label>
             <div className="site-detail-block">
               <span className="field-label">Site Managers</span>
@@ -232,21 +231,21 @@ export function SiteDialogs({
                   {selectedSite.siteManagers.map((manager) => (
                     <span className="manager-chip" key={manager.id}>
                       {manager.displayName}
-                      <button type="button" aria-label={`Fjern ${manager.displayName} som Site Manager`} onClick={() => setManagerToRemove(manager)}>×</button>
+                      <button type="button" aria-label={t("removeManagerLabel", { name: manager.displayName })} onClick={() => setManagerToRemove(manager)}>×</button>
                     </span>
                   ))}
                 </div>
-              ) : <p className="site-warning">Ingen Site Manager er tildelt.</p>}
+              ) : <p className="site-warning">{t("noSiteManager")}</p>}
             </div>
             <div className="field">
-              <label htmlFor="site-manager-search">Finn bruker som skal bli Site Manager</label>
-              <input id="site-manager-search" type="search" autoComplete="off" placeholder="Søk på navn, e-post eller brukernavn" value={managerQuery} onChange={(event) => { setManagerQuery(event.target.value); setSelectedManagerId(""); }} />
-              {managerQuery.trim().length > 0 && managerQuery.trim().length < 2 && <p className="muted modal-note">Skriv minst to tegn.</p>}
-              {people.length > 0 && !selectedManagerId && <div className="person-search-results" role="listbox" aria-label="Brukertreff">{people.filter((person) => !selectedSite?.siteManagers.some((manager) => manager.id === person.id)).map((person) => <button key={person.id} type="button" role="option" aria-selected="false" onClick={() => { setSelectedManagerId(person.id); setManagerQuery(person.displayName); }}><strong>{person.displayName}</strong>{person.email && <small>{person.email}</small>}</button>)}</div>}
+              <label htmlFor="site-manager-search">{t("findSiteManager")}</label>
+              <input id="site-manager-search" type="search" autoComplete="off" placeholder={t("managerSearchPlaceholder")} value={managerQuery} onChange={(event) => { setManagerQuery(event.target.value); setSelectedManagerId(""); }} />
+              {managerQuery.trim().length > 0 && managerQuery.trim().length < 2 && <p className="muted modal-note">{t("minimumTwoCharacters")}</p>}
+              {people.length > 0 && !selectedManagerId && <div className="person-search-results" role="listbox" aria-label={t("userResults")}>{people.filter((person) => !selectedSite?.siteManagers.some((manager) => manager.id === person.id)).map((person) => <button key={person.id} type="button" role="option" aria-selected="false" onClick={() => { setSelectedManagerId(person.id); setManagerQuery(person.displayName); }}><strong>{person.displayName}</strong>{person.email && <small>{person.email}</small>}</button>)}</div>}
             </div>
             <div className="inline-actions">
-              {configuration.authentication.localEnabled && <button className="secondary-button" type="button" onClick={() => setManagerUserForm({ displayName: "", email: "", username: "", password: "" })}>Ny lokal bruker</button>}
-              <button className="secondary-button" type="button" disabled={busy || !selectedManagerId} onClick={assignSiteManager}>Tildel Site Manager</button>
+              {configuration.authentication.localEnabled && <button className="secondary-button" type="button" onClick={() => setManagerUserForm({ displayName: "", email: "", username: "", password: "" })}>{t("newLocalUser")}</button>}
+              <button className="secondary-button" type="button" disabled={busy || !selectedManagerId} onClick={assignSiteManager}>{t("assignSiteManager")}</button>
             </div>
             <div className="modal-actions">
               <button
@@ -255,7 +254,7 @@ export function SiteDialogs({
                 disabled={busy || !siteEditor.isActive}
                 onClick={deleteSite}
               >
-                Slett site
+                {t("deleteSite")}
               </button>
               <span className="action-spacer" />
               <button
@@ -263,35 +262,34 @@ export function SiteDialogs({
                 type="button"
                 onClick={() => setSiteEditor(null)}
               >
-                Avbryt
+                {t("cancel")}
               </button>
               <button className="primary-button" disabled={busy}>
-                Lagre
+                {t("save")}
               </button>
             </div>
             <p className="muted modal-note">
-              Sletting deaktiverer siten og bevarer historikk og audit-spor.
+              {t("deleteSiteHelp")}
             </p>
           </form>
         </Modal>
       )}
       {managerToRemove && (
         <Modal
-          title="Fjern Site Manager"
+          title={t("removeSiteManager")}
           onClose={() => setManagerToRemove(null)}
         >
           <p>
-            Vil du fjerne <strong>{managerToRemove.displayName}</strong> som
-            Site Manager for {selectedSite?.name}?
+            {t("removeSiteManagerQuestion", { name: managerToRemove.displayName, site: selectedSite?.name ?? "" })}
           </p>
-          <p className="muted">Brukeren og historiske handlinger beholdes.</p>
+          <p className="muted">{t("userHistoryRetained")}</p>
           <div className="modal-actions">
             <button
               className="secondary-button"
               type="button"
               onClick={() => setManagerToRemove(null)}
             >
-              Avbryt
+              {t("cancel")}
             </button>
             <button
               className="danger-button"
@@ -299,23 +297,22 @@ export function SiteDialogs({
               disabled={busy}
               onClick={() => removeSiteManager(managerToRemove)}
             >
-              Fjern tildeling
+              {t("removeAssignment")}
             </button>
           </div>
         </Modal>
       )}
       {managerUserForm && (
         <Modal
-          title="Opprett lokal Site Manager-bruker"
+          title={t("createLocalManager")}
           onClose={() => setManagerUserForm(null)}
         >
           <form className="stacked-form" onSubmit={createManagerUser}>
             <p className="muted modal-note">
-              Brukeren opprettes i {selectedSite?.name} og kan deretter tildeles
-              som Site Manager.
+              {t("createLocalManagerIntro", { site: selectedSite?.name ?? "" })}
             </p>
             <div className="field">
-              <label htmlFor="manager-display-name">Navn</label>
+              <label htmlFor="manager-display-name">{t("name")}</label>
               <input
                 id="manager-display-name"
                 required
@@ -330,7 +327,7 @@ export function SiteDialogs({
               />
             </div>
             <div className="field">
-              <label htmlFor="manager-email">E-postadresse</label>
+              <label htmlFor="manager-email">{t("emailAddress")}</label>
               <input
                 id="manager-email"
                 type="email"
@@ -345,7 +342,7 @@ export function SiteDialogs({
               />
             </div>
             <div className="field">
-              <label htmlFor="manager-username">Brukernavn</label>
+              <label htmlFor="manager-username">{t("username")}</label>
               <input
                 id="manager-username"
                 required
@@ -360,7 +357,7 @@ export function SiteDialogs({
               />
             </div>
             <div className="field">
-              <label htmlFor="manager-password">Startpassord</label>
+              <label htmlFor="manager-password">{t("startPassword")}</label>
               <input
                 id="manager-password"
                 type="password"
@@ -381,10 +378,10 @@ export function SiteDialogs({
                 type="button"
                 onClick={() => setManagerUserForm(null)}
               >
-                Avbryt
+                {t("cancel")}
               </button>
               <button className="primary-button" disabled={busy}>
-                Opprett bruker
+                {t("createUser")}
               </button>
             </div>
           </form>
@@ -393,4 +390,3 @@ export function SiteDialogs({
     </>
   );
 }
-

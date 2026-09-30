@@ -2,8 +2,10 @@ import { platformApiEn } from "./platformApi.en";
 import { federationEn } from "./federation.en";
 import { identityEn } from "./identity.en";
 import { notificationsEn } from "./notifications.en";
+import { sitesEn } from "./sites.en";
 
 export const en = {
+  ...sitesEn,
   ...notificationsEn,
   ...identityEn,
   ...federationEn,

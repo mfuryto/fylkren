@@ -9,8 +9,10 @@ import type { PersonSummary, PlacementOption, SiteSummary } from "../siteAdmin/m
 import { loadPlacementOptions, loadSites as fetchSites, mutateSiteAccess, searchSitePeople } from "../siteAdmin/siteAdminApi";
 import { buildSiteHierarchy, filterSites } from "./siteHierarchy";
 import { SiteDialogs, type ManagerUserForm } from "./SiteDialogs";
+import { useTranslation } from "../localization/LocalizationProvider";
 
 export function SitesPage({ configuration }: { configuration: PublicConfiguration }) {
+  const t = useTranslation();
   const portabilityFile = useRef<HTMLInputElement>(null);
   const [sites, setSites] = useState<SiteSummary[]>([]);
   const [people, setPeople] = useState<PersonSummary[]>([]);
@@ -50,7 +52,7 @@ export function SitesPage({ configuration }: { configuration: PublicConfiguratio
       setSelectedSiteId(nextSiteId);
       setError("");
     } catch (problem) {
-      setError(errorMessage(problem,"Siteoversikten kunne ikke lastes."));
+      setError(errorMessage(problem,t("siteOverviewLoadFailed")));
     }
   }
 
@@ -69,7 +71,7 @@ export function SitesPage({ configuration }: { configuration: PublicConfiguratio
     const timer = window.setTimeout(() => {
       searchSitePeople(siteEditor.id, managerQuery.trim())
         .then(setPeople)
-        .catch(problem => setError(errorMessage(problem,"Brukersøket kunne ikke fullføres.")));
+        .catch(problem => setError(errorMessage(problem,t("peopleSearchFailed"))));
     }, 250);
     return () => window.clearTimeout(timer);
   }, [siteEditor?.id, managerQuery]);
@@ -79,7 +81,7 @@ export function SitesPage({ configuration }: { configuration: PublicConfiguratio
     method: "POST" | "PUT" | "DELETE",
     body?: object,
   ) {
-    await apiMutate(path, method, body, "Handlingen kunne ikke utføres.");
+    await apiMutate(path, method, body, t("siteActionFailed"));
     await loadData();
   }
 
@@ -92,7 +94,7 @@ export function SitesPage({ configuration }: { configuration: PublicConfiguratio
       setNewSiteOverviewDesign("classic");
       setSiteCreatorOpen(false);
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Siten kunne ikke opprettes.");
+      setError(problem instanceof Error ? problem.message : t("siteCreateFailed"));
     }
     setBusy(false);
   }
@@ -109,7 +111,7 @@ export function SitesPage({ configuration }: { configuration: PublicConfiguratio
       });
       setSiteEditor(null);
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Siten kunne ikke oppdateres.");
+      setError(problem instanceof Error ? problem.message : t("siteUpdateFailed"));
     }
     setBusy(false);
   }
@@ -120,7 +122,7 @@ export function SitesPage({ configuration }: { configuration: PublicConfiguratio
       await mutate(`/api/sites/${siteEditor.id}`, "DELETE");
       setSiteEditor(null);
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Siten kunne ikke slettes.");
+      setError(problem instanceof Error ? problem.message : t("siteDeleteFailed"));
     }
     setBusy(false);
   }
@@ -135,7 +137,7 @@ export function SitesPage({ configuration }: { configuration: PublicConfiguratio
       setManagerQuery("");
       setPeople([]);
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Site Manager kunne ikke tildeles.");
+      setError(problem instanceof Error ? problem.message : t("siteManagerAssignFailed"));
     }
     setBusy(false);
   }
@@ -148,7 +150,7 @@ export function SitesPage({ configuration }: { configuration: PublicConfiguratio
       );
       setManagerToRemove(null);
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Site Manager-tildelingen kunne ikke fjernes.");
+      setError(problem instanceof Error ? problem.message : t("siteManagerRemoveFailed"));
     }
     setBusy(false);
   }
@@ -164,7 +166,7 @@ export function SitesPage({ configuration }: { configuration: PublicConfiguratio
       setPeople([person]);
       setManagerQuery(person.displayName);
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Den lokale brukeren kunne ikke opprettes.");
+      setError(problem instanceof Error ? problem.message : t("localUserCreateFailed"));
     }
     setBusy(false);
   }
@@ -175,7 +177,7 @@ export function SitesPage({ configuration }: { configuration: PublicConfiguratio
     setStatus("");
     try {
       const token = await getAntiforgeryToken();
-      const response = await apiRequest(`/api/portability/sites/${site.id}/export`, "Eksportpakken kunne ikke opprettes.", { method: "POST", headers: { "X-Fylkren-CSRF": token } });
+      const response = await apiRequest(`/api/portability/sites/${site.id}/export`, t("exportPackageCreateFailed"), { method: "POST", headers: { "X-Fylkren-CSRF": token } });
       const url = URL.createObjectURL(await response.blob());
       const link = document.createElement("a");
       link.href = url;
@@ -184,9 +186,9 @@ export function SitesPage({ configuration }: { configuration: PublicConfiguratio
       link.click();
       link.remove();
       URL.revokeObjectURL(url);
-      setStatus(`Eksportpakken for ${site.name} er lastet ned.`);
+      setStatus(t("exportDownloaded", { site: site.name }));
     } catch (problem) {
-      setError(errorMessage(problem, "Eksportpakken kunne ikke opprettes."));
+      setError(errorMessage(problem, t("exportPackageCreateFailed")));
     }
     setBusy(false);
   }
@@ -199,11 +201,11 @@ export function SitesPage({ configuration }: { configuration: PublicConfiguratio
     try {
       const form = new FormData();
       form.append("package", file);
-      const result = await apiFormMutate<{ valid: boolean; datasetCount: number; attachmentCount: number; errors: string[]; warnings: string[] }>(`/api/portability/sites/${portabilitySiteId}/imports/validate`, "POST", form, "Eksportpakken kunne ikke valideres.");
-      if (!result.valid) setError(`Pakken ble avvist: ${result.errors.join(" ")}`);
-      else setStatus(`Pakken er gyldig. ${result.datasetCount} datasett og ${result.attachmentCount} vedlegg ble kontrollert. Ingen data ble endret.`);
+      const result = await apiFormMutate<{ valid: boolean; datasetCount: number; attachmentCount: number; errors: string[]; warnings: string[] }>(`/api/portability/sites/${portabilitySiteId}/imports/validate`, "POST", form, t("exportPackageValidateFailed"));
+      if (!result.valid) setError(t("packageRejected", { errors: result.errors.join(" ") }));
+      else setStatus(t("packageValid", { datasets: result.datasetCount, attachments: result.attachmentCount }));
     } catch (problem) {
-      setError(errorMessage(problem, "Eksportpakken kunne ikke valideres."));
+      setError(errorMessage(problem, t("exportPackageValidateFailed")));
     }
     if (portabilityFile.current) portabilityFile.current.value = "";
     setBusy(false);
@@ -217,18 +219,16 @@ export function SitesPage({ configuration }: { configuration: PublicConfiguratio
     : undefined;
   const placementLabel = selectedPlacement
     ? selectedPlacement.isSiteRoot
-      ? `Under ${selectedPlacement.siteName}`
-      : `Under ${selectedPlacement.siteName} · ${selectedPlacement.unitName}`
-    : "Selvstendig toppnivå";
+      ? t("underSite", { site: selectedPlacement.siteName })
+      : t("underSiteUnit", { site: selectedPlacement.siteName, unit: selectedPlacement.unitName })
+    : t("standaloneTopLevel");
 
   return (
     <div className="page platform-admin-page">
       <header className="page-header">
         <div>
-          <h1>Sites</h1>
-          <p className="muted">
-            Samlet oversikt over sites, relasjoner og Site Managers.
-          </p>
+          <h1>{t("sites")}</h1>
+          <p className="muted">{t("sitesIntro")}</p>
         </div>
         <button
           className="primary-button"
@@ -236,15 +236,15 @@ export function SitesPage({ configuration }: { configuration: PublicConfiguratio
           disabled={communityLimitReached}
           onClick={() => setSiteCreatorOpen(true)}
         >
-          Ny site
+          {t("newSite")}
         </button>
       </header>
       {configuration.edition === "community" && (
         <p className="muted">
-          Community: {activeSiteCount} av {configuration.communitySiteLimit} aktive sites.
+          {t("communitySiteUsage", { active: activeSiteCount, limit: configuration.communitySiteLimit })}
         </p>
       )}
-      {communityLimitReached && <EnterpriseRequiredNotice>Community-grensen for aktive sites er nådd. Enterprise kreves for å opprette eller reaktivere flere sites.</EnterpriseRequiredNotice>}
+      {communityLimitReached && <EnterpriseRequiredNotice>{t("communitySiteLimit")}</EnterpriseRequiredNotice>}
       {error && (
         <p className="status-message" role="alert">
           {error}
@@ -252,17 +252,17 @@ export function SitesPage({ configuration }: { configuration: PublicConfiguratio
       )}
       {status && <p className="status-message success" role="status">{status}</p>}
       <input ref={portabilityFile} className="sr-only" type="file" accept=".zip,application/zip" tabIndex={-1} aria-hidden="true" onChange={event => { const file = event.target.files?.[0]; if (file) void validatePackage(file); }} />
-      <div className="summary-grid" aria-label="Sitesammendrag">
+      <div className="summary-grid" aria-label={t("sitesSummary")}>
         <div className="summary-card">
-          <span>Totalt</span>
+          <span>{t("total")}</span>
           <strong>{sites.length}</strong>
         </div>
         <div className="summary-card">
-          <span>Aktive</span>
+          <span>{t("activePlural")}</span>
           <strong>{sites.filter((site) => site.isActive).length}</strong>
         </div>
         <div className="summary-card">
-          <span>Uten Site Manager</span>
+          <span>{t("withoutSiteManager")}</span>
           <strong>
             {
               sites.filter(
@@ -272,35 +272,32 @@ export function SitesPage({ configuration }: { configuration: PublicConfiguratio
           </strong>
         </div>
         <div className="summary-card">
-          <span>Toppnivå</span>
+          <span>{t("topLevel")}</span>
           <strong>
             {sites.filter((site) => !site.parentOrganizationUnitId).length}
           </strong>
         </div>
         <div className="summary-card">
-          <span>Federerte</span>
+          <span>{t("federated")}</span>
           <strong>{federatedSiteCount}</strong>
         </div>
       </div>
       {sites.length === 0 && !error ? (
         <section className="panel empty-state">
           <div>
-            <h2>Ingen sites er opprettet</h2>
-            <p className="muted">
-              Opprett den første siten for å etablere et administrativt og
-              organisatorisk nivå.
-            </p>
+            <h2>{t("noSites")}</h2>
+            <p className="muted">{t("noSitesIntro")}</p>
           </div>
         </section>
       ) : (
         <div className="sites-layout">
           <section className="panel site-directory">
             <div className="field">
-              <label htmlFor="site-search">Finn site</label>
+              <label htmlFor="site-search">{t("findSite")}</label>
               <input
                 id="site-search"
                 type="search"
-                placeholder="Navn, leder eller plassering"
+                placeholder={t("siteSearchPlaceholder")}
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
               />
@@ -323,31 +320,31 @@ export function SitesPage({ configuration }: { configuration: PublicConfiguratio
                       <span>
                         {placement
                           ? placement.isSiteRoot
-                            ? `Under ${placement.siteName}`
+                            ? t("underSite", { site: placement.siteName })
                             : `${placement.siteName} · ${placement.unitName}`
-                          : "Selvstendig toppnivå"}
+                          : t("standaloneTopLevel")}
                       </span>
                       {children.length > 0 && (
                         <span>
-                          Underlagte sites: {children.map((child) => child.name).join(", ")}
+                          {t("childSites", { sites: children.map((child) => child.name).join(", ") })}
                         </span>
                       )}
                     </span>
                     <span className={site.isActive ? "status-active" : "muted"}>
-                      {site.isActive ? "Aktiv" : "Slettet"}
+                      {site.isActive ? t("active") : t("deleted")}
                     </span>
                     <div className="row-actions">
                       <button className="secondary-button" type="button" disabled={busy} onClick={() => void exportSite(site)}>
-                        Eksporter
+                        {t("export")}
                       </button>
                       <button className="secondary-button" type="button" disabled={busy} onClick={() => { setPortabilitySiteId(site.id); portabilityFile.current?.click(); }}>
-                        Valider pakke
+                        {t("validatePackage")}
                       </button>
                       <button className="secondary-button" type="button" onClick={() => { setSelectedSiteId(site.id); setSiteViewerOpen(true); }}>
-                        Vis
+                        {t("view")}
                       </button>
                       <button className="secondary-button" type="button" onClick={() => { setSelectedSiteId(site.id); setSelectedManagerId(""); setManagerQuery(""); setPeople([]); setSiteEditor(site); }}>
-                        Rediger
+                        {t("edit")}
                       </button>
                     </div>
                   </div>

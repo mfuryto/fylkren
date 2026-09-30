@@ -13,11 +13,11 @@ const site = (id: string, name: string, parentOrganizationUnitId: string | null)
 
 describe("site hierarchy", () => {
   it("orders parent sites before children and calculates indentation depth", () => {
-    const sites = [site("child", "Barn", "parent-root"), site("parent", "Forelder", null)];
+    const sites = [site("child", "Child", "parent-root"), site("parent", "Parent", null)];
     const placements: PlacementOption[] = [{
       id: "parent-root",
       siteId: "parent",
-      siteName: "Forelder",
+      siteName: "Parent",
       unitName: "Rot",
       isSiteRoot: true,
     }];
@@ -27,15 +27,15 @@ describe("site hierarchy", () => {
   });
 
   it("searches site names and placement names", () => {
-    const sites = [site("child", "Barn", "parent-root")];
+    const sites = [site("child", "Child", "parent-root")];
     const placements: PlacementOption[] = [{
       id: "parent-root",
       siteId: "parent",
-      siteName: "Forelder",
-      unitName: "Ledelse",
+      siteName: "Parent",
+      unitName: "Management",
       isSiteRoot: true,
     }];
     const hierarchy = buildSiteHierarchy(sites, placements);
-    expect(filterSites(hierarchy.orderedSites, hierarchy.placementById, "ledelse")).toHaveLength(1);
+    expect(filterSites(hierarchy.orderedSites, hierarchy.placementById, "management")).toHaveLength(1);
   });
 });
