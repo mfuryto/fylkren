@@ -28,7 +28,9 @@ The profile button opens a small menu containing Profile and Log out. Internal b
 
 ## Lists, cards and actions
 
-Long task, planning, execution and report queues use bounded-width list columns, newest-first ordering, search/filtering and pagination. A personal preference may switch subordinate overview content between cards and lists.
+Every user-facing data list provides an explicit sort control appropriate to its contents. The active field and direction are visible, keyboard accessible and translated. Defaults follow the work context rather than one global assumption: task types and chronological work queues default to newest first, name-based reference lists default to the active language's alphabetical order, and ordered workflows, timelines and organization hierarchies default to their configured or semantic sequence. Changing the sort never changes stored workflow, hierarchy or classification order.
+
+Long task, planning, execution and report queues use bounded-width list columns, search/filtering, pagination and server-side sorting whenever pagination is server-side. A personal preference may switch subordinate overview content between cards and lists.
 
 Task cards are collapsed initially. Metadata uses compact, consistently colored badges/icons. One clear control opens the content. Contextual actions are collected in one `Next step` area; completed work has no next-step area. Destructive chain cancellation remains a separate, final danger action.
 

@@ -16,9 +16,13 @@ export async function testLookupSorting({ manager, reader, siteId }) {
     const listed = await reader.request(`/api/work/sites/${siteId}/${path}`);
     assert.equal(listed.status, 200, `${path}: ${JSON.stringify(listed.body)}`);
     const names = listed.body.map(value => value.name);
-    assert.deepEqual(names, [...names].sort(collator.compare), `${path} was not alphabetic in English order`);
+    if (path === 'types') {
+      assert.deepEqual(names.slice(0, created.length), [...created].reverse().map(value => value.name), 'Task types were not newest first');
+    } else {
+      assert.deepEqual(names, [...names].sort(collator.compare), `${path} was not alphabetic in English order`);
+    }
     assert.equal(listed.body.find(value => value.id === inactive.id)?.isActive, false);
     const activeNames = listed.body.filter(value => value.isActive).map(value => value.name);
-    assert.deepEqual(activeNames, [...activeNames].sort(collator.compare), `${path} select options were not alphabetic`);
+    if (path !== 'types') assert.deepEqual(activeNames, [...activeNames].sort(collator.compare), `${path} select options were not alphabetic`);
   }
 }

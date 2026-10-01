@@ -9,7 +9,7 @@ namespace Fylkren.Api.WorkManagement;
 
 internal static class WorkItemLookupEndpoints
 {
-    private static readonly StringComparer NameComparer = StringComparer.Create(CultureInfo.GetCultureInfo("nb-NO"), ignoreCase: true);
+    private static readonly StringComparer NameComparer = StringComparer.Create(CultureInfo.GetCultureInfo("en-US"), ignoreCase: true);
 
     internal static void Map(RouteGroupBuilder group)
     {
@@ -27,9 +27,11 @@ internal static class WorkItemLookupEndpoints
             return Results.Problem(statusCode: 403);
         var values = await db.WorkItemTypes.AsNoTracking()
             .Where(type => type.SiteId == siteId)
+            .OrderByDescending(type => type.CreatedAt)
+            .ThenByDescending(type => type.Id)
             .Select(type => new { type.Id, type.Name, type.IsActive, type.IsSystemManaged, inUse = type.WorkItems.Any() })
             .ToListAsync(ct);
-        return Results.Ok(values.OrderBy(type => type.Name, NameComparer).ThenBy(type => type.Id));
+        return Results.Ok(values);
     }
 
     private static async Task<IResult> CreateType(Guid siteId, TypeRequest request, ClaimsPrincipal user, IAntiforgery antiforgery, HttpContext context, FylkrenDbContext db, CancellationToken ct)

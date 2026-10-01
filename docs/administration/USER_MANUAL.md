@@ -46,7 +46,7 @@ Site and work-level selectors appear only when the user has more than one real c
 
 Task, planning, execution and report permalinks use stable language-neutral IDs. Use the compact link icon to copy a direct link. The recipient must still have normal authorization; possession of the URL grants nothing.
 
-Long lists support search/filtering, newest-first ordering and pagination. Title columns truncate safely instead of widening the page.
+Every data list has a visible sorting control. The available fields depend on the list, and the selected direction is shown. Long lists also support search/filtering and pagination. Sorting applies to the complete result set rather than only the visible page. Ordered structures such as workflows, timelines and organization hierarchies retain their configured sequence by default, but their management views still expose relevant alternative sorting without changing the stored order. Title columns truncate safely instead of widening the page.
 
 ## 5. Overview and workload
 
@@ -72,7 +72,7 @@ Leaders also have a 12-month workload-history view based only on work recorded i
 ### Registering work
 
 Users with registration authority choose **New task** at their current level and provide title, description, optional recommendation, deadline, main-document reference and site-managed metadata such as task type, source type and sender.
-Task types, source types and senders are displayed alphabetically by name in both their management lists and the new-task selectors, using Norwegian alphabetical order. Deactivated values remain visible in the management lists but are not offered for new tasks.
+Task types default to newest first in both their management list and the new-task selector. Source types and senders default to alphabetical order in the active interface language. Each list exposes its available sort choices and direction. Deactivated values remain visible in management lists but are not offered for new tasks.
 
 Recommendation is decision support for the first leader assessment only; it does not follow the task through later processing. Priority is a leader decision set when the task is accepted for handling.
 
