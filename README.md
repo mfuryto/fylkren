@@ -205,41 +205,20 @@ The [documentation portal](docs/README.md) is the maintained entry point.
 | [Get Enterprise](docs/operations/GET_ENTERPRISE_LICENSE.md) | [System requirements](docs/operations/SYSTEM_REQUIREMENTS.md) | [Roadmap](docs/project/ROADMAP.md) |
 | [API overview](docs/api/API.md) | [Backup and offline deployment](docs/operations/DEPLOYMENT_AND_OFFLINE.md) | [Security verification](docs/security/SECURITY_VERIFICATION.md) |
 
-Repository-facing documentation is English. The product currently bundles American
-English (`en-US`) as its source/fallback catalog, with British English (`en-GB`) and
-Norwegian Bokmal (`nb-NO`) as reviewed language packs. Sixteen additional complete
-catalogs are bundled for interface preview and native-language review. The maintained
-[language roster and language-pack rules](docs/product/LOCALIZATION.md) define when
-additional translations become supported. Routes, API contracts, persistent
-identifiers and permalinks remain language-neutral.
+Repository-facing documentation is English. American English (`en-US`) is the
+source and fallback interface language. All language resources are bundled for
+offline use; routes, API contracts, persistent identifiers and permalinks remain
+language-neutral. The maintained [localization policy](docs/product/LOCALIZATION.md)
+defines the automated technical and linguistic quality gates.
 
-### Interface language roster
+### Interface languages
 
-| Language | Locale | Status |
-| --- | --- | --- |
-| English (United States) | `en-US` | Supported; source language and fallback |
-| English (United Kingdom) | `en-GB` | Supported regional variant |
-| Norwegian Bokmal | `nb-NO` | Supported language pack |
-| Swedish | `sv-SE` | Complete preview; native review pending |
-| Danish | `da-DK` | Complete preview; native review pending |
-| Finnish | `fi-FI` | Complete preview; native review pending |
-| German | `de-DE` | Complete preview; native review pending |
-| French | `fr-FR` | Complete preview; native review pending |
-| Polish | `pl-PL` | Complete preview; native review pending |
-| Spanish (Spain) | `es-ES` | Complete preview; native review pending |
-| Italian | `it-IT` | Complete preview; native review pending |
-| Ukrainian | `uk-UA` | Complete preview; native review pending |
-| Dutch | `nl-NL` | Complete preview; native review pending |
-| Portuguese (Portugal) | `pt-PT` | Complete preview; native review pending |
-| Czech | `cs-CZ` | Complete preview; native review pending |
-| Romanian | `ro-RO` | Complete preview; native review pending |
-| Estonian | `et-EE` | Complete preview; native review pending |
-| Latvian | `lv-LV` | Complete preview; native review pending |
-| Lithuanian | `lt-LT` | Complete preview; native review pending |
-
-Preview packs are selectable for evaluation and pass the same automated key,
-placeholder, locale and build checks as reviewed packs. They must receive
-native-language review before being advertised as publicly supported.
+Fylkren includes English (United States and United Kingdom), Norwegian Bokmal,
+Swedish, Danish, Finnish, German, French, Polish, Spanish (Spain), Italian,
+Ukrainian, Dutch, Portuguese (Portugal), Czech, Romanian, Estonian, Latvian and
+Lithuanian. Every bundled catalog passes the same coverage, placeholder, locale
+behavior and build checks. Linguistic verification is recorded separately so the
+README remains a product overview rather than a translation-status report.
 
 ## Issues, contributions, license and brand
 
