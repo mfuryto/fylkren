@@ -9,8 +9,10 @@ import type { Session } from "../work/WorkContextModels";
 import { orderOrganizationUnits } from "./organizationHierarchy";
 import { OrganizationStructure } from "./OrganizationStructure";
 import { OrganizationRoles } from "./OrganizationRoles";
+import { useTranslation } from "../localization/LocalizationProvider";
 
 export function OrganizationPage({ session }: { session: Session }) {
+  const t = useTranslation();
   const [helpOpen, setHelpOpen] = useState(false);
   const [sites, setSites] = useState<SiteSummary[]>([]);
   const [units, setUnits] = useState<OrganizationUnitSummary[]>([]);
@@ -95,7 +97,7 @@ export function OrganizationPage({ session }: { session: Session }) {
         isTemporary,
         worksAtParentLevel,
         isSiteLeadership,
-      }, "Organisasjonsenheten kunne ikke opprettes.");
+      }, t("organizationUnitCreateFailed"));
       setUnits((current) => [...current, unit]);
       setUnitName("");
       setParentId("");
@@ -130,7 +132,7 @@ export function OrganizationPage({ session }: { session: Session }) {
     event.preventDefault();
     if (!unitEditor) return;
     try {
-      const updated = await apiMutate<OrganizationUnitSummary>(`/api/sites/${selectedSiteId}/organization-units/${unitEditor.id}`, "PUT", unitEditor, "Organisasjonsenheten kunne ikke lagres.");
+      const updated = await apiMutate<OrganizationUnitSummary>(`/api/sites/${selectedSiteId}/organization-units/${unitEditor.id}`, "PUT", unitEditor, t("organizationUnitSaveFailed"));
       setUnits((current) =>
         current.map((value) => (value.id === updated.id ? updated : value)),
       );
@@ -139,7 +141,7 @@ export function OrganizationPage({ session }: { session: Session }) {
   }
   async function reorderUnit(unitId: string, direction: "up" | "down") {
     try {
-      await apiMutate(`/api/sites/${selectedSiteId}/organization-units/${unitId}/reorder`, "POST", { direction }, "Rekkefølgen kunne ikke endres.");
+      await apiMutate(`/api/sites/${selectedSiteId}/organization-units/${unitId}/reorder`, "POST", { direction }, t("organizationUnitReorderFailed"));
       setUnits(await loadOrganizationUnits(selectedSiteId));
     } catch {
       setState("error");
@@ -150,29 +152,29 @@ export function OrganizationPage({ session }: { session: Session }) {
     <div className="page">
       <header className="page-header">
         <div>
-          <h1>Organisasjon</h1>
+          <h1>{t("organizationTitle")}</h1>
           <p className="muted">
-            Intern struktur, roller og bemanning på ditt organisasjonsnivå.
+            {t("organizationIntro")}
           </p>
         </div>
         <div className="task-actions">
-        <button className="help-button" type="button" onClick={() => setHelpOpen(true)}><i aria-hidden="true">?</i><span>Hjelp</span></button>
+        <button className="help-button" type="button" onClick={() => setHelpOpen(true)}><i aria-hidden="true">?</i><span>{t("help")}</span></button>
         {canManageSelectedSite && (
           <button
             className="primary-button"
             type="button"
             onClick={() => setUnitCreatorOpen(true)}
           >
-            Ny intern enhet
+            {t("newInternalUnit")}
           </button>
         )}
         </div>
       </header>
       {state === "loading" && (
-        <p className="status-message">Laster organisasjonen …</p>
+        <p className="status-message">{t("loadingOrganization")}</p>
       )}
       {state === "error" && (
-        <p className="status-message">Organisasjonsdata kunne ikke lastes.</p>
+        <p className="status-message">{t("organizationLoadFailed")}</p>
       )}
       {state === "ready" && sites.length === 0 && (
         <section className="panel empty-state">
@@ -180,9 +182,9 @@ export function OrganizationPage({ session }: { session: Session }) {
             <span className="empty-state-symbol" aria-hidden="true">
               ◇
             </span>
-            <h2>Ingen tilgjengelige organisasjonsområder</h2>
+            <h2>{t("noOrganizationAreas")}</h2>
             <p className="muted">
-              Du må være leder eller Site Manager for å se intern struktur.
+              {t("noOrganizationAreasIntro")}
             </p>
           </div>
         </section>
@@ -191,7 +193,7 @@ export function OrganizationPage({ session }: { session: Session }) {
         <>
           {sites.length > 1 && <section className="panel site-workspace">
             <div className="field">
-              <label htmlFor="selected-site">Valgt site</label>
+              <label htmlFor="selected-site">{t("selectedSite")}</label>
               <select
                 id="selected-site"
                 value={selectedSiteId}
@@ -201,19 +203,19 @@ export function OrganizationPage({ session }: { session: Session }) {
                   <option key={site.id} value={site.id}>
                     {site.parentOrganizationUnitId ? "↳ " : ""}
                     {site.name}
-                    {site.isActive ? "" : " (slettet)"}
+                    {site.isActive ? "" : t("deletedSuffix")}
                   </option>
                 ))}
               </select>
             </div>
             <div>
-              <span className="field-label">Område</span>
-              <p>Intern organisering i valgt site</p>
+              <span className="field-label">{t("areaLabel")}</span>
+              <p>{t("selectedSiteOrganization")}</p>
             </div>
           </section>}
 
           {!canManageSelectedSite && (
-            <p className="muted status-message">Skrivebeskyttet visning for ditt nivå og underliggende enheter.</p>
+            <p className="muted status-message">{t("organizationReadOnly")}</p>
           )}
 
           <OrganizationStructure
@@ -226,12 +228,12 @@ export function OrganizationPage({ session }: { session: Session }) {
           <OrganizationRoles orderedUnits={orderedUnits} access={access} />
         </>
       )}
-      {helpOpen && <SectionHelp title="Slik bruker du Organisasjon" intro="Organisasjon viser sitens interne struktur, roller og bemanning innenfor området du har tilgang til." steps={[{title:"Velg riktig site.",text:"Hvis du har tilgang til flere sites, velger du først hvilken organisasjon som skal vises."},{title:"Les strukturen ovenfra og ned.",text:"Innrykk viser hvilke underenheter og team som tilhører nivået over."},{title:"Se ledelse, roller og bemanning.",text:"Sjef og bemyndiget leder kan se organisasjonen på eget nivå og nedover som grunnlag for operativ ledelse."},{title:"Forvalt interne enheter.",text:"Site Manager oppretter, redigerer, sorterer og deaktiverer interne enheter. Denne strukturadministrasjonen utføres på site-nivå."},{title:"Bruk Personell for personer og roller.",text:"Brukere, organisatorisk tilknytning, arbeidsroller og rolletildelinger forvaltes på Personell-siden."}]} note="Operative skriverettigheter for sjef og bemyndiget leder påvirkes ikke av at organisasjonsstrukturen administreres på site-nivå." onClose={() => setHelpOpen(false)} />}
+      {helpOpen && <SectionHelp title={t("organizationHelpTitle")} intro={t("organizationHelpIntro")} steps={[{title:t("organizationHelpSelectTitle"),text:t("organizationHelpSelectText")},{title:t("organizationHelpStructureTitle"),text:t("organizationHelpStructureText")},{title:t("organizationHelpLeadershipTitle"),text:t("organizationHelpLeadershipText")},{title:t("organizationHelpManageTitle"),text:t("organizationHelpManageText")},{title:t("organizationHelpPersonnelTitle"),text:t("organizationHelpPersonnelText")}]} note={t("organizationHelpNote")} onClose={() => setHelpOpen(false)} />}
       {canManageSelectedSite && unitEditor && (
-        <Modal title="Rediger intern enhet" onClose={() => setUnitEditor(null)}>
+        <Modal title={t("editInternalUnit")} onClose={() => setUnitEditor(null)}>
           <form className="stacked-form" onSubmit={saveUnit}>
             <div className="field">
-              <label htmlFor="edit-unit-name">Navn</label>
+              <label htmlFor="edit-unit-name">{t("name")}</label>
               <input
                 id="edit-unit-name"
                 required
@@ -242,7 +244,7 @@ export function OrganizationPage({ session }: { session: Session }) {
               />
             </div>
             <div className="field">
-              <label htmlFor="edit-unit-parent">Plassering</label>
+              <label htmlFor="edit-unit-parent">{t("placement")}</label>
               <select
                 id="edit-unit-parent"
                 value={unitEditor.parentId ?? ""}
@@ -255,7 +257,7 @@ export function OrganizationPage({ session }: { session: Session }) {
                   })
                 }
               >
-                <option value="">Direkte under {selectedSite?.name}</option>
+                <option value="">{t("directlyUnder", { name: selectedSite?.name ?? "" })}</option>
                 {units
                   .filter((value) => value.id !== unitEditor.id)
                   .map((value) => (
@@ -276,7 +278,7 @@ export function OrganizationPage({ session }: { session: Session }) {
                   })
                 }
               />{" "}
-              Midlertidig enhet
+              {t("temporaryUnit")}
             </label>
             <label className="checkbox-field">
               <input
@@ -289,12 +291,10 @@ export function OrganizationPage({ session }: { session: Session }) {
                   })
                 }
               />{" "}
-              Arbeider på overordnet nivå
+              {t("worksAtParentLevel")}
             </label>
             <p className="muted modal-note">
-              Medlemmer kan lese oppgaver på nivået over. Planleggere i enheten
-              kan planlegge der, uten å få leder-, godkjennings- eller
-              administrasjonsrettigheter.
+              {t("parentLevelAccessHelp")}
             </p>
             <label className="checkbox-field">
               <input
@@ -308,14 +308,14 @@ export function OrganizationPage({ session }: { session: Session }) {
                   })
                 }
               />{" "}
-              Sitens toppledelsesenhet
+              {t("siteLeadershipUnit")}
             </label>
             <p className="muted modal-note">
               {units.some((unit) => unit.isSiteLeadership && unit.id !== unitEditor.id)
-                ? "Siten har allerede en toppledelsesenhet. Denne funksjonen kan ikke flyttes til en annen enhet her."
+                ? t("leadershipExistsCannotMove")
                 : unitEditor.isSiteLeadership
-                  ? "Dette er sitens toppledelsesenhet og kan ikke fjernes eller deaktiveres."
-                  : "Lederen for denne enheten er sitens toppleder. Enheten må ligge direkte under siten."}
+                  ? t("leadershipUnitProtected")
+                  : t("leadershipUnitLeaderHelp")}
             </p>
             <label className="checkbox-field">
               <input
@@ -329,7 +329,7 @@ export function OrganizationPage({ session }: { session: Session }) {
                   })
                 }
               />{" "}
-              Aktiv enhet
+              {t("activeUnit")}
             </label>
             <div className="modal-actions">
               <button
@@ -337,26 +337,24 @@ export function OrganizationPage({ session }: { session: Session }) {
                 type="button"
                 onClick={() => setUnitEditor(null)}
               >
-                Avbryt
+                {t("cancel")}
               </button>
-              <button className="primary-button">Lagre</button>
+              <button className="primary-button">{t("save")}</button>
             </div>
           </form>
         </Modal>
       )}
       {canManageSelectedSite && unitCreatorOpen && (
         <Modal
-          title="Ny intern enhet"
+          title={t("newInternalUnit")}
           onClose={() => setUnitCreatorOpen(false)}
         >
           <form className="stacked-form" onSubmit={createUnit}>
             <p className="muted modal-note">
-              Enheten blir en del av den interne organisasjonen i{" "}
-              {selectedSite?.name}. Opprett «Ny site» for et selvstendig
-              organisatorisk nivå.
+              {t("newUnitIntro", { site: selectedSite?.name ?? "" })}
             </p>
             <div className="field">
-              <label htmlFor="new-unit-name">Navn</label>
+              <label htmlFor="new-unit-name">{t("name")}</label>
               <input
                 id="new-unit-name"
                 required
@@ -367,7 +365,7 @@ export function OrganizationPage({ session }: { session: Session }) {
               />
             </div>
             <div className="field">
-              <label htmlFor="new-parent-unit">Plassering</label>
+              <label htmlFor="new-parent-unit">{t("placement")}</label>
               <select
                 id="new-parent-unit"
                 value={parentId}
@@ -376,7 +374,7 @@ export function OrganizationPage({ session }: { session: Session }) {
                   if (event.target.value) setIsSiteLeadership(false);
                 }}
               >
-                <option value="">Direkte under {selectedSite?.name}</option>
+                <option value="">{t("directlyUnder", { name: selectedSite?.name ?? "" })}</option>
                 {units
                   .filter((unit) => unit.isActive)
                   .map((unit) => (
@@ -392,7 +390,7 @@ export function OrganizationPage({ session }: { session: Session }) {
                 checked={isTemporary}
                 onChange={(event) => setIsTemporary(event.target.checked)}
               />{" "}
-              Midlertidig enhet
+              {t("temporaryUnit")}
             </label>
             <label className="checkbox-field">
               <input
@@ -402,12 +400,10 @@ export function OrganizationPage({ session }: { session: Session }) {
                   setWorksAtParentLevel(event.target.checked)
                 }
               />{" "}
-              Arbeider på overordnet nivå
+              {t("worksAtParentLevel")}
             </label>
             <p className="muted modal-note">
-              Medlemmer kan lese oppgaver på nivået over. Planleggere i enheten
-              kan planlegge der, uten å få leder-, godkjennings- eller
-              administrasjonsrettigheter.
+              {t("parentLevelAccessHelp")}
             </p>
             <label className="checkbox-field">
               <input
@@ -416,12 +412,12 @@ export function OrganizationPage({ session }: { session: Session }) {
                 disabled={Boolean(parentId) || units.some((unit) => unit.isSiteLeadership)}
                 onChange={(event) => setIsSiteLeadership(event.target.checked)}
               />{" "}
-              Sitens toppledelsesenhet
+              {t("siteLeadershipUnit")}
             </label>
             <p className="muted modal-note">
               {units.some((unit) => unit.isSiteLeadership)
-                ? "Siten har allerede en toppledelsesenhet. En ny enhet kan derfor ikke få denne funksjonen."
-                : "Lederen for denne enheten blir sitens toppleder. Navnet på enheten er valgfritt og påvirker ikke tilgangen."}
+                ? t("leadershipExistsForNewUnit")
+                : t("leadershipNewUnitHelp")}
             </p>
             <div className="modal-actions">
               <button
@@ -429,10 +425,10 @@ export function OrganizationPage({ session }: { session: Session }) {
                 type="button"
                 onClick={() => setUnitCreatorOpen(false)}
               >
-                Avbryt
+                {t("cancel")}
               </button>
               <button className="primary-button" disabled={creating}>
-                {creating ? "Oppretter …" : "Opprett enhet"}
+                {creating ? t("creating") : t("createUnit")}
               </button>
             </div>
           </form>

@@ -1,5 +1,6 @@
 import type { AccessSummary } from "../siteAdmin/models";
 import type { OrderedOrganizationUnit } from "./organizationHierarchy";
+import { useLanguage, useTranslation } from "../localization/LocalizationProvider";
 
 export function OrganizationRoles({
   orderedUnits,
@@ -8,9 +9,11 @@ export function OrganizationRoles({
   orderedUnits: OrderedOrganizationUnit[];
   access: AccessSummary;
 }) {
+  const t = useTranslation();
+  const language = useLanguage();
   return (
     <div className="panel access-overview organization-roles">
-      <h2>Roller og bemanning</h2>
+      <h2>{t("rolesAndStaffing")}</h2>
       {orderedUnits
         .filter(({ unit }) => unit.isActive && !unit.isChildSite)
         .flatMap(({ unit, depth }) => {
@@ -19,7 +22,7 @@ export function OrganizationRoles({
             .sort(
               (a, b) =>
                 Number(b.isLeader) - Number(a.isLeader) ||
-                a.name.localeCompare(b.name, "nb"),
+                a.name.localeCompare(b.name, language),
             );
           const withoutRole = access.members.filter(
             (member) =>
@@ -36,7 +39,7 @@ export function OrganizationRoles({
             >
               <strong>{depth ? "↳ " : ""}{unit.name}</strong>
               <span className="muted">
-                {unit.worksAtParentLevel ? "Arbeider på overordnet nivå" : "Eget nivå"}
+                {unit.worksAtParentLevel ? t("worksAtParentLevel") : t("ownLevel")}
               </span>
             </div>,
             ...unitRoles.map((role) => {
@@ -47,12 +50,12 @@ export function OrganizationRoles({
                     {role.name}
                   </strong>
                   <span className="muted">
-                    {role.isLeader ? "Lederrolle" : "Arbeidsrolle"}
+                    {role.isLeader ? t("leaderRole") : t("workRole")}
                   </span>
                   <span>
                     {role.assignments
-                      .map((assignment) => `${assignment.displayName}${assignment.canLeadParentLevel ? " (leder overordnet)" : ""}`)
-                      .join(", ") || "Ikke bemannet"}
+                      .map((assignment) => `${assignment.displayName}${assignment.canLeadParentLevel ? t("parentLeaderSuffix") : ""}`)
+                      .join(", ") || t("unstaffed")}
                   </span>
                 </div>
               );
@@ -61,9 +64,9 @@ export function OrganizationRoles({
               ? [
                   <div className="role-row" key={`${unit.id}-without-role`}>
                     <strong style={{ paddingLeft: `${(depth + 2) * 20}px` }}>
-                      Ingen rolle
+                      {t("noRole")}
                     </strong>
-                    <span className="muted">Enhetstilknytning</span>
+                    <span className="muted">{t("unitMembership")}</span>
                     <span>{withoutRole.map((member) => member.displayName).join(", ")}</span>
                   </div>,
                 ]

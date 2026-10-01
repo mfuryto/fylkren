@@ -6,8 +6,10 @@ import { sitesEn } from "./sites.en";
 import { siteAuditEn } from "./siteAudit.en";
 import { profileEn } from "./profile.en";
 import { overviewEn } from "./overview.en";
+import { organizationEn } from "./organization.en";
 
 export const en = {
+  ...organizationEn,
   ...overviewEn,
   ...profileEn,
   ...siteAuditEn,

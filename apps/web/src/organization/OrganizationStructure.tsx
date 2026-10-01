@@ -1,5 +1,6 @@
 import type { OrganizationUnitSummary } from "../siteAdmin/models";
 import type { OrderedOrganizationUnit } from "./organizationHierarchy";
+import { useLanguage, useTranslation } from "../localization/LocalizationProvider";
 
 export function OrganizationStructure({
   units,
@@ -14,23 +15,25 @@ export function OrganizationStructure({
   onEdit: (unit: OrganizationUnitSummary) => void;
   onReorder: (unitId: string, direction: "up" | "down") => void;
 }) {
+  const t = useTranslation();
+  const language = useLanguage();
   return (
     <section className="panel organization-list">
       <div className="section-heading hierarchy-panel-heading">
         <div>
-          <h2>Struktur</h2>
-          <p className="muted">Enheter vises i organisatorisk rekkefølge.</p>
+          <h2>{t("organizationStructure")}</h2>
+          <p className="muted">{t("organizationStructureIntro")}</p>
         </div>
       </div>
       {units.length === 0 ? (
-        <p className="empty-list">Ingen organisasjonsenheter er opprettet.</p>
+        <p className="empty-list">{t("noOrganizationUnits")}</p>
       ) : (
         orderedUnits.map(({ unit, depth }) => {
           const siblings = units
             .filter((candidate) => candidate.parentId === unit.parentId)
             .sort(
               (a, b) =>
-                a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, "nb"),
+                a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, language),
             );
           const siblingIndex = siblings.findIndex((candidate) => candidate.id === unit.id);
           return (
@@ -41,21 +44,21 @@ export function OrganizationStructure({
               </strong>
               <span className="muted">
                 {unit.isChildSite
-                  ? "Child-site"
+                  ? t("childSite")
                   : unit.isSiteLeadership
-                    ? "Sitens toppledelse"
+                    ? t("siteLeadership")
                     : unit.parentId
-                      ? `Under ${units.find((parent) => parent.id === unit.parentId)?.name ?? "ukjent"}`
-                      : "Toppnivå"}
+                      ? t("underUnit", { name: units.find((parent) => parent.id === unit.parentId)?.name ?? t("unknownUnit") })
+                      : t("topLevel")}
               </span>
               <span className={unit.isActive ? "status-active" : "muted"}>
                 {unit.isChildSite
-                  ? "Site"
+                  ? t("site")
                   : unit.isTemporary
-                    ? "Midlertidig"
+                    ? t("temporary")
                     : unit.isActive
-                      ? "Aktiv"
-                      : "Deaktivert"}
+                      ? t("active")
+                      : t("deactivated")}
               </span>
               {canManage && !unit.isChildSite && (
                 <div className="row-actions">
@@ -63,8 +66,8 @@ export function OrganizationStructure({
                     className="icon-button compact"
                     type="button"
                     disabled={siblingIndex === 0}
-                    aria-label={`Flytt ${unit.name} opp`}
-                    title="Flytt opp"
+                    aria-label={t("moveUnitUp", { name: unit.name })}
+                    title={t("moveUp")}
                     onClick={() => onReorder(unit.id, "up")}
                   >
                     ↑
@@ -73,14 +76,14 @@ export function OrganizationStructure({
                     className="icon-button compact"
                     type="button"
                     disabled={siblingIndex === siblings.length - 1}
-                    aria-label={`Flytt ${unit.name} ned`}
-                    title="Flytt ned"
+                    aria-label={t("moveUnitDown", { name: unit.name })}
+                    title={t("moveDown")}
                     onClick={() => onReorder(unit.id, "down")}
                   >
                     ↓
                   </button>
                   <button className="link-button" type="button" onClick={() => onEdit(unit)}>
-                    Rediger
+                    {t("edit")}
                   </button>
                 </div>
               )}
