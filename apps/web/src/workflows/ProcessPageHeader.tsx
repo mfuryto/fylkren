@@ -1,3 +1,4 @@
+import { translateActive } from "../localization";
 import { Modal } from "../components/Modal";
 
 export type ProcessHelpStep = {
@@ -33,7 +34,7 @@ export function ProcessPageHeader({
         <p className="muted">{description}</p>
       </div>
       <button className="help-button" type="button" onClick={onHelpOpen}>
-        <i aria-hidden="true">?</i><span>Hjelp</span>
+        <i aria-hidden="true">?</i><span>{translateActive("help")}</span>
       </button>
     </header>
     {helpOpen && <Modal title={helpTitle} onClose={onHelpClose}>
@@ -46,7 +47,7 @@ export function ProcessPageHeader({
         </ol>
       </div>
       <div className="modal-actions">
-        <button className="primary-button" type="button" onClick={onHelpClose}>Close</button>
+        <button className="primary-button" type="button" onClick={onHelpClose}>{translateActive("close")}</button>
       </div>
     </Modal>}
   </>;

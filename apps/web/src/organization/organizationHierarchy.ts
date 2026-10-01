@@ -1,4 +1,5 @@
 import type { OrganizationUnitSummary } from "../siteAdmin/models";
+import { compareActiveLanguage } from "../localization";
 
 export type OrderedOrganizationUnit = {
   unit: OrganizationUnitSummary;
@@ -16,7 +17,7 @@ export function orderOrganizationUnits(
       .filter((unit) => unit.parentId === parentId && !visited.has(unit.id))
       .sort(
         (a, b) =>
-          a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, "nb"),
+          a.sortOrder - b.sortOrder || compareActiveLanguage(a.name, b.name),
       )
       .forEach((unit) => {
         visited.add(unit.id);
@@ -28,7 +29,7 @@ export function orderOrganizationUnits(
   append(null, 0);
   units
     .filter((unit) => !visited.has(unit.id))
-    .sort((a, b) => a.name.localeCompare(b.name, "nb"))
+    .sort((a, b) => compareActiveLanguage(a.name, b.name))
     .forEach((unit) => {
       visited.add(unit.id);
       ordered.push({ unit, depth: 0 });

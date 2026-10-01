@@ -131,7 +131,7 @@ internal static class PlanningApprovalService
         var links = await db.WorkflowStepLinks.AsNoTracking().Where(x => x.RunId == run.Id).OrderBy(x => x.CreatedAt).Select(x => new { x.StepId, x.Label, x.Url }).ToListAsync(ct);
         var events = await db.WorkflowTimelineEvents.AsNoTracking().Where(x => x.RunId == run.Id).OrderBy(x => x.Date).ThenBy(x => x.SortOrder).Select(x => new { x.StepId, x.Date, x.Description }).ToListAsync(ct);
         var text = new StringBuilder().AppendLine("# Task basis").AppendLine().AppendLine("## Primary task description").AppendLine(run.WorkItem.Description);
-        if (!string.IsNullOrWhiteSpace(run.WorkItem.ReferenceUrl)) text.AppendLine().AppendLine($"Hoveddokument: {run.WorkItem.ReferenceUrl}");
+        if (!string.IsNullOrWhiteSpace(run.WorkItem.ReferenceUrl)) text.AppendLine().AppendLine($"Primary document: {run.WorkItem.ReferenceUrl}");
         text.AppendLine().AppendLine("## Approved plan");
         foreach (var step in steps)
         {

@@ -12,8 +12,12 @@ import { risksEn } from "./sections/risks";
 import { personnelEn } from "./sections/personnel";
 import { workTemplatesEn } from "./sections/workTemplates";
 import { workEn } from "./sections/work";
+import { tasksEn } from "./sections/tasks";
+import { workflowsEn } from "./sections/workflows";
 
 export const en = {
+  ...workflowsEn,
+  ...tasksEn,
   ...workEn,
   ...workTemplatesEn,
   ...personnelEn,
@@ -29,6 +33,14 @@ export const en = {
   ...federationEn,
   ...platformApiEn,
   loading: "Loading…",
+  loadingPage: "Loading page…",
+  loadingConfiguration: "Loading configuration…",
+  configurationLoadFailed: "Configuration could not be loaded.",
+  licenseRefreshFailed: "License status could not be refreshed.",
+  tryAgain: "Try again",
+  singleSignOn: "Single sign-on",
+  siteManagers: "Site Managers",
+  licensingAuthority: "Licensing Authority",
   close: "Close",
   cancel: "Cancel",
   next: "Next",

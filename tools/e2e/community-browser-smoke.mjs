@@ -161,15 +161,15 @@ async function assertCommunityBoundary() {
     'Community license page');
   const licenseText = await bodyText();
   assert.match(licenseText, /the same software for Community and Enterprise/);
-  assert.match(licenseText, /Importer signert lisensfil/);
+  assert.match(licenseText, /Import signed license file/);
 
   await navigate('/#/federation');
-  await waitFor('document.body.innerText.includes("Federation requires Enterprise")',
+  await waitFor('document.body.innerText.includes("Requires an Enterprise license")',
     'Community federation boundary');
   const federationText = await bodyText();
-  assert.match(federationText, /Eksisterende oppsett kan fortsatt leses/);
-  assert.ok(!federationText.includes('Legg til motpart'));
-  assert.ok(!federationText.includes('Create federation key'));
+  assert.match(federationText, /The entire feature remains visible below/);
+  assert.ok(federationText.includes('Add peer'));
+  assert.ok(federationText.includes('Create federation key'));
 }
 async function importEnterpriseLicense() {
   await navigate('/#/license');
@@ -186,10 +186,10 @@ async function importEnterpriseLicense() {
 }
 async function removeEnterpriseLicense() {
   await evaluate(`[...document.querySelectorAll('button')]
-    .find(button => button.textContent.trim() === 'Fjern lisens').click()`);
+    .find(button => button.textContent.trim() === 'Remove license').click()`);
   await waitFor(`document.querySelector('[role="dialog"]') !== null`, 'license removal dialog');
   await evaluate(`[...document.querySelectorAll('[role="dialog"] button')]
-    .find(button => button.textContent.trim() === 'Fjern lisens').click()`);
+    .find(button => button.textContent.trim() === 'Remove license').click()`);
   await waitFor(`document.body.innerText.includes("Enterprise entitlements are disabled") &&
     document.body.innerText.includes("No Enterprise entitlements are active")`,
   'Community downgrade');
@@ -250,10 +250,10 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
   const referenceUrl = 'https://example.invalid/source-document';
   const dueDate = new Date(Date.now() + 7 * 86_400_000).toISOString().slice(0, 10);
   await navigate('/#/tasks');
-  await waitFor('document.body.innerText.includes("Ny oppgave")', 'Tasks page');
+  await waitFor('document.body.innerText.includes("New task")', 'Tasks page');
   const keyboardEvidence = keyboardAccessibility
     ? await verifyTaskDialogKeyboard({ call, evaluate, waitFor })
-    : (await clickButton('Ny oppgave'), {});
+    : (await clickButton('New task'), {});
   await waitFor('document.querySelector("#task-title") !== null', 'task registration dialog');
   await setInput('#task-title', title);
   await setInput('#task-description', description);
@@ -264,7 +264,7 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
   await waitFor(`document.querySelector("#task-title") === null &&
     document.body.innerText.includes(${JSON.stringify(title)})`, 'registered task');
   await navigate('/#/');
-  await waitForSummary('Krever handling', 1);
+  await waitForSummary('Requires action', 1);
   await waitForSummary('Active', 1);
   await verifyWorkloadPresentation({ navigate, waitFor, request, evaluate, assertNoOverflow, siteId: site.id, expected: 1 });
   await navigate('/#/tasks');
@@ -273,7 +273,7 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
   await waitFor('document.body.innerText.includes("Move to assessment")', 'registered task actions');
   await evaluate(`(() => {
     const summary = [...document.querySelectorAll('summary')]
-      .find(value => value.textContent.includes('Beskrivelse'));
+      .find(value => value.textContent.includes('Description'));
     if (!summary) throw new Error('Missing task description disclosure');
     if (!summary.closest('details')?.open) summary.click();
   })()`);
@@ -289,7 +289,7 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
   assert.match(await bodyText(), new RegExp(recommendation.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   await setSelect('#review-priority', 'high');
   await evaluate('document.querySelector("#review-priority").closest("form").requestSubmit()');
-  await waitFor(`document.body.innerText.includes("Til vurdering") &&
+  await waitFor(`document.body.innerText.includes("Under review") &&
     document.body.innerText.includes("Send to execution")`, 'reviewed task');
   assert.ok(!(await bodyText()).includes(recommendation),
     'Recommendation remained visible after initial assessment');
@@ -314,7 +314,7 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
     setter.call(select, ${JSON.stringify(definition)});
     select.dispatchEvent(new Event('change', { bubbles: true }));
   })()`);
-  await clickButton('Start arbeidsflyt');
+  await clickButton('Start workflow');
   await waitFor('document.body.innerText.includes("Step 1 of")', 'execution workflow');
   for (let step = 1; step <= 10; step++) {
     await setRichText('document', `<h1>Execution step ${step}</h1><ul><li>Completed in Chromium</li></ul>`);
@@ -372,7 +372,7 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
   await signInLocalActor({ request, navigate, waitFor, setInput, evaluate, actor: author });
 
   await navigate('/#/');
-  await waitForSummary('Krever handling', 0);
+  await waitForSummary('Requires action', 0);
   await waitForSummary('Active', 0);
   await waitForSummary('Registered and received tasks', 1, '.overview-stat-card');
   await waitForSummary('Completed tasks', 1, '.overview-stat-card');
@@ -380,13 +380,13 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
 
   await navigate('/#/reports');
   await waitFor(`document.body.innerText.includes(${JSON.stringify(title)}) &&
-    document.body.innerText.includes("1 rapport")`, 'report archive');
-  await clickButton('Vis rapport');
+    document.body.innerText.includes("1 report")`, 'report archive');
+  await clickButton('View report');
   await waitFor(`document.body.innerText.includes("Task completed.") &&
     document.body.innerText.includes("CONFIDENTIAL") &&
     document.body.innerText.includes(${JSON.stringify(author.displayName)}) &&
     document.body.innerText.includes(${JSON.stringify(approver.displayName)}) &&
-    document.body.innerText.includes("Eksporter som PDF")`, 'classified archived report viewer');
+    document.body.innerText.includes("Export as PDF")`, 'classified archived report viewer');
   if (reportPdfPath) {
     await writeReportPdf({ call, evaluate, outputPath: reportPdfPath, targetUrl });
     verifyMultiPageClassifiedPdf(reportPdfPath);
@@ -401,7 +401,7 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
   });
 
   await navigate('/#/audit');
-  await waitFor(`document.body.innerText.includes("Sporbare hendelser i sites du administrerer") &&
+  await waitFor(`document.body.innerText.includes("Traceable events in sites you administer") &&
     document.body.innerText.includes("Task registered") &&
     document.body.innerText.includes("Execution submitted for review") &&
     document.body.innerText.includes("Final report approved")`, 'site audit chain');
@@ -409,11 +409,11 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
   const leaderLogout = await request('/api/session', 'DELETE');
   assert.equal(leaderLogout.status, 204, JSON.stringify(leaderLogout.body));
   await navigate('/');
-  await waitFor('document.body.innerText.includes("Logg inn")', 'Platform Manager login');
+  await waitFor('document.body.innerText.includes("Sign in")', 'Platform Manager login');
   await setInput('#username', platformCredentials.username);
   await setInput('#password', platformCredentials.password);
   await evaluate('document.querySelector("#password").closest("form").requestSubmit()');
-  await waitFor('document.body.innerText.includes("Plattform")', 'Platform Manager shell');
+  await waitFor('document.body.innerText.includes("Platform")', 'Platform Manager shell');
   const platformSession = await request('/api/session');
   assert.equal(platformSession.status, 200, JSON.stringify(platformSession.body));
   assert.equal(platformSession.body.isPlatformManager, true, JSON.stringify(platformSession.body));
@@ -454,20 +454,20 @@ try {
   await setInput('#setup-password', password);
   await setInput('#setup-confirm-password', password);
   await evaluate('document.querySelector("#setup-password").closest("form").requestSubmit()');
-  await waitFor('document.body.innerText.includes("Community") && document.body.innerText.includes("Plattform")',
+  await waitFor('document.body.innerText.includes("Community") && document.body.innerText.includes("Platform")',
     'authenticated shell');
   await assertNoOverflow('Authenticated shell');
 
   await navigate('/#/sites');
   await waitFor('document.body.innerText.includes("No sites have been created")', 'empty Sites page');
-  assert.match(await bodyText(), /Community: 0 av 3 aktive sites/);
+  assert.match(await bodyText(), /Community: 0 of 3 active sites/);
   await evaluate(`[...document.querySelectorAll('button')]
-    .find(button => button.textContent.trim() === 'Ny site').click()`);
+    .find(button => button.textContent.trim() === 'New site').click()`);
   await waitFor('document.querySelector("#new-site-name") !== null', 'new-site dialog');
   await setInput('#new-site-name', 'Synthetic Browser Site');
   await evaluate('document.querySelector("#new-site-name").closest("form").requestSubmit()');
   await waitFor(`document.body.innerText.includes("Synthetic Browser Site") &&
-    document.body.innerText.includes("Community: 1 av 3 aktive sites")`, 'created site');
+    document.body.innerText.includes("Community: 1 of 3 active sites")`, 'created site');
 
   const taskEvidence = taskFlow
     ? await runTopLevelTaskFlow(suffix, { username, password }) : {};
@@ -477,13 +477,13 @@ try {
     await importEnterpriseLicense();
 
     await navigate('/#/federation');
-    await waitFor(`document.body.innerText.includes("Legg til motpart") &&
+    await waitFor(`document.body.innerText.includes("Add peer") &&
       document.body.innerText.includes("Create federation key")`,
     'Enterprise federation controls');
     await assertNoOverflow('Enterprise federation page');
 
     await navigate('/#/api');
-    await waitFor('document.body.innerText.includes("Ny API-klient")',
+    await waitFor('document.body.innerText.includes("New API client")',
       'Enterprise API controls');
 
     await navigate('/#/license');
@@ -491,7 +491,7 @@ try {
 
     await navigate('/#/sites');
     await waitFor(`document.body.innerText.includes("Synthetic Browser Site") &&
-      document.body.innerText.includes("Community: 1 av 3 aktive sites")`,
+      document.body.innerText.includes("Community: 1 of 3 active sites")`,
     'site preserved after Community downgrade');
     await assertCommunityBoundary();
   }
@@ -501,7 +501,7 @@ try {
       width: 390, height: 844, deviceScaleFactor: 1, mobile: true,
     });
     await navigate('/#/license');
-    await waitFor('document.body.innerText.includes("Importer signert lisensfil")',
+    await waitFor('document.body.innerText.includes("Import signed license file")',
       'mobile license page');
     await assertNoOverflow('Mobile license page');
   }

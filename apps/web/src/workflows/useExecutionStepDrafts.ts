@@ -1,3 +1,4 @@
+import { translateActive } from "../localization";
 import { useMemo, useState } from "react";
 import { apiMutate } from "../api/client";
 import type { ExecutionItem, ExecutionStep } from "./ExecutionModels";
@@ -25,7 +26,7 @@ export function useExecutionStepDrafts({ items, personId, onError }: UseExecutio
           .filter(event => event.date && event.description.trim())
           .map(event => ({ date: event.date, description: event.description })),
       },
-      "The execution step could not be saved.",
+      translateActive("workflowsUseExecutionStepDraftsTheExecutionStepCouldNotBe"),
     ));
   }
 
@@ -33,7 +34,7 @@ export function useExecutionStepDrafts({ items, personId, onError }: UseExecutio
   useWorkflowAutosave({
     revision,
     enabled: Object.keys(drafts).length > 0 || Object.keys(timelineDrafts).length > 0,
-    fallbackError: "Changes to the execution step could not be saved automatically.",
+    fallbackError: translateActive("workflowsUseExecutionStepDraftsChangesToTheExecutionStepCould"),
     onError,
     save: async () => {
       const dirtyStepIds = new Set([...Object.keys(drafts), ...Object.keys(timelineDrafts)]);

@@ -70,7 +70,7 @@ internal static class ReportQueryEndpoints
                     workReceivedAt = x.CreatedAt,
                     workCompletedAt = x.FinalReportUpdatedAt,
                     writtenBy = x.FinalReportWrittenByPerson == null
-                        ? x.CreatedByPerson == null ? x.SenderSiteName ?? "Ekstern site" : x.CreatedByPerson.DisplayName
+                        ? x.CreatedByPerson == null ? x.SenderSiteName ?? "External site" : x.CreatedByPerson.DisplayName
                         : x.FinalReportWrittenByPerson.DisplayName,
                     approvedBy = x.FinalReportApprovedByPerson == null
                         ? null

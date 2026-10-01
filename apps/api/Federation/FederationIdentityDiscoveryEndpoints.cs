@@ -19,7 +19,7 @@ internal static class FederationIdentityDiscoveryEndpoints
         HttpContext context, IDataProtectionProvider protection, FylkrenDbContext db,
         CancellationToken ct)
     {
-        if (!context.Request.IsHttps) return Results.Problem(statusCode: 400, title: "HTTPS kreves.");
+        if (!context.Request.IsHttps) return Results.Problem(statusCode: 400, title: "HTTPS is required.");
         if (request.RequesterInstanceId == Guid.Empty || request.Nonce == Guid.Empty)
             return Results.BadRequest(new { error = "invalid_identity_discovery" });
         var localId = await db.InstanceIdentities.AsNoTracking().Where(row => row.Key == 1)

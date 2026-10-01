@@ -206,7 +206,7 @@ Site Manager alone sees and edits:
 - Organization and Personnel for the assigned site;
 - Workflows and Templates;
 - Notifications;
-- site Audit (`Revisjon` in Norwegian UI).
+- Site Audit.
 
 Workflow/template definitions are administration-only, but active eligible users can use configured content during processing. Site audit excludes Platform Manager actions and other sites.
 
@@ -216,7 +216,7 @@ Platform Manager pages include platform Overview/operations, Sites, global Users
 
 On **Identity**, select **Configure** on Local account, Active Directory, LDAP, OIDC or SAML. Save a new or changed external provider while it is deactivated, run **Test stored configuration**, then activate it. Stored secrets are never displayed again. Existing `.env` identity values are imported only when database settings are first created; the GUI is authoritative afterwards. Local account can remain enabled as emergency access even when normal users use AD/LDAP or SSO. **Go directly to OIDC/SAML** bypasses the ordinary login form; `/?local=1` opens the emergency local form. Disabling or changing that provider cancels direct redirect. Local login cannot be disabled until a tested external provider has an active Platform Manager link.
 
-OIDC links belong to the exact issuer plus `sub`; SAML links belong to the exact IdP Entity ID plus permanent NameID. The same identifier text from another provider instance is never treated as the same identity. Each link has **Fjern kobling**. Removal blocks that sign-in but preserves the internal person, memberships, roles and history, and the same identity can later be linked again. The final external Platform Manager link cannot be removed while local login is disabled.
+OIDC links belong to the exact issuer plus `sub`; SAML links belong to the exact IdP Entity ID plus permanent NameID. The same identifier text from another provider instance is never treated as the same identity. Each link has **Remove link**. Removal blocks that sign-in but preserves the internal person, memberships, roles and history, and the same identity can later be linked again. The final external Platform Manager link cannot be removed while local login is disabled.
 
 Enterprise features are always visible. When the required Enterprise entitlement is not active, the feature shows one standardized **Requires an Enterprise license** box with a short explanation and **Open License**. Fields and actions remain visible but disabled; Community features on the same page are unaffected. This applies to the machine and report APIs, webhooks, external identity, federation and creation of sites beyond the Community limit.
 
@@ -238,7 +238,7 @@ Under **Appearance**, Platform Manager configures names, theme colors and logo. 
 
 The **Language and regional settings** box stores the platform defaults for UI language, IANA time zone, 12/24-hour clock and metric/imperial measurements. Changes apply immediately without restarting the server. American English is the source language and fallback, while British English is selected separately where its wording or locale conventions differ. Timestamps remain stored in UTC, and changing presentation units never reinterprets stored values.
 
-### Federering mellom installasjoner
+### Federation between installations
 
 Federation connects two or more independent Enterprise installations. The **Federation** menu item and the entire GUI remain visible to the Platform Manager. Without Enterprise, one clear **Requires an Enterprise license** box appears at the top and actions are disabled. A valid Enterprise license enables the feature; Enterprise licenses issued before federation became available also work without a new license file. Use **Help** on the page for a short in-application explanation. Setup does not send or receive tasks while **Work routing** is disabled.
 

@@ -59,7 +59,7 @@ collect_service() {
             status=down
             detail="The container is running, but its health check is failing."
         else
-            detail="Containerstatus: $state."
+        detail="Container status: $state."
         fi
     fi
     item="{\"key\":\"$service_key\",\"name\":\"$service_name\",\"status\":\"$status\",\"detail\":\"$detail\",\"restartCount\":$restarts}"

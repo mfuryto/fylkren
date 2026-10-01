@@ -189,7 +189,7 @@ export async function testAdministrationReportApis({ platform, leader, siteId, c
   assert.equal(assess.status, 204, `Classified task assessment: ${JSON.stringify(assess.body)}`);
   await executeDefault(leader, classifiedTask.body.id, siteId);
   const reportWrite = await leader.put(`${taskPath}/final-report`, {
-    content: '# Sammendrag\n\nSynthetic classified API test report.', classification: abbreviation,
+    content: '# Summary\n\nSynthetic classified API test report.', classification: abbreviation,
   });
   assert.equal(reportWrite.status, 204, `Classified report write: ${JSON.stringify(reportWrite.body)}`);
   const reportApproval = await leader.post(`${taskPath}/final-report/approve`, {});

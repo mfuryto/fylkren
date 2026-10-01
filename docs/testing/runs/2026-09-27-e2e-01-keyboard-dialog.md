@@ -6,14 +6,14 @@ The clean command was `node tools/e2e/community-browser-smoke.mjs --task-flow --
 
 | Control | Expected | Observed | Result / evidence |
 | --- | --- | --- | --- |
-| Keyboard activation | Focused task action opens without a pointer | `Enter` opened **Registrer oppgave** | Pass; DevTools key input |
-| Dialog semantics | Assistive technology receives modal role and name | Accessibility tree contained a `dialog` named `Registrer oppgave`; DOM exposed `aria-modal=true` with a unique label reference | Pass; `accessibleDialogTree: true` |
+| Keyboard activation | Focused task action opens without a pointer | `Enter` opened **Register task** | Pass; DevTools key input |
+| Dialog semantics | Assistive technology receives modal role and name | Accessibility tree contained a `dialog` named `Register task`; DOM exposed `aria-modal=true` with a unique label reference | Pass; `accessibleDialogTree: true` |
 | Initial focus | Opening does not leave focus behind the overlay | Focus moved to a visible control inside the dialog | Pass; active-element assertion |
 | Reverse containment | `Shift+Tab` at the first control remains inside | Focus wrapped to the final dialog control | Pass; focus-index assertion |
 | Forward containment | `Tab` at the final control remains inside | Focus wrapped to the first dialog control | Pass; `keyboardModalNavigation: true` |
 | Visible focus | Keyboard location is perceptible | The next tab stop matched `:focus-visible` with an outline of at least two pixels | Pass; `visibleKeyboardFocus: true` |
 | Dismissal | A dismissible dialog closes with `Escape` | Dialog closed without pointer input | Pass; DOM postcondition |
-| Focus restoration | Context returns to the action that opened the dialog | The **Ny oppgave** button regained focus and could reopen the dialog with `Enter` | Pass; active-element and reopen assertions |
+| Focus restoration | Context returns to the action that opened the dialog | The **New task** button regained focus and could reopen the dialog with `Enter` | Pass; active-element and reopen assertions |
 | Adjacent E2E-01 chain | Focus management does not break ordinary work | Registration, assessment, execution, report, archive, overview, workload, audit, notification, classification and separate-approver controls passed; zero browser errors | Pass; final JSON result |
 | Disposable cleanup | No synthetic installation remains | Chromium, application, PostgreSQL, networks and volumes were removed after the run | Pass; cleanup output |
 

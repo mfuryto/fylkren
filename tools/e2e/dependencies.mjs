@@ -61,7 +61,7 @@ export async function testDependencies({ leader, siteId, otherSiteTaskId, suffix
     assert.equal((await status(id, 'execution')).status, 204);
     await executeDefault(leader, id, siteId);
     assert.equal((await leader.put(`${root}/${id}/final-report`, {
-      content: '# Sammendrag\n\nSynthetic predecessor completed.', classification: null,
+    content: '# Summary\n\nSynthetic predecessor completed.', classification: null,
     })).status, 204);
     assert.equal((await leader.post(`${root}/${id}/final-report/approve`, {})).status, 204);
     assert.equal((await status(id, 'completed')).status, 204);

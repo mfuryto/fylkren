@@ -1,3 +1,4 @@
+import { translateActive } from "../localization";
 import { useEffect, useState } from "react";
 import { apiGet, apiMutate } from "../api/client";
 import type { Session, TaskSite, TaskUnit } from "../work/WorkContextModels";
@@ -52,7 +53,7 @@ export function ExecutionPage({ session, language, classificationMarkings, perma
         setUnits(data.units);
         setSiteId(eligible.find(site => site.siteId === permalink.siteId)?.siteId ?? eligible[0]?.siteId ?? "");
       })
-      .catch(problem => setError(problem instanceof Error ? problem.message : "The execution context could not be loaded."));
+      .catch(problem => setError(problem instanceof Error ? problem.message : translateActive("workflowsExecutionPageTheExecutionContextCouldNotBe")));
   }, [permalink.siteId]);
 
   async function load(requestedPage = queuePage) {
@@ -60,7 +61,7 @@ export function ExecutionPage({ session, language, classificationMarkings, perma
     try {
       const parameters = new URLSearchParams({ page: String(requestedPage) });
       if (permalink.itemId && requestedPage === 1) parameters.set("focusItemId", permalink.itemId);
-      const data = await apiGet<{ items: ExecutionItem[]; definitions: ExecutionDefinition[]; managedItemIds: string[]; planContextIds?: Record<string, string>; total: number; page: number }>(`/api/execution/sites/${siteId}?${parameters}`, "The execution queue could not be loaded.");
+      const data = await apiGet<{ items: ExecutionItem[]; definitions: ExecutionDefinition[]; managedItemIds: string[]; planContextIds?: Record<string, string>; total: number; page: number }>(`/api/execution/sites/${siteId}?${parameters}`, translateActive("workflowsExecutionPageTheExecutionQueueCouldNotBe"));
       setItems(data.items);
       setTotalItems(data.total);
       if (data.page !== queuePage) setQueuePage(data.page);
@@ -69,7 +70,7 @@ export function ExecutionPage({ session, language, classificationMarkings, perma
       setPlanContextIds(data.planContextIds ?? {});
       setError("");
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "The execution queue could not be loaded.");
+      setError(problem instanceof Error ? problem.message : translateActive("workflowsExecutionPageTheExecutionQueueCouldNotBe"));
     }
   }
 
@@ -84,7 +85,7 @@ export function ExecutionPage({ session, language, classificationMarkings, perma
   }, [permalink.itemId, items]);
 
   async function mutate(path: string, method: "POST" | "PUT" = "POST", body?: object) {
-    await apiMutate(path, method, body, "The action could not be completed.");
+    await apiMutate(path, method, body, translateActive("siteActionFailed"));
     await load();
   }
 
@@ -98,7 +99,7 @@ export function ExecutionPage({ session, language, classificationMarkings, perma
         title: sideRequest.title, description: sideRequest.description,
       });
       setSideRequest(null); setRequestRecipientQuery(""); setRequestRecipients([]);
-    } catch (problem) { setError(problem instanceof Error ? problem.message : "The request could not be sent."); }
+    } catch (problem) { setError(problem instanceof Error ? problem.message : translateActive("tasksTasksPageTheRequestCouldNotBeSent")); }
     finally { setRequestBusy(false); }
   }
 
@@ -112,19 +113,19 @@ export function ExecutionPage({ session, language, classificationMarkings, perma
     const planItemId = planContextIds[item.id];
     if (!planItemId) return;
     try {
-      setPlanContext(await apiGet<PlanningContextDetails>(`/api/work/sites/${siteId}/items/${planItemId}/details`, "The plan could not be loaded."));
+      setPlanContext(await apiGet<PlanningContextDetails>(`/api/work/sites/${siteId}/items/${planItemId}/details`, translateActive("tasksTasksPageThePlanCouldNotBeLoaded")));
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "The plan could not be loaded.");
+      setError(problem instanceof Error ? problem.message : translateActive("tasksTasksPageThePlanCouldNotBeLoaded"));
     }
   }
 
   async function openExecutionReassignment(item: ExecutionItem) {
     if (!item.run) return;
     try {
-      const candidates = await apiGet<Array<{ personId: string; displayName: string }>>(`/api/execution/${item.run.id}/candidates`, "Available recipients could not be loaded.");
+      const candidates = await apiGet<Array<{ personId: string; displayName: string }>>(`/api/execution/${item.run.id}/candidates`, translateActive("workflowsExecutionPageAvailableRecipientsCouldNotBeLoaded"));
       setExecutionReassignment({ item, personId: candidates.find(candidate => candidate.personId !== item.run?.claimedByPersonId)?.personId ?? candidates[0]?.personId ?? "", candidates });
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Available recipients could not be loaded.");
+      setError(problem instanceof Error ? problem.message : translateActive("workflowsExecutionPageAvailableRecipientsCouldNotBeLoaded"));
     }
   }
 
@@ -132,16 +133,16 @@ export function ExecutionPage({ session, language, classificationMarkings, perma
   const childUnits = (item: ExecutionItem) => executionChildUnits(units, siteId, item);
   return <div className="page">
     <ProcessPageHeader
-      title="Execution"
-      description="Claim tasks at your level, select a workflow, and document execution through review and final report."
-      helpTitle="How to work with execution"
-      helpIntroduction="Execution is the active processing of a task at the receiving level. The working method follows the selected execution workflow."
+      title={translateActive("taskStatusExecution")}
+      description={translateActive("workflowsExecutionPageClaimTasksAtYourLevelSelect")}
+      helpTitle={translateActive("workflowsExecutionPageHowToWorkWithExecution")}
+      helpIntroduction={translateActive("workflowsExecutionPageExecutionIsTheActiveProcessingOf")}
       helpSteps={[
-        { title: "Read the task basis.", description: "Review task text, documents, and any approved plans from this and superior levels." },
-        { title: "Claim responsibility for the task.", description: "One user claims processing responsibility. The manager can release or reassign responsibility without losing documentation or history." },
-        { title: "Select execution workflow.", description: "Select an available workflow that suits the task and work level." },
-        { title: "Document the execution.", description: "Complete the steps, update the timeline if needed, and record follow-up with external contacts outside the system. A manager who has personally claimed execution can send a request from here. Changes are saved automatically." },
-        { title: "Avslutt riktig.", description: "Route onward if a subordinate level should take over. Otherwise, execution is submitted for review before the final report is written and approved at this level." },
+        { title: translateActive("tasksTaskPageHeaderReadTheTaskBasis"), description: translateActive("workflowsExecutionPageReviewTaskTextDocumentsAndAny") },
+        { title: translateActive("workflowsExecutionPageClaimResponsibilityForTheTask"), description: translateActive("workflowsExecutionPageOneUserClaimsProcessingResponsibilityThe") },
+        { title: translateActive("workflowsExecutionPageSelectExecutionWorkflow"), description: translateActive("workflowsExecutionPageSelectAnAvailableWorkflowThatSuits") },
+        { title: translateActive("workflowsExecutionPageDocumentTheExecution"), description: translateActive("workflowsExecutionPageCompleteTheStepsUpdateTheTimeline") },
+        { title: translateActive("completeCorrectly"), description: translateActive("workflowsExecutionPageRouteOnwardIfASubordinateLevel") },
       ]}
       helpOpen={helpOpen}
       onHelpOpen={() => setHelpOpen(true)}
@@ -150,7 +151,7 @@ export function ExecutionPage({ session, language, classificationMarkings, perma
     {error && <p className="status-message error-message">{error}</p>}
     {linkMessage && <p className="status-message" role="status">{linkMessage}</p>}
     {sites.length > 1 && <section className="panel personnel-site"><div className="field">
-      <label htmlFor="execution-site">Site</label>
+      <label htmlFor="execution-site">{translateActive("site")}</label>
       <select id="execution-site" value={siteId} onChange={event => setSiteId(event.target.value)}>
         {sites.map(site => <option key={site.siteId} value={site.siteId}>{site.name}</option>)}
       </select>
@@ -166,7 +167,7 @@ export function ExecutionPage({ session, language, classificationMarkings, perma
       planContextIds={planContextIds}
       childUnits={childUnits}
       onToggle={itemId => { setOpenItemId(current => current === itemId ? null : itemId); navigateToLocation({ page: "Execution", siteId, itemId }); }}
-      onCopyLink={itemId => { void copyPermalink({ page: "Execution", siteId, itemId }).then(() => setLinkMessage("The execution link has been copied.")).catch(() => setError("The link could not be copied.")); }}
+      onCopyLink={itemId => { void copyPermalink({ page: "Execution", siteId, itemId }).then(() => setLinkMessage(translateActive("workflowsExecutionPageTheExecutionLinkHasBeenCopied"))).catch(() => setError(translateActive("reportLinkCopyFailed"))); }}
       onToggleDetails={itemId => setExpandedItemId(current => current === itemId ? null : itemId)}
       onShowPlan={item => { void showPlan(item); }}
       onClaim={item => { void mutate(`/api/execution/items/${item.id}/claim`).catch(problem => setError(problem.message)); }}

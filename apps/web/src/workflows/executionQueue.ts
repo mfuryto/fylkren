@@ -1,11 +1,12 @@
+import { compareActiveLanguage, translateActive } from "../localization";
 import type { TaskUnit } from "../work/WorkContextModels";
 import type { ExecutionDefinition, ExecutionItem } from "./ExecutionModels";
 
 export function executionStatus(item: ExecutionItem) {
   const run = item.run;
-  if (!run) return "Togjengelig";
-  if (run.status === "claimed") return "Ansvar tatt";
-  if (run.status === "in_progress") return "In execution";
+  if (!run) return translateActive("workflowsPlanningQueueListAvailable");
+  if (run.status === "claimed") return translateActive("responsibilityClaimed");
+  if (run.status === "in_progress") return translateActive("workflowsExecutionQueueInExecution");
   return run.status;
 }
 
@@ -31,5 +32,5 @@ export function executionChildUnits(units: TaskUnit[], siteId: string, item: Exe
       !unit.isSiteLeadership &&
       (item.assignedUnitId ? unit.parentId === item.assignedUnitId : unit.parentId === null),
     )
-    .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, "nb"));
+    .sort((a, b) => a.sortOrder - b.sortOrder || compareActiveLanguage(a.name, b.name));
 }

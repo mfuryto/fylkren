@@ -2,7 +2,7 @@
 
 Run ID: `federation-classified-report-pdf-2026-09-27`. The application base was commit `cf7af41`; the print-layout correction and focused regression test described here were the uncommitted test-code revision under verification. The normal production-like pair harness created an official `SECRET` answer through ordinary receiver report, approval and completion commands. The sender's ordinary report archive retained the receiver site-name snapshot and structured classification.
 
-Headless Chromium 149 authenticated as the synthetic sender site leader over the TLS proxy and built web/Nginx gateway. The report screen showed `Synthetic Root b`, `Synthetic Secret`, the `(SECRET)` task marking and the official answer. The application’s own **Eksporter som PDF** action built its print iframe; Chrome DevTools `Page.printToPDF` captured that exact printable document as [the retained one-page evidence PDF](../../../output/pdf/federation-official-report.pdf).
+Headless Chromium 149 authenticated as the synthetic sender site leader over the TLS proxy and built web/Nginx gateway. The report screen showed `Synthetic Root b`, `Synthetic Secret`, the `(SECRET)` task marking and the official answer. The application’s own **Export as PDF** action built its print iframe; Chrome DevTools `Page.printToPDF` captured that exact printable document as [the retained one-page evidence PDF](../../../output/pdf/federation-official-report.pdf).
 
 | Control | Expected | Observed | Result / evidence |
 | --- | --- | --- | --- |

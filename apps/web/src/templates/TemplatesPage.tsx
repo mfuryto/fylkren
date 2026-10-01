@@ -88,7 +88,7 @@ export function TemplatesPage() {
       {error && <p className="error-message">{error}</p>}
       {sites.length > 1 && <section className="panel personnel-site">
         <div className="field">
-          <label>Site</label>
+          <label>{t("site")}</label>
           <select value={siteId} onChange={(e) => setSiteId(e.target.value)}>
             {sites.map((s) => (
               <option key={s.siteId} value={s.siteId}>

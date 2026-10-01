@@ -1,3 +1,4 @@
+import { translateActive } from "../localization";
 import { useEffect, useState } from "react";
 import type { WorkItem, WorkItemDetails } from "../work/WorkItemModels";
 import { errorMessage } from "../api/errors";
@@ -16,7 +17,7 @@ export function useTaskPlanDetails(siteId: string, openItemId: string | null, it
     }).catch(problem => {
       if (active) {
         setPlanDetails(current => ({ ...current, [item.id]: null }));
-        onError(errorMessage(problem, "The proposed plan could not be loaded."));
+        onError(errorMessage(problem, translateActive("tasksTaskQueueListTheProposedPlanCouldNotBe")));
       }
     });
     return () => { active = false; };

@@ -7,15 +7,15 @@ afterEach(() => {
 });
 
 describe("apiGetCached", () => {
-  it("deler en kortlivet GET mellom sider", async () => {
+  it("shares a short-lived GET request between pages", async () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ value: 1 }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     }));
     vi.stubGlobal("fetch", fetchMock);
 
-    const first = apiGetCached<{ value: number }>("context:user", "/api/work/context", "Feil");
-    const second = apiGetCached<{ value: number }>("context:user", "/api/work/context", "Feil");
+    const first = apiGetCached<{ value: number }>("context:user", "/api/work/context", "Error");
+    const second = apiGetCached<{ value: number }>("context:user", "/api/work/context", "Error");
 
     await expect(Promise.all([first, second])).resolves.toEqual([{ value: 1 }, { value: 1 }]);
     expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -32,9 +32,9 @@ describe("apiGetCached", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    await apiGetCached("context:user", "/api/work/context", "Feil");
-    await apiMutate("/api/change", "POST", {}, "Feil");
-    await apiGetCached("context:user", "/api/work/context", "Feil");
+    await apiGetCached("context:user", "/api/work/context", "Error");
+    await apiMutate("/api/change", "POST", {}, "Error");
+    await apiGetCached("context:user", "/api/work/context", "Error");
 
     expect(fetchMock).toHaveBeenCalledTimes(4);
     expect(fetchMock.mock.calls.filter(([path]) => path === "/api/work/context")).toHaveLength(2);
@@ -46,20 +46,20 @@ describe("apiRequest", () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
     vi.stubGlobal("fetch", fetchMock);
 
-    await apiRequest("/api/example", "Feil", { headers: { "X-Test": "behold" } });
+    await apiRequest("/api/example", "Error", { headers: { "X-Test": "retain" } });
 
     const init = fetchMock.mock.calls[0][1] as RequestInit;
     const headers = init.headers as Headers;
     expect(headers.get("Accept")).toBe("application/json");
-    expect(headers.get("X-Test")).toBe("behold");
+    expect(headers.get("X-Test")).toBe("retain");
   });
 
   it("shows a safe and specific problem reason from the API", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({
-      errors: { email: ["E-postadressen er allerede i bruk."] },
+      errors: { email: ["The email address is already in use."] },
     }), { status: 409, headers: { "Content-Type": "application/problem+json" } })));
 
     await expect(apiRequest("/api/example", "Handlingen feilet."))
-      .rejects.toThrow("E-postadressen er allerede i bruk.");
+      .rejects.toThrow("The email address is already in use.");
   });
 });

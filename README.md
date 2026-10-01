@@ -207,8 +207,7 @@ The [documentation portal](docs/README.md) is the maintained entry point.
 
 Repository-facing documentation is English. The product currently bundles American
 English (`en-US`) as its source/fallback catalog, with British English (`en-GB`) and
-Norwegian Bokmal (`nb-NO`) as complete language packs;
-migration of remaining legacy hard-coded UI text is in progress. The maintained
+Norwegian Bokmal (`nb-NO`) as complete language packs. The maintained
 [language roster and language-pack rules](docs/product/LOCALIZATION.md) define when
 additional translations become supported. Routes, API contracts, persistent
 identifiers and permalinks remain language-neutral.

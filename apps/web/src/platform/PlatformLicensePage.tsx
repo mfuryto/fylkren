@@ -45,7 +45,7 @@ export function LicenseCertificate({ response }: { response: LicenseResponse | n
     <div className="license-certificate-frame">
       <header className="license-certificate-issuer">
         <img src={issuerMark} alt="" />
-        <div><strong>THUNOLD-OLSEN</strong><span>Licensing Authority</span></div>
+        <div><strong>THUNOLD-OLSEN</strong><span>{t("licensingAuthority")}</span></div>
         <span className={`license-certificate-state license-certificate-state-${state === "valid" ? "valid" : "inactive"}`}>{verification}</span>
       </header>
       <div className="license-certificate-title">
@@ -55,7 +55,7 @@ export function LicenseCertificate({ response }: { response: LicenseResponse | n
         <strong>{status?.customer ?? (state === "loading" ? t("loading") : t("thisInstallation"))}</strong>
       </div>
       <dl className="license-certificate-details">
-        <div><dt>Status</dt><dd>{status ? statusLabelKeys[status.state] ? t(statusLabelKeys[status.state]) : status.state : t("loading")}</dd></div>
+        <div><dt>{t("approvalStatus")}</dt><dd>{status ? statusLabelKeys[status.state] ? t(statusLabelKeys[status.state]) : status.state : t("loading")}</dd></div>
         <div><dt>{t("validUntil")}</dt><dd>{enterprise ? licenseDate(status?.expiresAt ?? null, language, t("unlimited")) : t("noExpiryDate")}</dd></div>
         <div><dt>{t("licenseId")}</dt><dd><code>{status?.licenseId ?? t("notAssigned")}</code></dd></div>
         <div><dt>{t("instanceId")}</dt><dd><code>{status?.instanceId ?? t("loading")}</code></dd></div>

@@ -1,3 +1,4 @@
+import { translateActive } from "../localization";
 import { useEffect, useState } from "react";
 import { apiGet, apiMutate } from "../api/client";
 import { Modal } from "../components/Modal";
@@ -22,7 +23,7 @@ export function WorkflowsPage() {
   const [error, setError] = useState("");
   const selectedSite = sites.find((x) => x.siteId === siteId);
   useEffect(() => {
-    apiGet<{ sites: TaskSite[]; units: TaskUnit[] }>("/api/work/context", "The workflow context could not be loaded.")
+    apiGet<{ sites: TaskSite[]; units: TaskUnit[] }>("/api/work/context", translateActive("workflowsWorkflowsPageTheWorkflowContextCouldNotBe"))
       .then((d: { sites: TaskSite[]; units: TaskUnit[] }) => {
         setSites(d.sites);
         setUnits(d.units);
@@ -31,17 +32,17 @@ export function WorkflowsPage() {
         if (firstSite && !firstSite.isSiteManager) {
           setForm((current) => ({ ...current, kind: "execution", ownerUnitId: d.units.find((unit) => unit.siteId === firstSite.siteId && unit.isLeader)?.id ?? "" }));
         }
-      }).catch(problem => setError(problem instanceof Error ? problem.message : "The workflow context could not be loaded."));
+      }).catch(problem => setError(problem instanceof Error ? problem.message : translateActive("workflowsWorkflowsPageTheWorkflowContextCouldNotBe")));
   }, []);
   async function load() {
     if (!siteId) return;
     try {
       const [workflowResponse, templateResponse] = await Promise.all([
-        apiGet<WorkflowDefinitionSummary[]>(`/api/workflows/sites/${siteId}`, "Workflows could not be loaded."),
-        apiGet<WorkflowTemplateSummary[]>(`/api/templates/sites/${siteId}`, "Templates could not be loaded."),
+        apiGet<WorkflowDefinitionSummary[]>(`/api/workflows/sites/${siteId}`, translateActive("workflowsWorkflowsPageWorkflowsCouldNotBeLoaded")),
+        apiGet<WorkflowTemplateSummary[]>(`/api/templates/sites/${siteId}`, translateActive("workTemplatesLoadFailed")),
       ]);
       setFlows(workflowResponse); setTemplates(templateResponse); setError("");
-    } catch (problem) { setError(problem instanceof Error ? problem.message : "Workflows could not be loaded."); }
+    } catch (problem) { setError(problem instanceof Error ? problem.message : translateActive("workflowsWorkflowsPageWorkflowsCouldNotBeLoaded")); }
   }
   useEffect(() => {
     void load();
@@ -67,7 +68,7 @@ export function WorkflowsPage() {
           kind: value.kind,
           steps,
       },
-      "The workflow could not be saved.",
+      translateActive("workflowsWorkflowsPageTheWorkflowCouldNotBeSaved"),
     );
     await load();
   }
@@ -84,7 +85,7 @@ export function WorkflowsPage() {
             : (units.find((unit) => unit.siteId === siteId && unit.isLeader)?.id ?? ""),
       });
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "The workflow could not be created.");
+      setError(problem instanceof Error ? problem.message : translateActive("workflowsWorkflowsPageTheWorkflowCouldNotBeCreated"));
     }
   }
   async function update(e: React.FormEvent) {
@@ -95,12 +96,12 @@ export function WorkflowsPage() {
       await save(editor, editor.id);
       setEditor(null);
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "The workflow could not be updated.");
+      setError(problem instanceof Error ? problem.message : translateActive("workflowsWorkflowsPageTheWorkflowCouldNotBeUpdated"));
     }
   }
   async function removeFlow(flow: WorkflowDefinitionSummary) {
-    try { await apiMutate(`/api/workflows/sites/${siteId}/${flow.id}`, "DELETE", undefined, "The workflow could not be disabled."); }
-    catch (problem) { setError(problem instanceof Error ? problem.message : "The workflow could not be disabled."); return; }
+    try { await apiMutate(`/api/workflows/sites/${siteId}/${flow.id}`, "DELETE", undefined, translateActive("workflowsWorkflowsPageTheWorkflowCouldNotBeDisabled")); }
+    catch (problem) { setError(problem instanceof Error ? problem.message : translateActive("workflowsWorkflowsPageTheWorkflowCouldNotBeDisabled")); return; }
     if (viewer?.id === flow.id) setViewer(null);
     await load();
   }
@@ -135,18 +136,17 @@ export function WorkflowsPage() {
     <div className="page">
       <header className="page-header">
         <div>
-          <h1>Arbeidsflyter</h1>
+          <h1>{translateActive("navWorkflows")}</h1>
           <p className="muted">
-            The Site Manager determines the content and order of the site's planning workflow
-            and other processing workflows.
+            {translateActive("workflowsWorkflowsPageTheSiteManagerDeterminesTheContent")}
           </p>
         </div>
-        <button className="help-button" type="button" onClick={() => setHelpOpen(true)}><i aria-hidden="true">?</i><span>Hjelp</span></button>
+        <button className="help-button" type="button" onClick={() => setHelpOpen(true)}><i aria-hidden="true">?</i><span>{translateActive("help")}</span></button>
       </header>
       {error && <p className="status-message error-message">{error}</p>}
       {sites.length > 1 && <section className="panel personnel-site">
         <div className="field">
-          <label>Site</label>
+          <label>{translateActive("site")}</label>
           <select value={siteId} onChange={(e) => {
             const nextSiteId = e.target.value;
             const nextSite = sites.find((site) => site.siteId === nextSiteId);
@@ -163,7 +163,7 @@ export function WorkflowsPage() {
       </section>}
       <div className="workflow-layout">
         <section className="panel">
-          <h2>Active arbeidsflyter</h2>
+          <h2>{translateActive("workflowsWorkflowsPageActiveWorkflows")}</h2>
           <div className="admin-list">
             {flows.map((f) => (
               <div className="admin-list-row" key={f.id}>
@@ -171,14 +171,14 @@ export function WorkflowsPage() {
                   <strong>{f.name}</strong>
                   <small className="muted">
                     {f.kind === "planning"
-                      ? "Planning"
-                      : `Execution · ${f.ownerUnitName ?? "Entire site"}`}
+                      ? translateActive("taskStatusPlanning")
+                      : translateActive("workflowExecutionSummary", { scope: f.ownerUnitName ?? translateActive("entireSite") })}
                   </small>
                 </span>
                 <div className="row-actions">
-                  <button className="link-button" type="button" onClick={() => setViewer(f)}>Vis</button>
-                  {f.canEdit && <button className="link-button" type="button" onClick={() => edit(f)}>Edit</button>}
-                  {f.canEdit && <button className="link-button danger" type="button" onClick={() => void removeFlow(f)}>Slett</button>}
+                  <button className="link-button" type="button" onClick={() => setViewer(f)}>{translateActive("view")}</button>
+                  {f.canEdit && <button className="link-button" type="button" onClick={() => edit(f)}>{translateActive("edit")}</button>}
+                  {f.canEdit && <button className="link-button danger" type="button" onClick={() => void removeFlow(f)}>{translateActive("delete")}</button>}
                 </div>
               </div>
             ))}
@@ -186,34 +186,33 @@ export function WorkflowsPage() {
         </section>
         {selectedSite?.isSiteManager && <form className="panel stacked-form" onSubmit={create}>
           <h2>
-            {form.kind === "planning" ? "Konfigurer planleggerflyt" : "New execution workflow"}
+            {form.kind === "planning" ? translateActive("configurePlanningWorkflow") : translateActive("workflowsWorkflowsPageNewExecutionWorkflow")}
           </h2>
           {selectedSite.isSiteManager && (
             <>
               <div className="field">
-                <label htmlFor="workflow-direction">Retning</label>
+                <label htmlFor="workflow-direction">{translateActive("workflowsWorkflowsPageDirection")}</label>
                 <select id="workflow-direction" value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value as "planning" | "execution", ownerUnitId: "", allocationStepName: "" })}>
-                  <option value="planning">Planning</option>
-                  <option value="execution">Execution</option>
+                  <option value="planning">{translateActive("taskStatusPlanning")}</option>
+                  <option value="execution">{translateActive("taskStatusExecution")}</option>
                 </select>
               </div>
-              <p className="muted">The site has one active planning workflow but can have many execution workflows. Active processing retains the workflow version it started with.</p>
+              <p className="muted">{translateActive("workflowsWorkflowsPageTheSiteHasOneActivePlanning")}</p>
             </>
           )}
           {fields(form, setForm)}
           <button className="primary-button">
-            {form.kind === "planning" ? "Activer planleggerflyt" : "Create execution workflow"}
+            {form.kind === "planning" ? translateActive("workflowsWorkflowsPageActivatePlanningWorkflow") : translateActive("workflowsWorkflowsPageCreateExecutionWorkflow")}
           </button>
         </form>}
       </div>
-      {helpOpen && <SectionHelp title="How to work with workflows" intro="Workflows determine which steps a task follows in planning or execution. They are configured before processing begins." steps={[{title:"Select direction and scope.",text:"Planning is a continuous, site-owned flow. Execution workflows can be shared across the site or linked to an internal level."},{title:"Create the steps in the correct order.",text:"Each step becomes a separate documentation section during processing. Names should describe what the user must do or deliver."},{title:"Link optional features.",text:"A step can receive initial content from a template, timeline, or task-allocation field when appropriate for the process."},{title:"Review and activate.",text:"Editing creates a new version, while active processing retains the version it started with."},{title:"Manage the site's workflows.",text:"The Site Manager creates, edits, and disables planning and execution workflows for the site."}]} note="Workflows are used in operational processing by relevant users, but are administered only by a Site Manager." onClose={() => setHelpOpen(false)} />}
+      {helpOpen && <SectionHelp title={translateActive("workflowsWorkflowsPageHowToWorkWithWorkflows")} intro={translateActive("workflowsWorkflowsPageWorkflowsDetermineWhichStepsATask")} steps={[{title:translateActive("workflowsWorkflowsPageSelectDirectionAndScope"),text:translateActive("workflowsWorkflowsPagePlanningIsAContinuousSiteOwned")},{title:translateActive("workflowsWorkflowsPageCreateTheStepsInTheCorrect"),text:translateActive("workflowsWorkflowsPageEachStepBecomesASeparateDocumentation")},{title:translateActive("workflowsWorkflowsPageLinkOptionalFeatures"),text:translateActive("workflowsWorkflowsPageAStepCanReceiveInitialContent")},{title:translateActive("workflowsWorkflowsPageReviewAndActivate"),text:translateActive("workflowsWorkflowsPageEditingCreatesANewVersionWhile")},{title:translateActive("workflowsWorkflowsPageManageTheSiteSWorkflows"),text:translateActive("workflowsWorkflowsPageTheSiteManagerCreatesEditsAnd")}]} note={translateActive("workflowsWorkflowsPageWorkflowsAreUsedInOperationalProcessing")} onClose={() => setHelpOpen(false)} />}
       {editor && (
-        <Modal title="Edit workflow" onClose={() => setEditor(null)}>
+        <Modal title={translateActive("workflowsWorkflowsPageEditWorkflow")} onClose={() => setEditor(null)}>
           <form className="stacked-form" onSubmit={update}>
             {fields(editor, (value) => setEditor({ ...editor, ...value }))}
             <p className="muted modal-note">
-              Saving creates a new version. Active processing retains
-              the previous version.
+              {translateActive("workflowsWorkflowsPageSavingCreatesANewVersionActive")}
             </p>
             <div className="modal-actions">
               <button
@@ -221,9 +220,9 @@ export function WorkflowsPage() {
                 type="button"
                 onClick={() => setEditor(null)}
               >
-                Cancel
+                {translateActive("cancel")}
               </button>
-              <button className="primary-button">Save new version</button>
+              <button className="primary-button">{translateActive("saveNewVersion")}</button>
             </div>
           </form>
         </Modal>
@@ -233,23 +232,23 @@ export function WorkflowsPage() {
           <div className="stacked-form">
             <p className="muted">
               {viewer.kind === "planning"
-                ? "Direction: Planning"
-                : `Direction: Execution · Scope: ${viewer.ownerUnitName ?? "Entire site"}`}
+                ? translateActive("workflowsWorkflowsPageDirectionPlanning")
+                : translateActive("workflowDirectionExecutionSummary", { scope: viewer.ownerUnitName ?? translateActive("entireSite") })}
             </p>
             <ol className="workflow-step-list">
               {viewer.steps.map((step, index) => (
                 <li key={`${step.name}-${index}`}>
                   <strong>{step.name}</strong>
                   <span className="muted">
-                    {[step.templateName ? `Mal: ${step.templateName}` : null, step.hasTimeline ? "Timeline" : null, step.allowsTaskAllocation ? "Task allocation" : null].filter(Boolean).join(" · ") || "No special step configuration"}
+                    {[step.templateName ? translateActive("templateNameLabel", { name: step.templateName }) : null, step.hasTimeline ? translateActive("workflowsWorkflowFieldsTimeline") : null, step.allowsTaskAllocation ? translateActive("tasksTaskContextDialogsTaskAllocation") : null].filter(Boolean).join(" · ") || translateActive("noSpecialStepConfiguration")}
                   </span>
                 </li>
               ))}
             </ol>
             <div className="modal-actions">
-              <button className="secondary-button" type="button" onClick={() => setViewer(null)}>Close</button>
-              {viewer.canEdit && <button className="primary-button" type="button" onClick={() => { const selected=viewer; setViewer(null); edit(selected); }}>Edit</button>}
-              {viewer.canEdit && <button className="danger-button" type="button" onClick={() => void removeFlow(viewer)}>Slett</button>}
+              <button className="secondary-button" type="button" onClick={() => setViewer(null)}>{translateActive("close")}</button>
+              {viewer.canEdit && <button className="primary-button" type="button" onClick={() => { const selected=viewer; setViewer(null); edit(selected); }}>{translateActive("edit")}</button>}
+              {viewer.canEdit && <button className="danger-button" type="button" onClick={() => void removeFlow(viewer)}>{translateActive("delete")}</button>}
             </div>
           </div>
         </Modal>

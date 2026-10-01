@@ -11,13 +11,13 @@ const item = (values: Partial<ExecutionItem> = {}): ExecutionItem => ({
 });
 
 const unit = (values: Partial<TaskUnit>): TaskUnit => ({
-  id: "unit", siteId: "site", name: "Enhet", parentId: null, isSiteLeadership: false,
+  id: "unit", siteId: "site", name: "Unit", parentId: null, isSiteLeadership: false,
   sortOrder: 0, assignedToMe: true, isLeader: false, ...values,
 });
 
 describe("executionQueue", () => {
   it("presents known execution statuses", () => {
-    expect(executionStatus(item())).toBe("Togjengelig");
+    expect(executionStatus(item())).toBe("Available");
     expect(executionStatus(item({ run: { id: "run", definitionId: null, definitionName: null, claimedByPersonId: "person", claimedBy: "Test", status: "in_progress", currentStep: 0, timelineStartedOn: null, steps: [] } }))).toBe("In execution");
   });
 
@@ -29,12 +29,12 @@ describe("executionQueue", () => {
     expect(executionChildUnits([nested, foreign, child], "site", assigned).map(value => value.id)).toEqual(["child"]);
   });
 
-  it("viser globale, egne og toppledelsens arbeidsflyter", () => {
+  it("shows global, own, and leadership workflows", () => {
     const leadership = unit({ id: "leadership", isSiteLeadership: true });
     const definitions = [
       { id: "global", name: "Global", ownerUnitId: null },
-      { id: "leadership", name: "Ledelse", ownerUnitId: "leadership" },
-      { id: "other", name: "Annen", ownerUnitId: "other" },
+      { id: "leadership", name: "Leadership", ownerUnitId: "leadership" },
+      { id: "other", name: "Other", ownerUnitId: "other" },
     ];
     expect(executionDefinitionOptions(definitions, [leadership], "site", item()).map(value => value.id))
       .toEqual(["global", "leadership"]);

@@ -3,7 +3,7 @@
 Run ID: `gui-identity-provider-settings-2026-09-28`. The implementation was
 verified as an uncommitted revision based on commit `3d46023`. It moves Local,
 AD, LDAP, OIDC and SAML provider configuration into Platform Manager's
-**Identitet** page, protects stored configuration with the persistent Data
+**Identity** page, protects stored configuration with the persistent Data
 Protection key ring and imports existing environment configuration once.
 
 | Control | Observed result | Result / evidence |

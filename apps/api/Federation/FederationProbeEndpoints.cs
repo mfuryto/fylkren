@@ -29,7 +29,7 @@ internal static class FederationProbeEndpoints
     private static async Task<IResult> Receive(FederationProbeRequest request, HttpContext context,
         IDataProtectionProvider protection, FylkrenDbContext db, CancellationToken ct)
     {
-        if (!context.Request.IsHttps) return Results.Problem(statusCode: 400, title: "HTTPS kreves.");
+        if (!context.Request.IsHttps) return Results.Problem(statusCode: 400, title: "HTTPS is required.");
         var now = DateTimeOffset.UtcNow;
         var nowSeconds = now.ToUnixTimeSeconds();
         if (request.SenderInstanceId == Guid.Empty || request.RecipientInstanceId == Guid.Empty ||

@@ -1,4 +1,5 @@
 import type { TaskSite, TaskUnit } from "../work/WorkContextModels";
+import { compareActiveLanguage } from "../localization";
 
 export type TaskUnitWithDepth = TaskUnit & { depth: number };
 
@@ -9,7 +10,7 @@ export function buildTaskScope(taskUnits: TaskUnit[], siteId: string, selectedUn
   const appendUnits = (parentId: string | null, depth: number) => {
     siteUnits
       .filter(unit => unit.parentId === parentId && !visited.has(unit.id))
-      .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, "nb"))
+      .sort((a, b) => a.sortOrder - b.sortOrder || compareActiveLanguage(a.name, b.name))
       .forEach(unit => {
         visited.add(unit.id);
         availableUnits.push({ ...unit, depth });

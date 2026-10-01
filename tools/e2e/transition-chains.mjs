@@ -48,7 +48,7 @@ export async function testTransitionChains({ leader, sectionLeader, siteId, sect
   await executeDefault(leader, returnedReportTaskId, siteId);
   assert.equal((await item(returnedReportTaskId)).status, 'in_review');
   const draft = await leader.put(`${path(returnedReportTaskId)}/final-report`, {
-    content: '# Sammendrag\n\nSynthetic report requiring a correction.', classification: null,
+    content: '# Summary\n\nSynthetic report requiring a correction.', classification: null,
   });
   assert.equal(draft.status, 204, `draft report: ${JSON.stringify(draft.body)}`);
   await status(returnedReportTaskId, 'in_progress', 'Correct the execution before approval.');
@@ -60,7 +60,7 @@ export async function testTransitionChains({ leader, sectionLeader, siteId, sect
   const approvedReportTaskId = await source('approved report protection');
   await executeDefault(leader, approvedReportTaskId, siteId);
   const written = await leader.put(`${path(approvedReportTaskId)}/final-report`, {
-    content: '# Sammendrag\n\nSynthetic approved report.', classification: null,
+    content: '# Summary\n\nSynthetic approved report.', classification: null,
   });
   assert.equal(written.status, 204, `approved report write: ${JSON.stringify(written.body)}`);
   const approved = await leader.post(`${path(approvedReportTaskId)}/final-report/approve`, {});
@@ -74,7 +74,7 @@ export async function testTransitionChains({ leader, sectionLeader, siteId, sect
   const initialChild = (await overview()).find(value => value.parentWorkItemId === reassignmentRootId && value.assignedUnitId === sectionId);
   assert.ok(initialChild, 'Initial section assignment missing');
   await executeDefault(sectionLeader, initialChild.id, siteId);
-  const reportText = '# Sammendrag\n\nSynthetic Section 1 work before reassignment.';
+  const reportText = '# Summary\n\nSynthetic Section 1 work before reassignment.';
   const childReport = await sectionLeader.put(`${path(initialChild.id)}/final-report`, { content: reportText, classification: null });
   assert.equal(childReport.status, 204, `section report: ${JSON.stringify(childReport.body)}`);
   const childApproval = await sectionLeader.post(`${path(initialChild.id)}/final-report/approve`, {});

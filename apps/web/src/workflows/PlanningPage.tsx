@@ -1,3 +1,4 @@
+import { translateActive } from "../localization";
 import { useEffect, useRef, useState } from "react";
 import { apiGet, apiMutate } from "../api/client";
 import { errorMessage } from "../api/errors";
@@ -59,7 +60,7 @@ export function PlanningPage({
         setUnits(d.units);
         setSiteId(eligible.find(site => site.siteId === permalink.siteId)?.siteId ?? eligible[0]?.siteId ?? "");
       })
-      .catch(problem => setError(errorMessage(problem,"The planning context could not be loaded.")));
+      .catch(problem => setError(errorMessage(problem,translateActive("workflowsPlanningPageThePlanningContextCouldNotBe"))));
   }, [permalink.siteId]);
   async function load(requestedPage = queuePage) {
     if (!siteId) return;
@@ -68,7 +69,7 @@ export function PlanningPage({
       if (levelFilter === "top") parameters.set("topLevel", "true");
       else if (levelFilter !== "all") parameters.set("levelId", levelFilter);
       if (permalink.runId && requestedPage === 1) parameters.set("focusRunId", permalink.runId);
-      const data = await apiGet<{ items: PlanningRun[]; levels: Array<{ assignedUnitId: string | null; name: string }>; total: number; page: number }>(`/api/workflows/planning/sites/${siteId}?${parameters}`, "The planning queue could not be loaded.");
+      const data = await apiGet<{ items: PlanningRun[]; levels: Array<{ assignedUnitId: string | null; name: string }>; total: number; page: number }>(`/api/workflows/planning/sites/${siteId}?${parameters}`, translateActive("workflowsPlanningPageThePlanningQueueCouldNotBe"));
       setRuns(data.items);
       setPlanningLevels(data.levels.map(level => [level.assignedUnitId ?? "top", level.name]));
       setTotalRuns(data.total);
@@ -85,13 +86,13 @@ export function PlanningPage({
         }
         return next;
       });
-    } catch (problem) { setError(problem instanceof Error ? problem.message : "The planning queue could not be loaded."); }
+    } catch (problem) { setError(problem instanceof Error ? problem.message : translateActive("workflowsPlanningPageThePlanningQueueCouldNotBe")); }
   }
   useEffect(() => {
     void load();
   }, [siteId, levelFilter, queuePage, permalink.runId]);
   async function mutate(path: string, body?: object) {
-    await apiMutate(path, "POST", body, "The action could not be completed.");
+    await apiMutate(path, "POST", body, translateActive("siteActionFailed"));
     await load();
   }
   const {
@@ -104,20 +105,20 @@ export function PlanningPage({
     saveCurrentStep,
   } = usePlanningStepDrafts({ runs, personId: session.personId, reload: load, onError: setError });
   async function removePlannedRequest(runId: string, requestId: string) {
-    await apiMutate(`/api/workflows/planning/${runId}/requests/${requestId}`, "DELETE", undefined, "The request could not be removed from the plan.");
+    await apiMutate(`/api/workflows/planning/${runId}/requests/${requestId}`, "DELETE", undefined, translateActive("workflowsPlanningPageTheRequestCouldNotBeRemoved"));
     await load();
   }
   async function showParentContext(parentWorkItemId: string) {
-    try { setParentContext(await apiGet<PlanningContextDetails>(`/api/work/sites/${siteId}/items/${parentWorkItemId}/details`, "The superior task and plan could not be loaded.")); }
-    catch (problem) { setError(problem instanceof Error ? problem.message : "The superior task and plan could not be loaded."); }
+    try { setParentContext(await apiGet<PlanningContextDetails>(`/api/work/sites/${siteId}/items/${parentWorkItemId}/details`, translateActive("workflowsPlanningPageTheSuperiorTaskAndPlanCould"))); }
+    catch (problem) { setError(problem instanceof Error ? problem.message : translateActive("workflowsPlanningPageTheSuperiorTaskAndPlanCould")); }
   }
   async function openReassignment(run: PlanningRun) {
     let candidates: Array<{
       personId: string;
       displayName: string;
     }>;
-    try { candidates = await apiGet(`/api/workflows/planning/${run.id}/candidates`, "Eligible planners could not be loaded."); }
-    catch (problem) { setError(problem instanceof Error ? problem.message : "Eligible planners could not be loaded."); return; }
+    try { candidates = await apiGet(`/api/workflows/planning/${run.id}/candidates`, translateActive("workflowsPlanningPageEligiblePlannersCouldNotBeLoaded")); }
+    catch (problem) { setError(problem instanceof Error ? problem.message : translateActive("workflowsPlanningPageEligiblePlannersCouldNotBeLoaded")); return; }
     setReassignment({
       run,
       candidates,
@@ -132,7 +133,7 @@ export function PlanningPage({
       await saveCurrentStep(run);
       await mutate(`/api/workflows/planning/${run.id}/step`, { step });
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "The step could not be saved.");
+      setError(problem instanceof Error ? problem.message : translateActive("workflowsPlanningPageTheStepCouldNotBeSaved"));
     }
   }
   const allocationUnits = (run: PlanningRun) => planningAllocationUnits(units, siteId, run);
@@ -146,7 +147,7 @@ export function PlanningPage({
   async function persistAllocations(runId: string, allocations: PlanAllocation[]) {
     await enqueueAllocationSave(runId, () => apiMutate(
       `/api/workflows/planning/${runId}/allocations`, "PUT", { allocations },
-      "Subtasks could not be saved automatically.",
+      translateActive("workflowsPlanningPageSubtasksCouldNotBeSavedAutomatically"),
     ));
   }
   function updateAllocations(run: PlanningRun, allocations: PlanAllocation[]) {
@@ -156,7 +157,7 @@ export function PlanningPage({
     if (prior !== undefined) window.clearTimeout(prior);
     allocationSaveTimers.current.set(run.id, window.setTimeout(() => {
       allocationSaveTimers.current.delete(run.id);
-      void persistAllocations(run.id, allocations).catch(problem => setError(errorMessage(problem, "Subtasks could not be saved automatically.")));
+      void persistAllocations(run.id, allocations).catch(problem => setError(errorMessage(problem, translateActive("workflowsPlanningPageSubtasksCouldNotBeSavedAutomatically"))));
     }, 350));
   }
   async function flushAllocations(run: PlanningRun) {
@@ -174,16 +175,16 @@ export function PlanningPage({
   return (
     <div className="page">
       <ProcessPageHeader
-        title="Planning"
-        description="Preview, claim responsibility, and prepare a proposed plan."
-        helpTitle="How to work with planning"
-        helpIntroduction="Planning is the optional stage between assessment and execution. The specific steps are determined by the site's planning workflow."
+        title={translateActive("taskStatusPlanning")}
+        description={translateActive("workflowsPlanningPagePreviewClaimResponsibilityAndPrepareA")}
+        helpTitle={translateActive("workflowsPlanningPageHowToWorkWithPlanning")}
+        helpIntroduction={translateActive("workflowsPlanningPagePlanningIsTheOptionalStageBetween")}
         helpSteps={[
-          { title: "Preview the task basis.", description: "Read the task text, document links, and any approved plans from superior levels before claiming responsibility." },
-          { title: "Claim responsibility for processing.", description: "The task is locked to you while you plan. A manager can release or reassign responsibility without deleting history." },
-          { title: "Follow the workflow steps.", description: "Document the assessments, use the timeline if needed, and add task allocation where the workflow permits it. Changes are saved automatically." },
-          { title: "Submit the proposed plan for approval.", description: "The manager can approve, return the plan with written corrections, put the task on hold, or reject it." },
-          { title: "Continue after approval.", description: "The task is sent to execution at the same level, allocated internally, or sent as a request to another top-level site in accordance with the approved plan." },
+          { title: translateActive("workflowsPlanningPagePreviewTheTaskBasis"), description: translateActive("workflowsPlanningPageReadTheTaskTextDocumentLinks") },
+          { title: translateActive("workflowsPlanningPageClaimResponsibilityForProcessing"), description: translateActive("workflowsPlanningPageTheTaskIsLockedToYou") },
+          { title: translateActive("workflowsPlanningPageFollowTheWorkflowSteps"), description: translateActive("workflowsPlanningPageDocumentTheAssessmentsUseTheTimeline") },
+          { title: translateActive("workflowsPlanningPageSubmitTheProposedPlanForApproval"), description: translateActive("workflowsPlanningPageTheManagerCanApproveReturnThe") },
+          { title: translateActive("workflowsPlanningPageContinueAfterApproval"), description: translateActive("workflowsPlanningPageTheTaskIsSentToExecution") },
         ]}
         helpOpen={helpOpen}
         onHelpOpen={() => setHelpOpen(true)}
@@ -210,13 +211,13 @@ export function PlanningPage({
         timeZone={timeZone}
         allocationUnits={allocationUnits}
         onToggle={runId => { setOpenRunId(current => current === runId ? null : runId); navigateToLocation({ page: "Planning", siteId, runId }); }}
-        onCopyLink={runId => { void copyPermalink({ page: "Planning", siteId, runId }).then(() => setLinkMessage("The planning link has been copied.")).catch(() => setError("The link could not be copied.")); }}
+        onCopyLink={runId => { void copyPermalink({ page: "Planning", siteId, runId }).then(() => setLinkMessage(translateActive("workflowsPlanningPageThePlanningLinkHasBeenCopied"))).catch(() => setError(translateActive("reportLinkCopyFailed"))); }}
         onTogglePreview={runId => setPreview(current => current === runId ? null : runId)}
-        onRelease={run => { void flushAllocations(run).then(() => mutate(`/api/workflows/planning/${run.id}/release`)).catch(problem => setError(errorMessage(problem,"Planning responsibility could not be released."))); }}
+        onRelease={run => { void flushAllocations(run).then(() => mutate(`/api/workflows/planning/${run.id}/release`)).catch(problem => setError(errorMessage(problem,translateActive("workflowsPlanningPagePlanningResponsibilityCouldNotBeReleased")))); }}
         onReassign={run => { void openReassignment(run); }}
         onAllocateDownward={(run, childUnits) => setDownwardAllocation({ run, unitId: childUnits[0].id, instruction: run.item.description })}
         onShowAncestor={itemId => { void showParentContext(itemId); }}
-        onClaim={run => { void mutate(`/api/workflows/planning/${run.id}/claim`).catch(problem => setError(errorMessage(problem,"The task could not be claimed."))); }}
+        onClaim={run => { void mutate(`/api/workflows/planning/${run.id}/claim`).catch(problem => setError(errorMessage(problem,translateActive("workflowsPlanningPageTheTaskCouldNotBeClaimed")))); }}
         onPageChange={value => { setQueuePage(value); setOpenRunId(null); navigateToLocation({ page: "Planning", siteId }, true); }}
         renderEditor={run => run.status === "in_progress" && run.claimedByPersonId === session.personId ? (
                 <PlanningStepEditor
@@ -260,7 +261,7 @@ export function PlanningPage({
                         allocations: latestAllocations.current.get(run.id) ?? plan.allocations,
                       });
                     } catch (reason) {
-                      setError(reason instanceof Error ? reason.message : "The proposed plan could not be submitted.");
+                      setError(reason instanceof Error ? reason.message : translateActive("workflowsPlanningPageTheProposedPlanCouldNotBe"));
                     }
                   }}
                 />
@@ -279,7 +280,7 @@ export function PlanningPage({
               await mutate(`/api/workflows/planning/${reassignment.run.id}/reassign`, { personId: reassignment.personId });
               setReassignment(null);
             } catch (problem) {
-              setError(problem instanceof Error ? problem.message : "Planning responsibility could not be reassigned.");
+              setError(problem instanceof Error ? problem.message : translateActive("workflowsPlanningPagePlanningResponsibilityCouldNotBeReassigned"));
             }
           }}
         />
@@ -295,7 +296,7 @@ export function PlanningPage({
               await mutate(`/api/work/sites/${siteId}/items/${downwardAllocation.run.item.id}/delegate`, { assignedUnitId: downwardAllocation.unitId, instruction: downwardAllocation.instruction });
               setDownwardAllocation(null);
             } catch (problem) {
-              setError(problem instanceof Error ? problem.message : "The task could not be routed onward.");
+              setError(problem instanceof Error ? problem.message : translateActive("workflowsPlanningPageTheTaskCouldNotBeRouted"));
             }
           }}
         />

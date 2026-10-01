@@ -27,7 +27,7 @@ internal static class PortableImportValidator
                     errors.Add($"Invalid file path in the package: {entry.FullName}");
             }
             foreach (var duplicate in archive.Entries.GroupBy(value => value.FullName, StringComparer.Ordinal).Where(group => group.Count() > 1))
-                errors.Add($"ZIP-pakken inneholder duplisert filsti: {duplicate.Key}");
+                errors.Add($"The ZIP package contains a duplicate path: {duplicate.Key}");
 
             var manifestEntry = archive.GetEntry("manifest.json");
             if (manifestEntry is null)
@@ -46,7 +46,7 @@ internal static class PortableImportValidator
             var inspections = new Dictionary<string, DatasetInspection>(StringComparer.Ordinal);
             foreach (var dataset in manifest.Datasets)
             {
-                if (!declaredPaths.Add(dataset.Path)) { errors.Add($"Duplisert fil i manifestet: {dataset.Path}"); continue; }
+                if (!declaredPaths.Add(dataset.Path)) { errors.Add($"Duplicate file in the manifest: {dataset.Path}"); continue; }
                 if (!dataset.Path.StartsWith("data/", StringComparison.Ordinal) || !dataset.Path.EndsWith(".jsonl", StringComparison.Ordinal))
                 {
                     errors.Add($"Invalid dataset path: {dataset.Path}");
@@ -65,7 +65,7 @@ internal static class PortableImportValidator
 
             foreach (var attachment in manifest.Attachments)
             {
-                if (!declaredPaths.Add(attachment.Path)) { errors.Add($"Duplisert fil i manifestet: {attachment.Path}"); continue; }
+                if (!declaredPaths.Add(attachment.Path)) { errors.Add($"Duplicate file in the manifest: {attachment.Path}"); continue; }
                 if (!attachment.Path.StartsWith("attachments/", StringComparison.Ordinal)) { errors.Add($"Invalid attachment path: {attachment.Path}"); continue; }
                 var entry = archive.GetEntry(attachment.Path);
                 if (entry is null) { errors.Add($"Missing attachment: {attachment.Path}"); continue; }
@@ -111,7 +111,7 @@ internal static class PortableImportValidator
             if (document.RootElement.TryGetProperty("id", out var idValue))
             {
                 if (idValue.ValueKind != JsonValueKind.String || !Guid.TryParse(idValue.GetString(), out var id)) errors.Add($"Record {count} has an invalid ID.");
-                else if (!ids.Add(id)) errors.Add($"Duplisert ID {id}.");
+                else if (!ids.Add(id)) errors.Add($"Duplicate ID {id}.");
             }
             if (document.RootElement.TryGetProperty("site_id", out var siteValue) && siteValue.ValueKind == JsonValueKind.String && Guid.TryParse(siteValue.GetString(), out var siteId) && siteId != expectedSiteId)
                 errors.Add($"Record {count} points to site {siteId} outside the import boundary.");

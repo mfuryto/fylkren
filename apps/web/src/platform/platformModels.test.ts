@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { apiClientExpiryDate, apiClientScopes, filterApiClients, notificationTemplateFields, type ApiClient } from "./platformModels";
 
 const clients: ApiClient[] = [
-  { id: "1", name: "Aktiv", keyId: "a", scopes: [], expiresAt: null, createdAt: "2026-01-01", lastUsedAt: null, isActive: true },
-  { id: "2", name: "Deaktivert", keyId: "b", scopes: [], expiresAt: null, createdAt: "2026-01-01", lastUsedAt: null, isActive: false },
+  { id: "1", name: "Active", keyId: "a", scopes: [], expiresAt: null, createdAt: "2026-01-01", lastUsedAt: null, isActive: true },
+  { id: "2", name: "Inactive", keyId: "b", scopes: [], expiresAt: null, createdAt: "2026-01-01", lastUsedAt: null, isActive: false },
 ];
 
 describe("platform models", () => {

@@ -105,7 +105,7 @@ export function SiteDialogs({
                 <p>{selectedSite.overviewDesign === "classic" ? t("classic") : t("minimal")}</p>
               </div>
               <div className="site-detail-block">
-                <span className="field-label">Site Managers</span>
+                <span className="field-label">{t("siteManagers")}</span>
                 {selectedSite.siteManagers.length ? (
                   <div className="manager-list">
                     {selectedSite.siteManagers.map((manager) => (
@@ -225,7 +225,7 @@ export function SiteDialogs({
               {t("activeSite")}
             </label>
             <div className="site-detail-block">
-              <span className="field-label">Site Managers</span>
+              <span className="field-label">{t("siteManagers")}</span>
               {selectedSite?.siteManagers.length ? (
                 <div className="manager-list">
                   {selectedSite.siteManagers.map((manager) => (

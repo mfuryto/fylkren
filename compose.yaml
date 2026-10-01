@@ -83,7 +83,7 @@ services:
       Fylkren__Authentication__DirectoryLifecycle__MissingConfirmationCount: ${FYLKREN_DIRECTORY_LIFECYCLE_MISSING_CONFIRMATIONS:-3}
       Fylkren__Authentication__WebAuthn__Enabled: ${FYLKREN_WEBAUTHN_ENABLED:-false}
       Fylkren__Authentication__WebAuthn__RpId: ${FYLKREN_WEBAUTHN_RP_ID:-localhost}
-      Fylkren__Authentication__WebAuthn__DisplayName: ${FYLKREN_WEBAUTHN_DISPLAY_NAME:-Lokal installasjon}
+      Fylkren__Authentication__WebAuthn__DisplayName: ${FYLKREN_WEBAUTHN_DISPLAY_NAME:-Local installation}
       Fylkren__Authentication__WebAuthn__Origins__0: ${FYLKREN_WEBAUTHN_ORIGIN:-http://localhost:8080}
     restart: unless-stopped
     read_only: true

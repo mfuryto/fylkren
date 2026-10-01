@@ -65,7 +65,7 @@ internal static class ExecutionQueryEndpoints
                     x.Priority,
                     x.DueAt,
                     x.DecisionNote,
-                    createdBy = x.CreatedByPerson == null ? x.SenderSiteName ?? "Ekstern site" : x.CreatedByPerson.DisplayName,
+                    createdBy = x.CreatedByPerson == null ? x.SenderSiteName ?? "External site" : x.CreatedByPerson.DisplayName,
                     x.CreatedAt,
                     hasPlan = x.WorkflowRun != null && x.WorkflowRun.Definition.Kind == "planning",
                     run = x.ExecutionRun == null

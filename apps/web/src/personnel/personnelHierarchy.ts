@@ -1,4 +1,5 @@
 import type { OrganizationUnitSummary } from "../siteAdmin/models";
+import { compareActiveLanguage } from "../localization";
 
 export type PersonnelUnit = {
   unit: OrganizationUnitSummary;
@@ -19,7 +20,7 @@ export function buildPersonnelUnits(
       .sort(
         (left, right) =>
           left.sortOrder - right.sortOrder ||
-          left.name.localeCompare(right.name, "nb"),
+          compareActiveLanguage(left.name, right.name),
       )
       .forEach((unit) => {
         result.push({ unit, depth });

@@ -4,16 +4,16 @@ import { emptyWorkflowForm, type WorkflowTemplateSummary } from "./WorkflowModel
 import { isWorkflowTemplateApplicable, workflowStepNames } from "./WorkflowFormFields";
 
 const unit = (values: Partial<TaskUnit>): TaskUnit => ({
-  id: "unit", siteId: "site", name: "Enhet", parentId: null, isSiteLeadership: false,
+  id: "unit", siteId: "site", name: "Unit", parentId: null, isSiteLeadership: false,
   sortOrder: 0, assignedToMe: true, isLeader: true, ...values,
 });
 const template = (ownerUnitId: string | null): WorkflowTemplateSummary => ({
-  id: "template", name: "Mal", content: "", ownerUnitId, ownerUnitName: null, canEdit: true,
+  id: "template", name: "Template", content: "", ownerUnitId, ownerUnitName: null, canEdit: true,
 });
 
 describe("WorkflowFormFields", () => {
-  it("normaliserer tomme linjer i stegnavn", () => {
-    expect(workflowStepNames(" Analyse \n\n Plan \n")).toEqual(["Analyse", "Plan"]);
+  it("normalizes blank lines in step names", () => {
+    expect(workflowStepNames(" Analysis \n\n Plan \n")).toEqual(["Analysis", "Plan"]);
   });
 
   it("allows execution to use templates from its own and parent levels", () => {

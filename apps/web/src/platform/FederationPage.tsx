@@ -223,7 +223,7 @@ export function FederationPage({ canManage }: { canManage: boolean }) {
     </section>
 
     {selected && <section id="federation-sites" className="panel stacked-form">
-      <h2>Sites</h2>
+      <h2>{t("sites")}</h2>
       <h3>{t("localTopLevelSites")}</h3>
       <p className="muted">{t("localTopLevelSitesIntro")}</p>
       {topSites.length === 0 ? <p className="empty-state">{t("noActiveTopLevelSites")}</p> : <div className="admin-list">

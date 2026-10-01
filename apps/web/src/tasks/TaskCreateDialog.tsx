@@ -1,3 +1,4 @@
+import { translateActive } from "../localization";
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 import { ClassificationControls, type ClassificationMarking } from "../components/ClassificationControls";
 import { Modal } from "../components/Modal";
@@ -71,29 +72,29 @@ export function TaskCreateDialog({
     setForm((current) => ({ ...current, ...change }));
 
   return (
-    <Modal title="Register task" onClose={onClose}>
+    <Modal title={translateActive("tasksTaskCreateDialogRegisterTask")} onClose={onClose}>
       <form className="stacked-form" onSubmit={onSubmit}>
         <div className="field">
-          <label htmlFor="task-title">Tittel</label>
+          <label htmlFor="task-title">{translateActive("approvalTitle")}</label>
           <input id="task-title" required minLength={2} maxLength={200} value={form.title} onChange={(event) => update({ title: event.target.value })} />
           <ClassificationControls markings={classificationMarkings} value={form.title} onChange={(title) => update({ title })} />
         </div>
         <div className="field">
-          <label htmlFor="task-type">Type</label>
+          <label htmlFor="task-type">{translateActive("taskTypeLabel")}</label>
           <select id="task-type" value={form.workItemTypeId} onChange={(event) => update({ workItemTypeId: event.target.value, targetSiteId: "", targetInstanceId: "", targetUnitId: "" })}>
-            <option value="">None type</option>
+            <option value="">{translateActive("tasksTaskCreateDialogNoneType")}</option>
             {types.filter((type) => type.isActive).map((type) => <option key={type.id} value={type.id}>{type.name}</option>)}
           </select>
         </div>
         {requestTypeSelected && (
           <div className="field">
-            <label htmlFor="request-recipient-site">Recipient</label>
+            <label htmlFor="request-recipient-site">{translateActive("tasksTaskCreateDialogRecipient")}</label>
             <input
               id="request-recipient-site"
               type="search"
               autoComplete="off"
               required
-              placeholder={selectedUnitId ? "Search for work level or site" : "Search for site"}
+              placeholder={selectedUnitId ? translateActive("tasksTaskCreateDialogSearchForWorkLevelOrSite") : translateActive("tasksTaskCreateDialogSearchForSite")}
               value={recipientQuery}
               onChange={(event) => {
                 setRecipientQuery(event.target.value);
@@ -101,7 +102,7 @@ export function TaskCreateDialog({
               }}
             />
             {recipients.length > 0 && !form.targetSiteId && !form.targetUnitId && (
-              <div className="person-search-results" role="listbox" aria-label="Mottakere">
+              <div className="person-search-results" role="listbox" aria-label={translateActive("recipientsLabel")}>
                 {recipients.map((recipient) => (
                   <button
                     key={`${recipient.kind}-${recipient.instanceId}-${recipient.id}`}
@@ -119,7 +120,7 @@ export function TaskCreateDialog({
                     }}
                   >
                     <strong>{recipient.name}</strong>
-                    <small>{recipient.kind === "unit" ? "Work level in the same site" : "External top-level site"}</small>
+                    <small>{recipient.kind === "unit" ? translateActive("tasksTaskCreateDialogWorkLevelInTheSameSite") : translateActive("tasksTaskCreateDialogExternalTopLevelSite")}</small>
                   </button>
                 ))}
               </div>
@@ -127,26 +128,26 @@ export function TaskCreateDialog({
             {(form.targetSiteId || form.targetUnitId) && (
               <small className="muted">
                 {form.targetUnitId
-                  ? "Internal request: the complete task basis follows the case under ordinary access rules."
-                  : "The request is sent directly to this site's top level."}
+                  ? translateActive("tasksTaskCreateDialogInternalRequestTheCompleteTaskBasis")
+                  : translateActive("tasksTaskCreateDialogTheRequestIsSentDirectlyTo")}
               </small>
             )}
           </div>
         )}
         <div className="field">
-          <label htmlFor="task-description">Beskrivelse</label>
+          <label htmlFor="task-description">{translateActive("approvalDescription")}</label>
           <div className="form-row">
             <div className="field">
-              <label htmlFor="task-source-type">Kildetype</label>
+              <label htmlFor="task-source-type">{translateActive("tasksTaskCreateDialogSourceType")}</label>
               <select id="task-source-type" value={form.sourceTypeId} onChange={(event) => update({ sourceTypeId: event.target.value })}>
-                <option value="">None kildetype</option>
+                <option value="">{translateActive("tasksTaskCreateDialogNoSourceType")}</option>
                 {sourceTypes.filter((value) => value.isActive).map((value) => <option key={value.id} value={value.id}>{value.name}</option>)}
               </select>
             </div>
             <div className="field">
-              <label htmlFor="task-sender">Sender</label>
+              <label htmlFor="task-sender">{translateActive("tasksTaskClassifiersSender")}</label>
               <select id="task-sender" value={form.senderId} onChange={(event) => update({ senderId: event.target.value })}>
-                <option value="">No sender</option>
+                <option value="">{translateActive("tasksTaskCreateDialogNoSender")}</option>
                 {senders.filter((value) => value.isActive).map((value) => <option key={value.id} value={value.id}>{value.name}</option>)}
               </select>
             </div>
@@ -155,22 +156,22 @@ export function TaskCreateDialog({
           <ClassificationControls markings={classificationMarkings} value={form.description} onChange={(description) => update({ description })} />
         </div>
         <div className="field">
-          <label htmlFor="task-recommendation">Anbefaling (valgfritt)</label>
-          <textarea id="task-recommendation" rows={4} maxLength={4000} placeholder="Propose further action for the manager to consider" value={form.recommendation} onChange={(event) => update({ recommendation: event.target.value })} />
+          <label htmlFor="task-recommendation">{translateActive("tasksTaskCreateDialogRecommendationOptional")}</label>
+          <textarea id="task-recommendation" rows={4} maxLength={4000} placeholder={translateActive("tasksTaskCreateDialogProposeFurtherActionForTheManager")} value={form.recommendation} onChange={(event) => update({ recommendation: event.target.value })} />
           <ClassificationControls markings={classificationMarkings} value={form.recommendation} onChange={(recommendation) => update({ recommendation })} />
         </div>
         <div className="field">
-          <label htmlFor="task-reference">Link to primary document or task text (optional)</label>
-          <input id="task-reference" type="url" maxLength={2048} placeholder="https://sharepoint… or file://server/folder/file" value={form.referenceUrl} onChange={(event) => update({ referenceUrl: event.target.value })} />
+          <label htmlFor="task-reference">{translateActive("tasksTaskCreateDialogLinkToPrimaryDocumentOrTask")}</label>
+          <input id="task-reference" type="url" maxLength={2048} placeholder={translateActive("tasksTaskCreateDialogHttpsSharepointOrFileServerFolder")} value={form.referenceUrl} onChange={(event) => update({ referenceUrl: event.target.value })} />
         </div>
         <div className="field">
-          <label htmlFor="task-due">Requested due date</label>
+          <label htmlFor="task-due">{translateActive("tasksTaskCreateDialogRequestedDueDate")}</label>
           <input id="task-due" type="date" value={form.dueAt} onChange={(event) => update({ dueAt: event.target.value })} />
         </div>
-        <p className="muted modal-note">The task is registered without an assignee and placed in the site's unallocated queue for assessment. The source link follows the task when routed onward.</p>
+        <p className="muted modal-note">{translateActive("tasksTaskCreateDialogTheTaskIsRegisteredWithoutAn")}</p>
         <div className="modal-actions">
-          <button className="secondary-button" type="button" onClick={onClose}>Cancel</button>
-          <button className="primary-button" disabled={busy}>Registrer</button>
+          <button className="secondary-button" type="button" onClick={onClose}>{translateActive("cancel")}</button>
+          <button className="primary-button" disabled={busy}>{translateActive("tasksTaskCreateDialogRegister")}</button>
         </div>
       </form>
     </Modal>

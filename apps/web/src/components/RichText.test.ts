@@ -5,8 +5,8 @@ import { markdownToEditorHtml, RichTextContent } from "./RichText";
 
 describe("markdownToEditorHtml", () => {
   it("renders headings and escapes user supplied markup", () => {
-    expect(markdownToEditorHtml("# Analyse\n<script>alert(1)</script>"))
-      .toBe("<h1>Analyse</h1><p>&lt;script&gt;alert(1)&lt;/script&gt;</p>");
+    expect(markdownToEditorHtml("# Analysis\n<script>alert(1)</script>"))
+      .toBe("<h1>Analysis</h1><p>&lt;script&gt;alert(1)&lt;/script&gt;</p>");
   });
 
   it("keeps unordered and ordered lists as separate blocks", () => {

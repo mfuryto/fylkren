@@ -26,7 +26,7 @@ internal static class FederationOfficialAnswerReceiveEndpoints
         IDataProtectionProvider protection, FylkrenDbContext db, CancellationToken ct)
     {
         if (!await FederationRoutingPolicy.IsEnabledAsync(db, ct)) return Results.NotFound();
-        if (!context.Request.IsHttps) return Results.Problem(statusCode: 400, title: "HTTPS kreves.");
+        if (!context.Request.IsHttps) return Results.Problem(statusCode: 400, title: "HTTPS is required.");
         var now = DateTimeOffset.UtcNow;
         var seconds = now.ToUnixTimeSeconds();
         if (!FederationOfficialAnswerContract.TryDecode(request, out var answer) ||

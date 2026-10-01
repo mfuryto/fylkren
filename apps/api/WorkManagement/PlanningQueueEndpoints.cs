@@ -98,7 +98,7 @@ internal static class PlanningQueueEndpoints
                             ? null
                             : x.WorkItem.FinalReportWrittenByPerson.DisplayName,
                         x.WorkItem.FinalReportUpdatedAt,
-                        createdBy = x.WorkItem.CreatedByPerson == null ? x.WorkItem.SenderSiteName ?? "Ekstern site" : x.WorkItem.CreatedByPerson.DisplayName,
+                        createdBy = x.WorkItem.CreatedByPerson == null ? x.WorkItem.SenderSiteName ?? "External site" : x.WorkItem.CreatedByPerson.DisplayName,
                         x.WorkItem.CreatedAt
                     },
                     steps = x.Definition.Steps

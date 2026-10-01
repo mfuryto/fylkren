@@ -24,7 +24,7 @@ internal static class FederationKeyRotationEndpoints
         HttpContext context, IDataProtectionProvider protection, FylkrenDbContext db,
         CancellationToken ct)
     {
-        if (!context.Request.IsHttps) return Results.Problem(statusCode: 400, title: "HTTPS kreves.");
+        if (!context.Request.IsHttps) return Results.Problem(statusCode: 400, title: "HTTPS is required.");
         var now = DateTimeOffset.UtcNow;
         if (!Fresh(request.Timestamp, now))
             return Results.Conflict(new { error = "federation_clock_skew" });
@@ -87,7 +87,7 @@ internal static class FederationKeyRotationEndpoints
         HttpContext context, IDataProtectionProvider protection, FylkrenDbContext db,
         CancellationToken ct)
     {
-        if (!context.Request.IsHttps) return Results.Problem(statusCode: 400, title: "HTTPS kreves.");
+        if (!context.Request.IsHttps) return Results.Problem(statusCode: 400, title: "HTTPS is required.");
         var now = DateTimeOffset.UtcNow;
         if (!Fresh(request.Timestamp, now))
             return Results.Conflict(new { error = "federation_clock_skew" });

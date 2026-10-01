@@ -1,3 +1,4 @@
+import { translateActive } from "../localization";
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 import { ClassificationControls, type ClassificationMarking } from "../components/ClassificationControls";
 import { Modal } from "../components/Modal";
@@ -18,24 +19,24 @@ export function TaskDelegationDialog({ draft, setDraft, units, markings, busy, o
   onClose: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
-  return <Modal title="Route onward to subordinate unit" onClose={onClose}>
+  return <Modal title={translateActive("tasksTaskRoutingDialogsRouteOnwardToSubordinateUnit")} onClose={onClose}>
     <form className="stacked-form" onSubmit={onSubmit}>
       <p><strong>{draft.item.title}</strong></p>
       <div className="field">
-        <label htmlFor="delegate-unit">Receiving subordinate unit</label>
+        <label htmlFor="delegate-unit">{translateActive("tasksTaskRoutingDialogsReceivingSubordinateUnit")}</label>
         <select id="delegate-unit" required value={draft.assignedUnitId} onChange={(event) => setDraft({ ...draft, assignedUnitId: event.target.value })}>
           {units.map((unit) => <option key={unit.id} value={unit.id}>{unit.name}</option>)}
         </select>
       </div>
       <div className="field">
-        <label htmlFor="delegate-instruction">Task</label>
+        <label htmlFor="delegate-instruction">{translateActive("approvalTask")}</label>
         <textarea id="delegate-instruction" required minLength={2} maxLength={10000} rows={6} value={draft.instruction} onChange={(event) => setDraft({ ...draft, instruction: event.target.value })} />
         <ClassificationControls markings={markings} value={draft.instruction} onChange={(instruction) => setDraft({ ...draft, instruction })} />
       </div>
-      <p className="muted modal-note">A separate subtask is created. Source link, type, priority, and due date are carried forward.</p>
+      <p className="muted modal-note">{translateActive("tasksTaskRoutingDialogsASeparateSubtaskIsCreatedSource")}</p>
       <div className="modal-actions">
-        <button className="secondary-button" type="button" onClick={onClose}>Cancel</button>
-        <button className="primary-button" disabled={busy || !draft.assignedUnitId || draft.instruction.trim().length < 2}>Allocate task</button>
+        <button className="secondary-button" type="button" onClick={onClose}>{translateActive("cancel")}</button>
+        <button className="primary-button" disabled={busy || !draft.assignedUnitId || draft.instruction.trim().length < 2}>{translateActive("tasksTaskRoutingDialogsAllocateTask")}</button>
       </div>
     </form>
   </Modal>;
@@ -53,19 +54,19 @@ export function TaskSideRequestDialog({ draft, setDraft, recipientQuery, setReci
   onClose: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
-  return <Modal title="Send request" onClose={onClose}>
+  return <Modal title={translateActive("tasksTaskActionPanelsSendRequest")} onClose={onClose}>
     <form className="stacked-form" onSubmit={onSubmit}>
-      <p className="muted">The request becomes a separate branch under the task. For an internal recipient, the full task basis follows the site's ordinary access rules; across a site boundary, only the official basis and response are shared.</p>
+      <p className="muted">{translateActive("tasksTaskRoutingDialogsTheRequestBecomesASeparateBranch")}</p>
       <div className="field">
-        <label htmlFor="side-request-recipient">Recipient</label>
-        <input id="side-request-recipient" autoComplete="off" placeholder={draft.item.assignedUnitId ? "Search for work level or site" : "Search for site"} value={recipientQuery} onChange={(event) => { setRecipientQuery(event.target.value); setDraft({ ...draft, targetSiteId: "", targetInstanceId: "", targetUnitId: "" }); }} />
+        <label htmlFor="side-request-recipient">{translateActive("tasksTaskCreateDialogRecipient")}</label>
+        <input id="side-request-recipient" autoComplete="off" placeholder={draft.item.assignedUnitId ? translateActive("tasksTaskCreateDialogSearchForWorkLevelOrSite") : translateActive("tasksTaskCreateDialogSearchForSite")} value={recipientQuery} onChange={(event) => { setRecipientQuery(event.target.value); setDraft({ ...draft, targetSiteId: "", targetInstanceId: "", targetUnitId: "" }); }} />
         {recipients.length > 0 && !draft.targetSiteId && !draft.targetUnitId && <div className="person-search-results" role="listbox">
-          {recipients.map((recipient) => <button key={`${recipient.kind}-${recipient.instanceId}-${recipient.id}`} type="button" role="option" onClick={() => { setDraft({ ...draft, targetSiteId: recipient.kind === "site" ? recipient.id : "", targetInstanceId: recipient.instanceId, targetUnitId: recipient.kind === "unit" ? recipient.id : "" }); setRecipientQuery(recipient.name); clearRecipients(); }}><strong>{recipient.name}</strong><small>{recipient.kind === "unit" ? "Work level in the same site" : "External top-level site"}</small></button>)}
+          {recipients.map((recipient) => <button key={`${recipient.kind}-${recipient.instanceId}-${recipient.id}`} type="button" role="option" onClick={() => { setDraft({ ...draft, targetSiteId: recipient.kind === "site" ? recipient.id : "", targetInstanceId: recipient.instanceId, targetUnitId: recipient.kind === "unit" ? recipient.id : "" }); setRecipientQuery(recipient.name); clearRecipients(); }}><strong>{recipient.name}</strong><small>{recipient.kind === "unit" ? translateActive("tasksTaskCreateDialogWorkLevelInTheSameSite") : translateActive("tasksTaskCreateDialogExternalTopLevelSite")}</small></button>)}
         </div>}
       </div>
-      <div className="field"><label htmlFor="side-request-title">Tittel</label><input id="side-request-title" required minLength={2} maxLength={200} value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} /></div>
-      <div className="field"><label htmlFor="side-request-description">Request</label><textarea id="side-request-description" required minLength={2} maxLength={10000} rows={7} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} /><ClassificationControls markings={markings} value={draft.description} onChange={(description) => setDraft({ ...draft, description })} /></div>
-      <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>Cancel</button><button className="primary-button" disabled={busy || (!draft.targetSiteId && !draft.targetUnitId) || draft.title.trim().length < 2 || draft.description.trim().length < 2}>Send request</button></div>
+      <div className="field"><label htmlFor="side-request-title">{translateActive("approvalTitle")}</label><input id="side-request-title" required minLength={2} maxLength={200} value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} /></div>
+      <div className="field"><label htmlFor="side-request-description">{translateActive("tasksTaskRoutingDialogsRequest")}</label><textarea id="side-request-description" required minLength={2} maxLength={10000} rows={7} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} /><ClassificationControls markings={markings} value={draft.description} onChange={(description) => setDraft({ ...draft, description })} /></div>
+      <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>{translateActive("cancel")}</button><button className="primary-button" disabled={busy || (!draft.targetSiteId && !draft.targetUnitId) || draft.title.trim().length < 2 || draft.description.trim().length < 2}>{translateActive("tasksTaskActionPanelsSendRequest")}</button></div>
     </form>
   </Modal>;
 }
@@ -78,17 +79,17 @@ export function TaskReassignmentDialog({ draft, setDraft, units, busy, onClose, 
   onClose: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
-  return <Modal title="Reassign task" onClose={onClose}>
+  return <Modal title={translateActive("tasksTaskDelegationTreeReassignTask")} onClose={onClose}>
     <form className="stacked-form" onSubmit={onSubmit}>
       <p><strong>{draft.item.title}</strong></p>
       <div className="field">
-        <label htmlFor="reassign-unit">New receiving subordinate unit</label>
+        <label htmlFor="reassign-unit">{translateActive("tasksTaskRoutingDialogsNewReceivingSubordinateUnit")}</label>
         <select id="reassign-unit" required value={draft.assignedUnitId} onChange={(event) => setDraft({ ...draft, assignedUnitId: event.target.value })}>
           {units.map((unit) => <option key={unit.id} value={unit.id}>{unit.name}</option>)}
         </select>
       </div>
-      <p className="muted modal-note">Previous processing is retained as history. A new subtask is created. If the same subordinate unit is selected, any final report is carried forward as a draft that must be approved again.</p>
-      <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>Cancel</button><button className="primary-button" disabled={busy || !draft.assignedUnitId}>Omfordel</button></div>
+      <p className="muted modal-note">{translateActive("tasksTaskRoutingDialogsPreviousProcessingIsRetainedAsHistory")}</p>
+      <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>{translateActive("cancel")}</button><button className="primary-button" disabled={busy || !draft.assignedUnitId}>{translateActive("tasksTaskRoutingDialogsReassign")}</button></div>
     </form>
   </Modal>;
 }

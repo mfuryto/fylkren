@@ -1,3 +1,4 @@
+import { translateActive } from "../localization";
 import type { Dispatch, SetStateAction } from "react";
 import { RichTextEditor } from "../components/RichText";
 import type {
@@ -57,7 +58,7 @@ export function ExecutionWorkflowEditor({
     return (
       <section className="stacked-form planning-result">
         <div className="field">
-          <label>Select execution workflow</label>
+          <label>{translateActive("workflowsExecutionWorkflowEditorSelectExecutionWorkflow")}</label>
           <select
             value={selectedDefinitions[run.id] ?? ""}
             onChange={(event) =>
@@ -67,7 +68,7 @@ export function ExecutionWorkflowEditor({
               }))
             }
           >
-            <option value="">Select arbeidsflyt</option>
+            <option value="">{translateActive("workflowsExecutionWorkflowEditorSelectWorkflow")}</option>
             {definitions.map((flow) => (
               <option key={flow.id} value={flow.id}>{flow.name}</option>
             ))}
@@ -83,7 +84,7 @@ export function ExecutionWorkflowEditor({
             }).catch((problem) => onError(problem.message))
           }
         >
-          Start arbeidsflyt
+          {translateActive("workflowsExecutionWorkflowEditorStartWorkflow")}
         </button>
       </section>
     );
@@ -103,8 +104,8 @@ export function ExecutionWorkflowEditor({
     <section className="execution-workflow">
       <div className="task-meta">
         <strong>{run.definitionName}</strong>
-        <span>Step {run.currentStep + 1} of {run.steps?.length}: {currentStep.name}</span>
-        <span className="muted">Endringer lagres automatisk.</span>
+        <span>{translateActive("workflowsExecutionWorkflowEditorStep")} {run.currentStep + 1} {translateActive("workflowsExecutionWorkflowEditorOf")} {run.steps?.length}: {currentStep.name}</span>
+        <span className="muted">{translateActive("workflowsExecutionWorkflowEditorChangesAreSavedAutomatically")}</span>
       </div>
       {currentStep.hasTimeline && run.timelineStartedOn && (
         <WorkflowTimeline
@@ -123,14 +124,14 @@ export function ExecutionWorkflowEditor({
         }
       />
       {(currentStep.externalRequests.length > 0 || externalFollowUpOpen) && <section className="external-requests">
-        <h3>External follow-up</h3>
-        <p className="muted">Record dialogue with an external party outside Fylkren.</p>
+        <h3>{translateActive("entityExternalRequest")}</h3>
+        <p className="muted">{translateActive("workflowsExecutionWorkflowEditorRecordDialogueWithAnExternalParty")}</p>
         {currentStep.externalRequests.map((request) => (
           <article className="workflow-definition" key={request.id}>
             <strong>{request.recipient}</strong>
             <p>{request.requestText}</p>
             {request.responseText ? (
-              <div><strong>Received response</strong><p>{request.responseText}</p></div>
+              <div><strong>{translateActive("tasksExecutionHistoryReceivedResponse")}</strong><p>{request.responseText}</p></div>
             ) : responseDraft?.id === request.id ? (
               <div className="stacked-form">
                 <textarea
@@ -147,18 +148,18 @@ export function ExecutionWorkflowEditor({
                     }).then(() => setResponseDraft(null)).catch((problem) => onError(problem.message))
                   }
                 >
-                  Record received response
+                  {translateActive("workflowsExecutionWorkflowEditorRecordReceivedResponse")}
                 </button>
               </div>
             ) : (
-              <button className="link-button" type="button" onClick={() => setResponseDraft({ id: request.id, text: "" })}>Record response</button>
+              <button className="link-button" type="button" onClick={() => setResponseDraft({ id: request.id, text: "" })}>{translateActive("workflowsExecutionWorkflowEditorRecordResponse")}</button>
             )}
           </article>
         ))}
         {externalFollowUpOpen && (
           <div className="stacked-form">
             <div className="field">
-              <label>External party or contact</label>
+              <label>{translateActive("workflowsExecutionWorkflowEditorExternalPartyOrContact")}</label>
               <input
                 maxLength={320}
                 value={externalDraft.recipient}
@@ -166,7 +167,7 @@ export function ExecutionWorkflowEditor({
               />
             </div>
             <div className="field">
-              <label>What gjelder dialogen?</label>
+              <label>{translateActive("workflowsExecutionWorkflowEditorDialogueSubject")}</label>
               <textarea
                 rows={5}
                 maxLength={10000}
@@ -185,10 +186,10 @@ export function ExecutionWorkflowEditor({
                 }).then(() => setExternalDraft(null)).catch((problem) => onError(problem.message))
               }
             >
-              Record external dialogue
+              {translateActive("workflowsExecutionWorkflowEditorRecordExternalDialogue")}
             </button>
             <button className="secondary-button" type="button" onClick={() => setExternalDraft(null)}>
-              Cancel
+              {translateActive("cancel")}
             </button>
           </div>
         )}
@@ -200,7 +201,7 @@ export function ExecutionWorkflowEditor({
           type="button"
           onClick={() => void saveAndMove(`/api/execution/${run.id}/step`, { step: run.currentStep - 1 })}
         >
-          Previous step
+          {translateActive("workflowsExecutionWorkflowEditorPreviousStep")}
         </button>
         <button
           className="secondary-button execution-follow-up-button"
@@ -208,17 +209,17 @@ export function ExecutionWorkflowEditor({
           disabled={externalFollowUpOpen}
           onClick={() => setExternalDraft({ runId: run.id, stepId: currentStep.id, recipient: "", requestText: "" })}
         >
-          External follow-up
+          {translateActive("entityExternalRequest")}
         </button>
         {canSendRequest && (
           <button className="secondary-button execution-request-button" type="button" onClick={() => onSendRequest(item)}>
-            Send request
+            {translateActive("tasksTaskActionPanelsSendRequest")}
           </button>
         )}
         {run.currentStep < (run.steps?.length ?? 1) - 1 ? (
-          <button className="primary-button" type="button" onClick={() => void saveAndMove(`/api/execution/${run.id}/step`, { step: run.currentStep + 1 })}>Next step</button>
+          <button className="primary-button" type="button" onClick={() => void saveAndMove(`/api/execution/${run.id}/step`, { step: run.currentStep + 1 })}>{translateActive("tasksTaskActionPanelsNextStep")}</button>
         ) : (
-          <button className="primary-button" type="button" onClick={() => void saveAndMove(`/api/execution/${run.id}/submit`)}>Submit for review</button>
+          <button className="primary-button" type="button" onClick={() => void saveAndMove(`/api/execution/${run.id}/submit`)}>{translateActive("actionSendForReview")}</button>
         )}
       </div>
     </section>

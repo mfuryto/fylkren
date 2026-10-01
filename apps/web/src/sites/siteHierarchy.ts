@@ -1,4 +1,5 @@
 import type { PlacementOption, SiteSummary } from "../siteAdmin/models";
+import { compareActiveLanguage } from "../localization";
 
 export type SiteHierarchy = {
   orderedSites: SiteSummary[];
@@ -30,7 +31,7 @@ export function buildSiteHierarchy(
     ]);
   });
   childSitesByParent.forEach((children) =>
-    children.sort((a, b) => a.name.localeCompare(b.name, "nb")),
+    children.sort((a, b) => compareActiveLanguage(a.name, b.name)),
   );
 
   const siteById = new Map(sites.map((site) => [site.id, site]));
@@ -63,10 +64,10 @@ export function buildSiteHierarchy(
       const parentId = parentSiteBySite.get(site.id);
       return !parentId || !siteById.has(parentId);
     })
-    .sort((a, b) => a.name.localeCompare(b.name, "nb"))
+    .sort((a, b) => compareActiveLanguage(a.name, b.name))
     .forEach(appendSiteBranch);
   [...sites]
-    .sort((a, b) => a.name.localeCompare(b.name, "nb"))
+    .sort((a, b) => compareActiveLanguage(a.name, b.name))
     .forEach(appendSiteBranch);
 
   return { orderedSites, placementById, siteDepths, childSitesByParent };

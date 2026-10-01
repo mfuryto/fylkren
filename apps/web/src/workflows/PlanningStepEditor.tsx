@@ -1,3 +1,4 @@
+import { translateActive } from "../localization";
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 import { ClassificationControls, type ClassificationMarking } from "../components/ClassificationControls";
 import { RichTextEditor } from "../components/RichText";
@@ -60,11 +61,11 @@ export function PlanningStepEditor({
     <>
       {run.item.decisionNote && (
         <section className="planning-correction" role="note">
-          <strong>Corrections from manager</strong>
+          <strong>{translateActive("workflowsPlanningStepEditorCorrectionsFromManager")}</strong>
           <p>{run.item.decisionNote}</p>
         </section>
       )}
-      <nav className="workflow-step-tabs" aria-label="Plansteg">
+      <nav className="workflow-step-tabs" aria-label={translateActive("planningStepsLabel")}>
         {run.steps.map((candidate, index) => (
           <button
             className={index === run.currentStep ? "current" : ""}
@@ -78,7 +79,7 @@ export function PlanningStepEditor({
       </nav>
       <section className="workflow-step-editor">
         <h3>{step.name}</h3>
-        {step.isOptional && <span className="muted">Optional step</span>}
+        {step.isOptional && <span className="muted">{translateActive("workflowsPlanningStepEditorOptionalStep")}</span>}
         <PlanningRfiLog runId={run.id} entries={run.rfi ?? []} onReload={onReload} onError={onError} />
         {step.hasTimeline && run.timelineStartedOn && (
           <WorkflowTimeline
@@ -91,8 +92,8 @@ export function PlanningStepEditor({
           />
         )}
         <div className="field">
-          <label>Dokumentasjon og planinnhold</label>
-          <span className="muted">Endringer lagres automatisk.</span>
+          <label>{translateActive("workflowsPlanningStepEditorDocumentationAndPlanContent")}</label>
+          <span className="muted">{translateActive("workflowsExecutionWorkflowEditorChangesAreSavedAutomatically")}</span>
           <RichTextEditor
             value={content}
             onChange={(value) =>
@@ -136,7 +137,7 @@ export function PlanningStepEditor({
             disabled={run.currentStep === 0}
             onClick={() => void onNavigate(run.currentStep - 1)}
           >
-            Forrige
+            {translateActive("previous")}
           </button>
           {run.currentStep < run.steps.length - 1 && (
             <button
@@ -144,7 +145,7 @@ export function PlanningStepEditor({
               type="button"
               onClick={() => void onNavigate(run.currentStep + 1)}
             >
-              Next step
+              {translateActive("tasksTaskActionPanelsNextStep")}
             </button>
           )}
         </div>
@@ -152,26 +153,26 @@ export function PlanningStepEditor({
       {run.currentStep === run.steps.length - 1 && (
         <form className="stacked-form planning-result" onSubmit={onSubmit}>
           <div className="field">
-            <label>Prioritet</label>
+            <label>{translateActive("approvalPriority")}</label>
             <select
               value={plan.priority}
               onChange={(event) => onPlanChange({ priority: event.target.value })}
             >
-              <option value="low">Lav</option>
-              <option value="normal">Normal</option>
-              <option value="high">High</option>
-              <option value="critical">Kritisk</option>
+              <option value="low">{translateActive("priorityLow")}</option>
+              <option value="normal">{translateActive("priorityNormal")}</option>
+              <option value="high">{translateActive("priorityHigh")}</option>
+              <option value="critical">{translateActive("priorityCritical")}</option>
             </select>
           </div>
           <div className="field">
-            <label>Proposed due date</label>
+            <label>{translateActive("workflowsPlanningStepEditorProposedDueDate")}</label>
             <input
               type="date"
               value={plan.dueAt}
               onChange={(event) => onPlanChange({ dueAt: event.target.value })}
             />
           </div>
-          <button className="primary-button">Submit the plan for approval</button>
+          <button className="primary-button">{translateActive("workflowsPlanningStepEditorSubmitThePlanForApproval")}</button>
         </form>
       )}
     </>

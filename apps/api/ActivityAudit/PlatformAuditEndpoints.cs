@@ -109,11 +109,11 @@ public static class PlatformAuditEndpoints
                 value.ActorPersonId is Guid personId
                     ? people.GetValueOrDefault(personId, "Unknown user")
                     : value.ActorInstanceId is Guid instanceId
-                        ? $"Federert instans: {instanceId}"
+                        ? $"Federated instance: {instanceId}"
                     : value.ActorSystem is not null
                         ? $"System: {value.ActorSystem}"
                     : value.MachineIdentityId is Guid machineId
-                        ? $"API: {machines.GetValueOrDefault(machineId, "Ukjent klient")}"
+                        ? $"API: {machines.GetValueOrDefault(machineId, "Unknown client")}"
                         : "Unknown actor",
                 value.SiteId is Guid siteId ? sites.GetValueOrDefault(siteId) : null,
                 value.CorrelationId)).ToArray();

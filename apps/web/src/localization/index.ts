@@ -42,3 +42,7 @@ export function translate(language: string, key: MessageKey, variables: MessageV
 export function translateActive(key: MessageKey, variables: MessageVariables = {}) {
   return translate(activeLanguage, key, variables);
 }
+
+export function compareActiveLanguage(left: string, right: string) {
+  return left.localeCompare(right, activeLanguage, { sensitivity: "base" });
+}

@@ -817,7 +817,7 @@ async function assertFederatedAuditActor(account, localSiteId, remoteInstanceId,
   const revision = await expectStatus(account.request(`/api/site-audit/sites/${localSiteId}`),
     200, 'read federated audit actor');
   const event = revision.events.find(value => value.id === eventId);
-  assert.equal(event?.actor, 'Federert site: Synthetic remote site');
+  assert.equal(event?.actor, 'Federated site: Synthetic remote site');
   sql('postgres-a', `DO $$ BEGIN
     INSERT INTO audit_events
       (id, site_id, actor_person_id, actor_instance_id, actor_site_id, actor_site_name,

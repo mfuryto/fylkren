@@ -126,7 +126,7 @@ export function LoginPage({
     </div>
   );
 
-  if(automaticSso&&!breakGlassLogin)return <div className="product-shell"><main className="login-page"><section className="panel login-panel"><h1>Single sign-on</h1><p className="status-message">{t("redirectingToOrganization")}</p></section></main></div>;
+  if(automaticSso&&!breakGlassLogin)return <div className="product-shell"><main className="login-page"><section className="panel login-panel"><h1>{t("singleSignOn")}</h1><p className="status-message">{t("redirectingToOrganization")}</p></section></main></div>;
 
   return (
     <div className="product-shell">

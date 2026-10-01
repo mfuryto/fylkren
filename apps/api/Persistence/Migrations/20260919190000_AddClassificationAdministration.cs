@@ -43,7 +43,7 @@ public sealed class AddClassificationAdministration : Migration
             VALUES ('00000000-0000-0000-0000-000000000006', TRUE);
 
             INSERT INTO classification_definitions (id, name, abbreviation, sort_order, is_active)
-            VALUES ('00000000-0000-0000-0000-000000000007', 'BEGRENSET', 'B', 10, TRUE);
+            VALUES ('00000000-0000-0000-0000-000000000007', 'LEGACY_RESTRICTED', 'LR', 10, TRUE);
             """);
     }
 

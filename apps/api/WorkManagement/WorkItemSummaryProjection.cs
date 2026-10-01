@@ -76,7 +76,7 @@ internal static class WorkItemSummaryProjection
                 item.FinalReportWrittenByPerson == null ? null : item.FinalReportWrittenByPerson.DisplayName,
                 item.FinalReportApprovedAt,
                 item.FinalReportApprovedByPerson == null ? null : item.FinalReportApprovedByPerson.DisplayName,
-                item.CreatedByPerson == null ? item.SenderSiteName ?? "Ekstern site" : item.CreatedByPerson.DisplayName,
+                item.CreatedByPerson == null ? item.SenderSiteName ?? "External site" : item.CreatedByPerson.DisplayName,
                 item.CreatedAt,
                 item.UpdatedAt,
                 item.WorkItemType != null && item.WorkItemType.IsSystemManaged &&

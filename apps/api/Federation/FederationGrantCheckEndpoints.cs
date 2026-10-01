@@ -27,7 +27,7 @@ internal static class FederationGrantCheckEndpoints
     private static async Task<IResult> Receive(FederationGrantCheckRequest request, HttpContext context,
         IDataProtectionProvider protection, FylkrenDbContext db, CancellationToken ct)
     {
-        if (!context.Request.IsHttps) return Results.Problem(statusCode: 400, title: "HTTPS kreves.");
+        if (!context.Request.IsHttps) return Results.Problem(statusCode: 400, title: "HTTPS is required.");
         var now = DateTimeOffset.UtcNow;
         if (request.SchemaVersion != FederationGrantCheckProtocol.SchemaVersion ||
             request.SenderInstanceId == Guid.Empty || request.RecipientInstanceId == Guid.Empty ||

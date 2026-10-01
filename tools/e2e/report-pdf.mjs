@@ -3,7 +3,7 @@ import { writeFileSync } from 'node:fs';
 export async function writeReportPdf({ call, evaluate, outputPath, targetUrl }) {
   const html = await evaluate(`(() => {
     const button = [...document.querySelectorAll('button')]
-      .find(value => value.textContent.trim() === 'Eksporter som PDF');
+      .find(value => value.textContent.trim() === 'Export as PDF');
     if (!button) throw new Error('Missing PDF export button');
     button.click();
     const frame = document.querySelector('iframe[data-report-print-frame]');

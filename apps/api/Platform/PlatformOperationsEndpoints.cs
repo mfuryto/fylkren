@@ -34,7 +34,7 @@ public static class PlatformOperationsEndpoints
             var stale = hostStatus.Problem == "stale";
             var services = new List<OperationServiceStatus>
             {
-                new("api", "API", "healthy", "Applikasjonen svarer.", null),
+                new("api", "API", "healthy", "The application is responding.", null),
                 new("database", "Database", databaseHealthy ? "healthy" : "down",
                     databaseHealthy ? "The connection is healthy." : $"The connection failed{(databaseError is null ? "." : $" ({databaseError}).")}", null),
                 new("authentication", "Authentication", "healthy", "Session and access control are active.", null)
@@ -48,7 +48,7 @@ public static class PlatformOperationsEndpoints
                 var diskDegraded = snapshot.Disk.AvailableBytes < 5L * 1024 * 1024 * 1024 || freePercent < 15;
                 services.Add(new("host-disk", snapshot.Disk.Name,
                     stale ? "unknown" : diskDegraded ? "degraded" : "healthy",
-                    stale ? "The host measurement is too old." : $"{freePercent:F0} % ledig kapasitet.", null));
+                    stale ? "The host measurement is too old." : $"{freePercent:F0}% free capacity.", null));
                 var lastBackup = snapshot.Backup?.LastCompletedAt;
                 var backupDegraded = lastBackup is null || checkedAt - lastBackup > TimeSpan.FromHours(options.Operations.BackupWarningHours);
                 var backupDetail = stale

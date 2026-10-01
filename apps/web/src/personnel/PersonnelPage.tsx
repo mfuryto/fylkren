@@ -367,7 +367,7 @@ export function PersonnelPage({ session, configuration }: { session: Session; co
         <>
           {sites.length > 1 && <section className="panel personnel-site">
             <div className="field">
-              <label htmlFor="personnel-site">Site</label>
+              <label htmlFor="personnel-site">{t("site")}</label>
               <select
                 id="personnel-site"
                 value={selectedSiteId}

@@ -7,7 +7,7 @@ const site = (values: Partial<TaskSite> = {}): TaskSite => ({
   hasTopLevelAccess: false, isManager: false, ...values,
 });
 const unit = (values: Partial<TaskUnit>): TaskUnit => ({
-  id: "unit", siteId: "site", name: "Enhet", parentId: null, isSiteLeadership: false,
+  id: "unit", siteId: "site", name: "Unit", parentId: null, isSiteLeadership: false,
   sortOrder: 0, assignedToMe: true, isLeader: false, ...values,
 });
 

@@ -35,7 +35,7 @@ internal static class WorkItemQueuePager
             includeSearchText ? item.SenderSiteName : null,
             includeSearchText ? item.SenderPersonName : null,
             includeSearchText ? item.AssignedUnit == null ? item.SiteId != siteId ? item.Site.Name : null : item.AssignedUnit.Name : null,
-            includeSearchText ? item.CreatedByPerson == null ? item.SenderSiteName ?? "Ekstern site" : item.CreatedByPerson.DisplayName : "",
+            includeSearchText ? item.CreatedByPerson == null ? item.SenderSiteName ?? "External site" : item.CreatedByPerson.DisplayName : "",
             includeSearchText ? item.FinalReport : null,
             item.Status,
             item.CreatedAt,
@@ -113,7 +113,7 @@ internal static class WorkItemQueuePager
 
     private static string StatusLabel(string status) => status switch
     {
-        "registered" => "Registrert",
+        "registered" => "Registered",
         "under_review" => "Under review",
         "on_hold" => "Pending",
         "rejected" => "Rejected",
@@ -121,13 +121,13 @@ internal static class WorkItemQueuePager
         "planning_approval" => "Plan awaiting approval",
         "planning_approved" => "Approved plan · awaiting initiation",
         "execution" => "Execution",
-        "assigned" => "Fordelt",
+        "assigned" => "Assigned",
         "in_progress" => "In progress",
         "in_review" => "Awaiting review",
         "completed" => "Completed",
-        "cancelled" => "Kansellert",
+        "cancelled" => "Cancelled",
         "request_cancelled" => "Withdrawn by sender",
-        "reassigned" => "Omfordelt",
+        "reassigned" => "Reassigned",
         _ => status,
     };
 

@@ -66,7 +66,7 @@ public static class ReportApiEndpoints
                 ReportCreatedAt = item.FinalReportCreatedAt ?? item.FinalReportUpdatedAt,
                 WorkReceivedAt = item.CreatedAt,
                 WorkCompletedAt = item.FinalReportUpdatedAt,
-                WrittenBy = item.FinalReportWrittenByPerson == null ? item.CreatedByPerson == null ? item.SenderSiteName ?? "Ekstern site" : item.CreatedByPerson.DisplayName : item.FinalReportWrittenByPerson.DisplayName,
+                WrittenBy = item.FinalReportWrittenByPerson == null ? item.CreatedByPerson == null ? item.SenderSiteName ?? "External site" : item.CreatedByPerson.DisplayName : item.FinalReportWrittenByPerson.DisplayName,
                 ApprovedBy = item.FinalReportApprovedByPerson == null ? null : item.FinalReportApprovedByPerson.DisplayName,
                 item.FinalReportApprovedAt
             })
@@ -123,7 +123,7 @@ public static class ReportApiEndpoints
                 ReportCreatedAt = item.FinalReportCreatedAt ?? item.FinalReportUpdatedAt,
                 WorkReceivedAt = item.CreatedAt,
                 WorkCompletedAt = item.FinalReportUpdatedAt,
-                WrittenBy = item.FinalReportWrittenByPerson == null ? item.CreatedByPerson == null ? item.SenderSiteName ?? "Ekstern site" : item.CreatedByPerson.DisplayName : item.FinalReportWrittenByPerson.DisplayName,
+                WrittenBy = item.FinalReportWrittenByPerson == null ? item.CreatedByPerson == null ? item.SenderSiteName ?? "External site" : item.CreatedByPerson.DisplayName : item.FinalReportWrittenByPerson.DisplayName,
                 ApprovedBy = item.FinalReportApprovedByPerson == null ? null : item.FinalReportApprovedByPerson.DisplayName,
                 item.FinalReportApprovedAt
             })

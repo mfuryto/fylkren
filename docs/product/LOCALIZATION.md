@@ -6,9 +6,9 @@ Fylkren separates repository language from product language. Source code, identi
 
 | Locale | Language | Status |
 | --- | --- | --- |
-| `en-US` | English (United States) | Source catalog and mandatory fallback; migration of legacy hard-coded UI text is in progress |
+| `en-US` | English (United States) | Complete source catalog and mandatory fallback |
 | `en-GB` | English (United Kingdom) | Complete bundled regional variant with reviewed British wording |
-| `nb-NO` | Norwegian Bokmal | Complete bundled language pack; migration of legacy hard-coded UI text is in progress |
+| `nb-NO` | Norwegian Bokmal | Complete bundled language pack |
 
 The legacy locale value `en` is treated as `en-US` and upgraded to that explicit value. No additional locale is considered supported until its complete bundled catalog, locale behavior, documentation and automated tests are delivered together.
 

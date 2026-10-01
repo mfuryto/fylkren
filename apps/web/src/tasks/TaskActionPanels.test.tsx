@@ -13,7 +13,7 @@ function renderActions(status: string, options: { canManage?: boolean; hasPlan?:
   const noop = vi.fn();
   return renderToStaticMarkup(<TaskActionPanels
     item={item} canManage={options.canManage ?? true} childUnitCount={1} busy={false}
-    nextActions={status === "in_review" ? [{ status: options.approved ? "completed" : "in_progress", label: options.approved ? "Complete" : "Returner" }] : []}
+    nextActions={status === "in_review" ? [{ status: options.approved ? "completed" : "in_progress", label: options.approved ? "Complete" : "Return" }] : []}
     canDelegate={false} canSendRequest={options.canSendRequest ?? false} pendingChildren={[]}
     onDecision={noop} onStatus={noop} onReview={noop} onDelegate={noop} onSendRequest={noop}
     onReleasePlan={noop} onPlanDecision={noop} onApprovePlan={noop} onOpenReport={noop} onApproveReport={noop}
@@ -27,10 +27,10 @@ describe("Next step in Tasks", () => {
     expect(html).toContain("Next step");
     expect(html).toContain("Approve and allocate");
     expect(html).toContain("Send request");
-    expect(html).not.toContain("Lederbeslutning");
+    expect(html).not.toContain("Manager decision");
   });
 
-  it("viser planbeslutninger bare for manager", () => {
+  it("shows plan decisions only to managers", () => {
     expect(renderActions("planning_approval", { hasPlan: true })).toContain("Approve plan");
     expect(renderActions("planning_approval", { hasPlan: true, canManage: false })).not.toContain("Approve plan");
   });
@@ -38,8 +38,8 @@ describe("Next step in Tasks", () => {
   it("combines report writing, return, and approval", () => {
     const empty = renderActions("in_review");
     expect(empty).toContain("Write final report");
-    expect(empty).toContain("Returner");
-    const written = renderActions("in_review", { finalReport: "Rapport" });
+    expect(empty).toContain("Return");
+    const written = renderActions("in_review", { finalReport: "Report" });
     expect(written).toContain("Edit final report");
     expect(written).toContain("Approve final report");
   });

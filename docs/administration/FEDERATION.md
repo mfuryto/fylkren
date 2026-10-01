@@ -12,7 +12,7 @@ The receiving installation owns all internal assessment, planning, delegation an
 
 ## Responsibility and prerequisites
 
-Platform Manager performs all application setup on **Federering**. Site Managers do not configure federation. The menu and complete page remain visible without Enterprise, but a single **Krever Enterpriselisens** notice disables mutations.
+Platform Manager performs all application setup on **Federation**. Site Managers do not configure federation. The menu and complete page remain visible without Enterprise, but a single **Requires an Enterprise license** notice disables mutations.
 
 Before activation, both installations need:
 
@@ -29,25 +29,25 @@ These are deployment properties, not hidden federation configuration. All remain
 
 Perform the following on installation A and repeat it independently on installation B.
 
-1. Sign in as Platform Manager and open **Federering**.
+1. Sign in as Platform Manager and open **Federation**.
 2. Under **This instance**, select **Create federation key**. Fylkren creates a dedicated P-256 signing key. The private key remains protected on the server; no PNG, certificate file or private-key file is created for manual exchange.
 3. Record the displayed **Instance ID** and **Public key fingerprint** through the organization's approved independent channel. The fingerprint is visible on the same page whenever the key is usable.
-4. Under **Legg til motpart**, enter a recognizable local name and the other installation's final public HTTPS origin, for example `https://fylkren.example.no`. Do not add a path, query, fragment or credentials.
-5. Select **Hent signert identitet**. The Fylkren server contacts the entered address directly and verifies a nonce-bound signed identity proof. Nothing is uploaded in the browser.
+4. Under **Add peer**, enter a recognizable local name and the other installation's final public HTTPS origin, for example `https://fylkren.example.no`. Do not add a path, query, fragment or credentials.
+5. Select **Retrieve signed identity**. The Fylkren server contacts the entered address directly and verifies a nonce-bound signed identity proof. Nothing is uploaded in the browser.
 6. Compare **Key fingerprint** with the value obtained independently from the other Platform Manager. Do not use only the newly discovered value as its own confirmation. Select the confirmation checkbox and then **Approve peer on this instance**.
-7. Under **Motparter og tilkobling**, select the peer and choose **Test tilkobling**. A successful test proves possession of the pinned key and fetches the peer's signed active top-level-site catalog.
+7. Under **Peers and connection**, select the peer and choose **Test connection**. A successful test proves possession of the pinned key and fetches the peer's signed active top-level-site catalog.
 8. Confirm that **Sites received from the peer** contains the expected active top-level sites. **Local top-level sites** shows what this installation exposes automatically. Use **Refresh site catalog** after a peer-site change when an immediate refresh is needed.
 
 The relationship is intentionally bilateral. Completing A → B does not authorize B → A by itself; the other Platform Manager must complete the same identity check and approval on B. This bilateral peer approval is the only reciprocal setup. It must not be confused with per-site or per-direction permissions, which do not exist.
 
 ## Activate and verify routing
 
-The **Oppdragsrouting** panel lists any unresolved technical condition. The activation button is enabled only when the current installation has a valid Enterprise entitlement, secure HTTPS/proxy configuration, a usable federation key and at least one active peer with a successful connection test.
+The **Work routing** panel lists any unresolved technical condition. The activation button is enabled only when the current installation has a valid Enterprise entitlement, secure HTTPS/proxy configuration, a usable federation key and at least one active peer with a successful connection test.
 
 After both Platform Managers have compared fingerprints and tested the connection:
 
-1. Select **Jeg bekrefter at motpart og fingeravtrykk er kontrollert**.
-2. Select **Aktiver oppdragsrouting** on each installation. Activation is immediate, persisted and audited; it requires no restart.
+1. Select **I confirm that the peer and fingerprint have been verified**.
+2. Select **Enable work routing** on each installation. Activation is immediate, persisted and audited; it requires no restart.
 3. From an operational task that has completed initial leader assessment, select **Send request**, search for one of the peer's top-level sites and send a synthetic acceptance request.
 4. Confirm that the sender shows a sent request, the receiver gets a normal received task, and **Delivery queue** shows the signed protocol message as delivered.
 5. Complete the task on the receiver and approve its top-level final report. Confirm that only the official response and classification return to the sender, and that both report archives retain their own record.
@@ -74,13 +74,13 @@ A disaster-recovery replacement of the same installation must preserve its Insta
 
 ## Troubleshooting
 
-If **Hent signert identitet** fails, verify the exact HTTPS origin, DNS, outbound reachability from the API container, certificate trust and that the peer is healthy. Redirects, certificate-validation bypasses and URLs containing credentials or paths are rejected deliberately.
+If **Retrieve signed identity** fails, verify the exact HTTPS origin, DNS, outbound reachability from the API container, certificate trust and that the peer is healthy. Redirects, certificate-validation bypasses and URLs containing credentials or paths are rejected deliberately.
 
-If **Test tilkobling** fails, compare the currently displayed peer fingerprint, check both clocks and confirm the peer still has a usable key. A changed fingerprint requires the explicit lost-key recovery flow; editing a URL or rerunning a normal test cannot replace a pin.
+If **Test connection** fails, compare the currently displayed peer fingerprint, check both clocks and confirm the peer still has a usable key. A changed fingerprint requires the explicit lost-key recovery flow; editing a URL or rerunning a normal test cannot replace a pin.
 
 If routing cannot be activated, use the concrete list under **This remains before activation**. Server HTTPS, proxy, public URL and clock issues are corrected by the operator; key, peer and test conditions are completed on this page. No database edit is a supported setup step.
 
-If an expected site is missing, confirm that it is active and top-level on the peer, then select **Oppdater site-oversikt**. Child sites and internal units are intentionally absent.
+If an expected site is missing, confirm that it is active and top-level on the peer, then select **Refresh site catalog**. Child sites and internal units are intentionally absent.
 
 If delivery fails, leave the local task intact, inspect **Delivery queue**, Platform Audit and sanitized API logs, correct connectivity/license/peer/routing state, and retry only a permanently failed message. Do not delete queue rows or create a replacement task as a recovery shortcut.
 

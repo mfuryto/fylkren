@@ -1,3 +1,4 @@
+import { translateActive } from "../localization";
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 import { Modal } from "../components/Modal";
 import type { WorkItemType } from "../work/WorkItemModels";
@@ -20,36 +21,36 @@ export function TaskTypeManagerDialog({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   return (
-    <Modal title="Tasktyper" onClose={onClose}>
+    <Modal title={translateActive("tasksTaskLookupDialogsTaskTypes")} onClose={onClose}>
       <form className="stacked-form" onSubmit={onSubmit}>
         <div className="field">
-          <label htmlFor="work-type-name">Navn</label>
+          <label htmlFor="work-type-name">{translateActive("name")}</label>
           <input id="work-type-name" required minLength={2} maxLength={100} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} />
         </div>
         {form.id && (
           <label className="checkbox-field">
-            <input type="checkbox" checked={form.isActive} onChange={(event) => setForm({ ...form, isActive: event.target.checked })} /> Aktiv oppgavetype
+            <input type="checkbox" checked={form.isActive} onChange={(event) => setForm({ ...form, isActive: event.target.checked })} /> {translateActive("tasksTaskLookupDialogsActiveTaskType")}
           </label>
         )}
-        <button className="primary-button" disabled={busy}>{form.id ? "Save type" : "Opprett type"}</button>
+        <button className="primary-button" disabled={busy}>{form.id ? translateActive("tasksTaskLookupDialogsSaveType") : translateActive("createType")}</button>
       </form>
       <section className="type-list">
-        <h3>Forvaltede typer</h3>
+        <h3>{translateActive("tasksTaskLookupDialogsManagedTypes")}</h3>
         {types.map((type) => (
           <div className="type-row" key={type.id}>
             <span>
               <strong>{type.name}</strong>
-              <small className="muted">{type.isActive ? "Aktiv" : "Deaktivert"}{type.inUse ? " · i bruk" : ""}</small>
+              <small className="muted">{type.isActive ? translateActive("active") : translateActive("inactive")}{type.inUse ? translateActive("inUseSuffix") : ""}</small>
             </span>
             {type.isSystemManaged ? (
-              <span className="muted">Systemstyrt</span>
+              <span className="muted">{translateActive("tasksTaskLookupDialogsSystemManaged")}</span>
             ) : (
-              <button className="link-button" type="button" onClick={() => setForm({ id: type.id, name: type.name, isActive: type.isActive })}>Edit</button>
+              <button className="link-button" type="button" onClick={() => setForm({ id: type.id, name: type.name, isActive: type.isActive })}>{translateActive("edit")}</button>
             )}
           </div>
         ))}
       </section>
-      <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>Close</button></div>
+      <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>{translateActive("close")}</button></div>
     </Modal>
   );
 }
@@ -72,32 +73,32 @@ export function TaskLookupManagerDialog({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   return (
-    <Modal title={kind === "source-type" ? "Kildetyper" : "Sendere"} onClose={onClose}>
+    <Modal title={kind === "source-type" ? translateActive("tasksTaskLookupDialogsSourceTypes") : translateActive("tasksTaskLookupDialogsSenders")} onClose={onClose}>
       <form className="stacked-form" onSubmit={onSubmit}>
         <div className="field">
-          <label>Navn</label>
+          <label>{translateActive("name")}</label>
           <input required minLength={2} maxLength={100} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} />
         </div>
         {form.id && (
           <label className="checkbox-field">
-            <input type="checkbox" checked={form.isActive} onChange={(event) => setForm({ ...form, isActive: event.target.checked })} /> Aktiv
+            <input type="checkbox" checked={form.isActive} onChange={(event) => setForm({ ...form, isActive: event.target.checked })} /> {translateActive("active")}
           </label>
         )}
-        <button className="primary-button" disabled={busy}>{form.id ? "Save" : "Opprett"}</button>
+        <button className="primary-button" disabled={busy}>{form.id ? translateActive("save") : translateActive("create")}</button>
       </form>
       <section className="type-list">
-        <h3>Forvaltede verdier</h3>
+        <h3>{translateActive("tasksTaskLookupDialogsManagedValues")}</h3>
         {values.map((value) => (
           <div className="type-row" key={value.id}>
             <span>
               <strong>{value.name}</strong>
-              <small className="muted">{value.isActive ? "Aktiv" : "Deaktivert"}{value.inUse ? " · i bruk" : ""}</small>
+              <small className="muted">{value.isActive ? translateActive("active") : translateActive("inactive")}{value.inUse ? translateActive("inUseSuffix") : ""}</small>
             </span>
-            <button className="link-button" type="button" onClick={() => setForm({ id: value.id, name: value.name, isActive: value.isActive })}>Edit</button>
+            <button className="link-button" type="button" onClick={() => setForm({ id: value.id, name: value.name, isActive: value.isActive })}>{translateActive("edit")}</button>
           </div>
         ))}
       </section>
-      <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>Close</button></div>
+      <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>{translateActive("close")}</button></div>
     </Modal>
   );
 }

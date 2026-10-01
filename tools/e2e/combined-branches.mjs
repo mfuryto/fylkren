@@ -165,7 +165,7 @@ export async function testCombinedBranches({ leader, sectionLeader, sectionTwoLe
   assert.equal(receivedRequest[0].description, requestInstruction);
   assert.equal(receivedRequest[0].parentWorkItemId, null,
     'Receiver view exposed the sending site\'s internal request-tracking ID');
-  assert.ok(receivedRequest[0].requestBasisSnapshot?.includes('Godkjent plan'),
+  assert.ok(receivedRequest[0].requestBasisSnapshot?.includes('Approved plan'),
     'Planned request did not carry the approved plan as context');
   const repeatedRelease = await leader.post(`/api/workflows/planning/${run.id}/decision`, { action: 'release', note: null });
   assert.ok(repeatedRelease.status === 404 || repeatedRelease.status === 409,

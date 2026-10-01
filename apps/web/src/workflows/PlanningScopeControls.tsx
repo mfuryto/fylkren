@@ -1,3 +1,4 @@
+import { translateActive } from "../localization";
 import type { TaskSite } from "../work/WorkContextModels";
 
 type PlanningScopeControlsProps = {
@@ -21,15 +22,15 @@ export function PlanningScopeControls({
 
   return <section className="panel personnel-site">
     {sites.length > 1 && <div className="field">
-      <label htmlFor="planning-site">Site</label>
+      <label htmlFor="planning-site">{translateActive("site")}</label>
       <select id="planning-site" value={siteId} onChange={event => onSiteChange(event.target.value)}>
         {sites.map(site => <option key={site.siteId} value={site.siteId}>{site.name}</option>)}
       </select>
     </div>}
     {levels.length > 1 && <div className="field">
-      <label htmlFor="planning-level">Work level</label>
+      <label htmlFor="planning-level">{translateActive("workLevel")}</label>
       <select id="planning-level" value={levelFilter} onChange={event => onLevelChange(event.target.value)}>
-        <option value="all">All my levels</option>
+        <option value="all">{translateActive("workflowsPlanningScopeControlsAllMyLevels")}</option>
         {levels.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
       </select>
     </div>}

@@ -6,10 +6,10 @@ import './demo.css';
 
 function Demo() {
   const summaries = [
-    ['Aktive', '8'],
+    ['Active', '8'],
     ['Near deadline', '3'],
-    ['Blokkerte', '1'],
-    ['Krever oppmerksomhet', '2']
+    ['Blocked', '1'],
+    ['Requires attention', '2']
   ] as const;
 
   return (
@@ -17,17 +17,17 @@ function Demo() {
       <div className="page">
         <header className="page-header">
           <div>
-            <h1>Arbeidsoversikt</h1>
+            <h1>Work overview</h1>
             <p className="muted">Synthetic sample data. Content cannot be changed.</p>
           </div>
         </header>
-        <div className="summary-grid" aria-label="Oppgavesammendrag">
+        <div className="summary-grid" aria-label="Task summary">
           {summaries.map(([label, value]) => (
             <div className="summary-card" key={label}><span>{label}</span><strong>{value}</strong></div>
           ))}
         </div>
         <div className="panel task-list">
-          <div className="section-heading"><h2>Prioriterte oppgaver</h2><span className="muted">3 av 12</span></div>
+          <div className="section-heading"><h2>Prioritized tasks</h2><span className="muted">3 of 12</span></div>
           {exampleTasks.map(task => (
             <article className="task-row" key={task.id}>
               <span>{task.id}</span><strong>{task.title}</strong><span>{task.owner}</span><span>{task.status}</span>

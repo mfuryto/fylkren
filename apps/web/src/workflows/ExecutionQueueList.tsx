@@ -1,3 +1,4 @@
+import { translateActive } from "../localization";
 import type { ReactNode } from "react";
 import { PaginationNav } from "../components/PaginationNav";
 import { RichTextContent } from "../components/RichText";
@@ -49,8 +50,8 @@ export function ExecutionQueueList({
   onPageChange,
 }: ExecutionQueueListProps) {
   const managedIds = new Set(managedItemIds);
-  return <section className="task-list process-queue" aria-label="Execution queue, newest first">
-    {totalItems === 0 && <div className="panel empty-state"><p className="muted">No tasks in the execution queue.</p></div>}
+  return <section className="task-list process-queue" aria-label={translateActive("workflowsExecutionQueueListExecutionQueueNewestFirst")}>
+    {totalItems === 0 && <div className="panel empty-state"><p className="muted">{translateActive("workflowsExecutionQueueListNoTasksInTheExecutionQueue")}</p></div>}
     {items.map(item => {
       const run = item.run;
       const mine = run?.claimedByPersonId === personId;
@@ -59,30 +60,30 @@ export function ExecutionQueueList({
       const units = childUnits(item);
       return <article className={`panel task-card process-card${open ? "" : " minimized"}`} key={item.id}>
         <div className="task-card-heading">
-          <div><h2>{item.title}</h2><span className="muted">{item.assignedUnitName ?? "Top level"}</span></div>
+          <div><h2>{item.title}</h2><span className="muted">{item.assignedUnitName ?? translateActive("topLevel")}</span></div>
           <span className="task-status execution">{executionStatus(item)}</span>
         </div>
         <button className="task-card-toggle process-card-toggle" type="button" aria-expanded={open} onClick={() => onToggle(item.id)}>
-          <i aria-hidden="true">▱</i><span>{open ? "Close execution" : "Open execution"}</span>
+          <i aria-hidden="true">▱</i><span>{open ? translateActive("workflowsExecutionQueueListCloseExecution") : translateActive("workflowsExecutionQueueListOpenExecution")}</span>
         </button>
-        {open && <div className="permalink-action-row"><button className="task-icon-action permalink-action" type="button" title="Copy link to execution" aria-label="Copy link to execution" onClick={() => onCopyLink(item.id)}><i aria-hidden="true">🔗</i></button></div>}
-        <button className="link-button" type="button" onClick={() => onToggleDetails(item.id)}>{expanded ? "Hide task" : "Read task"}</button>
+        {open && <div className="permalink-action-row"><button className="task-icon-action permalink-action" type="button" title={translateActive("workflowsExecutionQueueListCopyLinkToExecution")} aria-label={translateActive("workflowsExecutionQueueListCopyLinkToExecution")} onClick={() => onCopyLink(item.id)}><i aria-hidden="true">🔗</i></button></div>}
+        <button className="link-button" type="button" onClick={() => onToggleDetails(item.id)}>{expanded ? translateActive("workflowsExecutionQueueListHideTask") : translateActive("workflowsExecutionQueueListReadTask")}</button>
         {expanded && <div className="planning-preview">
-          {item.requestBasisSnapshot && <details className="returned-report treatment-history-section"><summary><span>Task basis from sender</span><small>Show frozen description and approved plan</small></summary><div className="returned-report-content"><RichTextContent value={item.requestBasisSnapshot}/></div></details>}
-          {item.description && <details className="returned-report task-description-section"><summary><span>Beskrivelse</span><small>Show the task text</small></summary><div className="returned-report-content"><p>{item.description}</p></div></details>}
-          {item.referenceUrl && <a href={item.referenceUrl} target="_blank" rel="noopener noreferrer">Open source link ↗</a>}
-          {planContextIds[item.id] && <button className="link-button" type="button" onClick={() => onShowPlan(item)}>Vis tilgjengelig plan</button>}
+          {item.requestBasisSnapshot && <details className="returned-report treatment-history-section"><summary><span>{translateActive("tasksTaskCardPresentationTaskBasisFromSender")}</span><small>{translateActive("tasksTaskCardPresentationShowFrozenDescriptionAndApprovedPlan")}</small></summary><div className="returned-report-content"><RichTextContent value={item.requestBasisSnapshot}/></div></details>}
+          {item.description && <details className="returned-report task-description-section"><summary><span>{translateActive("approvalDescription")}</span><small>{translateActive("tasksTaskCardPresentationShowTheTaskText")}</small></summary><div className="returned-report-content"><p>{item.description}</p></div></details>}
+          {item.referenceUrl && <a href={item.referenceUrl} target="_blank" rel="noopener noreferrer">{translateActive("workflowsExecutionQueueListOpenSourceLink")}</a>}
+          {planContextIds[item.id] && <button className="link-button" type="button" onClick={() => onShowPlan(item)}>{translateActive("workflowsExecutionQueueListShowAvailablePlan")}</button>}
         </div>}
-        {(!run || run.status === "available") && <button className="primary-button" type="button" onClick={() => onClaim(item)}>Claim responsibility for the task</button>}
-        {run && !mine && run.status !== "available" && <p className="status-message">Ansvarlig: {run.claimedBy}</p>}
+        {(!run || run.status === "available") && <button className="primary-button" type="button" onClick={() => onClaim(item)}>{translateActive("workflowsExecutionQueueListClaimResponsibilityForTheTask")}</button>}
+        {run && !mine && run.status !== "available" && <p className="status-message">{translateActive("workflowsExecutionQueueListAssignee")} {run.claimedBy}</p>}
         {run && managedIds.has(item.id) && run.claimedByPersonId && <div className="task-actions">
-          <button className="secondary-button" type="button" onClick={() => onRelease(item)}>Release execution</button>
-          <button className="secondary-button" type="button" onClick={() => onReassign(item)}>Reassign execution</button>
+          <button className="secondary-button" type="button" onClick={() => onRelease(item)}>{translateActive("workflowsExecutionQueueListReleaseExecution")}</button>
+          <button className="secondary-button" type="button" onClick={() => onReassign(item)}>{translateActive("workflowsExecutionDialogsReassignExecution")}</button>
         </div>}
-        {managedIds.has(item.id) && units.length > 0 && <button className="secondary-button" type="button" onClick={() => onAllocateDownward(item, units)}>Close execution and route onward</button>}
+        {managedIds.has(item.id) && units.length > 0 && <button className="secondary-button" type="button" onClick={() => onAllocateDownward(item, units)}>{translateActive("workflowsExecutionQueueListCloseExecutionAndRouteOnward")}</button>}
         {renderEditor(item)}
       </article>;
     })}
-    <PaginationNav page={page} totalItems={totalItems} onPageChange={onPageChange} label="Execution pages" />
+    <PaginationNav page={page} totalItems={totalItems} onPageChange={onPageChange} label={translateActive("workflowsExecutionQueueListExecutionPages")} />
   </section>;
 }

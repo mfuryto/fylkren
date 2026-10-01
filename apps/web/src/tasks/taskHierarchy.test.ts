@@ -22,7 +22,7 @@ const item = (values: Partial<WorkItem>): WorkItem => ({
 });
 
 const unit = (values: Partial<TaskUnit>): TaskUnit => ({
-  id: "unit", siteId: "site", name: "Enhet", parentId: null, isSiteLeadership: false,
+  id: "unit", siteId: "site", name: "Unit", parentId: null, isSiteLeadership: false,
   sortOrder: 0, assignedToMe: true, isLeader: false, ...values,
 });
 
@@ -37,9 +37,9 @@ describe("taskHierarchy", () => {
   });
 
   it("excludes the executive unit from the report path", () => {
-    const leadership = unit({ id: "leadership", name: "Ledelse", isSiteLeadership: true });
-    const section = unit({ id: "section", name: "Seksjon", parentId: "leadership" });
+    const leadership = unit({ id: "leadership", name: "Leadership", isSiteLeadership: true });
+    const section = unit({ id: "section", name: "Section", parentId: "leadership" });
     const team = unit({ id: "team", name: "Team", parentId: "section" });
-    expect(buildReportUnitPath([leadership, section, team], "site", "team")).toEqual(["Seksjon", "Team"]);
+    expect(buildReportUnitPath([leadership, section, team], "site", "team")).toEqual(["Section", "Team"]);
   });
 });

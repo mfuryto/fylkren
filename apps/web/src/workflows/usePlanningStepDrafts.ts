@@ -1,3 +1,4 @@
+import { translateActive } from "../localization";
 import { useMemo, useState } from "react";
 import { apiMutate } from "../api/client";
 import type { PlanningRun } from "./PlanningModels";
@@ -28,7 +29,7 @@ export function usePlanningStepDrafts({ runs, personId, reload, onError }: UsePl
         `/api/workflows/planning/${runId}/steps/${stepId}`,
         "PUT",
         { content, links: links.map(link => ({ label: link.label, url: link.url })), timelineEvents },
-        "The workflow step could not be saved.",
+        translateActive("workflowsUsePlanningStepDraftsTheWorkflowStepCouldNotBe"),
       );
       await reload();
     });
@@ -49,7 +50,7 @@ export function usePlanningStepDrafts({ runs, personId, reload, onError }: UsePl
   useWorkflowAutosave({
     revision,
     enabled: hasChanges,
-    fallbackError: "Changes to the workflow step could not be saved automatically.",
+    fallbackError: translateActive("workflowsUsePlanningStepDraftsChangesToTheWorkflowStepCould"),
     onError,
     save: async () => {
       const dirtyStepIds = new Set([...Object.keys(stepDrafts), ...Object.keys(linkDrafts)]);

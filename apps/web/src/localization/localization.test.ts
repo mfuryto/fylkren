@@ -16,6 +16,12 @@ describe("localization catalogs", () => {
     expect(translate("en-GB", "colors")).toBe("Colours");
     expect(translate("en-US", "navOrganization")).toBe("Organization");
     expect(translate("en-GB", "navOrganization")).toBe("Organisation");
+    expect(translate("en-US", "siteCatalogueUpdated")).toBe("The site catalog was updated.");
+    expect(translate("en-GB", "siteCatalogueUpdated")).toBe("The site catalogue was updated.");
+    expect(translate("en-US", "workflowsPlanningRfiLogNoInquiriesAreRegistered")).toBe("No inquiries are registered.");
+    expect(translate("en-GB", "workflowsPlanningRfiLogNoInquiriesAreRegistered")).toBe("No enquiries are registered.");
+    expect(translate("en-US", "taskStatusCancelled")).toBe("Canceled");
+    expect(translate("en-GB", "taskStatusCancelled")).toBe("Cancelled");
   });
 
   it("keeps Norwegian in its dedicated language pack", () => {

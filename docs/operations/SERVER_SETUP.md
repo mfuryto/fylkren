@@ -132,7 +132,7 @@ Platform Manager is a system identity and does not belong to a site.
 
 OIDC, SAML, Active Directory, and LDAP are optional. They do not automatically create operational people or populate a site's Personnel list. External identities must be explicitly linked to an internal person, and site membership, unit placement, roles, and authority remain local.
 
-Configure, test and activate these providers in **Platform Manager → Identitet**. Provider configuration is stored in PostgreSQL; bind passwords and client secrets are protected with the persistent Data Protection key ring. No restart is required. Existing provider values from `.env` are imported once when this database-backed configuration is first introduced, then the GUI becomes authoritative.
+Configure, test and activate these providers in **Platform Manager → Identity**. Provider configuration is stored in PostgreSQL; bind passwords and client secrets are protected with the persistent Data Protection key ring. No restart is required. Existing provider values from `.env` are imported once when this database-backed configuration is first introduced, then the GUI becomes authoritative.
 
 Use the canonical [Access and identity](../administration/ACCESS_AND_IDENTITY.md) manual for configuration, mapping, migration, MFA, passkeys, and recovery. Security requirements include:
 
@@ -153,7 +153,7 @@ Directory lifecycle checking is enabled by default every 15 minutes. Configure
 protects users from a single replication or search anomaly; transport or bind
 failure is never counted as a missing account. AD has a secure default filter
 for the `ACCOUNTDISABLE` flag and also checks account expiry. For another AD
-schema, edit **Filter for aktiv konto** in the AD dialog. Generic LDAP deployments
+schema, edit **Active-account filter** in the AD dialog. Generic LDAP deployments
 must edit the corresponding field when their directory retains
 disabled entries; for example, use the directory product's documented lock or
 status attribute rather than copying an AD filter. Keep the filter static—no

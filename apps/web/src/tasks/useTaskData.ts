@@ -1,3 +1,4 @@
+import { translateActive } from "../localization";
 import { useCallback, useEffect, useState } from "react";
 import type { TaskSite, TaskUnit } from "../work/WorkContextModels";
 import type { WorkItem, WorkItemType } from "../work/WorkItemModels";
@@ -18,13 +19,13 @@ export function useTaskData(onError: (message: string) => void, personId: string
   const loadItems = useCallback(async (siteId: string) => {
     if (!siteId) { setItems([]); return; }
     try { const result = await getWorkItems(siteId, query); setItems(result.items); setItemTotal(result.total); setItemPage(result.page); setItemSummary(result.summary); onError(""); }
-    catch (problem) { onError(problem instanceof Error ? problem.message : "Tasks could not be loaded."); }
+    catch (problem) { onError(problem instanceof Error ? problem.message : translateActive("tasksTaskApiTasksCouldNotBeLoaded")); }
   }, [onError, query.unitId, query.filter, query.search, query.page, query.focusItemId]);
 
   const loadTypes = useCallback(async (siteId: string) => {
     if (!siteId) { setTypes([]); return; }
     try { setTypes(await getWorkItemTypes(siteId)); }
-    catch (problem) { onError(problem instanceof Error ? problem.message : "Task types could not be loaded."); }
+    catch (problem) { onError(problem instanceof Error ? problem.message : translateActive("tasksTaskApiTaskTypesCouldNotBeLoaded")); }
   }, [onError]);
 
   const loadLookups = useCallback(async (siteId: string) => {
@@ -33,7 +34,7 @@ export function useTaskData(onError: (message: string) => void, personId: string
       const lookups = await getWorkItemLookups(siteId);
       setSourceTypes(lookups.sourceTypes);
       setSenders(lookups.senders);
-    } catch (problem) { onError(problem instanceof Error ? problem.message : "Lookup values could not be loaded."); }
+    } catch (problem) { onError(problem instanceof Error ? problem.message : translateActive("tasksUseTaskDataLookupValuesCouldNotBeLoaded")); }
   }, [onError]);
 
   useEffect(() => {
@@ -44,7 +45,7 @@ export function useTaskData(onError: (message: string) => void, personId: string
       setSites(operationalSites);
       setTaskUnits(data.units);
       setSelectedSiteId(current => operationalSites.some(site => site.siteId === current) ? current : operationalSites.find(site => site.siteId === preferredSiteId)?.siteId ?? operationalSites[0]?.siteId ?? "");
-    }).catch(problem => { if (active) onError(problem instanceof Error ? problem.message : "The task context could not be loaded."); });
+    }).catch(problem => { if (active) onError(problem instanceof Error ? problem.message : translateActive("tasksTaskApiTheTaskContextCouldNotBe")); });
     return () => { active = false; };
   }, [onError, personId, preferredSiteId]);
 
@@ -63,7 +64,7 @@ export function useTaskData(onError: (message: string) => void, personId: string
         setSenders(lookupResult.value.senders);
       }
       const failure = [typeResult, lookupResult].find(result => result.status === "rejected");
-      if (failure?.status === "rejected") onError(failure.reason instanceof Error ? failure.reason.message : "Task data could not be loaded.");
+      if (failure?.status === "rejected") onError(failure.reason instanceof Error ? failure.reason.message : translateActive("tasksUseTaskDataTaskDataCouldNotBeLoaded"));
       else onError("");
     });
     return () => { active = false; };

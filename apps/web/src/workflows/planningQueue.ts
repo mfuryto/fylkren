@@ -1,11 +1,12 @@
 import type { TaskUnit } from "../work/WorkContextModels";
 import type { PlanningDraft, PlanningRun } from "./PlanningModels";
+import { compareActiveLanguage, translateActive } from "../localization";
 
 export function buildPlanningLevels(runs: PlanningRun[]) {
   return Array.from(new Map(runs.map(run => [
     run.item.assignedUnitId ?? "top",
-    run.item.assignedUnitName ?? "Top level",
-  ])).entries()).sort((a, b) => a[1].localeCompare(b[1], "nb"));
+    run.item.assignedUnitName ?? translateActive("topLevel"),
+  ])).entries()).sort((a, b) => compareActiveLanguage(a[1], b[1]));
 }
 
 export function filterPlanningRuns(runs: PlanningRun[], levelFilter: string) {
@@ -22,7 +23,7 @@ export function planningAllocationUnits(units: TaskUnit[], siteId: string, run: 
         ? unit.parentId === run.item.assignedUnitId
         : unit.parentId === null),
     )
-    .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, "nb"));
+    .sort((a, b) => a.sortOrder - b.sortOrder || compareActiveLanguage(a.name, b.name));
 }
 
 export function createPlanningDraft(run: PlanningRun): PlanningDraft {

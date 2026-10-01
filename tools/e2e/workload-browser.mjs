@@ -11,7 +11,7 @@ export async function verifyWorkloadPresentation({
 
   await navigate('/#/workload');
   await waitFor(`document.body.innerText.includes("Active tasks over time") &&
-    document.body.innerText.includes("Historikk er tilgjengelig fra") &&
+    document.body.innerText.includes("History is available from") &&
     [...document.querySelectorAll('.workload-chart polyline title')]
       .some(value => value.textContent === 'Entire site')`, `workload chart total = ${expected}`);
   const chart = await evaluate(`(() => {

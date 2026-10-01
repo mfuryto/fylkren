@@ -35,11 +35,11 @@ export async function signInLocalActor({
   const logout = await request('/api/session', 'DELETE');
   assert.equal(logout.status, 204, JSON.stringify(logout.body));
   await navigate('/');
-  await waitFor('document.body.innerText.includes("Logg inn")', `${actor.displayName} login`);
+  await waitFor('document.body.innerText.includes("Sign in")', `${actor.displayName} login`);
   await setInput('#username', actor.username);
   await setInput('#password', actor.password);
   await evaluate('document.querySelector("#password").closest("form").requestSubmit()');
-  await waitFor(`document.body.innerText.includes("Oppgaver") &&
+  await waitFor(`document.body.innerText.includes("Tasks") &&
     document.body.innerText.includes("Synthetic Browser Site")`, `${actor.displayName} shell`);
   const session = await request('/api/session');
   assert.equal(session.status, 200, JSON.stringify(session.body));

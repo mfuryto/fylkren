@@ -1,3 +1,4 @@
+import { translateActive } from "../localization";
 import type { TaskSite, TaskUnit } from "../work/WorkContextModels";
 import type { WorkflowForm, WorkflowTemplateSummary } from "./WorkflowModels";
 
@@ -35,19 +36,19 @@ export function WorkflowFormFields({ value, onChange, selectedSite, siteId, unit
 
   return <>
     <div className="field">
-      <label>Navn</label>
+      <label>{translateActive("name")}</label>
       <input required minLength={2} maxLength={200} value={value.name} onChange={event => onChange({ ...value, name: event.target.value })}/>
     </div>
     {value.kind === "execution" && <div className="field">
-      <label>Omfang</label>
+      <label>{translateActive("scope")}</label>
       <select value={value.ownerUnitId} onChange={event => onChange({ ...value, ownerUnitId: event.target.value })}>
-        {canAdministerSite && <option value="">Entire site</option>}
-        {!canAdministerSite && <option value="">Select own level</option>}
+        {canAdministerSite && <option value="">{translateActive("entireSite")}</option>}
+        {!canAdministerSite && <option value="">{translateActive("workflowsWorkflowFormFieldsSelectOwnLevel")}</option>}
         {selectableUnits.map(unit => <option key={unit.id} value={unit.id}>{unit.name}</option>)}
       </select>
     </div>}
     <div className="field">
-      <label>Steps – one per line in the desired order</label>
+      <label>{translateActive("workflowsWorkflowFormFieldsStepsOnePerLineInThe")}</label>
       <textarea required rows={8} value={value.steps} onChange={event => {
         const steps = event.target.value;
         const names = workflowStepNames(steps);
@@ -60,28 +61,28 @@ export function WorkflowFormFields({ value, onChange, selectedSite, siteId, unit
       }}/>
     </div>
     {stepNames.length > 0 && <section className="workflow-template-assignment">
-      <h3>Initial content for steps</h3>
-      <p className="muted">Optionally select one template per step. Its content is copied when new processing starts.</p>
+      <h3>{translateActive("workflowsWorkflowFormFieldsInitialContentForSteps")}</h3>
+      <p className="muted">{translateActive("workflowsWorkflowFormFieldsOptionallySelectOneTemplatePerStep")}</p>
       {stepNames.map((name, index) => <div className="field" key={`${name}-${index}`}>
         <label>{name}</label>
         <select value={value.templateIds[name] ?? ""} onChange={event => onChange({ ...value, templateIds: { ...value.templateIds, [name]: event.target.value } })}>
-          <option value="">None mal</option>
+          <option value="">{translateActive("workflowsWorkflowFormFieldsNoTemplate")}</option>
           {applicableTemplates.map(template => <option key={template.id} value={template.id}>{template.name}</option>)}
         </select>
       </div>)}
     </section>}
     <div className="field">
-      <label>Step with timeline</label>
+      <label>{translateActive("workflowsWorkflowFormFieldsStepWithTimeline")}</label>
       <select value={value.timelineStepName} onChange={event => onChange({ ...value, timelineStepName: event.target.value })}>
-        <option value="">None tidslinjal</option>
+        <option value="">{translateActive("workflowsWorkflowFormFieldsNoTimeline")}</option>
         {stepNames.map((name, index) => <option key={`${name}-timeline-${index}`} value={name}>{name}</option>)}
       </select>
-      <small className="muted">The timeline appears before the step's other content. The start date is set when processing is created.</small>
+      <small className="muted">{translateActive("workflowsWorkflowFormFieldsTheTimelineAppearsBeforeTheStep")}</small>
     </div>
     {value.kind === "planning" && <div className="field">
-      <label>Task-allocation step</label>
+      <label>{translateActive("workflowsWorkflowFormFieldsTaskAllocationStep")}</label>
       <select required value={value.allocationStepName} onChange={event => onChange({ ...value, allocationStepName: event.target.value })}>
-        <option value="">Select where [Add task allocation] should appear</option>
+        <option value="">{translateActive("workflowsWorkflowFormFieldsSelectWhereAddTaskAllocationShould")}</option>
         {stepNames.map((name, index) => <option key={`${name}-${index}`} value={name}>{name}</option>)}
       </select>
     </div>}

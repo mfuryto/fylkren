@@ -11,7 +11,7 @@ The final clean command was `node tools/run-federation-pair.mjs --production-bou
 | Administrative setup | Identity, bilateral discovery/approval/probe and automatic top-level site catalogs work while disabled | Complete bilateral setup succeeded without publication or site permissions | Pass; assertions through both TLS proxies |
 | Disabled work boundary | Four work routes return 404 and no remote recipient is offered | All returned 404; recipient absent | Pass; fully licensed and connected pair |
 | Disabled persistence | Setup alone creates no work transport state | Zero outbound messages and inbound receipts | Pass; database assertions |
-| GUI/API readiness | Production setup is reported ready and activation is authenticated, antiforgery-protected and persisted | Both Platform Manager sessions enabled routing | Pass; same API used by Federering page |
+| GUI/API readiness | Production setup is reported ready and activation is authenticated, antiforgery-protected and persisted | Both Platform Manager sessions enabled routing | Pass; same API used by the Federation page |
 | Audit | Each activation creates one platform event | One `federation-routing.enabled` event per database | Pass; direct count |
 | Operational selection | Authorized remote top-level site appears after activation | Ordinary site-leader search returned the exact remote address | Pass |
 | Production delivery | Ordinary work creation queues and delivers a signed assignment | Sender stored signed receipt/counterpart; receiver stored exactly one task and receipt; forced retry remained idempotent | Pass |

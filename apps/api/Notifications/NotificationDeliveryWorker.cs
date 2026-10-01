@@ -263,7 +263,7 @@ public sealed class NotificationDeliveryWorker(
             ["status"] = item.Status,
             ["deadline"] = item.DueAt?.ToString("yyyy-MM-dd HH:mm") ?? "",
             ["actionRequired"] = kind is "planning-completed" or "execution-completed" or "decision-required"
-                ? "Lederbehandling kreves" : "",
+                ? "Manager review required" : "",
             ["actorName"] = item.SenderPersonName ?? actor,
             ["reportingUnit"] = item.Site.Name,
             ["link"] = $"{publicUrl}/#/{route}",

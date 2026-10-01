@@ -14,7 +14,7 @@ Overview prioritizes items requiring action, active workload, deadlines and subo
 
 Platform Manager selects a supported overview presentation per site during site creation or editing. Presentation changes appearance only; data, authorization, profile colors and subordinate/statistics sections remain consistent. Site design must be resolved before branded content renders, so refresh or concurrent sessions never flash another site's design.
 
-The page heading uses the site name. `Oversikt` remains the navigation label.
+The page heading uses the site name. `Overview` remains the navigation label.
 
 ## Navigation and responsive layout
 

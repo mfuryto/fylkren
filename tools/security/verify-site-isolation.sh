@@ -4,7 +4,7 @@ set -euo pipefail
 [[ $# -ge 1 ]] || { printf 'Usage: %s <https://test-host> [synthetic-credentials-file] [account-a] [account-b]\n' "$0" >&2; exit 2; }
 base_url="$1"
 credentials_file="${2:-e2e-test-credentials.local}"
-account_a="${3:-sjef}"
+account_a="${3:-leader}"
 account_b="${4:-datterleder}"
 
 if [[ ! -f "$credentials_file" ]]; then

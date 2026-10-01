@@ -106,7 +106,7 @@ internal static class WorkItemDetailQueryEndpoints
                     x.FinalReportUpdatedAt,
                     unitName = x.AssignedUnit == null ? null : x.AssignedUnit.Name,
                     parentTitle = x.ParentWorkItem == null ? null : x.ParentWorkItem.Title,
-                    createdBy = x.CreatedByPerson == null ? x.SenderSiteName ?? "Ekstern site" : x.CreatedByPerson.DisplayName,
+                    createdBy = x.CreatedByPerson == null ? x.SenderSiteName ?? "External site" : x.CreatedByPerson.DisplayName,
                     x.CreatedAt
                 })
                 .SingleAsync(ct);

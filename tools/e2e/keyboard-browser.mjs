@@ -20,7 +20,7 @@ async function pressKey(call, key, shift = false) {
 export async function verifyTaskDialogKeyboard({ call, evaluate, waitFor }) {
   const openerReady = await evaluate(`(() => {
     const button = [...document.querySelectorAll('button')]
-      .find(value => value.textContent.trim() === 'Ny oppgave');
+      .find(value => value.textContent.trim() === 'New task');
     if (!button) return false;
     button.dataset.keyboardOpener = 'task';
     button.focus();
@@ -37,11 +37,11 @@ export async function verifyTaskDialogKeyboard({ call, evaluate, waitFor }) {
     const label = dialog && document.getElementById(dialog.getAttribute('aria-labelledby'));
     return { modal: dialog?.getAttribute('aria-modal'), label: label?.textContent?.trim() };
   })()`);
-  assert.deepEqual(semantics, { modal: 'true', label: 'Registrer oppgave' });
+  assert.deepEqual(semantics, { modal: 'true', label: 'Register task' });
   await call('Accessibility.enable');
   const tree = await call('Accessibility.getFullAXTree');
   assert.ok(tree.nodes.some(node => node.role?.value === 'dialog' &&
-    node.name?.value === 'Registrer oppgave'), 'Named task dialog missing from accessibility tree');
+    node.name?.value === 'Register task'), 'Named task dialog missing from accessibility tree');
 
   const focusableCount = await evaluate(`(() => {
     const dialog = document.querySelector('[role="dialog"]');

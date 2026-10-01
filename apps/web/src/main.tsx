@@ -109,7 +109,7 @@ function App() {
   useEffect(() => {
     const refresh = window.setInterval(() => {
       if (session?.authenticated)
-        void apiGet<PublicConfiguration>("/api/configuration", "License status could not be refreshed.")
+        void apiGet<PublicConfiguration>("/api/configuration", translate(baseLanguage, "licenseRefreshFailed"))
           .then(setConfiguration)
           .catch(() => undefined);
     }, 60_000);
@@ -126,7 +126,7 @@ function App() {
   }, [baseLanguage]);
 
   if (session === null || loginConfiguration === null)
-    return <LocalizationProvider language={displayLanguage}><div className="login-page">Loading…</div></LocalizationProvider>;
+    return <LocalizationProvider language={displayLanguage}><div className="login-page">{translate(baseLanguage, "loading")}</div></LocalizationProvider>;
   const brandedStyle = {
     "--brand": branding.primaryColor,
     "--accent": branding.accentColor,
@@ -145,7 +145,7 @@ function App() {
         {branding.customCss && <style id="customer-css-overrides">{branding.customCss}</style>}
         <LoginPage
           onSignedIn={(nextSession) => {
-            void apiGet<PublicConfiguration>("/api/configuration", "Configuration could not be loaded.")
+            void apiGet<PublicConfiguration>("/api/configuration", translate(baseLanguage, "configurationLoadFailed"))
               .then(setConfiguration)
               .catch(() => setConfigurationError(true));
             warmAuthenticatedExperience(nextSession);
@@ -181,12 +181,12 @@ function App() {
 
   if (configuration === null)
     return <LocalizationProvider language={displayLanguage}><div className="login-page">{configurationError
-      ? <div><p>Configuration could not be loaded.</p><button type="button" onClick={() => {
+      ? <div><p>{translate(baseLanguage, "configurationLoadFailed")}</p><button type="button" onClick={() => {
           setConfigurationError(false);
-          void apiGet<PublicConfiguration>("/api/configuration", "Configuration could not be loaded.")
+          void apiGet<PublicConfiguration>("/api/configuration", translate(baseLanguage, "configurationLoadFailed"))
             .then(setConfiguration).catch(() => setConfigurationError(true));
-        }}>Try again</button></div>
-      : "Loading configuration…"}</div></LocalizationProvider>;
+        }}>{translate(baseLanguage, "tryAgain")}</button></div>
+      : translate(baseLanguage, "loadingConfiguration")}</div></LocalizationProvider>;
 
   function navigateTo(item: AppPage) {
     if (item === activeItem && !appLocation.siteId && !appLocation.itemId && !appLocation.runId && !appLocation.reportId) return;
@@ -258,7 +258,7 @@ function App() {
         version={configuration.version}
         edition={configuration.edition}
       >
-        <Suspense fallback={<div className="page"><p className="status-message">Loading page…</p></div>}>
+        <Suspense fallback={<div className="page"><p className="status-message">{translate(baseLanguage, "loadingPage")}</p></div>}>
         <AppContent
           effectiveItem={effectiveItem}
           session={session}
