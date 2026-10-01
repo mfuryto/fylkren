@@ -19,7 +19,7 @@ internal static class RecipientAddressPolicy
         return targetInstanceId == localInstanceId ? null : Results.Conflict(new
         {
             error = "federated_recipient_not_routable",
-            message = "Mottakersiten tilhører en annen Fylkren-instans. Federert sending er ikke tilgjengelig ennå."
+            message = "The recipient site belongs to another Fylkren instance. Federated delivery is not available yet."
         });
     }
 }

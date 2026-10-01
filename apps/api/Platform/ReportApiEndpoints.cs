@@ -28,13 +28,13 @@ public static class ReportApiEndpoints
         if (!TryGetMachineId(context.User, out var machineId)) return Results.Unauthorized();
         if (RequestQueryPolicy.Validate(page, search, pageSize) is { } queryError) return queryError;
         if (year is < 1900 or > 9999)
-            return Validation("year", "År må være mellom 1900 og 9999.");
+            return Validation("year", "The year must be between 1900 and 9999.");
         var grant = await FindGrant(machineId, siteId, unitId, db, ct);
         if (grant is null)
         {
             return Results.Problem(
                 statusCode: StatusCodes.Status403Forbidden,
-                title: "API-klienten har ikke rapporttilgang til dette arbeidsnivået.");
+                title: "The API client does not have report access to this work level.");
         }
 
         var query = db.WorkItems.AsNoTracking().Where(item =>

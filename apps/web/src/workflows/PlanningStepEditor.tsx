@@ -60,7 +60,7 @@ export function PlanningStepEditor({
     <>
       {run.item.decisionNote && (
         <section className="planning-correction" role="note">
-          <strong>Korrigeringer fra leder</strong>
+          <strong>Corrections from manager</strong>
           <p>{run.item.decisionNote}</p>
         </section>
       )}
@@ -78,7 +78,7 @@ export function PlanningStepEditor({
       </nav>
       <section className="workflow-step-editor">
         <h3>{step.name}</h3>
-        {step.isOptional && <span className="muted">Valgfritt steg</span>}
+        {step.isOptional && <span className="muted">Optional step</span>}
         <PlanningRfiLog runId={run.id} entries={run.rfi ?? []} onReload={onReload} onError={onError} />
         {step.hasTimeline && run.timelineStartedOn && (
           <WorkflowTimeline
@@ -144,7 +144,7 @@ export function PlanningStepEditor({
               type="button"
               onClick={() => void onNavigate(run.currentStep + 1)}
             >
-              Neste steg
+              Next step
             </button>
           )}
         </div>
@@ -159,19 +159,19 @@ export function PlanningStepEditor({
             >
               <option value="low">Lav</option>
               <option value="normal">Normal</option>
-              <option value="high">Høy</option>
+              <option value="high">High</option>
               <option value="critical">Kritisk</option>
             </select>
           </div>
           <div className="field">
-            <label>Foreslått frist</label>
+            <label>Proposed due date</label>
             <input
               type="date"
               value={plan.dueAt}
               onChange={(event) => onPlanChange({ dueAt: event.target.value })}
             />
           </div>
-          <button className="primary-button">Send planen til godkjenning</button>
+          <button className="primary-button">Submit the plan for approval</button>
         </form>
       )}
     </>

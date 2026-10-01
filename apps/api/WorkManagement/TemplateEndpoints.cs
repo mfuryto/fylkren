@@ -9,8 +9,7 @@ namespace Fylkren.Api.WorkManagement;
 
 public static class TemplateEndpoints
 {
-    private const string DefaultFinalReportTemplate = "# Sammendrag\n\n# Gjennomføring\n\n# Konklusjon";
-    private const string LegacyFinalReportTemplate = "## Sammendrag\n\n## Gjennomføring\n\n## Konklusjon";
+    private const string DefaultFinalReportTemplate = "# Summary\n\n# Execution\n\n# Conclusion";
 
     public static IEndpointRouteBuilder MapTemplateEndpoints(this IEndpointRouteBuilder endpoints)
     {
@@ -62,7 +61,7 @@ public static class TemplateEndpoints
         if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest();
         if (!PersonId(user, out var personId) || !await IsSiteManager(siteId, personId, db, ct)) return Results.Forbid();
         var content = request.Content?.Trim();
-        if (content?.Length > 20000) return Results.ValidationProblem(new Dictionary<string, string[]> { ["content"] = ["Sluttrapportmalen kan være maksimalt 20 000 tegn."] });
+        if (content?.Length > 20000) return Results.ValidationProblem(new Dictionary<string, string[]> { ["content"] = ["The final report template can contain at most 20,000 characters."] });
         var site = await db.Sites.SingleOrDefaultAsync(x => x.Id == siteId && x.IsActive, ct);
         if (site is null) return Results.NotFound();
         site.UpdateFinalReportTemplate(content);
@@ -75,8 +74,8 @@ public static class TemplateEndpoints
     {
         if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest();
         if (!PersonId(user, out var personId) || !await CanOwn(siteId, request.OwnerUnitId, personId, db, ct)) return Results.Forbid();
-        if (!Valid(request)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["template"] = ["Kontroller navn og innhold."] });
-        if (await db.WorkflowStepTemplates.AnyAsync(x => x.SiteId == siteId && x.OwnerUnitId == request.OwnerUnitId && x.IsActive && x.Name.ToLower() == request.Name.Trim().ToLower(), ct)) return Results.Conflict(new { error = "En aktiv mal med samme navn finnes allerede på nivået." });
+        if (!Valid(request)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["template"] = ["Check the name and content."] });
+        if (await db.WorkflowStepTemplates.AnyAsync(x => x.SiteId == siteId && x.OwnerUnitId == request.OwnerUnitId && x.IsActive && x.Name.ToLower() == request.Name.Trim().ToLower(), ct)) return Results.Conflict(new { error = "An active template with the same name already exists at this level." });
         var template = new WorkflowStepTemplate(Guid.NewGuid(), siteId, request.OwnerUnitId, request.Name, request.Content, DateTimeOffset.UtcNow);
         db.Add(template);
         db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId,
@@ -90,8 +89,8 @@ public static class TemplateEndpoints
         var template = await db.WorkflowStepTemplates.SingleOrDefaultAsync(x => x.Id == id && x.IsActive, ct);
         if (template is null) return Results.NotFound();
         if (!PersonId(user, out var personId) || request.OwnerUnitId != template.OwnerUnitId || !await CanOwn(template.SiteId, template.OwnerUnitId, personId, db, ct)) return Results.Forbid();
-        if (!Valid(request)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["template"] = ["Kontroller navn og innhold."] });
-        if (await db.WorkflowStepTemplates.AnyAsync(x => x.SiteId == template.SiteId && x.OwnerUnitId == template.OwnerUnitId && x.IsActive && x.Id != id && x.Name.ToLower() == request.Name.Trim().ToLower(), ct)) return Results.Conflict(new { error = "En aktiv mal med samme navn finnes allerede på nivået." });
+        if (!Valid(request)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["template"] = ["Check the name and content."] });
+        if (await db.WorkflowStepTemplates.AnyAsync(x => x.SiteId == template.SiteId && x.OwnerUnitId == template.OwnerUnitId && x.IsActive && x.Id != id && x.Name.ToLower() == request.Name.Trim().ToLower(), ct)) return Results.Conflict(new { error = "An active template with the same name already exists at this level." });
         template.Update(request.Name, request.Content);
         db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), template.SiteId, personId,
             "workflow-template.updated", "workflow-template", template.Id, DateTimeOffset.UtcNow));
@@ -114,7 +113,7 @@ public static class TemplateEndpoints
     private static Task<bool> IsSiteManager(Guid siteId, Guid personId, FylkrenDbContext db, CancellationToken ct) => db.SiteManagerAssignments.AnyAsync(x => x.SiteId == siteId && x.PersonId == personId && x.IsActive && x.Site.IsActive, ct);
 
     private static string FinalReportTemplateContent(string? content) =>
-        string.IsNullOrWhiteSpace(content) || content.Trim() == LegacyFinalReportTemplate
+        string.IsNullOrWhiteSpace(content)
             ? DefaultFinalReportTemplate
             : content;
 

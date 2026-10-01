@@ -16,7 +16,7 @@ internal static class WorkRequestRecipientEndpoints
         {
             if (!WorkItemPolicy.PersonId(user, out var personId) || !await WorkItemPolicy.CanLeadAnyLevel(siteId, personId, db, ct) && !await OrganizationAuthorization.CanPlanInSite(siteId, personId, db, ct)) return Results.Problem(statusCode: 403);
             var term = search?.Trim() ?? string.Empty;
-            if (term.Length > RequestQueryPolicy.MaximumSearchLength) return Results.ValidationProblem(new Dictionary<string, string[]> { ["search"] = [$"Søket kan ikke være lengre enn {RequestQueryPolicy.MaximumSearchLength} tegn."] });
+            if (term.Length > RequestQueryPolicy.MaximumSearchLength) return Results.ValidationProblem(new Dictionary<string, string[]> { ["search"] = [$"The search cannot exceed {RequestQueryPolicy.MaximumSearchLength} characters."] });
             if (term.Length < 2) return Results.Ok(Array.Empty<object>());
             var instanceId = await db.InstanceIdentities.AsNoTracking().Where(x => x.Key == 1).Select(x => x.InstanceId).SingleAsync(ct);
             var pattern = RequestQueryPolicy.LikePattern(term);

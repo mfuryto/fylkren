@@ -56,7 +56,7 @@ internal static class WorkItemLookupEndpoints
         var type = await db.WorkItemTypes.SingleOrDefaultAsync(value => value.Id == typeId && value.SiteId == siteId, ct);
         if (type is null) return Results.NotFound();
         if (type.IsSystemManaged)
-            return Results.Conflict(new { error = "Systemstyrte oppgavetyper kan ikke endres eller deaktiveres." });
+            return Results.Conflict(new { error = "System-managed task types cannot be changed or disabled." });
         var name = NormalizeName(request.Name);
         if (!ValidName(name) || await db.WorkItemTypes.AnyAsync(value =>
                 value.SiteId == siteId && value.Id != typeId && value.NormalizedName == name.ToUpperInvariant(), ct))
@@ -132,7 +132,7 @@ internal static class WorkItemLookupEndpoints
         db.SiteManagerAssignments.AnyAsync(assignment => assignment.SiteId == siteId && assignment.PersonId == personId && assignment.IsActive && assignment.Site.IsActive && assignment.Person.IsActive, ct);
     private static string NormalizeName(string? name) => (name ?? "").Trim();
     private static bool ValidName(string name) => name.Length is >= 2 and <= 100;
-    private static IResult InvalidName() => Results.ValidationProblem(new Dictionary<string, string[]> { ["name"] = ["Navnet må være unikt og mellom 2 og 100 tegn."] });
+    private static IResult InvalidName() => Results.ValidationProblem(new Dictionary<string, string[]> { ["name"] = ["The name must be unique and between 2 and 100 characters."] });
     private static bool LookupKind(string kind) => kind is "source-type" or "sender";
 
     private sealed record TypeRequest(string? Name, bool IsActive = true);

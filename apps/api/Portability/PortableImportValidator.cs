@@ -17,30 +17,30 @@ internal static class PortableImportValidator
         {
             using var archive = new ZipArchive(packageStream, ZipArchiveMode.Read, true);
             if (archive.Entries.Count > PortableExportPackage.MaximumEntries)
-                errors.Add($"Pakken har flere enn {PortableExportPackage.MaximumEntries} filer.");
+                errors.Add($"The package contains more than {PortableExportPackage.MaximumEntries} files.");
             var totalBytes = archive.Entries.Sum(value => value.Length);
             if (totalBytes > PortableExportPackage.MaximumPackageBytes)
-                errors.Add("Pakkens utpakkede størrelse overskrider 512 MiB.");
+                errors.Add("The package's extracted size exceeds 512 MiB.");
             foreach (var entry in archive.Entries)
             {
                 if (entry.FullName.Contains("..", StringComparison.Ordinal) || entry.FullName.StartsWith('/') || entry.FullName.StartsWith('\\'))
-                    errors.Add($"Ugyldig filsti i pakken: {entry.FullName}");
+                    errors.Add($"Invalid file path in the package: {entry.FullName}");
             }
             foreach (var duplicate in archive.Entries.GroupBy(value => value.FullName, StringComparer.Ordinal).Where(group => group.Count() > 1))
                 errors.Add($"ZIP-pakken inneholder duplisert filsti: {duplicate.Key}");
 
             var manifestEntry = archive.GetEntry("manifest.json");
             if (manifestEntry is null)
-                return Invalid(errors, "Pakken mangler manifest.json.");
+                return Invalid(errors, "The package is missing manifest.json.");
             PortableExportManifest? manifest;
             await using (var manifestStream = manifestEntry.Open())
                 manifest = await JsonSerializer.DeserializeAsync<PortableExportManifest>(manifestStream, new JsonSerializerOptions(JsonSerializerDefaults.Web), cancellationToken);
-            if (manifest is null) return Invalid(errors, "Manifestet er ugyldig.");
-            if (manifest.Format != PortableExportPackage.Format) errors.Add("Pakken er ikke et Fylkren-portabilitetsformat.");
-            if (manifest.FormatVersion != PortableExportPackage.FormatVersion) errors.Add($"Formatversjon {manifest.FormatVersion} støttes ikke av denne installasjonen.");
-            if (manifest.Scope != "site") errors.Add("Bare site-avgrensede pakker støttes.");
-            if (manifest.Site.Id != expectedSiteId) errors.Add("Pakken tilhører en annen site. Import på tvers av sitegrenser er blokkert.");
-            if (!string.Equals(manifest.IntegrityAlgorithm, "SHA-256", StringComparison.OrdinalIgnoreCase)) errors.Add("Pakken bruker en ukjent integritetsalgoritme.");
+            if (manifest is null) return Invalid(errors, "The manifest is invalid.");
+            if (manifest.Format != PortableExportPackage.Format) errors.Add("The package is not a Fylkren portability format.");
+            if (manifest.FormatVersion != PortableExportPackage.FormatVersion) errors.Add($"Format version {manifest.FormatVersion} is not supported by this installation.");
+            if (manifest.Scope != "site") errors.Add("Only site-scoped packages are supported.");
+            if (manifest.Site.Id != expectedSiteId) errors.Add("The package belongs to another site. Import across site boundaries is blocked.");
+            if (!string.Equals(manifest.IntegrityAlgorithm, "SHA-256", StringComparison.OrdinalIgnoreCase)) errors.Add("The package uses an unknown integrity algorithm.");
 
             var declaredPaths = new HashSet<string>(StringComparer.Ordinal);
             var inspections = new Dictionary<string, DatasetInspection>(StringComparer.Ordinal);
@@ -49,16 +49,16 @@ internal static class PortableImportValidator
                 if (!declaredPaths.Add(dataset.Path)) { errors.Add($"Duplisert fil i manifestet: {dataset.Path}"); continue; }
                 if (!dataset.Path.StartsWith("data/", StringComparison.Ordinal) || !dataset.Path.EndsWith(".jsonl", StringComparison.Ordinal))
                 {
-                    errors.Add($"Ugyldig datasettsti: {dataset.Path}");
+                    errors.Add($"Invalid dataset path: {dataset.Path}");
                     continue;
                 }
                 var entry = archive.GetEntry(dataset.Path);
-                if (entry is null) { errors.Add($"Mangler datasett: {dataset.Path}"); continue; }
-                if (entry.Length != dataset.Bytes) errors.Add($"Filstørrelsen stemmer ikke for {dataset.Path}.");
+                if (entry is null) { errors.Add($"Missing dataset: {dataset.Path}"); continue; }
+                if (entry.Length != dataset.Bytes) errors.Add($"The file size does not match for {dataset.Path}.");
                 var result = await InspectJsonLines(entry, expectedSiteId, cancellationToken);
                 inspections[dataset.Name] = result;
-                if (!string.Equals(result.Hash, dataset.Sha256, StringComparison.OrdinalIgnoreCase)) errors.Add($"Integritetskontrollen feilet for {dataset.Path}.");
-                if (result.Count != dataset.RecordCount) errors.Add($"Antall poster stemmer ikke for {dataset.Path}.");
+                if (!string.Equals(result.Hash, dataset.Sha256, StringComparison.OrdinalIgnoreCase)) errors.Add($"The integrity check failed for {dataset.Path}.");
+                if (result.Count != dataset.RecordCount) errors.Add($"The record count does not match for {dataset.Path}.");
                 errors.AddRange(result.Errors.Select(value => $"{dataset.Path}: {value}"));
             }
             ValidateDatasetStructure(inspections, expectedSiteId, errors);
@@ -66,27 +66,27 @@ internal static class PortableImportValidator
             foreach (var attachment in manifest.Attachments)
             {
                 if (!declaredPaths.Add(attachment.Path)) { errors.Add($"Duplisert fil i manifestet: {attachment.Path}"); continue; }
-                if (!attachment.Path.StartsWith("attachments/", StringComparison.Ordinal)) { errors.Add($"Ugyldig vedleggssti: {attachment.Path}"); continue; }
+                if (!attachment.Path.StartsWith("attachments/", StringComparison.Ordinal)) { errors.Add($"Invalid attachment path: {attachment.Path}"); continue; }
                 var entry = archive.GetEntry(attachment.Path);
-                if (entry is null) { errors.Add($"Mangler vedlegg: {attachment.Path}"); continue; }
+                if (entry is null) { errors.Add($"Missing attachment: {attachment.Path}"); continue; }
                 await using var input = entry.Open();
                 var hash = Convert.ToHexStringLower(await SHA256.HashDataAsync(input, cancellationToken));
-                if (!string.Equals(hash, attachment.Sha256, StringComparison.OrdinalIgnoreCase)) errors.Add($"Integritetskontrollen feilet for {attachment.Path}.");
-                if (entry.Length != attachment.Bytes) errors.Add($"Filstørrelsen stemmer ikke for {attachment.Path}.");
+                if (!string.Equals(hash, attachment.Sha256, StringComparison.OrdinalIgnoreCase)) errors.Add($"The integrity check failed for {attachment.Path}.");
+                if (entry.Length != attachment.Bytes) errors.Add($"The file size does not match for {attachment.Path}.");
             }
 
             var undeclared = archive.Entries.Where(value => value.FullName is not "manifest.json" and not "README.txt" && !declaredPaths.Contains(value.FullName)).Select(value => value.FullName).ToArray();
-            if (undeclared.Length > 0) warnings.Add($"Pakken inneholder {undeclared.Length} filer som ikke er deklarert i manifestet.");
-            warnings.Add("Valideringen endrer ingen data. En senere, eksplisitt migreringsoperasjon må håndtere identitetskoblinger og eventuelle ID-konflikter.");
+            if (undeclared.Length > 0) warnings.Add($"The package contains {undeclared.Length} files that are not declared in the manifest.");
+            warnings.Add("Validation does not change any data. A later explicit migration operation must handle identity links and any ID conflicts.");
             return new PortablePackageValidationResult(errors.Count == 0, manifest.Format, manifest.FormatVersion, manifest.ExportId, manifest.Site.Id, manifest.Site.Name, manifest.Datasets.Count, manifest.Attachments.Count, totalBytes, errors, warnings);
         }
         catch (InvalidDataException)
         {
-            return Invalid(errors, "Filen er ikke en gyldig ZIP-pakke.");
+            return Invalid(errors, "The file is not a valid ZIP package.");
         }
         catch (JsonException)
         {
-            return Invalid(errors, "Pakken inneholder ugyldig JSON.");
+            return Invalid(errors, "The package contains invalid JSON.");
         }
     }
 
@@ -105,19 +105,19 @@ internal static class PortableImportValidator
         {
             if (string.IsNullOrWhiteSpace(line)) continue;
             count++;
-            if (count > 1_000_000) { errors.Add("Datasettet har flere enn én million poster."); break; }
+            if (count > 1_000_000) { errors.Add("The dataset contains more than one million records."); break; }
             using var document = JsonDocument.Parse(line);
-            if (document.RootElement.ValueKind != JsonValueKind.Object) { errors.Add($"Post {count} er ikke et JSON-objekt."); continue; }
+            if (document.RootElement.ValueKind != JsonValueKind.Object) { errors.Add($"Record {count} is not a JSON object."); continue; }
             if (document.RootElement.TryGetProperty("id", out var idValue))
             {
-                if (idValue.ValueKind != JsonValueKind.String || !Guid.TryParse(idValue.GetString(), out var id)) errors.Add($"Post {count} har ugyldig ID.");
+                if (idValue.ValueKind != JsonValueKind.String || !Guid.TryParse(idValue.GetString(), out var id)) errors.Add($"Record {count} has an invalid ID.");
                 else if (!ids.Add(id)) errors.Add($"Duplisert ID {id}.");
             }
             if (document.RootElement.TryGetProperty("site_id", out var siteValue) && siteValue.ValueKind == JsonValueKind.String && Guid.TryParse(siteValue.GetString(), out var siteId) && siteId != expectedSiteId)
-                errors.Add($"Post {count} peker på site {siteId} utenfor importgrensen.");
+                errors.Add($"Record {count} points to site {siteId} outside the import boundary.");
             foreach (var property in document.RootElement.EnumerateObject().Where(value => value.Name.EndsWith("_id", StringComparison.Ordinal) && value.Value.ValueKind == JsonValueKind.String))
             {
-                if (!Guid.TryParse(property.Value.GetString(), out var reference)) { errors.Add($"Post {count} har ugyldig referanse i {property.Name}."); continue; }
+                if (!Guid.TryParse(property.Value.GetString(), out var reference)) { errors.Add($"Record {count} has an invalid reference in {property.Name}."); continue; }
                 if (!references.TryGetValue(property.Name, out var values)) references[property.Name] = values = [];
                 values.Add(reference);
             }
@@ -128,8 +128,8 @@ internal static class PortableImportValidator
     private static void ValidateDatasetStructure(Dictionary<string, DatasetInspection> values, Guid expectedSiteId, List<string> errors)
     {
         string[] required = ["site", "organization-units", "site-memberships", "people", "work-items", "work-item-history", "workflow-definitions", "workflow-steps", "workflow-runs", "execution-runs", "decisions", "decision-revisions", "risks", "risk-revisions", "audit-events"];
-        foreach (var name in required.Where(name => !values.ContainsKey(name))) errors.Add($"Obligatorisk datasett mangler: {name}.");
-        if (values.TryGetValue("site", out var site) && (site.Count != 1 || !site.Ids.Contains(expectedSiteId))) errors.Add("Site-datasettet må inneholde nøyaktig den siten pakken gjelder.");
+        foreach (var name in required.Where(name => !values.ContainsKey(name))) errors.Add($"Required dataset is missing: {name}.");
+        if (values.TryGetValue("site", out var site) && (site.Count != 1 || !site.Ids.Contains(expectedSiteId))) errors.Add("The site dataset must contain exactly the site covered by the package.");
 
         Reference(values, errors, "organization-unit-memberships", "organization_unit_id", "organization-units");
         Reference(values, errors, "organization-unit-memberships", "person_id", "people");
@@ -192,7 +192,7 @@ internal static class PortableImportValidator
     {
         if (!values.TryGetValue(sourceName, out var source) || !values.TryGetValue(targetName, out var target) || !source.References.TryGetValue(property, out var references)) return;
         var missing = references.Where(value => !target.Ids.Contains(value)).Distinct().Take(5).ToArray();
-        if (missing.Length > 0) errors.Add($"{sourceName}.{property} inneholder referanser som mangler i {targetName}: {string.Join(", ", missing)}.");
+        if (missing.Length > 0) errors.Add($"{sourceName}.{property} contains references missing from {targetName}: {string.Join(", ", missing)}.");
     }
 
     private static PortablePackageValidationResult Invalid(List<string> errors, string error)

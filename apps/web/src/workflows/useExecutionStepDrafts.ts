@@ -25,7 +25,7 @@ export function useExecutionStepDrafts({ items, personId, onError }: UseExecutio
           .filter(event => event.date && event.description.trim())
           .map(event => ({ date: event.date, description: event.description })),
       },
-      "Utførelsessteget kunne ikke lagres.",
+      "The execution step could not be saved.",
     ));
   }
 
@@ -33,7 +33,7 @@ export function useExecutionStepDrafts({ items, personId, onError }: UseExecutio
   useWorkflowAutosave({
     revision,
     enabled: Object.keys(drafts).length > 0 || Object.keys(timelineDrafts).length > 0,
-    fallbackError: "Endringene i utførelsessteget kunne ikke lagres automatisk.",
+    fallbackError: "Changes to the execution step could not be saved automatically.",
     onError,
     save: async () => {
       const dirtyStepIds = new Set([...Object.keys(drafts), ...Object.keys(timelineDrafts)]);

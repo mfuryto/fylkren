@@ -32,22 +32,22 @@ export function ExecutionDownwardAllocationDialog({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   return (
-    <Modal title="Fordel oppdraget videre" onClose={onClose}>
+    <Modal title="Route the task onward" onClose={onClose}>
       <form className="stacked-form" onSubmit={onSubmit}>
         <p><strong>{draft.item.title}</strong></p>
-        <p className="status-message">Utførelsen på dette nivået avsluttes. Dokumentasjon og historikk beholdes, og underenheten mottar et nytt deloppdrag.</p>
+        <p className="status-message">Execution at this level is closed. Documentation and history are retained, and the subordinate unit receives a new subtask.</p>
         <div className="field">
-          <label htmlFor="execution-downward-unit">Mottakende underenhet</label>
+          <label htmlFor="execution-downward-unit">Receiving subordinate unit</label>
           <select id="execution-downward-unit" value={draft.unitId} onChange={(event) => onChange({ ...draft, unitId: event.target.value })}>
             {units.map((unit) => <option key={unit.id} value={unit.id}>{unit.name}</option>)}
           </select>
         </div>
         <div className="field">
-          <label htmlFor="execution-downward-instruction">Oppdragstekst til underenheten</label>
+          <label htmlFor="execution-downward-instruction">Task text for the subordinate unit</label>
           <textarea id="execution-downward-instruction" rows={6} maxLength={10000} value={draft.instruction} onChange={(event) => onChange({ ...draft, instruction: event.target.value })} />
         </div>
         <div className="modal-actions">
-          <button className="secondary-button" type="button" onClick={onClose}>Avbryt</button>
+          <button className="secondary-button" type="button" onClick={onClose}>Cancel</button>
           <button className="primary-button" disabled={!draft.unitId || draft.instruction.trim().length < 2}>Fordel videre</button>
         </div>
       </form>
@@ -67,7 +67,7 @@ export function ExecutionReassignmentDialog({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   return (
-    <Modal title="Omfordel utførelse" onClose={onClose}>
+    <Modal title="Reassign execution" onClose={onClose}>
       <form className="stacked-form" onSubmit={onSubmit}>
         <p><strong>{draft.item.title}</strong></p>
         <div className="field">
@@ -76,9 +76,9 @@ export function ExecutionReassignmentDialog({
             {draft.candidates.map((candidate) => <option key={candidate.personId} value={candidate.personId}>{candidate.displayName}</option>)}
           </select>
         </div>
-        <p className="muted modal-note">Gjennomførte steg, dokumentasjon, tidslinje og historikk beholdes.</p>
+        <p className="muted modal-note">Completed steps, documentation, timeline, and history are retained.</p>
         <div className="modal-actions">
-          <button className="secondary-button" type="button" onClick={onClose}>Avbryt</button>
+          <button className="secondary-button" type="button" onClick={onClose}>Cancel</button>
           <button className="primary-button" disabled={!draft.personId}>Omfordel</button>
         </div>
       </form>
@@ -88,7 +88,7 @@ export function ExecutionReassignmentDialog({
 
 export function ExecutionPlanDialog({ details, onClose }: { details: PlanningContextDetails; onClose: () => void }) {
   return (
-    <Modal title="Plan for oppdraget" onClose={onClose}>
+    <Modal title="Plan for the task" onClose={onClose}>
       {details.plan ? (
         <div className="plan-presentation">
           {details.plan.steps.map((step) => (
@@ -99,7 +99,7 @@ export function ExecutionPlanDialog({ details, onClose }: { details: PlanningCon
             </section>
           ))}
         </div>
-      ) : <p className="muted">Oppdraget har ingen plan.</p>}
+      ) : <p className="muted">The task has no plan.</p>}
     </Modal>
   );
 }

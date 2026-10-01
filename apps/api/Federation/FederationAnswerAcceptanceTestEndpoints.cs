@@ -44,7 +44,7 @@ internal static class FederationAnswerAcceptanceTestEndpoints
         work.AcceptFederatedOfficialReport(link.OfficialAnswer,
             link.OfficialAnswerClassification, link.OfficialAnswerApprovedAt.Value, actor, now);
         await FormalApprovalService.Approve(db, siteId, "final_report", work.Id, work.Id,
-            $"Svar på anmodning: {work.Title}", new
+            $"Response to request: {work.Title}", new
             {
                 task = new { work.Id, work.Title, work.Description, work.AssignedUnitId,
                     work.CreatedAt, work.DueAt },

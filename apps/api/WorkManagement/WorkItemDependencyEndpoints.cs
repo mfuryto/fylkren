@@ -48,11 +48,11 @@ internal static class WorkItemDependencyEndpoints
         if (dependent is null) return Results.NotFound();
         if (!await CanManageItem(dependent, personId, db, ct)) return Results.Problem(statusCode: 403);
         if (dependent.Status is "completed" or "cancelled" or "rejected" or "reassigned")
-            return Results.Conflict(new { error = "Avhengigheter kan ikke endres på et avsluttet oppdrag." });
+            return Results.Conflict(new { error = "Dependencies cannot be changed on a closed task." });
         if (dependent.Status == "registered")
-            return Results.Conflict(new { error = "Ta oppdraget til vurdering før du registrerer avhengigheter." });
+            return Results.Conflict(new { error = "Move the task to review before registering dependencies." });
         if (dependent.Status is "planning" or "execution" or "in_review")
-            return Results.Conflict(new { error = "Sett oppdraget på vent før du registrerer avhengigheter." });
+            return Results.Conflict(new { error = "Put the task on hold before registering dependencies." });
 
         var term = (search ?? string.Empty).Trim().ToLower();
         if (term.Length < 2) return Results.Ok(Array.Empty<object>());
@@ -76,23 +76,23 @@ internal static class WorkItemDependencyEndpoints
         if (dependent is null) return Results.NotFound();
         if (!await CanManageItem(dependent, personId, db, ct)) return Results.Problem(statusCode: 403);
         if (dependent.Status is "completed" or "cancelled" or "rejected" or "reassigned")
-            return Results.Conflict(new { error = "Avhengigheter kan ikke endres på et avsluttet oppdrag." });
+            return Results.Conflict(new { error = "Dependencies cannot be changed on a closed task." });
         if (dependent.Status == "registered")
-            return Results.Conflict(new { error = "Ta oppdraget til vurdering før du registrerer avhengigheter." });
+            return Results.Conflict(new { error = "Move the task to review before registering dependencies." });
         if (dependent.Status is "planning" or "execution" or "in_review")
-            return Results.Conflict(new { error = "Sett oppdraget på vent før du registrerer avhengigheter." });
+            return Results.Conflict(new { error = "Put the task on hold before registering dependencies." });
         var type = string.IsNullOrWhiteSpace(request.Type) ? WorkItemDependency.FinishToStart : request.Type.Trim().ToLowerInvariant();
         if (type != WorkItemDependency.FinishToStart)
-            return Results.ValidationProblem(new Dictionary<string, string[]> { ["type"] = ["Bare fullfør-til-start-avhengighet støttes foreløpig."] });
+            return Results.ValidationProblem(new Dictionary<string, string[]> { ["type"] = ["Only finish-to-start dependencies are currently supported."] });
         if (request.PredecessorWorkItemId == itemId)
-            return Results.Conflict(new { error = "Et oppdrag kan ikke avhenge av seg selv." });
+            return Results.Conflict(new { error = "A task cannot depend on itself." });
         var visible = await WorkItemVisibility.QueryForPerson(siteId, personId, DateTimeOffset.UtcNow, db, ct);
         if (!await visible.AnyAsync(value => value.Id == request.PredecessorWorkItemId && value.SiteId == siteId, ct))
-            return Results.ValidationProblem(new Dictionary<string, string[]> { ["predecessorWorkItemId"] = ["Velg et eksisterende oppdrag i samme site."] });
+            return Results.ValidationProblem(new Dictionary<string, string[]> { ["predecessorWorkItemId"] = ["Select an existing task in the same site."] });
         if (await db.WorkItemDependencies.AnyAsync(value => value.DependentWorkItemId == itemId && value.PredecessorWorkItemId == request.PredecessorWorkItemId && value.Type == type, ct))
-            return Results.Conflict(new { error = "Denne avhengigheten finnes allerede." });
+            return Results.Conflict(new { error = "This dependency already exists." });
         if (await WouldCreateCycle(siteId, request.PredecessorWorkItemId, itemId, db, ct))
-            return Results.Conflict(new { error = "Avhengigheten kan ikke opprettes fordi den ville laget en sirkel mellom oppdragene." });
+            return Results.Conflict(new { error = "The dependency cannot be created because it would create a cycle between tasks." });
 
         var now = DateTimeOffset.UtcNow;
         var dependency = new WorkItemDependency(Guid.NewGuid(), siteId, request.PredecessorWorkItemId, itemId, type, personId, now);
@@ -110,7 +110,7 @@ internal static class WorkItemDependencyEndpoints
         if (dependent is null) return Results.NotFound();
         if (!await CanManageItem(dependent, personId, db, ct)) return Results.Problem(statusCode: 403);
         if (dependent.Status is "completed" or "cancelled" or "rejected" or "reassigned")
-            return Results.Conflict(new { error = "Avhengigheter kan ikke endres på et avsluttet oppdrag." });
+            return Results.Conflict(new { error = "Dependencies cannot be changed on a closed task." });
         var dependency = await db.WorkItemDependencies.SingleOrDefaultAsync(value => value.Id == dependencyId && value.SiteId == siteId && value.DependentWorkItemId == itemId, ct);
         if (dependency is null) return Results.NotFound();
         db.WorkItemDependencies.Remove(dependency);

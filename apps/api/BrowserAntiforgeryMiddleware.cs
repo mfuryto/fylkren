@@ -12,7 +12,7 @@ internal sealed class BrowserAntiforgeryMiddleware(RequestDelegate next)
             context.Response.StatusCode = StatusCodes.Status400BadRequest;
             await context.Response.WriteAsJsonAsync(new
             {
-                error = "Sikkerhetskontrollen utløp. Last siden på nytt og prøv igjen."
+                error = "The security check expired. Reload the page and try again."
             });
             return;
         }

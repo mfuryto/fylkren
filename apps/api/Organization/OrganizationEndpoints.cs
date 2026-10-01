@@ -32,7 +32,7 @@ public static class OrganizationEndpoints
 
             var name = (request.Name ?? "").Trim();
             if (name.Length is < 2 or > 200)
-                return Results.ValidationProblem(new Dictionary<string, string[]> { ["name"] = ["Navnet må være mellom 2 og 200 tegn."] });
+                return Results.ValidationProblem(new Dictionary<string, string[]> { ["name"] = ["The name must be between 2 and 200 characters."] });
 
             var normalizedName = name.ToUpperInvariant();
             if (await database.Sites.AnyAsync(site => site.NormalizedName == normalizedName, cancellationToken))
@@ -46,7 +46,7 @@ public static class OrganizationEndpoints
 
             var now = DateTimeOffset.UtcNow;
             var site = new Site(Guid.NewGuid(), name, now);
-            if (!ValidOverviewDesign(request.OverviewDesign)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["overviewDesign"] = ["Velg en gyldig oversiktsprofil."] });
+            if (!ValidOverviewDesign(request.OverviewDesign)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["overviewDesign"] = ["Select a valid overview profile."] });
             site.UpdateOverviewDesign(request.OverviewDesign);
             var siteRoot = new OrganizationUnit(Guid.NewGuid(), site.Id, null, site.Name, false, now, true);
             database.Sites.Add(site);
@@ -66,20 +66,20 @@ public static class OrganizationEndpoints
             var site = await database.Sites.SingleOrDefaultAsync(value => value.Id == siteId, cancellationToken);
             if (site is null) return Results.NotFound();
             var name = (request.Name ?? "").Trim();
-            if (name.Length is < 2 or > 200) return Results.ValidationProblem(new Dictionary<string, string[]> { ["name"] = ["Navnet må være mellom 2 og 200 tegn."] });
-            if (!ValidOverviewDesign(request.OverviewDesign)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["overviewDesign"] = ["Velg en gyldig oversiktsprofil."] });
-            if (await database.Sites.AnyAsync(value => value.Id != siteId && value.NormalizedName == name.ToUpperInvariant(), cancellationToken)) return Results.Conflict(new { error = "En site med dette navnet finnes allerede." });
+            if (name.Length is < 2 or > 200) return Results.ValidationProblem(new Dictionary<string, string[]> { ["name"] = ["The name must be between 2 and 200 characters."] });
+            if (!ValidOverviewDesign(request.OverviewDesign)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["overviewDesign"] = ["Select a valid overview profile."] });
+            if (await database.Sites.AnyAsync(value => value.Id != siteId && value.NormalizedName == name.ToUpperInvariant(), cancellationToken)) return Results.Conflict(new { error = "A site with this name already exists." });
             Guid? parentSiteId = null;
             if (request.ParentOrganizationUnitId is { } placementId)
             {
                 var placement = await database.OrganizationUnits.Where(unit => unit.Id == placementId && unit.IsActive).Select(unit => new { unit.Id, unit.SiteId }).SingleOrDefaultAsync(cancellationToken);
-                if (placement is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["parentOrganizationUnitId"] = ["Organisatorisk festepunkt finnes ikke eller er deaktivert."] });
-                if (placement.SiteId == siteId) return Results.ValidationProblem(new Dictionary<string, string[]> { ["parentOrganizationUnitId"] = ["En site kan ikke plasseres i sin egen interne organisasjon."] });
+                if (placement is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["parentOrganizationUnitId"] = ["The organizational attachment point does not exist or is disabled."] });
+                if (placement.SiteId == siteId) return Results.ValidationProblem(new Dictionary<string, string[]> { ["parentOrganizationUnitId"] = ["A site cannot be placed within its own internal organization."] });
                 parentSiteId = placement.SiteId;
             }
             var parentMap = await database.Sites.Select(value => new { value.Id, ParentSiteId = value.ParentOrganizationUnit == null ? (Guid?)null : value.ParentOrganizationUnit.SiteId }).ToDictionaryAsync(value => value.Id, value => value.ParentSiteId, cancellationToken);
             var cursor = parentSiteId;
-            while (cursor is { } current) { if (current == siteId) return Results.ValidationProblem(new Dictionary<string, string[]> { ["parentOrganizationUnitId"] = ["Flyttingen ville opprettet en sirkel i site-hierarkiet."] }); cursor = parentMap.GetValueOrDefault(current); }
+            while (cursor is { } current) { if (current == siteId) return Results.ValidationProblem(new Dictionary<string, string[]> { ["parentOrganizationUnitId"] = ["The move would create a cycle in the site hierarchy."] }); cursor = parentMap.GetValueOrDefault(current); }
             await using var capacity = !site.IsActive && request.IsActive
                 ? await SiteCapacityPolicy.BeginAdditionAsync(database, license, cancellationToken)
                 : null;
@@ -103,9 +103,9 @@ public static class OrganizationEndpoints
             if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest(new { error = "Antiforgery token validation failed." });
             if (!Guid.TryParse(user.FindFirstValue("fylkren:person_id"), out var actorPersonId)) return Results.Problem(statusCode: 403);
             var site = await database.Sites.SingleOrDefaultAsync(value => value.Id == siteId, cancellationToken); if (site is null) return Results.NotFound();
-            if (!site.IsActive) return Results.Conflict(new { error = "Siten er allerede slettet." });
+            if (!site.IsActive) return Results.Conflict(new { error = "The site has already been deleted." });
             if (await SiteDeactivationService.HasActiveChildrenAsync(siteId, database, cancellationToken))
-                return Results.Conflict(new { error = "Siten har aktive underlagte sites. Flytt eller deaktiver disse først." });
+                return Results.Conflict(new { error = "The site has active subordinate sites. Move or disable them first." });
             var now = DateTimeOffset.UtcNow;
             await SiteDeactivationService.DeactivateAsync(site, database, now, cancellationToken);
             database.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, actorPersonId, "site.deactivated", "site", siteId, now));

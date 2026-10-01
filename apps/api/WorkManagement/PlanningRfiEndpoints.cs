@@ -48,7 +48,7 @@ internal static class PlanningRfiEndpoints
             if (entry is null) return Results.NotFound();
             var who = (request.Who ?? "").Trim(); var what = (request.What ?? "").Trim(); var answer = (request.Answer ?? "").Trim();
             if (who.Length > 320 || what.Length > 10000 || answer.Length > 10000)
-                return Results.ValidationProblem(new Dictionary<string, string[]> { ["rfi"] = ["Kontroller lengden på Hvem, Hva og Svar."] });
+                return Results.ValidationProblem(new Dictionary<string, string[]> { ["rfi"] = ["Check the length of Who, What, and Response."] });
             var now = DateTimeOffset.UtcNow;
             entry.Update(who, what, request.DueOn, request.Answered, answer, now);
             db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "planning.rfi-updated", "planning-rfi", entry.Id, now));

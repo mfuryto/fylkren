@@ -104,7 +104,7 @@ public static class AdministrationApiEndpoints
         if (!ValidIdempotencyKey(key))
         {
             return Problem(context, 400, "invalid_idempotency_key",
-                "Idempotency-Key må bestå av 8–128 tillatte tegn.");
+                "Idempotency-Key must contain 8–128 permitted characters.");
         }
 
         var name = request.Name?.Trim() ?? "";
@@ -124,7 +124,7 @@ public static class AdministrationApiEndpoints
         var normalizedName = name.ToUpperInvariant();
         if (await db.Sites.AnyAsync(x => x.NormalizedName == normalizedName, ct))
         {
-            return Problem(context, 409, "site_name_conflict", "En site med dette navnet finnes allerede.");
+            return Problem(context, 409, "site_name_conflict", "A site with this name already exists.");
         }
 
         await using var capacity = await SiteCapacityPolicy.BeginAdditionAsync(db, license, ct);
@@ -159,7 +159,7 @@ public static class AdministrationApiEndpoints
 
             if (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
             {
-                return Problem(context, 409, "site_name_conflict", "En site med dette navnet finnes allerede.");
+                return Problem(context, 409, "site_name_conflict", "A site with this name already exists.");
             }
 
             throw;
@@ -181,7 +181,7 @@ public static class AdministrationApiEndpoints
         if (await db.Sites.AnyAsync(
             x => x.Id != siteId && x.NormalizedName == name.ToUpperInvariant(), ct))
         {
-            return Problem(context, 409, "site_name_conflict", "En site med dette navnet finnes allerede.");
+            return Problem(context, 409, "site_name_conflict", "A site with this name already exists.");
         }
 
         var nameChanged = site.Name != name;
@@ -206,9 +206,9 @@ public static class AdministrationApiEndpoints
                 .Where(x => x.Id == placementId && x.IsActive && x.Site.IsActive)
                 .Select(x => new { x.SiteId }).SingleOrDefaultAsync(ct);
             if (placement is null)
-                return Validation("parentOrganizationUnitId", "Festepunktet finnes ikke eller er deaktivert.");
+                return Validation("parentOrganizationUnitId", "The attachment point does not exist or is disabled.");
             if (placement.SiteId == siteId)
-                return Validation("parentOrganizationUnitId", "En site kan ikke plasseres i sin egen organisasjon.");
+                return Validation("parentOrganizationUnitId", "A site cannot be placed within its own organization.");
             parentSiteId = placement.SiteId;
         }
 
@@ -218,7 +218,7 @@ public static class AdministrationApiEndpoints
         for (var cursor = parentSiteId; cursor is Guid current; cursor = parents.GetValueOrDefault(current))
         {
             if (current == siteId)
-                return Validation("parentOrganizationUnitId", "Flyttingen ville opprettet en sirkel i site-hierarkiet.");
+                return Validation("parentOrganizationUnitId", "The move would create a cycle in the site hierarchy.");
         }
 
         site.Update(site.Name, request.ParentOrganizationUnitId, site.IsActive);
@@ -234,11 +234,11 @@ public static class AdministrationApiEndpoints
         if (access.Error is not null) return access.Error;
         var (machineId, site) = (access.MachineId, access.Site!);
         if (!site.IsActive)
-            return Problem(context, 409, "site_already_inactive", "Siten er allerede deaktivert.");
+            return Problem(context, 409, "site_already_inactive", "The site is already disabled.");
         if (await SiteDeactivationService.HasActiveChildrenAsync(siteId, db, ct))
         {
             return Problem(context, 409, "active_child_sites",
-                "Siten har aktive underlagte sites og må tømmes før den kan deaktiveres.");
+                "The site has active subordinate sites and must be emptied before it can be disabled.");
         }
 
         var now = DateTimeOffset.UtcNow;
@@ -256,7 +256,7 @@ public static class AdministrationApiEndpoints
         catch (DbUpdateConcurrencyException)
         {
             return Problem(context, 409, "version_conflict",
-                "Siten er endret av en annen klient. Les den på nytt og prøv igjen.");
+                "The site was changed by another client. Read it again and retry.");
         }
 
         context.Response.Headers.ETag = ETag(site.Version);
@@ -274,7 +274,7 @@ public static class AdministrationApiEndpoints
     {
         if (record.RequestHash != hash)
             return Problem(context, 409, "idempotency_key_reused",
-                "Idempotency-Key er allerede brukt med et annet innhold.");
+                "Idempotency-Key has already been used with different content.");
         var site = await db.Sites.AsNoTracking().Where(x => x.Id == record.ResourceId)
             .Select(SiteProjection()).SingleAsync(ct);
         context.Response.Headers.ETag = ETag(site.Version);
@@ -301,9 +301,9 @@ public static class AdministrationApiEndpoints
     private static IResult? ValidateSiteInput(string name, string design)
     {
         if (name.Length is < 2 or > 200)
-            return Validation("name", "Navnet må være mellom 2 og 200 tegn.");
+            return Validation("name", "The name must be between 2 and 200 characters.");
         return !OverviewDesigns.Contains(design)
-            ? Validation("overviewDesign", "Velg en gyldig oversiktsprofil.")
+            ? Validation("overviewDesign", "Select a valid overview profile.")
             : null;
     }
 
@@ -333,14 +333,14 @@ public static class AdministrationApiEndpoints
             !long.TryParse(raw[1..^1], out var expected))
         {
             error = Problem(context, 428, "if_match_required",
-                "Gyldig If-Match fra siste lesing er påkrevd.");
+                "A valid If-Match value from the latest read is required.");
             return false;
         }
 
         if (expected != current)
         {
             error = Problem(context, 409, "version_conflict",
-                "Siten er endret. Les den på nytt og prøv igjen.");
+                "The site has changed. Read it again and retry.");
             return false;
         }
 

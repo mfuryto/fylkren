@@ -54,12 +54,12 @@ internal static class FederationWorkReceiveEndpoints
         if (sourceName is null) return Results.StatusCode(403);
         var identity = await db.FederationSigningIdentities.AsNoTracking()
             .SingleOrDefaultAsync(value => value.Key == 1, ct);
-        if (identity is null) return Results.Problem(statusCode: 503, title: "Federeringsnøkkel mangler.");
+        if (identity is null) return Results.Problem(statusCode: 503, title: "The federation key is missing.");
         ECDsa localKey;
         try { localKey = FederationSigningKeys.Load(identity, protection); }
         catch (CryptographicException)
         {
-            return Results.Problem(statusCode: 503, title: "Federeringsnøkkelen kan ikke brukes.");
+            return Results.Problem(statusCode: 503, title: "The federation key cannot be used.");
         }
         using (localKey)
         {
@@ -102,7 +102,7 @@ internal static class FederationWorkReceiveEndpoints
                     payload!.Title, payload.Instruction, null, payload.Priority, payload.DueAt, now,
                     senderSiteName: sourceName,
                     sourceTypeNameSnapshot: payload.SourceTypeName,
-                    workItemTypeNameSnapshot: payload.Kind == "request" ? "Anmodning" : null,
+                    workItemTypeNameSnapshot: payload.Kind == "request" ? "Request" : null,
                     senderNameSnapshot: payload.SenderName,
                     requestBasisSnapshot: payload.RequestBasis);
                 db.WorkItems.Add(item);

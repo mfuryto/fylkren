@@ -59,7 +59,7 @@ internal static class WorkItemVisibility
             item.ParentWorkItem != null && item.ParentWorkItem.SiteId == siteId &&
             !(item.ParentWorkItem.WorkItemType != null &&
               item.ParentWorkItem.WorkItemType.IsSystemManaged &&
-              item.ParentWorkItem.WorkItemType.NormalizedName == "ANMODNING"));
+              item.ParentWorkItem.WorkItemType.IsSystemManaged));
     }
 
     private static IQueryable<WorkItem> DirectlyAccessibleQuery(

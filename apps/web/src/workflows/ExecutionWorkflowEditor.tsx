@@ -57,7 +57,7 @@ export function ExecutionWorkflowEditor({
     return (
       <section className="stacked-form planning-result">
         <div className="field">
-          <label>Velg utførelsesflyt</label>
+          <label>Select execution workflow</label>
           <select
             value={selectedDefinitions[run.id] ?? ""}
             onChange={(event) =>
@@ -67,7 +67,7 @@ export function ExecutionWorkflowEditor({
               }))
             }
           >
-            <option value="">Velg arbeidsflyt</option>
+            <option value="">Select arbeidsflyt</option>
             {definitions.map((flow) => (
               <option key={flow.id} value={flow.id}>{flow.name}</option>
             ))}
@@ -103,7 +103,7 @@ export function ExecutionWorkflowEditor({
     <section className="execution-workflow">
       <div className="task-meta">
         <strong>{run.definitionName}</strong>
-        <span>Steg {run.currentStep + 1} av {run.steps?.length}: {currentStep.name}</span>
+        <span>Step {run.currentStep + 1} of {run.steps?.length}: {currentStep.name}</span>
         <span className="muted">Endringer lagres automatisk.</span>
       </div>
       {currentStep.hasTimeline && run.timelineStartedOn && (
@@ -123,14 +123,14 @@ export function ExecutionWorkflowEditor({
         }
       />
       {(currentStep.externalRequests.length > 0 || externalFollowUpOpen) && <section className="external-requests">
-        <h3>Ekstern oppfølging</h3>
-        <p className="muted">Loggfør dialog som skjer med en ekstern part utenfor Fylkren.</p>
+        <h3>External follow-up</h3>
+        <p className="muted">Record dialogue with an external party outside Fylkren.</p>
         {currentStep.externalRequests.map((request) => (
           <article className="workflow-definition" key={request.id}>
             <strong>{request.recipient}</strong>
             <p>{request.requestText}</p>
             {request.responseText ? (
-              <div><strong>Mottatt svar</strong><p>{request.responseText}</p></div>
+              <div><strong>Received response</strong><p>{request.responseText}</p></div>
             ) : responseDraft?.id === request.id ? (
               <div className="stacked-form">
                 <textarea
@@ -147,18 +147,18 @@ export function ExecutionWorkflowEditor({
                     }).then(() => setResponseDraft(null)).catch((problem) => onError(problem.message))
                   }
                 >
-                  Registrer mottatt svar
+                  Record received response
                 </button>
               </div>
             ) : (
-              <button className="link-button" type="button" onClick={() => setResponseDraft({ id: request.id, text: "" })}>Registrer svar</button>
+              <button className="link-button" type="button" onClick={() => setResponseDraft({ id: request.id, text: "" })}>Record response</button>
             )}
           </article>
         ))}
         {externalFollowUpOpen && (
           <div className="stacked-form">
             <div className="field">
-              <label>Ekstern part eller kontakt</label>
+              <label>External party or contact</label>
               <input
                 maxLength={320}
                 value={externalDraft.recipient}
@@ -166,7 +166,7 @@ export function ExecutionWorkflowEditor({
               />
             </div>
             <div className="field">
-              <label>Hva gjelder dialogen?</label>
+              <label>What gjelder dialogen?</label>
               <textarea
                 rows={5}
                 maxLength={10000}
@@ -185,10 +185,10 @@ export function ExecutionWorkflowEditor({
                 }).then(() => setExternalDraft(null)).catch((problem) => onError(problem.message))
               }
             >
-              Loggfør ekstern dialog
+              Record external dialogue
             </button>
             <button className="secondary-button" type="button" onClick={() => setExternalDraft(null)}>
-              Avbryt
+              Cancel
             </button>
           </div>
         )}
@@ -200,7 +200,7 @@ export function ExecutionWorkflowEditor({
           type="button"
           onClick={() => void saveAndMove(`/api/execution/${run.id}/step`, { step: run.currentStep - 1 })}
         >
-          Forrige steg
+          Previous step
         </button>
         <button
           className="secondary-button execution-follow-up-button"
@@ -208,17 +208,17 @@ export function ExecutionWorkflowEditor({
           disabled={externalFollowUpOpen}
           onClick={() => setExternalDraft({ runId: run.id, stepId: currentStep.id, recipient: "", requestText: "" })}
         >
-          Ekstern oppfølging
+          External follow-up
         </button>
         {canSendRequest && (
           <button className="secondary-button execution-request-button" type="button" onClick={() => onSendRequest(item)}>
-            Send anmodning
+            Send request
           </button>
         )}
         {run.currentStep < (run.steps?.length ?? 1) - 1 ? (
-          <button className="primary-button" type="button" onClick={() => void saveAndMove(`/api/execution/${run.id}/step`, { step: run.currentStep + 1 })}>Neste steg</button>
+          <button className="primary-button" type="button" onClick={() => void saveAndMove(`/api/execution/${run.id}/step`, { step: run.currentStep + 1 })}>Next step</button>
         ) : (
-          <button className="primary-button" type="button" onClick={() => void saveAndMove(`/api/execution/${run.id}/submit`)}>Send til kontroll</button>
+          <button className="primary-button" type="button" onClick={() => void saveAndMove(`/api/execution/${run.id}/submit`)}>Submit for review</button>
         )}
       </div>
     </section>

@@ -47,7 +47,7 @@ internal static class FederationPeerEndpoints
             var discovered = await FederationPeerDiscovery.Fetch(baseUrl, localId, clients, ct);
             if (discovered is null)
                 return Results.Problem(statusCode: 502,
-                    title: "Motpartens signerte identitet kunne ikke bekreftes.");
+                    title: "The peer's signed identity could not be verified.");
             if (await db.FederationPeers.AsNoTracking().AnyAsync(row =>
                     row.InstanceId == discovered.InstanceId, ct))
                 return Results.Conflict(new { error = "federation_peer_exists" });
@@ -69,7 +69,7 @@ internal static class FederationPeerEndpoints
                 await LocalInstanceId(db, ct), clients, ct);
             if (discovered is null || discovered.InstanceId != instanceId)
                 return Results.Problem(statusCode: 502,
-                    title: "Motpartens nye signerte identitet kunne ikke bekreftes.");
+                    title: "The peer's new signed identity could not be verified.");
             if (discovered.PublicKeySpki == peer.PinnedPublicKeySpki)
                 return Results.Conflict(new { error = "federation_peer_key_unchanged" });
             return Results.Ok(new { discovered.InstanceId, peer.BaseUrl,
@@ -138,13 +138,13 @@ internal static class FederationPeerEndpoints
             var localId = await db.InstanceIdentities.AsNoTracking().Where(row => row.Key == 1)
                 .Select(row => row.InstanceId).SingleAsync(ct);
             if (request.InstanceId == localId)
-                return Results.ValidationProblem(new Dictionary<string, string[]> { ["instanceId"] = ["Den lokale instansen kan ikke registreres som fjerninstans."] });
+                return Results.ValidationProblem(new Dictionary<string, string[]> { ["instanceId"] = ["The local instance cannot be registered as a remote instance."] });
             if (await db.FederationPeers.AnyAsync(peer => peer.InstanceId == request.InstanceId, ct))
                 return Results.Conflict(new { error = "federation_peer_exists" });
             var discovered = await FederationPeerDiscovery.Fetch(baseUrl, localId, clients, ct);
             if (discovered is null)
                 return Results.Problem(statusCode: 502,
-                    title: "Motpartens signerte identitet kunne ikke bekreftes.");
+                    title: "The peer's signed identity could not be verified.");
             if (discovered.InstanceId != request.InstanceId ||
                 !string.Equals(discovered.Fingerprint, request.Fingerprint.Trim(),
                     StringComparison.OrdinalIgnoreCase))
@@ -240,7 +240,7 @@ internal static class FederationPeerEndpoints
 
     private static IResult InvalidPeer() => Results.ValidationProblem(new Dictionary<string, string[]>
     {
-        ["peer"] = ["Oppgi gyldig instans-ID, navn og HTTPS-grunnadresse uten sti, spørring eller fragment."]
+        ["peer"] = ["Enter a valid instance ID, name, and HTTPS base address without a path, query, or fragment."]
     });
 
     private sealed record PeerDiscoveryRequest(string? BaseUrl);

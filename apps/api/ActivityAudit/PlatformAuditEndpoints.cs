@@ -107,14 +107,14 @@ public static class PlatformAuditEndpoints
                 value.EntityType,
                 value.EntityId,
                 value.ActorPersonId is Guid personId
-                    ? people.GetValueOrDefault(personId, "Ukjent bruker")
+                    ? people.GetValueOrDefault(personId, "Unknown user")
                     : value.ActorInstanceId is Guid instanceId
                         ? $"Federert instans: {instanceId}"
                     : value.ActorSystem is not null
                         ? $"System: {value.ActorSystem}"
                     : value.MachineIdentityId is Guid machineId
                         ? $"API: {machines.GetValueOrDefault(machineId, "Ukjent klient")}"
-                        : "Ukjent aktør",
+                        : "Unknown actor",
                 value.SiteId is Guid siteId ? sites.GetValueOrDefault(siteId) : null,
                 value.CorrelationId)).ToArray();
             return Results.Ok(new { events = rows, eventTypes, page = pageNumber, pageSize, total, totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)pageSize)) });

@@ -37,7 +37,7 @@ public static class ClassificationEndpoints
             var validation = Validate(request);
             if (validation is not null) return validation;
             var abbreviation = request.Abbreviation!.Trim().ToUpperInvariant();
-            if (await db.ClassificationDefinitions.AnyAsync(x => x.Abbreviation == abbreviation, ct)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["abbreviation"] = ["Kortformen er allerede i bruk."] });
+            if (await db.ClassificationDefinitions.AnyAsync(x => x.Abbreviation == abbreviation, ct)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["abbreviation"] = ["The abbreviation is already in use."] });
             var value = new ClassificationDefinition(Guid.NewGuid(), request.Name!, abbreviation, request.SortOrder);
             db.ClassificationDefinitions.Add(value);
             Record(db, context, "classification.created", "classification-definition", value.Id);
@@ -53,7 +53,7 @@ public static class ClassificationEndpoints
             var value = await db.ClassificationDefinitions.SingleOrDefaultAsync(x => x.Id == id, ct);
             if (value is null) return Results.NotFound();
             var abbreviation = request.Abbreviation!.Trim().ToUpperInvariant();
-            if (await db.ClassificationDefinitions.AnyAsync(x => x.Id != id && x.Abbreviation == abbreviation, ct)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["abbreviation"] = ["Kortformen er allerede i bruk."] });
+            if (await db.ClassificationDefinitions.AnyAsync(x => x.Id != id && x.Abbreviation == abbreviation, ct)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["abbreviation"] = ["The abbreviation is already in use."] });
             value.Update(request.Name!, abbreviation, request.SortOrder, request.IsActive);
             Record(db, context, "classification.updated", "classification-definition", value.Id);
             await db.SaveChangesAsync(ct);
@@ -77,11 +77,11 @@ public static class ClassificationEndpoints
     private static IResult? Validate(SaveDefinition request)
     {
         if ((request.Name?.Trim().Length ?? 0) is < 2 or > 100)
-            return Results.ValidationProblem(new Dictionary<string, string[]> { ["name"] = ["Navnet må være mellom 2 og 100 tegn."] });
+            return Results.ValidationProblem(new Dictionary<string, string[]> { ["name"] = ["The name must be between 2 and 100 characters."] });
         if ((request.Abbreviation?.Trim().Length ?? 0) is < 1 or > 12)
-            return Results.ValidationProblem(new Dictionary<string, string[]> { ["abbreviation"] = ["Kortformen må være mellom 1 og 12 tegn."] });
+            return Results.ValidationProblem(new Dictionary<string, string[]> { ["abbreviation"] = ["The abbreviation must be between 1 and 12 characters."] });
         if (request.SortOrder is < 0 or > 100000)
-            return Results.ValidationProblem(new Dictionary<string, string[]> { ["sortOrder"] = ["Rekkefølgen må være mellom 0 og 100000."] });
+            return Results.ValidationProblem(new Dictionary<string, string[]> { ["sortOrder"] = ["The sort order must be between 0 and 100000."] });
         return null;
     }
 

@@ -46,7 +46,7 @@ export function ProcessPageHeader({
         </ol>
       </div>
       <div className="modal-actions">
-        <button className="primary-button" type="button" onClick={onHelpClose}>Lukk</button>
+        <button className="primary-button" type="button" onClick={onHelpClose}>Close</button>
       </div>
     </Modal>}
   </>;

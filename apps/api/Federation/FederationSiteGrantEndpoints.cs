@@ -36,7 +36,7 @@ internal static class FederationSiteGrantEndpoints
             if (!Guid.TryParse(user.FindFirstValue("fylkren:person_id"), out var actor)) return Results.Forbid();
             if (direction is not ("inbound" or "outbound"))
                 return Results.ValidationProblem(new Dictionary<string, string[]> {
-                    ["direction"] = ["Velg inbound eller outbound."] });
+                    ["direction"] = ["Select inbound or outbound."] });
             var peer = await db.FederationPeers.AsNoTracking()
                 .SingleOrDefaultAsync(value => value.InstanceId == instanceId, ct);
             if (peer is null) return Results.NotFound();

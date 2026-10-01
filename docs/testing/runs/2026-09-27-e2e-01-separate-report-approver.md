@@ -10,7 +10,7 @@ The clean command was `node tools/e2e/community-browser-smoke.mjs --task-flow`. 
 | Equivalent operational authority | Both actors may lead the same top-level work context | Both received the same protected leadership role; only the author received Site Manager separately | Pass; role-assignment responses |
 | Authorship boundary | Saving the report records the signed-in author | Completed work stored `Synthetic Report Author` as `finalReportWrittenBy` | Pass; authenticated postcondition |
 | Session boundary | Approval occurs only after a real account change | Author session was deleted; approver logged in through username/password form and session identity matched | Pass; rendered login and session assertion |
-| Approval action | Separate leader can inspect and approve the saved report | Approver opened the task and `Godkjenn sluttrapport` became available | Pass; rendered task controls |
+| Approval action | Separate manager can inspect and approve the saved report | Approver opened the task and `Approve final report` became available | Pass; rendered task controls |
 | Approval identity | Approval records the second actor | Completed work stored `Synthetic Report Approver` as `finalReportApprovedBy`, with approval timestamp | Pass; authenticated postcondition |
 | Archive presentation | Formal report visibly distinguishes both actors | Report viewer rendered both author and approver display names with the classified content | Pass; DOM assertions |
 | Adjacent regression | Account changes do not break the existing E2E-01 chain | All task, overview, workload, audit, notification and classification flags passed; zero browser errors | Pass; final JSON result |

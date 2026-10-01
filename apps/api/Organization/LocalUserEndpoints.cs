@@ -24,17 +24,17 @@ internal static class LocalUserEndpoints
             if (siteName is null) return Results.NotFound();
             var displayName = (request.DisplayName ?? "").Trim(); var username = (request.Username ?? "").Trim(); var email = (request.Email ?? "").Trim();
             if (displayName.Length is < 2 or > 200 || username.Length is < 3 or > 100 || !MailAddress.TryCreate(email, out _))
-                return Results.ValidationProblem(new Dictionary<string, string[]> { ["request"] = ["Navn, e-postadresse eller brukernavn er ugyldig."] });
-            if (string.Equals(username, email, StringComparison.OrdinalIgnoreCase)) return Results.Conflict(new { error = "Brukernavn og e-postadresse må være forskjellige." });
-            if (await database.LoginIdentities.AnyAsync(value => value.NormalizedUsername == username.ToUpperInvariant(), cancellationToken)) return Results.Conflict(new { error = "Brukernavnet er allerede i bruk." });
-            if (await database.People.AnyAsync(value => value.NormalizedEmail == username.ToUpperInvariant(), cancellationToken)) return Results.Conflict(new { error = "Brukernavnet er allerede i bruk som e-postadresse." });
-            if (await database.People.AnyAsync(value => value.NormalizedEmail == email.ToUpperInvariant(), cancellationToken)) return Results.Conflict(new { error = "E-postadressen er allerede i bruk." });
-            if (await database.LoginIdentities.AnyAsync(value => value.NormalizedUsername == email.ToUpperInvariant(), cancellationToken)) return Results.Conflict(new { error = "E-postadressen er allerede i bruk som brukernavn." });
+                return Results.ValidationProblem(new Dictionary<string, string[]> { ["request"] = ["The name, email address, or username is invalid."] });
+            if (string.Equals(username, email, StringComparison.OrdinalIgnoreCase)) return Results.Conflict(new { error = "The username and email address must be different." });
+            if (await database.LoginIdentities.AnyAsync(value => value.NormalizedUsername == username.ToUpperInvariant(), cancellationToken)) return Results.Conflict(new { error = "The username is already in use." });
+            if (await database.People.AnyAsync(value => value.NormalizedEmail == username.ToUpperInvariant(), cancellationToken)) return Results.Conflict(new { error = "The username is already used as an email address." });
+            if (await database.People.AnyAsync(value => value.NormalizedEmail == email.ToUpperInvariant(), cancellationToken)) return Results.Conflict(new { error = "The email address is already in use." });
+            if (await database.LoginIdentities.AnyAsync(value => value.NormalizedUsername == email.ToUpperInvariant(), cancellationToken)) return Results.Conflict(new { error = "The email address is already used as a username." });
             OrganizationUnit? organizationUnit = null;
             if (request.OrganizationUnitId is Guid unitId)
             {
                 organizationUnit = await database.OrganizationUnits.SingleOrDefaultAsync(value => value.Id == unitId && value.SiteId == siteId && value.IsActive && !value.IsSiteRoot, cancellationToken);
-                if (organizationUnit is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["organizationUnitId"] = ["Velg en aktiv underenhet."] });
+                if (organizationUnit is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["organizationUnitId"] = ["Select an active subordinate unit."] });
             }
             var now = DateTimeOffset.UtcNow; var person = new Person(Guid.NewGuid(), displayName, now, email); var identity = new LoginIdentity(Guid.NewGuid(), person.Id, username, false, now);
             identity.SetPasswordHash(passwordHasher.HashPassword(identity, Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(48))));

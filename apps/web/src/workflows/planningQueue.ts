@@ -4,7 +4,7 @@ import type { PlanningDraft, PlanningRun } from "./PlanningModels";
 export function buildPlanningLevels(runs: PlanningRun[]) {
   return Array.from(new Map(runs.map(run => [
     run.item.assignedUnitId ?? "top",
-    run.item.assignedUnitName ?? "Toppnivå",
+    run.item.assignedUnitName ?? "Top level",
   ])).entries()).sort((a, b) => a[1].localeCompare(b[1], "nb"));
 }
 

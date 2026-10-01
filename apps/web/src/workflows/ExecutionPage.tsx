@@ -52,7 +52,7 @@ export function ExecutionPage({ session, language, classificationMarkings, perma
         setUnits(data.units);
         setSiteId(eligible.find(site => site.siteId === permalink.siteId)?.siteId ?? eligible[0]?.siteId ?? "");
       })
-      .catch(problem => setError(problem instanceof Error ? problem.message : "Utførelseskonteksten kunne ikke lastes."));
+      .catch(problem => setError(problem instanceof Error ? problem.message : "The execution context could not be loaded."));
   }, [permalink.siteId]);
 
   async function load(requestedPage = queuePage) {
@@ -60,7 +60,7 @@ export function ExecutionPage({ session, language, classificationMarkings, perma
     try {
       const parameters = new URLSearchParams({ page: String(requestedPage) });
       if (permalink.itemId && requestedPage === 1) parameters.set("focusItemId", permalink.itemId);
-      const data = await apiGet<{ items: ExecutionItem[]; definitions: ExecutionDefinition[]; managedItemIds: string[]; planContextIds?: Record<string, string>; total: number; page: number }>(`/api/execution/sites/${siteId}?${parameters}`, "Utførelseskøen kunne ikke lastes.");
+      const data = await apiGet<{ items: ExecutionItem[]; definitions: ExecutionDefinition[]; managedItemIds: string[]; planContextIds?: Record<string, string>; total: number; page: number }>(`/api/execution/sites/${siteId}?${parameters}`, "The execution queue could not be loaded.");
       setItems(data.items);
       setTotalItems(data.total);
       if (data.page !== queuePage) setQueuePage(data.page);
@@ -69,7 +69,7 @@ export function ExecutionPage({ session, language, classificationMarkings, perma
       setPlanContextIds(data.planContextIds ?? {});
       setError("");
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Utførelseskøen kunne ikke lastes.");
+      setError(problem instanceof Error ? problem.message : "The execution queue could not be loaded.");
     }
   }
 
@@ -84,7 +84,7 @@ export function ExecutionPage({ session, language, classificationMarkings, perma
   }, [permalink.itemId, items]);
 
   async function mutate(path: string, method: "POST" | "PUT" = "POST", body?: object) {
-    await apiMutate(path, method, body, "Handlingen kunne ikke utføres.");
+    await apiMutate(path, method, body, "The action could not be completed.");
     await load();
   }
 
@@ -98,7 +98,7 @@ export function ExecutionPage({ session, language, classificationMarkings, perma
         title: sideRequest.title, description: sideRequest.description,
       });
       setSideRequest(null); setRequestRecipientQuery(""); setRequestRecipients([]);
-    } catch (problem) { setError(problem instanceof Error ? problem.message : "Anmodningen kunne ikke sendes."); }
+    } catch (problem) { setError(problem instanceof Error ? problem.message : "The request could not be sent."); }
     finally { setRequestBusy(false); }
   }
 
@@ -112,19 +112,19 @@ export function ExecutionPage({ session, language, classificationMarkings, perma
     const planItemId = planContextIds[item.id];
     if (!planItemId) return;
     try {
-      setPlanContext(await apiGet<PlanningContextDetails>(`/api/work/sites/${siteId}/items/${planItemId}/details`, "Planen kunne ikke lastes."));
+      setPlanContext(await apiGet<PlanningContextDetails>(`/api/work/sites/${siteId}/items/${planItemId}/details`, "The plan could not be loaded."));
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Planen kunne ikke lastes.");
+      setError(problem instanceof Error ? problem.message : "The plan could not be loaded.");
     }
   }
 
   async function openExecutionReassignment(item: ExecutionItem) {
     if (!item.run) return;
     try {
-      const candidates = await apiGet<Array<{ personId: string; displayName: string }>>(`/api/execution/${item.run.id}/candidates`, "Aktuelle mottakere kunne ikke lastes.");
+      const candidates = await apiGet<Array<{ personId: string; displayName: string }>>(`/api/execution/${item.run.id}/candidates`, "Available recipients could not be loaded.");
       setExecutionReassignment({ item, personId: candidates.find(candidate => candidate.personId !== item.run?.claimedByPersonId)?.personId ?? candidates[0]?.personId ?? "", candidates });
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Aktuelle mottakere kunne ikke lastes.");
+      setError(problem instanceof Error ? problem.message : "Available recipients could not be loaded.");
     }
   }
 
@@ -132,16 +132,16 @@ export function ExecutionPage({ session, language, classificationMarkings, perma
   const childUnits = (item: ExecutionItem) => executionChildUnits(units, siteId, item);
   return <div className="page">
     <ProcessPageHeader
-      title="Utførelse"
-      description="Ta ansvar for oppdrag på ditt nivå, velg arbeidsflyt og dokumenter utførelsen frem til kontroll og sluttrapport."
-      helpTitle="Slik arbeider du med utførelse"
-      helpIntroduction="Utførelse er den aktive behandlingen av et oppdrag på mottakernivået. Arbeidsmåten følger utførelsesflyten som velges."
+      title="Execution"
+      description="Claim tasks at your level, select a workflow, and document execution through review and final report."
+      helpTitle="How to work with execution"
+      helpIntroduction="Execution is the active processing of a task at the receiving level. The working method follows the selected execution workflow."
       helpSteps={[
-        { title: "Les oppdragsgrunnlaget.", description: "Kontroller oppdragstekst, dokumenter og eventuelle godkjente planer fra dette og overordnede nivåer." },
-        { title: "Ta ansvar for oppdraget.", description: "Én bruker tar behandlingsansvaret. Lederen kan frigjøre eller omfordele ansvaret uten at dokumentasjon eller historikk forsvinner." },
-        { title: "Velg utførelsesflyt.", description: "Velg en tilgjengelig arbeidsflyt som passer oppdraget og arbeidsnivået." },
-        { title: "Dokumenter utførelsen.", description: "Fyll ut stegene, oppdater eventuell tidslinje og registrer oppfølging av eksterne kontakter som skjer utenfor løsningen. En leder som selv har tatt ansvar for utførelsen kan sende en anmodning herfra. Endringer lagres automatisk." },
-        { title: "Avslutt riktig.", description: "Fordel videre dersom et undernivå skal overta. Ellers sendes utførelsen til kontroll før sluttrapporten skrives og godkjennes på nivået." },
+        { title: "Read the task basis.", description: "Review task text, documents, and any approved plans from this and superior levels." },
+        { title: "Claim responsibility for the task.", description: "One user claims processing responsibility. The manager can release or reassign responsibility without losing documentation or history." },
+        { title: "Select execution workflow.", description: "Select an available workflow that suits the task and work level." },
+        { title: "Document the execution.", description: "Complete the steps, update the timeline if needed, and record follow-up with external contacts outside the system. A manager who has personally claimed execution can send a request from here. Changes are saved automatically." },
+        { title: "Avslutt riktig.", description: "Route onward if a subordinate level should take over. Otherwise, execution is submitted for review before the final report is written and approved at this level." },
       ]}
       helpOpen={helpOpen}
       onHelpOpen={() => setHelpOpen(true)}
@@ -166,7 +166,7 @@ export function ExecutionPage({ session, language, classificationMarkings, perma
       planContextIds={planContextIds}
       childUnits={childUnits}
       onToggle={itemId => { setOpenItemId(current => current === itemId ? null : itemId); navigateToLocation({ page: "Execution", siteId, itemId }); }}
-      onCopyLink={itemId => { void copyPermalink({ page: "Execution", siteId, itemId }).then(() => setLinkMessage("Lenken til utførelsen er kopiert.")).catch(() => setError("Lenken kunne ikke kopieres.")); }}
+      onCopyLink={itemId => { void copyPermalink({ page: "Execution", siteId, itemId }).then(() => setLinkMessage("The execution link has been copied.")).catch(() => setError("The link could not be copied.")); }}
       onToggleDetails={itemId => setExpandedItemId(current => current === itemId ? null : itemId)}
       onShowPlan={item => { void showPlan(item); }}
       onClaim={item => { void mutate(`/api/execution/items/${item.id}/claim`).catch(problem => setError(problem.message)); }}

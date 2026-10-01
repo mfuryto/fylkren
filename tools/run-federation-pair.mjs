@@ -1026,7 +1026,7 @@ async function assertQueuedOutboundDelivery(sender, receiver, operationalLeader 
       candidate.instanceId === receiver.instanceId),
     'Authorized remote site was not returned by the isolated operational recipient search');
     const requestTypeId = sqlValue('postgres-a', `SELECT id FROM work_item_types
-      WHERE site_id = '${sender.siteId}' AND normalized_name = 'ANMODNING'`);
+      WHERE site_id = '${sender.siteId}' AND is_system_managed = TRUE`);
     const created = await expectStatus(operationalLeader.post(
       `/api/work/sites/${sender.siteId}/items`, {
         title: operationalTitle,
@@ -1200,7 +1200,7 @@ async function assertEntitlementLossStopsOperationalRouting(sender, receiver, op
     candidate.instanceId === receiver.instanceId),
   'Remote recipient remained selectable after entitlement loss');
   const requestTypeId = sqlValue('postgres-a', `SELECT id FROM work_item_types
-    WHERE site_id = '${sender.siteId}' AND normalized_name = 'ANMODNING'`);
+    WHERE site_id = '${sender.siteId}' AND is_system_managed = TRUE`);
   const before = sqlValue('postgres-a', 'SELECT COUNT(*) FROM federation_outbound_messages');
   await expectStatus(operationalLeader.post(`/api/work/sites/${sender.siteId}/items`, {
     title: 'Rejected request without federation entitlement',

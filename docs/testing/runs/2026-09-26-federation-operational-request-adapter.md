@@ -8,7 +8,7 @@
 
 ## Change under test
 
-The isolated federation test environment now exposes authorized remote catalog entries through the ordinary request-recipient search and routes the ordinary primary `Anmodning` creation command through the transactional federation outbox. Ordinary environments still omit remote recipients and reject foreign instance addresses. Side-request, planned-request and ordinary return actions remain disconnected.
+The isolated federation test environment now exposes authorized remote catalog entries through the ordinary request-recipient search and routes the ordinary primary `Request` creation command through the transactional federation outbox. Ordinary environments still omit remote recipients and reject foreign instance addresses. Side-request, planned-request and ordinary return actions remain disconnected.
 
 | Control | Expected | Observed | Result / evidence |
 | --- | --- | --- | --- |

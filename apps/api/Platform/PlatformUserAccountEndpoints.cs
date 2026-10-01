@@ -19,28 +19,28 @@ public static partial class PlatformUserEndpoints
         CancellationToken cancellationToken)
     {
         if (!await antiforgery.IsRequestValidAsync(context))
-            return Results.BadRequest(new { error = "Sikkerhetskontrollen utløp. Last siden på nytt og prøv igjen." });
+            return Results.BadRequest(new { error = "The security check expired. Reload the page and try again." });
         if (!Guid.TryParse(context.User.FindFirst("fylkren:person_id")?.Value, out var actor))
-            return Results.Problem(statusCode: 403, title: "Innlogget Platform Manager kunne ikke identifiseres.");
+            return Results.Problem(statusCode: 403, title: "The signed-in Platform Manager could not be identified.");
         if (actor == personId)
-            return Results.Conflict(new { error = "Du kan ikke flytte din egen site-tilknytning." });
+            return Results.Conflict(new { error = "You cannot move your own site association." });
         if (await database.LoginIdentities.AnyAsync(identity => identity.PersonId == personId && identity.IsPlatformManager, cancellationToken))
-            return Results.Conflict(new { error = "Platform Manager-kontoer tilhører plattformen og kan ikke flyttes mellom sites." });
+            return Results.Conflict(new { error = "Platform Manager accounts belong to the platform and cannot be moved between sites." });
         if (request.SourceSiteId == request.TargetSiteId)
-            return Results.ValidationProblem(new Dictionary<string, string[]> { ["targetSiteId"] = ["Velg en annen målsite."] });
+            return Results.ValidationProblem(new Dictionary<string, string[]> { ["targetSiteId"] = ["Select a different target site."] });
 
         var person = await database.People.SingleOrDefaultAsync(value => value.Id == personId, cancellationToken);
-        if (person is null) return Results.NotFound(new { error = "Brukeren finnes ikke lenger." });
+        if (person is null) return Results.NotFound(new { error = "The user no longer exists." });
         var source = await database.SiteMemberships.SingleOrDefaultAsync(
             value => value.PersonId == personId && value.SiteId == request.SourceSiteId && value.IsActive,
             cancellationToken);
-        if (source is null) return Results.Conflict(new { error = "Brukeren har ikke lenger et aktivt medlemskap i kildesiten." });
+        if (source is null) return Results.Conflict(new { error = "The user no longer has an active membership in the source site." });
         if (!await database.Sites.AnyAsync(site => site.Id == request.TargetSiteId && site.IsActive, cancellationToken))
-            return Results.ValidationProblem(new Dictionary<string, string[]> { ["targetSiteId"] = ["Målsiten finnes ikke eller er deaktivert."] });
+            return Results.ValidationProblem(new Dictionary<string, string[]> { ["targetSiteId"] = ["The target site does not exist or is disabled."] });
         if (await database.SiteMemberships.AnyAsync(
                 value => value.PersonId == personId && value.SiteId == request.TargetSiteId && value.IsActive,
                 cancellationToken))
-            return Results.Conflict(new { error = "Brukeren tilhører allerede målsiten." });
+            return Results.Conflict(new { error = "The user already belongs to the target site." });
 
         var now = DateTimeOffset.UtcNow;
         source.Deactivate();
@@ -96,15 +96,15 @@ public static partial class PlatformUserEndpoints
         var validation = await ValidateBulkRequest(request.PersonIds, antiforgery, context, database, cancellationToken);
         if (validation.Error is not null) return validation.Error;
         if (await database.LoginIdentities.AnyAsync(identity => request.PersonIds.Contains(identity.PersonId) && identity.IsPlatformManager, cancellationToken))
-            return Results.Conflict(new { error = "Platform Manager-passord kan ikke tilbakestilles fra den globale brukeroversikten." });
+            return Results.Conflict(new { error = "Platform Manager passwords cannot be reset from the global user overview." });
         if (await database.ExternalIdentityLinks.AnyAsync(value => request.PersonIds.Contains(value.PersonId) && value.IsActive && (value.Provider == "ad" || value.Provider == "ldap"), cancellationToken))
-            return Results.Conflict(new { error = "Én eller flere valgte brukeres passord forvaltes av katalogtjenesten." });
+            return Results.Conflict(new { error = "One or more selected users have passwords managed by the directory service." });
 
         var identities = await database.LoginIdentities.Include(value => value.Person)
             .Where(value => request.PersonIds.Contains(value.PersonId) && value.IsActive && value.Person.IsActive && !value.Person.IsDeleted)
             .ToListAsync(cancellationToken);
         if (identities.Count != request.PersonIds.Distinct().Count())
-            return Results.Conflict(new { error = "Én eller flere valgte brukere mangler en aktiv lokal innloggingskonto." });
+            return Results.Conflict(new { error = "One or more selected users do not have an active local sign-in account." });
         var now = DateTimeOffset.UtcNow;
         var resetCodes = new List<object>();
         foreach (var identity in identities)

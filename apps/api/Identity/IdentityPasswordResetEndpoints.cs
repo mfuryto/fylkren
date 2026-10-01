@@ -16,7 +16,7 @@ public static partial class IdentityEndpoints
     {
         var code = PasswordResetGrant.Normalize(request.ResetCode ?? string.Empty);
         if (code.Length != 32)
-            return Results.ValidationProblem(new Dictionary<string, string[]> { ["resetCode"] = ["Engangskoden er ugyldig eller utløpt."] });
+            return Results.ValidationProblem(new Dictionary<string, string[]> { ["resetCode"] = ["The one-time code is invalid or expired."] });
 
         await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
         var now = DateTimeOffset.UtcNow;
@@ -28,9 +28,9 @@ public static partial class IdentityEndpoints
         var grant = candidates.SingleOrDefault(value => value.Matches(code, now));
         var identity = grant?.LoginIdentity;
         if (grant is null || identity is null || !identity.IsActive || !identity.Person.IsActive || identity.Person.IsDeleted)
-            return Results.ValidationProblem(new Dictionary<string, string[]> { ["resetCode"] = ["Engangskoden er ugyldig eller utløpt."] });
+            return Results.ValidationProblem(new Dictionary<string, string[]> { ["resetCode"] = ["The one-time code is invalid or expired."] });
         if (await IsDirectoryManaged(identity.PersonId, database, cancellationToken))
-            return Results.ValidationProblem(new Dictionary<string, string[]> { ["resetCode"] = ["Engangskoden er ugyldig eller utløpt."] });
+            return Results.ValidationProblem(new Dictionary<string, string[]> { ["resetCode"] = ["The one-time code is invalid or expired."] });
         if (passwordPolicy.Validate(request.NewPassword, identity.Username, identity.Person.DisplayName, identity.Person.Email) is { } passwordError)
             return Results.ValidationProblem(new Dictionary<string, string[]> { ["newPassword"] = [passwordError] });
 
@@ -38,7 +38,7 @@ public static partial class IdentityEndpoints
             .Where(value => value.Id == grant.Id && value.ConsumedAt == null && value.RevokedAt == null && value.ExpiresAt > now)
             .ExecuteUpdateAsync(update => update.SetProperty(value => value.ConsumedAt, (DateTimeOffset?)now), cancellationToken);
         if (consumed != 1)
-            return Results.ValidationProblem(new Dictionary<string, string[]> { ["resetCode"] = ["Engangskoden er ugyldig eller utløpt."] });
+            return Results.ValidationProblem(new Dictionary<string, string[]> { ["resetCode"] = ["The one-time code is invalid or expired."] });
         await database.PasswordResetGrants
             .Where(value => value.Id != grant.Id && value.LoginIdentityId == identity.Id &&
                 value.ConsumedAt == null && value.RevokedAt == null && value.ExpiresAt > now)

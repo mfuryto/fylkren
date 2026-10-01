@@ -18,7 +18,7 @@ internal static class ExecutionDocumentEndpoints
             if (!PersonId(user, out var personId)) return Results.Problem(statusCode: 403);
             var events = request.TimelineEvents ?? [];
             var content = request.Content ?? "";
-            if (content.Length > 20000 || events.Count > 100 || events.Any(x => string.IsNullOrWhiteSpace(x.Description) || x.Description.Trim().Length > 1000)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["content"] = ["Kontroller tekst og tidslinje."] });
+            if (content.Length > 20000 || events.Count > 100 || events.Any(x => string.IsNullOrWhiteSpace(x.Description) || x.Description.Trim().Length > 1000)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["content"] = ["Check the text and timeline."] });
             var run = await db.ExecutionRuns.Include(x => x.WorkItem).SingleOrDefaultAsync(x => x.Id == runId && x.ClaimedByPersonId == personId && x.Status == "in_progress", ct);
             var step = run is null ? null : await db.WorkflowSteps.SingleOrDefaultAsync(x => x.Id == stepId && x.DefinitionId == run.DefinitionId, ct);
             if (run is null || step is null || !await WorkLevelAuthorization.BelongsToLevel(run.WorkItem.SiteId, run.WorkItem.AssignedUnitId, personId, db, ct) || events.Count > 0 && !step.HasTimeline || events.Any(x => run.TimelineStartedOn.HasValue && x.Date < run.TimelineStartedOn.Value)) return Results.Problem(statusCode: 403);
@@ -39,7 +39,7 @@ internal static class ExecutionDocumentEndpoints
             var run = await db.ExecutionRuns.Include(x => x.WorkItem).SingleOrDefaultAsync(x => x.Id == runId && x.ClaimedByPersonId == personId && x.Status == "in_progress", ct);
             if (run is null || !await WorkLevelAuthorization.BelongsToLevel(run.WorkItem.SiteId, run.WorkItem.AssignedUnitId, personId, db, ct)) return Results.Problem(statusCode: 403);
             var count = await db.WorkflowSteps.CountAsync(x => x.DefinitionId == run.DefinitionId, ct);
-            if (request.Step < 0 || request.Step >= count) return Results.ValidationProblem(new Dictionary<string, string[]> { ["step"] = ["Ugyldig steg."] });
+            if (request.Step < 0 || request.Step >= count) return Results.ValidationProblem(new Dictionary<string, string[]> { ["step"] = ["Invalid step."] });
             var now = DateTimeOffset.UtcNow;
             run.Advance(request.Step, now);
             db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "execution.step-changed", "execution-run", run.Id, now));

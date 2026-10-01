@@ -136,7 +136,7 @@ assert.ok(!Number.isNaN(Date.parse(platformOperations.body.hostIntegration.backu
 assert.equal(platformOperations.body.hostIntegration.backupWarningHours, 36, 'Backup warning threshold must be explicit');
 const backupService = platformOperations.body.services.find(value => value.key === 'host-backup');
 assert.equal(backupService.status, 'healthy', JSON.stringify(backupService));
-assert.match(backupService.detail, /36 timer.*ekstern kopiering overvåkes ikke/i, 'Backup status scope must be explicit');
+assert.match(backupService.detail, /36 hours.*off-host copying is not monitored/i, 'Backup status scope must be explicit');
 for (const service of ['host-web', 'host-api', 'host-postgres']) {
   const observed = platformOperations.body.services.find(value => value.key === service);
   assert.ok(observed, `Missing ${service} status`);
@@ -369,7 +369,7 @@ const prematureComplete = await leader.account.put(`/api/work/sites/${siteId}/it
 });
 assert.equal(prematureComplete.status, 409, 'Completion without final report must be rejected');
 const report = await leader.account.put(`/api/work/sites/${siteId}/items/${task.body.id}/final-report`, {
-  content: '# Sammendrag\n\nSynthetic task completed.\n\n# Gjennomføring\n\nThe test execution was documented.\n\n# Konklusjon\n\nCompleted.',
+  content: '# Summary\n\nSynthetic task completed.\n\n# Execution\n\nThe test execution was documented.\n\n# Conclusion\n\nCompleted.',
   classification: null,
 });
 assert.equal(report.status, 204, `write report: ${JSON.stringify(report.body)}`);
@@ -426,7 +426,7 @@ async function finishAndArchive(account, itemId, unitId, label, reportSiteId = s
   const current = overview.body.find(item => item.id === itemId);
   assert.ok(current, `${label} task missing before report`);
   if (current.status !== 'in_review') await updateStatus(account, itemId, 'in_review', null, null, reportSiteId);
-  const reportContent = `# Sammendrag\n\n${label} completed its work.\n\n# Gjennomføring\n\nSynthetic execution.\n\n# Konklusjon\n\nCompleted.`;
+  const reportContent = `# Summary\n\n${label} completed its work.\n\n# Execution\n\nSynthetic execution.\n\n# Conclusion\n\nCompleted.`;
   const written = await account.put(`/api/work/sites/${reportSiteId}/items/${itemId}/final-report`, {
     content: reportContent, classification: null,
   });

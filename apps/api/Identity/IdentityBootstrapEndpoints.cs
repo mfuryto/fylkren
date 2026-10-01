@@ -32,14 +32,14 @@ public static partial class IdentityEndpoints
         var email = (request.Email ?? "").Trim();
         var password = request.Password ?? "";
         if (username.Length is < 3 or > 100 || displayName.Length is < 2 or > 200 || !MailAddress.TryCreate(email, out _))
-            return Results.ValidationProblem(new Dictionary<string, string[]> { ["request"] = ["Kontroller brukernavn, navn og e-postadresse."] });
+            return Results.ValidationProblem(new Dictionary<string, string[]> { ["request"] = ["Check the username, name, and email address."] });
         if (passwordPolicy.Validate(password, username, displayName, email) is { } passwordError)
             return Results.ValidationProblem(new Dictionary<string, string[]> { ["password"] = [passwordError] });
         var normalizedUsername = username.ToUpperInvariant();
         var normalizedEmail = email.ToUpperInvariant();
-        if (normalizedUsername == normalizedEmail) return Results.Conflict(new { error = "Brukernavn og e-postadresse må være forskjellige." });
+        if (normalizedUsername == normalizedEmail) return Results.Conflict(new { error = "The username and email address must be different." });
         if (await database.LoginIdentities.AnyAsync(value => value.NormalizedUsername == normalizedUsername, cancellationToken) || await database.People.AnyAsync(value => value.NormalizedEmail == normalizedEmail, cancellationToken))
-            return Results.Conflict(new { error = "Brukernavnet eller e-postadressen er allerede i bruk." });
+            return Results.Conflict(new { error = "The username or email address is already in use." });
 
         var now = DateTimeOffset.UtcNow;
         var person = new Person(Guid.NewGuid(), displayName, now, email);
@@ -56,7 +56,7 @@ public static partial class IdentityEndpoints
         catch (DbUpdateException)
         {
             await transaction.RollbackAsync(cancellationToken);
-            return Results.Conflict(new { error = "Førstegangsoppsettet er allerede fullført eller ble fullført samtidig." });
+            return Results.Conflict(new { error = "Initial setup has already been completed or was completed concurrently." });
         }
         await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, CreatePrincipal(identity));
         return Results.Created("/api/session", new { identity.Username, person.DisplayName });

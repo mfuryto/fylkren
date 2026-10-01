@@ -18,8 +18,8 @@ internal static class ExecutionCompletionEndpoints
             if (!PersonId(user, out var personId)) return Results.Problem(statusCode: 403);
             var run = await db.ExecutionRuns.Include(x => x.WorkItem).Include(x => x.ExternalRequests).SingleOrDefaultAsync(x => x.Id == runId && x.ClaimedByPersonId == personId && x.Status == "in_progress", ct);
             if (run is null || !await WorkLevelAuthorization.BelongsToLevel(run.WorkItem.SiteId, run.WorkItem.AssignedUnitId, personId, db, ct)) return Results.Problem(statusCode: 403);
-            if (run.ExternalRequests.Any(x => x.Status == "awaiting_response")) return Results.Conflict(new { error = "Eksterne forespørsler venter fortsatt på svar." });
-            if (await db.WorkItems.AnyAsync(x => x.ParentWorkItemId == run.WorkItemId && x.Status != "completed" && x.Status != "reassigned", ct)) return Results.Conflict(new { error = "Alle direkte underoppdrag må være fullført og rapportert tilbake før utførelsen kan sendes til kontroll." });
+            if (run.ExternalRequests.Any(x => x.Status == "awaiting_response")) return Results.Conflict(new { error = "External enquiries are still awaiting responses." });
+            if (await db.WorkItems.AnyAsync(x => x.ParentWorkItemId == run.WorkItemId && x.Status != "completed" && x.Status != "reassigned", ct)) return Results.Conflict(new { error = "All direct subtasks must be completed and reported before execution can be submitted for review." });
             var now = DateTimeOffset.UtcNow;
             run.Submit(now);
             run.WorkItem.TransitionWithinLevel("in_review", null, now);

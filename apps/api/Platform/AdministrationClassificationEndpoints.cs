@@ -42,7 +42,7 @@ internal static class AdministrationClassificationEndpoints
             if (validation is not null) return validation;
             var abbreviation = request.Abbreviation!.Trim().ToUpperInvariant();
             if (await db.ClassificationDefinitions.AnyAsync(value => value.Abbreviation == abbreviation, ct))
-                return Validation("abbreviation", "Kortformen er allerede i bruk.");
+                return Validation("abbreviation", "The abbreviation is already in use.");
             var value = new ClassificationDefinition(Guid.NewGuid(), request.Name!, abbreviation, request.SortOrder);
             if (!request.IsActive) value.Update(request.Name!, abbreviation, request.SortOrder, false);
             db.ClassificationDefinitions.Add(value);
@@ -61,7 +61,7 @@ internal static class AdministrationClassificationEndpoints
             if (value is null) return Results.NotFound();
             var abbreviation = request.Abbreviation!.Trim().ToUpperInvariant();
             if (await db.ClassificationDefinitions.AnyAsync(candidate => candidate.Id != id && candidate.Abbreviation == abbreviation, ct))
-                return Validation("abbreviation", "Kortformen er allerede i bruk.");
+                return Validation("abbreviation", "The abbreviation is already in use.");
             value.Update(request.Name!, abbreviation, request.SortOrder, request.IsActive);
             AddAudit(db, machineId, "classification.updated", "classification-definition", value.Id, context);
             await db.SaveChangesAsync(ct);
@@ -84,9 +84,9 @@ internal static class AdministrationClassificationEndpoints
 
     private static IResult? Validate(ClassificationRequest request)
     {
-        if ((request.Name?.Trim().Length ?? 0) is < 2 or > 100) return Validation("name", "Navnet må være mellom 2 og 100 tegn.");
-        if ((request.Abbreviation?.Trim().Length ?? 0) is < 1 or > 12) return Validation("abbreviation", "Kortformen må være mellom 1 og 12 tegn.");
-        if (request.SortOrder is < 0 or > 100000) return Validation("sortOrder", "Rekkefølgen må være mellom 0 og 100000.");
+        if ((request.Name?.Trim().Length ?? 0) is < 2 or > 100) return Validation("name", "The name must be between 2 and 100 characters.");
+        if ((request.Abbreviation?.Trim().Length ?? 0) is < 1 or > 12) return Validation("abbreviation", "The abbreviation must be between 1 and 12 characters.");
+        if (request.SortOrder is < 0 or > 100000) return Validation("sortOrder", "The sort order must be between 0 and 100000.");
         return null;
     }
 

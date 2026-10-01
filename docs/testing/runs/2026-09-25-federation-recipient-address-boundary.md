@@ -8,7 +8,7 @@
 
 ## Change under test
 
-Recipient search already returns `(instanceId, id)` for local site and unit choices. Task creation, side-anmodning and planning-anmodning now retain that instance ID and include `targetInstanceId` in their write requests. Their shared API boundary accepts the local instance ID, preserves omitted IDs for existing local clients, and rejects an explicitly different instance ID before local site lookup or work-item creation. No remote recipient is returned by the normal search and no production federated work route is enabled.
+Recipient search already returns `(instanceId, id)` for local site and unit choices. Task creation, side requests and planning requests now retain that instance ID and include `targetInstanceId` in their write requests. Their shared API boundary accepts the local instance ID, preserves omitted IDs for existing local clients, and rejects an explicitly different instance ID before local site lookup or work-item creation. No remote recipient is returned by the normal search and no production federated work route is enabled.
 
 | Control | Expected | Observed | Result / evidence |
 | --- | --- | --- | --- |

@@ -28,7 +28,7 @@ internal static class WorkItemDetailQueryEndpoints
                     ParentIsRequest = x.ParentWorkItem != null &&
                         x.ParentWorkItem.WorkItemType != null &&
                         x.ParentWorkItem.WorkItemType.IsSystemManaged &&
-                        x.ParentWorkItem.WorkItemType.NormalizedName == "ANMODNING",
+                        x.ParentWorkItem.WorkItemType.IsSystemManaged,
                     CanRead = x.CreatedByPersonId == personId ||
                         x.AssignedUnitId != null && db.OrganizationUnitMemberships.Any(membership =>
                             membership.SiteId == siteId &&
@@ -75,7 +75,7 @@ internal static class WorkItemDetailQueryEndpoints
             if (item.SiteId != siteId && item.ParentIsRequest)
                 return Results.Problem(
                     statusCode: 403,
-                    title: "Mottakers interne saksbehandling er ikke tilgjengelig for anmodende site.");
+                    title: "The recipient's internal processing is not available to the requesting site.");
             if (!item.CanRead &&
                 !await LeadsSiteRoot(siteId, personId, db, ct) &&
                 !await CanReadWorkTree(siteId, itemId, personId, db, ct))

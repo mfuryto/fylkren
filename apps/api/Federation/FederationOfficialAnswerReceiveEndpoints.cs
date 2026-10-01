@@ -48,12 +48,12 @@ internal static class FederationOfficialAnswerReceiveEndpoints
         if (sourceName is null) return Results.StatusCode(403);
         var identity = await db.FederationSigningIdentities.AsNoTracking()
             .SingleOrDefaultAsync(value => value.Key == 1, ct);
-        if (identity is null) return Results.Problem(statusCode: 503, title: "Federeringsnøkkel mangler.");
+        if (identity is null) return Results.Problem(statusCode: 503, title: "The federation key is missing.");
         ECDsa localKey;
         try { localKey = FederationSigningKeys.Load(identity, protection); }
         catch (CryptographicException)
         {
-            return Results.Problem(statusCode: 503, title: "Federeringsnøkkelen kan ikke brukes.");
+            return Results.Problem(statusCode: 503, title: "The federation key cannot be used.");
         }
         using (localKey)
         {

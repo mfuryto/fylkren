@@ -10,9 +10,9 @@ export function TaskHoldDependencySection({ siteId, itemId, busy, selected, onTo
   onError: (message: string) => void;
 }) {
   return <section className="dependency-section">
-    <h3>Avvent på andre oppdrag</h3>
+    <h3>Wait for other tasks</h3>
     <TaskDependencyPicker siteId={siteId} itemId={itemId} busy={busy} selectedIds={selected.map(value => value.id)} onSelect={onToggle} onError={onError} />
     {selected.length > 0 ? <div className="selection-summary"><strong>Valgte avhengigheter:</strong><ul>{selected.map(value => <li key={value.id}>{value.title}</li>)}</ul></div>
-      : <p className="muted">Valgfritt: Velg ett eller flere oppdrag som må fullføres før dette kan fortsette.</p>}
+      : <p className="muted">Optional: select one or more tasks that must be completed before this can continue.</p>}
   </section>;
 }

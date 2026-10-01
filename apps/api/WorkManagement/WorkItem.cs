@@ -68,7 +68,7 @@ public sealed class WorkItem
     }
     public static WorkItem CreateInternalRequest(Guid id, WorkItem parent, Guid createdByPersonId, Guid receivingUnitId, string senderSiteName, string senderPersonName, string? sourceTypeName, string? senderName, string instruction, DateTimeOffset createdAt, string? requestBasisSnapshot = null)
     {
-        var received = new WorkItem(id, parent.SiteId, createdByPersonId, parent.Title, instruction, parent.ReferenceUrl, parent.Priority, parent.DueAt, createdAt, parent.Id, parent.WorkItemTypeId, null, null, parent.Recommendation, senderSiteName, senderPersonName, sourceTypeName, "Anmodning", senderName, requestBasisSnapshot: requestBasisSnapshot ?? parent.RequestBasisSnapshot);
+        var received = new WorkItem(id, parent.SiteId, createdByPersonId, parent.Title, instruction, parent.ReferenceUrl, parent.Priority, parent.DueAt, createdAt, parent.Id, parent.WorkItemTypeId, null, null, parent.Recommendation, senderSiteName, senderPersonName, sourceTypeName, "Request", senderName, requestBasisSnapshot: requestBasisSnapshot ?? parent.RequestBasisSnapshot);
         received.AssignToUnit(receivingUnitId, null, createdAt);
         return received;
     }

@@ -7,7 +7,7 @@ namespace Fylkren.Api.Licensing;
 internal static class SiteCapacityPolicy
 {
     internal const int CommunityActiveSiteLimit = 3;
-    internal const string LimitMessage = "Community tillater høyst 3 aktive sites. Deaktiver en site eller aktiver Enterprise-lisens før du legger til flere.";
+    internal const string LimitMessage = "Community allows at most 3 active sites. Disable a site or activate an Enterprise licence before adding more.";
 
     // All paths that increase the active-site count take this transaction-scoped lock.
     // It prevents two simultaneous requests from both passing the quota check.

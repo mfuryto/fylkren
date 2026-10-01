@@ -39,7 +39,7 @@ public static class PortabilityEndpoints
         }
         catch (PortablePackageTooLargeException)
         {
-            return Results.Problem(statusCode: StatusCodes.Status413PayloadTooLarge, title: "Eksportpakken overskrider grensen på 512 MiB.");
+            return Results.Problem(statusCode: StatusCodes.Status413PayloadTooLarge, title: "The export package exceeds the 512 MiB limit.");
         }
     }
 
@@ -55,11 +55,11 @@ public static class PortabilityEndpoints
         if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest(new { error = "Antiforgery token validation failed." });
         if (!PersonId(user, out var actorPersonId) || !await CanAdminister(siteId, actorPersonId, user, db, cancellationToken))
             return Results.Problem(statusCode: StatusCodes.Status403Forbidden);
-        if (!request.HasFormContentType) return Results.ValidationProblem(new Dictionary<string, string[]> { ["package"] = ["Last opp en Fylkren-eksportpakke."] });
+        if (!request.HasFormContentType) return Results.ValidationProblem(new Dictionary<string, string[]> { ["package"] = ["Upload a Fylkren export package."] });
         var form = await request.ReadFormAsync(cancellationToken);
         var file = form.Files.GetFile("package");
-        if (file is null || file.Length == 0) return Results.ValidationProblem(new Dictionary<string, string[]> { ["package"] = ["Eksportpakken mangler eller er tom."] });
-        if (file.Length > PortableExportPackage.MaximumPackageBytes) return Results.ValidationProblem(new Dictionary<string, string[]> { ["package"] = ["Eksportpakken kan ikke være større enn 512 MiB."] });
+        if (file is null || file.Length == 0) return Results.ValidationProblem(new Dictionary<string, string[]> { ["package"] = ["The export package is missing or empty."] });
+        if (file.Length > PortableExportPackage.MaximumPackageBytes) return Results.ValidationProblem(new Dictionary<string, string[]> { ["package"] = ["The export package cannot exceed 512 MiB."] });
         await using var stream = file.OpenReadStream();
         var result = await PortableImportValidator.Validate(stream, siteId, cancellationToken);
         var now = DateTimeOffset.UtcNow;

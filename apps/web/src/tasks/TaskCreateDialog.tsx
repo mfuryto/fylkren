@@ -71,7 +71,7 @@ export function TaskCreateDialog({
     setForm((current) => ({ ...current, ...change }));
 
   return (
-    <Modal title="Registrer oppgave" onClose={onClose}>
+    <Modal title="Register task" onClose={onClose}>
       <form className="stacked-form" onSubmit={onSubmit}>
         <div className="field">
           <label htmlFor="task-title">Tittel</label>
@@ -81,19 +81,19 @@ export function TaskCreateDialog({
         <div className="field">
           <label htmlFor="task-type">Type</label>
           <select id="task-type" value={form.workItemTypeId} onChange={(event) => update({ workItemTypeId: event.target.value, targetSiteId: "", targetInstanceId: "", targetUnitId: "" })}>
-            <option value="">Ingen type</option>
+            <option value="">None type</option>
             {types.filter((type) => type.isActive).map((type) => <option key={type.id} value={type.id}>{type.name}</option>)}
           </select>
         </div>
         {requestTypeSelected && (
           <div className="field">
-            <label htmlFor="request-recipient-site">Mottaker</label>
+            <label htmlFor="request-recipient-site">Recipient</label>
             <input
               id="request-recipient-site"
               type="search"
               autoComplete="off"
               required
-              placeholder={selectedUnitId ? "Søk etter arbeidsnivå eller site" : "Søk etter site"}
+              placeholder={selectedUnitId ? "Search for work level or site" : "Search for site"}
               value={recipientQuery}
               onChange={(event) => {
                 setRecipientQuery(event.target.value);
@@ -119,7 +119,7 @@ export function TaskCreateDialog({
                     }}
                   >
                     <strong>{recipient.name}</strong>
-                    <small>{recipient.kind === "unit" ? "Arbeidsnivå i samme site" : "Ekstern toppnivå-site"}</small>
+                    <small>{recipient.kind === "unit" ? "Work level in the same site" : "External top-level site"}</small>
                   </button>
                 ))}
               </div>
@@ -127,8 +127,8 @@ export function TaskCreateDialog({
             {(form.targetSiteId || form.targetUnitId) && (
               <small className="muted">
                 {form.targetUnitId
-                  ? "Intern anmodning: hele oppdragsgrunnlaget følger saken etter ordinære tilgangsregler."
-                  : "Anmodningen sendes direkte til denne sitens toppnivå."}
+                  ? "Internal request: the complete task basis follows the case under ordinary access rules."
+                  : "The request is sent directly to this site's top level."}
               </small>
             )}
           </div>
@@ -139,14 +139,14 @@ export function TaskCreateDialog({
             <div className="field">
               <label htmlFor="task-source-type">Kildetype</label>
               <select id="task-source-type" value={form.sourceTypeId} onChange={(event) => update({ sourceTypeId: event.target.value })}>
-                <option value="">Ingen kildetype</option>
+                <option value="">None kildetype</option>
                 {sourceTypes.filter((value) => value.isActive).map((value) => <option key={value.id} value={value.id}>{value.name}</option>)}
               </select>
             </div>
             <div className="field">
-              <label htmlFor="task-sender">Avsender</label>
+              <label htmlFor="task-sender">Sender</label>
               <select id="task-sender" value={form.senderId} onChange={(event) => update({ senderId: event.target.value })}>
-                <option value="">Ingen avsender</option>
+                <option value="">No sender</option>
                 {senders.filter((value) => value.isActive).map((value) => <option key={value.id} value={value.id}>{value.name}</option>)}
               </select>
             </div>
@@ -156,20 +156,20 @@ export function TaskCreateDialog({
         </div>
         <div className="field">
           <label htmlFor="task-recommendation">Anbefaling (valgfritt)</label>
-          <textarea id="task-recommendation" rows={4} maxLength={4000} placeholder="Foreslå videre handling som leder kan ta stilling til" value={form.recommendation} onChange={(event) => update({ recommendation: event.target.value })} />
+          <textarea id="task-recommendation" rows={4} maxLength={4000} placeholder="Propose further action for the manager to consider" value={form.recommendation} onChange={(event) => update({ recommendation: event.target.value })} />
           <ClassificationControls markings={classificationMarkings} value={form.recommendation} onChange={(recommendation) => update({ recommendation })} />
         </div>
         <div className="field">
-          <label htmlFor="task-reference">Lenke til hoveddokument eller oppdragstekst (valgfritt)</label>
-          <input id="task-reference" type="url" maxLength={2048} placeholder="https://sharepoint… eller file://server/mappe/fil" value={form.referenceUrl} onChange={(event) => update({ referenceUrl: event.target.value })} />
+          <label htmlFor="task-reference">Link to primary document or task text (optional)</label>
+          <input id="task-reference" type="url" maxLength={2048} placeholder="https://sharepoint… or file://server/folder/file" value={form.referenceUrl} onChange={(event) => update({ referenceUrl: event.target.value })} />
         </div>
         <div className="field">
-          <label htmlFor="task-due">Ønsket frist</label>
+          <label htmlFor="task-due">Requested due date</label>
           <input id="task-due" type="date" value={form.dueAt} onChange={(event) => update({ dueAt: event.target.value })} />
         </div>
-        <p className="muted modal-note">Oppgaven registreres uten ansvarlig og legges i sitens ufordelte kø for vurdering. Kildelenken følger oppgaven ved viderefordeling.</p>
+        <p className="muted modal-note">The task is registered without an assignee and placed in the site's unallocated queue for assessment. The source link follows the task when routed onward.</p>
         <div className="modal-actions">
-          <button className="secondary-button" type="button" onClick={onClose}>Avbryt</button>
+          <button className="secondary-button" type="button" onClick={onClose}>Cancel</button>
           <button className="primary-button" disabled={busy}>Registrer</button>
         </div>
       </form>

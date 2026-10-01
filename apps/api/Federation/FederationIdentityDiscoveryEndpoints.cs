@@ -29,9 +29,9 @@ internal static class FederationIdentityDiscoveryEndpoints
         var identity = await db.FederationSigningIdentities.AsNoTracking()
             .SingleOrDefaultAsync(row => row.Key == 1, ct);
         if (identity is null)
-            return Results.Problem(statusCode: 503, title: "Federeringsnøkkel mangler.");
+            return Results.Problem(statusCode: 503, title: "The federation key is missing.");
         if (!FederationPublicKey.TryParse(identity.PublicKeySpki, out _, out var fingerprint))
-            return Results.Problem(statusCode: 503, title: "Federeringsnøkkelen er ugyldig.");
+            return Results.Problem(statusCode: 503, title: "The federation key is invalid.");
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         using var key = FederationSigningKeys.Load(identity, protection);
         var signature = FederationProbeProtocol.Sign(key,

@@ -21,7 +21,7 @@ internal static class SiteMemberEndpoints
             var actor = await Actor(siteId, user, database, cancellationToken); if (actor is null) return Results.Problem(statusCode: 403);
             var membership = await database.SiteMemberships.Include(value => value.Person).ThenInclude(person => person.LoginIdentities).SingleOrDefaultAsync(value => value.SiteId == siteId && value.PersonId == personId && value.IsActive, cancellationToken);
             if (membership is null) return Results.NotFound();
-            var identity = membership.Person.LoginIdentities.FirstOrDefault(); if (identity is null) return Results.Conflict(new { error = "Personen har ingen lokal innlogging som kan redigeres." });
+            var identity = membership.Person.LoginIdentities.FirstOrDefault(); if (identity is null) return Results.Conflict(new { error = "The person has no editable local sign-in." });
             var displayName = (request.DisplayName ?? "").Trim(); var username = (request.Username ?? "").Trim(); var email = (request.Email ?? "").Trim();
             var directoryProvider = await database.ExternalIdentityLinks.Where(value => value.PersonId == personId && value.IsActive && (value.Provider == "ad" || value.Provider == "ldap")).Select(value => value.Provider).FirstOrDefaultAsync(cancellationToken);
             var directoryManaged = directoryProvider is not null;
@@ -38,22 +38,22 @@ internal static class SiteMemberEndpoints
             if (hasAccessToAnotherSite && changesGlobalIdentity)
                 return Results.Conflict(new
                 {
-                    error = "Brukeren er aktiv i flere sites. Globale kontoopplysninger må endres av brukeren selv eller av Platform Manager."
+                    error = "The user is active in multiple sites. Global account details must be changed by the user or by a Platform Manager."
                 });
             if (!directoryManaged)
             {
-                if (displayName.Length is < 2 or > 200 || username.Length is < 3 or > 100 || !MailAddress.TryCreate(email, out _)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["request"] = ["Navn, e-postadresse eller brukernavn er ugyldig."] });
-                if (string.Equals(username, email, StringComparison.OrdinalIgnoreCase)) return Results.Conflict(new { error = "Brukernavn og e-postadresse må være forskjellige." });
-                if (await database.LoginIdentities.AnyAsync(value => value.Id != identity.Id && value.NormalizedUsername == username.ToUpperInvariant(), cancellationToken)) return Results.Conflict(new { error = "Brukernavnet er allerede i bruk." });
-                if (await database.People.AnyAsync(value => value.Id != personId && value.NormalizedEmail == username.ToUpperInvariant(), cancellationToken)) return Results.Conflict(new { error = "Brukernavnet er allerede i bruk som e-postadresse." });
-                if (await database.People.AnyAsync(value => value.Id != personId && value.NormalizedEmail == email.ToUpperInvariant(), cancellationToken)) return Results.Conflict(new { error = "E-postadressen er allerede i bruk." });
-                if (await database.LoginIdentities.AnyAsync(value => value.Id != identity.Id && value.NormalizedUsername == email.ToUpperInvariant(), cancellationToken)) return Results.Conflict(new { error = "E-postadressen er allerede i bruk som brukernavn." });
+                if (displayName.Length is < 2 or > 200 || username.Length is < 3 or > 100 || !MailAddress.TryCreate(email, out _)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["request"] = ["The name, email address, or username is invalid."] });
+                if (string.Equals(username, email, StringComparison.OrdinalIgnoreCase)) return Results.Conflict(new { error = "The username and email address must be different." });
+                if (await database.LoginIdentities.AnyAsync(value => value.Id != identity.Id && value.NormalizedUsername == username.ToUpperInvariant(), cancellationToken)) return Results.Conflict(new { error = "The username is already in use." });
+                if (await database.People.AnyAsync(value => value.Id != personId && value.NormalizedEmail == username.ToUpperInvariant(), cancellationToken)) return Results.Conflict(new { error = "The username is already used as an email address." });
+                if (await database.People.AnyAsync(value => value.Id != personId && value.NormalizedEmail == email.ToUpperInvariant(), cancellationToken)) return Results.Conflict(new { error = "The email address is already in use." });
+                if (await database.LoginIdentities.AnyAsync(value => value.Id != identity.Id && value.NormalizedUsername == email.ToUpperInvariant(), cancellationToken)) return Results.Conflict(new { error = "The email address is already used as a username." });
             }
             OrganizationUnit? organizationUnit = null;
             if (request.OrganizationUnitId is Guid unitId)
             {
                 organizationUnit = await database.OrganizationUnits.SingleOrDefaultAsync(value => value.Id == unitId && value.SiteId == siteId && value.IsActive && !value.IsSiteRoot, cancellationToken);
-                if (organizationUnit is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["organizationUnitId"] = ["Velg en aktiv underenhet."] });
+                if (organizationUnit is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["organizationUnitId"] = ["Select an active subordinate unit."] });
             }
             if (directoryManaged) membership.Person.Update(membership.Person.DisplayName, request.IsActive);
             else { membership.Person.UpdateWithEmail(displayName, request.IsActive, email); identity.Update(username, request.IsActive); }
@@ -79,10 +79,10 @@ internal static class SiteMemberEndpoints
             if (await HasAccessToAnotherSite(siteId, personId, database, cancellationToken))
                 return Results.Conflict(new
                 {
-                    error = "Brukeren er aktiv i flere sites. Passordreset må initieres av Platform Manager."
+                    error = "The user is active in multiple sites. A Platform Manager must initiate the password reset."
                 });
             if (await database.ExternalIdentityLinks.AnyAsync(value => value.PersonId == personId && value.IsActive && (value.Provider == "ad" || value.Provider == "ldap"), cancellationToken))
-                return Results.Conflict(new { error = "Passordet forvaltes av katalogtjenesten." });
+                return Results.Conflict(new { error = "The password is managed by the directory service." });
             var now = DateTimeOffset.UtcNow;
             var reset = await PasswordResetService.CreateAsync(identity, actor.Value, database, now, cancellationToken);
             database.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, actor.Value, "local-user.password-reset-initiated", "person", personId, now));
@@ -94,7 +94,7 @@ internal static class SiteMemberEndpoints
         {
             if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest(new { error = "Antiforgery token validation failed." });
             var actor = await Actor(siteId, user, database, cancellationToken); if (actor is null) return Results.Problem(statusCode: 403);
-            if (actor.Value == personId) return Results.Conflict(new { error = "Du kan ikke fjerne ditt eget aktive medlemskap." });
+            if (actor.Value == personId) return Results.Conflict(new { error = "You cannot remove your own active membership." });
             var membership = await database.SiteMemberships.SingleOrDefaultAsync(value => value.SiteId == siteId && value.PersonId == personId && value.IsActive, cancellationToken); if (membership is null) return Results.NotFound();
             membership.Deactivate();
             var unitMembership = await database.OrganizationUnitMemberships.SingleOrDefaultAsync(value => value.SiteId == siteId && value.PersonId == personId, cancellationToken);

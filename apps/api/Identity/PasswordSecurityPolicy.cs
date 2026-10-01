@@ -25,16 +25,16 @@ internal sealed class PasswordSecurityPolicy
     public string? Validate(string? password, params string?[] contextualValues)
     {
         if (password?.Length is not (>= MinimumLength and <= MaximumLength))
-            return $"Passordet må være mellom {MinimumLength} og {MaximumLength} tegn.";
+            return $"The password must be between {MinimumLength} and {MaximumLength} characters.";
 
         var normalizedPassword = Normalize(password);
         if (ContainsFingerprint(SHA256.HashData(Encoding.UTF8.GetBytes(normalizedPassword))))
-            return "Velg et mindre vanlig passord.";
+            return "Choose a less common password.";
 
         foreach (var token in ContextTokens(contextualValues.Prepend("Fylkren")))
         {
             if (normalizedPassword.Contains(token, StringComparison.Ordinal))
-                return "Passordet kan ikke inneholde brukernavn, navn, e-postadresse, organisasjonsnavn eller produktnavn.";
+                return "The password cannot contain the username, name, email address, organization name, or product name.";
         }
 
         return null;

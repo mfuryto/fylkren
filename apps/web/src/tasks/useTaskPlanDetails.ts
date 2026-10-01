@@ -16,7 +16,7 @@ export function useTaskPlanDetails(siteId: string, openItemId: string | null, it
     }).catch(problem => {
       if (active) {
         setPlanDetails(current => ({ ...current, [item.id]: null }));
-        onError(errorMessage(problem, "Planforslaget kunne ikke lastes."));
+        onError(errorMessage(problem, "The proposed plan could not be loaded."));
       }
     });
     return () => { active = false; };

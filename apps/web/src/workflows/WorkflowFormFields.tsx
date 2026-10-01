@@ -41,13 +41,13 @@ export function WorkflowFormFields({ value, onChange, selectedSite, siteId, unit
     {value.kind === "execution" && <div className="field">
       <label>Omfang</label>
       <select value={value.ownerUnitId} onChange={event => onChange({ ...value, ownerUnitId: event.target.value })}>
-        {canAdministerSite && <option value="">Hele siten</option>}
-        {!canAdministerSite && <option value="">Velg eget nivå</option>}
+        {canAdministerSite && <option value="">Entire site</option>}
+        {!canAdministerSite && <option value="">Select own level</option>}
         {selectableUnits.map(unit => <option key={unit.id} value={unit.id}>{unit.name}</option>)}
       </select>
     </div>}
     <div className="field">
-      <label>Steg – ett per linje og i ønsket rekkefølge</label>
+      <label>Steps – one per line in the desired order</label>
       <textarea required rows={8} value={value.steps} onChange={event => {
         const steps = event.target.value;
         const names = workflowStepNames(steps);
@@ -60,28 +60,28 @@ export function WorkflowFormFields({ value, onChange, selectedSite, siteId, unit
       }}/>
     </div>
     {stepNames.length > 0 && <section className="workflow-template-assignment">
-      <h3>Startinnhold for steg</h3>
-      <p className="muted">Velg valgfritt en mal per steg. Innholdet kopieres inn når en ny behandling starter.</p>
+      <h3>Initial content for steps</h3>
+      <p className="muted">Optionally select one template per step. Its content is copied when new processing starts.</p>
       {stepNames.map((name, index) => <div className="field" key={`${name}-${index}`}>
         <label>{name}</label>
         <select value={value.templateIds[name] ?? ""} onChange={event => onChange({ ...value, templateIds: { ...value.templateIds, [name]: event.target.value } })}>
-          <option value="">Ingen mal</option>
+          <option value="">None mal</option>
           {applicableTemplates.map(template => <option key={template.id} value={template.id}>{template.name}</option>)}
         </select>
       </div>)}
     </section>}
     <div className="field">
-      <label>Steg med tidslinjal</label>
+      <label>Step with timeline</label>
       <select value={value.timelineStepName} onChange={event => onChange({ ...value, timelineStepName: event.target.value })}>
-        <option value="">Ingen tidslinjal</option>
+        <option value="">None tidslinjal</option>
         {stepNames.map((name, index) => <option key={`${name}-timeline-${index}`} value={name}>{name}</option>)}
       </select>
-      <small className="muted">Tidslinjalen vises før stegets øvrige innhold. Startdato settes når behandlingen opprettes.</small>
+      <small className="muted">The timeline appears before the step's other content. The start date is set when processing is created.</small>
     </div>
     {value.kind === "planning" && <div className="field">
-      <label>Steg for oppgavefordeling</label>
+      <label>Task-allocation step</label>
       <select required value={value.allocationStepName} onChange={event => onChange({ ...value, allocationStepName: event.target.value })}>
-        <option value="">Velg hvor [Legg inn oppgavefordeling] skal vises</option>
+        <option value="">Select where [Add task allocation] should appear</option>
         {stepNames.map((name, index) => <option key={`${name}-${index}`} value={name}>{name}</option>)}
       </select>
     </div>}

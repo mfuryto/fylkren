@@ -7,12 +7,12 @@ The clean command was `node tools/e2e/community-browser-smoke.mjs --task-flow --
 | Control | Expected | Observed | Result / evidence |
 | --- | --- | --- | --- |
 | Active workload data | One active leaf task is represented once | Latest of 12 API points had `total: 1` | Pass; authenticated workload-history assertion |
-| Active workload chart | Rendered total series reflects one active task | `Hele siten` line ended at SVG y=40 on a scale whose maximum was one | Pass; rendered polyline assertion |
+| Active workload chart | Rendered total series reflects one active task | `Entire site` line ended at SVG y=40 on a scale whose maximum was one | Pass; rendered polyline assertion |
 | Completed workload data | Completed work leaves current active workload | Latest API point changed to `total: 0` | Pass; authenticated postcondition |
-| Completed workload chart | Rendered total series returns to zero | `Hele siten` line ended at SVG y=250 | Pass; rendered polyline assertion |
-| Chart semantics | History is identifiable and spans the required period | Accessible label, availability date, 12 month labels and `Hele siten` legend rendered | Pass; DOM assertions |
+| Completed workload chart | Rendered total series returns to zero | `Entire site` line ended at SVG y=250 | Pass; rendered polyline assertion |
+| Chart semantics | History is identifiable and spans the required period | Accessible label, availability date, 12 month labels and `Entire site` legend rendered | Pass; DOM assertions |
 | Chart layout | Both states fit the desktop viewport | No horizontal document overflow at either total | Pass; Chromium layout measurement |
-| Default classification order | Fresh installations use ordinary English terms in ascending order | `PUBLIC (PUB)`, `INTERNAL (INT)`, `CONFIDENTIAL (CONF)`, `SENSITIVE (SENS)`, `SECRET (SECRET)` rendered in exact order after `Ingen klassifisering` | Pass; complete select-option assertion |
+| Default classification order | Fresh installations use ordinary English terms in ascending order | `PUBLIC (PUB)`, `INTERNAL (INT)`, `CONFIDENTIAL (CONF)`, `SENSITIVE (SENS)`, `SECRET (SECRET)` rendered in exact order after `No classification` | Pass; complete select-option assertion |
 | No unclassified default | `UNCLASSIFIED` is not seeded | No such option appeared | Pass; exact option-list assertion |
 | Adjacent E2E-01 regression | Existing direct-execution controls remain green | All chain, overview, audit, notification, classification and PDF flags passed; zero browser errors | Pass; final JSON result |
 | Disposable cleanup | No synthetic installation remains | Chromium, web/API/PostgreSQL, networks, volumes and PNG intermediates were removed | Pass; cleanup output |

@@ -28,12 +28,12 @@ internal static class SiteManagerEndpoints
 
         var person = await database.People.SingleOrDefaultAsync(value => value.Id == request.PersonId && value.IsActive, cancellationToken);
         if (person is null)
-            return Results.ValidationProblem(new Dictionary<string, string[]> { ["personId"] = ["Personen finnes ikke eller er deaktivert."] });
+            return Results.ValidationProblem(new Dictionary<string, string[]> { ["personId"] = ["The person does not exist or is disabled."] });
 
         var now = DateTimeOffset.UtcNow;
         var assignment = await database.SiteManagerAssignments.SingleOrDefaultAsync(value => value.SiteId == siteId && value.PersonId == request.PersonId, cancellationToken);
         if (assignment?.IsActive == true)
-            return Results.Conflict(new { error = "Personen er allerede tildelt som Site Manager." });
+            return Results.Conflict(new { error = "The person is already assigned as a Site Manager." });
         if (assignment is null)
         {
             assignment = new SiteManagerAssignment(Guid.NewGuid(), siteId, request.PersonId, now);

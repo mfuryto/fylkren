@@ -53,7 +53,7 @@ internal static class FederationCatalogEndpoints
                 FederationCatalogProtocol.RequestBytes(request.SenderInstanceId, localId, request.Timestamp, request.Nonce),
                 request.Signature)) return Results.Unauthorized();
         var localKey = await db.FederationSigningIdentities.AsNoTracking().SingleOrDefaultAsync(row => row.Key == 1, ct);
-        if (localKey is null) return Results.Problem(statusCode: 503, title: "Federeringsnøkkel mangler.");
+        if (localKey is null) return Results.Problem(statusCode: 503, title: "The federation key is missing.");
         // Approved peers automatically see active top-level sites. Inactive root sites are
         // included as revocations; attached child sites are omitted and suspended by sync.
         var sites = await db.Sites.AsNoTracking()
@@ -62,7 +62,7 @@ internal static class FederationCatalogEndpoints
                 1_000_000_000L + site.Version, site.IsActive))
             .ToArrayAsync(ct);
         if (!FederationCatalogProtocol.ValidSites(sites))
-            return Results.Problem(statusCode: 503, title: "Site-katalogen kan ikke publiseres.");
+            return Results.Problem(statusCode: 503, title: "The site catalogue cannot be published.");
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         string signature;
         try
@@ -73,7 +73,7 @@ internal static class FederationCatalogEndpoints
         }
         catch (CryptographicException)
         {
-            return Results.Problem(statusCode: 503, title: "Federeringsnøkkelen kan ikke brukes.");
+            return Results.Problem(statusCode: 503, title: "The federation key cannot be used.");
         }
         db.FederationProbeNonces.Add(new FederationProbeNonce(peer.InstanceId, request.Nonce, now));
         try { await db.SaveChangesAsync(ct); }
@@ -111,7 +111,7 @@ internal static class FederationCatalogEndpoints
         }
         catch (CryptographicException)
         {
-            return Results.Problem(statusCode: 503, title: "Federeringsnøkkelen kan ikke brukes.");
+            return Results.Problem(statusCode: 503, title: "The federation key cannot be used.");
         }
         try
         {
@@ -124,7 +124,7 @@ internal static class FederationCatalogEndpoints
             using var response = await clients.CreateClient("federation-probe")
                 .SendAsync(outgoing, HttpCompletionOption.ResponseHeadersRead, ct);
             if (!response.IsSuccessStatusCode)
-                return Results.Problem(statusCode: 502, title: "Motparten avviste katalogforespørselen.");
+                return Results.Problem(statusCode: 502, title: "The peer rejected the catalogue request.");
             await response.Content.LoadIntoBufferAsync(1_000_000, ct);
             var catalog = await response.Content.ReadFromJsonAsync<FederationCatalogResponse>(cancellationToken: ct);
             var now = DateTimeOffset.UtcNow;
@@ -134,7 +134,7 @@ internal static class FederationCatalogEndpoints
                 !FederationCatalogProtocol.ValidSites(catalog.Sites) ||
                 !FederationProbeProtocol.Verify(peerKey, FederationCatalogProtocol.ResponseBytes(instanceId,
                     localId, catalog.Timestamp, nonce, catalog.Sites), catalog.Signature))
-                return Results.Problem(statusCode: 502, title: "Site-katalogens signatur eller innhold kunne ikke bekreftes.");
+                return Results.Problem(statusCode: 502, title: "The site catalogue signature or contents could not be verified.");
             var known = await db.FederationRemoteSites.Where(site => site.InstanceId == instanceId)
                 .ToDictionaryAsync(site => site.SiteId, ct);
             var changed = 0;
@@ -170,7 +170,7 @@ internal static class FederationCatalogEndpoints
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException or InvalidOperationException)
         {
-            return Results.Problem(statusCode: 502, title: "Site-katalogen kunne ikke synkroniseres.");
+            return Results.Problem(statusCode: 502, title: "The site catalogue could not be synchronized.");
         }
     }
 

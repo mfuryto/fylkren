@@ -15,7 +15,7 @@ internal static class ReportQueryEndpoints
         {
             if (!PersonId(user, out var personId) || !await CanReadReportsAtLevel(siteId, unitId, personId, db, ct)) return Results.Problem(statusCode: 403);
             if (RequestQueryPolicy.Validate(page, search) is { } queryError) return queryError;
-            if (year is < 1900 or > 9999) return Results.ValidationProblem(new Dictionary<string, string[]> { ["year"] = ["År må være mellom 1900 og 9999."] });
+            if (year is < 1900 or > 9999) return Results.ValidationProblem(new Dictionary<string, string[]> { ["year"] = ["The year must be between 1900 and 9999."] });
             var pageNumber = Math.Max(page ?? 1, 1); const int pageSize = 20;
             var query = db.WorkItems.AsNoTracking().Where(x => x.SiteId == siteId && x.AssignedUnitId == unitId && x.Status == "completed" && x.FinalReport != null && x.FinalReportApprovedAt != null);
             var years = await query.Select(x => x.FinalReportApprovedAt!.Value.Year).Distinct().OrderByDescending(x => x).ToListAsync(ct);

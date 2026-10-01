@@ -5,7 +5,7 @@ import { executionChildUnits, executionDefinitionOptions, executionStatus } from
 
 const item = (values: Partial<ExecutionItem> = {}): ExecutionItem => ({
   id: "item", parentWorkItemId: null, assignedUnitId: null, assignedUnitName: null,
-  title: "Oppdrag", description: "", requestBasisSnapshot: null, recommendation: null,
+  title: "Task", description: "", requestBasisSnapshot: null, recommendation: null,
   referenceUrl: null, priority: "normal", dueAt: null, decisionNote: null, createdBy: "Test",
   createdAt: "2026-01-01T00:00:00Z", hasPlan: false, run: null, ...values,
 });
@@ -17,8 +17,8 @@ const unit = (values: Partial<TaskUnit>): TaskUnit => ({
 
 describe("executionQueue", () => {
   it("presents known execution statuses", () => {
-    expect(executionStatus(item())).toBe("Tilgjengelig");
-    expect(executionStatus(item({ run: { id: "run", definitionId: null, definitionName: null, claimedByPersonId: "person", claimedBy: "Test", status: "in_progress", currentStep: 0, timelineStartedOn: null, steps: [] } }))).toBe("Under utførelse");
+    expect(executionStatus(item())).toBe("Togjengelig");
+    expect(executionStatus(item({ run: { id: "run", definitionId: null, definitionName: null, claimedByPersonId: "person", claimedBy: "Test", status: "in_progress", currentStep: 0, timelineStartedOn: null, steps: [] } }))).toBe("In execution");
   });
 
   it("finds only direct subunits in the correct site", () => {

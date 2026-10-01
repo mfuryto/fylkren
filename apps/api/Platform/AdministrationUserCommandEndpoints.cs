@@ -19,14 +19,14 @@ internal static class AdministrationUserCommandEndpoints
         var hash = RequestHash("assign", personId, request);
         var replay = await CheckIdempotency(machineId, context, hash, db, ct);
         if (replay is not null) return replay;
-        if (!await db.Sites.AnyAsync(site => site.Id == request.SiteId && site.IsActive, ct)) return Validation("siteId", "Målsiten finnes ikke eller er deaktivert.");
+        if (!await db.Sites.AnyAsync(site => site.Id == request.SiteId && site.IsActive, ct)) return Validation("siteId", "The target site does not exist or is disabled.");
         var person = await db.People.SingleOrDefaultAsync(value => value.Id == personId && !value.IsDeleted, ct);
         if (person is null) return Results.NotFound();
-        if (await IsPlatformManager(db, personId, ct)) return Problem(context, 409, "platform_account", "Platform Manager-kontoer kan ikke tildeles en site.");
+        if (await IsPlatformManager(db, personId, ct)) return Problem(context, 409, "platform_account", "Platform Manager accounts cannot be assigned to a site.");
         if (await db.SiteMemberships.AnyAsync(membership =>
                 membership.PersonId == personId && membership.IsActive &&
                 membership.Site.IsActive, ct))
-            return Problem(context, 409, "active_site_membership", "Brukeren har allerede en aktiv site.");
+            return Problem(context, 409, "active_site_membership", "The user already has an active site.");
         var now = DateTimeOffset.UtcNow;
         var membership = await db.SiteMemberships.SingleOrDefaultAsync(value => value.PersonId == personId && value.SiteId == request.SiteId, ct);
         if (membership is null) db.SiteMemberships.Add(new SiteMembership(Guid.NewGuid(), request.SiteId, personId, now));
@@ -48,14 +48,14 @@ internal static class AdministrationUserCommandEndpoints
         var hash = RequestHash("move", personId, request);
         var replay = await CheckIdempotency(machineId, context, hash, db, ct);
         if (replay is not null) return replay;
-        if (request.SourceSiteId == request.TargetSiteId) return Validation("targetSiteId", "Velg en annen målsite.");
-        if (await IsPlatformManager(db, personId, ct)) return Problem(context, 409, "platform_account", "Platform Manager-kontoer kan ikke flyttes mellom sites.");
+        if (request.SourceSiteId == request.TargetSiteId) return Validation("targetSiteId", "Select a different target site.");
+        if (await IsPlatformManager(db, personId, ct)) return Problem(context, 409, "platform_account", "Platform Manager accounts cannot be moved between sites.");
         var person = await db.People.SingleOrDefaultAsync(value => value.Id == personId && !value.IsDeleted, ct);
         if (person is null) return Results.NotFound();
         var source = await db.SiteMemberships.SingleOrDefaultAsync(value => value.PersonId == personId && value.SiteId == request.SourceSiteId && value.IsActive, ct);
-        if (source is null) return Problem(context, 409, "source_membership_missing", "Brukeren har ikke et aktivt medlemskap i kildesiten.");
-        if (!await db.Sites.AnyAsync(site => site.Id == request.TargetSiteId && site.IsActive, ct)) return Validation("targetSiteId", "Målsiten finnes ikke eller er deaktivert.");
-        if (await db.SiteMemberships.AnyAsync(value => value.PersonId == personId && value.SiteId == request.TargetSiteId && value.IsActive, ct)) return Problem(context, 409, "target_membership_exists", "Brukeren tilhører allerede målsiten.");
+        if (source is null) return Problem(context, 409, "source_membership_missing", "The user does not have an active membership in the source site.");
+        if (!await db.Sites.AnyAsync(site => site.Id == request.TargetSiteId && site.IsActive, ct)) return Validation("targetSiteId", "The target site does not exist or is disabled.");
+        if (await db.SiteMemberships.AnyAsync(value => value.PersonId == personId && value.SiteId == request.TargetSiteId && value.IsActive, ct)) return Problem(context, 409, "target_membership_exists", "The user already belongs to the target site.");
         var now = DateTimeOffset.UtcNow;
         source.Deactivate();
         var target = await db.SiteMemberships.SingleOrDefaultAsync(value => value.PersonId == personId && value.SiteId == request.TargetSiteId, ct);
@@ -74,12 +74,12 @@ internal static class AdministrationUserCommandEndpoints
         var hash = RequestHash("deactivate", personId, "none");
         var replay = await CheckIdempotency(machineId, context, hash, db, ct);
         if (replay is not null) return replay;
-        if (await IsPlatformManager(db, personId, ct)) return Problem(context, 409, "platform_account", "Platform Manager-kontoer kan ikke deaktiveres gjennom bruker-API-et.");
+        if (await IsPlatformManager(db, personId, ct)) return Problem(context, 409, "platform_account", "Platform Manager accounts cannot be disabled through the user API.");
         if (await db.SiteMemberships.AnyAsync(value =>
                 value.PersonId == personId && value.IsActive && value.Site.IsActive, ct) ||
             await db.SiteManagerAssignments.AnyAsync(value =>
                 value.PersonId == personId && value.IsActive && value.Site.IsActive, ct))
-            return Problem(context, 409, "active_site_membership", "Brukeren må fjernes eller flyttes fra aktive sites før deaktivering.");
+            return Problem(context, 409, "active_site_membership", "The user must be removed or moved from active sites before being disabled.");
         var person = await db.People.SingleOrDefaultAsync(value => value.Id == personId && !value.IsDeleted, ct);
         if (person is null) return Results.NotFound();
         var now = DateTimeOffset.UtcNow;

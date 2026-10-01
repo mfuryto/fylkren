@@ -47,7 +47,7 @@ describe("overviewModel", () => {
   });
 
   it("deduplicates a received request in the action queue", () => {
-    const request = item({ id: "request", workItemTypeName: "Anmodning", senderSiteName: "Sender", status: "registered" });
+    const request = item({ id: "request", workItemTypeName: "Request", senderSiteName: "Sender", status: "registered" });
     const metrics = buildOverviewMetrics([request], "", new Date("2026-01-01").getTime());
     expect(metrics.needsAction.map(value => value.id)).toEqual(["request"]);
     expect(isReceivedRequest(request)).toBe(true);
@@ -56,7 +56,7 @@ describe("overviewModel", () => {
   it("keeps the parent work item active when a side request is sent", () => {
     const source = item({ id: "source", status: "in_progress" });
     const sent = item({ id: "sent", parentWorkItemId: "source", parentTitle: source.title,
-      workItemTypeName: "Anmodning", isOutgoingRequest: true, status: "in_progress",
+      workItemTypeName: "Request", isOutgoingRequest: true, status: "in_progress",
       requestProgressStatus: "under_review" });
     const metrics = buildOverviewMetrics([source, sent], "", new Date("2026-01-01").getTime());
     expect(metrics.active.map(value => value.id)).toEqual(["source"]);
@@ -77,14 +77,14 @@ describe("overviewModel", () => {
     const source = item({ id: "source", status: "in_progress" });
     const internal = item({ id: "internal", parentWorkItemId: "source", assignedUnitId: "section", status: "assigned" });
     const sent = item({ id: "sent", parentWorkItemId: "source", parentTitle: source.title,
-      workItemTypeName: "Anmodning", isOutgoingRequest: true, status: "in_progress", requestProgressStatus: "registered" });
+      workItemTypeName: "Request", isOutgoingRequest: true, status: "in_progress", requestProgressStatus: "registered" });
     const metrics = buildOverviewMetrics([source, internal, sent], "", new Date("2026-01-01").getTime());
     expect(metrics.active.map(value => value.id)).toEqual(["internal"]);
     expect(metrics.sentRequests.map(value => value.id)).toEqual(["sent"]);
   });
 
   it("counts a received request once and removes an acknowledged cancellation from the active queue", () => {
-    const received = item({ id: "received", workItemTypeName: "Anmodning", senderSiteName: "Sender", status: "registered" });
+    const received = item({ id: "received", workItemTypeName: "Request", senderSiteName: "Sender", status: "registered" });
     const active = buildOverviewMetrics([received], "", new Date("2026-01-01").getTime());
     expect(active.active.map(value => value.id)).toEqual(["received"]);
     expect(active.statisticsScope.filter(isReceivedRequest).map(value => value.id)).toEqual(["received"]);

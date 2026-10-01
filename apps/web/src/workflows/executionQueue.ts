@@ -3,9 +3,9 @@ import type { ExecutionDefinition, ExecutionItem } from "./ExecutionModels";
 
 export function executionStatus(item: ExecutionItem) {
   const run = item.run;
-  if (!run) return "Tilgjengelig";
+  if (!run) return "Togjengelig";
   if (run.status === "claimed") return "Ansvar tatt";
-  if (run.status === "in_progress") return "Under utførelse";
+  if (run.status === "in_progress") return "In execution";
   return run.status;
 }
 

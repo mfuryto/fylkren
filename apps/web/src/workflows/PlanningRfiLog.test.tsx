@@ -16,12 +16,12 @@ describe("planning RFI", () => {
       task: { id: "task", parentWorkItemId: null },
       plan: {
         id: "plan", ownerWorkItemId: "task", steps: [], allocations: [], requests: [],
-        rfi: [{ id: "rfi", who: "Seksjon 1", what: "Kan tankbilen komme?", dueOn: "2026-10-15", answered: true, answer: "Ja." }],
+        rfi: [{ id: "rfi", who: "Section 1", what: "Can the tanker arrive?", dueOn: "2026-10-15", answered: true, answer: "Yes." }],
       },
     } as unknown as WorkItemDetails;
     const html = renderToStaticMarkup(<TaskPlanContent details={details} language="nb-NO" />);
-    expect(html).toContain("Kan tankbilen komme?");
-    expect(html).toContain("Ja.");
+    expect(html).toContain("Can the tanker arrive?");
+    expect(html).toContain("Yes.");
     expect(html).toContain("2026-10-15");
   });
 });

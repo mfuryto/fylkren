@@ -96,16 +96,16 @@ public static class DirectoryEndpoints
         DirectoryUser? directoryUser;
         try { directoryUser = await directory.FindUserAsync(provider, directoryUsername, cancellationToken); }
         catch (InvalidOperationException) { return Results.BadRequest(); }
-        if (directoryUser is null) return Results.NotFound(new { error = "Brukeren ble ikke funnet entydig i katalogen." });
+        if (directoryUser is null) return Results.NotFound(new { error = "The user could not be uniquely identified in the directory." });
 
         var identity = await database.LoginIdentities.Include(value => value.Person)
             .SingleOrDefaultAsync(value => value.NormalizedUsername == localUsername.ToUpperInvariant() && value.IsActive, cancellationToken);
-        if (identity is null) return Results.NotFound(new { error = "Den lokale brukeren finnes ikke eller er deaktivert." });
+        if (identity is null) return Results.NotFound(new { error = "The local user does not exist or is disabled." });
         if (await database.ExternalIdentityLinks.AnyAsync(value => value.Provider == provider && value.PersonId == identity.PersonId && value.IsActive, cancellationToken))
-            return Results.Conflict(new { error = "Den lokale brukeren har allerede en aktiv kobling til denne katalogtypen." });
+            return Results.Conflict(new { error = "The local user already has an active link to this directory type." });
         var existingLink = await database.ExternalIdentityLinks.SingleOrDefaultAsync(value => value.Provider == provider && value.SubjectId == directoryUser.StableId, cancellationToken);
         if (existingLink?.IsActive == true)
-            return Results.Conflict(new { error = "Katalogidentiteten er allerede koblet." });
+            return Results.Conflict(new { error = "The directory identity is already linked." });
 
         var now = DateTimeOffset.UtcNow;
         var link = existingLink ?? new ExternalIdentityLink(Guid.NewGuid(), identity.PersonId, provider, directoryUser.StableId, directoryUser.Username, now);
@@ -136,7 +136,7 @@ public static class DirectoryEndpoints
             (value.Provider == "ad" || value.Provider == "ldap") && value.IsActive, cancellationToken);
         if (link is null) return Results.NotFound();
         if (!await ExternalIdentityLinkSafety.CanDeactivateAsync(link, database, options, cancellationToken))
-            return Results.Conflict(new { error = "Koblingen kan ikke fjernes fordi den er siste aktive eksterne innlogging for en Platform Manager mens lokal innlogging er deaktivert." });
+            return Results.Conflict(new { error = "The link cannot be removed because it is the last active external sign-in for a Platform Manager while local sign-in is disabled." });
         link.Deactivate();
         if (Guid.TryParse(actor.FindFirstValue("fylkren:person_id"), out var actorPersonId))
             database.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), null, actorPersonId, $"identity.{link.Provider}.unlinked", "external-identity-link", link.Id, DateTimeOffset.UtcNow));
@@ -164,7 +164,7 @@ public static class DirectoryEndpoints
         }
         catch (InvalidOperationException)
         {
-            return Results.Conflict(new { error = "En katalogsynkronisering kjører allerede." });
+            return Results.Conflict(new { error = "A directory synchronization is already running." });
         }
     }
 

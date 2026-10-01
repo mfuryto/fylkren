@@ -106,15 +106,15 @@ public static partial class IdentityEndpoints
         if (!options.Authentication.MfaEnabled) return Results.NotFound();
         if (string.IsNullOrWhiteSpace(request.ChallengeToken) || request.ChallengeToken.Length > 4096 ||
             string.IsNullOrWhiteSpace(request.Code) || request.Code.Length > 128)
-            return Results.Problem(statusCode: 401, title: "Ugyldig eller utløpt tofaktorutfordring.");
+            return Results.Problem(statusCode: 401, title: "Invalid or expired two-factor challenge.");
         Guid identityId;
         try { identityId = totp.ReadChallenge(request.ChallengeToken); }
-        catch { return Results.Problem(statusCode: 401, title: "Ugyldig eller utløpt tofaktorutfordring."); }
+        catch { return Results.Problem(statusCode: 401, title: "Invalid or expired two-factor challenge."); }
         await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
         var identityLockKey = BitConverter.ToInt64(identityId.ToByteArray(), 0);
         await database.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock({identityLockKey})", cancellationToken);
         var identity = await database.LoginIdentities.Include(value => value.Person).SingleOrDefaultAsync(value => value.Id == identityId && value.IsActive && value.Person.IsActive && value.TotpEnabled, cancellationToken);
-        if (identity?.TotpSecret is null || (!identity.IsPlatformManager && !await HasActiveAccess(identity.PersonId, database, cancellationToken))) return Results.Problem(statusCode: 401, title: "Ugyldig tofaktorkode.");
+        if (identity?.TotpSecret is null || (!identity.IsPlatformManager && !await HasActiveAccess(identity.PersonId, database, cancellationToken))) return Results.Problem(statusCode: 401, title: "Invalid two-factor code.");
         var valid = false;
         try
         {
@@ -133,7 +133,7 @@ public static partial class IdentityEndpoints
             if (!valid) identity.RecordAuthenticationFailure(now);
             await database.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
-            return Results.Problem(statusCode: 401, title: "Ugyldig tofaktorkode.");
+            return Results.Problem(statusCode: 401, title: "Invalid two-factor code.");
         }
         identity.ClearAuthenticationFailures();
         identity.RecordSignIn(now);

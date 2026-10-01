@@ -7,17 +7,17 @@ namespace Fylkren.Api.WorkManagement;
 
 internal static class WorkItemPolicy
 {
-    internal static Task<bool> IsOutgoingRequest(Guid itemId, Guid siteId, FylkrenDbContext db, CancellationToken ct) => db.WorkItems.AnyAsync(x => x.Id == itemId && x.SiteId == siteId && x.WorkItemType != null && x.WorkItemType.IsSystemManaged && x.WorkItemType.NormalizedName == "ANMODNING" && (db.WorkItems.Any(child => child.ParentWorkItemId == x.Id && child.SenderSiteName != null && (child.SiteId != x.SiteId || child.AssignedUnitId != x.AssignedUnitId)) || db.FederationWorkLinks.Any(link => link.LocalWorkItemId == x.Id && link.Direction == "outgoing")), ct);
+    internal static Task<bool> IsOutgoingRequest(Guid itemId, Guid siteId, FylkrenDbContext db, CancellationToken ct) => db.WorkItems.AnyAsync(x => x.Id == itemId && x.SiteId == siteId && x.WorkItemType != null && x.WorkItemType.IsSystemManaged && (db.WorkItems.Any(child => child.ParentWorkItemId == x.Id && child.SenderSiteName != null && (child.SiteId != x.SiteId || child.AssignedUnitId != x.AssignedUnitId)) || db.FederationWorkLinks.Any(link => link.LocalWorkItemId == x.Id && link.Direction == "outgoing")), ct);
     internal static string? BuildInternalDelegationBasis(WorkItem parent, IEnumerable<(string UnitName, string FinalReport)> previousDeliveries)
     {
         var deliveries = previousDeliveries.ToList();
         if (deliveries.Count == 0) return parent.RequestBasisSnapshot;
         var sections = new List<string>();
         if (!string.IsNullOrWhiteSpace(parent.RequestBasisSnapshot)) sections.Add(parent.RequestBasisSnapshot);
-        else if (!string.IsNullOrWhiteSpace(parent.Description)) sections.Add($"# Oppdragsgrunnlag\n\n## Hovedoppdragets beskrivelse\n{parent.Description}");
+        else if (!string.IsNullOrWhiteSpace(parent.Description)) sections.Add($"# Task basis\n\n## Primary task description\n{parent.Description}");
         foreach (var delivery in deliveries)
         {
-            var section = $"## Tidligere sluttrapport fra {delivery.UnitName}\n{delivery.FinalReport}";
+            var section = $"## Previous final report from {delivery.UnitName}\n{delivery.FinalReport}";
             if (sections.Sum(value => value.Length) + section.Length > 95000) break;
             sections.Add(section);
         }

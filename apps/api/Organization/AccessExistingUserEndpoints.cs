@@ -70,11 +70,11 @@ internal static class AccessExistingUserEndpoints
             person.ExternalIdentityLinks.Any(link => link.IsActive && (link.Provider == "ad" || link.Provider == "ldap")))
             return Results.NotFound();
         if (!await database.SiteMemberships.AnyAsync(value => value.PersonId == person.Id && value.SiteId != siteId && value.IsActive && value.Site.IsActive, cancellationToken))
-            return Results.Conflict(new { error = "Brukeren tilhører ikke lenger en annen aktiv site." });
+            return Results.Conflict(new { error = "The user no longer belongs to another active site." });
         if (await database.SiteMemberships.AnyAsync(value => value.SiteId == siteId && value.PersonId == person.Id && value.IsActive, cancellationToken))
-            return Results.Conflict(new { error = "Brukeren er allerede lagt til i denne siten." });
+            return Results.Conflict(new { error = "The user has already been added to this site." });
         var unit = await database.OrganizationUnits.SingleOrDefaultAsync(value => value.Id == request.OrganizationUnitId && value.SiteId == siteId && value.IsActive && !value.IsSiteRoot, cancellationToken);
-        if (unit is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["organizationUnitId"] = ["Velg en aktiv underenhet i mottakende site."] });
+        if (unit is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["organizationUnitId"] = ["Select an active subordinate unit in the receiving site."] });
         var now = DateTimeOffset.UtcNow;
         var previousMembership = await database.SiteMemberships.SingleOrDefaultAsync(value => value.SiteId == siteId && value.PersonId == person.Id, cancellationToken);
         if (previousMembership is null) database.SiteMemberships.Add(new SiteMembership(Guid.NewGuid(), siteId, person.Id, now));

@@ -27,32 +27,32 @@ internal static class PrimaryWorkItemCreationEndpoints
                 return Results.Conflict(new { error = "federated_recipient_not_routable" });
             if (remoteTarget && !await license.Has(db, FeatureCatalog.InstanceFederation, ct))
                 return Results.Problem(statusCode: StatusCodes.Status403Forbidden,
-                    title: "Enterprise-rettighet kreves for denne funksjonen.",
+                    title: "An Enterprise entitlement is required for this feature.",
                     extensions: new Dictionary<string, object?> {
                         ["code"] = "enterprise_entitlement_required",
                         ["feature"] = FeatureCatalog.InstanceFederation });
             var title = (request.Title ?? "").Trim(); var description = (request.Description ?? "").Trim(); var recommendation = string.IsNullOrWhiteSpace(request.Recommendation) ? null : request.Recommendation.Trim();
-            if (title.Length is < 2 or > 200 || description.Length > 10000 || recommendation is { Length: > 4000 }) return Results.ValidationProblem(new Dictionary<string, string[]> { ["request"] = ["Kontroller tittel, beskrivelse og anbefaling."] });
-            if (!WorkLinkPolicy.TryNormalize(request.ReferenceUrl, out var referenceUrl)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["referenceUrl"] = ["Lenken må bruke https, http, file eller smb, og kan ikke inneholde innloggingsinformasjon."] });
+            if (title.Length is < 2 or > 200 || description.Length > 10000 || recommendation is { Length: > 4000 }) return Results.ValidationProblem(new Dictionary<string, string[]> { ["request"] = ["Check the title, description, and recommendation."] });
+            if (!WorkLinkPolicy.TryNormalize(request.ReferenceUrl, out var referenceUrl)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["referenceUrl"] = ["The link must use https, http, file, or smb and cannot contain credentials."] });
             WorkItemType? selectedType = null;
             if (request.WorkItemTypeId is Guid typeId)
             {
                 selectedType = await db.WorkItemTypes.SingleOrDefaultAsync(x => x.Id == typeId && x.SiteId == siteId && x.IsActive, ct);
-                if (selectedType is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["workItemTypeId"] = ["Velg en aktiv oppgavetype i siten."] });
+                if (selectedType is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["workItemTypeId"] = ["Select an active task type in the site."] });
             }
-            var isRequest = selectedType?.IsSystemManaged == true && selectedType.NormalizedName == "ANMODNING";
+            var isRequest = selectedType?.IsSystemManaged == true;
             Site? requestRecipient = null; FederationRemoteSite? remoteRecipient = null;
             OrganizationUnit? internalRecipient = null;
             if (isRequest)
             {
-                if (request.TargetSiteId is null && request.TargetUnitId is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["recipient"] = ["Velg mottakende site eller internt arbeidsnivå."] });
-                if (request.TargetSiteId is not null && request.TargetUnitId is not null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["recipient"] = ["Velg bare én mottaker."] });
+                if (request.TargetSiteId is null && request.TargetUnitId is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["recipient"] = ["Select a receiving site or internal work level."] });
+                if (request.TargetSiteId is not null && request.TargetUnitId is not null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["recipient"] = ["Select only one recipient."] });
                 if (request.TargetUnitId is Guid targetUnitId)
                 {
-                    if (remoteTarget) return Results.ValidationProblem(new Dictionary<string, string[]> { ["targetUnitId"] = ["Federerte anmodninger kan bare sendes til en toppnivå-site."] });
-                    if (request.AssignedUnitId is not Guid fromUnitId) return Results.ValidationProblem(new Dictionary<string, string[]> { ["targetUnitId"] = ["Interne anmodninger må sendes fra et undernivå."] });
+                    if (remoteTarget) return Results.ValidationProblem(new Dictionary<string, string[]> { ["targetUnitId"] = ["Federated requests can only be sent to a top-level site."] });
+                    if (request.AssignedUnitId is not Guid fromUnitId) return Results.ValidationProblem(new Dictionary<string, string[]> { ["targetUnitId"] = ["Internal requests must be sent from a subordinate level."] });
                     internalRecipient = await db.OrganizationUnits.SingleOrDefaultAsync(x => x.Id == targetUnitId && x.SiteId == siteId && x.IsActive && !x.IsSiteRoot && !x.IsSiteLeadership && x.Id != fromUnitId, ct);
-                    if (internalRecipient is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["targetUnitId"] = ["Velg et annet aktivt arbeidsnivå i samme site."] });
+                    if (internalRecipient is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["targetUnitId"] = ["Select another active work level in the same site."] });
                 }
                 else
                 {
@@ -69,12 +69,12 @@ internal static class PrimaryWorkItemCreationEndpoints
                     {
                         var eligibleSiteIds = await RequestRecipientPolicy.EligibleSiteIds(siteId, db, ct);
                         requestRecipient = await db.Sites.SingleOrDefaultAsync(x => x.Id == targetSiteId && eligibleSiteIds.Contains(x.Id), ct);
-                        if (requestRecipient is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["targetSiteId"] = ["Velg en annen aktiv site som ikke er underlagt avsenders site."] });
+                        if (requestRecipient is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["targetSiteId"] = ["Select another active site that is not subordinate to the sender's site."] });
                     }
                 }
             }
-            else if (request.TargetSiteId is not null || request.TargetUnitId is not null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["recipient"] = ["Mottaker kan bare velges for typen Anmodning."] });
-            if (request.SourceTypeId is Guid sourceId && !await db.WorkItemLookups.AnyAsync(x => x.Id == sourceId && x.SiteId == siteId && x.Kind == "source-type" && x.IsActive, ct) || request.SenderId is Guid senderId && !await db.WorkItemLookups.AnyAsync(x => x.Id == senderId && x.SiteId == siteId && x.Kind == "sender" && x.IsActive, ct)) return Results.ValidationProblem(new Dictionary<string, string[]> { { "lookup", ["Velg en aktiv kildetype og avsender i siten."] } });
+            else if (request.TargetSiteId is not null || request.TargetUnitId is not null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["recipient"] = ["A recipient can only be selected for the Request type."] });
+            if (request.SourceTypeId is Guid sourceId && !await db.WorkItemLookups.AnyAsync(x => x.Id == sourceId && x.SiteId == siteId && x.Kind == "source-type" && x.IsActive, ct) || request.SenderId is Guid senderId && !await db.WorkItemLookups.AnyAsync(x => x.Id == senderId && x.SiteId == siteId && x.Kind == "sender" && x.IsActive, ct)) return Results.ValidationProblem(new Dictionary<string, string[]> { { "lookup", ["Select an active source type and sender in the site."] } });
             var sourceTypeName = request.SourceTypeId is Guid requestSourceId ? await db.WorkItemLookups.Where(x => x.Id == requestSourceId).Select(x => x.Name).SingleOrDefaultAsync(ct) : null;
             var senderName = request.SenderId is Guid requestSenderId ? await db.WorkItemLookups.Where(x => x.Id == requestSenderId).Select(x => x.Name).SingleOrDefaultAsync(ct) : null;
             var now = DateTimeOffset.UtcNow; var item = new WorkItem(Guid.NewGuid(), siteId, personId, title, description, referenceUrl, "normal", request.DueAt, now, workItemTypeId: request.WorkItemTypeId, sourceTypeId: request.SourceTypeId, senderId: request.SenderId, recommendation: recommendation, sourceTypeNameSnapshot: sourceTypeName, senderNameSnapshot: senderName); db.WorkItems.Add(item);
@@ -85,9 +85,9 @@ internal static class PrimaryWorkItemCreationEndpoints
             {
                 var sourceSite = await db.Sites.SingleAsync(x => x.Id == siteId, ct);
                 var actor = await db.People.SingleAsync(x => x.Id == personId, ct);
-                var received = WorkItem.CreateTransferred(Guid.NewGuid(), item, requestRecipient.Id, personId, sourceSite.Name, actor.DisplayName, sourceTypeName, "Anmodning", senderName, null, description, now);
+                var received = WorkItem.CreateTransferred(Guid.NewGuid(), item, requestRecipient.Id, personId, sourceSite.Name, actor.DisplayName, sourceTypeName, "Request", senderName, null, description, now);
                 db.WorkItems.Add(received);
-                item.TransitionWithinLevel("in_progress", $"Anmodningen er sendt til {requestRecipient.Name} og avventer behandling og rapportering.", now);
+                item.TransitionWithinLevel("in_progress", $"The request has been sent to {requestRecipient.Name} and is awaiting processing and reporting.", now);
                 db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), requestRecipient.Id, personId, "work-item.received-from-parent-site", "work-item", received.Id, now));
             }
             else if (remoteRecipient is not null)
@@ -95,7 +95,7 @@ internal static class PrimaryWorkItemCreationEndpoints
                 var outbound = await FederationOutboundWorkQueue.EnqueueAssignmentAsync(item,
                     remoteRecipient.InstanceId, remoteRecipient.SiteId, localInstanceId, db, ct);
                 if (outbound is null) return Results.Conflict(new { error = "federation_outbound_not_authorized" });
-                item.TransitionWithinLevel("in_progress", $"Anmodningen er lagt i leveringskø til {remoteRecipient.Name}.", now);
+                item.TransitionWithinLevel("in_progress", $"The request has been queued for delivery to {remoteRecipient.Name}.", now);
                 db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId,
                     "work-item.federated-request-queued", "work-item", item.Id, now));
             }
@@ -103,7 +103,7 @@ internal static class PrimaryWorkItemCreationEndpoints
             {
                 var sourceSite = await db.Sites.SingleAsync(x => x.Id == siteId, ct); var actor = await db.People.SingleAsync(x => x.Id == personId, ct);
                 var received = WorkItem.CreateInternalRequest(Guid.NewGuid(), item, personId, internalRecipient.Id, sourceSite.Name, actor.DisplayName, sourceTypeName, senderName, description, now, description);
-                db.WorkItems.Add(received); item.TransitionWithinLevel("in_progress", $"Anmodningen er sendt til {internalRecipient.Name} og avventer behandling og rapportering.", now);
+                db.WorkItems.Add(received); item.TransitionWithinLevel("in_progress", $"The request has been sent to {internalRecipient.Name} and is awaiting processing and reporting.", now);
                 db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.internal-request-received", "work-item", received.Id, now));
             }
             await db.SaveChangesAsync(ct); return Results.Created($"/api/work/sites/{siteId}/items/{item.Id}", new { item.Id });

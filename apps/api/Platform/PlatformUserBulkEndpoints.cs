@@ -20,13 +20,13 @@ public static partial class PlatformUserEndpoints
         var validation = await ValidateBulkRequest(request.PersonIds, antiforgery, context, database, cancellationToken);
         if (validation.Error is not null) return validation.Error;
         if (!await database.Sites.AnyAsync(site => site.Id == request.SiteId && site.IsActive, cancellationToken))
-            return Results.ValidationProblem(new Dictionary<string, string[]> { ["siteId"] = ["Målsiten finnes ikke eller er deaktivert."] });
+            return Results.ValidationProblem(new Dictionary<string, string[]> { ["siteId"] = ["The target site does not exist or is disabled."] });
         if (await database.SiteMemberships.AnyAsync(membership =>
                 request.PersonIds.Contains(membership.PersonId) && membership.IsActive &&
                 membership.Site.IsActive, cancellationToken))
-            return Results.Conflict(new { error = "Én eller flere valgte brukere har allerede en aktiv site. Oppdater søket og prøv igjen." });
+            return Results.Conflict(new { error = "One or more selected users already have an active site. Refresh the search and try again." });
         if (await database.LoginIdentities.AnyAsync(identity => request.PersonIds.Contains(identity.PersonId) && identity.IsPlatformManager, cancellationToken))
-            return Results.Conflict(new { error = "Platform Manager-kontoer tilhører plattformen og kan ikke tildeles en site." });
+            return Results.Conflict(new { error = "Platform Manager accounts belong to the platform and cannot be assigned to a site." });
 
         var now = DateTimeOffset.UtcNow;
         var people = await database.People.Where(person => request.PersonIds.Contains(person.Id)).ToDictionaryAsync(person => person.Id, cancellationToken);
@@ -54,16 +54,16 @@ public static partial class PlatformUserEndpoints
         var validation = await ValidateBulkRequest(request.PersonIds, antiforgery, context, database, cancellationToken);
         if (validation.Error is not null) return validation.Error;
         if (request.PersonIds.Contains(validation.Actor))
-            return Results.Conflict(new { error = "Du kan ikke slette din egen bruker." });
+            return Results.Conflict(new { error = "You cannot delete your own user account." });
         if (await database.LoginIdentities.AnyAsync(identity => request.PersonIds.Contains(identity.PersonId) && identity.IsPlatformManager, cancellationToken))
-            return Results.Conflict(new { error = "Platform Manager-kontoer kan ikke slettes fra personelloppryddingen." });
+            return Results.Conflict(new { error = "Platform Manager accounts cannot be deleted through personnel cleanup." });
         if (await database.SiteMemberships.AnyAsync(membership =>
                 request.PersonIds.Contains(membership.PersonId) && membership.IsActive &&
                 membership.Site.IsActive, cancellationToken) ||
             await database.SiteManagerAssignments.AnyAsync(assignment =>
                 request.PersonIds.Contains(assignment.PersonId) && assignment.IsActive &&
                 assignment.Site.IsActive, cancellationToken))
-            return Results.Conflict(new { error = "Én eller flere valgte brukere har fortsatt en aktiv site-tilknytning." });
+            return Results.Conflict(new { error = "One or more selected users still have an active site association." });
 
         var people = await database.People.Where(person => request.PersonIds.Contains(person.Id) && !person.IsDeleted).ToListAsync(cancellationToken);
         var ids = people.Select(person => person.Id).ToArray();
@@ -100,14 +100,14 @@ public static partial class PlatformUserEndpoints
         CancellationToken cancellationToken)
     {
         if (!await antiforgery.IsRequestValidAsync(context))
-            return (Guid.Empty, Results.BadRequest(new { error = "Sikkerhetskontrollen utløp. Last siden på nytt og prøv igjen." }));
+            return (Guid.Empty, Results.BadRequest(new { error = "The security check expired. Reload the page and try again." }));
         if (!Guid.TryParse(context.User.FindFirst("fylkren:person_id")?.Value, out var actor))
-            return (Guid.Empty, Results.Problem(statusCode: 403, title: "Innlogget Platform Manager kunne ikke identifiseres."));
+            return (Guid.Empty, Results.Problem(statusCode: 403, title: "The signed-in Platform Manager could not be identified."));
         var ids = personIds.Distinct().ToArray();
         if (ids.Length is < 1 or > 200)
-            return (actor, Results.ValidationProblem(new Dictionary<string, string[]> { ["personIds"] = ["Velg mellom 1 og 200 brukere."] }));
+            return (actor, Results.ValidationProblem(new Dictionary<string, string[]> { ["personIds"] = ["Select between 1 and 200 users."] }));
         if (await database.People.CountAsync(person => ids.Contains(person.Id) && !person.IsDeleted, cancellationToken) != ids.Length)
-            return (actor, Results.Conflict(new { error = "Én eller flere valgte brukere finnes ikke lenger. Oppdater listen." }));
+            return (actor, Results.Conflict(new { error = "One or more selected users no longer exist. Refresh the list." }));
         return (actor, null);
     }
 }

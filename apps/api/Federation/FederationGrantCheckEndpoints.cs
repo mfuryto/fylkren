@@ -48,7 +48,7 @@ internal static class FederationGrantCheckEndpoints
             return Results.Unauthorized();
         var localKey = await db.FederationSigningIdentities.AsNoTracking()
             .SingleOrDefaultAsync(row => row.Key == 1, ct);
-        if (localKey is null) return Results.Problem(statusCode: 503, title: "Federeringsnøkkel mangler.");
+        if (localKey is null) return Results.Problem(statusCode: 503, title: "The federation key is missing.");
 
         var grantRevision = await FederationSiteGrantPolicy.ActiveInboundRevisionAsync(peer.InstanceId,
             request.SourceSiteId, request.DestinationSiteId, db, ct);
@@ -64,7 +64,7 @@ internal static class FederationGrantCheckEndpoints
         }
         catch (CryptographicException)
         {
-            return Results.Problem(statusCode: 503, title: "Federeringsnøkkelen kan ikke brukes.");
+            return Results.Problem(statusCode: 503, title: "The federation key cannot be used.");
         }
         db.FederationProbeNonces.Add(new FederationProbeNonce(peer.InstanceId, request.Nonce, now));
         try { await db.SaveChangesAsync(ct); }
@@ -115,7 +115,7 @@ internal static class FederationGrantCheckEndpoints
         }
         catch (CryptographicException)
         {
-            return Results.Problem(statusCode: 503, title: "Federeringsnøkkelen kan ikke brukes.");
+            return Results.Problem(statusCode: 503, title: "The federation key cannot be used.");
         }
         try
         {
@@ -128,7 +128,7 @@ internal static class FederationGrantCheckEndpoints
             using var response = await clients.CreateClient("federation-probe")
                 .SendAsync(outgoing, HttpCompletionOption.ResponseHeadersRead, ct);
             if (!response.IsSuccessStatusCode)
-                return Results.Problem(statusCode: 502, title: "Motparten avviste kontrollen av site-tillatelser.");
+                return Results.Problem(statusCode: 502, title: "The peer rejected the site grant check.");
             await response.Content.LoadIntoBufferAsync(16_384, ct);
             var received = await response.Content.ReadFromJsonAsync<FederationGrantCheckResponse>(cancellationToken: ct);
             var now = DateTimeOffset.UtcNow;
@@ -140,7 +140,7 @@ internal static class FederationGrantCheckEndpoints
                 !FederationProbeProtocol.Verify(peerKey, FederationGrantCheckProtocol.ResponseBytes(instanceId,
                     localId, received.Timestamp, nonce, sourceSiteId, destinationSiteId,
                     received.Allowed, received.GrantRevision), received.Signature))
-                return Results.Problem(statusCode: 502, title: "Motpartens site-tillatelse kunne ikke bekreftes.");
+                return Results.Problem(statusCode: 502, title: "The peer's site grant could not be verified.");
             var audit = new AuditEvent(Guid.NewGuid(), null, actor, "federation-site-grant.verified",
                 "federation-site-grant", localGrant.Id, now);
             audit.SnapshotActorRole(true);
@@ -153,7 +153,7 @@ internal static class FederationGrantCheckEndpoints
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
         {
-            return Results.Problem(statusCode: 502, title: "Site-tillatelsen kunne ikke kontrolleres.");
+            return Results.Problem(statusCode: 502, title: "The site grant could not be checked.");
         }
     }
 

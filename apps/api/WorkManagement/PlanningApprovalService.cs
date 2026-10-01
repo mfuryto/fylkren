@@ -12,7 +12,7 @@ internal static class PlanningApprovalService
 {
     internal static async Task Approve(WorkflowRun run, Guid personId, FylkrenDbContext db, CancellationToken ct)
     {
-        if (run.ProposedPriority is null) throw new InvalidOperationException("Planforslaget er ufullstendig.");
+        if (run.ProposedPriority is null) throw new InvalidOperationException("The proposed plan is incomplete.");
         var now = DateTimeOffset.UtcNow;
         var allocations = await db.WorkflowPlanAllocations.Include(x => x.Step).Include(x => x.Unit).Where(x => x.RunId == run.Id).OrderBy(x => x.Step.SortOrder).ThenBy(x => x.Unit.Name).ToListAsync(ct);
         var requests = await db.WorkflowPlanRequests.Include(x => x.Step).Include(x => x.TargetSite).Where(x => x.RunId == run.Id).OrderBy(x => x.Step.SortOrder).ThenBy(x => x.TargetSite == null ? x.TargetSiteNameSnapshot : x.TargetSite.Name).ToListAsync(ct);
@@ -29,7 +29,7 @@ internal static class PlanningApprovalService
     internal static async Task<string?> Release(WorkflowRun run, Guid personId,
         Guid localInstanceId, FylkrenDbContext db, CancellationToken ct)
     {
-        if (run.Status != "approved" || run.WorkItem.Status != "planning_approved") throw new InvalidOperationException("Planen er ikke klar til iverksetting.");
+        if (run.Status != "approved" || run.WorkItem.Status != "planning_approved") throw new InvalidOperationException("The plan is not ready for initiation.");
         var now = DateTimeOffset.UtcNow;
         var allocations = await db.WorkflowPlanAllocations.Include(x => x.Step).Include(x => x.Unit).Where(x => x.RunId == run.Id).OrderBy(x => x.Step.SortOrder).ThenBy(x => x.Unit.Name).ToListAsync(ct);
         var requests = await db.WorkflowPlanRequests.Include(x => x.Step).Include(x => x.TargetSite).Where(x => x.RunId == run.Id).OrderBy(x => x.Step.SortOrder).ThenBy(x => x.TargetSite == null ? x.TargetSiteNameSnapshot : x.TargetSite.Name).ToListAsync(ct);
@@ -46,7 +46,7 @@ internal static class PlanningApprovalService
         var sourceTypeName = run.WorkItem.SourceTypeId is Guid sourceTypeId ? await db.WorkItemLookups.Where(x => x.Id == sourceTypeId).Select(x => x.Name).SingleOrDefaultAsync(ct) : run.WorkItem.SourceTypeNameSnapshot;
         var workItemTypeName = run.WorkItem.WorkItemTypeId is Guid workItemTypeId ? await db.WorkItemTypes.Where(x => x.Id == workItemTypeId).Select(x => x.Name).SingleOrDefaultAsync(ct) : run.WorkItem.WorkItemTypeNameSnapshot;
         var senderName = run.WorkItem.SenderId is Guid senderId ? await db.WorkItemLookups.Where(x => x.Id == senderId).Select(x => x.Name).SingleOrDefaultAsync(ct) : run.WorkItem.SenderNameSnapshot;
-        var requestType = requests.Count == 0 ? null : await db.WorkItemTypes.SingleAsync(x => x.SiteId == run.WorkItem.SiteId && x.IsSystemManaged && x.NormalizedName == "ANMODNING", ct);
+        var requestType = requests.Count == 0 ? null : await db.WorkItemTypes.SingleAsync(x => x.SiteId == run.WorkItem.SiteId && x.IsSystemManaged, ct);
         var requestBasis = requests.Count == 0 ? null : await BuildRequestBasis(run, db, ct);
         foreach (var allocation in allocations)
         {
@@ -68,8 +68,8 @@ internal static class PlanningApprovalService
                 requestBasisSnapshot: requestBasis);
             if (run.WorkItem.AssignedUnitId is Guid unitId) tracking.AssignToUnit(unitId, null, now);
             tracking.TransitionWithinLevel("in_progress", plannedRequest.TargetInstanceId is null
-                ? $"Anmodningen er sendt til {recipientName} og avventer behandling og svar."
-                : $"Anmodningen er lagt i leveringskø til {recipientName}.", now);
+                ? $"The request has been sent to {recipientName} and is awaiting processing and a response."
+                : $"The request has been queued for delivery to {recipientName}.", now);
             db.WorkItems.Add(tracking);
             db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "work-item.request-sent-from-level", "work-item", tracking.Id, now));
             if (plannedRequest.TargetInstanceId is Guid peerInstanceId &&
@@ -85,14 +85,14 @@ internal static class PlanningApprovalService
             {
                 var received = WorkItem.CreateTransferred(Guid.NewGuid(), tracking,
                     plannedRequest.TargetSiteId!.Value, personId, source.Name, actor.DisplayName,
-                    sourceTypeName, "Anmodning", senderName, null, plannedRequest.Instruction,
+                    sourceTypeName, "Request", senderName, null, plannedRequest.Instruction,
                     now, requestBasis);
                 db.WorkItems.Add(received);
                 db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), plannedRequest.TargetSiteId.Value,
                     personId, "work-item.request-received", "work-item", received.Id, now));
             }
         }
-        run.WorkItem.TransitionWithinLevel("in_progress", "Godkjent plan er iverksatt.", now);
+        run.WorkItem.TransitionWithinLevel("in_progress", "The approved plan has been initiated.", now);
         db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.released", "workflow-run", run.Id, now));
         await db.SaveChangesAsync(ct);
         return null;
@@ -130,9 +130,9 @@ internal static class PlanningApprovalService
         var documents = await db.WorkflowStepDocuments.AsNoTracking().Where(x => x.RunId == run.Id).ToDictionaryAsync(x => x.StepId, x => x.Content, ct);
         var links = await db.WorkflowStepLinks.AsNoTracking().Where(x => x.RunId == run.Id).OrderBy(x => x.CreatedAt).Select(x => new { x.StepId, x.Label, x.Url }).ToListAsync(ct);
         var events = await db.WorkflowTimelineEvents.AsNoTracking().Where(x => x.RunId == run.Id).OrderBy(x => x.Date).ThenBy(x => x.SortOrder).Select(x => new { x.StepId, x.Date, x.Description }).ToListAsync(ct);
-        var text = new StringBuilder().AppendLine("# Oppdragsgrunnlag").AppendLine().AppendLine("## Hovedoppdragets beskrivelse").AppendLine(run.WorkItem.Description);
+        var text = new StringBuilder().AppendLine("# Task basis").AppendLine().AppendLine("## Primary task description").AppendLine(run.WorkItem.Description);
         if (!string.IsNullOrWhiteSpace(run.WorkItem.ReferenceUrl)) text.AppendLine().AppendLine($"Hoveddokument: {run.WorkItem.ReferenceUrl}");
-        text.AppendLine().AppendLine("## Godkjent plan");
+        text.AppendLine().AppendLine("## Approved plan");
         foreach (var step in steps)
         {
             text.AppendLine().AppendLine($"### {step.Name}");

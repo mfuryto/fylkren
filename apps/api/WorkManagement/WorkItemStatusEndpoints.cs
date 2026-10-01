@@ -24,7 +24,7 @@ internal static class WorkItemStatusEndpoints
     {
         if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest();
         if (!PersonId(user, out var personId)) return Results.Problem(statusCode: 403);
-        if (!Statuses.Contains(request.Status)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["status"] = ["Ugyldig oppgavestatus."] });
+        if (!Statuses.Contains(request.Status)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["status"] = ["Invalid task status."] });
         var item = await db.WorkItems.SingleOrDefaultAsync(x => x.Id == itemId && x.SiteId == siteId, ct);
         if (item is null) return Results.NotFound();
         var outgoingRequest = await IsOutgoingRequest(item.Id, siteId, db, ct);
@@ -36,7 +36,7 @@ internal static class WorkItemStatusEndpoints
         if (request.Status is not ("cancelled" or "rejected" or "on_hold") &&
             request.Status != item.Status &&
             await WorkItemDependencyEndpoints.IsBlocked(item.Id, db, ct))
-            return Results.Conflict(new { error = "Oppdraget er blokkert til alle oppdrag det avhenger av er fullført." });
+            return Results.Conflict(new { error = "The task is blocked until all tasks it depends on are completed." });
 
         if (outgoingRequest)
         {
@@ -51,12 +51,12 @@ internal static class WorkItemStatusEndpoints
                     string.IsNullOrWhiteSpace(federated.OfficialAnswerSiteName) ||
                     string.IsNullOrWhiteSpace(federated.OfficialAnswer) ||
                     item.Status is "completed" or "cancelled" || item.FinalReportApprovedAt is not null)
-                    return Results.Conflict(new { error = "Anmodningen kan fullføres av leder når mottaker har levert et godkjent offisielt svar." });
+                    return Results.Conflict(new { error = "A manager can complete the request after the recipient has delivered an approved official response." });
                 item.AcceptFederatedOfficialReport(federated.OfficialAnswer,
                     federated.OfficialAnswerClassification,
                     federated.OfficialAnswerApprovedAt.Value, personId, now);
                 await FormalApprovalService.Approve(db, siteId, "final_report", item.Id, item.Id,
-                    $"Svar på anmodning: {item.Title}", new
+                    $"Response to request: {item.Title}", new
                     {
                         task = new { item.Id, item.Title, item.Description, item.AssignedUnitId,
                             item.CreatedAt, item.DueAt },
@@ -78,60 +78,60 @@ internal static class WorkItemStatusEndpoints
                 return Results.NoContent();
             }
             var response = await db.WorkItems.SingleOrDefaultAsync(child => child.ParentWorkItemId == item.Id && child.SenderSiteName != null && (child.SiteId != item.SiteId || child.AssignedUnitId != item.AssignedUnitId) && (child.Status == "completed" || child.Status == "rejected" || child.Status == "cancelled"), ct);
-            if (!manager || request.Status != "completed" || response is null) return Results.Conflict(new { error = "Anmodningen kan fullføres av leder når mottaker har besvart eller avsluttet den." });
+            if (!manager || request.Status != "completed" || response is null) return Results.Conflict(new { error = "A manager can complete the request after the recipient has responded to or closed it." });
             if (response.Status == "completed")
             {
-                if (string.IsNullOrWhiteSpace(response.FinalReport) || response.FinalReportApprovedAt is null) return Results.Conflict(new { error = "Mottakende site har ikke levert et godkjent offisielt svar." });
+                if (string.IsNullOrWhiteSpace(response.FinalReport) || response.FinalReportApprovedAt is null) return Results.Conflict(new { error = "The receiving site has not delivered an approved official response." });
                 item.CarryForwardFinalReport(response, now);
                 item.ApproveFinalReport(personId, now);
-                await FormalApprovalService.Approve(db, siteId, "final_report", item.Id, item.Id, $"Svar på anmodning: {item.Title}", new
+                await FormalApprovalService.Approve(db, siteId, "final_report", item.Id, item.Id, $"Response to request: {item.Title}", new
                 {
                     task = new { item.Id, item.Title, item.Description, item.AssignedUnitId, item.CreatedAt, item.DueAt },
                     report = new { content = item.FinalReport, classification = item.FinalReportClassification, sourceWorkItemId = response.Id, sourceSiteId = response.SiteId, writtenAt = item.FinalReportUpdatedAt }
                 }, personId, now, ct);
             }
-            item.TransitionWithinLevel("completed", "Anmodningen er lukket av avsender.", now);
+            item.TransitionWithinLevel("completed", "The request was closed by the sender.", now);
             db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.request-closed", "work-item", item.Id, now));
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         }
         if (item.Status == "request_cancelled")
         {
-            if (!manager || request.Status != "completed") return Results.Conflict(new { error = "En trukket anmodning kan bare kvitteres som fullført av mottakende leder." });
+            if (!manager || request.Status != "completed") return Results.Conflict(new { error = "A withdrawn request can only be acknowledged as completed by the receiving manager." });
             item.TransitionWithinLevel("completed", item.DecisionNote, now);
             db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.request-cancellation-acknowledged", "work-item", item.Id, now));
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         }
-        if (!ValidTransition(item.Status, request.Status, manager)) return Results.Conflict(new { error = "Statusovergangen er ikke tillatt." });
-        if (item.Status == "registered" && request.Status == "under_review" && (request.Priority is null || !Priorities.Contains(request.Priority))) return Results.ValidationProblem(new Dictionary<string, string[]> { ["priority"] = ["Lederen må velge prioritet når oppdraget tas til vurdering."] });
-        if (item.Status == "in_review" && request.Status == "in_progress" && item.FinalReportApprovedAt is not null) return Results.Conflict(new { error = "En godkjent sluttrapport kan ikke returneres. Fullfør oppdraget, eller rediger rapporten slik at godkjenningen oppheves først." });
+        if (!ValidTransition(item.Status, request.Status, manager)) return Results.Conflict(new { error = "The status transition is not allowed." });
+        if (item.Status == "registered" && request.Status == "under_review" && (request.Priority is null || !Priorities.Contains(request.Priority))) return Results.ValidationProblem(new Dictionary<string, string[]> { ["priority"] = ["The manager must select a priority when the task enters review."] });
+        if (item.Status == "in_review" && request.Status == "in_progress" && item.FinalReportApprovedAt is not null) return Results.Conflict(new { error = "An approved final report cannot be returned. Complete the task, or edit the report to revoke approval first." });
         if (request.Status == "in_review")
         {
             var directChildren = await db.WorkItems.Where(x => x.ParentWorkItemId == item.Id).Select(x => x.Status).ToListAsync(ct);
-            if (directChildren.Count == 0) return Results.Conflict(new { error = "Oppdrag uten viderefordeling må gjennom Utførelse før det kan sendes til kontroll." });
-            if (directChildren.Any(status => status is not ("completed" or "reassigned"))) return Results.Conflict(new { error = "Alle direkte underoppdrag må være fullført før oppdraget kan sendes til kontroll." });
+            if (directChildren.Count == 0) return Results.Conflict(new { error = "Tasks that are not routed further must pass through Execution before they can be submitted for review." });
+            if (directChildren.Any(status => status is not ("completed" or "reassigned"))) return Results.Conflict(new { error = "All direct subtasks must be completed before the task can be submitted for review." });
         }
-        if (request.Status == "completed" && string.IsNullOrWhiteSpace(item.FinalReport)) return Results.Conflict(new { error = "Sluttrapport må lagres før oppdraget kan fullføres." });
-        if (request.Status == "completed" && item.FinalReportApprovedAt is null) return Results.Conflict(new { error = "Sluttrapporten må godkjennes før oppdraget kan fullføres." });
+        if (request.Status == "completed" && string.IsNullOrWhiteSpace(item.FinalReport)) return Results.Conflict(new { error = "The final report must be saved before the task can be completed." });
+        if (request.Status == "completed" && item.FinalReportApprovedAt is null) return Results.Conflict(new { error = "The final report must be approved before the task can be completed." });
         OrganizationUnit? requestedAssignment = null;
         if (request.Status == "assigned")
         {
-            if (request.AssignedUnitId is not { } requestedUnit || !await IsDirectChild(siteId, item.AssignedUnitId, requestedUnit, db, ct)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["assignedUnitId"] = ["Velg en aktiv direkte underenhet."] });
+            if (request.AssignedUnitId is not { } requestedUnit || !await IsDirectChild(siteId, item.AssignedUnitId, requestedUnit, db, ct)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["assignedUnitId"] = ["Select an active direct subordinate unit."] });
             requestedAssignment = await db.OrganizationUnits.SingleAsync(x => x.Id == requestedUnit, ct);
         }
-        if (request.Status is "on_hold" or "rejected" && string.IsNullOrWhiteSpace(request.DecisionNote)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["decisionNote"] = ["Begrunnelse er påkrevd."] });
+        if (request.Status is "on_hold" or "rejected" && string.IsNullOrWhiteSpace(request.DecisionNote)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["decisionNote"] = ["A rationale is required."] });
         WorkflowDefinition? planningDefinition = null;
         if (request.Status == "planning")
         {
             planningDefinition = await db.WorkflowDefinitions.FirstOrDefaultAsync(x => x.SiteId == siteId && x.Kind == "planning" && x.IsActive, ct);
-            if (planningDefinition is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["planningWorkflow"] = ["Site Manager må konfigurere planleggerflyten før oppgaver kan sendes til planlegging."] });
+            if (planningDefinition is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["planningWorkflow"] = ["A Site Manager must configure the planning workflow before tasks can be sent to planning."] });
         }
         if (request.Status == "execution")
         {
             var workflowOwnerUnitId = item.AssignedUnitId ?? await db.OrganizationUnits.Where(x => x.SiteId == siteId && x.IsActive && x.IsSiteLeadership).Select(x => (Guid?)x.Id).SingleOrDefaultAsync(ct);
             if (!await db.WorkflowDefinitions.AnyAsync(x => x.SiteId == siteId && x.Kind == "execution" && x.IsActive && (x.OwnerUnitId == null || x.OwnerUnitId == workflowOwnerUnitId), ct))
-                return Results.ValidationProblem(new Dictionary<string, string[]> { ["executionWorkflow"] = ["Det må finnes minst én aktiv utførelsesflyt for dette nivået."] });
+                return Results.ValidationProblem(new Dictionary<string, string[]> { ["executionWorkflow"] = ["There must be at least one active execution workflow for this level."] });
         }
         if (item.Status == "registered" && request.Status == "under_review") item.SetPriority(request.Priority!, now);
         var decisionNote = (item.Status is "rejected" or "on_hold") && request.Status == "under_review" && string.IsNullOrWhiteSpace(request.DecisionNote) ? item.DecisionNote : request.DecisionNote;

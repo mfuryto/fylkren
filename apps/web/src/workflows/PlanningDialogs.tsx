@@ -21,20 +21,20 @@ export function PlanningReassignmentDialog({ draft, onChange, onSubmit, onClose 
   onClose: () => void;
 }) {
   return (
-    <Modal title="Omfordel planlegging" onClose={onClose}>
+    <Modal title="Reassign planning" onClose={onClose}>
       <form className="stacked-form" onSubmit={(event) => { event.preventDefault(); void onSubmit(); }}>
-        <p><strong>{draft.run.item.title}</strong><br /><span className="muted">Nåværende ansvarlig: {draft.run.claimedBy}</span></p>
+        <p><strong>{draft.run.item.title}</strong><br /><span className="muted">Current assignee: {draft.run.claimedBy}</span></p>
         <div className="field">
           <label htmlFor="planning-reassignment-person">Ny ansvarlig planlegger</label>
           <select id="planning-reassignment-person" value={draft.personId} onChange={(event) => onChange({ ...draft, personId: event.target.value })}>
             {draft.candidates.map((candidate) => (
-              <option key={candidate.personId} value={candidate.personId}>{candidate.displayName}{candidate.personId === draft.run.claimedByPersonId ? " (nåværende)" : ""}</option>
+              <option key={candidate.personId} value={candidate.personId}>{candidate.displayName}{candidate.personId === draft.run.claimedByPersonId ? " (current)" : ""}</option>
             ))}
           </select>
-          {draft.candidates.length === 0 && <p className="muted">Ingen kvalifiserte planleggere finnes på dette nivået.</p>}
+          {draft.candidates.length === 0 && <p className="muted">No eligible planners exist at this level.</p>}
         </div>
         <div className="modal-actions">
-          <button className="secondary-button" type="button" onClick={onClose}>Avbryt</button>
+          <button className="secondary-button" type="button" onClick={onClose}>Cancel</button>
           <button className="primary-button" disabled={!draft.personId}>Omfordel</button>
         </div>
       </form>
@@ -50,22 +50,22 @@ export function DownwardAllocationDialog({ draft, units, onChange, onSubmit, onC
   onClose: () => void;
 }) {
   return (
-    <Modal title="Fordel oppdraget videre" onClose={onClose}>
+    <Modal title="Route the task onward" onClose={onClose}>
       <form className="stacked-form" onSubmit={(event) => { event.preventDefault(); void onSubmit(); }}>
         <p><strong>{draft.run.item.title}</strong></p>
-        <p className="status-message">Planleggingen på dette nivået avsluttes. Dokumentasjon og historikk beholdes, og underenheten mottar et nytt deloppdrag.</p>
+        <p className="status-message">Planning at this level is closed. Documentation and history are retained, and the subordinate unit receives a new subtask.</p>
         <div className="field">
-          <label htmlFor="planning-downward-unit">Mottakende underenhet</label>
+          <label htmlFor="planning-downward-unit">Receiving subordinate unit</label>
           <select id="planning-downward-unit" value={draft.unitId} onChange={(event) => onChange({ ...draft, unitId: event.target.value })}>
             {units.map((unit) => <option key={unit.id} value={unit.id}>{unit.name}</option>)}
           </select>
         </div>
         <div className="field">
-          <label htmlFor="planning-downward-instruction">Oppdragstekst til underenheten</label>
+          <label htmlFor="planning-downward-instruction">Task text for the subordinate unit</label>
           <textarea id="planning-downward-instruction" rows={6} maxLength={10000} value={draft.instruction} onChange={(event) => onChange({ ...draft, instruction: event.target.value })} />
         </div>
         <div className="modal-actions">
-          <button className="secondary-button" type="button" onClick={onClose}>Avbryt</button>
+          <button className="secondary-button" type="button" onClick={onClose}>Cancel</button>
           <button className="primary-button" disabled={!draft.unitId || draft.instruction.trim().length < 2}>Fordel videre</button>
         </div>
       </form>

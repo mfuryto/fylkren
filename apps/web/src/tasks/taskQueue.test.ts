@@ -3,7 +3,7 @@ import type { WorkItem } from "../work/WorkItemModels";
 import { selectScopedItems } from "./taskQueue";
 
 const item = (values: Partial<WorkItem>): WorkItem => ({
-  id: "item", title: "Oppdrag", description: "", status: "registered", createdAt: "2026-01-01T00:00:00Z",
+  id: "item", title: "Task", description: "", status: "registered", createdAt: "2026-01-01T00:00:00Z",
   parentWorkItemId: null, parentTitle: null, assignedUnitId: null, isOutgoingRequest: false,
   requestProgressStatus: null, recommendation: null, workItemTypeName: null, sourceTypeName: null,
   senderName: null, senderSiteName: null, senderPersonName: null, unitName: null, createdBy: "Test",

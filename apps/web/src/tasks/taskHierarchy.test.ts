@@ -7,7 +7,7 @@ const item = (values: Partial<WorkItem>): WorkItem => ({
   id: "item", siteId: "site", parentWorkItemId: null, parentTitle: null,
   workItemTypeId: null, workItemTypeName: null, sourceTypeId: null, sourceTypeName: null,
   senderId: null, senderName: null, senderSiteName: null, senderPersonName: null,
-  requestBasisSnapshot: null, isCrossSiteView: false, title: "Oppdrag", description: "",
+  requestBasisSnapshot: null, isCrossSiteView: false, title: "Task", description: "",
   recommendation: null, referenceUrl: null, priority: "normal", status: "assigned", dueAt: null,
   assignedUnitId: null, unitName: null, isAssignedToMe: true, hasPlan: false,
   workflowCurrentStep: null, workflowStepCount: 0, workflowStepName: null,
@@ -36,7 +36,7 @@ describe("taskHierarchy", () => {
       .toEqual([["root", 0], ["earlier", 1], ["leaf", 2], ["later", 1]]);
   });
 
-  it("utelater toppledelsesenheten fra rapportstien", () => {
+  it("excludes the executive unit from the report path", () => {
     const leadership = unit({ id: "leadership", name: "Ledelse", isSiteLeadership: true });
     const section = unit({ id: "section", name: "Seksjon", parentId: "leadership" });
     const team = unit({ id: "team", name: "Team", parentId: "section" });

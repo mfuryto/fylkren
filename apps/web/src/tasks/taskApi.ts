@@ -4,7 +4,7 @@ import type { DomainDecision, WorkItem, WorkItemDependency, WorkItemDependencyCa
 import type { TaskCreateDraft } from "./TaskCreateDialog";
 
 export async function getTaskContext(personId?: string) {
-  return apiGetCached<{ sites: TaskSite[]; units: TaskUnit[] }>(`work-context:${personId ?? "current"}`, "/api/work/context", "Oppgavekonteksten kunne ikke lastes.");
+  return apiGetCached<{ sites: TaskSite[]; units: TaskUnit[] }>(`work-context:${personId ?? "current"}`, "/api/work/context", "The task context could not be loaded.");
 }
 
 export type WorkItemPage = {
@@ -21,21 +21,21 @@ export async function getWorkItems(siteId: string, query: { unitId: string; filt
   if (query.unitId) parameters.set("unitId", query.unitId);
   if (query.search) parameters.set("search", query.search);
   if (query.focusItemId && query.page === 1) parameters.set("focusItemId", query.focusItemId);
-  return apiGet<WorkItemPage>(`/api/work/sites/${siteId}/items?${parameters}`, "Oppgavene kunne ikke lastes.");
+  return apiGet<WorkItemPage>(`/api/work/sites/${siteId}/items?${parameters}`, "Tasks could not be loaded.");
 }
 
 export async function getOverviewWorkItems(siteId: string, personId?: string) {
-  return apiGetCached<WorkItem[]>(`overview-items:${personId ?? "current"}:${siteId}`, `/api/work/sites/${siteId}/items/overview`, "Oppgavegrunnlaget for oversikten kunne ikke lastes.");
+  return apiGetCached<WorkItem[]>(`overview-items:${personId ?? "current"}:${siteId}`, `/api/work/sites/${siteId}/items/overview`, "The task basis for the overview could not be loaded.");
 }
 
 export async function getWorkItemTypes(siteId: string) {
-  return apiGet<WorkItemType[]>(`/api/work/sites/${siteId}/types`, "Oppgavetypene kunne ikke lastes.");
+  return apiGet<WorkItemType[]>(`/api/work/sites/${siteId}/types`, "Task types could not be loaded.");
 }
 
 export async function getWorkItemLookups(siteId: string) {
   const [sourceTypes, senders] = await Promise.all([
-    apiGet<WorkItemType[]>(`/api/work/sites/${siteId}/lookups/source-type`, "Kildetypene kunne ikke lastes."),
-    apiGet<WorkItemType[]>(`/api/work/sites/${siteId}/lookups/sender`, "Avsenderne kunne ikke lastes."),
+    apiGet<WorkItemType[]>(`/api/work/sites/${siteId}/lookups/source-type`, "Source types could not be loaded."),
+    apiGet<WorkItemType[]>(`/api/work/sites/${siteId}/lookups/sender`, "Senders could not be loaded."),
   ]);
   return { sourceTypes, senders };
 }
@@ -45,7 +45,7 @@ export async function taskMutation(path: string, method: "POST" | "PUT" | "DELET
 }
 
 export async function getTaskDetails(siteId: string, itemId: string) {
-  return apiGet<WorkItemDetails>(`/api/work/sites/${siteId}/items/${itemId}/details`, "Oppdragsdetaljene kunne ikke lastes.");
+  return apiGet<WorkItemDetails>(`/api/work/sites/${siteId}/items/${itemId}/details`, "Task details could not be loaded.");
 }
 
 export function taskCreatePayload(form: TaskCreateDraft, assignedUnitId: string) {
@@ -66,7 +66,7 @@ export function taskCreatePayload(form: TaskCreateDraft, assignedUnitId: string)
 export async function approvedPlanRunId(siteId: string, itemId: string) {
   const details = await getTaskDetails(siteId, itemId);
   if (details.task.status !== "planning_approved" || !details.plan || details.plan.ownerWorkItemId !== itemId || details.plan.status !== "approved")
-    throw new Error("Oppdraget har ingen godkjent plan som kan iverksettes.");
+    throw new Error("The task has no approved plan that can be initiated.");
   return details.plan.id;
 }
 
@@ -75,36 +75,36 @@ export async function addHoldDependencies(siteId: string, itemId: string, predec
   const existing = new Set((await getTaskDependencies(siteId, itemId)).map(value => value.predecessorWorkItemId));
   for (const predecessorWorkItemId of predecessorIds) {
     if (existing.has(predecessorWorkItemId)) continue;
-    await taskMutation(`/api/work/sites/${siteId}/items/${itemId}/dependencies`, "POST", { predecessorWorkItemId, type: "finish_to_start" }, "Avhengigheten kunne ikke legges til.");
+    await taskMutation(`/api/work/sites/${siteId}/items/${itemId}/dependencies`, "POST", { predecessorWorkItemId, type: "finish_to_start" }, "The dependency could not be added.");
     existing.add(predecessorWorkItemId);
   }
 }
 
 export async function getTaskDependencies(siteId: string, itemId: string) {
-  return apiGet<WorkItemDependency[]>(`/api/work/sites/${siteId}/items/${itemId}/dependencies`, "Avhengighetene kunne ikke lastes.");
+  return apiGet<WorkItemDependency[]>(`/api/work/sites/${siteId}/items/${itemId}/dependencies`, "Dependencies could not be loaded.");
 }
 
 export async function searchTaskDependencyCandidates(siteId: string, itemId: string, search: string) {
-  return apiGet<WorkItemDependencyCandidate[]>(`/api/work/sites/${siteId}/items/${itemId}/dependency-candidates?search=${encodeURIComponent(search)}`, "Oppdragssøket kunne ikke gjennomføres.");
+  return apiGet<WorkItemDependencyCandidate[]>(`/api/work/sites/${siteId}/items/${itemId}/dependency-candidates?search=${encodeURIComponent(search)}`, "The task search could not be completed.");
 }
 
 export async function getTaskDecisions(siteId: string, itemId: string) {
-  return apiGet<DomainDecision[]>(`/api/decisions/sites/${siteId}/tasks/${itemId}`, "Beslutningene kunne ikke lastes.");
+  return apiGet<DomainDecision[]>(`/api/decisions/sites/${siteId}/tasks/${itemId}`, "Decisions could not be loaded.");
 }
 
 export async function getExecutionHistory(itemId: string) {
-  return apiGet<any>(`/api/execution/items/${itemId}/history`, "Utførelseshistorikken kunne ikke lastes.");
+  return apiGet<any>(`/api/execution/items/${itemId}/history`, "Execution history could not be loaded.");
 }
 
 export async function getFinalReportTemplate(siteId: string) {
-  return apiGet<{ content: string | null }>(`/api/templates/sites/${siteId}/final-report`, "Sluttrapportmalen kunne ikke lastes.");
+  return apiGet<{ content: string | null }>(`/api/templates/sites/${siteId}/final-report`, "The final report template could not be loaded.");
 }
 
 export async function getDescendantWorkload(siteId: string, unitId: string, personId?: string) {
   const query = unitId ? `?unitId=${encodeURIComponent(unitId)}` : "";
-  return apiGetCached<{ active: number; nearDeadline: number; overdue: number; unitSummaries: Array<{ unitId: string; active: number; underway: number; statusCounts: Array<{ status: string; count: number }> }>; siteSummaries: Array<{ siteId: string; active: number; underway: number; statusCounts: Array<{ status: string; count: number }> }> }>(`descendant-workload:${personId ?? "current"}:${siteId}:${unitId || "top"}`, `/api/work/sites/${siteId}/descendant-workload${query}`, "Belastningen i underenhetene kunne ikke lastes.");
+  return apiGetCached<{ active: number; nearDeadline: number; overdue: number; unitSummaries: Array<{ unitId: string; active: number; underway: number; statusCounts: Array<{ status: string; count: number }> }>; siteSummaries: Array<{ siteId: string; active: number; underway: number; statusCounts: Array<{ status: string; count: number }> }> }>(`descendant-workload:${personId ?? "current"}:${siteId}:${unitId || "top"}`, `/api/work/sites/${siteId}/descendant-workload${query}`, "The workload in subordinate units could not be loaded.");
 }
 
 export async function getWorkloadHistory<T>(siteId: string) {
-  return apiGet<{ availableFrom: string | null; points: T[] }>(`/api/work/sites/${siteId}/workload-history`, "Belastningshistorikken kunne ikke lastes.");
+  return apiGet<{ availableFrom: string | null; points: T[] }>(`/api/work/sites/${siteId}/workload-history`, "Workload history could not be loaded.");
 }

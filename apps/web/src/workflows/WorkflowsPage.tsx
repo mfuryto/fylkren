@@ -22,7 +22,7 @@ export function WorkflowsPage() {
   const [error, setError] = useState("");
   const selectedSite = sites.find((x) => x.siteId === siteId);
   useEffect(() => {
-    apiGet<{ sites: TaskSite[]; units: TaskUnit[] }>("/api/work/context", "Arbeidsflytkonteksten kunne ikke lastes.")
+    apiGet<{ sites: TaskSite[]; units: TaskUnit[] }>("/api/work/context", "The workflow context could not be loaded.")
       .then((d: { sites: TaskSite[]; units: TaskUnit[] }) => {
         setSites(d.sites);
         setUnits(d.units);
@@ -31,17 +31,17 @@ export function WorkflowsPage() {
         if (firstSite && !firstSite.isSiteManager) {
           setForm((current) => ({ ...current, kind: "execution", ownerUnitId: d.units.find((unit) => unit.siteId === firstSite.siteId && unit.isLeader)?.id ?? "" }));
         }
-      }).catch(problem => setError(problem instanceof Error ? problem.message : "Arbeidsflytkonteksten kunne ikke lastes."));
+      }).catch(problem => setError(problem instanceof Error ? problem.message : "The workflow context could not be loaded."));
   }, []);
   async function load() {
     if (!siteId) return;
     try {
       const [workflowResponse, templateResponse] = await Promise.all([
-        apiGet<WorkflowDefinitionSummary[]>(`/api/workflows/sites/${siteId}`, "Arbeidsflytene kunne ikke lastes."),
-        apiGet<WorkflowTemplateSummary[]>(`/api/templates/sites/${siteId}`, "Malene kunne ikke lastes."),
+        apiGet<WorkflowDefinitionSummary[]>(`/api/workflows/sites/${siteId}`, "Workflows could not be loaded."),
+        apiGet<WorkflowTemplateSummary[]>(`/api/templates/sites/${siteId}`, "Templates could not be loaded."),
       ]);
       setFlows(workflowResponse); setTemplates(templateResponse); setError("");
-    } catch (problem) { setError(problem instanceof Error ? problem.message : "Arbeidsflytene kunne ikke lastes."); }
+    } catch (problem) { setError(problem instanceof Error ? problem.message : "Workflows could not be loaded."); }
   }
   useEffect(() => {
     void load();
@@ -67,7 +67,7 @@ export function WorkflowsPage() {
           kind: value.kind,
           steps,
       },
-      "Arbeidsflyten kunne ikke lagres.",
+      "The workflow could not be saved.",
     );
     await load();
   }
@@ -84,7 +84,7 @@ export function WorkflowsPage() {
             : (units.find((unit) => unit.siteId === siteId && unit.isLeader)?.id ?? ""),
       });
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Arbeidsflyten kunne ikke opprettes.");
+      setError(problem instanceof Error ? problem.message : "The workflow could not be created.");
     }
   }
   async function update(e: React.FormEvent) {
@@ -95,12 +95,12 @@ export function WorkflowsPage() {
       await save(editor, editor.id);
       setEditor(null);
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Arbeidsflyten kunne ikke oppdateres.");
+      setError(problem instanceof Error ? problem.message : "The workflow could not be updated.");
     }
   }
   async function removeFlow(flow: WorkflowDefinitionSummary) {
-    try { await apiMutate(`/api/workflows/sites/${siteId}/${flow.id}`, "DELETE", undefined, "Arbeidsflyten kunne ikke deaktiveres."); }
-    catch (problem) { setError(problem instanceof Error ? problem.message : "Arbeidsflyten kunne ikke deaktiveres."); return; }
+    try { await apiMutate(`/api/workflows/sites/${siteId}/${flow.id}`, "DELETE", undefined, "The workflow could not be disabled."); }
+    catch (problem) { setError(problem instanceof Error ? problem.message : "The workflow could not be disabled."); return; }
     if (viewer?.id === flow.id) setViewer(null);
     await load();
   }
@@ -137,8 +137,8 @@ export function WorkflowsPage() {
         <div>
           <h1>Arbeidsflyter</h1>
           <p className="muted">
-            Site Manager bestemmer innhold og rekkefølge i sitens planleggerflyt
-            og øvrige behandlingsprosesser.
+            The Site Manager determines the content and order of the site's planning workflow
+            and other processing workflows.
           </p>
         </div>
         <button className="help-button" type="button" onClick={() => setHelpOpen(true)}><i aria-hidden="true">?</i><span>Hjelp</span></button>
@@ -163,7 +163,7 @@ export function WorkflowsPage() {
       </section>}
       <div className="workflow-layout">
         <section className="panel">
-          <h2>Aktive arbeidsflyter</h2>
+          <h2>Active arbeidsflyter</h2>
           <div className="admin-list">
             {flows.map((f) => (
               <div className="admin-list-row" key={f.id}>
@@ -171,13 +171,13 @@ export function WorkflowsPage() {
                   <strong>{f.name}</strong>
                   <small className="muted">
                     {f.kind === "planning"
-                      ? "Planlegging"
-                      : `Utførelse · ${f.ownerUnitName ?? "Hele siten"}`}
+                      ? "Planning"
+                      : `Execution · ${f.ownerUnitName ?? "Entire site"}`}
                   </small>
                 </span>
                 <div className="row-actions">
                   <button className="link-button" type="button" onClick={() => setViewer(f)}>Vis</button>
-                  {f.canEdit && <button className="link-button" type="button" onClick={() => edit(f)}>Rediger</button>}
+                  {f.canEdit && <button className="link-button" type="button" onClick={() => edit(f)}>Edit</button>}
                   {f.canEdit && <button className="link-button danger" type="button" onClick={() => void removeFlow(f)}>Slett</button>}
                 </div>
               </div>
@@ -186,34 +186,34 @@ export function WorkflowsPage() {
         </section>
         {selectedSite?.isSiteManager && <form className="panel stacked-form" onSubmit={create}>
           <h2>
-            {form.kind === "planning" ? "Konfigurer planleggerflyt" : "Ny utførelsesflyt"}
+            {form.kind === "planning" ? "Konfigurer planleggerflyt" : "New execution workflow"}
           </h2>
           {selectedSite.isSiteManager && (
             <>
               <div className="field">
                 <label htmlFor="workflow-direction">Retning</label>
                 <select id="workflow-direction" value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value as "planning" | "execution", ownerUnitId: "", allocationStepName: "" })}>
-                  <option value="planning">Planlegging</option>
-                  <option value="execution">Utførelse</option>
+                  <option value="planning">Planning</option>
+                  <option value="execution">Execution</option>
                 </select>
               </div>
-              <p className="muted">Siten har én aktiv planleggerflyt, men kan ha mange utførelsesflyter. Pågående behandlinger beholder arbeidsflytversjonen de startet med.</p>
+              <p className="muted">The site has one active planning workflow but can have many execution workflows. Active processing retains the workflow version it started with.</p>
             </>
           )}
           {fields(form, setForm)}
           <button className="primary-button">
-            {form.kind === "planning" ? "Aktiver planleggerflyt" : "Opprett utførelsesflyt"}
+            {form.kind === "planning" ? "Activer planleggerflyt" : "Create execution workflow"}
           </button>
         </form>}
       </div>
-      {helpOpen && <SectionHelp title="Slik arbeider du med arbeidsflyter" intro="Arbeidsflyter bestemmer hvilke steg et oppdrag følger i planlegging eller utførelse. De konfigureres før behandlingen starter." steps={[{title:"Velg retning og omfang.",text:"Planlegging er en gjennomgående, site-eid flyt. Utførelsesflyter kan være felles for siten eller knyttes til et internt nivå."},{title:"Opprett stegene i riktig rekkefølge.",text:"Hvert steg blir en egen dokumentasjonsdel under behandlingen. Navnene skal beskrive hva brukeren skal gjøre eller levere."},{title:"Knytt til valgfrie funksjoner.",text:"Et steg kan få startinnhold fra en mal, tidslinje eller felt for oppgavefordeling når dette passer prosessen."},{title:"Kontroller og aktiver.",text:"Ved redigering opprettes en ny versjon, mens pågående behandlinger beholder versjonen de startet med."},{title:"Forvalt sitens flyter.",text:"Site Manager oppretter, redigerer og deaktiverer planleggings- og utførelsesflyter for siten."}]} note="Arbeidsflytene brukes i operativ behandling av relevante brukere, men administreres bare av Site Manager." onClose={() => setHelpOpen(false)} />}
+      {helpOpen && <SectionHelp title="How to work with workflows" intro="Workflows determine which steps a task follows in planning or execution. They are configured before processing begins." steps={[{title:"Select direction and scope.",text:"Planning is a continuous, site-owned flow. Execution workflows can be shared across the site or linked to an internal level."},{title:"Create the steps in the correct order.",text:"Each step becomes a separate documentation section during processing. Names should describe what the user must do or deliver."},{title:"Link optional features.",text:"A step can receive initial content from a template, timeline, or task-allocation field when appropriate for the process."},{title:"Review and activate.",text:"Editing creates a new version, while active processing retains the version it started with."},{title:"Manage the site's workflows.",text:"The Site Manager creates, edits, and disables planning and execution workflows for the site."}]} note="Workflows are used in operational processing by relevant users, but are administered only by a Site Manager." onClose={() => setHelpOpen(false)} />}
       {editor && (
-        <Modal title="Rediger arbeidsflyt" onClose={() => setEditor(null)}>
+        <Modal title="Edit workflow" onClose={() => setEditor(null)}>
           <form className="stacked-form" onSubmit={update}>
             {fields(editor, (value) => setEditor({ ...editor, ...value }))}
             <p className="muted modal-note">
-              Lagring oppretter en ny versjon. Pågående behandlinger beholder
-              den tidligere versjonen.
+              Saving creates a new version. Active processing retains
+              the previous version.
             </p>
             <div className="modal-actions">
               <button
@@ -221,9 +221,9 @@ export function WorkflowsPage() {
                 type="button"
                 onClick={() => setEditor(null)}
               >
-                Avbryt
+                Cancel
               </button>
-              <button className="primary-button">Lagre ny versjon</button>
+              <button className="primary-button">Save new version</button>
             </div>
           </form>
         </Modal>
@@ -233,22 +233,22 @@ export function WorkflowsPage() {
           <div className="stacked-form">
             <p className="muted">
               {viewer.kind === "planning"
-                ? "Retning: Planlegging"
-                : `Retning: Utførelse · Omfang: ${viewer.ownerUnitName ?? "Hele siten"}`}
+                ? "Direction: Planning"
+                : `Direction: Execution · Scope: ${viewer.ownerUnitName ?? "Entire site"}`}
             </p>
             <ol className="workflow-step-list">
               {viewer.steps.map((step, index) => (
                 <li key={`${step.name}-${index}`}>
                   <strong>{step.name}</strong>
                   <span className="muted">
-                    {[step.templateName ? `Mal: ${step.templateName}` : null, step.hasTimeline ? "Tidslinjal" : null, step.allowsTaskAllocation ? "Oppgavefordeling" : null].filter(Boolean).join(" · ") || "Ingen særskilt stegkonfigurasjon"}
+                    {[step.templateName ? `Mal: ${step.templateName}` : null, step.hasTimeline ? "Timeline" : null, step.allowsTaskAllocation ? "Task allocation" : null].filter(Boolean).join(" · ") || "No special step configuration"}
                   </span>
                 </li>
               ))}
             </ol>
             <div className="modal-actions">
-              <button className="secondary-button" type="button" onClick={() => setViewer(null)}>Lukk</button>
-              {viewer.canEdit && <button className="primary-button" type="button" onClick={() => { const selected=viewer; setViewer(null); edit(selected); }}>Rediger</button>}
+              <button className="secondary-button" type="button" onClick={() => setViewer(null)}>Close</button>
+              {viewer.canEdit && <button className="primary-button" type="button" onClick={() => { const selected=viewer; setViewer(null); edit(selected); }}>Edit</button>}
               {viewer.canEdit && <button className="danger-button" type="button" onClick={() => void removeFlow(viewer)}>Slett</button>}
             </div>
           </div>

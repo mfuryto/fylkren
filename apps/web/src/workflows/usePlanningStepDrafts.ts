@@ -28,7 +28,7 @@ export function usePlanningStepDrafts({ runs, personId, reload, onError }: UsePl
         `/api/workflows/planning/${runId}/steps/${stepId}`,
         "PUT",
         { content, links: links.map(link => ({ label: link.label, url: link.url })), timelineEvents },
-        "Arbeidsflytsteget kunne ikke lagres.",
+        "The workflow step could not be saved.",
       );
       await reload();
     });
@@ -49,7 +49,7 @@ export function usePlanningStepDrafts({ runs, personId, reload, onError }: UsePl
   useWorkflowAutosave({
     revision,
     enabled: hasChanges,
-    fallbackError: "Endringene i arbeidsflytsteget kunne ikke lagres automatisk.",
+    fallbackError: "Changes to the workflow step could not be saved automatically.",
     onError,
     save: async () => {
       const dirtyStepIds = new Set([...Object.keys(stepDrafts), ...Object.keys(linkDrafts)]);

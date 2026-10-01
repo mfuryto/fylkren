@@ -17,7 +17,7 @@ internal static class ExecutionFollowUpEndpoints
             if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest();
             var recipient = (request.Recipient ?? "").Trim();
             var requestText = (request.RequestText ?? "").Trim();
-            if (!PersonId(user, out var personId) || recipient.Length is < 2 or > 320 || requestText.Length is < 2 or > 10000) return Results.ValidationProblem(new Dictionary<string, string[]> { ["request"] = ["Kontroller ekstern kontakt og oppfølgingstekst."] });
+            if (!PersonId(user, out var personId) || recipient.Length is < 2 or > 320 || requestText.Length is < 2 or > 10000) return Results.ValidationProblem(new Dictionary<string, string[]> { ["request"] = ["Check the external contact and follow-up text."] });
             var run = await db.ExecutionRuns.Include(x => x.WorkItem).SingleOrDefaultAsync(x => x.Id == runId && x.ClaimedByPersonId == personId && x.Status == "in_progress", ct);
             if (run is null || !await WorkLevelAuthorization.BelongsToLevel(run.WorkItem.SiteId, run.WorkItem.AssignedUnitId, personId, db, ct) || !await db.WorkflowSteps.AnyAsync(x => x.Id == request.StepId && x.DefinitionId == run.DefinitionId, ct)) return Results.Problem(statusCode: 403);
             var now = DateTimeOffset.UtcNow;
@@ -33,7 +33,7 @@ internal static class ExecutionFollowUpEndpoints
             if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest();
             if (!PersonId(user, out var personId)) return Results.Problem(statusCode: 403);
             var responseText = (request.ResponseText ?? "").Trim();
-            if (responseText.Length is < 1 or > 10000) return Results.ValidationProblem(new Dictionary<string, string[]> { ["responseText"] = ["Svaret kan være maksimalt 10 000 tegn."] });
+            if (responseText.Length is < 1 or > 10000) return Results.ValidationProblem(new Dictionary<string, string[]> { ["responseText"] = ["The response can contain at most 10,000 characters."] });
             var value = await db.ExecutionExternalRequests.Include(x => x.Run).ThenInclude(x => x.WorkItem).SingleOrDefaultAsync(x => x.Id == requestId && x.Run.ClaimedByPersonId == personId && x.Run.Status == "in_progress", ct);
             if (value is null || !await WorkLevelAuthorization.BelongsToLevel(value.Run.WorkItem.SiteId, value.Run.WorkItem.AssignedUnitId, personId, db, ct)) return Results.Problem(statusCode: 403);
             var now = DateTimeOffset.UtcNow;

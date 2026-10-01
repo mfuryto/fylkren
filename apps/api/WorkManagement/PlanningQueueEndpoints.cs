@@ -32,7 +32,7 @@ internal static class PlanningQueueEndpoints
                 .Select(x => new
                 {
                     x.WorkItem.AssignedUnitId,
-                    Name = x.WorkItem.AssignedUnit == null ? "Toppnivå" : x.WorkItem.AssignedUnit.Name
+                    Name = x.WorkItem.AssignedUnit == null ? "Top level" : x.WorkItem.AssignedUnit.Name
                 })
                 .Distinct()
                 .OrderBy(x => x.Name)

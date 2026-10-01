@@ -13,15 +13,15 @@ export function PlanningContextModal({
   onClose: () => void;
 }) {
   return (
-    <Modal title="Overordnet oppdrag og plan" onClose={onClose}>
+    <Modal title="Superior task and plan" onClose={onClose}>
       <article className="task-detail-view">
         <h3>{details.task.title}</h3>
         <p className="document-content">
-          {details.task.description || "Ingen beskrivelse"}
+          {details.task.description || "No description"}
         </p>
         {details.task.referenceUrl && (
           <a href={details.task.referenceUrl} target="_blank" rel="noopener noreferrer">
-            Åpne hoveddokument eller oppdragstekst ↗
+            Open primary document or task text ↗
           </a>
         )}
         {details.plan ? (
@@ -44,7 +44,7 @@ export function PlanningContextModal({
             </div>
             {details.plan.allocations.length > 0 && (
               <>
-                <h4>Oppgavefordeling</h4>
+                <h4>Task allocation</h4>
                 <ul className="plan-allocations">
                   {details.plan.allocations.map((allocation, index) => (
                     <li key={`${allocation.unitName}-${index}`}>
@@ -56,7 +56,7 @@ export function PlanningContextModal({
             )}
             {details.plan.requests.length > 0 && (
               <>
-                <h4>Anmodninger til andre sites</h4>
+                <h4>Requests to other sites</h4>
                 <ul className="plan-allocations">
                   {details.plan.requests.map((request, index) => (
                     <li key={`${request.targetSiteName}-${index}`}>
@@ -68,11 +68,11 @@ export function PlanningContextModal({
             )}
           </>
         ) : (
-          <p className="muted">Det overordnede oppdraget har ingen lagret plan.</p>
+          <p className="muted">The superior task has no saved plan.</p>
         )}
       </article>
       <div className="modal-actions">
-        <button className="secondary-button" type="button" onClick={onClose}>Lukk</button>
+        <button className="secondary-button" type="button" onClick={onClose}>Close</button>
       </div>
     </Modal>
   );

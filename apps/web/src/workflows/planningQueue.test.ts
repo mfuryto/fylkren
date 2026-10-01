@@ -25,7 +25,7 @@ describe("planningQueue", () => {
   it("creates unique alphabetized work levels and filters the top level", () => {
     const top = run({ id: "top" });
     const section = run({ id: "section", item: { ...run().item, assignedUnitId: "section", assignedUnitName: "Section" } });
-    expect(buildPlanningLevels([section, top, section])).toEqual([["section", "Section"], ["top", "Toppnivå"]]);
+    expect(buildPlanningLevels([section, top, section])).toEqual([["section", "Section"], ["top", "Top level"]]);
     expect(filterPlanningRuns([section, top], "top")).toEqual([top]);
   });
 

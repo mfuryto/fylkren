@@ -20,7 +20,7 @@ export function TaskTypeManagerDialog({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   return (
-    <Modal title="Oppgavetyper" onClose={onClose}>
+    <Modal title="Tasktyper" onClose={onClose}>
       <form className="stacked-form" onSubmit={onSubmit}>
         <div className="field">
           <label htmlFor="work-type-name">Navn</label>
@@ -31,7 +31,7 @@ export function TaskTypeManagerDialog({
             <input type="checkbox" checked={form.isActive} onChange={(event) => setForm({ ...form, isActive: event.target.checked })} /> Aktiv oppgavetype
           </label>
         )}
-        <button className="primary-button" disabled={busy}>{form.id ? "Lagre type" : "Opprett type"}</button>
+        <button className="primary-button" disabled={busy}>{form.id ? "Save type" : "Opprett type"}</button>
       </form>
       <section className="type-list">
         <h3>Forvaltede typer</h3>
@@ -44,12 +44,12 @@ export function TaskTypeManagerDialog({
             {type.isSystemManaged ? (
               <span className="muted">Systemstyrt</span>
             ) : (
-              <button className="link-button" type="button" onClick={() => setForm({ id: type.id, name: type.name, isActive: type.isActive })}>Rediger</button>
+              <button className="link-button" type="button" onClick={() => setForm({ id: type.id, name: type.name, isActive: type.isActive })}>Edit</button>
             )}
           </div>
         ))}
       </section>
-      <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>Lukk</button></div>
+      <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>Close</button></div>
     </Modal>
   );
 }
@@ -72,7 +72,7 @@ export function TaskLookupManagerDialog({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   return (
-    <Modal title={kind === "source-type" ? "Kildetyper" : "Avsendere"} onClose={onClose}>
+    <Modal title={kind === "source-type" ? "Kildetyper" : "Sendere"} onClose={onClose}>
       <form className="stacked-form" onSubmit={onSubmit}>
         <div className="field">
           <label>Navn</label>
@@ -83,7 +83,7 @@ export function TaskLookupManagerDialog({
             <input type="checkbox" checked={form.isActive} onChange={(event) => setForm({ ...form, isActive: event.target.checked })} /> Aktiv
           </label>
         )}
-        <button className="primary-button" disabled={busy}>{form.id ? "Lagre" : "Opprett"}</button>
+        <button className="primary-button" disabled={busy}>{form.id ? "Save" : "Opprett"}</button>
       </form>
       <section className="type-list">
         <h3>Forvaltede verdier</h3>
@@ -93,11 +93,11 @@ export function TaskLookupManagerDialog({
               <strong>{value.name}</strong>
               <small className="muted">{value.isActive ? "Aktiv" : "Deaktivert"}{value.inUse ? " · i bruk" : ""}</small>
             </span>
-            <button className="link-button" type="button" onClick={() => setForm({ id: value.id, name: value.name, isActive: value.isActive })}>Rediger</button>
+            <button className="link-button" type="button" onClick={() => setForm({ id: value.id, name: value.name, isActive: value.isActive })}>Edit</button>
           </div>
         ))}
       </section>
-      <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>Lukk</button></div>
+      <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>Close</button></div>
     </Modal>
   );
 }

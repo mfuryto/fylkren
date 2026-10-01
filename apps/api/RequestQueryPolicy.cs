@@ -9,11 +9,11 @@ internal static class RequestQueryPolicy
     internal static IResult? Validate(int? page, string? search, int? pageSize = null)
     {
         if (page is < 1 or > MaximumPage)
-            return Validation("page", $"Sidenummer må være mellom 1 og {MaximumPage:N0}.");
+            return Validation("page", $"The page number must be between 1 and {MaximumPage:N0}.");
         if (pageSize is < 1 or > MaximumPageSize)
-            return Validation("pageSize", $"Sidestørrelse må være mellom 1 og {MaximumPageSize}.");
+            return Validation("pageSize", $"The page size must be between 1 and {MaximumPageSize}.");
         if (search?.Trim().Length > MaximumSearchLength)
-            return Validation("search", $"Søket kan ikke være lengre enn {MaximumSearchLength} tegn.");
+            return Validation("search", $"The search cannot exceed {MaximumSearchLength} characters.");
         return null;
     }
 

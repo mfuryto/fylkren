@@ -46,15 +46,15 @@ internal static class AccessDirectoryCommandEndpoints
             return Results.NotFound();
         }
         if (directoryUser is null || !string.Equals(directoryUser.StableId, request.StableId, StringComparison.OrdinalIgnoreCase))
-            return Results.NotFound(new { error = "Katalogbrukeren finnes ikke lenger eller er endret." });
+            return Results.NotFound(new { error = "The directory user no longer exists or has changed." });
         var existingLink = await database.ExternalIdentityLinks
             .Include(value => value.Person)
             .ThenInclude(person => person.LoginIdentities)
             .SingleOrDefaultAsync(value => value.Provider == provider && value.SubjectId == directoryUser.StableId && value.IsActive, cancellationToken);
         if (existingLink is not null && await database.SiteMemberships.AnyAsync(value => value.SiteId == siteId && value.PersonId == existingLink.PersonId && value.IsActive, cancellationToken))
-            return Results.Conflict(new { error = "Katalogbrukeren er allerede lagt til i denne siten." });
+            return Results.Conflict(new { error = "The directory user has already been added to this site." });
         var unit = await database.OrganizationUnits.SingleOrDefaultAsync(value => value.Id == request.OrganizationUnitId && value.SiteId == siteId && value.IsActive && !value.IsSiteRoot, cancellationToken);
-        if (unit is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["organizationUnitId"] = ["Velg en aktiv underenhet."] });
+        if (unit is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["organizationUnitId"] = ["Select an active subordinate unit."] });
         var now = DateTimeOffset.UtcNow;
         Person person;
         if (existingLink is not null)
@@ -70,9 +70,9 @@ internal static class AccessDirectoryCommandEndpoints
                 : directoryUser.DisplayName.Trim();
             var email = NormalizeEmail(directoryUser.Email);
             if (email is not null && await database.People.AnyAsync(value => value.NormalizedEmail == email.ToUpperInvariant(), cancellationToken))
-                return Results.Conflict(new { error = "E-postadressen tilhører allerede en intern person. Koble identiteten til denne personen i stedet." });
+                return Results.Conflict(new { error = "The email address already belongs to an internal person. Link the identity to that person instead." });
             if (email is not null && await database.LoginIdentities.AnyAsync(value => value.NormalizedUsername == email.ToUpperInvariant(), cancellationToken))
-                return Results.Conflict(new { error = "E-postadressen er allerede i bruk som lokalt brukernavn." });
+                return Results.Conflict(new { error = "The email address is already used as a local username." });
             person = new Person(Guid.NewGuid(), displayName, now, email);
             var anchorUsername = directoryUser.Username.Trim();
             if (!await AvailableAnchor(anchorUsername, email, database, cancellationToken))

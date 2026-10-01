@@ -52,7 +52,7 @@ internal static class FederationCapabilityEndpoints
         var identity = await db.FederationSigningIdentities.AsNoTracking()
             .SingleOrDefaultAsync(row => row.Key == 1, ct);
         if (identity is null)
-            return Results.Problem(statusCode: 503, title: "Federeringsnøkkel mangler.");
+            return Results.Problem(statusCode: 503, title: "The federation key is missing.");
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         var unsigned = new FederationCapabilityResponse(localId, peer.InstanceId,
             FederationCapabilityProtocol.ProtocolVersion, FederationWorkProtocol.SchemaVersion,

@@ -22,16 +22,16 @@ public static partial class IdentityEndpoints
     {
         await antiforgery.ValidateRequestAsync(context);
         var identity = await CurrentIdentity(user, database, cancellationToken); if (identity is null) return Results.Unauthorized();
-        if (await IsDirectoryManaged(identity.PersonId, database, cancellationToken)) return Results.Conflict(new { error = "Profilinformasjonen forvaltes av katalogtjenesten." });
+        if (await IsDirectoryManaged(identity.PersonId, database, cancellationToken)) return Results.Conflict(new { error = "Profile information is managed by the directory service." });
         var displayName = (request.DisplayName ?? "").Trim(); var email = (request.Email ?? "").Trim();
-        if (displayName.Length is < 2 or > 200 || !MailAddress.TryCreate(email, out _)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["profile"] = ["Navn eller e-postadresse er ugyldig."] });
+        if (displayName.Length is < 2 or > 200 || !MailAddress.TryCreate(email, out _)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["profile"] = ["The name or email address is invalid."] });
         var emailChanged = !string.Equals(identity.Person.Email, email, StringComparison.OrdinalIgnoreCase);
         if (emailChanged &&
             !VerifyCurrentPassword(identity, request.CurrentPassword, passwordHasher))
-            return Results.Problem(statusCode: 400, title: "Gjeldende passord er feil.");
-        if (string.Equals(identity.Username, email, StringComparison.OrdinalIgnoreCase)) return Results.Conflict(new { error = "E-postadressen kan ikke være identisk med brukernavnet." });
-        if (await database.People.AnyAsync(value => value.Id != identity.PersonId && value.NormalizedEmail == email.ToUpperInvariant(), cancellationToken)) return Results.Conflict(new { error = "E-postadressen er allerede i bruk." });
-        if (await database.LoginIdentities.AnyAsync(value => value.Id != identity.Id && value.NormalizedUsername == email.ToUpperInvariant(), cancellationToken)) return Results.Conflict(new { error = "E-postadressen er allerede i bruk som brukernavn." });
+            return Results.Problem(statusCode: 400, title: "The current password is incorrect.");
+        if (string.Equals(identity.Username, email, StringComparison.OrdinalIgnoreCase)) return Results.Conflict(new { error = "The email address cannot be identical to the username." });
+        if (await database.People.AnyAsync(value => value.Id != identity.PersonId && value.NormalizedEmail == email.ToUpperInvariant(), cancellationToken)) return Results.Conflict(new { error = "The email address is already in use." });
+        if (await database.LoginIdentities.AnyAsync(value => value.Id != identity.Id && value.NormalizedUsername == email.ToUpperInvariant(), cancellationToken)) return Results.Conflict(new { error = "The email address is already used as a username." });
         identity.Person.UpdateWithEmail(displayName, identity.Person.IsActive, email);
         if (emailChanged) identity.AdvanceSecurityVersion();
         database.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), null, identity.PersonId, "profile.updated", "person", identity.PersonId, DateTimeOffset.UtcNow));
@@ -48,10 +48,10 @@ public static partial class IdentityEndpoints
     {
         await antiforgery.ValidateRequestAsync(context);
         var identity = await CurrentIdentity(user, database, cancellationToken); if (identity is null) return Results.Unauthorized();
-        if (await IsDirectoryManaged(identity.PersonId, database, cancellationToken)) return Results.Conflict(new { error = "Passordet forvaltes av katalogtjenesten." });
-        if (string.IsNullOrEmpty(request.CurrentPassword) || string.IsNullOrEmpty(request.NewPassword)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["password"] = ["Fyll ut både gjeldende og nytt passord."] });
-        if (passwordHasher.VerifyHashedPassword(identity, identity.PasswordHash, request.CurrentPassword) == PasswordVerificationResult.Failed) return Results.Problem(statusCode: 400, title: "Gjeldende passord er feil.");
-        if (request.CurrentPassword == request.NewPassword) return Results.ValidationProblem(new Dictionary<string, string[]> { ["newPassword"] = ["Nytt passord må være forskjellig fra gjeldende passord."] });
+        if (await IsDirectoryManaged(identity.PersonId, database, cancellationToken)) return Results.Conflict(new { error = "The password is managed by the directory service." });
+        if (string.IsNullOrEmpty(request.CurrentPassword) || string.IsNullOrEmpty(request.NewPassword)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["password"] = ["Enter both the current and new password."] });
+        if (passwordHasher.VerifyHashedPassword(identity, identity.PasswordHash, request.CurrentPassword) == PasswordVerificationResult.Failed) return Results.Problem(statusCode: 400, title: "The current password is incorrect.");
+        if (request.CurrentPassword == request.NewPassword) return Results.ValidationProblem(new Dictionary<string, string[]> { ["newPassword"] = ["The new password must be different from the current password."] });
         if (passwordPolicy.Validate(request.NewPassword, identity.Username, identity.Person.DisplayName, identity.Person.Email) is { } passwordError)
             return Results.ValidationProblem(new Dictionary<string, string[]> { ["newPassword"] = [passwordError] });
         identity.SetPasswordHash(passwordHasher.HashPassword(identity, request.NewPassword));
@@ -67,7 +67,7 @@ public static partial class IdentityEndpoints
         var identity = await CurrentIdentity(user, database, cancellationToken); if (identity is null) return Results.Unauthorized();
         var form = await context.Request.ReadFormAsync(cancellationToken); var image = form.Files.GetFile("image");
         var validatedImage = await SafeImageUpload.ReadAsync(image, cancellationToken);
-        if (validatedImage is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["image"] = ["Velg et gyldig JPEG-, PNG- eller WebP-bilde på maksimalt 2 MB. Filinnholdet må samsvare med filtypen."] });
+        if (validatedImage is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["image"] = ["Select a valid JPEG, PNG, or WebP image no larger than 2 MB. The file contents must match the file type."] });
         identity.Person.SetProfileImage(validatedImage.Bytes, validatedImage.ContentType);
         database.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), null, identity.PersonId, "profile-image.updated", "person", identity.PersonId, DateTimeOffset.UtcNow));
         await database.SaveChangesAsync(cancellationToken);

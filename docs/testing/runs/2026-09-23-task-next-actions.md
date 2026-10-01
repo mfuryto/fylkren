@@ -14,9 +14,9 @@
 
 | Control | Expected | Observed | Result |
 | --- | --- | --- | --- |
-| Task under review | One “Neste steg” panel contains leader decisions and the eligible request action | Static-render assertion found exactly one action panel, including “Godkjenn og fordel” and “Send anmodning”; no “Lederbeslutning” panel | Pass |
+| Task under review | One “Next step” panel contains leader decisions and the eligible request action | Static-render assertion found exactly one action panel, including “Approve and allocate” and “Send request”; no separate manager-decision panel | Pass |
 | Plan awaiting approval | Plan decisions are visible only to the level's manager | Static-render assertions found “Godkjenn plan” for manager and not for non-manager | Pass |
-| Final-report review | Writing/editing, approval and return share “Neste steg” | Static-render assertions found writing and return before a report, editing and approval after saving | Pass |
+| Final-report review | Writing/editing, approval and return share “Next step” | Static-render assertions found writing and return before a report, editing and approval after saving | Pass |
 | Execution-stage request on Tasks | No side-request action is offered in the task card | Policy assertion returned false for `execution`, true for `under_review` | Pass |
 | Frontend regression | Existing unit tests and production bundle remain valid | `pnpm --filter @fylkren/web test`: 20 files, 66 tests passed; `pnpm --filter @fylkren/web build`: exit 0 | Pass |
 | Source structure | Files remain within configured source limits | `pnpm check:structure`: 329 files checked, exit 0 | Pass |

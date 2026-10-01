@@ -80,7 +80,7 @@ internal static class ReportApiManagementEndpoints
                 (" " + identity.Scopes + " ").Contains(" reports:read "), cancellationToken))
             return Results.ValidationProblem(new Dictionary<string, string[]>
             {
-                ["machineIdentityId"] = ["API-klienten finnes ikke eller mangler reports:read."]
+                ["machineIdentityId"] = ["The API client does not exist or lacks reports:read."]
             });
         if (request.OrganizationUnitId is Guid unitId &&
             !await database.OrganizationUnits.AnyAsync(unit =>
@@ -88,7 +88,7 @@ internal static class ReportApiManagementEndpoints
                 !unit.IsSiteRoot && !unit.IsSiteLeadership, cancellationToken))
             return Results.ValidationProblem(new Dictionary<string, string[]>
             {
-                ["organizationUnitId"] = ["Arbeidsnivået finnes ikke i siten."]
+                ["organizationUnitId"] = ["The work level does not exist in the site."]
             });
 
         var grant = await database.ApiReportGrants.SingleOrDefaultAsync(value =>

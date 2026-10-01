@@ -10,14 +10,14 @@ export async function verifyWorkloadPresentation({
   assert.ok(response.body.availableFrom, JSON.stringify(response.body));
 
   await navigate('/#/workload');
-  await waitFor(`document.body.innerText.includes("Aktive oppdrag over tid") &&
+  await waitFor(`document.body.innerText.includes("Active tasks over time") &&
     document.body.innerText.includes("Historikk er tilgjengelig fra") &&
     [...document.querySelectorAll('.workload-chart polyline title')]
-      .some(value => value.textContent === 'Hele siten')`, `workload chart total = ${expected}`);
+      .some(value => value.textContent === 'Entire site')`, `workload chart total = ${expected}`);
   const chart = await evaluate(`(() => {
     const svg = document.querySelector('.workload-chart');
     const line = [...svg.querySelectorAll('polyline')]
-      .find(value => value.querySelector('title')?.textContent === 'Hele siten');
+      .find(value => value.querySelector('title')?.textContent === 'Entire site');
     const points = line.getAttribute('points').trim().split(/\\s+/);
     return {
       label: svg.getAttribute('aria-label'),
@@ -27,9 +27,9 @@ export async function verifyWorkloadPresentation({
       lastY: Number(points.at(-1).split(',')[1]),
     };
   })()`);
-  assert.equal(chart.label, 'Registrert oppdragsbelastning de siste 12 månedene');
+  assert.equal(chart.label, 'Recorded task workload over the last 12 months');
   assert.equal(chart.monthLabels, 12, JSON.stringify(chart));
-  assert.ok(chart.legend.includes('Hele siten'), JSON.stringify(chart));
+  assert.ok(chart.legend.includes('Entire site'), JSON.stringify(chart));
   assert.ok(Math.abs(chart.lastY - (expected ? 40 : 250)) < 0.01, JSON.stringify(chart));
   await assertNoOverflow(`Workload chart total ${expected}`);
 }

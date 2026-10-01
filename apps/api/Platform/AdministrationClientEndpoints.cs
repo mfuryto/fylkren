@@ -51,9 +51,9 @@ internal static class AdministrationClientEndpoints
                 .ToArray() ?? [];
             var now = DateTimeOffset.UtcNow;
             if (name.Length is < 2 or > 120 || scopes.Length == 0 || scopes.Any(scope => !AllowedScopes.Contains(scope)))
-                return Validation("client", "Kontroller navn og scopes.");
+                return Validation("client", "Check the name and scopes.");
             if (request.ExpiresAt is null || request.ExpiresAt <= now || request.ExpiresAt > now.AddDays(366))
-                return Validation("expiresAt", "Utløpsdato er obligatorisk og kan være maksimalt ett år frem i tid.");
+                return Validation("expiresAt", "An expiry date is required and can be at most one year in the future.");
             var generated = ApiMachineSecrets.Create();
             var value = new ApiMachineIdentity(Guid.NewGuid(), name, generated.KeyId, generated.Salt, generated.Hash, string.Join(' ', scopes), request.ExpiresAt, now);
             db.ApiMachineIdentities.Add(value);

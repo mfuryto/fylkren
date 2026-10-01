@@ -80,7 +80,7 @@ internal static class WorkItemSummaryProjection
                 item.CreatedAt,
                 item.UpdatedAt,
                 item.WorkItemType != null && item.WorkItemType.IsSystemManaged &&
-                item.WorkItemType.NormalizedName == "ANMODNING" && (db.WorkItems.Any(child =>
+                item.WorkItemType.IsSystemManaged && (db.WorkItems.Any(child =>
                     child.ParentWorkItemId == item.Id && child.SenderSiteName != null &&
                     (child.SiteId != item.SiteId || child.AssignedUnitId != item.AssignedUnitId)) ||
                     db.FederationWorkLinks.Any(link => link.LocalWorkItemId == item.Id && link.Direction == "outgoing")),

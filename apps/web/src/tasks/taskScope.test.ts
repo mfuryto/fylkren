@@ -28,7 +28,7 @@ describe("taskScope", () => {
     expect(scope.canManageScope).toBe(true);
   });
 
-  it("ignorerer en syklisk enhetsgren uten rot", () => {
+  it("ignores a cyclic unit branch without a root", () => {
     const first = unit({ id: "first", parentId: "second" });
     const second = unit({ id: "second", parentId: "first" });
     expect(buildTaskScope([first, second], "site", "", site()).availableUnits).toEqual([]);

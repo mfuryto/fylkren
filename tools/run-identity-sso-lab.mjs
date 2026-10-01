@@ -609,7 +609,7 @@ try {
   await emergencyLocalBrowser.navigate(`${browserBase}/?local=1`);
   await emergencyLocalBrowser.waitFor(`location.hostname === 'localhost' && document.querySelector('#username') !== null`,
     'emergency local login presentation');
-  assert.equal(await emergencyLocalBrowser.evaluate(`document.body.innerText.includes('Lokal konto') || document.body.innerText.includes('Brukernavn eller e-postadresse')`), true);
+  assert.equal(await emergencyLocalBrowser.evaluate(`document.body.innerText.includes('Local account') || document.body.innerText.includes('Username or email address')`), true);
   await emergencyLocalBrowser.close();
   const oidcDisabledWithDirectSso = await manager.put('/api/platform/identity/providers/oidc', {
     enabled: false, clearSecret: false, configuration: oidcConfiguration,

@@ -27,9 +27,9 @@ export function PlanningScopeControls({
       </select>
     </div>}
     {levels.length > 1 && <div className="field">
-      <label htmlFor="planning-level">Arbeidsnivå</label>
+      <label htmlFor="planning-level">Work level</label>
       <select id="planning-level" value={levelFilter} onChange={event => onLevelChange(event.target.value)}>
-        <option value="all">Alle mine nivåer</option>
+        <option value="all">All my levels</option>
         {levels.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
       </select>
     </div>}

@@ -22,7 +22,7 @@ internal static class ExecutionWorkflowEndpoints
             if (run is null || !await WorkLevelAuthorization.BelongsToLevel(run.WorkItem.SiteId, run.WorkItem.AssignedUnitId, personId, db, ct)) return Results.Problem(statusCode: 403);
             var definition = await db.WorkflowDefinitions.Include(x => x.Steps).ThenInclude(x => x.Template).SingleOrDefaultAsync(x => x.Id == request.DefinitionId && x.SiteId == run.WorkItem.SiteId && x.IsActive && x.Kind == "execution", ct);
             var allowedOwners = await WorkLevelAuthorization.ConfigurationLineage(run.WorkItem.SiteId, [run.WorkItem.AssignedUnitId], db, ct);
-            if (definition is null || definition.OwnerUnitId is not null && !allowedOwners.Contains(definition.OwnerUnitId.Value)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["definitionId"] = ["Velg en aktiv utførelsesflyt for dette nivået."] });
+            if (definition is null || definition.OwnerUnitId is not null && !allowedOwners.Contains(definition.OwnerUnitId.Value)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["definitionId"] = ["Select an active execution workflow for this level."] });
             var now = DateTimeOffset.UtcNow;
             run.Start(definition.Id, now);
             if (definition.Steps.Any(x => x.HasTimeline)) run.InitializeTimeline(DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(now, TimeZoneInfo.FindSystemTimeZoneById(options.Localization.TimeZone)).DateTime));

@@ -24,7 +24,7 @@ describe("WorkflowFormFields", () => {
     expect(isWorkflowTemplateApplicable(template("other"), form, units)).toBe(false);
   });
 
-  it("begrenser planlegging til site-felles maler", () => {
+  it("limits planning to site-wide templates", () => {
     const form = { ...emptyWorkflowForm(), kind: "planning" as const, ownerUnitId: "team" };
     expect(isWorkflowTemplateApplicable(template("team"), form, [unit({ id: "team" })])).toBe(false);
   });

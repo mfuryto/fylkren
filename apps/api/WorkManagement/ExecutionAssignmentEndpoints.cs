@@ -22,7 +22,7 @@ internal static class ExecutionAssignmentEndpoints
             var now = DateTimeOffset.UtcNow;
             var run = await db.ExecutionRuns.SingleOrDefaultAsync(x => x.WorkItemId == itemId, ct);
             if (run is null) { run = new ExecutionRun(Guid.NewGuid(), itemId, personId, now); db.ExecutionRuns.Add(run); }
-            else { if (run.ClaimedByPersonId is not null && run.ClaimedByPersonId != personId) return Results.Conflict(new { error = "En annen bruker har tatt ansvar for utførelsen." }); run.Claim(personId, now); }
+            else { if (run.ClaimedByPersonId is not null && run.ClaimedByPersonId != personId) return Results.Conflict(new { error = "Another user has claimed execution." }); run.Claim(personId, now); }
             db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), item.SiteId, personId, "execution.claimed", "execution-run", run.Id, now));
             await db.SaveChangesAsync(ct);
             return Results.NoContent();

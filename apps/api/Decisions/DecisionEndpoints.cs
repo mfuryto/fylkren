@@ -47,9 +47,9 @@ public static class DecisionEndpoints
         if (!await CanManageItem(item, personId, db, ct)) return Results.Problem(statusCode: 403);
         if (Validate(request) is { } error) return error;
         var makers = await ResolveMakers(siteId, request.DecisionMakerIds, personId, db, ct);
-        if (makers is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["decisionMakerIds"] = ["Alle beslutningstakere må være aktive medlemmer av siten."] });
+        if (makers is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["decisionMakerIds"] = ["All decision-makers must be active members of the site."] });
         var references = NormalizeReferences(itemId, request.References);
-        if (!await ReferencesAreValid(siteId, references, db, ct)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["references"] = ["En eller flere objektreferanser er ugyldige eller tilhører en annen site."] });
+        if (!await ReferencesAreValid(siteId, references, db, ct)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["references"] = ["One or more object references are invalid or belong to another site."] });
 
         var now = DateTimeOffset.UtcNow;
         var decision = new Decision(Guid.NewGuid(), siteId, personId, now);
@@ -71,16 +71,16 @@ public static class DecisionEndpoints
         var decision = await db.Decisions.Include(value => value.Revisions).ThenInclude(value => value.References).SingleOrDefaultAsync(value => value.Id == decisionId, ct);
         if (decision is null) return Results.NotFound();
         var latest = decision.Revisions.OrderByDescending(value => value.RevisionNumber).First();
-        if (latest.RevisionNumber != request.ExpectedRevision) return Results.Conflict(new { error = "Beslutningen er endret av en annen bruker. Last inn siste versjon før du prøver igjen." });
+        if (latest.RevisionNumber != request.ExpectedRevision) return Results.Conflict(new { error = "The decision was changed by another user. Load the latest version before trying again." });
         var taskId = latest.References.FirstOrDefault(value => value.ObjectType == "work_item")?.ObjectId;
-        if (taskId is not Guid itemId) return Results.Conflict(new { error = "Beslutningen mangler oppdragskontekst og kan ikke endres fra oppgavebildet." });
+        if (taskId is not Guid itemId) return Results.Conflict(new { error = "The decision lacks task context and cannot be changed from the task view." });
         var item = await db.WorkItems.SingleOrDefaultAsync(value => value.Id == itemId && value.SiteId == decision.SiteId, ct);
         if (item is null || !await CanManageItem(item, personId, db, ct)) return Results.Problem(statusCode: 403);
         if (Validate(request) is { } error) return error;
         var makers = await ResolveMakers(decision.SiteId, request.DecisionMakerIds, personId, db, ct);
-        if (makers is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["decisionMakerIds"] = ["Alle beslutningstakere må være aktive medlemmer av siten."] });
+        if (makers is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["decisionMakerIds"] = ["All decision-makers must be active members of the site."] });
         var references = NormalizeReferences(itemId, request.References);
-        if (!await ReferencesAreValid(decision.SiteId, references, db, ct)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["references"] = ["En eller flere objektreferanser er ugyldige eller tilhører en annen site."] });
+        if (!await ReferencesAreValid(decision.SiteId, references, db, ct)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["references"] = ["One or more object references are invalid or belong to another site."] });
 
         var now = DateTimeOffset.UtcNow;
         var revision = CreateRevision(decision.Id, latest.RevisionNumber + 1, request, personId, now, makers, references);
@@ -89,18 +89,18 @@ public static class DecisionEndpoints
             await FormalApprovalService.Approve(db, decision.SiteId, "decision", decision.Id, itemId, request.Title!, new { revision = revision.RevisionNumber, title = request.Title, decision = request.Decision, request.Rationale, request.Status, decidedAt = request.DecidedAt ?? now, decisionMakers = makers.Select(x => new { personId = x.Id, displayName = x.Name }), references }, personId, now, ct);
         db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), decision.SiteId, personId, "decision.revised", "decision", decision.Id, now));
         try { await db.SaveChangesAsync(ct); }
-        catch (DbUpdateException) { return Results.Conflict(new { error = "Beslutningen ble endret samtidig. Last inn siste versjon og prøv igjen." }); }
+        catch (DbUpdateException) { return Results.Conflict(new { error = "The decision was changed concurrently. Load the latest version and try again." }); }
         return Results.Ok(new { decision.Id, revision = revision.RevisionNumber });
     }
 
     private static IResult? Validate(DecisionRequest request)
     {
         var errors = new Dictionary<string, string[]>();
-        if ((request.Title ?? "").Trim().Length is < 2 or > 200) errors["title"] = ["Tittel må være mellom 2 og 200 tegn."];
-        if ((request.Decision ?? "").Trim().Length is < 2 or > 10000) errors["decision"] = ["Beslutning må være mellom 2 og 10 000 tegn."];
-        if ((request.Rationale ?? "").Trim().Length is < 2 or > 10000) errors["rationale"] = ["Begrunnelse må være mellom 2 og 10 000 tegn."];
-        if (!Statuses.Contains(request.Status ?? "")) errors["status"] = ["Velg en gyldig beslutningsstatus."];
-        if (request.References?.Count > 20 || request.DecisionMakerIds?.Count > 20) errors["decision"] = ["En beslutning kan ha maksimalt 20 beslutningstakere og 20 referanser."];
+        if ((request.Title ?? "").Trim().Length is < 2 or > 200) errors["title"] = ["The title must be between 2 and 200 characters."];
+        if ((request.Decision ?? "").Trim().Length is < 2 or > 10000) errors["decision"] = ["The decision must be between 2 and 10,000 characters."];
+        if ((request.Rationale ?? "").Trim().Length is < 2 or > 10000) errors["rationale"] = ["The rationale must be between 2 and 10,000 characters."];
+        if (!Statuses.Contains(request.Status ?? "")) errors["status"] = ["Select a valid decision status."];
+        if (request.References?.Count > 20 || request.DecisionMakerIds?.Count > 20) errors["decision"] = ["A decision can have at most 20 decision-makers and 20 references."];
         return errors.Count == 0 ? null : Results.ValidationProblem(errors);
     }
 

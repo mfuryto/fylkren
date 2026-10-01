@@ -157,19 +157,19 @@ async function waitForSummary(label, expected, scope = '.summary-card') {
 }
 async function assertCommunityBoundary() {
   await navigate('/#/license');
-  await waitFor('document.body.innerText.includes("Ingen Enterprise-rettigheter er aktive")',
+  await waitFor('document.body.innerText.includes("No Enterprise entitlements are active")',
     'Community license page');
   const licenseText = await bodyText();
-  assert.match(licenseText, /samme programvare for Community og Enterprise/);
+  assert.match(licenseText, /the same software for Community and Enterprise/);
   assert.match(licenseText, /Importer signert lisensfil/);
 
   await navigate('/#/federation');
-  await waitFor('document.body.innerText.includes("Federering krever Enterprise")',
+  await waitFor('document.body.innerText.includes("Federation requires Enterprise")',
     'Community federation boundary');
   const federationText = await bodyText();
   assert.match(federationText, /Eksisterende oppsett kan fortsatt leses/);
   assert.ok(!federationText.includes('Legg til motpart'));
-  assert.ok(!federationText.includes('Opprett federeringsnøkkel'));
+  assert.ok(!federationText.includes('Create federation key'));
 }
 async function importEnterpriseLicense() {
   await navigate('/#/license');
@@ -180,8 +180,8 @@ async function importEnterpriseLicense() {
   });
   assert.notEqual(nodeId, 0, 'Enterprise license file input was not rendered');
   await call('DOM.setFileInputFiles', { nodeId, files: [licensePath] });
-  await waitFor(`document.body.innerText.includes("Enterprise-lisensen er aktivert uten ny installasjon.") &&
-    document.body.innerText.includes("Enterprise") && document.body.innerText.includes("Gyldig")`,
+  await waitFor(`document.body.innerText.includes("The Enterprise license was activated without reinstalling.") &&
+    document.body.innerText.includes("Enterprise") && document.body.innerText.includes("Valid")`,
   'Enterprise license activation');
 }
 async function removeEnterpriseLicense() {
@@ -190,8 +190,8 @@ async function removeEnterpriseLicense() {
   await waitFor(`document.querySelector('[role="dialog"]') !== null`, 'license removal dialog');
   await evaluate(`[...document.querySelectorAll('[role="dialog"] button')]
     .find(button => button.textContent.trim() === 'Fjern lisens').click()`);
-  await waitFor(`document.body.innerText.includes("Enterprise-rettighetene er slått av") &&
-    document.body.innerText.includes("Ingen Enterprise-rettigheter er aktive")`,
+  await waitFor(`document.body.innerText.includes("Enterprise entitlements are disabled") &&
+    document.body.innerText.includes("No Enterprise entitlements are active")`,
   'Community downgrade');
 }
 async function runTopLevelTaskFlow(suffix, platformCredentials) {
@@ -265,12 +265,12 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
     document.body.innerText.includes(${JSON.stringify(title)})`, 'registered task');
   await navigate('/#/');
   await waitForSummary('Krever handling', 1);
-  await waitForSummary('Aktive', 1);
+  await waitForSummary('Active', 1);
   await verifyWorkloadPresentation({ navigate, waitFor, request, evaluate, assertNoOverflow, siteId: site.id, expected: 1 });
   await navigate('/#/tasks');
   await waitFor(`document.body.innerText.includes(${JSON.stringify(title)})`, 'registered task queue');
-  if (!(await bodyText()).includes('Ta til vurdering')) await clickButton('Åpne oppdrag');
-  await waitFor('document.body.innerText.includes("Ta til vurdering")', 'registered task actions');
+  if (!(await bodyText()).includes('Move to assessment')) await clickButton('Open task');
+  await waitFor('document.body.innerText.includes("Move to assessment")', 'registered task actions');
   await evaluate(`(() => {
     const summary = [...document.querySelectorAll('summary')]
       .find(value => value.textContent.includes('Beskrivelse'));
@@ -284,23 +284,23 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
     ![...document.scripts].some(value => value.textContent.includes(${JSON.stringify('__fylkrenXss')})) &&
     globalThis.__fylkrenXss === undefined)()`), true,
   'Stored active-content payload was not rendered as inert text');
-  await clickButton('Ta til vurdering');
+  await clickButton('Move to assessment');
   await waitFor('document.querySelector("#review-priority") !== null', 'review dialog');
   assert.match(await bodyText(), new RegExp(recommendation.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   await setSelect('#review-priority', 'high');
   await evaluate('document.querySelector("#review-priority").closest("form").requestSubmit()');
   await waitFor(`document.body.innerText.includes("Til vurdering") &&
-    document.body.innerText.includes("Send til utførelse")`, 'reviewed task');
+    document.body.innerText.includes("Send to execution")`, 'reviewed task');
   assert.ok(!(await bodyText()).includes(recommendation),
     'Recommendation remained visible after initial assessment');
-  await clickButton('Send til utførelse');
-  await waitFor('document.body.innerText.includes("Utførelse")', 'task sent to execution');
+  await clickButton('Send to execution');
+  await waitFor('document.body.innerText.includes("Execution")', 'task sent to execution');
 
   await navigate('/#/execution');
   await waitFor(`document.body.innerText.includes(${JSON.stringify(title)})`, 'execution queue');
-  await clickButton('Åpne utførelse');
-  await clickButton('Ta ansvar for oppdraget');
-  await waitFor('document.body.innerText.includes("Velg utførelsesflyt")', 'claimed execution');
+  await clickButton('Open execution');
+  await clickButton('Claim responsibility for the task');
+  await waitFor('document.body.innerText.includes("Select execution workflow")', 'claimed execution');
   const definition = await evaluate(`(() => {
     const select = [...document.querySelectorAll('select')]
       .find(value => value.closest('.planning-result'));
@@ -315,42 +315,42 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
     select.dispatchEvent(new Event('change', { bubbles: true }));
   })()`);
   await clickButton('Start arbeidsflyt');
-  await waitFor('document.body.innerText.includes("Steg 1 av")', 'execution workflow');
+  await waitFor('document.body.innerText.includes("Step 1 of")', 'execution workflow');
   for (let step = 1; step <= 10; step++) {
     await setRichText('document', `<h1>Execution step ${step}</h1><ul><li>Completed in Chromium</li></ul>`);
     const lastStep = await evaluate(`[...document.querySelectorAll('button')]
-      .some(button => button.textContent.trim() === 'Send til kontroll')`);
-    await clickButton(lastStep ? 'Send til kontroll' : 'Neste steg');
+      .some(button => button.textContent.trim() === 'Submit for review')`);
+    await clickButton(lastStep ? 'Submit for review' : 'Next step');
     if (lastStep) break;
-    await waitFor(`document.body.innerText.includes("Steg ${step + 1} av")`,
+    await waitFor(`document.body.innerText.includes("Step ${step + 1} of")`,
       `execution step ${step + 1}`);
     if (step === 10) throw new Error('Execution workflow exceeded ten steps');
   }
 
   await navigate('/#/tasks');
   await waitFor(`document.body.innerText.includes(${JSON.stringify(title)})`, 'task review queue');
-  if (!(await bodyText()).includes('Skriv sluttrapport')) await clickButton('Åpne oppdrag');
-  await waitFor('document.body.innerText.includes("Skriv sluttrapport")', 'final report action');
-  await clickButton('Skriv sluttrapport');
+  if (!(await bodyText()).includes('Write final report')) await clickButton('Open task');
+  await waitFor('document.body.innerText.includes("Write final report")', 'final report action');
+  await clickButton('Write final report');
   await waitFor('document.querySelector("[role=dialog] .workflow-document-editor") !== null',
     'final report dialog');
   await setRichText('document.querySelector("[role=dialog]")',
     reportPdfPath ? buildMultiPageReportHtml()
-      : '<h1>Sammendrag</h1><p>Task completed.</p><h1>Konklusjon</h1><p>Accepted.</p>');
+      : '<h1>Summary</h1><p>Task completed.</p><h1>Conclusion</h1><p>Accepted.</p>');
   await assertClassificationOrder(evaluate);
   await setSelect('#final-report-classification', 'CONF');
-  await clickButton('Lagre sluttrapport', 'document.querySelector("[role=dialog]")');
-  await waitFor('document.body.innerText.includes("Godkjenn sluttrapport")',
+  await clickButton('Save final report', 'document.querySelector("[role=dialog]")');
+  await waitFor('document.body.innerText.includes("Approve final report")',
     'saved final report');
   await signInLocalActor({ request, navigate, waitFor, setInput, evaluate, actor: approver });
   await navigate('/#/tasks');
   await waitFor(`document.body.innerText.includes(${JSON.stringify(title)})`, 'approver task queue');
-  if (!(await bodyText()).includes('Godkjenn sluttrapport')) await clickButton('Åpne oppdrag');
-  await waitFor('document.body.innerText.includes("Godkjenn sluttrapport")', 'separate approval action');
-  await clickButton('Godkjenn sluttrapport');
+  if (!(await bodyText()).includes('Approve final report')) await clickButton('Open task');
+  await waitFor('document.body.innerText.includes("Approve final report")', 'separate approval action');
+  await clickButton('Approve final report');
   await waitFor(`[...document.querySelectorAll('button')]
-    .some(button => button.textContent.trim() === 'Fullfør')`, 'approved final report');
-  await clickButton('Fullfør');
+    .some(button => button.textContent.trim() === 'Complete')`, 'approved final report');
+  await clickButton('Complete');
 
   let completed;
   for (let attempt = 0; attempt < 60; attempt++) {
@@ -373,9 +373,9 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
 
   await navigate('/#/');
   await waitForSummary('Krever handling', 0);
-  await waitForSummary('Aktive', 0);
-  await waitForSummary('Registrerte og mottatte oppdrag', 1, '.overview-stat-card');
-  await waitForSummary('Gjennomførte oppdrag', 1, '.overview-stat-card');
+  await waitForSummary('Active', 0);
+  await waitForSummary('Registered and received tasks', 1, '.overview-stat-card');
+  await waitForSummary('Completed tasks', 1, '.overview-stat-card');
   await verifyWorkloadPresentation({ navigate, waitFor, request, evaluate, assertNoOverflow, siteId: site.id, expected: 0 });
 
   await navigate('/#/reports');
@@ -402,9 +402,9 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
 
   await navigate('/#/audit');
   await waitFor(`document.body.innerText.includes("Sporbare hendelser i sites du administrerer") &&
-    document.body.innerText.includes("Oppdrag registrert") &&
-    document.body.innerText.includes("Utførelse sendt til kontroll") &&
-    document.body.innerText.includes("Sluttrapport godkjent")`, 'site audit chain');
+    document.body.innerText.includes("Task registered") &&
+    document.body.innerText.includes("Execution submitted for review") &&
+    document.body.innerText.includes("Final report approved")`, 'site audit chain');
 
   const leaderLogout = await request('/api/session', 'DELETE');
   assert.equal(leaderLogout.status, 204, JSON.stringify(leaderLogout.body));
@@ -440,9 +440,9 @@ try {
   const publicConfiguration = JSON.parse(configurationResponse.text);
   assert.equal(publicConfiguration.setupRequired, true,
     `Fresh browser fixture did not require setup: ${JSON.stringify(publicConfiguration)}`);
-  await waitFor('document.body.innerText.includes("Førstegangsoppsett")', 'setup page');
+  await waitFor('document.body.innerText.includes("First-run setup")', 'setup page');
   const setupText = await bodyText();
-  assert.match(setupText, /Opprett installasjonens første Platform Manager/);
+  assert.match(setupText, /Create the installation's first Platform Manager/);
   await assertNoOverflow('Setup page');
 
   const suffix = randomBytes(6).toString('hex');
@@ -459,7 +459,7 @@ try {
   await assertNoOverflow('Authenticated shell');
 
   await navigate('/#/sites');
-  await waitFor('document.body.innerText.includes("Ingen sites er opprettet")', 'empty Sites page');
+  await waitFor('document.body.innerText.includes("No sites have been created")', 'empty Sites page');
   assert.match(await bodyText(), /Community: 0 av 3 aktive sites/);
   await evaluate(`[...document.querySelectorAll('button')]
     .find(button => button.textContent.trim() === 'Ny site').click()`);
@@ -478,7 +478,7 @@ try {
 
     await navigate('/#/federation');
     await waitFor(`document.body.innerText.includes("Legg til motpart") &&
-      document.body.innerText.includes("Opprett federeringsnøkkel")`,
+      document.body.innerText.includes("Create federation key")`,
     'Enterprise federation controls');
     await assertNoOverflow('Enterprise federation page');
 

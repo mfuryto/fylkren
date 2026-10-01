@@ -26,14 +26,14 @@ internal static class PlanningRequestEndpoints
                 return Results.Conflict(new { error = "federated_recipient_not_routable" });
             if (remoteTarget && !await license.Has(db, FeatureCatalog.InstanceFederation, ct))
                 return Results.Problem(statusCode: StatusCodes.Status403Forbidden,
-                    title: "Enterprise-rettighet kreves for denne funksjonen.",
+                    title: "An Enterprise entitlement is required for this feature.",
                     extensions: new Dictionary<string, object?> {
                         ["code"] = "enterprise_entitlement_required",
                         ["feature"] = FeatureCatalog.InstanceFederation });
             var instruction = (request.Instruction ?? "").Trim();
             var validStep = await db.WorkflowSteps.AnyAsync(x => x.Id == request.StepId && x.DefinitionId == run.DefinitionId && x.AllowsTaskAllocation, ct);
             if (!validStep || instruction.Length is < 2 or > 2000)
-                return Results.ValidationProblem(new Dictionary<string, string[]> { ["request"] = ["Velg en annen aktiv site som ikke er underlagt avsenders site, og fyll inn anmodningen."] });
+                return Results.ValidationProblem(new Dictionary<string, string[]> { ["request"] = ["Select another active site that is not subordinate to the sender's site, and enter the request."] });
             WorkflowPlanRequest plannedRequest;
             if (remoteTarget)
             {
@@ -44,7 +44,7 @@ internal static class PlanningRequestEndpoints
                 if (await db.WorkflowPlanRequests.AnyAsync(x => x.RunId == runId &&
                         x.StepId == request.StepId && x.TargetInstanceId == peerInstanceId &&
                         x.RemoteSiteId == request.TargetSiteId, ct))
-                    return Results.Conflict(new { error = "Siten er allerede lagt til i dette plansteget." });
+                    return Results.Conflict(new { error = "The site has already been added to this planning step." });
                 var remote = await db.FederationRemoteSites.SingleAsync(x =>
                     x.InstanceId == peerInstanceId && x.SiteId == request.TargetSiteId, ct);
                 plannedRequest = new WorkflowPlanRequest(Guid.NewGuid(), runId, request.StepId,
@@ -54,10 +54,10 @@ internal static class PlanningRequestEndpoints
             {
                 var eligibleSiteIds = await RequestRecipientPolicy.EligibleSiteIds(run.WorkItem.SiteId, db, ct);
                 if (!eligibleSiteIds.Contains(request.TargetSiteId))
-                    return Results.ValidationProblem(new Dictionary<string, string[]> { ["request"] = ["Velg en annen aktiv site som ikke er underlagt avsenders site, og fyll inn anmodningen."] });
+                    return Results.ValidationProblem(new Dictionary<string, string[]> { ["request"] = ["Select another active site that is not subordinate to the sender's site, and enter the request."] });
                 if (await db.WorkflowPlanRequests.AnyAsync(x => x.RunId == runId &&
                         x.StepId == request.StepId && x.TargetSiteId == request.TargetSiteId, ct))
-                    return Results.Conflict(new { error = "Siten er allerede lagt til i dette plansteget." });
+                    return Results.Conflict(new { error = "The site has already been added to this planning step." });
                 plannedRequest = new WorkflowPlanRequest(Guid.NewGuid(), runId, request.StepId,
                     request.TargetSiteId, instruction);
             }

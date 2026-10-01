@@ -24,13 +24,13 @@ internal static class LicenseEndpoints
         if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest();
         if (!Guid.TryParse(user.FindFirstValue("fylkren:person_id"), out var actor)) return Results.Problem(statusCode: 403);
         if (!service.HasTrustedIssuer)
-            return Results.Problem(statusCode: 503, title: "Ingen betrodd lisensutsteder er konfigurert.");
+            return Results.Problem(statusCode: 503, title: "No trusted licence issuer is configured.");
         if (request.Payload is null || request.Signature is null || request.Payload.Length > 24_000 || request.Signature.Length > 256)
-            return Results.ValidationProblem(new Dictionary<string, string[]> { ["license"] = ["Lisensfilen har ugyldig format eller størrelse."] });
+            return Results.ValidationProblem(new Dictionary<string, string[]> { ["license"] = ["The licence file has an invalid format or size."] });
         var instanceId = await db.InstanceIdentities.AsNoTracking().Where(x => x.Key == 1).Select(x => x.InstanceId).SingleAsync(ct);
         var evaluated = service.Evaluate(request.Payload, request.Signature, instanceId, DateTimeOffset.UtcNow);
         if (evaluated.State != "valid")
-            return Results.ValidationProblem(new Dictionary<string, string[]> { ["license"] = [$"Lisensen ble ikke aktivert: {evaluated.State}."] });
+            return Results.ValidationProblem(new Dictionary<string, string[]> { ["license"] = [$"The licence was not activated: {evaluated.State}."] });
         var existing = await db.InstalledLicenses.SingleOrDefaultAsync(x => x.Key == 1, ct);
         if (existing is null) db.InstalledLicenses.Add(new InstalledLicense(request.Payload, request.Signature, actor, DateTimeOffset.UtcNow));
         else existing.Replace(request.Payload, request.Signature, actor, DateTimeOffset.UtcNow);

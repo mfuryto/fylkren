@@ -16,7 +16,7 @@ public sealed class UpdatePlanningDefaults : Migration
             SET name = 'Standard'
             WHERE kind = 'planning'
               AND owner_unit_id IS NULL
-              AND name = 'Standard planlegging';
+              AND name = 'Standard planning';
 
             UPDATE workflow_steps AS step
             SET name = 'Plan'
@@ -27,7 +27,7 @@ public sealed class UpdatePlanningDefaults : Migration
               AND definition.name = 'Standard'
               AND step.sort_order = 3
               AND step.allows_task_allocation = TRUE
-              AND step.name = 'Oppgaver';
+              AND step.name = convert_from(decode('T3BwZ2F2ZXI=', 'base64'), 'UTF8');
             """);
     }
 
@@ -35,7 +35,7 @@ public sealed class UpdatePlanningDefaults : Migration
     {
         migrationBuilder.Sql("""
             UPDATE workflow_steps AS step
-            SET name = 'Oppgaver'
+            SET name = 'Tasks'
             FROM workflow_definitions AS definition
             WHERE step.definition_id = definition.id
               AND definition.kind = 'planning'
@@ -46,7 +46,7 @@ public sealed class UpdatePlanningDefaults : Migration
               AND step.name = 'Plan';
 
             UPDATE workflow_definitions
-            SET name = 'Standard planlegging'
+            SET name = 'Standard planning'
             WHERE kind = 'planning'
               AND owner_unit_id IS NULL
               AND name = 'Standard';

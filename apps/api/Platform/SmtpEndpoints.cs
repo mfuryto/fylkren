@@ -73,7 +73,7 @@ public static class SmtpEndpoints
         if (normalizedStatus is not (null or "" or "pending" or "sent" or "failed"))
             return Results.ValidationProblem(new Dictionary<string, string[]>
             {
-                ["status"] = ["Status må være pending, sent eller failed."]
+                ["status"] = ["Status must be pending, sent, or failed."]
             });
 
         var smtp = await database.SmtpSettings.AsNoTracking()
@@ -151,7 +151,7 @@ public static class SmtpEndpoints
             body.Length is < 1 or > 10000)
             return Results.ValidationProblem(new Dictionary<string, string[]>
             {
-                ["template"] = ["Emne og melding må fylles ut innenfor tillatt lengde."]
+                ["template"] = ["The subject and message must be provided within the allowed length."]
             });
         var unknownFields = Regex.Matches($"{subject}\n{body}", @"\{\{([A-Za-z][A-Za-z0-9]*)\}\}")
             .Select(match => match.Groups[1].Value)
@@ -194,7 +194,7 @@ public static class SmtpEndpoints
             !MailAddress.TryCreate(fromAddress, out _))
             return Results.ValidationProblem(new Dictionary<string, string[]>
             {
-                ["smtp"] = ["Kontroller server, port, sikkerhet, brukernavn og avsender."]
+                ["smtp"] = ["Check the server, port, security, username, and sender."]
             });
 
         var value = await database.SmtpSettings.SingleAsync(settings => settings.Id == Id, cancellationToken);
@@ -222,7 +222,7 @@ public static class SmtpEndpoints
     {
         if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest();
         if (!MailAddress.TryCreate(request.Recipient?.Trim(), out var recipient))
-            return Results.BadRequest(new { error = "Ugyldig testmottaker." });
+            return Results.BadRequest(new { error = "Invalid test recipient." });
         var value = await database.SmtpSettings.SingleAsync(settings => settings.Id == Id, cancellationToken);
         try
         {
@@ -234,7 +234,7 @@ public static class SmtpEndpoints
             if (value.Username is not null)
             {
                 if (value.ProtectedPassword is null)
-                    throw new InvalidOperationException("SMTP-passord mangler.");
+                    throw new InvalidOperationException("The SMTP password is missing.");
                 client.Credentials = new NetworkCredential(value.Username,
                     dataProtection.CreateProtector("Fylkren.SmtpPassword.v1")
                         .Unprotect(value.ProtectedPassword));
@@ -242,8 +242,8 @@ public static class SmtpEndpoints
             using var message = new MailMessage(
                 new MailAddress(value.FromAddress, MailHeaderPolicy.Normalize(value.FromName, 200)), recipient)
             {
-                Subject = "Test av e-postoppsett",
-                Body = "Dette er en testmelding fra den konfigurerte installasjonen."
+                Subject = "Email configuration test",
+                Body = "This is a test message from the configured installation."
             };
             await client.SendMailAsync(message, cancellationToken);
             value.RecordTest(true, null);
@@ -254,9 +254,9 @@ public static class SmtpEndpoints
                                                System.Security.Cryptography.CryptographicException)
         {
             loggerFactory.CreateLogger("SmtpTest").LogWarning(exception, "SMTP-test mislyktes");
-            value.RecordTest(false, "Tilkobling eller utsending mislyktes. Se tekniske logger.");
+            value.RecordTest(false, "Connection or delivery failed. See the technical logs.");
             await database.SaveChangesAsync(cancellationToken);
-            return Results.Problem(statusCode: 502, title: "Testutsendingen mislyktes.");
+            return Results.Problem(statusCode: 502, title: "The test delivery failed.");
         }
     }
     private sealed record SmtpUpdate(bool Enabled, string Host, int Port, string Security, string? Username, string? Password, bool ClearPassword, string FromAddress, string FromName);

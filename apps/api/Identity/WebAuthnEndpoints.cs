@@ -80,7 +80,7 @@ public static class WebAuthnEndpoints
         if (login is null)
             return Results.Unauthorized();
         if (!IdentityEndpoints.VerifyCurrentPassword(login, request.CurrentPassword, passwordHasher))
-            return Results.Problem(statusCode: 400, title: "Gjeldende passord er feil.");
+            return Results.Problem(statusCode: 400, title: "The current password is incorrect.");
 
         var existing = await db.WebAuthnCredentials
             .AsNoTracking()
@@ -333,7 +333,7 @@ public static class WebAuthnEndpoints
         if (login is null)
             return Results.Unauthorized();
         if (!IdentityEndpoints.VerifyCurrentPassword(login, request.CurrentPassword, passwordHasher))
-            return Results.Problem(statusCode: 400, title: "Gjeldende passord er feil.");
+            return Results.Problem(statusCode: 400, title: "The current password is incorrect.");
         var credential = await db.WebAuthnCredentials.SingleOrDefaultAsync(value =>
             value.Id == id && value.PersonId == personId && value.IsActive,
             ct);

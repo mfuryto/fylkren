@@ -121,7 +121,7 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
   useEffect(() => {
     if (!permalink.itemId || !items.length) return;
     const target = items.find(item => item.id === permalink.itemId);
-    if (!target) { setError("Oppdraget finnes ikke, eller du har ikke tilgang til det."); return; }
+    if (!target) { setError("The task does not exist, or you do not have access to it."); return; }
     let root = target;
     while (root.parentWorkItemId) {
       const parent = items.find(item => item.id === root.parentWorkItemId);
@@ -157,40 +157,40 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
   async function createItem(event: React.FormEvent) {
     event.preventDefault();
     await executeTaskCommand({
-      path: `/api/work/sites/${selectedSiteId}/items`, method: "POST", body: taskCreatePayload(form, selectedUnitId), fallback: "Oppgaven kunne ikke registreres.",
+      path: `/api/work/sites/${selectedSiteId}/items`, method: "POST", body: taskCreatePayload(form, selectedUnitId), fallback: "The task could not be registered.",
       onSuccess: () => { setForm(emptyTaskCreateDraft()); setRequestRecipientQuery(""); setRequestRecipients([]); setCreatorOpen(false); },
       refresh: () => loadItems(selectedSiteId),
     });
   }
   async function saveType(event: React.FormEvent) {
     event.preventDefault();
-    await executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/types${typeForm.id ? `/${typeForm.id}` : ""}`, method: typeForm.id ? "PUT" : "POST", body: { name: typeForm.name, isActive: typeForm.isActive }, fallback: "Oppgavetypen kunne ikke lagres.", onSuccess: () => setTypeForm({ id: "", name: "", isActive: true }), refresh: () => loadTypes(selectedSiteId) });
+    await executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/types${typeForm.id ? `/${typeForm.id}` : ""}`, method: typeForm.id ? "PUT" : "POST", body: { name: typeForm.name, isActive: typeForm.isActive }, fallback: "The task type could not be saved.", onSuccess: () => setTypeForm({ id: "", name: "", isActive: true }), refresh: () => loadTypes(selectedSiteId) });
   }
   async function saveLookup(event: React.FormEvent) {
     event.preventDefault(); if (!lookupManager) return;
-    await executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/lookups/${lookupManager}${lookupForm.id ? `/${lookupForm.id}` : ""}`, method: lookupForm.id ? "PUT" : "POST", body: { name: lookupForm.name, isActive: lookupForm.isActive }, fallback: "Verdien kunne ikke lagres.", onSuccess: () => setLookupForm({ id: "", name: "", isActive: true }), refresh: () => loadLookups(selectedSiteId) });
+    await executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/lookups/${lookupManager}${lookupForm.id ? `/${lookupForm.id}` : ""}`, method: lookupForm.id ? "PUT" : "POST", body: { name: lookupForm.name, isActive: lookupForm.isActive }, fallback: "The value could not be saved.", onSuccess: () => setLookupForm({ id: "", name: "", isActive: true }), refresh: () => loadLookups(selectedSiteId) });
   }
   async function delegateItem(event: React.FormEvent) {
     event.preventDefault();
     if (!delegation) return;
-    await executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/items/${delegation.item.id}/delegate`, method: "POST", body: { assignedUnitId: delegation.assignedUnitId, instruction: delegation.instruction }, fallback: "Oppgaven kunne ikke fordeles videre.", onSuccess: () => setDelegation(null), refresh: () => loadItems(selectedSiteId) });
+    await executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/items/${delegation.item.id}/delegate`, method: "POST", body: { assignedUnitId: delegation.assignedUnitId, instruction: delegation.instruction }, fallback: "The task could not be routed onward.", onSuccess: () => setDelegation(null), refresh: () => loadItems(selectedSiteId) });
   }
   async function sendSideRequest(event: React.FormEvent) {
     event.preventDefault();
     if (!sideRequest) return;
-    await executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/items/${sideRequest.item.id}/request`, method: "POST", body: { targetSiteId: sideRequest.targetSiteId || null, targetInstanceId: sideRequest.targetInstanceId || null, targetUnitId: sideRequest.targetUnitId || null, title: sideRequest.title, description: sideRequest.description }, fallback: "Anmodningen kunne ikke sendes.", onSuccess: () => { setSideRequest(null); setSideRequestRecipientQuery(""); setSideRequestRecipients([]); }, refresh: () => loadItems(selectedSiteId) });
+    await executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/items/${sideRequest.item.id}/request`, method: "POST", body: { targetSiteId: sideRequest.targetSiteId || null, targetInstanceId: sideRequest.targetInstanceId || null, targetUnitId: sideRequest.targetUnitId || null, title: sideRequest.title, description: sideRequest.description }, fallback: "The request could not be sent.", onSuccess: () => { setSideRequest(null); setSideRequestRecipientQuery(""); setSideRequestRecipients([]); }, refresh: () => loadItems(selectedSiteId) });
   }
   async function reassignItem(event: React.FormEvent) {
     event.preventDefault();
     if (!reassignment) return;
-    await executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/items/${reassignment.item.id}/reassign`, method: "POST", body: { assignedUnitId: reassignment.assignedUnitId }, fallback: "Oppdraget kunne ikke omfordeles.", onSuccess: () => setReassignment(null), refresh: () => loadItems(selectedSiteId) });
+    await executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/items/${reassignment.item.id}/reassign`, method: "POST", body: { assignedUnitId: reassignment.assignedUnitId }, fallback: "The task could not be reassigned.", onSuccess: () => setReassignment(null), refresh: () => loadItems(selectedSiteId) });
   }
   async function showPlan(item: WorkItem) {
     setError("");
     try {
       setDetails({ data: await getTaskDetails(selectedSiteId, item.id) });
     } catch (problem) {
-      setError(errorMessage(problem,"Planen kunne ikke lastes."));
+      setError(errorMessage(problem,"The plan could not be loaded."));
     }
   }
   async function loadChildHistory(item: WorkItem) {
@@ -212,50 +212,50 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
     decisionNote?: string,
     priority?: string,
   ) {
-    return executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/items/${item.id}/status`, method: "PUT", body: { status, assignedUnitId: assignedUnitId || null, decisionNote: decisionNote || null, priority: priority || null }, fallback: "Statusen kunne ikke endres.", refresh: () => loadItems(selectedSiteId) });
+    return executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/items/${item.id}/status`, method: "PUT", body: { status, assignedUnitId: assignedUnitId || null, decisionNote: decisionNote || null, priority: priority || null }, fallback: "The status could not be changed.", refresh: () => loadItems(selectedSiteId) });
   }
   async function decidePlan(runId: string, action: "approve" | "replan" | "hold" | "reject", note: string | null) {
-    await executeTaskCommand({ path: `/api/workflows/planning/${runId}/decision`, method: "POST", body: { action, note }, fallback: "Planbeslutningen kunne ikke lagres.", onSuccess: () => { setPlanDecision(null); setDetails(null); clearPlanDetails(); }, refresh: () => loadItems(selectedSiteId) });
+    await executeTaskCommand({ path: `/api/workflows/planning/${runId}/decision`, method: "POST", body: { action, note }, fallback: "The plan decision could not be saved.", onSuccess: () => { setPlanDecision(null); setDetails(null); clearPlanDetails(); }, refresh: () => loadItems(selectedSiteId) });
   }
   async function planDecisionForItem(item: WorkItem, action: "approve" | "replan" | "hold" | "reject") {
     try {
       const plan = planDetails[item.id]?.plan ?? (await getTaskDetails(selectedSiteId, item.id)).plan;
-      if (!plan) { setError("Planforslaget finnes ikke lenger."); return; }
+      if (!plan) { setError("The proposed plan no longer exists."); return; }
       if (action === "approve") { await decidePlan(plan.id, action, null); return; }
       setPlanDecision({ runId: plan.id, item, action, note: "" });
       setDecisionDependencies([]);
-    } catch (problem) { setError(errorMessage(problem, "Planforslaget kunne ikke lastes.")); }
+    } catch (problem) { setError(errorMessage(problem, "The proposed plan could not be loaded.")); }
   }
   async function releaseApprovedPlan(item: WorkItem) {
     try {
       const runId = await approvedPlanRunId(selectedSiteId, item.id);
-      await executeTaskCommand({ path: `/api/workflows/planning/${runId}/decision`, method: "POST", body: { action: "release" }, fallback: "Den godkjente planen kunne ikke iverksettes.", refresh: () => loadItems(selectedSiteId) });
-    } catch (problem) { setError(errorMessage(problem, "Den godkjente planen kunne ikke iverksettes.")); }
+      await executeTaskCommand({ path: `/api/workflows/planning/${runId}/decision`, method: "POST", body: { action: "release" }, fallback: "The approved plan could not be initiated.", refresh: () => loadItems(selectedSiteId) });
+    } catch (problem) { setError(errorMessage(problem, "The approved plan could not be initiated.")); }
   }
   const toggleDecisionDependency = (candidate: WorkItemDependencyCandidate) => setDecisionDependencies(current => current.some(value => value.id === candidate.id) ? current.filter(value => value.id !== candidate.id) : [...current, candidate]);
   async function saveHoldDependencies(item: WorkItem) {
     try { await addHoldDependencies(selectedSiteId, item.id, decisionDependencies.map(value => value.id)); return true; }
-    catch (problem) { setError(errorMessage(problem, "Avhengighetene kunne ikke legges til.")); return false; }
+    catch (problem) { setError(errorMessage(problem, "Dependencies could not be added.")); return false; }
   }
   async function cancelWorkChain(item: WorkItem, decisionNote: string) {
-    await executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/items/${item.id}/cancel`, method: "POST", body: { decisionNote }, fallback: "Oppdragskjeden kunne ikke kanselleres.", refresh: () => loadItems(selectedSiteId) });
+    await executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/items/${item.id}/cancel`, method: "POST", body: { decisionNote }, fallback: "The task chain could not be cancelled.", refresh: () => loadItems(selectedSiteId) });
   }
   async function saveFinalReport(event: React.FormEvent) {
     event.preventDefault();
     if (!reportEditor) return;
-    await executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/items/${reportEditor.item.id}/final-report`, method: "PUT", body: { content: reportEditor.content, classification: reportEditor.classification || null }, fallback: "Sluttrapporten kunne ikke lagres.", onSuccess: () => setReportEditor(null), refresh: () => loadItems(selectedSiteId) });
+    await executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/items/${reportEditor.item.id}/final-report`, method: "PUT", body: { content: reportEditor.content, classification: reportEditor.classification || null }, fallback: "The final report could not be saved.", onSuccess: () => setReportEditor(null), refresh: () => loadItems(selectedSiteId) });
   }
   async function approveFinalReport(item: WorkItem) {
-    await executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/items/${item.id}/final-report/approve`, method: "POST", fallback: "Sluttrapporten kunne ikke godkjennes.", refresh: () => loadItems(selectedSiteId) });
+    await executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/items/${item.id}/final-report/approve`, method: "POST", fallback: "The final report could not be approved.", refresh: () => loadItems(selectedSiteId) });
   }
   async function addDependency(item: WorkItem, predecessorWorkItemId: string) {
-    return executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/items/${item.id}/dependencies`, method: "POST", body: { predecessorWorkItemId, type: "finish_to_start" }, fallback: "Avhengigheten kunne ikke legges til.", refresh: () => loadItems(selectedSiteId) });
+    return executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/items/${item.id}/dependencies`, method: "POST", body: { predecessorWorkItemId, type: "finish_to_start" }, fallback: "The dependency could not be added.", refresh: () => loadItems(selectedSiteId) });
   }
   async function removeDependency(item: WorkItem, dependencyId: string) {
-    return executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/items/${item.id}/dependencies/${dependencyId}`, method: "DELETE", fallback: "Avhengigheten kunne ikke fjernes.", refresh: () => loadItems(selectedSiteId) });
+    return executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/items/${item.id}/dependencies/${dependencyId}`, method: "DELETE", fallback: "The dependency could not be removed.", refresh: () => loadItems(selectedSiteId) });
   }
   async function recordDomainDecision(item: WorkItem, draft: DomainDecisionDraft) {
-    return executeTaskCommand({ path: `/api/decisions/sites/${selectedSiteId}/tasks/${item.id}`, method: "POST", body: { ...draft, decidedAt: new Date().toISOString(), decisionMakerIds: personId ? [personId] : [], references: [] }, fallback: "Beslutningen kunne ikke registreres.", refresh: () => loadItems(selectedSiteId) });
+    return executeTaskCommand({ path: `/api/decisions/sites/${selectedSiteId}/tasks/${item.id}`, method: "POST", body: { ...draft, decidedAt: new Date().toISOString(), decisionMakerIds: personId ? [personId] : [], references: [] }, fallback: "The decision could not be registered.", refresh: () => loadItems(selectedSiteId) });
   }
   async function openFinalReport(item: WorkItem) {
     const savedReport = item.finalReport?.trim() ? item.finalReport : null;
@@ -271,7 +271,7 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
       historyLoading: false,
     } : current);
   }
-  const reportDate = (value: string | null) => value ? new Date(value).toLocaleDateString(displayLanguage, { timeZone: displayTimeZone }) : "Ikke registrert";
+  const reportDate = (value: string | null) => value ? new Date(value).toLocaleDateString(displayLanguage, { timeZone: displayTimeZone }) : "Not registered";
   const reportMarking = (item: WorkItem) => classificationMarkings.find((marking) => marking.abbreviation === item.finalReportClassification);
   const structuredReport = (item: WorkItem, reportSiteName = selectedSite?.name) => (
     <TaskReportDocument item={item} siteName={reportSiteName} unitPath={buildReportUnitPath(taskUnits, selectedSiteId, item.assignedUnitId)} rootTitle={rootWorkTitle(item, items)} marking={reportMarking(item)} language={displayLanguage} timeZone={displayTimeZone} />
@@ -352,9 +352,9 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
       {sites.length === 0 ? (
         <section className="panel empty-state">
           <div>
-            <h2>Ingen tilgjengelige sites</h2>
+            <h2>None tilgjengelige sites</h2>
             <p className="muted">
-              Du må være aktivt medlem av en site før du kan se oppgaver.
+              You must be an active member of a site before you can view tasks.
             </p>
           </div>
         </section>
@@ -379,7 +379,7 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
                 taskSearch: search || undefined,
               });
             }}
-            onCopyLink={itemId => { void copyPermalink({ page: "Tasks", siteId: selectedSiteId, itemId }).then(() => setLinkMessage("Lenken til oppdraget er kopiert.")).catch(() => setError("Lenken kunne ikke kopieres. Kopier adressen fra nettleseren.")); }}
+            onCopyLink={itemId => { void copyPermalink({ page: "Tasks", siteId: selectedSiteId, itemId }).then(() => setLinkMessage("The task link has been copied.")).catch(() => setError("The link could not be copied. Copy the address from the browser.")); }}
             onShowContext={setWorkContextItem} onShowPlan={item => { void showPlan(item); }}
             onDependencies={setDependencyItem}
             onDecisions={setDomainDecisionItem}
@@ -461,7 +461,7 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
       {planDecision && <PlanDecisionDialog decision={planDecision} setDecision={setPlanDecision} markings={classificationMarkings} busy={busy}
         dependencyReason={decisionDependencies.length > 0}
         dependencyPicker={planDecision.action === "hold" ? <TaskHoldDependencySection siteId={selectedSiteId} itemId={planDecision.item.id} busy={busy} selected={decisionDependencies} onToggle={toggleDecisionDependency} onError={setError} /> : undefined}
-        onSubmit={event => { event.preventDefault(); void (async () => { if (planDecision.action === "hold" && !await saveHoldDependencies(planDecision.item)) return; const note = planDecision.note.trim() || "Avventer fullføring av registrerte avhengigheter."; await decidePlan(planDecision.runId, planDecision.action, note); })(); }} />}
+        onSubmit={event => { event.preventDefault(); void (async () => { if (planDecision.action === "hold" && !await saveHoldDependencies(planDecision.item)) return; const note = planDecision.note.trim() || "Awaiting completion of registered dependencies."; await decidePlan(planDecision.runId, planDecision.action, note); })(); }} />}
       {workContextItem && (
         <TaskWorkContextDialog
           selectedItem={workContextItem}
@@ -489,7 +489,7 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
           event.preventDefault();
           if (decision.status === "cancelled") { await cancelWorkChain(decision.item, decisionNote); setDecision(null); return; }
           if (decision.status === "on_hold" && !await saveHoldDependencies(decision.item)) return;
-          const note = decisionNote.trim() || (decisionDependencies.length ? "Avventer fullføring av registrerte avhengigheter." : "");
+          const note = decisionNote.trim() || (decisionDependencies.length ? "Awaiting completion of registered dependencies." : "");
           if (await changeStatus(decision.item, decision.status, decisionUnitId, note)) setDecision(null);
         }} />}
       {reviewDecision && <ReviewDecisionDialog decision={reviewDecision} setDecision={setReviewDecision} busy={busy} onSubmit={async event => { event.preventDefault(); await changeStatus(reviewDecision.item, "under_review", undefined, undefined, reviewDecision.priority); setReviewDecision(null); }} />}

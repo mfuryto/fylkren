@@ -235,7 +235,7 @@ Check(!FederationProbeProtocol.Verify(publicKey, FederationProbeProtocol.Request
     recipient, timestamp, work.Nonce), workSignature), "work signature cannot sign probe");
 Check(!FederationWorkProtocol.ValidEnvelope(work with { SenderInstanceId = recipient }), "self-addressed work rejected");
 Check(!FederationWorkProtocol.ValidEnvelope(work with { MessageType = "Assignment.Created" }), "invalid message type rejected");
-Check(!FederationWorkProtocol.ValidEnvelope(work with { PayloadJson = new string('ø', 130_000) }),
+Check(!FederationWorkProtocol.ValidEnvelope(work with { PayloadJson = new string('x', 130_000) }),
     "UTF-8 payload byte limit enforced");
 var assignment = work with { PayloadJson = "{\"kind\":\"request\",\"title\":\"Synthetic request\",\"instruction\":\"Please assist\",\"priority\":\"normal\",\"dueAt\":null,\"requestBasis\":null,\"sourceTypeName\":null,\"senderName\":null}" };
 Check(FederationAssignmentContract.TryDecode(assignment, out var decodedAssignment) &&

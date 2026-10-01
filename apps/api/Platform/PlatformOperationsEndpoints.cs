@@ -36,28 +36,28 @@ public static class PlatformOperationsEndpoints
             {
                 new("api", "API", "healthy", "Applikasjonen svarer.", null),
                 new("database", "Database", databaseHealthy ? "healthy" : "down",
-                    databaseHealthy ? "Tilkoblingen fungerer." : $"Tilkoblingen feilet{(databaseError is null ? "." : $" ({databaseError}).")}", null),
-                new("authentication", "Autentisering", "healthy", "Sesjon og tilgangskontroll er aktiv.", null)
+                    databaseHealthy ? "The connection is healthy." : $"The connection failed{(databaseError is null ? "." : $" ({databaseError}).")}", null),
+                new("authentication", "Authentication", "healthy", "Session and access control are active.", null)
             };
             if (snapshot is not null)
             {
                 services.AddRange(snapshot.Services.Select(service => new OperationServiceStatus(
                     $"host-{service.Key}", service.Name, stale ? "unknown" : service.Status,
-                    stale ? "Vertsmålingen er for gammel." : service.Detail, service.RestartCount)));
+                    stale ? "The host measurement is too old." : service.Detail, service.RestartCount)));
                 var freePercent = snapshot.Disk!.AvailableBytes * 100d / snapshot.Disk.TotalBytes;
                 var diskDegraded = snapshot.Disk.AvailableBytes < 5L * 1024 * 1024 * 1024 || freePercent < 15;
                 services.Add(new("host-disk", snapshot.Disk.Name,
                     stale ? "unknown" : diskDegraded ? "degraded" : "healthy",
-                    stale ? "Vertsmålingen er for gammel." : $"{freePercent:F0} % ledig kapasitet.", null));
+                    stale ? "The host measurement is too old." : $"{freePercent:F0} % ledig kapasitet.", null));
                 var lastBackup = snapshot.Backup?.LastCompletedAt;
                 var backupDegraded = lastBackup is null || checkedAt - lastBackup > TimeSpan.FromHours(options.Operations.BackupWarningHours);
                 var backupDetail = stale
-                    ? "Vertsmålingen er for gammel."
+                    ? "The host measurement is too old."
                     : lastBackup is null
-                        ? $"Ingen fullført Fylkren-backup er registrert. Status er redusert etter {options.Operations.BackupWarningHours} timer uten registrert backup."
+                        ? $"No completed Fylkren backup has been recorded. Status becomes degraded after {options.Operations.BackupWarningHours} hours without a recorded backup."
                         : backupDegraded
-                            ? $"Sist fullført {lastBackup.Value:yyyy-MM-dd HH:mm} UTC. Mer enn {options.Operations.BackupWarningHours} timer har gått; ekstern kopiering overvåkes ikke av Fylkren."
-                            : $"Sist fullført {lastBackup.Value:yyyy-MM-dd HH:mm} UTC. Grensen for redusert status er {options.Operations.BackupWarningHours} timer; ekstern kopiering overvåkes ikke av Fylkren.";
+                            ? $"Last completed {lastBackup.Value:yyyy-MM-dd HH:mm} UTC. More than {options.Operations.BackupWarningHours} hours have elapsed; Fylkren does not monitor off-host copying."
+                            : $"Last completed {lastBackup.Value:yyyy-MM-dd HH:mm} UTC. The degraded-status threshold is {options.Operations.BackupWarningHours} hours; Fylkren does not monitor off-host copying.";
                 services.Add(new("host-backup", "Backup",
                     stale ? "unknown" : backupDegraded ? "degraded" : "healthy",
                     backupDetail, null));

@@ -4,7 +4,7 @@ export async function testLookupSorting({ manager, reader, siteId }) {
   const collator = new Intl.Collator('nb-NO', { sensitivity: 'base' });
   for (const path of ['types', 'lookups/source-type', 'lookups/sender']) {
     const created = [];
-    for (const name of ['Øvelse', 'Ålesund', 'Beta', 'Alfa']) {
+    for (const name of ['Exercise', 'Aalesund', 'Beta', 'Alfa']) {
       const response = await manager.post(`/api/work/sites/${siteId}/${path}`, { name });
       assert.equal(response.status, 201, `${path}: ${JSON.stringify(response.body)}`);
       created.push({ id: response.body.id, name });

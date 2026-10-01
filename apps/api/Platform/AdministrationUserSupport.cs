@@ -17,12 +17,12 @@ internal static class AdministrationUserSupport
     {
         var key = context.Request.Headers["Idempotency-Key"].ToString().Trim();
         if (key.Length is < 8 or > 128 || key.Any(character => !(char.IsAsciiLetterOrDigit(character) || "._:-".Contains(character))))
-            return Problem(context, 400, "invalid_idempotency_key", "Idempotency-Key må bestå av 8–128 tillatte tegn.");
+            return Problem(context, 400, "invalid_idempotency_key", "Idempotency-Key must contain 8–128 permitted characters.");
         var record = await db.ApiIdempotencyRecords.AsNoTracking().SingleOrDefaultAsync(value => value.MachineIdentityId == machineId && value.Key == key, ct);
         if (record is null) return null;
         return record.RequestHash == hash
             ? Results.Ok(new { id = record.ResourceId, replayed = true })
-            : Problem(context, 409, "idempotency_key_reused", "Idempotency-Key er allerede brukt med et annet innhold.");
+            : Problem(context, 409, "idempotency_key_reused", "Idempotency-Key has already been used with different content.");
     }
 
     internal static void AddIdempotency(FylkrenDbContext db, Guid machineId, HttpContext context, string hash, Guid resourceId, DateTimeOffset now) =>

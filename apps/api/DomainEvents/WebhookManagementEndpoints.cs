@@ -27,9 +27,9 @@ internal static class WebhookManagementEndpoints
         if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest();
         if (!Guid.TryParse(user.FindFirstValue("fylkren:person_id"), out var personId)) return Results.Problem(statusCode: 403);
         if (!await db.Sites.AnyAsync(x => x.Id == siteId && x.IsActive, ct)) return Results.NotFound();
-        if (!Uri.TryCreate(request.EndpointUrl, UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps) return Results.ValidationProblem(new Dictionary<string, string[]> { ["endpointUrl"] = ["Webhook-adressen må være en absolutt HTTPS-adresse."] });
+        if (!Uri.TryCreate(request.EndpointUrl, UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps) return Results.ValidationProblem(new Dictionary<string, string[]> { ["endpointUrl"] = ["The webhook address must be an absolute HTTPS address."] });
         var selected = request.EventTypes.Distinct(StringComparer.Ordinal).ToArray();
-        if (selected.Length == 0 || selected.Any(x => !DomainEventTypes.ExternallySupported.Contains(x))) return Results.ValidationProblem(new Dictionary<string, string[]> { ["eventTypes"] = ["Velg minst én støttet hendelsestype."] });
+        if (selected.Length == 0 || selected.Any(x => !DomainEventTypes.ExternallySupported.Contains(x))) return Results.ValidationProblem(new Dictionary<string, string[]> { ["eventTypes"] = ["Select at least one supported event type."] });
         var secret = Convert.ToHexString(RandomNumberGenerator.GetBytes(32)).ToLowerInvariant(); var now = DateTimeOffset.UtcNow;
         var subscription = new WebhookSubscription(Guid.NewGuid(), siteId, request.Name.Trim(), uri.ToString(), protection.CreateProtector("Fylkren.Webhooks.v1").Protect(secret), string.Join(' ', selected), personId, now);
         db.WebhookSubscriptions.Add(subscription); db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "webhook.created", "webhook-subscription", subscription.Id, now)); await db.SaveChangesAsync(ct);

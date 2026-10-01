@@ -49,7 +49,7 @@ internal static class FederationProbeEndpoints
             return Results.Unauthorized();
 
         var localKey = await db.FederationSigningIdentities.AsNoTracking().SingleOrDefaultAsync(row => row.Key == 1, ct);
-        if (localKey is null) return Results.Problem(statusCode: 503, title: "Federeringsnøkkel mangler.");
+        if (localKey is null) return Results.Problem(statusCode: 503, title: "The federation key is missing.");
         var responseTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         string signature;
         try
@@ -60,7 +60,7 @@ internal static class FederationProbeEndpoints
         }
         catch (CryptographicException)
         {
-            return Results.Problem(statusCode: 503, title: "Federeringsnøkkelen kan ikke brukes.");
+            return Results.Problem(statusCode: 503, title: "The federation key cannot be used.");
         }
         db.FederationProbeNonces.Add(new FederationProbeNonce(peer.InstanceId, request.Nonce, now));
         try { await db.SaveChangesAsync(ct); }
@@ -96,7 +96,7 @@ internal static class FederationProbeEndpoints
         }
         catch (CryptographicException)
         {
-            return Results.Problem(statusCode: 503, title: "Federeringsnøkkelen kan ikke brukes.");
+            return Results.Problem(statusCode: 503, title: "The federation key cannot be used.");
         }
         if (!FederationPublicKey.TryParse(peer.PinnedPublicKeySpki, out var peerKey, out var fingerprint))
             return Results.Conflict(new { error = "federation_peer_key_invalid" });
@@ -110,7 +110,7 @@ internal static class FederationProbeEndpoints
             using var response = await clients.CreateClient("federation-probe").SendAsync(
                 request, HttpCompletionOption.ResponseHeadersRead, ct);
             if (!response.IsSuccessStatusCode)
-                return Results.Problem(statusCode: 502, title: "Motparten avviste prøvekoblingen.");
+                return Results.Problem(statusCode: 502, title: "The peer rejected the connection test.");
             await response.Content.LoadIntoBufferAsync(16_384, ct);
             var received = await response.Content.ReadFromJsonAsync<FederationProbeResponse>(cancellationToken: ct);
             var now = DateTimeOffset.UtcNow;
@@ -121,7 +121,7 @@ internal static class FederationProbeEndpoints
                 !FederationProbeProtocol.Verify(peerKey,
                     FederationProbeProtocol.ResponseBytes(instanceId, localId, received.Timestamp, nonce),
                     received.Signature))
-                return Results.Problem(statusCode: 502, title: "Motpartens signatur kunne ikke bekreftes.");
+                return Results.Problem(statusCode: 502, title: "The peer signature could not be verified.");
             peer.RecordProof(now);
             var audit = new AuditEvent(Guid.NewGuid(), null, actor, "federation-peer.proved", "federation-peer", instanceId, now);
             audit.SnapshotActorRole(true);
@@ -135,7 +135,7 @@ internal static class FederationProbeEndpoints
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
         {
-            return Results.Problem(statusCode: 502, title: "Prøvekoblingen kunne ikke fullføres.");
+            return Results.Problem(statusCode: 502, title: "The connection test could not be completed.");
         }
     }
 

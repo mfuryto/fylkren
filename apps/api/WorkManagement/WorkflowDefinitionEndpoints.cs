@@ -25,10 +25,10 @@ internal static class WorkflowDefinitionEndpoints
         {
             if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest();
             if (!Pid(user, out var personId) || !await CanCreate(siteId, request.OwnerUnitId, personId, db, ct)) return Results.Problem(statusCode: 403);
-            if (!await IsValid(siteId, request, false, db, ct)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["workflow"] = ["Kontroller navn, steg, tidslinjal og malvalg."] });
+            if (!await IsValid(siteId, request, false, db, ct)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["workflow"] = ["Check the name, steps, timeline, and template selection."] });
             if (request.Kind == "planning")
             {
-                if (request.OwnerUnitId is not null || !request.Steps.Any(x => x.AllowsTaskAllocation)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["workflow"] = ["Planleggerflyten må ha et steg for oppgavefordeling."] });
+                if (request.OwnerUnitId is not null || !request.Steps.Any(x => x.AllowsTaskAllocation)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["workflow"] = ["The planning workflow must contain a task allocation step."] });
                 var previous = await db.WorkflowDefinitions.Where(x => x.SiteId == siteId && x.Kind == "planning" && x.IsActive).ToListAsync(ct);
                 foreach (var previousDefinition in previous) previousDefinition.Deactivate();
             }
@@ -46,7 +46,7 @@ internal static class WorkflowDefinitionEndpoints
             if (current is null) return Results.NotFound();
             var isPlanning = current.Kind == "planning";
             if (request.Kind != current.Kind || request.OwnerUnitId != current.OwnerUnitId || !await SiteAdministrator(siteId, personId, db, ct)) return Results.Problem(statusCode: 403);
-            if (!await IsValid(siteId, request, isPlanning, db, ct)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["workflow"] = ["Kontroller navn, steg, tidslinjal og malvalg. Planleggerflyten må ha et steg for oppgavefordeling."] });
+            if (!await IsValid(siteId, request, isPlanning, db, ct)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["workflow"] = ["Check the name, steps, timeline, and template selection. The planning workflow must contain a task allocation step."] });
             current.Deactivate();
             var replacement = CreateDefinition(siteId, isPlanning ? null : request.OwnerUnitId, request, db);
             db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "workflow.revised", "workflow-definition", replacement.Id, DateTimeOffset.UtcNow));

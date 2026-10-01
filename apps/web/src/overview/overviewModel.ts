@@ -14,7 +14,7 @@ export const overviewStatusLabelKeys: Record<string, MessageKey> = {
 };
 
 export function isReceivedRequest(item: WorkItem) {
-  return !item.isOutgoingRequest && item.workItemTypeName === "Anmodning" && Boolean(item.senderSiteName);
+  return !item.isOutgoingRequest && item.workItemTypeName === "Request" && Boolean(item.senderSiteName);
 }
 
 export function overviewWorkspaceFor(item: WorkItem): AppPage {

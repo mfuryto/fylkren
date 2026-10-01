@@ -15,7 +15,7 @@ internal static class EntitlementEndpointExtensions
             var db = services.GetRequiredService<FylkrenDbContext>();
             if (!await license.Has(db, feature, context.HttpContext.RequestAborted))
                 return Results.Problem(statusCode: StatusCodes.Status403Forbidden,
-                    title: "Enterprise-rettighet kreves for denne funksjonen.",
+                    title: "An Enterprise entitlement is required for this feature.",
                     extensions: new Dictionary<string, object?> { ["code"] = "enterprise_entitlement_required", ["feature"] = feature });
             return await next(context);
         });

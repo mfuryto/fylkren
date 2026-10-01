@@ -19,8 +19,8 @@ internal static class PlanningAssignmentEndpoints
             var run = await db.WorkflowRuns.Include(x => x.WorkItem).SingleOrDefaultAsync(x => x.Id == runId, ct);
             if (run is null) return Results.NotFound();
             if (!await OrganizationAuthorization.CanPlanAtLevel(run.WorkItem.SiteId, run.WorkItem.AssignedUnitId, personId, db, ct)) return Results.Problem(statusCode: 403);
-            if (run.Status is not ("available" or "in_progress")) return Results.Conflict(new { error = "Planleggingen kan ikke tas i denne statusen." });
-            if (run.ClaimedByPersonId is not null && run.ClaimedByPersonId != personId) return Results.Conflict(new { error = "En annen planlegger har tatt ansvar." });
+            if (run.Status is not ("available" or "in_progress")) return Results.Conflict(new { error = "Planning cannot be claimed in this status." });
+            if (run.ClaimedByPersonId is not null && run.ClaimedByPersonId != personId) return Results.Conflict(new { error = "Another planner has claimed this work." });
             var now = DateTimeOffset.UtcNow;
             run.Claim(personId, now);
             db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.claimed", "workflow-run", run.Id, now));
@@ -57,7 +57,7 @@ internal static class PlanningAssignmentEndpoints
             if (!Pid(user, out var personId)) return Results.Problem(statusCode: 403);
             var run = await db.WorkflowRuns.Include(x => x.WorkItem).SingleOrDefaultAsync(x => x.Id == runId, ct);
             if (run is null) return Results.NotFound();
-            if (run.Status != "in_progress" || run.ClaimedByPersonId is null) return Results.Conflict(new { error = "Planleggingen er ikke låst til en bruker." });
+            if (run.Status != "in_progress" || run.ClaimedByPersonId is null) return Results.Conflict(new { error = "Planning is not locked to a user." });
             if (!await WorkLevelAuthorization.LeadsLevel(run.WorkItem.SiteId, run.WorkItem.AssignedUnitId, personId, db, ct)) return Results.Problem(statusCode: 403);
             var now = DateTimeOffset.UtcNow;
             run.Release();
@@ -72,7 +72,7 @@ internal static class PlanningAssignmentEndpoints
             if (!Pid(user, out var personId)) return Results.Problem(statusCode: 403);
             var run = await db.WorkflowRuns.Include(x => x.WorkItem).SingleOrDefaultAsync(x => x.Id == runId, ct);
             if (run is null) return Results.NotFound();
-            if (run.Status != "in_progress" || run.ClaimedByPersonId is null) return Results.Conflict(new { error = "Planleggingen er ikke låst til en bruker." });
+            if (run.Status != "in_progress" || run.ClaimedByPersonId is null) return Results.Conflict(new { error = "Planning is not locked to a user." });
             if (!await WorkLevelAuthorization.LeadsLevel(run.WorkItem.SiteId, run.WorkItem.AssignedUnitId, personId, db, ct) || !await OrganizationAuthorization.CanPlanAtLevel(run.WorkItem.SiteId, run.WorkItem.AssignedUnitId, request.PersonId, db, ct)) return Results.Problem(statusCode: 403);
             var now = DateTimeOffset.UtcNow;
             run.Claim(request.PersonId, now);

@@ -7,7 +7,7 @@ describe("execution step actions", () => {
   it("keeps external dialogue separate from requests sent in Fylkren", () => {
     const item = {
       id: "item",
-      title: "Oppdrag",
+      title: "Task",
       run: {
         id: "run",
         definitionId: "definition",
@@ -18,7 +18,7 @@ describe("execution step actions", () => {
         timelineStartedOn: null,
         steps: [{
           id: "step",
-          name: "Utførelse",
+          name: "Execution",
           sortOrder: 10,
           isOptional: false,
           hasTimeline: false,
@@ -50,14 +50,14 @@ describe("execution step actions", () => {
       onSendRequest={noop}
     />);
 
-    expect(html).toContain("Ekstern oppfølging");
-    expect(html).toContain("Loggfør dialog som skjer med en ekstern part utenfor Fylkren.");
-    expect(html).toContain("Loggfør ekstern dialog");
+    expect(html).toContain("External follow-up");
+    expect(html).toContain("Record dialogue with an external party outside Fylkren.");
+    expect(html).toContain("Record external dialogue");
     expect(html).toContain('class="step-navigation"');
     expect(html).toContain('class="secondary-button execution-follow-up-button"');
-    expect(html).toContain("Ekstern oppfølging");
+    expect(html).toContain("External follow-up");
     expect(html).toContain('class="secondary-button execution-request-button"');
-    expect(html).toContain("Send anmodning");
-    expect(html.indexOf("Ekstern oppfølging")).toBeLessThan(html.indexOf('class="step-navigation"'));
+    expect(html).toContain("Send request");
+    expect(html.indexOf("External follow-up")).toBeLessThan(html.indexOf('class="step-navigation"'));
   });
 });

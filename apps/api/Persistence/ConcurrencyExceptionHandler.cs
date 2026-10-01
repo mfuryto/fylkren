@@ -15,8 +15,8 @@ internal sealed class ConcurrencyExceptionHandler : IExceptionHandler
         httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
         await Results.Problem(
             statusCode: StatusCodes.Status409Conflict,
-            title: "Dataene ble endret av en annen handling.",
-            detail: "Last inn oppdaterte data og prøv handlingen på nytt.",
+            title: "The data was changed by another operation.",
+            detail: "Load the updated data and try the action again.",
             extensions: new Dictionary<string, object?> { ["code"] = "concurrency_conflict" })
             .ExecuteAsync(httpContext);
         return true;

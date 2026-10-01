@@ -38,7 +38,7 @@ Only leaf work that is actually being handled contributes to active workload. A 
 
 ### Site-managed metadata
 
-Task types, source types and senders are managed inside one site and may be deactivated for new work without breaking existing references. Cross-site transfers use immutable display snapshots and never populate or reuse the receiver's local registry IDs. `Anmodning` is the system-managed request type.
+Task types, source types and senders are managed inside one site and may be deactivated for new work without breaking existing references. Cross-site transfers use immutable display snapshots and never populate or reuse the receiver's local registry IDs. `Request` is the system-managed request type.
 
 ### Planning and execution
 

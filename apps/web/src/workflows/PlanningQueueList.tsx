@@ -27,10 +27,10 @@ type PlanningQueueListProps = {
 };
 
 function planningStatus(run: PlanningRun) {
-  if (run.status === "cancelled") return "Kansellert";
-  if (run.status === "available") return "Tilgjengelig";
-  if (run.status === "awaiting_approval") return "Til godkjenning";
-  return "Under planlegging";
+  if (run.status === "cancelled") return "Cancelled";
+  if (run.status === "available") return "Togjengelig";
+  if (run.status === "awaiting_approval") return "Awaiting approval";
+  return "In planning";
 }
 
 export function PlanningQueueList({
@@ -54,9 +54,9 @@ export function PlanningQueueList({
   onClaim,
   onPageChange,
 }: PlanningQueueListProps) {
-  return <section className="task-list process-queue" aria-label="Planleggingskø, nyeste først">
+  return <section className="task-list process-queue" aria-label="Planning queue, newest first">
     {totalItems === 0 && <div className="panel empty-state">
-      <p className="muted">Ingen oppdrag i planleggingskøen på valgt nivå.</p>
+      <p className="muted">No tasks in the planning queue at the selected level.</p>
     </div>}
     {runs.map(run => {
       const childUnits = allocationUnits(run);
@@ -67,35 +67,35 @@ export function PlanningQueueList({
           <span className={`task-status ${run.status === "cancelled" ? "cancelled" : "planning"}`}>{planningStatus(run)}</span>
         </div>
         <button className="task-card-toggle process-card-toggle" type="button" aria-expanded={open} onClick={() => onToggle(run.id)}>
-          <i aria-hidden="true">▱</i><span>{open ? "Lukk planlegging" : "Åpne planlegging"}</span>
+          <i aria-hidden="true">▱</i><span>{open ? "Close planning" : "Open planning"}</span>
         </button>
-        {open && <div className="permalink-action-row"><button className="task-icon-action permalink-action" type="button" title="Kopier lenke til planleggingen" aria-label="Kopier lenke til planleggingen" onClick={() => onCopyLink(run.id)}><i aria-hidden="true">🔗</i></button></div>}
+        {open && <div className="permalink-action-row"><button className="task-icon-action permalink-action" type="button" title="Copy link to planning" aria-label="Copy link to planning" onClick={() => onCopyLink(run.id)}><i aria-hidden="true">🔗</i></button></div>}
         {run.status === "cancelled" && <p className="task-decision-note">
-          <strong>Oppdraget er kansellert av toppleder:</strong> {run.item.decisionNote}
+          <strong>The task was cancelled by the top-level manager:</strong> {run.item.decisionNote}
         </p>}
         <div className="task-meta">
-          <span><strong>Arbeidsnivå:</strong> {run.item.assignedUnitName ?? "Toppnivå"}</span>
-          <span>{run.claimedBy ? `Ansvarlig: ${run.claimedBy}` : "Ingen har tatt ansvar"}</span>
-          <span>Steg {Math.min(run.currentStep + 1, run.steps.length)} av {run.steps.length}</span>
+          <span><strong>Work level:</strong> {run.item.assignedUnitName ?? "Top level"}</span>
+          <span>{run.claimedBy ? `Ansvarlig: ${run.claimedBy}` : "No one has claimed responsibility"}</span>
+          <span>Step {Math.min(run.currentStep + 1, run.steps.length)} of {run.steps.length}</span>
         </div>
         {run.status === "in_progress" && run.claimedByPersonId && run.canManage && <div className="task-actions">
-          <button className="secondary-button" type="button" onClick={() => onRelease(run)}>Frigjør planlegging</button>
-          <button className="secondary-button" type="button" onClick={() => onReassign(run)}>Omfordel planlegging</button>
+          <button className="secondary-button" type="button" onClick={() => onRelease(run)}>Release planning</button>
+          <button className="secondary-button" type="button" onClick={() => onReassign(run)}>Reassign planning</button>
         </div>}
-        {run.canManage && childUnits.length > 0 && <button className="secondary-button" type="button" onClick={() => onAllocateDownward(run, childUnits)}>Avslutt planlegging og fordel videre</button>}
+        {run.canManage && childUnits.length > 0 && <button className="secondary-button" type="button" onClick={() => onAllocateDownward(run, childUnits)}>Close planning and route onward</button>}
         <button className="link-button" type="button" onClick={() => onTogglePreview(run.id)}>
-          {previewRunId === run.id ? "Skjul oppgave" : "Vis oppgave"}
+          {previewRunId === run.id ? "Hide task" : "Show task"}
         </button>
         {run.ancestors.length > 0 && <div className="task-detail-links" aria-label="Overordnede planer">
           {run.ancestors.map(ancestor => <button className="link-button" type="button" key={ancestor.id} onClick={() => onShowAncestor(ancestor.id)}>
-            {ancestor.distance === 1 ? `Vis planen fra nivået over · ${ancestor.title}` : `Vis planen ${ancestor.distance} nivåer opp · ${ancestor.title}`}
+            {ancestor.distance === 1 ? `Show the plan from the level above · ${ancestor.title}` : `Show the plan ${ancestor.distance} levels above · ${ancestor.title}`}
           </button>)}
         </div>}
         {previewRunId === run.id && <PlanningTaskPreview item={run.item} language={language} timeZone={timeZone} />}
-        {run.status === "available" && canPlan && <button className="primary-button" type="button" onClick={() => onClaim(run)}>Ta ansvar for behandling</button>}
+        {run.status === "available" && canPlan && <button className="primary-button" type="button" onClick={() => onClaim(run)}>Claim processing responsibility</button>}
         {renderEditor(run)}
       </article>;
     })}
-    <PaginationNav page={page} totalItems={totalItems} onPageChange={onPageChange} label="Planleggingssider" />
+    <PaginationNav page={page} totalItems={totalItems} onPageChange={onPageChange} label="Planning pages" />
   </section>;
 }

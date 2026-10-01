@@ -18,7 +18,7 @@ internal static class PlanningSubmissionEndpoints
             if (!Pid(user, out var personId)) return Results.Problem(statusCode: 403);
             var run = await db.WorkflowRuns.Include(x => x.WorkItem).Include(x => x.Allocations).SingleOrDefaultAsync(x => x.Id == runId && x.ClaimedByPersonId == personId && x.Status == "in_progress", ct);
             if (run is null || !await OrganizationAuthorization.CanPlanAtLevel(run.WorkItem.SiteId, run.WorkItem.AssignedUnitId, personId, db, ct)) return Results.Problem(statusCode: 403);
-            if (!await ValidAllocations(run, request.Allocations, db, ct, allowEmptyInstruction: true)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["allocations"] = ["Kontroller mottakere og oppdragstekst i deloppdragene."] });
+            if (!await ValidAllocations(run, request.Allocations, db, ct, allowEmptyInstruction: true)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["allocations"] = ["Check the recipients and task text in the subtasks."] });
             ReconcileAllocations(run, request.Allocations!, db);
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
@@ -30,7 +30,7 @@ internal static class PlanningSubmissionEndpoints
             if (!Pid(user, out var personId)) return Results.Problem(statusCode: 403);
             var run = await db.WorkflowRuns.Include(x => x.WorkItem).Include(x => x.Allocations).SingleOrDefaultAsync(x => x.Id == runId && x.ClaimedByPersonId == personId && x.Status == "in_progress", ct);
             if (run is null || !await OrganizationAuthorization.CanPlanAtLevel(run.WorkItem.SiteId, run.WorkItem.AssignedUnitId, personId, db, ct)) return Results.Problem(statusCode: 403);
-            if (!await ValidAllocations(run, request.Allocations, db, ct) || request.Priority is not ("low" or "normal" or "high" or "critical")) return Results.ValidationProblem(new Dictionary<string, string[]> { ["plan"] = ["Kontroller eventuelle oppgavefordelinger og tekstlengder."] });
+            if (!await ValidAllocations(run, request.Allocations, db, ct) || request.Priority is not ("low" or "normal" or "high" or "critical")) return Results.ValidationProblem(new Dictionary<string, string[]> { ["plan"] = ["Check any task allocations and text lengths."] });
             ReconcileAllocations(run, request.Allocations!, db);
             var now = DateTimeOffset.UtcNow;
             run.Submit(request.Allocations.FirstOrDefault()?.UnitId, request.Priority, request.DueAt);

@@ -76,8 +76,8 @@ public static class IdentityProviderEndpoints
             migration = new
             {
                 status = externalEnabled ? "external-identity-operational" : "foundation",
-                principle = "Behold intern person-ID og koble ekstern identitet med leverandørens stabile nøkkel.",
-                usernameMatching = "Kun eksplisitt valg av eksisterende bruker; aldri varig koblingsnøkkel."
+                principle = "Retain the internal person ID and link the external identity using the provider's stable key.",
+                usernameMatching = "Explicit selection of an existing user only; never a persistent linking key."
             }
         });
     }
@@ -109,7 +109,7 @@ public static class IdentityProviderEndpoints
         if (ValidateProvider(provider, request.Enabled, configuration) is { } validation) return validation;
         var configurationChanged = configuration != previous;
         if (request.Enabled && (configurationChanged || value.LastTestSucceeded != true))
-            return Results.Conflict(new { error = "Lagre oppsettet deaktivert, kjør en vellykket tilkoblingstest og aktiver deretter tjenesten." });
+            return Results.Conflict(new { error = "Save the configuration as disabled, run a successful connection test, and then activate the service." });
         var now = DateTimeOffset.UtcNow;
         if (configurationChanged) value.Update(request.Enabled, service.Protect(configuration), now);
         else value.SetEnabled(request.Enabled, now);
@@ -152,7 +152,7 @@ public static class IdentityProviderEndpoints
         }
         catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException or UriFormatException or JsonException or XmlException)
         { succeeded = false; }
-        value.RecordTest(succeeded, succeeded ? null : "Tilkobling eller validering mislyktes. Se tekniske logger.", DateTimeOffset.UtcNow);
+        value.RecordTest(succeeded, succeeded ? null : "Connection or validation failed. See the technical logs.", DateTimeOffset.UtcNow);
         RecordProvider(database, context, $"identity.{provider}.connection-tested", provider);
         await database.SaveChangesAsync(cancellationToken);
         return succeeded ? Results.NoContent() : Results.Problem(statusCode: 502, title: "Tilkoblingstesten mislyktes.");
@@ -226,7 +226,7 @@ public static class IdentityProviderEndpoints
         {
             var ready = await database.IdentityProviderSettings.AsNoTracking().AnyAsync(value =>
                 value.Provider == requestedSso && value.Enabled && value.LastTestSucceeded == true, cancellationToken);
-            if (!ready) return Results.Conflict(new { error = "Direkte SSO krever at valgt OIDC- eller SAML-tjeneste er aktiv og har bestått tilkoblingstest." });
+            if (!ready) return Results.Conflict(new { error = "Direct SSO requires the selected OIDC or SAML service to be active and to have passed its connection test." });
         }
         if (!request.Enabled)
         {
@@ -239,7 +239,7 @@ public static class IdentityProviderEndpoints
                 (link.Provider != "ad" && link.Provider != "ldap" || link.DirectoryAccessEnabled) &&
                 link.Person.IsActive && link.Person.LoginIdentities.Any(identity => identity.IsActive && identity.IsPlatformManager), cancellationToken);
             if (!hasExternalManager)
-                return Results.Conflict(new { error = "Lokal innlogging kan først deaktiveres når en aktiv Platform Manager er koblet til en aktiv ekstern innloggingstjeneste." });
+                return Results.Conflict(new { error = "Local sign-in can only be disabled after an active Platform Manager is linked to an active external sign-in service." });
         }
         var value = await database.IdentityProviderSettings.SingleAsync(item => item.Provider == "local", cancellationToken);
         var configuration = service.Unprotect(value.ProtectedConfiguration) with { SsoAutoRedirectProvider = string.IsNullOrEmpty(requestedSso) ? null : requestedSso };
@@ -273,7 +273,7 @@ public static class IdentityProviderEndpoints
                 Uri.TryCreate(value.EntityId, UriKind.Absolute, out _) && Uri.TryCreate(value.IdentityProviderEntityId, UriKind.Absolute, out _)),
             _ => false
         };
-        return valid ? null : Results.ValidationProblem(new Dictionary<string, string[]> { ["provider"] = ["Kontroller alle obligatoriske felt, adresser, attributter og tilkoblingsvalg."] });
+        return valid ? null : Results.ValidationProblem(new Dictionary<string, string[]> { ["provider"] = ["Check all required fields, addresses, attributes, and connection options."] });
     }
 
     private static async Task<IResult> GetLinks(
@@ -309,25 +309,25 @@ public static class IdentityProviderEndpoints
         if (username.Length is < 1 or > 100 || subject.Length is < 1 or > 256)
             return Results.ValidationProblem(new Dictionary<string, string[]>
             {
-                ["identity"] = ["Brukernavn og stabil identifikator må fylles ut med gyldig lengde."]
+                ["identity"] = ["The username and stable identifier must be provided with valid lengths."]
             });
 
         var normalizedUsername = username.ToUpperInvariant();
         var identity = await database.LoginIdentities.SingleOrDefaultAsync(value =>
             value.NormalizedUsername == normalizedUsername && value.IsActive, cancellationToken);
         if (identity is null)
-            return Results.NotFound(new { error = "Den lokale brukeren finnes ikke eller er deaktivert." });
+            return Results.NotFound(new { error = "The local user does not exist or is disabled." });
         var setting = await database.IdentityProviderSettings.AsNoTracking()
             .SingleAsync(value => value.Provider == provider, cancellationToken);
         var providerInstanceId = IdentityProviderConfigurationService.ProviderInstanceId(
             provider, service.Unprotect(setting.ProtectedConfiguration));
         if (providerInstanceId is null)
-            return Results.Conflict(new { error = $"{provider.ToUpperInvariant()} må konfigureres før identiteten kan kobles." });
+            return Results.Conflict(new { error = $"{provider.ToUpperInvariant()} must be configured before the identity can be linked." });
         var existingLink = await database.ExternalIdentityLinks.SingleOrDefaultAsync(link =>
             link.Provider == provider && link.ProviderInstanceId == providerInstanceId && link.SubjectId == subject,
             cancellationToken);
         if (existingLink?.IsActive == true)
-            return Results.Conflict(new { error = $"{provider.ToUpperInvariant()}-identiteten er allerede koblet." });
+            return Results.Conflict(new { error = $"The {provider.ToUpperInvariant()} identity is already linked." });
 
         var now = DateTimeOffset.UtcNow;
         var link = existingLink ?? new ExternalIdentityLink(Guid.NewGuid(), identity.PersonId, provider,
@@ -347,7 +347,7 @@ public static class IdentityProviderEndpoints
             value.Id == id && value.Provider == provider && value.IsActive, cancellationToken);
         if (link is null) return Results.NotFound();
         if (!await ExternalIdentityLinkSafety.CanDeactivateAsync(link, database, options, cancellationToken))
-            return Results.Conflict(new { error = "Koblingen kan ikke fjernes fordi den er siste aktive eksterne innlogging for en Platform Manager mens lokal innlogging er deaktivert." });
+            return Results.Conflict(new { error = "The link cannot be removed because it is the last active external sign-in for a Platform Manager while local sign-in is disabled." });
         link.Deactivate();
         Record(database, context, $"identity.{provider}.unlinked", link.Id);
         await database.SaveChangesAsync(cancellationToken);
