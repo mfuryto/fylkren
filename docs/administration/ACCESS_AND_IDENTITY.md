@@ -63,7 +63,7 @@ the person, memberships, roles and history, but blocks new directory sign-in and
 advances the internal security version so existing directory sessions are
 rejected on their next request. A later authoritative active result restores the
 link without recreating the person. Platform Manager can see each link's state
-and last check and can select **Synkroniser nå** on **Identitet**.
+and last check and can select **Synchronize now** on **Identity**.
 
 AD account status uses `userAccountControl`, `accountExpires` and the configured
 active-account filter. Generic LDAP has no universal disabled-account attribute;

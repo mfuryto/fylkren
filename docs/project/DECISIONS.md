@@ -184,7 +184,7 @@ Desktop and mobile use the same product shell. Mobile navigation is an overlay a
 
 ### ADR-037 — Repository language and product languages are separate
 
-Repository-facing material is English. The application uses language resources, initially complete for Norwegian Bokmål (`nb-NO`) and English. Routes, permalinks, API contracts, IDs, and stored event types remain language-neutral.
+Repository-facing material is English. The application uses language resources, initially complete for Norwegian Bokmal (`nb-NO`) and English. Routes, permalinks, API contracts, IDs, and stored event types remain language-neutral.
 
 ### ADR-038 — Documentation is a maintained product surface
 

@@ -4,7 +4,7 @@ The task type, source type and sender lists were checked in a fresh, isolated `f
 
 | Control | Result |
 | --- | --- |
-| Values inserted out of order (`Øvelse`, `Ålesund`, `Beta`, `Alfa`) | All three authenticated API lists returned Norwegian alphabetical name order, independent of creation order. |
+| Values inserted out of order (`Zulu`, `Echo`, `Beta`, `Alpha`) | All three authenticated API lists returned locale-aware alphabetical name order, independent of creation order. |
 | `Alfa` deactivated after insertion | It remained alphabetically placed in the management list; filtering active values for selectors preserved alphabetical order. |
 | Regression suite | `pnpm test:e2e:local` exited `0`, reporting `lookupSorting: passed` and all existing scenario flags `passed`. |
 

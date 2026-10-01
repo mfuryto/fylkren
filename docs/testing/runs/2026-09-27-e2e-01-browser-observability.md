@@ -8,7 +8,7 @@ The clean command was `node tools/e2e/community-browser-smoke.mjs --task-flow`. 
 | --- | --- | --- | --- |
 | Active overview | Registered work appears once in action and active counts | Before assessment, `Krever handling` and `Aktive` both rendered `1` | Pass; rendered overview cards |
 | Completed overview | Completion clears active/action counts and updates annual statistics | Both live counts rendered `0`; registered/received and completed annual cards each rendered `1` | Pass; rendered overview cards |
-| Site audit | Material task transitions are traceable | Audit UI rendered `Oppdrag registrert`, `Utførelse sendt til kontroll` and `Sluttrapport godkjent` | Pass; rendered site-audit assertions |
+| Site audit | Material task transitions are traceable | Audit UI rendered `Task registered`, `Execution submitted for review` and `Final report approved` | Pass; rendered site-audit assertions |
 | Notification creation | Enabled task events create delivery records | At least one delivery for the exact synthetic task title appeared after the worker interval | Pass; authenticated platform delivery API |
 | Disabled transport | With SMTP disabled, generated deliveries remain queued | Every matching delivery had `pending`; `transportEnabled` was false | Pass; delivery postconditions |
 | Responsive report view | Completed report remains within a 390 × 844 viewport | Document width stayed within the mobile viewport | Pass; Chromium layout measurement |

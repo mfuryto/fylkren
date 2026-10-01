@@ -18,7 +18,7 @@ Prepare the repository for possible public publication. Retain only material req
 
 Every tracked file must have a clear purpose. No credential, customer data, local password, private test evidence, environment-specific secret, or workstation path may exist in publishable content or reachable history.
 
-All repository-facing material must be English: source identifiers and comments, documentation, examples, tests, scripts, configuration comments, and issue/PR templates. The UI is separate: Norwegian Bokmål remains the existing `nb-NO` product language.
+All repository-facing material must be English: source identifiers and comments, documentation, examples, tests, scripts, configuration comments, and issue/PR templates. The UI is separate: Norwegian Bokmal remains the existing `nb-NO` product language.
 
 Before publication, run repository and history scans for secrets, personal data, large binaries, local paths, generated artifacts, and license obligations. Document the reproducible checks in the operations manual.
 
@@ -69,7 +69,7 @@ Use the [security test plan](../security/SECURITY_TEST_PLAN.md), [threat model](
 
 ## Internationalization
 
-Internationalization is an active pre-release gate. Move all user-visible text from source code into language resources. American English (`en-US`) is the complete source catalog and mandatory fallback; British English (`en-GB`) is a distinct complete regional variant, and Norwegian Bokmål is a separate complete catalog.
+Internationalization is an active pre-release gate. Move all user-visible text from source code into language resources. American English (`en-US`) is the complete source catalog and mandatory fallback; British English (`en-GB`) is a distinct complete regional variant, and Norwegian Bokmal is a separate complete catalog.
 
 Requirements include:
 

@@ -9,7 +9,7 @@ The clean browser command was `node tools/e2e/community-browser-smoke.mjs --ente
 | Initial Community state | Fresh installation has no Enterprise rights | Community license state and read-only federation boundary rendered | Pass; positive and negative DOM assertions |
 | Existing Community data | A site can exist before activation | `Synthetic Browser Site` was created and the counter showed 1/3 | Pass; rendered form submission and DOM assertions |
 | Offline file import | Selecting a signed JSON file through the license file control activates Enterprise without reinstalling | Chromium assigned the read-only fixture to `#enterprise-license-file`; the page reported valid Enterprise activation without reinstall | Pass; DevTools file-input operation and status assertions |
-| Enterprise federation controls | Licensed Platform Manager can start federation setup | `Opprett federeringsnøkkel` and `Legg til motpart` rendered | Pass; DOM assertions |
+| Enterprise federation controls | Licensed Platform Manager can start federation setup | `Create federation key` and `Add peer` rendered | Pass; DOM assertions |
 | Enterprise API controls | Machine API creation is available while entitled | `Ny API-klient` rendered on the API page | Pass; DOM assertion |
 | License removal | Confirmed removal returns the same installation to Community | Removal dialog completed; page reported that Enterprise rights were disabled | Pass; rendered button/dialog interaction and status assertions |
 | Data preservation | Downgrade does not remove existing Community data | The pre-activation site remained and the Community counter still showed 1/3 | Pass; post-removal navigation and DOM assertions |

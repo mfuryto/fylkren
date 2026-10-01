@@ -191,7 +191,7 @@ Directory users are added selectively through search; AD/LDAP never populates th
 AD/LDAP remains the source for username, name, email, password and directory
 account state. Fylkren remains the source for site membership, internal unit,
 roles and operational authority. Platform Manager can review automatic lifecycle
-status and last-check time under **Identitet** and select **Synkroniser nå**.
+status and last-check time under **Identity** and select **Synchronize now**.
 When the directory confirms that an account is disabled, expired or repeatedly
 missing, Fylkren suspends its directory link and invalidates its active sessions
 without deleting memberships, roles or history. An unavailable directory does
@@ -214,11 +214,11 @@ Workflow/template definitions are administration-only, but active eligible users
 
 Platform Manager pages include platform Overview/operations, Sites, global Users/Identity, external identity providers, Email and templates, Classifications, Appearance, machine API clients and platform Audit.
 
-On **Identitet**, select **Konfigurer** on Local account, Active Directory, LDAP, OIDC or SAML. Save a new or changed external provider while it is deactivated, run **Test lagret oppsett**, then activate it. Stored secrets are never displayed again. Existing `.env` identity values are imported only when database settings are first created; the GUI is authoritative afterwards. Local account can remain enabled as emergency access even when normal users use AD/LDAP or SSO. **Gå direkte til OIDC/SAML** bypasses the ordinary login form; `/?local=1` opens the emergency local form. Disabling or changing that provider cancels direct redirect. Local login cannot be disabled until a tested external provider has an active Platform Manager link.
+On **Identity**, select **Configure** on Local account, Active Directory, LDAP, OIDC or SAML. Save a new or changed external provider while it is deactivated, run **Test stored configuration**, then activate it. Stored secrets are never displayed again. Existing `.env` identity values are imported only when database settings are first created; the GUI is authoritative afterwards. Local account can remain enabled as emergency access even when normal users use AD/LDAP or SSO. **Go directly to OIDC/SAML** bypasses the ordinary login form; `/?local=1` opens the emergency local form. Disabling or changing that provider cancels direct redirect. Local login cannot be disabled until a tested external provider has an active Platform Manager link.
 
 OIDC links belong to the exact issuer plus `sub`; SAML links belong to the exact IdP Entity ID plus permanent NameID. The same identifier text from another provider instance is never treated as the same identity. Each link has **Fjern kobling**. Removal blocks that sign-in but preserves the internal person, memberships, roles and history, and the same identity can later be linked again. The final external Platform Manager link cannot be removed while local login is disabled.
 
-Enterprise-funksjoner er alltid synlige. Når den nødvendige Enterprise-rettigheten ikke er aktiv, viser den aktuelle funksjonen én standardisert boks med **Krever Enterpriselisens**, en kort forklaring og **Åpne Lisens**. Feltene og handlingene er synlige, men deaktivert; Community-funksjoner på samme side påvirkes ikke. Dette gjelder maskin- og rapport-API, webhooks, ekstern identitet, federering og opprettelse av sites utover Community-grensen.
+Enterprise features are always visible. When the required Enterprise entitlement is not active, the feature shows one standardized **Requires an Enterprise license** box with a short explanation and **Open License**. Fields and actions remain visible but disabled; Community features on the same page are unaffected. This applies to the machine and report APIs, webhooks, external identity, federation and creation of sites beyond the Community limit.
 
 Sites are shown in an alphabetical hierarchy list. View is read-only; changes—including Site Manager assignment—belong in Edit. Child sites are indented by hierarchy depth. Site deactivation releases operational memberships for reassignment while preserving history.
 
@@ -240,16 +240,16 @@ The **Language and regional settings** box stores the platform defaults for UI l
 
 ### Federering mellom installasjoner
 
-Federering kobler to selvstendige Enterprise-installasjoner. Menypunktet **Federering** og hele GUI-et er alltid synlig for Platform Manager. Uten Enterprise vises én tydelig boks øverst, **Krever Enterpriselisens**, og handlingene er deaktivert. En gyldig Enterprise-lisens åpner funksjonen; også Enterprise-lisenser utstedt før federering ble tilgjengelig fungerer uten ny lisensfil. Bruk **Hjelp** på siden for en kort forklaring i applikasjonen. Oppsettet sender eller mottar ikke oppdrag mens **Oppdragsrouting** er deaktivert.
+Federation connects two or more independent Enterprise installations. The **Federation** menu item and the entire GUI remain visible to the Platform Manager. Without Enterprise, one clear **Requires an Enterprise license** box appears at the top and actions are disabled. A valid Enterprise license enables the feature; Enterprise licenses issued before federation became available also work without a new license file. Use **Help** on the page for a short in-application explanation. Setup does not send or receive tasks while **Work routing** is disabled.
 
 The maintained [Federation administration guide](FEDERATION.md) is the complete procedure for prerequisites, bilateral identity and fingerprint verification, activation, acceptance testing, delivery monitoring, key rotation, key loss and troubleshooting. The summary below follows the same GUI flow.
 
 1. Confirm that both installations use their final HTTPS addresses, trusted certificates and synchronized clocks. Import a matching Enterprise license on each installation.
-2. Select **Opprett federeringsnøkkel**. Keep the database and Data Protection key volume in the same backup set.
-3. Under **Legg til motpart**, skriv inn et gjenkjennelig navn og den andre installasjonens offentlige HTTPS-adresse, for eksempel `https://fylkren.example.no`. Velg **Hent signert identitet**. Serveren henter den signerte identiteten direkte fra motpartens adresse; ingen PNG, nøkkelfil eller annen manuell identitetsfil skal opprettes eller lastes opp. Sammenlign fingeravtrykket via en uavhengig kanal, kryss av for bekreftelsen og velg **Godkjenn motpart på denne instansen**. Gjenta motsatt vei på den andre installasjonen.
-4. Velg motparten og kjør **Test tilkobling** på begge sider. Testen henter samtidig motpartens aktive toppnivå-sites. Child-sites eksponeres ikke.
-5. Se statusen under **Oppdragsrouting**. Når nøkkel, motpart, tilkobling og serverforutsetninger er i orden, bekreft kontrollen og velg **Aktiver oppdragsrouting** uavhengig på begge installasjoner. Alle aktive toppnivå-sites kan da utveksle oppdrag begge veier; det finnes ingen ekstra site-par- eller retningsgodkjenning.
-6. Opprett en vanlig forespørsel til en ekstern toppnivå-site og kontroller **Leveringskø**, kvitteringsstatus hos avsender og den nye oppgaven hos mottaker.
+2. Select **Create federation key**. Keep the database and Data Protection key volume in the same backup set.
+3. Under **Add peer**, enter a recognizable name and the other installation's public HTTPS address, for example `https://fylkren.example.no`. Select **Retrieve signed identity**. The server retrieves the signed identity directly from the peer address; no PNG, key file or other manual identity file is created or uploaded. Compare the fingerprint through an independent channel, select the confirmation checkbox and choose **Approve peer on this instance**. Repeat in the opposite direction on the other installation.
+4. Select the peer and run **Test connection** on both sides. The test also retrieves the peer's active top-level sites. Child sites are not exposed separately.
+5. Review the status under **Work routing**. When the key, peer, connection and server prerequisites are valid, confirm the verification and select **Enable work routing** independently on both installations. All active top-level sites can then exchange tasks in both directions; there is no additional site-pair or direction approval.
+6. Create a normal request to an external top-level site and inspect **Delivery queue**, the sender's receipt status and the new task at the receiver.
 
 Activation and deactivation are immediate and audited; no server restart is required. Deactivation removes remote recipients, pauses queued delivery and closes work-message receipt without deleting peers, tasks, reports or audit history. A site move, peer change, key recovery or catalog withdrawal can stop new routing until identity and catalog state are valid again. Planned key rotation is automatic; confirmed key loss requires independent fingerprint approval and a new connection test at every peer.
 
