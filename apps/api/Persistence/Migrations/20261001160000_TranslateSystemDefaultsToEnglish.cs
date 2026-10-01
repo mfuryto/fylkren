@@ -33,7 +33,7 @@ public sealed class TranslateSystemDefaultsToEnglish : Migration
             WHERE name = convert_from(decode('QXZzbHV0bmluZyBvZyBldHRlcmFyYmVpZA==', 'base64'), 'UTF8');
 
             UPDATE organization_roles SET name = 'Manager', normalized_name = 'MANAGER'
-            WHERE is_manager = TRUE
+            WHERE is_leader = TRUE
               AND name = convert_from(decode('TGVkZXI=', 'base64'), 'UTF8');
 
             UPDATE sites SET final_report_template = '# Summary\n\n# Execution\n\n# Conclusion'

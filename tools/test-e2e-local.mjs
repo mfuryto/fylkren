@@ -136,7 +136,7 @@ assert.ok(!Number.isNaN(Date.parse(platformOperations.body.hostIntegration.backu
 assert.equal(platformOperations.body.hostIntegration.backupWarningHours, 36, 'Backup warning threshold must be explicit');
 const backupService = platformOperations.body.services.find(value => value.key === 'host-backup');
 assert.equal(backupService.status, 'healthy', JSON.stringify(backupService));
-assert.match(backupService.detail, /36 hours.*off-host copying is not monitored/i, 'Backup status scope must be explicit');
+assert.match(backupService.detail, /36 hours.*does not monitor off-host copying/i, 'Backup status scope must be explicit');
 for (const service of ['host-web', 'host-api', 'host-postgres']) {
   const observed = platformOperations.body.services.find(value => value.key === service);
   assert.ok(observed, `Missing ${service} status`);
