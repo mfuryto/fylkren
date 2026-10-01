@@ -11,7 +11,7 @@ export const reportsLtLT = {
   reportLinkCopied: "Pranešimas buvo nukopijuotas.",
   reportLinkCopyFailed: "Jungties nepavyko nukopijuoti.",
   reportSearchPlaceholder: "Pavadinimas, turinys arba pavadinimas",
-  reportArchive: "@ info: whatsthis",
+  reportArchive: "Ataskaitų archyvas",
   oneReport: "1 ataskaita",
   reportCount: "{count} ataskaitos",
   noReportsMatch: "Nr ataskaitos atitinka filtrą.",

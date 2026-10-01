@@ -1,7 +1,7 @@
 import type { MessageKey } from "../../en-US";
 
 export const sitesItIT = {
-  sites: "Siti",
+  sites: "Sites",
   sitesIntro: "Una visione consolidata di siti, relazioni e Site Manager.",
   newSite: "Nuovo sito",
   communitySiteUsage: "Comunità: {active} di {limit} siti attivi.",

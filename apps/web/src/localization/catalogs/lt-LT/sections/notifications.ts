@@ -3,8 +3,8 @@ import type { MessageKey } from "../../en-US";
 export const notificationsLtLT = {
   notificationSitesLoadFailed: "Turimų svetainių nebuvo galima įkelti.",
   notificationSettingsLoadFailed: "Nepavyko įkelti pranešimo nustatymų.",
-  notificationSettingsSaveFailed: "@ info: whatsthis",
-  notificationSettingsSaved: "@ info: whatsthis",
+  notificationSettingsSaveFailed: "Nepavyko išsaugoti pranešimų nustatymų.",
+  notificationSettingsSaved: "Pranešimų nustatymai išsaugoti.",
   notifications: "Pranešimai",
   notificationsIntro: "Pasirinkite, kurie e. pašto pranešimai yra naudojami svetainėje.",
   notificationScopeHelp: "Pranešimai sekti prieigos ir darbo lygį. Svetainės pavadinimas pridedamas prie SMTP siuntėjo pavadinimą.",

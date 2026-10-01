@@ -11,7 +11,7 @@ export const tasksEsES = {
   tasksTaskActionPanelsApproveFinalReport: "Aprobar el informe final",
   tasksTaskActionPanelsApprovePlan: "Plan aprobado",
   tasksTaskActionPanelsAvailableActionsInTheCurrentStatus: "Acciones disponibles en el estado actual.",
-  tasksTaskActionPanelsAwaitingReportFrom: "Awaiting report from:",
+  tasksTaskActionPanelsAwaitingReportFrom: "En espera del informe de:",
   tasksTaskActionPanelsEditFinalReport: "Editar el informe final",
   tasksTaskActionPanelsNextStep: "Siguiente paso",
   tasksTaskActionPanelsReject: "Rechazo",

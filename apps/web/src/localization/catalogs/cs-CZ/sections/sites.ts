@@ -1,7 +1,7 @@
 import type { MessageKey } from "../../en-US";
 
 export const sitesCsCZ = {
-  sites: "Stránky",
+  sites: "Sites",
   sitesIntro: "Konsolidovaný pohled na lokality, vztahy a správce stránek.",
   newSite: "Nová stránka",
   communitySiteUsage: "Společenství: {active} ze {limit} aktivní místa.",

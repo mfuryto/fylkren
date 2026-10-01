@@ -10,7 +10,7 @@ export const personnelLtLT = {
   addUser: "Pridėti naudotoją",
   createWorkRole: "Sukurti darbo vaidmenį",
   noDirectoryProvider: "Platformos valdytojas neįjungė nei AD, nei LDAP teikėjo.",
-  directoryPersonOnly: "@ info: status",
+  directoryPersonOnly: "Į Site įtraukiamas tik pasirinktas asmuo. Katalogas automatiškai neužpildo personalo registro.",
   directory: "Katalogas",
   findPerson: "Rasti asmenį",
   findUser: "Ieškoti naudotojo",

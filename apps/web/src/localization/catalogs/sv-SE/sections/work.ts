@@ -76,7 +76,7 @@ export const workSvSE = {
   executionClaimedNoWorkflow: "Utförande · ansvar som påstås, arbetsflödet som inte valts",
   executionAvailable: "Exekvation · frigörs och tillgänglig",
   executionSubmitted: "Exekverings komplett · vänta på granskning",
-  executionProgress: "Execution{workflow}{step}{responses}",
+  executionProgress: "Genomförande{workflow}{step}{responses}",
   workflowNameSuffix: "{name}",
   executionStepSuffix: "Steg {current} av {total}{name}",
   executionStepNameSuffix: "{name}",

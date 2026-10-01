@@ -1,7 +1,7 @@
 import type { MessageKey } from "../../en-US";
 
 export const sitesFiFI = {
-  sites: "Sivustot",
+  sites: "Sites",
   sitesIntro: "Konsolidoitu näkymä sivustoja, suhteita ja Site Managers.",
   newSite: "Uusi sivusto",
   communitySiteUsage: "Yhteisö: {active} {limit}:n aktiivisilta sivustoilta.",

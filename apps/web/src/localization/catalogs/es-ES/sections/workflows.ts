@@ -45,7 +45,7 @@ export const workflowsEsES = {
   workflowsExecutionWorkflowEditorPreviousStep: "Paso anterior",
   workflowsExecutionWorkflowEditorRecordDialogueWithAnExternalParty: "Grabar diálogo con un partido externo fuera de Fylkren.",
   workflowsExecutionWorkflowEditorRecordExternalDialogue: "Diálogo externo récord",
-  workflowsExecutionWorkflowEditorRecordReceivedResponse: "Record received response",
+  workflowsExecutionWorkflowEditorRecordReceivedResponse: "Registrar la respuesta recibida",
   workflowsExecutionWorkflowEditorRecordResponse: "Respuesta del registro",
   workflowsExecutionWorkflowEditorSelectExecutionWorkflow: "Seleccionar flujo de trabajo de ejecución",
   workflowsExecutionWorkflowEditorSelectWorkflow: "Seleccione el flujo de trabajo",

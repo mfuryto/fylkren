@@ -1,7 +1,7 @@
 import type { MessageKey } from "../../en-US";
 
 export const sitesDaDK = {
-  sites: "Websites",
+  sites: "Sites",
   sitesIntro: "En konsolideret oversigt over websteder, relationer og site ledere.",
   newSite: "Nyt sted",
   communitySiteUsage: "Fællesskabet: {active} af {limit} aktive lokaliteter.",

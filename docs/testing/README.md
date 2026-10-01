@@ -1,5 +1,9 @@
 # Tests
 
+The fixed interface catalogs received a multilingual semantic and deterministic
+quality pass on 2026-10-01. The retained evidence is in the
+[localization quality audit](runs/2026-10-01-localization-quality-audit.md).
+
 The [end-to-end matrix](END_TO_END_TEST_MATRIX.md) defines what must be tested. Dated [run records](runs/README.md) document what was actually observed, including failures, exclusions and the tested revision. The current API evidence is recorded for [E2E-08/09](runs/2026-09-23-api-e2e-08-09.md), [E2E-10](runs/2026-09-23-api-e2e-10.md), [E2E-11](runs/2026-09-23-api-e2e-11.md), [E2E-12](runs/2026-09-23-api-e2e-12.md), [E2E-13](runs/2026-09-23-api-e2e-13.md), and [E2E-15–18 with E2E-13 follow-up](runs/2026-09-23-api-e2e-15-18.md). These are not substitutes for the pending browser acceptance run.
 
 Automated frontend tests currently live beside their source files as `*.test.ts` and run with `pnpm test`. API build and repository checks are part of the reproducible gate in [technical cleanup verification](../operations/CLEANUP_VERIFICATION.md). A full automated PostgreSQL/API integration suite has not yet been established; a successful frontend test run must not be reported as an end-to-end result.

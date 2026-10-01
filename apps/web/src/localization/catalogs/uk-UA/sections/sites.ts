@@ -1,7 +1,7 @@
 import type { MessageKey } from "../../en-US";
 
 export const sitesUkUA = {
-  sites: "Контакти",
+  sites: "Sites",
   sitesIntro: "Зведена думка сайтів, відносин та менеджерів сайтів.",
   newSite: "Новий сайт",
   communitySiteUsage: "Громада: {active} з {limit} Активні сайти.",

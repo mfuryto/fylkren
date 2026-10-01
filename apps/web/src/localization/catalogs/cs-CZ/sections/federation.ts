@@ -96,7 +96,7 @@ export const federationCsCZ = {
   federationHelpKeys: "Na obou instalacích: Vytvořte federační klíč. Soukromý klíč je bezpečně uložen na serveru a nesmí být kopírován ručně.",
   federationHelpConnect: "Připojte instalace: Zadejte veřejnou adresu protějšku HTTPS pod Add protějšek. Získání podepsané identity zachytí identitu přímo z této adresy. Porovnejte otisk prstu přes nezávislý kanál, schvalujte spojení peer a spusťte test. Test také nabere aktivní top-level stránky protějšku. Opakujte v opačném směru.",
   federationHelpEnable: "Povolit: Pracovní směrování ukazuje přesně to, co chybí. Potvrďte ověření a zapněte jej na obou instalacích. Pak otestujte normální požadavek.",
-  federationHelpHost: "Veřejná adresa, certifikát, proxy a synchronizace času serveru jsou nastaveny hostingovým prostředím. Všechny ostatní konfigurace a aktivace jsou dokončeny zde v GUI.",
+  federationHelpHost: "Veřejná adresa HTTPS serveru, certifikát, proxy a synchronizace času se nastavují v hostitelském prostředí. Veškerá ostatní konfigurace a aktivace se provádí zde v GUI.",
   federationIdentityLoadFailed: "Totožnost instance nemohla být nahrána.",
   federationRoutingLoadFailed: "Stav směrování práce nelze načíst.",
   federationRoutingChangeFailed: "Pracovní směrování nebylo možné změnit.",

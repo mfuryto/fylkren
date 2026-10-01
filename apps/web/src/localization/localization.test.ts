@@ -86,4 +86,86 @@ describe("localization catalogs", () => {
       }
     }
   });
+
+  it("locks reviewed core actions, identity terms and measurement systems", () => {
+    const expected = {
+      "sv-SE": { loading: "Läser in…", singleSignOn: "Enkel inloggning", licensingAuthority: "Licensutfärdare", save: "Spara", cancel: "Avbryt", edit: "Redigera", delete: "Ta bort", metric: "Metrisk", imperial: "Imperial" },
+      "da-DK": { loading: "Indlæser...", singleSignOn: "Enkeltlogon", licensingAuthority: "Licensudsteder", save: "Gem", cancel: "Annullér", edit: "Redigér", delete: "Slet", metric: "Metrisk", imperial: "Imperial" },
+      "fi-FI": { loading: "Ladataan...", singleSignOn: "Kertakirjautuminen", licensingAuthority: "Lisenssin myöntäjä", save: "Tallenna", cancel: "Peruuta", edit: "Muokkaa", delete: "Poista", metric: "Metrinen", imperial: "Brittiläinen mittajärjestelmä" },
+      "de-DE": { loading: "Wird geladen…", singleSignOn: "Single Sign-on", licensingAuthority: "Lizenzgeber", save: "Speichern", cancel: "Abbrechen", edit: "Bearbeiten", delete: "Löschen", metric: "Metrisch", imperial: "Imperial" },
+      "fr-FR": { loading: "Chargement...", singleSignOn: "Authentification unique", licensingAuthority: "Autorité de délivrance des licences", save: "Enregistrer", cancel: "Annuler", edit: "Modifier", delete: "Supprimer", metric: "Métrique", imperial: "Impérial" },
+      "pl-PL": { loading: "Ładowanie...", singleSignOn: "Logowanie jednokrotne", licensingAuthority: "Organ wydający licencje", save: "Zapisz", cancel: "Anuluj", edit: "Edytuj", delete: "Usuń", metric: "Metryczny", imperial: "Imperialny" },
+      "es-ES": { loading: "Cargando...", singleSignOn: "Inicio de sesión único", licensingAuthority: "Autoridad de concesión de licencias", save: "Guardar", cancel: "Cancelar", edit: "Editar", delete: "Eliminar", metric: "Métrico", imperial: "Imperial" },
+      "it-IT": { loading: "Caricamento...", singleSignOn: "Accesso singolo", licensingAuthority: "Autorità di rilascio delle licenze", save: "Salva", cancel: "Annulla", edit: "Modifica", delete: "Cancella", metric: "Metrico", imperial: "Imperiale" },
+      "uk-UA": { loading: "Завантаження…", singleSignOn: "Єдиний вхід", licensingAuthority: "Орган ліцензування", save: "Зберегти", cancel: "Скасувати", edit: "Редагувати", delete: "Видалити", metric: "Метрична система", imperial: "Імперська система" },
+      "nl-NL": { loading: "Laden...", singleSignOn: "Eenmalige aanmelding", licensingAuthority: "Licentieautoriteit", save: "Opslaan", cancel: "Annuleren", edit: "Bewerken", delete: "Verwijderen", metric: "Metrisch", imperial: "Imperiaal" },
+      "pt-PT": { loading: "A carregar…", singleSignOn: "Início de sessão único", licensingAuthority: "Autoridade de licenciamento", save: "Guardar", cancel: "Cancelar", edit: "Editar", delete: "Apagar", metric: "Métrico", imperial: "Imperial" },
+      "cs-CZ": { loading: "Načítání…", singleSignOn: "Jednotné přihlášení", licensingAuthority: "Licenční autorita", save: "Uložit", cancel: "Zrušit", edit: "Upravit", delete: "Smazat", metric: "Metrický", imperial: "Imperiální" },
+      "ro-RO": { loading: "Se încarcă...", singleSignOn: "Autentificare unică", licensingAuthority: "Autoritatea de licențiere", save: "Salvează", cancel: "Anulează", edit: "Editează", delete: "Șterge", metric: "Metric", imperial: "Imperial" },
+      "et-EE": { loading: "Laadimine…", singleSignOn: "Ühekordne sisselogimine", licensingAuthority: "Litsentsi väljastaja", save: "Salvesta", cancel: "Tühista", edit: "Muuda", delete: "Kustuta", metric: "Meetermõõdustik", imperial: "Imperiaalne mõõdustik" },
+      "lv-LV": { loading: "Ielāde…", singleSignOn: "Vienotā pierakstīšanās", licensingAuthority: "Licences izdevējs", save: "Saglabāt", cancel: "Atcelt", edit: "Rediģēt", delete: "Dzēst", metric: "Metriskā sistēma", imperial: "Imperiālā sistēma" },
+      "lt-LT": { loading: "Įkeliama...", singleSignOn: "Bendrasis prisijungimas", licensingAuthority: "Licencijavimo institucija", save: "Išsaugoti", cancel: "Atšaukti", edit: "Redaguoti", delete: "Trinti", metric: "Metrinė sistema", imperial: "Imperinė sistema" },
+    } as const;
+    for (const [language, values] of Object.entries(expected)) {
+      for (const [key, value] of Object.entries(values)) expect(translate(language, key as keyof typeof en)).toBe(value);
+      expect(translate(language, "site")).toBe("Site");
+      expect(translate(language, "sites")).toBe("Sites");
+      expect(translate(language, "siteManagers")).toBe("Site Managers");
+    }
+  });
+
+  it("rejects translation-tool artifacts and control characters", () => {
+    const artifact = /@\s*info|whatsthis|STARTLS|TIRPIK|\bNPI\b|Nelegalus|Toksiškumas|(?:\.\s*){8,}|[\u0000-\u0008\u000B\u000C\u000E-\u001F]/i;
+    for (const language of supportedLanguages) {
+      for (const message of Object.values(languageCatalogs[language])) expect(message).not.toMatch(artifact);
+    }
+  });
+
+  it("does not silently retain substantial English interface text", () => {
+    const allowedIdenticalMessages = new Set([
+      "fylkrenSpEntityId",
+      "languagePortuguese",
+      "oidcSubject",
+      "revision",
+      "underSiteUnit",
+      "versionLabel",
+      "workflowsWorkflowFieldsHttpsFileOrSmb",
+    ]);
+    for (const language of supportedLanguages.filter(language => !["en-US", "en-GB"].includes(language))) {
+      for (const [key, message] of Object.entries(languageCatalogs[language])) {
+        if (message.length >= 18 && message === en[key as keyof typeof en]) {
+          expect(allowedIdenticalMessages, `${language}.${key} is still English`).toContain(key);
+        }
+      }
+    }
+  });
+
+  it("preserves protocol names, API paths, headers and permission scopes", () => {
+    const protectedTokens = [
+      "/api/v1/administration/sites",
+      "classifications:read",
+      "classifications:write",
+      "Idempotency-Key",
+      "If-Match",
+      "reports:read",
+      "STARTTLS",
+      "WebAuthn",
+      "HTTPS",
+      "SMTP",
+      "SAML",
+      "OIDC",
+      "LDAP",
+      "SCIM",
+      "ETag",
+      "UTC",
+      "API",
+    ];
+    for (const language of supportedLanguages) {
+      for (const [key, source] of Object.entries(en)) {
+        for (const token of protectedTokens.filter(candidate => source.includes(candidate))) {
+          expect(languageCatalogs[language][key as keyof typeof en], `${language}.${key} must preserve ${token}`).toContain(token);
+        }
+      }
+    }
+  });
 });

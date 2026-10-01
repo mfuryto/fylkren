@@ -1,7 +1,7 @@
 import type { MessageKey } from "../../en-US";
 
 export const sitesLtLT = {
-  sites: "Sienos",
+  sites: "Sites",
   sitesIntro: "Suvestinis vaizdas svetainių, santykių ir svetainių vadovai.",
   newSite: "Nauja svetainė",
   communitySiteUsage: "Bendrija: {active} iš {limit} aktyvias vietas.",
@@ -16,8 +16,8 @@ export const sitesLtLT = {
   findSite: "Ieškoti svetainės",
   siteSearchPlaceholder: "Vardas, pavardė, vadovas arba vieta",
   standaloneTopLevel: "Standly top level",
-  underSite: "@ info: whatsthis {site}",
-  underSiteUnit: "@ info: whatsthis {site} · {unit}",
+  underSite: "Po {site}",
+  underSiteUnit: "Po {site} · {unit}",
   childSites: "Vaiko vietos: {sites}",
   deleted: "Išbrauktas",
   export: "Eksportas",

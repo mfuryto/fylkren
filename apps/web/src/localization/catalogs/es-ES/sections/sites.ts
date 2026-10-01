@@ -1,7 +1,7 @@
 import type { MessageKey } from "../../en-US";
 
 export const sitesEsES = {
-  sites: "Sitios",
+  sites: "Sites",
   sitesIntro: "Una visión consolidada de sitios, relaciones y administradores de sitios.",
   newSite: "Nuevo sitio",
   communitySiteUsage: "Comunidad: {active} de sitios activos {limit}.",
@@ -55,10 +55,10 @@ export const sitesEsES = {
   minimumTwoCharacters: "Introduzca al menos dos caracteres.",
   userResults: "Resultados de usuario",
   newLocalUser: "Nuevo usuario local",
-  assignSiteManager: "Assign Site Manager",
+  assignSiteManager: "Asignar Site Manager",
   deleteSite: "Borrar el sitio",
   deleteSiteHelp: "Eliminar desactiva el sitio y conserva historia y registros de auditoría.",
-  removeSiteManager: "Remove Site Manager",
+  removeSiteManager: "Quitar Site Manager",
   removeSiteManagerQuestion: "¿Quieres eliminar {name} como Administrador de Sitios para {site}?",
   userHistoryRetained: "Se mantienen las acciones de usuario e histórica.",
   removeAssignment: "Eliminar la asignación",

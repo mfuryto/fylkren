@@ -1,7 +1,7 @@
 import type { MessageKey } from "../../en-US";
 
 export const sitesSvSE = {
-  sites: "Webbplatser",
+  sites: "Sites",
   sitesIntro: "En konsoliderad bild av webbplatser, relationer och Site Managers.",
   newSite: "Ny webbplats",
   communitySiteUsage: "Gemenskap: {active} av {limit} aktiva platser.",
@@ -56,7 +56,7 @@ export const sitesSvSE = {
   userResults: "Användarresultat",
   newLocalUser: "Ny lokal användare",
   assignSiteManager: "Tilldela Site Manager",
-  deleteSite: "Delete webbplats",
+  deleteSite: "Ta bort Site",
   deleteSiteHelp: "Ta bort inaktiverar webbplatsen och bevarar historia och revisionsrekord.",
   removeSiteManager: "Ta bort Site Manager",
   removeSiteManagerQuestion: "Vill du ta bort {name} som Site Manager för {site}?",

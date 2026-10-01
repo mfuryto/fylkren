@@ -1,0 +1,36 @@
+# Localization terminology
+
+This term base is authoritative for interface translation and automated localization QA. It prevents generic translation engines from changing Fylkren product concepts into unrelated web, geographic or commercial terms.
+
+## Reserved product terms
+
+The following names remain unchanged in every interface language, apart from normal grammatical punctuation around them:
+
+- `Fylkren`
+- `Site`
+- `Sites`
+- `Site Manager`
+- `Site Managers`
+- `Platform Manager`
+- `Community`
+- `Enterprise`
+- `AD`
+- `LDAP`
+- `OIDC`
+- `SAML`
+- `WebAuthn`
+
+`Site` is Fylkren's organizational and authorization boundary. It must never be translated as website, web page, physical construction site or an Internet domain. Role names built from this term are likewise product roles, not generic website administrators.
+
+## Context-sensitive terms
+
+- **Task** is an operational work item, not a software background process.
+- **Request** is a formal request routed inside Fylkren, not an HTTP request unless the text explicitly discusses the API.
+- **Planning** and **Execution** are workflow phases.
+- **Federation** is trusted instance-to-instance interoperability.
+- **Identity provider** means the configured authentication authority.
+- **Imperial** and **Metric** name measurement systems; `Imperial` must never be translated as an empire, emperor or royal status.
+- **License** is a software entitlement unless the surrounding text explicitly identifies an external certificate or permit.
+- Customer-defined classification names are data and are never translated by the interface catalog.
+
+Security-sensitive actions must preserve their force. Delete, deactivate, revoke, reject, cancel and remove are not interchangeable. Labels use the target language's normal imperative UI form; explanatory text states the resulting effect explicitly.

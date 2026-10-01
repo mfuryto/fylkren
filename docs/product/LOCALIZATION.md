@@ -2,6 +2,8 @@
 
 Fylkren separates repository language from product language. Source code, identifiers, tests, examples and maintained documentation are written in English. User-visible product text is resolved through bundled language catalogs and does not require an Internet service.
 
+The [localization terminology](LOCALIZATION_TERMINOLOGY.md) is authoritative for reserved product names, domain concepts and security-sensitive actions.
+
 ## Current language roster
 
 | Locale | Language | Status |

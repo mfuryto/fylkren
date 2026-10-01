@@ -96,7 +96,7 @@ export const federationRoRO = {
   federationHelpKeys: "Pe ambele instalații: Creați cheia federației. Cheia privată este stocată în siguranță pe server și nu trebuie copiată manual.",
   federationHelpConnect: "Conectați instalațiile: Introduceți adresa HTTPS publică a interpretului sub Adăugați peer. Retrageți identitatea semnată aduce identitatea direct de la acea adresă. Comparați amprenta printr-un canal independent, aprobați conexiunea de testare a interpretului și executați. Testul preia, de asemenea, site-urile active de nivel superior ale administratorului. Repetați în direcția opusă.",
   federationHelpEnable: "Activați: Rutarea de lucru arată exact ceea ce lipsește. Confirmați verificarea și activați-l pe ambele instalații. Apoi, testați cu o cerere normală.",
-  federationHelpHost: "Adresa, certificatul, proxy-ul şi sincronizarea ceasului serverului sunt configurate de mediul de găzduire. Toate celelalte configuraţii şi activare sunt completate aici în GUI.",
+  federationHelpHost: "Adresa HTTPS publică a serverului, certificatul, proxy-ul și sincronizarea ceasului sunt configurate de mediul de găzduire. Toate celelalte configurări și activarea se efectuează aici, în GUI.",
   federationIdentityLoadFailed: "Identitatea de exemplu nu a putut fi încărcată.",
   federationRoutingLoadFailed: "Starea de rutare a muncii nu a putut fi încărcată.",
   federationRoutingChangeFailed: "Rutarea muncii nu a putut fi schimbată.",

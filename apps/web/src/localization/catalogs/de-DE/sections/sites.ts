@@ -1,7 +1,7 @@
 import type { MessageKey } from "../../en-US";
 
 export const sitesDeDE = {
-  sites: "Gebiete",
+  sites: "Sites",
   sitesIntro: "Eine konsolidierte Ansicht von Websites, Beziehungen und Site-Managern.",
   newSite: "Neue Website",
   communitySiteUsage: "Gemeinschaft: {active} von {limit} aktive Standorte.",

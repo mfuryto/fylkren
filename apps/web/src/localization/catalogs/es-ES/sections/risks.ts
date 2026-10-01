@@ -29,7 +29,7 @@ export const risksEsES = {
   riskDueDate: "Fecha de presentación",
   riskStatusIdentified: "Identificado",
   riskStatusActive: "Activo",
-  riskStatusMitigating: "Mitigation in progress",
+  riskStatusMitigating: "Mitigación en curso",
   riskStatusAccepted: "Aceptado",
   riskStatusClosed: "Cerrado",
   mitigationStatusPlanned: "Planes previstos",

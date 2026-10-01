@@ -96,7 +96,7 @@ export const federationItIT = {
   federationHelpKeys: "Su entrambe le installazioni: Creare la chiave di federazione. La chiave privata viene memorizzata in modo sicuro sul server e non deve essere copiata manualmente.",
   federationHelpConnect: "Collegare le installazioni: entrare l'indirizzo HTTPS pubblico del pari sotto Add peer. Recuperare l'identità firmata si prefigge direttamente da quell'indirizzo. Confrontare l'impronta digitale attraverso un canale indipendente, approvare la connessione peer ed eseguire Test. Il test recupera anche i siti di alto livello attivi del pari.",
   federationHelpEnable: "Abilita: il routing di lavoro mostra esattamente cosa manca. Confermare la verifica e abilitarlo su entrambe le installazioni. Quindi testare con una normale richiesta.",
-  federationHelpHost: "L'indirizzo, il certificato, il proxy e la sincronizzazione dell'orologio del server sono configurati dall'ambiente di hosting.",
+  federationHelpHost: "L'indirizzo HTTPS pubblico, il certificato, il proxy e la sincronizzazione dell'orologio del server sono configurati dall'ambiente di hosting.",
   federationIdentityLoadFailed: "L'identità di esempio non poteva essere caricata.",
   federationRoutingLoadFailed: "Lo stato di routing del lavoro non poteva essere caricato.",
   federationRoutingChangeFailed: "Il routing del lavoro non potrebbe essere cambiato.",

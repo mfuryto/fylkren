@@ -1,7 +1,7 @@
 import type { MessageKey } from "../../en-US";
 
 export const sitesRoRO = {
-  sites: "Site-uri",
+  sites: "Sites",
   sitesIntro: "O imagine consolidată a site-urilor, relaţiilor şi a managerilor site-ului.",
   newSite: "Site nou",
   communitySiteUsage: "Comunitate: {active}  din {limit} site-uri active.",

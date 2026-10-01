@@ -39,7 +39,7 @@ export const siteAuditUkUA = {
   auditPasswordReset: "Одноразовий код для скидання пароля",
   auditSiteMemberDeactivated: "Користувач вилучений з сайту",
   auditAdUserAdded: "Додано користувач AD на сайт",
-  auditLdapUserAdded: "Користувач ЛДАП додано на сайт",
+  auditLdapUserAdded: "Користувача LDAP додано до Site",
   auditRoleCreated: "Робота в Україні",
   auditRoleUpdated: "Оновлена роль роботи",
   auditRoleDeactivated: "Роль роботи деактивовано",

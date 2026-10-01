@@ -96,7 +96,7 @@ export const federationPtPT = {
   federationHelpKeys: "Em ambas as instalações: Crie a chave da federação. A chave privada é guardada com segurança no servidor e não deve ser copiada manualmente.",
   federationHelpConnect: "Conecte as instalações: Digite o endereço HTTPS público do peer sob Adicionar par. Obtém a identidade assinada obtém a identidade diretamente desse endereço. Compare a impressão digital através de um canal independente, aprove a conexão Peer e execute a conexão Test. O teste também recupera os sites ativos de topo do peer. Repita na direção oposta.",
   federationHelpEnable: "Habilitar: O roteamento de trabalho mostra exatamente o que está faltando. Confirme a verificação e habilite-a em ambas as instalações. Em seguida, teste com uma solicitação normal.",
-  federationHelpHost: "O endereço, certificado, proxy e sincronização de relógio do servidor são configurados pelo ambiente de hospedagem. Toda a outra configuração e ativação é concluída aqui na GUI.",
+  federationHelpHost: "O endereço HTTPS público, o certificado, o proxy e a sincronização do relógio do servidor são configurados pelo ambiente de alojamento. Toda a restante configuração e ativação é concluída aqui na GUI.",
   federationIdentityLoadFailed: "A identidade da instância não pôde ser carregada.",
   federationRoutingLoadFailed: "O estado de roteamento do trabalho não pôde ser carregado.",
   federationRoutingChangeFailed: "O encaminhamento do trabalho não pôde ser alterado.",

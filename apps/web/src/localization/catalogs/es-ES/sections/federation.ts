@@ -35,7 +35,7 @@ export const federationEsES = {
   addPeer: "Agregar pares",
   addPeerIntro: "Los administradores de plataforma completan esto en sus propios casos. El servidor recupera y prueba la identidad directamente; la huella dactilar debe ser comparada a través de un canal independiente.",
   httpsAddress: "Dirección de HTTPS",
-  retrieveSignedIdentity: "Retrieve signed identity",
+  retrieveSignedIdentity: "Obtener identidad firmada",
   discoveredInstanceId: "ID de instancia descubierta",
   keyFingerprint: "Fotografiado",
   fingerprintConfirmed: "He comparado la huella a través de un canal independiente.",

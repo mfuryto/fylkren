@@ -50,7 +50,7 @@ export const siteAuditEsES = {
   auditSiteUpdated: "Sitio actualizado",
   auditSiteDeactivated: "Sitio desactivado",
   auditSiteManagerAssigned: "Administrador de sitios asignado",
-  auditSiteManagerRemoved: "Site Manager removed",
+  auditSiteManagerRemoved: "Site Manager eliminado",
   auditUnitCreated: "Unidad interna creada",
   auditUnitUpdated: "Unidad interna actualizada",
   auditUnitsReordered: "Orden interno actualizado",

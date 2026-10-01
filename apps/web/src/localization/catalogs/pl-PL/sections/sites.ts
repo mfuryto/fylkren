@@ -1,7 +1,7 @@
 import type { MessageKey } from "../../en-US";
 
 export const sitesPlPL = {
-  sites: "Strony",
+  sites: "Sites",
   sitesIntro: "Skonsolidowany widok stron, relacji i Managerów Site.",
   newSite: "Nowa strona",
   communitySiteUsage: "Wspólnota: {active} z {limit} aktywnych stron.",

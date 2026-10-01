@@ -96,7 +96,7 @@ export const federationPlPL = {
   federationHelpKeys: "W obu instalacjach: Utwórz klucz federacyjny. Prywatny klucz jest bezpiecznie przechowywany na serwerze i nie może być kopiowany ręcznie.",
   federationHelpConnect: "Podłącz instalacje: Wpisz publiczny adres HTTPS partnera pod add peer. Pobieranie podpisanej tożsamości pobiera tożsamość bezpośrednio z tego adresu. Porównaj odcisk palca za pośrednictwem niezależnego kanału, zatwierdzaj połączenie peer i uruchom test. Test pobiera również aktywne strony peer na poziomie top. Powtórz w przeciwnym kierunku.",
   federationHelpEnable: "Włącz: Trasa pracy pokazuje dokładnie to, czego brakuje. Potwierdź weryfikację i włącz ją w obu instalacjach. Następnie przetestuj z normalnym żądaniem.",
-  federationHelpHost: "Publiczny adres, certyfikat, synchronizacja proxy i zegara serwera są konfigurowane przez środowisko hostingowe. Wszystkie inne konfiguracje i aktywacja są zakończone tutaj w GUI.",
+  federationHelpHost: "Publiczny adres HTTPS serwera, certyfikat, proxy i synchronizacja zegara są konfigurowane w środowisku hostingowym. Cała pozostała konfiguracja i aktywacja odbywa się tutaj, w GUI.",
   federationIdentityLoadFailed: "Identyfikacja instancji nie mogła być załadowana.",
   federationRoutingLoadFailed: "Nie można wczytać statusu routingu roboczego.",
   federationRoutingChangeFailed: "Nie można było zmienić sposobu pracy.",

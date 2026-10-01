@@ -1,7 +1,7 @@
 import type { MessageKey } from "../../en-US";
 
 export const sitesLvLV = {
-  sites: "Objekti",
+  sites: "Sites",
   sitesIntro: "Konsolidēts pārskats par vietnēm, attiecībām un Vietņu vadītājiem.",
   newSite: "Jauna vieta",
   communitySiteUsage: "Kopiena: {active}  skaits * {limit}  aktīvās vietas.",

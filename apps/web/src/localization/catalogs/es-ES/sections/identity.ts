@@ -48,7 +48,7 @@ export const identityEsES = {
   linkIdentity: "Enlace de identidad",
   oidcSubject: "Tema OIDC (sub)",
   issuer: "Número",
-  linkSamlIdentity: "Link SAML identity",
+  linkSamlIdentity: "Vincular identidad SAML",
   permanentNameId: "Nombre persistenteID",
   nameIdHelp: "Utilice el valor NameID exacto enviado por el proveedor de identidad. Las direcciones de correo electrónico y los nombres de pantalla no se utilizan como claves de enlace.",
   idpEntity: "Entidad de identificación",
