@@ -3,6 +3,10 @@ import { nbNO } from "./nb-NO";
 
 export const supportedLanguages = ["en", "nb-NO"] as const;
 export type SupportedLanguage = (typeof supportedLanguages)[number];
+export const languageCatalogs: Record<SupportedLanguage, Record<MessageKey, string>> = {
+  en,
+  "nb-NO": nbNO,
+};
 
 export function normalizeLanguage(value: string): SupportedLanguage {
   const normalized = value.toLowerCase();
@@ -24,7 +28,7 @@ export function setActiveLanguage(language: string) {
 }
 
 export function translate(language: string, key: MessageKey, variables: MessageVariables = {}): string {
-  const message = normalizeLanguage(language) === "nb-NO" ? nbNO[key] ?? en[key] : en[key];
+  const message = languageCatalogs[normalizeLanguage(language)][key] ?? en[key];
   return message.replace(/\{([A-Za-z][A-Za-z0-9]*)\}/g, (match, name: string) =>
     Object.hasOwn(variables, name) ? String(variables[name]) : match);
 }

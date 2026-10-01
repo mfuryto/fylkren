@@ -61,6 +61,8 @@ The light theme uses white primary surfaces, a very light page background, visib
 
 Repository language and UI language are separate concerns. Repository-facing content is English. English is the source catalog and mandatory fallback; Norwegian Bokmål (`nb-NO`) is a separate complete language pack. Missing keys must render the English source text, never a mixture caused by hard-coded Norwegian text. Dates, times and numbers follow the configured locale and IANA time zone, while the clock and measurement systems follow explicit platform defaults. User-generated content is not translated automatically.
 
+Every change to user-visible text updates all complete bundled language packs atomically. The authoritative language roster, completeness rules and process for adding another locale are defined in [Localization and language packs](LOCALIZATION.md).
+
 Platform Manager changes the language, IANA time zone, 12/24-hour clock and metric/imperial measurement defaults under **Appearance**. The database is authoritative and changes apply without an API restart. Timestamps remain stored in UTC, and measurement preferences affect presentation rather than the meaning of stored values. All language resources ship locally for air-gapped operation. Routes, API contracts, persistent identifiers and permalinks remain language-neutral.
 
 ## Classification display

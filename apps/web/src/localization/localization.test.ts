@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { normalizeLanguage, regionalDisplayLocale, translate } from ".";
+import { languageCatalogs, normalizeLanguage, regionalDisplayLocale, supportedLanguages, translate } from ".";
+import { en } from "./en";
 
 describe("localization catalogs", () => {
   it("uses English for unknown and unsupported languages", () => {
@@ -20,5 +21,16 @@ describe("localization catalogs", () => {
     expect(twelveHour).toMatch(/PM/i);
     expect(twentyFourHour).toContain("18:30");
     expect(twentyFourHour).not.toMatch(/AM|PM/i);
+  });
+
+  it("requires every registered language pack to match source keys and placeholders", () => {
+    const sourceKeys = Object.keys(en).sort();
+    const placeholders = (message: string) => [...message.matchAll(/\{([A-Za-z][A-Za-z0-9]*)\}/g)].map(match => match[1]).sort();
+    for (const language of supportedLanguages) {
+      expect(Object.keys(languageCatalogs[language]).sort()).toEqual(sourceKeys);
+      for (const key of sourceKeys) {
+        expect(placeholders(languageCatalogs[language][key as keyof typeof en])).toEqual(placeholders(en[key as keyof typeof en]));
+      }
+    }
   });
 });

@@ -91,6 +91,7 @@ Before public publication, run `bash tools/security/verify-repository-safety.sh 
 - Repository documentation, source comments, test descriptions and examples are written in English.
 - `pnpm check:language` rejects Norwegian added outside the dedicated `nb-NO` catalog. `pnpm check:language:full` is the final migration gate and must pass before the release candidate is frozen.
 - UI localization is separate from repository language. English is the source catalog and mandatory fallback; Norwegian Bokmål is a separate complete `nb-NO` language pack.
+- Every user-visible text change must update every complete bundled language pack in the same commit; the maintained [language roster and pack requirements](product/LOCALIZATION.md) are authoritative.
 - Routes, API contracts, persistent identifiers and permalinks remain language-neutral.
 - Documentation must describe current behavior. Planned behavior belongs in the roadmap, and released changes belong in the changelog.
 - Air-gapped operation must never depend on external documentation, fonts, scripts or runtime lookups.
