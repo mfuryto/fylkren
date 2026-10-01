@@ -1,6 +1,7 @@
 import type { FormEvent } from "react";
 import type { TaskSite, TaskUnit } from "../work/WorkContextModels";
 import { availableReportYears } from "./reportFilters";
+import { useTranslation } from "../localization/LocalizationProvider";
 
 type ReportToolbarProps = {
   sites: TaskSite[];
@@ -19,31 +20,32 @@ type ReportToolbarProps = {
 };
 
 export function ReportToolbar({ sites, units, selectedSiteId, selectedUnitId, hasTopLevelAccess, year, years, search, onSiteChange, onUnitChange, onYearChange, onSearchChange, onSubmit }: ReportToolbarProps) {
+  const t = useTranslation();
   return <form className="panel report-toolbar" onSubmit={onSubmit}>
     {sites.length > 1 && <div className="field">
-      <label htmlFor="report-site">Site</label>
+      <label htmlFor="report-site">{t("site")}</label>
       <select id="report-site" value={selectedSiteId} onChange={event => onSiteChange(event.target.value)}>
         {sites.map(site => <option key={site.siteId} value={site.siteId}>{site.name}</option>)}
       </select>
     </div>}
     {units.length + (hasTopLevelAccess ? 1 : 0) > 1 && <div className="field">
-      <label htmlFor="report-level">Arbeidsnivå</label>
+      <label htmlFor="report-level">{t("workLevel")}</label>
       <select id="report-level" value={selectedUnitId} onChange={event => onUnitChange(event.target.value)}>
-        {hasTopLevelAccess && <option value="">Toppnivå</option>}
+        {hasTopLevelAccess && <option value="">{t("topLevel")}</option>}
         {units.map(unit => <option key={unit.id} value={unit.id}>{unit.name}</option>)}
       </select>
     </div>}
     <div className="field">
-      <label htmlFor="report-year">År</label>
+      <label htmlFor="report-year">{t("year")}</label>
       <select id="report-year" value={year} onChange={event => onYearChange(event.target.value)}>
-        <option value="">Alle år</option>
+        <option value="">{t("allYears")}</option>
         {availableReportYears(years, year).map(value => <option key={value} value={value}>{value}</option>)}
       </select>
     </div>
     <div className="field report-search">
-      <label htmlFor="report-search">Søk</label>
-      <input id="report-search" type="search" value={search} placeholder="Tittel, innhold eller navn" onChange={event => onSearchChange(event.target.value)}/>
+      <label htmlFor="report-search">{t("search")}</label>
+      <input id="report-search" type="search" value={search} placeholder={t("reportSearchPlaceholder")} onChange={event => onSearchChange(event.target.value)}/>
     </div>
-    <button className="primary-button" type="submit">Søk</button>
+    <button className="primary-button" type="submit">{t("search")}</button>
   </form>;
 }

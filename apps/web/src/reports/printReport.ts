@@ -12,7 +12,7 @@ export function reportPrintPageStyles(classification: string) {
   }`;
 }
 
-export function printReportDocument() {
+export function printReportDocument(language = "en", title = "Report", frameTitle = "Report print view") {
   const report = document.getElementById("printable-report");
   if (!report) return;
 
@@ -28,7 +28,7 @@ export function printReportDocument() {
   document.querySelector<HTMLIFrameElement>("iframe[data-report-print-frame]")?.remove();
   const frame = document.createElement("iframe");
   frame.dataset.reportPrintFrame = "true";
-  frame.title = "Utskriftsvisning av rapport";
+  frame.title = frameTitle;
   frame.setAttribute("aria-hidden", "true");
   frame.style.position = "absolute";
   frame.style.width = "174mm";
@@ -55,7 +55,7 @@ export function printReportDocument() {
     }, 250);
     window.setTimeout(cleanup, 120_000);
   };
-  frame.srcdoc = `<!doctype html><html lang="nb"><head><meta charset="UTF-8"><title>Rapport</title>${styles}<style>
+  frame.srcdoc = `<!doctype html><html lang="${language.replace(/[^A-Za-z0-9-]/g, "") || "en"}"><head><meta charset="UTF-8"><title>${title.replace(/[<>&]/g, "")}</title>${styles}<style>
     ${reportPrintPageStyles(classification)}
     :root, html, body { min-height: 0; margin: 0; padding: 0; background: #fff !important; }
     body * { visibility: visible !important; }

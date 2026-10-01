@@ -7,8 +7,10 @@ import { siteAuditEn } from "./siteAudit.en";
 import { profileEn } from "./profile.en";
 import { overviewEn } from "./overview.en";
 import { organizationEn } from "./organization.en";
+import { reportsEn } from "./reports.en";
 
 export const en = {
+  ...reportsEn,
   ...organizationEn,
   ...overviewEn,
   ...profileEn,

@@ -6,10 +6,12 @@ import { ReportToolbar } from "./ReportToolbar";
 import { ReportViewer, type ArchivedReport } from "./ReportViewer";
 import { availableReportUnits } from "./reportFilters";
 import { copyPermalink, navigateToLocation, type AppLocation } from "../navigation/permalinks";
+import { useTranslation } from "../localization/LocalizationProvider";
 
 type ClassificationMarking = { name: string; abbreviation: string };
 
 export function ReportsPage({ language, timeZone, classificationMarkings, permalink }: { language: string; timeZone: string; classificationMarkings: ClassificationMarking[]; permalink: AppLocation }) {
+  const t = useTranslation();
   const [sites, setSites] = useState<TaskSite[]>([]);
   const [units, setUnits] = useState<TaskUnit[]>([]);
   const [selectedSiteId, setSelectedSiteId] = useState("");
@@ -27,7 +29,7 @@ export function ReportsPage({ language, timeZone, classificationMarkings, permal
   const [linkMessage, setLinkMessage] = useState("");
 
   useEffect(() => {
-    apiGet<{ sites: TaskSite[]; units: TaskUnit[] }>("/api/work/context", "Rapportkonteksten kunne ikke lastes.")
+    apiGet<{ sites: TaskSite[]; units: TaskUnit[] }>("/api/work/context", t("reportContextLoadFailed"))
       .then(context => {
         const operationalSites = context.sites.filter(site => site.hasOperationalAccess);
         setSites(operationalSites);
@@ -38,13 +40,13 @@ export function ReportsPage({ language, timeZone, classificationMarkings, permal
         if (!operationalSites.length) setLoading(false);
       })
       .catch(problem => {
-        setError(problem instanceof Error ? problem.message : "Rapportkonteksten kunne ikke lastes.");
+        setError(problem instanceof Error ? problem.message : t("reportContextLoadFailed"));
         setLoading(false);
       });
   }, [permalink.siteId, permalink.unitId, permalink.year]);
 
   const selectedSite = sites.find(site => site.siteId === selectedSiteId);
-  const availableUnits = useMemo(() => availableReportUnits(units, selectedSiteId), [units, selectedSiteId]);
+  const availableUnits = useMemo(() => availableReportUnits(units, selectedSiteId, language), [units, selectedSiteId, language]);
   useEffect(() => {
     if (!selectedSite) return;
     if (!selectedSite.hasTopLevelAccess && !availableUnits.some(unit => unit.id === selectedUnitId)) {
@@ -62,7 +64,7 @@ export function ReportsPage({ language, timeZone, classificationMarkings, permal
     if (selectedUnitId) parameters.set("unitId", selectedUnitId);
     if (year) parameters.set("year", year);
     if (appliedSearch) parameters.set("search", appliedSearch);
-    apiGet<{ reports: ArchivedReport[]; years: number[]; total: number }>(`/api/work/sites/${selectedSiteId}/reports?${parameters}`, "Rapportene kunne ikke lastes.")
+    apiGet<{ reports: ArchivedReport[]; years: number[]; total: number }>(`/api/work/sites/${selectedSiteId}/reports?${parameters}`, t("reportsLoadFailed"))
       .then(value => {
         setReports(value.reports);
         setYears(value.years);
@@ -72,19 +74,19 @@ export function ReportsPage({ language, timeZone, classificationMarkings, permal
           const requested = value.reports.find(report => report.id === permalink.reportId);
           if (requested) setSelected(requested);
           else if (page * 20 < value.total) setPage(page + 1);
-          else setError("Rapporten finnes ikke, eller du har ikke tilgang til den på valgt nivå.");
+          else setError(t("reportUnavailable"));
         }
       })
-      .catch(problem => setError(problem instanceof Error ? problem.message : "Rapportene kunne ikke lastes."))
+      .catch(problem => setError(problem instanceof Error ? problem.message : t("reportsLoadFailed")))
       .finally(() => setLoading(false));
   }, [selectedSiteId, selectedUnitId, year, appliedSearch, page, permalink.reportId]);
 
   return <div className="page reports-page">
-    <header className="page-header"><div><h1>Rapporter</h1><p className="muted">Godkjente sluttrapporter på valgt arbeidsnivå.</p></div></header>
+    <header className="page-header"><div><h1>{t("reportsTitle")}</h1><p className="muted">{t("reportsIntro")}</p></div></header>
     {error && <p className="status-message error-message">{error}</p>}
     {linkMessage && <p className="status-message" role="status">{linkMessage}</p>}
     {sites.length === 0 && !loading ? <section className="panel empty-state"><div>
-      <h2>Ingen rapporttilgang</h2><p className="muted">Du har ingen tilgjengelige arbeidsnivåer.</p>
+      <h2>{t("noReportAccessTitle")}</h2><p className="muted">{t("noReportAccessIntro")}</p>
     </div></section> : <>
       <ReportToolbar
         sites={sites} units={availableUnits} selectedSiteId={selectedSiteId} selectedUnitId={selectedUnitId}
@@ -96,6 +98,17 @@ export function ReportsPage({ language, timeZone, classificationMarkings, permal
       />
       <ReportArchiveList reports={reports} loading={loading} total={total} page={page} language={language} timeZone={timeZone} onSelect={report => { setSelected(report); navigateToLocation({ page: "Reports", siteId: selectedSiteId, unitId: selectedUnitId || undefined, reportId: report.id, year }); }} onPageChange={setPage}/>
     </>}
-    {selected && <ReportViewer report={selected} language={language} timeZone={timeZone} classificationMarkings={classificationMarkings} onCopyLink={() => { void copyPermalink({ page: "Reports", siteId: selectedSiteId, unitId: selectedUnitId || undefined, reportId: selected.id, year }).then(() => setLinkMessage("Lenken til rapporten er kopiert.")).catch(() => setError("Lenken kunne ikke kopieres.")); }} onClose={() => setSelected(null)}/>}
+    {selected && <ReportViewer
+      report={selected}
+      language={language}
+      timeZone={timeZone}
+      classificationMarkings={classificationMarkings}
+      onCopyLink={() => {
+        void copyPermalink({ page: "Reports", siteId: selectedSiteId, unitId: selectedUnitId || undefined, reportId: selected.id, year })
+          .then(() => setLinkMessage(t("reportLinkCopied")))
+          .catch(() => setError(t("reportLinkCopyFailed")));
+      }}
+      onClose={() => setSelected(null)}
+    />}
   </div>;
 }
