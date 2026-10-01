@@ -11,6 +11,24 @@ Fylkren separates repository language from product language. Source code, identi
 
 No additional locale is considered supported until its complete bundled catalog, locale behavior, documentation and automated tests are delivered together. The previously discussed roster of additional planned translations was not preserved in the repository or the available project-conversation history. The product owner must reconfirm that roster before those locales are presented as planned or supported.
 
+## Approved translation phase after the English migration
+
+The complete migration of repository-facing material and hard-coded product text to English is a mandatory stopping point. When that gate passes, stop implementation and obtain explicit product-owner approval before creating the next language packs. The approved translation-phase roster is:
+
+| Order | Locale | Language |
+| ---: | --- | --- |
+| 1 | `sv-SE` | Swedish |
+| 2 | `da-DK` | Danish |
+| 3 | `fi-FI` | Finnish |
+| 4 | `de-DE` | German |
+| 5 | `fr-FR` | French |
+| 6 | `pl-PL` | Polish |
+| 7 | `es-ES` | Spanish |
+| 8 | `it-IT` | Italian |
+| 9 | `uk-UA` | Ukrainian |
+
+These are planned packs, not current supported languages. They must not appear in the Platform Manager selector until each pack independently meets the completeness and acceptance requirements below. Regional variants such as Canadian French or Latin American Spanish require an explicit product decision rather than silently reusing a region-specific pack.
+
 ## Mandatory change rule
 
 Every change that adds, removes or changes user-visible text must update the English source catalog and every complete bundled language pack in the same commit. This includes navigation, controls, validation, errors, accessibility labels, help, email templates, reports, print/PDF output and authentication text. A feature is not complete when one supported language still shows an old label, a raw identifier or fallback text unintentionally.

@@ -83,6 +83,8 @@ Requirements include:
 
 Existing `nb-NO` behavior must remain compatible during migration. Norwegian text is permitted only inside the dedicated `nb-NO` language resources; source, comments, tests, examples and documentation remain English.
 
+When the English migration and full repository-language check are complete, stop before beginning further translations and obtain explicit product-owner approval. The subsequent planned packs, in approved order, are Swedish (`sv-SE`), Danish (`da-DK`), Finnish (`fi-FI`), German (`de-DE`), French (`fr-FR`), Polish (`pl-PL`), Spanish (`es-ES`), Italian (`it-IT`) and Ukrainian (`uk-UA`). They remain planned rather than supported until delivered and accepted individually under the [language-pack requirements](../product/LOCALIZATION.md).
+
 ## Human-readable work references after internationalization
 
 After the internationalization gate is complete, introduce a Jira-inspired human-readable reference for every work item, including parent work, delegated child work, requests and federated work. The database UUID remains the canonical internal identifier; the reference is a durable operator-facing identifier used in navigation, search, notifications, reports, exports, audit presentation and supported APIs.
