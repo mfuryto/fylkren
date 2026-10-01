@@ -1,3 +1,6 @@
 export const workEn = {
   requestRecipientSearchFailed: "Recipients could not be searched.",
+  priorityLow: "Low", priorityNormal: "Normal", priorityHigh: "High", priorityCritical: "Critical",
+  decisionStatusProposed: "Proposed", decisionStatusActive: "Active", decisionStatusSuperseded: "Superseded", decisionStatusWithdrawn: "Withdrawn",
+  approvalTask: "Task", approvalTitle: "Title", approvalDescription: "Description", approvalPlanDecision: "Plan decision", approvalPriority: "Priority", approvalDue: "Due", approvalPlanStep: "Plan step {number}", approvalContent: "Content", approvalTimeline: "Timeline {number}", approvalDocument: "Document {number}", approvalSubunitTasks: "Tasks for subunits", approvalTaskNumber: "Task {number}", approvalRequests: "Requests", approvalRequestNumber: "Request {number}", approvalFinalReport: "Final report", approvalReport: "Report", approvalClassification: "Classification", approvalWritten: "Written", approvalDecision: "Decision", approvalRationale: "Rationale", approvalStatus: "Status", approvalDecided: "Decided", approvalDecisionMakers: "Decision makers", approvalSelectVersion: "Select a version.", approvalVersion: "Version {number}", approvalNoPreview: "No readable preview is available for this version type.", approvalShowRaw: "Show original version data",
 } as const;

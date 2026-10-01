@@ -1,3 +1,6 @@
 export const workNbNO = {
   requestRecipientSearchFailed: "Mottakere kunne ikke søkes opp.",
+  priorityLow: "Lav", priorityNormal: "Normal", priorityHigh: "Høy", priorityCritical: "Kritisk",
+  decisionStatusProposed: "Foreslått", decisionStatusActive: "Gjeldende", decisionStatusSuperseded: "Erstattet", decisionStatusWithdrawn: "Trukket tilbake",
+  approvalTask: "Oppdrag", approvalTitle: "Tittel", approvalDescription: "Beskrivelse", approvalPlanDecision: "Planbeslutning", approvalPriority: "Prioritet", approvalDue: "Frist", approvalPlanStep: "Plansteg {number}", approvalContent: "Innhold", approvalTimeline: "Tidslinje {number}", approvalDocument: "Dokument {number}", approvalSubunitTasks: "Oppgaver til underenheter", approvalTaskNumber: "Oppgave {number}", approvalRequests: "Anmodninger", approvalRequestNumber: "Anmodning {number}", approvalFinalReport: "Sluttrapport", approvalReport: "Rapport", approvalClassification: "Klassifisering", approvalWritten: "Skrevet", approvalDecision: "Beslutning", approvalRationale: "Begrunnelse", approvalStatus: "Status", approvalDecided: "Besluttet", approvalDecisionMakers: "Beslutningstakere", approvalSelectVersion: "Velg en versjon.", approvalVersion: "Versjon {number}", approvalNoPreview: "Ingen lesbar forhåndsvisning for denne versjonstypen.", approvalShowRaw: "Vis originale versjonsdata",
 } as const;
