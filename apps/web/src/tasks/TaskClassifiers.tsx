@@ -1,12 +1,12 @@
 import type { WorkItem } from "../work/WorkItemModels";
-import { isReceivedRequest, priorityLabels } from "./taskPolicy";
+import { isReceivedRequest, priorityLabel } from "./taskPolicy";
 
 export function TaskClassifiers({ item, delegation = false }: { item: WorkItem; delegation?: boolean }) {
   const receivedRequest = isReceivedRequest(item);
   return <div className="task-classifiers">
     {item.isOutgoingRequest && <span className="task-info-badge request-direction-badge request-direction-sent"><i aria-hidden="true">↗</i>Sendt anmodning</span>}
     {!delegation && receivedRequest && <span className="task-info-badge request-direction-badge request-direction-received"><i aria-hidden="true">↙</i>Mottatt anmodning</span>}
-    {item.status !== "registered" && <span className={`task-info-badge task-priority ${item.priority}`}><i aria-hidden="true">◆</i>{priorityLabels[item.priority]}</span>}
+    {item.status !== "registered" && <span className={`task-info-badge task-priority ${item.priority}`}><i aria-hidden="true">◆</i>{priorityLabel(item.priority)}</span>}
     {item.workItemTypeName && <span className="task-info-badge task-type-badge"><i aria-hidden="true">▣</i>{item.workItemTypeName}</span>}
     {item.sourceTypeName && <span className="task-info-badge task-source-badge"><i aria-hidden="true">◈</i>{item.sourceTypeName}</span>}
     {item.senderName && <span className="task-info-badge task-sender-badge"><i aria-hidden="true">●</i>{item.senderName}</span>}

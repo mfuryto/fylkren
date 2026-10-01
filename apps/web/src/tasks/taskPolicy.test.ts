@@ -46,22 +46,22 @@ describe("taskPolicy", () => {
   it("offers Hold and Start to the leader after approval without sending automatically", () => {
     const work = item({ status: "planning_approved", hasPlan: true });
     expect(getTaskNextActions(work, [work], { isLeader: true, isOperational: true, canManage: true })).toEqual([
-      { status: "on_hold", label: "Avvent" }, { status: "release", label: "Iverksett" },
+      { status: "on_hold", label: "Hold" }, { status: "release", label: "Start" },
     ]);
     expect(getTaskNextActions(work, [work], { isLeader: false, isOperational: true, canManage: false })).toEqual([]);
   });
 
   it("allows a blocked approved plan to be held but not started", () => {
     const work = item({ status: "planning_approved", hasPlan: true, isBlocked: true });
-    expect(getTaskNextActions(work, [work], { isLeader: true, isOperational: true, canManage: true })).toEqual([{ status: "on_hold", label: "Avvent" }]);
+    expect(getTaskNextActions(work, [work], { isLeader: true, isOperational: true, canManage: true })).toEqual([{ status: "on_hold", label: "Hold" }]);
   });
 
   it("sends a task for review when all direct children are complete", () => {
     const parent = item({ id: "parent", status: "in_progress" });
     const child = item({ id: "child", parentWorkItemId: "parent", status: "completed" });
     expect(getTaskNextActions(parent, [parent, child], { isLeader: true, isOperational: true, canManage: true })).toEqual([
-      { status: "on_hold", label: "Avvent" },
-      { status: "in_review", label: "Send til kontroll" },
+      { status: "on_hold", label: "Hold" },
+      { status: "in_review", label: "Send for review" },
     ]);
   });
 
@@ -72,6 +72,6 @@ describe("taskPolicy", () => {
 
   it("allows the sender to complete a processed request", () => {
     const request = item({ isOutgoingRequest: true, status: "assigned", requestProgressStatus: "completed" });
-    expect(getTaskNextActions(request, [request], { isLeader: true, isOperational: true, canManage: false })).toEqual([{ status: "completed", label: "Fullfør anmodning" }]);
+    expect(getTaskNextActions(request, [request], { isLeader: true, isOperational: true, canManage: false })).toEqual([{ status: "completed", label: "Complete request" }]);
   });
 });

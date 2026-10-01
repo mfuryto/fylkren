@@ -3,7 +3,7 @@ import { Modal } from "../components/Modal";
 import type { WorkItem, WorkItemDependency } from "../work/WorkItemModels";
 import { getTaskDependencies } from "./taskApi";
 import { TaskDependencyPicker } from "./TaskDependencyPicker";
-import { taskStatusLabels } from "./taskPolicy";
+import { taskStatusLabel } from "./taskPolicy";
 
 export function TaskDependencyDialog({ siteId, item, busy, editable, onClose, onAdd, onRemove, onError }: {
   siteId: string;
@@ -26,7 +26,7 @@ export function TaskDependencyDialog({ siteId, item, busy, editable, onClose, on
   return <Modal title="Oppdragsavhengigheter" onClose={onClose}>
     <section className="dependency-section"><h3>Registrerte avhengigheter</h3><p className="muted">Oppdraget er blokkert til alle registrerte forgjengere er fullført.</p>
       {dependencies.length === 0 ? <p className="empty-state-inline">Ingen avhengigheter er registrert.</p> : <ul className="dependency-list">{dependencies.map(value => <li key={value.id}>
-        <span><strong>{value.predecessorTitle}</strong><small>{value.isSatisfied ? "Fullført" : taskStatusLabels[value.predecessorStatus] ?? value.predecessorStatus}</small></span>
+        <span><strong>{value.predecessorTitle}</strong><small>{taskStatusLabel(value.isSatisfied ? "completed" : value.predecessorStatus)}</small></span>
         {editable && <button className="secondary-button" type="button" disabled={busy} onClick={() => { void onRemove(value.id).then(ok => { if (ok) void load(); }); }}>Fjern</button>}
       </li>)}</ul>}
     </section>

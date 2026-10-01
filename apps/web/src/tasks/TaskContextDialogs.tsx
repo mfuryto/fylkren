@@ -2,7 +2,7 @@ import { Modal } from "../components/Modal";
 import { RichTextContent } from "../components/RichText";
 import type { WorkItem, WorkItemDetails } from "../work/WorkItemModels";
 import { StepDocumentLinks, WorkflowTimeline } from "../workflows/WorkflowFields";
-import { priorityLabels, taskStatusLabels as statusLabels } from "./taskPolicy";
+import { priorityLabel, taskStatusLabel } from "./taskPolicy";
 
 export function TaskPlanContent({ details, language }: { details: WorkItemDetails; language: string }) {
   const { task, plan } = details;
@@ -36,8 +36,8 @@ export function TaskPlanDialog({ details, language, timeZone, onClose }: {
       <h3>{task.title}</h3>
       <div className="task-meta">
         <span><strong>Enhet:</strong> {task.unitName ?? "Toppnivå"}</span>
-        <span><strong>Status:</strong> {statusLabels[task.status] ?? task.status}</span>
-        <span><strong>Prioritet:</strong> {priorityLabels[task.priority] ?? task.priority}</span>
+        <span><strong>Status:</strong> {taskStatusLabel(task.status)}</span>
+        <span><strong>Prioritet:</strong> {priorityLabel(task.priority)}</span>
         <span><strong>Frist:</strong> {task.dueAt ? new Intl.DateTimeFormat(language, { dateStyle: "medium", timeZone }).format(new Date(task.dueAt)) : "Ingen"}</span>
       </div>
       <TaskPlanContent details={details} language={language} />
@@ -58,7 +58,7 @@ export function TaskWorkContextDialog({ selectedItem, tree, onClose, onShowPlan 
         <strong>{item.title}</strong>
         {item.id === selectedItem.id && <span className="task-type-badge">Ditt mottatte oppdrag</span>}
         <div className="task-classifiers">
-          {item.status !== "registered" && <span className={`task-info-badge task-priority ${item.priority}`}><i aria-hidden="true">◆</i>{priorityLabels[item.priority]}</span>}
+          {item.status !== "registered" && <span className={`task-info-badge task-priority ${item.priority}`}><i aria-hidden="true">◆</i>{priorityLabel(item.priority)}</span>}
           {item.workItemTypeName && <span className="task-info-badge task-type-badge"><i aria-hidden="true">▣</i>{item.workItemTypeName}</span>}
           {item.sourceTypeName && <span className="task-info-badge task-source-badge"><i aria-hidden="true">◈</i>{item.sourceTypeName}</span>}
           {item.senderName && <span className="task-info-badge task-sender-badge"><i aria-hidden="true">●</i>{item.senderName}</span>}
@@ -67,7 +67,7 @@ export function TaskWorkContextDialog({ selectedItem, tree, onClose, onShowPlan 
           {item.referenceUrl && <a className="task-info-badge task-document-badge" href={item.referenceUrl} target="_blank" rel="noopener noreferrer"><i aria-hidden="true">▤</i>Hoveddokument</a>}
         </div>
       </div>
-      <div className="task-meta"><span>{item.unitName ?? "Toppnivå"}</span><span>{statusLabels[item.status] ?? item.status}</span></div>
+      <div className="task-meta"><span>{item.unitName ?? "Toppnivå"}</span><span>{taskStatusLabel(item.status)}</span></div>
       {item.description && <details className="returned-report task-description-section"><summary><span>Beskrivelse</span><small>Vis oppdragsteksten</small></summary><div className="returned-report-content"><p>{item.description}</p></div></details>}
       {item.status === "cancelled" && item.decisionNote && <p className="task-decision-note"><strong>Kansellert:</strong> {item.decisionNote}</p>}
       {item.finalReport && <section className="planning-result"><h4>Sluttrapport</h4><RichTextContent value={item.finalReport} /></section>}

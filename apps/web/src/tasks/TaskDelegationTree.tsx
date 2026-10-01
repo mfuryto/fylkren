@@ -3,7 +3,7 @@ import type { WorkItem, WorkItemDetails } from "../work/WorkItemModels";
 import { StepDocumentLinks, WorkflowTimeline } from "../workflows/WorkflowFields";
 import { ExecutionHistoryDetails, type ExecutionHistory } from "./ExecutionHistory";
 import { TaskClassifiers } from "./TaskClassifiers";
-import { effectiveTaskStatus, requestProgressLabels, taskStatusLabels as statusLabels, workflowProgress } from "./taskPolicy";
+import { effectiveTaskStatus, requestProgressLabel, taskStatusLabel, workflowProgress } from "./taskPolicy";
 
 export type ChildHistory = { details: WorkItemDetails | null; execution: ExecutionHistory | null; loading: boolean; loaded: boolean };
 type NextAction = { status: string; label: string };
@@ -29,7 +29,7 @@ export function TaskDelegationTree({ children, history, language, busy, canReass
     const execution=childHistory?.execution;
     return <article className={`delegation-child ${child.status === "completed" ? "delegation-child-returned" : ["reassigned", "cancelled", "rejected"].includes(child.status) ? "delegation-child-history" : "delegation-child-active"}`} key={child.id}>
       <div><strong>{child.isOutgoingRequest ? child.requestRecipientSiteName ?? "Mottakende site" : child.unitName ?? child.title}</strong><TaskClassifiers item={child} delegation /></div>
-      <span className={`task-status ${effectiveTaskStatus(child)}`}>{child.isOutgoingRequest ? requestProgressLabels[child.requestProgressStatus ?? "registered"] ?? "Sendt" : statusLabels[child.status]}</span>
+      <span className={`task-status ${effectiveTaskStatus(child)}`}>{child.isOutgoingRequest ? requestProgressLabel(child.requestProgressStatus ?? "registered") : taskStatusLabel(child.status)}</span>
       {workflowProgress(child) && <p className="delegation-progress">{workflowProgress(child)}</p>}
       <details className="delegation-record-details" onToggle={event => { if (event.currentTarget.open) onLoadHistory(child); }}><summary>Vis oppdragsgrunnlag og tidligere behandling</summary><div className="delegation-record-content">
         {child.description && <section className="delegation-instruction"><h4>Oppgaver til {child.unitName ?? "mottakeren"}</h4><p>{child.description}</p></section>}
