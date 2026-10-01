@@ -8,8 +8,10 @@ import { profileEn } from "./profile.en";
 import { overviewEn } from "./overview.en";
 import { organizationEn } from "./organization.en";
 import { reportsEn } from "./reports.en";
+import { risksEn } from "./risks.en";
 
 export const en = {
+  ...risksEn,
   ...reportsEn,
   ...organizationEn,
   ...overviewEn,
