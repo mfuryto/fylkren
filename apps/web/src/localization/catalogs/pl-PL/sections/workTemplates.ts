@@ -25,7 +25,7 @@ export const workTemplatesPlPL = {
   workTemplateHelpTitle: "Jak pracować z szablami",
   workTemplateHelpIntro: "Szablony zapewniają wielokrotnego użytku początkową zawartość dla etapów przepływu pracy i raportów końcowych. Nie zmieniają one treści, które są już używane.",
   workTemplateHelpTypeTitle: "Wybierz odpowiedni typ szablonu.",
-  workTemplateHelpTypeText: "Szablon sprawozdania końcowego jest jednym szablonem na każdym poziomie.",
+  workTemplateHelpTypeText: "Zwykłe szablony zapewniają treść początkową dla wybranych kroków przepływu pracy. Szablon raportu końcowego jest jednym szablonem dla całej Site i wszystkich poziomów.",
   workTemplateHelpScopeTitle: "Wybierz zakres.",
   workTemplateHelpScopeText: "Szablon może być udostępniany przez stronę i planowanie lub własnością wewnętrznego poziomu dla lokalnych przepływów pracy związanych z wykonywaniem zleceń.",
   workTemplateHelpContentTitle: "Napisz początkową zawartość.",

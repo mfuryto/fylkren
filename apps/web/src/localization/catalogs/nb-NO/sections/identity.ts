@@ -148,7 +148,7 @@ export const identityNbNO = {
   moveUserBetweenSites: "Flytt bruker mellom sites",
   fromSite: "Fra site",
   toSite: "Til site",
-  moveUserWarning: "Identitet og historikk beholdes. Enhetstilknytning, roller og Site Manager-ansvar i kildesiten fjernes. Mottakende Site Manager må plassere brukeren og tildele nødvendige roller.",
+  moveUserWarning: "Identitet og historikk beholdes. Enhetstilknytning, roller og Site Manager-ansvar i kilde-Site fjernes. Mottakende Site Manager må plassere brukeren og tildele nødvendige roller.",
   moving: "Flytter …",
   moveUser: "Flytt bruker",
   resetPasswords: "Tilbakestill passord",

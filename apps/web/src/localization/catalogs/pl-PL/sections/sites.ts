@@ -6,7 +6,7 @@ export const sitesPlPL = {
   newSite: "Nowa strona",
   communitySiteUsage: "Wspólnota: {active} z {limit} aktywnych stron.",
   communitySiteLimit: "Osiągnięto limit wspólnotowy dla aktywnych obiektów. Przedsiębiorstwo jest zobowiązane do tworzenia lub reaktywowania większej liczby obiektów.",
-  sitesSummary: "Streszczenie",
+  sitesSummary: "Podsumowanie Site",
   total: "Ogółem",
   withoutSiteManager: "Bez menedżera strony",
   topLevel: "Najwyższy poziom",

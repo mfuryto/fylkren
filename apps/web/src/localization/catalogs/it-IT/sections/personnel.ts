@@ -64,7 +64,7 @@ export const personnelItIT = {
   withoutActiveUnit: "Senza unità attiva",
   moveUserToActiveUnit: "Spostare l'utente in un'unità attiva",
   roles: "Roles",
-  localAccount: "Locale locale",
+  localAccount: "Account locale",
   edit: "Modifica",
   remove: "Rimuovi",
   userCountOne: "1 utente",

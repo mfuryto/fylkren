@@ -70,7 +70,7 @@ export const workflowsDeDE = {
   workflowsPlanningAllocationEditorSubtasksAreSavedAutomaticallyWhenYou: "Teilaufgaben werden automatisch gespeichert, wenn Sie sie hinzufügen oder ihren Text ändern.",
   workflowsPlanningAllocationEditorTaskAndInstructionsForTheUnit: "Aufgabe und Anweisungen für das Referat",
   workflowsPlanningAllocationEditorTaskForSubordinateUnitOrTeam: "Aufgabe für untergeordnete Einheiten oder Teams",
-  workflowsPlanningAllocationEditorTaskTextForReceivingSite: "Aufgabentext für die Empfangsstelle",
+  workflowsPlanningAllocationEditorTaskTextForReceivingSite: "Aufgabentext für die empfangende Site",
   workflowsPlanningAllocationEditorTheRequestCouldNotBeAdded: "Die Anfrage konnte nicht in den Plan aufgenommen werden.",
   workflowsPlanningAllocationEditorTheRequestCouldNotBeRemoved: "Der Antrag konnte nicht entfernt werden.",
   workflowsPlanningAllocationEditorTheSubtaskCouldNotBeAdded: "Die Teilaufgabe konnte nicht hinzugefügt werden.",

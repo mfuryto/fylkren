@@ -150,7 +150,7 @@ export const identityFiFI = {
   moveUserBetweenSites: "Siirrä käyttäjää sivustojen välillä",
   fromSite: "Paikan päältä",
   toSite: "Paikan päällä",
-  moveUserWarning: "Identiteetti ja historia säilyvät. Yksikön jäsenyys, roolit ja Site Manager vastuu lähdesivuston poistetaan. Vastaanottavan Site Manager on asetettava käyttäjä ja määrittää vaaditut roolit.",
+  moveUserWarning: "Identiteetti ja historia säilyvät. Yksikön jäsenyys, roolit ja Site Manager -vastuu lähde-Sitessa poistetaan. Vastaanottavan Site Managerin on sijoitettava käyttäjä ja määritettävä tarvittavat roolit.",
   moving: "- Siirrän...",
   moveUser: "Siirrä käyttäjää",
   resetPasswords: "Nollaa salasanat",

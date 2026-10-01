@@ -6,7 +6,7 @@ export const notificationsEtEE = {
   notificationSettingsSaveFailed: "Märguannete seadistusi ei õnnestunud salvestada.",
   notificationSettingsSaved: "Märguannete seadistused salvestati.",
   notifications: "Teatised",
-  notificationsIntro: "Valige, milliseid e-posti teateid veebisait kasutab.",
+  notificationsIntro: "Valige, milliseid e-posti teavitusi Site kasutab.",
   notificationScopeHelp: "Teatised järgivad ligipääsu ja töötaset. Saidi nimi lisatakse SMTP saatja nimele.",
   saveNotificationSettings: "Märguannete seadistuste salvestamine",
   notifyNewWork: "Uus töö",

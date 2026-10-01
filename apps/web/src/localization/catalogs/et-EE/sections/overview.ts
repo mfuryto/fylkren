@@ -22,7 +22,7 @@ export const overviewEtEE = {
   subordinateWorkIntro: "Praegune töökoormus vahetult allutatud üksustes",
   cards: "Kaardid",
   listView: "Nimekirja",
-  childSite: "Lastekodu",
+  childSite: "Alam-Site",
   directSubordinateUnit: "Otsene allutatud üksus",
   activeLowercase: "aktiivsed",
   activeWorkload: "Aktiivse tööpunkti koormus",

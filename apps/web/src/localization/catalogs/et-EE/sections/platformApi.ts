@@ -80,7 +80,7 @@ export const platformApiEtEE = {
   reportApiIntro: "Grant API kliendid loevad juurdepääsu heakskiidetud lõpparuannetele saidi ja töökoha tasandil.",
   site: "Site",
   newReportAccess: "Uue aruande juurdepääsutoetus",
-  reportAccessExactLevel: "Toetust antakse ainult valitud asukohale ja täpsele töötasemele.",
+  reportAccessExactLevel: "Õigus kehtib ainult valitud Site ja täpse töötaseme kohta.",
   noReportClients: "Ühelgi aktiivsel API kliendil pole õigust reports:read. Loo esmalt selle õigusega klient.",
   apiClient: "API klient",
   workLevel: "Töötase",

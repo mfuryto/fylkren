@@ -25,7 +25,7 @@ export const workTemplatesDeDE = {
   workTemplateHelpTitle: "Wie man mit Templates arbeitet",
   workTemplateHelpIntro: "Vorlagen bieten wiederverwendbare Startinhalte für Workflowschritte und Abschlussberichte, die bereits verwendete Inhalte nicht verändern.",
   workTemplateHelpTypeTitle: "Wählen Sie den richtigen Template-Typ.",
-  workTemplateHelpTypeText: "Regelmäßige Vorlagen bieten Startinhalte für ausgewählte Workflowschritte.Die endgültige Berichtsvorlage ist eine standortweite Vorlage für jede Ebene.",
+  workTemplateHelpTypeText: "Reguläre Vorlagen stellen Startinhalte für ausgewählte Workflow-Schritte bereit. Die Vorlage für den Abschlussbericht ist eine Site-weite Vorlage für alle Ebenen.",
   workTemplateHelpScopeTitle: "Wählen Sie den Umfang.",
   workTemplateHelpScopeText: "Eine Vorlage kann von der Website und der Planung geteilt werden oder einer internen Ebene für lokale Ausführungsworkflows gehören.",
   workTemplateHelpContentTitle: "Schreibe den Startinhalt.",

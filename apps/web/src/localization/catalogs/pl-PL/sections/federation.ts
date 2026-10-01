@@ -15,7 +15,7 @@ export const federationPlPL = {
   copyManual: "Automatyczne kopiowanie nie powiodło się. Wybierz i skopiuj tekst ręcznie.",
   federationRecoveryDiscovered: "Nowy klucz został bezpośrednio pobrany. Sprawdź odciski palców przez niezależny kanał.",
   federationRecoveryDiscoveryFailed: "Nie można było zweryfikować nowego klucza u partnera.",
-  federationRecoveryApproved: "Klucz od partnera został zatwierdzony.",
+  federationRecoveryApproved: "Odzyskany klucz partnera został zatwierdzony. Ponownie przetestuj połączenie, aby pobrać Sites.",
   thisInstance: "Ten przypadek",
   instanceId: "Identyfikator rozstrzygnięcia",
   copyInstanceId: "Identyfikator kopiowania instancji",

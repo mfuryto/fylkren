@@ -18,7 +18,7 @@ export const sitesSvSE = {
   standaloneTopLevel: "Standalone toppnivå",
   underSite: "Under {site}",
   underSiteUnit: "Under {site} · {unit}",
-  childSites: "Barnwebbplatser: {sites}",
+  childSites: "Underordnade Sites: {sites}",
   deleted: "Raderad",
   export: "Export",
   validatePackage: "Validate Pack",

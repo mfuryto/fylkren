@@ -79,7 +79,7 @@ export const personnelNlNL = {
   personnelAreaUnavailableIntro: "U moet een leider of Site Manager zijn om personeel te bekijken.",
   personnelReadOnly: "Alleen-lezen weergave voor uw niveau en ondergeschikte eenheden.",
   personnelHelpTitle: "Hoe wordt Personeel gebruikt?",
-  personnelHelpIntro: "Personeel brengt de geselecteerde gebruikers, organisatorische connecties, werkfuncties en personeel bijeen.",
+  personnelHelpIntro: "Personeel brengt de geselecteerde gebruikers, organisatorische relaties, werkrollen en bezetting van de Site samen.",
   personnelHelpFindTitle: "Vind de juiste persoon of eenheid.",
   personnelHelpFindText: "Selecteer een site indien nodig en gebruik het overzicht om te zien waar de persoon thuishoort en welke rollen ze hebben.",
   personnelHelpAddTitle: "Voeg het juiste gebruikerstype toe.",

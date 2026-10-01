@@ -55,7 +55,7 @@ export const platformApiDaDK = {
   apiHelpDeactivateTitle: "Deaktivér på mistanke eller afslutning.",
   apiHelpDeactivateText: "Deaktivering stopper nye API-opkald med det samme og bevarer revisionssporet.",
   apiHelpNote: "Webstedet API giver ikke adgang til opgaver, planer, udførelse, rapporter eller personale.",
-  scopeSitesRead: "Læs sider",
+  scopeSitesRead: "Læs Sites",
   scopeSitesWrite: "Opret og redigér sites",
   scopeSitesMove: "Flyt steder",
   scopeSitesDeactivate: "Deaktivér steder",

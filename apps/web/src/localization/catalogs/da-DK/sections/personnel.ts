@@ -79,7 +79,7 @@ export const personnelDaDK = {
   personnelAreaUnavailableIntro: "Du skal være leder eller Site Manager for at se personale.",
   personnelReadOnly: "Read- kun visning for dit niveau og underordnede enheder.",
   personnelHelpTitle: "Sådan skal du bruge Personale",
-  personnelHelpIntro: "Personale samler de udvalgte brugere, organisationsmæssige tilhørsforhold, arbejdsroller og personale.",
+  personnelHelpIntro: "Personale samler de brugere, organisatoriske tilhørsforhold, arbejdsroller og bemanding, der er valgt for denne Site.",
   personnelHelpFindTitle: "Find den korrekte person eller enhed.",
   personnelHelpFindText: "Vælg et websted efter behov og brug overblikket til at se, hvor personen hører til, og hvilke roller de har.",
   personnelHelpAddTitle: "Tilføj den korrekte brugertype.",

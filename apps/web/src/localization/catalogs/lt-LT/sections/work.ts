@@ -49,7 +49,7 @@ export const workLtLT = {
   taskStatusPlanningApproved: "Planas patvirtintas · laukia pradžios",
   taskStatusExecution: "vykdymas",
   taskStatusAssigned: "Prijungtas",
-  taskStatusInProgress: "NAME OF TRANSLATORS",
+  taskStatusInProgress: "Vykdoma",
   taskStatusInReview: "Peržiūrima",
   taskStatusCompleted: "Baigta",
   taskStatusCancelled: "Naikintas",

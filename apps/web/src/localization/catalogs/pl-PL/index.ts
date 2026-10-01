@@ -402,7 +402,7 @@ export const plPL: Record<MessageKey, string> = {
   templateLinkText: "Użyj {{link}Więc email pozostaje zwięzły, a odbiorca otwiera poprawny widok kontrolowany przez dostęp.",
   templateContentNote: "Bezpłatny tekst z zadań, planów, wykonania i końcowych raportów nie może być kopiowany do szablonów poczty elektronicznej. Klasyfikacja jest wyświetlana z {{classification}W stosownych przypadkach.",
   appearanceTitle: "Wygląd",
-  appearanceIntro: "Tożsamość produktu, logo, motyw, kolory i regionalne domyślne.",
+  appearanceIntro: "Tożsamość produktu, logo, motyw, kolory i domyślne ustawienia regionalne.",
   visualIdentity: "Tożsamość wzrokowa",
   visualIdentityIntro: "Nazewnictwo produktu, motyw i kolory używane w całym interfejsie.",
   productName: "Nazwa produktu i tytuł strony",

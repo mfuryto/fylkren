@@ -18,7 +18,7 @@ export const workNlNL = {
   notAllocated: "Niet toegewezen",
   notRegistered: "Niet geregistreerd",
   noDescription: "Geen beschrijving",
-  receivingSite: "Ontvangstsite",
+  receivingSite: "Ontvangende Site",
   recipientFallback: "de begunstigde",
   managerFallback: "beheerder",
   tasksForRecipientLabel: "Taken voor {recipient}",

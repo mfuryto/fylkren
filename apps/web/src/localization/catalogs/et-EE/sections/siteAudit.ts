@@ -24,7 +24,7 @@ export const siteAuditEtEE = {
   previousPageLoadFailed: "Eelmise lehekülje laadimine nurjus.",
   nextPageLoadFailed: "Järgmist lehekülge ei saa laadida.",
   siteAuditHelpTitle: "Kuidas Auditit kasutada",
-  siteAuditHelpIntro: "Audit näitab, kes teostas kohapeal jälgitavaid toiminguid ja millal need tehti.",
+  siteAuditHelpIntro: "Audit näitab, kes tegi Site piires jälgitavaid toiminguid ja millal need tehti.",
   siteAuditHelpSiteTitle: "Vali veebileht.",
   siteAuditHelpSiteText: "Kui administreerid mitut saiti, vali esmalt, millist sündmuste logi näidata.",
   siteAuditHelpScopeTitle: "Kitsas ajavahemik ja pindala.",

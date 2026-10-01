@@ -119,7 +119,7 @@ export const identityNlNL = {
   userSearchFailed: "De gebruikerszoekopdracht kon niet worden voltooid.",
   searchUserFields: "Zoeken naar naam, e-mail, gebruikersnaam of identiteit provider",
   searchForUser: "Zoeken naar gebruiker",
-  noSiteFilter: "Geen sitefilter",
+  noSiteFilter: "Geen Site-filter",
   clearSearch: "Wissen",
   selectPage: "Alles op deze pagina selecteren",
   selectedCount: "{count}  geselecteerd",

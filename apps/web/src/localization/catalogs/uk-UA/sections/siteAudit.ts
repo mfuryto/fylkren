@@ -92,7 +92,7 @@ export const siteAuditUkUA = {
   auditWorkTypeCreated: "Створено тип робіт",
   auditWorkTypeUpdated: "Оновлено тип робіт",
   auditFinalReportTemplateUpdated: "Остаточний шаблон звіту оновлений",
-  entitySite: "КОМПЛЕКС",
+  entitySite: "Site",
   entityUnit: "Внутрішній блок",
   entitySiteManager: "Менеджер по роботі з сайтом",
   entityPerson: "Користувач",

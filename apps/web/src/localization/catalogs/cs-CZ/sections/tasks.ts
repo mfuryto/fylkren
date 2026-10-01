@@ -76,7 +76,7 @@ export const tasksCsCZ = {
   tasksTaskContextDialogsWhat: "Co?",
   tasksTaskContextDialogsWho: "Kdo",
   tasksTaskContextDialogsYourReceivedTask: "Váš úkol",
-  tasksTaskCreateDialogExternalTopLevelSite: "Vnější horní-úroveň",
+  tasksTaskCreateDialogExternalTopLevelSite: "Externí Site nejvyšší úrovně",
   tasksTaskCreateDialogHttpsSharepointOrFileServerFolder: "http: / / sharepoint... nebo soubor: / / server / složka / soubor",
   tasksTaskCreateDialogInternalRequestTheCompleteTaskBasis: "Vnitřní žádost: úplný základ úkolu se řídí běžnými pravidly pro přístup.",
   tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Odkaz na primární dokument nebo text úkolu (nepovinné)",

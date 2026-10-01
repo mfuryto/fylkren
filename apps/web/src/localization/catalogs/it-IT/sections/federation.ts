@@ -15,7 +15,7 @@ export const federationItIT = {
   copyManual: "Copia automatica non riuscita. Selezionare e copiare manualmente il testo.",
   federationRecoveryDiscovered: "Una nuova chiave firmata è stata recuperata direttamente. Verificare l'impronta digitale attraverso un canale indipendente.",
   federationRecoveryDiscoveryFailed: "Una nuova chiave non poteva essere verificata con il pari.",
-  federationRecoveryApproved: "La chiave recuperata del pari è stata approvata.",
+  federationRecoveryApproved: "La chiave recuperata della controparte è stata approvata. Verifica nuovamente la connessione per recuperare le Sites.",
   thisInstance: "Questo caso",
   instanceId: "ID di impresa",
   copyInstanceId: "Copia ID istanza",

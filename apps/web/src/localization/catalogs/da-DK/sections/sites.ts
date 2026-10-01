@@ -18,7 +18,7 @@ export const sitesDaDK = {
   standaloneTopLevel: "Standalone-topniveau",
   underSite: "Under {site}",
   underSiteUnit: "Under {site} · {unit}",
-  childSites: "Barnepladser: {sites}",
+  childSites: "Underordnede Sites: {sites}",
   deleted: "Slettede",
   export: "Eksport",
   validatePackage: "Validerér pakke",

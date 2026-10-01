@@ -61,7 +61,7 @@ export const federationLtLT = {
   localTopLevelSitesIntro: "Prisijungus darbo maršrutui, patvirtintiems bendraamžiams automatiškai tampa prieinamos aktyvios viršaukštuminio lygmens svetainės. Vaiko svetainės nėra rodomos kaip atskiri federacijos gavėjai.",
   noActiveTopLevelSites: "Nėra aktyvių vaisto poveikio vietų.",
   automaticallyVisible: "Automatiškai matomas",
-  peerSites: "Sienos, gautos iš bendraamžių",
+  peerSites: "Iš partnerio gautos Sites",
   siteCatalogueUpdated: "Svetainės katalogas buvo atnaujintas.",
   refreshSiteCatalogue: "Atnaujinti svetainės katalogą",
   noRemoteSites: "Nviena vieta nebuvo gauta.",
@@ -110,7 +110,7 @@ export const federationLtLT = {
   federationRecoveryIdentityLoadFailed: "Nepavyko gauti naujos parašytos bendraamžių tapatybės.",
   federationRecoveryApproveFailed: "naujojo rakto nepavyko patvirtinti.",
   federationRemoteCatalogueLoadFailed: "Nepavyko įkelti nutolusio svetainės katalogo.",
-  federationCatalogueSyncFailed: "Tinklalapio katalogas negali būti sinchronizuotas.",
+  federationCatalogueSyncFailed: "Nepavyko sinchronizuoti Site katalogo.",
   federationDeliveriesLoadFailed: "Nepavyko įkelti pristatymo eilės.",
   federationDeliveryRetryFailed: "Pristatymo nepavyko grąžinti į eilę.",
 } satisfies Partial<Record<MessageKey, string>>;

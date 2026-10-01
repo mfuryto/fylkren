@@ -24,7 +24,7 @@ export const organizationDeDE = {
   organizationHelpManageText: "Der Site Manager erstellt, bearbeitet, bestellt und deaktiviert interne Einheiten. Diese Strukturverwaltung erfolgt auf Site-Ebene.",
   organizationHelpPersonnelTitle: "Verwenden Sie Personal für Personen und Rollen.",
   organizationHelpPersonnelText: "Benutzer, Organisationszugehörigkeit, Arbeitsrollen und Rollenzuweisungen werden auf der Personalseite verwaltet.",
-  organizationHelpNote: "Der operative Schreibzugriff für den Leiter und den autorisierten Leiter ist nicht von der Organisationsstruktur betroffen, die auf Standortebene verwaltet wird.",
+  organizationHelpNote: "Der operative Schreibzugriff für die Leitung und die autorisierte Leitung bleibt davon unberührt, dass die Organisationsstruktur auf Site-Ebene verwaltet wird.",
   editInternalUnit: "Bearbeiten der internen Einheit",
   directlyUnder: "Direkt unter {name}",
   temporaryUnit: "Vorübergehende Einheit",

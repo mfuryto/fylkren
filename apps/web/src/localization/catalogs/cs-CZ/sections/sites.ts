@@ -36,7 +36,7 @@ export const sitesCsCZ = {
   exportPackageValidateFailed: "Vývozní balíček nemohl být potvrzen.",
   packageRejected: "Balíček byl zamítnut: {errors}",
   packageValid: "Balíček je platný. {datasets} soubory dat a {attachments} Byly zkontrolovány přílohy, žádná data se nezměnila.",
-  activeSite: "Aktivní",
+  activeSite: "Aktivní Site",
   inactiveSite: "Neaktivní místo",
   placement: "Umístění",
   placementHelp: "Kontroly umístění, kde práce začíná a kam se hlásí, neposkytují administrativní přístup.",

@@ -24,7 +24,7 @@ export const organizationRoRO = {
   organizationHelpManageText: "Site-ul manager creează, editează, comandă și dezactivează unități interne. Această administrare structurală este realizată la nivel de site.",
   organizationHelpPersonnelTitle: "Folosiţi personalul pentru oameni şi roluri.",
   organizationHelpPersonnelText: "Utilizatorii, afilierea organizaţională, rolurile de lucru şi misiunile de rol sunt gestionate pe pagina Personalului.",
-  organizationHelpNote: "Accesul operaţional la scrierea pentru lider şi liderul autorizat nu este afectat de structura organizaţiei administrată la nivel de şantier.",
+  organizationHelpNote: "Accesul operațional la scriere al liderului și al liderului autorizat nu este afectat de administrarea structurii organizației la nivel de Site.",
   editInternalUnit: "Editează unitatea internă",
   directlyUnder: "Direct sub {name}",
   temporaryUnit: "Unitatea temporară",

@@ -76,7 +76,7 @@ export const tasksDaDK = {
   tasksTaskContextDialogsWhat: "Hvad",
   tasksTaskContextDialogsWho: "Hvem",
   tasksTaskContextDialogsYourReceivedTask: "Din modtagne opgave",
-  tasksTaskCreateDialogExternalTopLevelSite: "Ekstern topniveauplacering",
+  tasksTaskCreateDialogExternalTopLevelSite: "Ekstern Site på topniveau",
   tasksTaskCreateDialogHttpsSharepointOrFileServerFolder: "https: / / sharepoint... eller fil: / / server / mappefil",
   tasksTaskCreateDialogInternalRequestTheCompleteTaskBasis: "Intern anmodning: Hele opgavegrundlaget følger opgaven i henhold til almindelige adgangsregler.",
   tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Link til primært dokument eller opgavekode (valgfri)",

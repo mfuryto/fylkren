@@ -2,7 +2,7 @@ import type { MessageKey } from "../../en-US";
 
 export const workTemplatesCsCZ = {
   workTemplates: "Šablony",
-  workTemplatesIntro: "Spravujte znovu použitelný výchozí obsah pro web. Šablona je spojena s krokem, kdy je pracovní postup nastaven.",
+  workTemplatesIntro: "Spravujte opakovaně použitelný výchozí obsah Site. Šablona se propojí s krokem při konfiguraci pracovního postupu.",
   templateContextLoadFailed: "Kontext šablony nemohl být načtený.",
   workTemplatesLoadFailed: "Šablony nemohly být načteny.",
   finalReportTemplateLoadFailed: "Konečná šablona zprávy nemohla být načtena.",
@@ -25,7 +25,7 @@ export const workTemplatesCsCZ = {
   workTemplateHelpTitle: "Jak pracovat se šablonami",
   workTemplateHelpIntro: "Šablony poskytují znovu použitelný výchozí obsah pro kroky při pracovním postupu a závěrečné zprávy. Nemění již používaný obsah.",
   workTemplateHelpTypeTitle: "Vyberte správný typ šablony.",
-  workTemplateHelpTypeText: "Pravidelné šablony poskytují výchozí obsah pro zvolené kroky pracovního postupu. Konečná šablona zprávy je jedna šablona široká pro každou úroveň.",
+  workTemplateHelpTypeText: "Běžné šablony poskytují výchozí obsah pro vybrané kroky pracovního postupu. Šablona závěrečné zprávy je jedna šablona pro celou Site a všechny úrovně.",
   workTemplateHelpScopeTitle: "Vyberte si rozsah.",
   workTemplateHelpScopeText: "Šablona může být sdílena lokalitou a plánováním nebo vlastněna vnitřní úrovní pro místní pracovní toky provádění.",
   workTemplateHelpContentTitle: "Napište výchozí obsah.",

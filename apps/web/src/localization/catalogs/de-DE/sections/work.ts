@@ -18,7 +18,7 @@ export const workDeDE = {
   notAllocated: "Nicht zugeteilt",
   notRegistered: "Nicht registriert",
   noDescription: "Keine Beschreibung",
-  receivingSite: "Empfangsstelle",
+  receivingSite: "Empfangende Site",
   recipientFallback: "der Empfänger",
   managerFallback: "Betriebsleiter",
   tasksForRecipientLabel: "Aufgaben für {recipient}",

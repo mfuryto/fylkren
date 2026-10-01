@@ -72,7 +72,7 @@ export const workflowsNbNO = {
   workflowsPlanningAllocationEditorTheRequestCouldNotBeAdded: "Anmodningen kunne ikke legges til i planen.",
   workflowsPlanningAllocationEditorTheRequestCouldNotBeRemoved: "Anmodningen kunne ikke fjernes.",
   workflowsPlanningAllocationEditorTheSubtaskCouldNotBeAdded: "Deloppdraget kunne ikke legges til.",
-  workflowsPlanningAllocationEditorAvailableRecipientSite: "Tilgjengelig mottakersite",
+  workflowsPlanningAllocationEditorAvailableRecipientSite: "Tilgjengelig mottaker-Site",
   workflowsPlanningAllocationEditorTopLevelSites: "Toppnivå-sites",
   workflowsPlanningAllocationEditorWriteAllTasksHereOnePer: "Skriv alle oppgavene her, én per linje.\n1. Første oppgave\n2. Neste oppgave",
   workflowsPlanningContextModalOpenPrimaryDocumentOrTaskText: "Åpne hoveddokument eller oppdragstekst ↗",

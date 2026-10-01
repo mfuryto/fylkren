@@ -33,7 +33,7 @@ export const risksLtLT = {
   riskStatusAccepted: "Pritarta",
   riskStatusClosed: "Uždaryta",
   mitigationStatusPlanned: "Planuojama",
-  mitigationStatusInProgress: "NAME OF TRANSLATORS",
+  mitigationStatusInProgress: "Vykdoma",
   mitigationStatusCompleted: "Baigta",
   residualRiskAfterMitigation: "Liekamoji rizika po mažinimo",
   residualProbability: "Liekamoji tikimybė",

@@ -22,7 +22,7 @@ export const overviewLvLV = {
   subordinateWorkIntro: "Pašreizējā slodze tieši pakļautajās vienībās",
   cards: "Kartes",
   listView: "Saraksts",
-  childSite: "Bērnu laukums",
+  childSite: "Pakārtota Site",
   directSubordinateUnit: "Tieša pakļautība",
   activeLowercase: "aktīvs",
   activeWorkload: "Aktīvs darba postenis",

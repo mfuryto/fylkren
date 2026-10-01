@@ -22,7 +22,7 @@ export const overviewNlNL = {
   subordinateWorkIntro: "Huidige werklast in direct ondergeschikte eenheden",
   cards: "Kaarten",
   listView: "Lijst",
-  childSite: "Kindersite",
+  childSite: "Onderliggende Site",
   directSubordinateUnit: "Directe ondergeschikte eenheid",
   activeLowercase: "actief",
   activeWorkload: "Actieve werk-itembelasting",
@@ -64,5 +64,5 @@ export const overviewNlNL = {
   historyAvailableFrom: "Geschiedenis is beschikbaar vanaf {date}.",
   workloadChartLabel: "Opgenomen werk-itembelasting in de afgelopen 12 maanden",
   entireSite: "Volledige site",
-  childSiteSuffix: "(kinderplaats)",
+  childSiteSuffix: "(onderliggende Site)",
 } satisfies Partial<Record<MessageKey, string>>;

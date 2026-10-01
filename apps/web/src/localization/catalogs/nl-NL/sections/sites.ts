@@ -18,7 +18,7 @@ export const sitesNlNL = {
   standaloneTopLevel: "Statonalone topniveau",
   underSite: "Onder {site}",
   underSiteUnit: "Onder {site} · {unit}",
-  childSites: "Kindersites: {sites}",
+  childSites: "Onderliggende Sites: {sites}",
   deleted: "Verwijderd",
   export: "Uitvoer",
   validatePackage: "Pakket valideren",

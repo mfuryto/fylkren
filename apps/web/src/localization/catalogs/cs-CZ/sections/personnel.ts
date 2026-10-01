@@ -79,7 +79,7 @@ export const personnelCsCZ = {
   personnelAreaUnavailableIntro: "Musíte být vedoucí nebo správce stránek, abyste viděl personál.",
   personnelReadOnly: "Přečti si jen pohled na své podřízené jednotky.",
   personnelHelpTitle: "Jak se personál používá",
-  personnelHelpIntro: "Personál spojuje vybrané uživatele, organizační vazby, pracovní role a personální obsazení.",
+  personnelHelpIntro: "Personál sdružuje vybrané uživatele, organizační zařazení, pracovní role a obsazení Site.",
   personnelHelpFindTitle: "Najděte správnou osobu nebo jednotku.",
   personnelHelpFindText: "Vyberte si stránku, pokud je to potřeba, a použijte přehled zjistit, kam osoba patří a jaké role drží.",
   personnelHelpAddTitle: "Přidat správný typ uživatele.",

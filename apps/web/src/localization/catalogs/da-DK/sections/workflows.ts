@@ -92,7 +92,7 @@ export const workflowsDaDK = {
   workflowsPlanningPageEligiblePlannersCouldNotBeLoaded: "Støtteberettigede planlæggere kunne ikke indlæses.",
   workflowsPlanningPageFollowTheWorkflowSteps: "Følg arbejdsgangen.",
   workflowsPlanningPageHowToWorkWithPlanning: "Hvordan arbejder man med planlægning",
-  workflowsPlanningPagePlanningIsTheOptionalStageBetween: "Planlægning er den valgfrie fase mellem vurdering og udførelse. De specifikke trin er bestemt af virksomhedens planlægning arbejdsgang.",
+  workflowsPlanningPagePlanningIsTheOptionalStageBetween: "Planlægning er det valgfrie trin mellem vurdering og udførelse. De konkrete trin bestemmes af denne Sites planlægningsworkflow.",
   workflowsPlanningPagePlanningResponsibilityCouldNotBeReassigned: "Planlægningsansvar kunne ikke omlægges.",
   workflowsPlanningPagePlanningResponsibilityCouldNotBeReleased: "Planlægningsansvar kunne ikke frigives.",
   workflowsPlanningPagePreviewClaimResponsibilityAndPrepareA: "Forhåndsvis, pålæg ansvar og forberede en foreslået plan.",

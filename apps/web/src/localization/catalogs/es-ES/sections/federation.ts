@@ -109,7 +109,7 @@ export const federationEsES = {
   federationProbeFailed: "La conexión de prueba falló.",
   federationRecoveryIdentityLoadFailed: "La nueva identidad firmada del par no se puede recuperar.",
   federationRecoveryApproveFailed: "La nueva llave del par no podría ser aprobada.",
-  federationRemoteCatalogueLoadFailed: "El catálogo remoto no se puede cargar.",
+  federationRemoteCatalogueLoadFailed: "No se pudo cargar el catálogo de la Site remota.",
   federationCatalogueSyncFailed: "El catálogo del sitio no se puede sincronizar.",
   federationDeliveriesLoadFailed: "La cola de entrega no se podía cargar.",
   federationDeliveryRetryFailed: "La entrega no puede ser devuelta a la cola.",

@@ -22,7 +22,7 @@ export const overviewDeDE = {
   subordinateWorkIntro: "Aktueller Arbeitsaufwand in direkt untergeordneten Einheiten",
   cards: "Karten",
   listView: "Liste",
-  childSite: "Kinderplatz",
+  childSite: "Untergeordnete Site",
   directSubordinateUnit: "Direkte untergeordnete Einheit",
   activeLowercase: "aktiv",
   activeWorkload: "Aktive Arbeitsgegenstände",
@@ -64,5 +64,5 @@ export const overviewDeDE = {
   historyAvailableFrom: "Geschichte ist erhältlich von {date}.",
   workloadChartLabel: "Aufgezeichnete Belastung von Arbeitsgegenständen in den letzten 12 Monaten",
   entireSite: "Gesamtes Gelände",
-  childSiteSuffix: "(Kinderseite)",
+  childSiteSuffix: "(untergeordnete Site)",
 } satisfies Partial<Record<MessageKey, string>>;

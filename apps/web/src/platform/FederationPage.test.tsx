@@ -9,7 +9,7 @@ describe("federation administration", () => {
     expect(html).toContain("This instance");
     expect(html).toContain("Add peer");
     expect(html).toContain("Peers and connection");
-    expect(html).toContain("active top-level site");
+    expect(html).toContain("active top-level Site");
     expect(html).not.toContain("Site grants");
     expect(html).toContain("Work routing");
     expect(html).toContain("Retrieve signed identity");

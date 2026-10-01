@@ -19,8 +19,8 @@ describe("localization catalogs", () => {
     expect(translate("en-GB", "colors")).toBe("Colours");
     expect(translate("en-US", "navOrganization")).toBe("Organization");
     expect(translate("en-GB", "navOrganization")).toBe("Organisation");
-    expect(translate("en-US", "siteCatalogueUpdated")).toBe("The site catalog was updated.");
-    expect(translate("en-GB", "siteCatalogueUpdated")).toBe("The site catalogue was updated.");
+    expect(translate("en-US", "siteCatalogueUpdated")).toBe("The Site catalog was updated.");
+    expect(translate("en-GB", "siteCatalogueUpdated")).toBe("The Site catalogue was updated.");
     expect(translate("en-US", "workflowsPlanningRfiLogNoInquiriesAreRegistered")).toBe("No inquiries are registered.");
     expect(translate("en-GB", "workflowsPlanningRfiLogNoInquiriesAreRegistered")).toBe("No enquiries are registered.");
     expect(translate("en-US", "taskStatusCancelled")).toBe("Canceled");
@@ -90,7 +90,7 @@ describe("localization catalogs", () => {
   it("locks reviewed core actions, identity terms and measurement systems", () => {
     const expected = {
       "sv-SE": { loading: "Läser in…", singleSignOn: "Enkel inloggning", licensingAuthority: "Licensutfärdare", save: "Spara", cancel: "Avbryt", edit: "Redigera", delete: "Ta bort", metric: "Metrisk", imperial: "Imperial" },
-      "da-DK": { loading: "Indlæser...", singleSignOn: "Enkeltlogon", licensingAuthority: "Licensudsteder", save: "Gem", cancel: "Annullér", edit: "Redigér", delete: "Slet", metric: "Metrisk", imperial: "Imperial" },
+      "da-DK": { loading: "Indl\u00e6ser...", singleSignOn: "Enkeltlogon", licensingAuthority: "Licensudsteder", save: "Gem", cancel: "Annullér", edit: "Redigér", delete: "Slet", metric: "Metrisk", imperial: "Imperial" },
       "fi-FI": { loading: "Ladataan...", singleSignOn: "Kertakirjautuminen", licensingAuthority: "Lisenssin myöntäjä", save: "Tallenna", cancel: "Peruuta", edit: "Muokkaa", delete: "Poista", metric: "Metrinen", imperial: "Brittiläinen mittajärjestelmä" },
       "de-DE": { loading: "Wird geladen…", singleSignOn: "Single Sign-on", licensingAuthority: "Lizenzgeber", save: "Speichern", cancel: "Abbrechen", edit: "Bearbeiten", delete: "Löschen", metric: "Metrisch", imperial: "Imperial" },
       "fr-FR": { loading: "Chargement...", singleSignOn: "Authentification unique", licensingAuthority: "Autorité de délivrance des licences", save: "Enregistrer", cancel: "Annuler", edit: "Modifier", delete: "Supprimer", metric: "Métrique", imperial: "Impérial" },
@@ -115,7 +115,7 @@ describe("localization catalogs", () => {
   });
 
   it("rejects translation-tool artifacts and control characters", () => {
-    const artifact = /@\s*info|whatsthis|STARTLS|TIRPIK|\bNPI\b|Nelegalus|Toksiškumas|(?:\.\s*){8,}|[\u0000-\u0008\u000B\u000C\u000E-\u001F]/i;
+    const artifact = /NAME OF TRANSLATORS|@\s*info|whatsthis|STARTLS|TIRPIK|\bNPI\b|Nelegalus|Toksiškumas|Locale locale|Nessun segnale locale|(?:\.\s*){8,}|(?:•\s*){12,}|[\u0000-\u0008\u000B\u000C\u000E-\u001F]/i;
     for (const language of supportedLanguages) {
       for (const message of Object.values(languageCatalogs[language])) expect(message).not.toMatch(artifact);
     }
@@ -165,6 +165,22 @@ describe("localization catalogs", () => {
         for (const token of protectedTokens.filter(candidate => source.includes(candidate))) {
           expect(languageCatalogs[language][key as keyof typeof en], `${language}.${key} must preserve ${token}`).toContain(token);
         }
+      }
+    }
+  });
+
+  it("keeps Site terminology invariant in every translated interface sentence", () => {
+    const withoutTechnicalSegments = (message: string) => message
+      .replace(/\{[A-Za-z][A-Za-z0-9]*\}/g, "")
+      .replace(/\/[^\s,.;)]+/g, "")
+      .replace(/\bSite Managers?\b/g, "");
+
+    for (const language of supportedLanguages) {
+      for (const [key, sourceMessage] of Object.entries(en)) {
+        const source = withoutTechnicalSegments(sourceMessage);
+        const translated = withoutTechnicalSegments(languageCatalogs[language][key as keyof typeof en]);
+        if (/\bsites\b/i.test(source)) expect(translated, `${language}.${key} must use Sites`).toMatch(/\bSites\b/);
+        else if (/\bsite(?:'s)?\b/i.test(source)) expect(translated, `${language}.${key} must use Site`).toMatch(/\bSite\b/);
       }
     }
   });

@@ -63,6 +63,6 @@ export const overviewPlPL = {
   loadingWorkloadHistory: "Wczytywanie historii obciążenia pracą...",
   historyAvailableFrom: "Historia jest dostępna od {date}.",
   workloadChartLabel: "Nagrane obciążenie elementów w ciągu ostatnich 12 miesięcy",
-  entireSite: "Cały teren",
+  entireSite: "Cała Site",
   childSiteSuffix: "(miejsce dla dziecka)",
 } satisfies Partial<Record<MessageKey, string>>;

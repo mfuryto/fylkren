@@ -92,7 +92,7 @@ export const workflowsPlPL = {
   workflowsPlanningPageEligiblePlannersCouldNotBeLoaded: "Kwalifikowalne projektanci nie mogli być załadowani.",
   workflowsPlanningPageFollowTheWorkflowSteps: "Postępuj zgodnie z ruchem roboczym.",
   workflowsPlanningPageHowToWorkWithPlanning: "Jak pracować z planowaniem",
-  workflowsPlanningPagePlanningIsTheOptionalStageBetween: "Planowanie jest fakultatywnym etapem pomiędzy oceną a realizacją. Określone kroki są określane przez pracę planującą.",
+  workflowsPlanningPagePlanningIsTheOptionalStageBetween: "Planowanie jest opcjonalnym etapem między oceną a wykonaniem. Konkretne kroki określa przepływ pracy planowania danej Site.",
   workflowsPlanningPagePlanningResponsibilityCouldNotBeReassigned: "Nie można było przenieść odpowiedzialności za planowanie.",
   workflowsPlanningPagePlanningResponsibilityCouldNotBeReleased: "Nie można było uwolnić odpowiedzialności za planowanie.",
   workflowsPlanningPagePreviewClaimResponsibilityAndPrepareA: "Podgląd, odpowiedzialność za roszczenie i przygotowanie proponowanego planu.",

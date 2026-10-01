@@ -48,7 +48,7 @@ export const overviewLtLT = {
   overviewStatusPlanningApproved: "Patvirtintas planas • laukiant tyrimo pradžios",
   overviewStatusExecution: "vykdymas",
   overviewStatusAssigned: "Prijungtas",
-  overviewStatusInProgress: "NAME OF TRANSLATORS",
+  overviewStatusInProgress: "Vykdoma",
   overviewStatusInReview: "Laukiama peržiūros",
   overviewStatusCompleted: "Baigta",
   overviewStatusRejected: "Atsisakyta",

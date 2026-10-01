@@ -18,7 +18,7 @@ export const workEtEE = {
   notAllocated: "Määratlemata",
   notRegistered: "Registreerimata",
   noDescription: "Kirjeldust ei ole",
-  receivingSite: "Vastuvõtukoht",
+  receivingSite: "Vastuvõttev Site",
   recipientFallback: "saaja",
   managerFallback: "mänedžer",
   tasksForRecipientLabel: "Ülesanded {recipient}",

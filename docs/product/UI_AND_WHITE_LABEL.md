@@ -8,6 +8,8 @@ The fixed product name appears only as `Fylkren (version)` in the navigation foo
 
 Page content must remain within the viewport. Long timelines and tables use their own bounded scrolling area; they must not create horizontal page scrolling. Top and side navigation remain stable while content scrolls.
 
+The desktop workspace is information-dense rather than document-narrow. It may use up to 1,560 CSS pixels for page content on wide displays, while retaining responsive padding and the navigation column. The standard interface uses a 15-pixel Segoe UI base and compact Windows-like controls so translated labels, operational references and future reference columns use available screen space without sacrificing readable line height. A typical 1,280-pixel-wide 13-inch layout keeps more than 1,050 pixels for the page; mobile continues to use the full viewport.
+
 ## Overview
 
 Overview prioritizes items requiring action, active workload, deadlines and subordinate capacity. Operational signals are visually stronger than annual statistics. Subordinate units and child sites use compact cards or a user-selected list view, with recursively aggregated workload but no leakage of internal details.
@@ -57,11 +59,11 @@ Platform Manager controls a limited global set:
 The default installation logo is `assets/branding/fylkren-logo-web-256.png`. Uploaded logos may be PNG, JPEG or WebP up to 2 MiB. The API verifies that MIME type matches the file signature and stores content without a client-controlled public path.
 The favicon derives from this same stored logo, including the seeded default logo on the first page load. The browser renders a centered 64×64 PNG while preserving the logo's aspect ratio; replacing the logo updates the favicon without rebuilding the application. When the logo is removed, the favicon falls back to the configured product name's initial and primary color.
 
-The light theme uses white primary surfaces, a very light page background, visible field/card boundaries and accessible contrast across different displays. Geometry is modern and restrained rather than excessively rounded.
+The light theme uses soft Windows-like primary surfaces, a light grey page background, restrained field/card boundaries and accessible contrast across different displays. Geometry is modern and restrained rather than excessively rounded.
 
 ## Localization
 
-Repository language and UI language are separate concerns. Repository-facing content is English. American English (`en-US`) is the source catalog and mandatory fallback; British English (`en-GB`) and Norwegian Bokmal (`nb-NO`) are reviewed alternatives, and the maintained language roster records the complete preview packs awaiting native review. Missing keys must render the American English source text, never a mixture caused by hard-coded text. Dates, times and numbers follow the configured locale and IANA time zone, while the clock and measurement systems follow explicit platform defaults. User-generated content is not translated automatically.
+Repository language and UI language are separate concerns. Repository-facing content is English. American English (`en-US`) is the source catalog and mandatory fallback; British English (`en-GB`), Norwegian Bokmal (`nb-NO`) and the maintained language roster are complete bundled interface packs governed by the same automated quality gate. Missing keys must render the American English source text, never a mixture caused by hard-coded text. Dates, times and numbers follow the configured locale and IANA time zone, while the clock and measurement systems follow explicit platform defaults. User-generated content is not translated automatically.
 
 Every change to user-visible text updates all complete bundled language packs atomically. The authoritative language roster, completeness rules and process for adding another locale are defined in [Localization and language packs](LOCALIZATION.md).
 

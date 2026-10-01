@@ -57,7 +57,7 @@ export const profilePlPL = {
   passkeyRegisterFailed: "Nie można zarejestrować klucza lub klucza bezpieczeństwa. Weryfikacja ustawień HTTPS i domen.",
   passkeyRemoveFailed: "Nie można usunąć klucza lub klucza bezpieczeństwa.",
   personalNotifications: "Powiadomienia osobiste",
-  personalNotificationsIntro: "Ustawienia powiadomień są domyślne. Możesz wyłączyć powiadomienia e-mail dla siebie bez wpływu na innych.",
+  personalNotificationsIntro: "Ustawienia powiadomień Site są domyślne. Możesz wyciszyć własne powiadomienia e-mail bez wpływu na innych.",
   notificationUnavailable: "Nie jest włączona dla witryny",
   personalNotificationNewWork: "Nowa praca",
   personalNotificationChanges: "Zmiany w pracy",

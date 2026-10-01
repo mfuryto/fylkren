@@ -46,7 +46,7 @@ export const siteAuditNlNL = {
   auditRoleAssigned: "Rol toegewezen",
   auditRoleAssignmentRemoved: "Roltoewijzing verwijderd",
   auditParentLeadershipUpdated: "Leiderschapsautoriteit bijgewerkt",
-  auditSiteCreated: "Aangemaakt",
+  auditSiteCreated: "Site aangemaakt",
   auditSiteUpdated: "Site bijgewerkt",
   auditSiteDeactivated: "Uitgeschakeld op de plaats",
   auditSiteManagerAssigned: "Sitebeheer toegewezen",

@@ -17,31 +17,32 @@ import { roRO } from "./catalogs/ro-RO";
 import { etEE } from "./catalogs/et-EE";
 import { lvLV } from "./catalogs/lv-LV";
 import { ltLT } from "./catalogs/lt-LT";
+import { normalizeReservedTerms } from "./reservedTerms";
 
 export type { MessageKey } from "./catalogs/en-US";
 
 export const supportedLanguages = ["en-US", "en-GB", "nb-NO", "sv-SE", "da-DK", "fi-FI", "de-DE", "fr-FR", "pl-PL", "es-ES", "it-IT", "uk-UA", "nl-NL", "pt-PT", "cs-CZ", "ro-RO", "et-EE", "lv-LV", "lt-LT"] as const;
 export type SupportedLanguage = (typeof supportedLanguages)[number];
 export const languageCatalogs: Record<SupportedLanguage, Record<MessageKey, string>> = {
-  "en-GB": enGB,
-  "en-US": en,
-  "nb-NO": nbNO,
-  "sv-SE": svSE,
-  "da-DK": daDK,
-  "fi-FI": fiFI,
-  "de-DE": deDE,
-  "fr-FR": frFR,
-  "pl-PL": plPL,
-  "es-ES": esES,
-  "it-IT": itIT,
-  "uk-UA": ukUA,
-  "nl-NL": nlNL,
-  "pt-PT": ptPT,
-  "cs-CZ": csCZ,
-  "ro-RO": roRO,
-  "et-EE": etEE,
-  "lv-LV": lvLV,
-  "lt-LT": ltLT,
+  "en-GB": normalizeReservedTerms("en-GB", en, enGB),
+  "en-US": normalizeReservedTerms("en-US", en, en),
+  "nb-NO": normalizeReservedTerms("nb-NO", en, nbNO),
+  "sv-SE": normalizeReservedTerms("sv-SE", en, svSE),
+  "da-DK": normalizeReservedTerms("da-DK", en, daDK),
+  "fi-FI": normalizeReservedTerms("fi-FI", en, fiFI),
+  "de-DE": normalizeReservedTerms("de-DE", en, deDE),
+  "fr-FR": normalizeReservedTerms("fr-FR", en, frFR),
+  "pl-PL": normalizeReservedTerms("pl-PL", en, plPL),
+  "es-ES": normalizeReservedTerms("es-ES", en, esES),
+  "it-IT": normalizeReservedTerms("it-IT", en, itIT),
+  "uk-UA": normalizeReservedTerms("uk-UA", en, ukUA),
+  "nl-NL": normalizeReservedTerms("nl-NL", en, nlNL),
+  "pt-PT": normalizeReservedTerms("pt-PT", en, ptPT),
+  "cs-CZ": normalizeReservedTerms("cs-CZ", en, csCZ),
+  "ro-RO": normalizeReservedTerms("ro-RO", en, roRO),
+  "et-EE": normalizeReservedTerms("et-EE", en, etEE),
+  "lv-LV": normalizeReservedTerms("lv-LV", en, lvLV),
+  "lt-LT": normalizeReservedTerms("lt-LT", en, ltLT),
 };
 
 const normalizedLanguages: Record<string, SupportedLanguage> = {
