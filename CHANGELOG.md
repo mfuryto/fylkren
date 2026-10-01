@@ -4,6 +4,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Added complete, selectable preview language packs for Swedish, Danish, Finnish, German, French, Polish, Spanish, Italian, Ukrainian, Dutch, Portuguese, Czech, Romanian, Estonian, Latvian and Lithuanian. All packs match the source keys and interpolation placeholders; native-language review remains required before public support claims.
 - Moved the default GUI language, time zone, clock format and measurement system from deployment environment variables into persistent Platform Manager settings. Completed the migration of user-visible source text to typed language catalogs, with American English as source/fallback, reviewed British wording and Norwegian as an explicit GUI locale. Repository checks prevent new Norwegian prose from entering source code or documentation outside locale resources.
 - Replaced the pre-release PolyForm Perimeter terms with the project-specific Fylkren Source Available License 1.0: compliant redistribution remains permitted, while Enterprise bypass and passing Fylkren or a substantially derived product off as independently created are prohibited. Legal verification remains a public-release gate.
 - Added a maintained isolated real-time license-expiry test that proves immediate Enterprise-to-Community downgrade, server-side entitlement closure, retained customer state, paused webhook processing and renewal without restart.

@@ -24,6 +24,8 @@ The [live Enterprise license-expiry run](2026-09-29-live-enterprise-license-expi
 
 The [regional settings and repository language run](2026-09-30-regional-settings-and-language-boundary.md) records database-managed language, time zone, clock and measurement defaults, English fallback behavior, the first localized Platform Manager page, and the non-regression gate that prevents additional Norwegian prose outside the dedicated locale resource.
 
+The [complete language-pack preview run](2026-10-01-language-pack-previews.md) records the 16 selectable post-English catalogs, placeholder protection, locale behavior, terminology controls and the native-review boundary.
+
 For each run, record:
 
 1. Run ID, date/time, test tool, application commit and version, test-code revision or hash, environment and fixture reset.

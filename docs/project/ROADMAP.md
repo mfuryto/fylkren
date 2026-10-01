@@ -83,7 +83,7 @@ Requirements include:
 
 Existing `nb-NO` behavior must remain compatible during migration. Norwegian text is permitted only inside the dedicated `nb-NO` language resources; source, comments, tests, examples and documentation remain English.
 
-When the English migration and full repository-language check are complete, stop before beginning further translations and obtain explicit product-owner approval. The subsequent planned packs, in approved order, are Swedish (`sv-SE`), Danish (`da-DK`), Finnish (`fi-FI`), German (`de-DE`), French (`fr-FR`), Polish (`pl-PL`), Spanish (`es-ES`), Italian (`it-IT`), Ukrainian (`uk-UA`), Dutch (`nl-NL`), Portuguese (`pt-PT`), Czech (`cs-CZ`), Romanian (`ro-RO`), Estonian (`et-EE`), Latvian (`lv-LV`), Lithuanian (`lt-LT`) and Icelandic (`is-IS`). The first nine form the initial translation phase; the remaining languages follow the documented priority tiers. They remain planned rather than supported until delivered and accepted individually under the [language-pack requirements](../product/LOCALIZATION.md).
+The English migration and full repository-language check are complete, and the product owner approved the subsequent translation phase. Complete preview packs are bundled for Swedish (`sv-SE`), Danish (`da-DK`), Finnish (`fi-FI`), German (`de-DE`), French (`fr-FR`), Polish (`pl-PL`), Spanish (`es-ES`), Italian (`it-IT`), Ukrainian (`uk-UA`), Dutch (`nl-NL`), Portuguese (`pt-PT`), Czech (`cs-CZ`), Romanian (`ro-RO`), Estonian (`et-EE`), Latvian (`lv-LV`) and Lithuanian (`lt-LT`). Native-language review remains required before each is publicly advertised as supported. Icelandic was removed from the approved roster.
 
 ## Human-readable work references after internationalization
 

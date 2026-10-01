@@ -1,21 +1,63 @@
 import { en, type MessageKey } from "./catalogs/en-US";
 import { enGB } from "./catalogs/en-GB";
 import { nbNO } from "./catalogs/nb-NO";
+import { svSE } from "./catalogs/sv-SE";
+import { daDK } from "./catalogs/da-DK";
+import { fiFI } from "./catalogs/fi-FI";
+import { deDE } from "./catalogs/de-DE";
+import { frFR } from "./catalogs/fr-FR";
+import { plPL } from "./catalogs/pl-PL";
+import { esES } from "./catalogs/es-ES";
+import { itIT } from "./catalogs/it-IT";
+import { ukUA } from "./catalogs/uk-UA";
+import { nlNL } from "./catalogs/nl-NL";
+import { ptPT } from "./catalogs/pt-PT";
+import { csCZ } from "./catalogs/cs-CZ";
+import { roRO } from "./catalogs/ro-RO";
+import { etEE } from "./catalogs/et-EE";
+import { lvLV } from "./catalogs/lv-LV";
+import { ltLT } from "./catalogs/lt-LT";
 
 export type { MessageKey } from "./catalogs/en-US";
 
-export const supportedLanguages = ["en-US", "en-GB", "nb-NO"] as const;
+export const supportedLanguages = ["en-US", "en-GB", "nb-NO", "sv-SE", "da-DK", "fi-FI", "de-DE", "fr-FR", "pl-PL", "es-ES", "it-IT", "uk-UA", "nl-NL", "pt-PT", "cs-CZ", "ro-RO", "et-EE", "lv-LV", "lt-LT"] as const;
 export type SupportedLanguage = (typeof supportedLanguages)[number];
 export const languageCatalogs: Record<SupportedLanguage, Record<MessageKey, string>> = {
   "en-GB": enGB,
   "en-US": en,
   "nb-NO": nbNO,
+  "sv-SE": svSE,
+  "da-DK": daDK,
+  "fi-FI": fiFI,
+  "de-DE": deDE,
+  "fr-FR": frFR,
+  "pl-PL": plPL,
+  "es-ES": esES,
+  "it-IT": itIT,
+  "uk-UA": ukUA,
+  "nl-NL": nlNL,
+  "pt-PT": ptPT,
+  "cs-CZ": csCZ,
+  "ro-RO": roRO,
+  "et-EE": etEE,
+  "lv-LV": lvLV,
+  "lt-LT": ltLT,
+};
+
+const normalizedLanguages: Record<string, SupportedLanguage> = {
+  sv: "sv-SE", "sv-se": "sv-SE", da: "da-DK", "da-dk": "da-DK", fi: "fi-FI", "fi-fi": "fi-FI",
+  de: "de-DE", "de-de": "de-DE", fr: "fr-FR", "fr-fr": "fr-FR", pl: "pl-PL", "pl-pl": "pl-PL",
+  es: "es-ES", "es-es": "es-ES", it: "it-IT", "it-it": "it-IT", uk: "uk-UA", "uk-ua": "uk-UA",
+  nl: "nl-NL", "nl-nl": "nl-NL", pt: "pt-PT", "pt-pt": "pt-PT", cs: "cs-CZ", "cs-cz": "cs-CZ",
+  ro: "ro-RO", "ro-ro": "ro-RO", et: "et-EE", "et-ee": "et-EE", lv: "lv-LV", "lv-lv": "lv-LV",
+  lt: "lt-LT", "lt-lt": "lt-LT",
 };
 
 export function normalizeLanguage(value: string): SupportedLanguage {
   const normalized = value.toLowerCase();
   if (normalized.startsWith("nb") || normalized.startsWith("no")) return "nb-NO";
   if (normalized.startsWith("en-gb")) return "en-GB";
+  if (normalizedLanguages[normalized]) return normalizedLanguages[normalized];
   return "en-US";
 }
 

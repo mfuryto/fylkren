@@ -13,7 +13,7 @@ All fixtures and containers were disposable. Raw command logs were not retained.
 | Return to source defaults | The same API restored English/UTC/24-hour/metric without a restart | Pass; E2E assertion |
 | Persistence and recovery | The complete database/configuration/key backup was verified and restored; the application returned healthy | Pass; full local E2E restore scenario |
 | Web localization contract | English lookup, Norwegian lookup, normalization and missing-language fallback tests passed | Pass; 30 test files and 89 web tests |
-| Repository language boundary | New files must be English; Norwegian is allowed only in the dedicated `nb-NO` locale catalog. Existing legacy markers cannot increase | Pass; `pnpm check:language` |
+| Repository language boundary | New repository-facing files must be English; localized text is allowed only in dedicated non-English locale catalogs. Existing legacy markers cannot increase | Pass; `pnpm check:language` |
 | Documentation and structure | Documentation links, source-size limits, language baseline and version consistency passed | Pass; maintained repository checks |
 | Full regression | Authentication, session security, authorization, work routing, reporting, portability, backup/restore and federation-candidate scenarios passed | Pass; `pnpm test:e2e:local`, exit zero |
 | Cleanup | Disposable containers, networks and volumes were removed | Pass; suite cleanup output |

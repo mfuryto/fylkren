@@ -2,6 +2,28 @@ namespace Fylkren.Api.Platform;
 
 public sealed class RegionalSettings
 {
+    private static readonly Dictionary<string, string> SupportedLanguages = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["en"] = "en-US", ["en-US"] = "en-US", ["en-GB"] = "en-GB",
+        ["nb"] = "nb-NO", ["nb-NO"] = "nb-NO", ["no"] = "nb-NO", ["no-NO"] = "nb-NO",
+        ["sv"] = "sv-SE", ["sv-SE"] = "sv-SE",
+        ["da"] = "da-DK", ["da-DK"] = "da-DK",
+        ["fi"] = "fi-FI", ["fi-FI"] = "fi-FI",
+        ["de"] = "de-DE", ["de-DE"] = "de-DE",
+        ["fr"] = "fr-FR", ["fr-FR"] = "fr-FR",
+        ["pl"] = "pl-PL", ["pl-PL"] = "pl-PL",
+        ["es"] = "es-ES", ["es-ES"] = "es-ES",
+        ["it"] = "it-IT", ["it-IT"] = "it-IT",
+        ["uk"] = "uk-UA", ["uk-UA"] = "uk-UA",
+        ["nl"] = "nl-NL", ["nl-NL"] = "nl-NL",
+        ["pt"] = "pt-PT", ["pt-PT"] = "pt-PT",
+        ["cs"] = "cs-CZ", ["cs-CZ"] = "cs-CZ",
+        ["ro"] = "ro-RO", ["ro-RO"] = "ro-RO",
+        ["et"] = "et-EE", ["et-EE"] = "et-EE",
+        ["lv"] = "lv-LV", ["lv-LV"] = "lv-LV",
+        ["lt"] = "lt-LT", ["lt-LT"] = "lt-LT"
+    };
+
     private RegionalSettings() { }
 
     public RegionalSettings(Guid id, string defaultLanguage, string timeZone)
@@ -30,15 +52,11 @@ public sealed class RegionalSettings
     public static string NormalizeLanguage(string? value)
     {
         var language = (value ?? "").Trim();
-        if (language.Equals("nb", StringComparison.OrdinalIgnoreCase) ||
-            language.Equals("nb-NO", StringComparison.OrdinalIgnoreCase) ||
-            language.Equals("no", StringComparison.OrdinalIgnoreCase) ||
-            language.Equals("no-NO", StringComparison.OrdinalIgnoreCase))
-            return "nb-NO";
-        if (language.Equals("en-GB", StringComparison.OrdinalIgnoreCase))
-            return "en-GB";
-        return "en-US";
+        return SupportedLanguages.GetValueOrDefault(language, "en-US");
     }
+
+    public static bool IsSupportedLanguage(string? value) =>
+        SupportedLanguages.ContainsKey((value ?? "").Trim());
 
     private static string NormalizeTimeZone(string? value)
     {

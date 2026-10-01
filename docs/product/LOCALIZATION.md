@@ -9,12 +9,28 @@ Fylkren separates repository language from product language. Source code, identi
 | `en-US` | English (United States) | Complete source catalog and mandatory fallback |
 | `en-GB` | English (United Kingdom) | Complete bundled regional variant with reviewed British wording |
 | `nb-NO` | Norwegian Bokmal | Complete bundled language pack |
+| `sv-SE` | Swedish | Complete bundled preview; native review pending |
+| `da-DK` | Danish | Complete bundled preview; native review pending |
+| `fi-FI` | Finnish | Complete bundled preview; native review pending |
+| `de-DE` | German | Complete bundled preview; native review pending |
+| `fr-FR` | French | Complete bundled preview; native review pending |
+| `pl-PL` | Polish | Complete bundled preview; native review pending |
+| `es-ES` | Spanish (Spain) | Complete bundled preview; native review pending |
+| `it-IT` | Italian | Complete bundled preview; native review pending |
+| `uk-UA` | Ukrainian | Complete bundled preview; native review pending |
+| `nl-NL` | Dutch | Complete bundled preview; native review pending |
+| `pt-PT` | Portuguese (Portugal) | Complete bundled preview; native review pending |
+| `cs-CZ` | Czech | Complete bundled preview; native review pending |
+| `ro-RO` | Romanian | Complete bundled preview; native review pending |
+| `et-EE` | Estonian | Complete bundled preview; native review pending |
+| `lv-LV` | Latvian | Complete bundled preview; native review pending |
+| `lt-LT` | Lithuanian | Complete bundled preview; native review pending |
 
 The legacy locale value `en` is treated as `en-US` and upgraded to that explicit value. No additional locale is considered supported until its complete bundled catalog, locale behavior, documentation and automated tests are delivered together.
 
-## Approved translation phase after the English migration
+## Translation phase after the English migration
 
-The complete migration of repository-facing material and hard-coded product text to English is a mandatory stopping point. When that gate passes, stop implementation and obtain explicit product-owner approval before creating the next language packs. The approved translation-phase roster is:
+The English migration gate passed and the product owner approved the following translation phase. Every listed catalog is technically complete and selectable for evaluation. Native-language review remains the final public-support gate.
 
 | Order | Locale | Language |
 | ---: | --- | --- |
@@ -34,9 +50,8 @@ The complete migration of repository-facing material and hard-coded product text
 | 14 | `et-EE` | Estonian |
 | 15 | `lv-LV` | Latvian |
 | 16 | `lt-LT` | Lithuanian |
-| 17 | `is-IS` | Icelandic |
 
-These are planned packs, not current supported languages. The first nine are the initial translation phase; Dutch and Portuguese are the next priority, followed by Czech, Romanian and the Baltic languages. Icelandic completes the planned Nordic coverage at the final priority. They must not appear in the Platform Manager selector until each pack independently meets the completeness and acceptance requirements below. Regional variants such as Brazilian Portuguese, Canadian French or Latin American Spanish require an explicit product decision rather than silently reusing a region-specific pack.
+Icelandic was removed from the approved roster by the product owner. Regional variants such as Brazilian Portuguese, Canadian French or Latin American Spanish require an explicit product decision rather than silently reusing a region-specific pack.
 
 ## Mandatory change rule
 

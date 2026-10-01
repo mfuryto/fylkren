@@ -4,8 +4,11 @@ import { en } from "./catalogs/en-US";
 
 describe("localization catalogs", () => {
   it("uses English for unknown and unsupported languages", () => {
-    expect(normalizeLanguage("fr-FR")).toBe("en-US");
-    expect(translate("fr-FR", "regionalTitle")).toBe("Language and regional settings");
+    expect(normalizeLanguage("ja-JP")).toBe("en-US");
+    expect(normalizeLanguage("pt-BR")).toBe("en-US");
+    expect(normalizeLanguage("fr-CA")).toBe("en-US");
+    expect(normalizeLanguage("es-MX")).toBe("en-US");
+    expect(translate("ja-JP", "regionalTitle")).toBe("Language and regional settings");
   });
 
   it("keeps British and American English as distinct complete variants", () => {
@@ -29,6 +32,17 @@ describe("localization catalogs", () => {
     expect(translate("nb-NO", "regionalTitle")).not.toBe("Language and regional settings");
   });
 
+  it("normalizes every bundled language and its bare language code", () => {
+    const expected = {
+      sv: "sv-SE", da: "da-DK", fi: "fi-FI", de: "de-DE", fr: "fr-FR", pl: "pl-PL", es: "es-ES", it: "it-IT",
+      uk: "uk-UA", nl: "nl-NL", pt: "pt-PT", cs: "cs-CZ", ro: "ro-RO", et: "et-EE", lv: "lv-LV", lt: "lt-LT",
+    } as const;
+    for (const [language, locale] of Object.entries(expected)) {
+      expect(normalizeLanguage(language)).toBe(locale);
+      expect(normalizeLanguage(locale)).toBe(locale);
+    }
+  });
+
   it("enforces the configured clock format independently of the language", () => {
     const instant = new Date("2026-10-01T18:30:00Z");
     const options: Intl.DateTimeFormatOptions = { hour: "numeric", minute: "2-digit", timeZone: "UTC" };
@@ -37,6 +51,29 @@ describe("localization catalogs", () => {
     expect(twelveHour).toMatch(/PM/i);
     expect(twentyFourHour).toContain("18:30");
     expect(twentyFourHour).not.toMatch(/AM|PM/i);
+  });
+
+  it("provides working date, number, plural and sorting behavior for every locale", () => {
+    const instant = new Date("2026-10-01T18:30:00Z");
+    for (const language of supportedLanguages) {
+      const locale = regionalDisplayLocale(language, "24-hour");
+      expect(new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "UTC" }).format(instant)).not.toHaveLength(0);
+      expect(new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(1234.5)).not.toHaveLength(0);
+      expect(new Intl.PluralRules(locale).select(2)).toMatch(/^(zero|one|two|few|many|other)$/);
+      expect(new Intl.Collator(locale, { sensitivity: "base" }).compare("a", "b")).toBeLessThan(0);
+    }
+  });
+
+  it("shows every language by its native name", () => {
+    const nativeNames = {
+      languageNorwegian: "Norsk bokmål", languageSwedish: "Svenska", languageDanish: "Dansk", languageFinnish: "Suomi",
+      languageGerman: "Deutsch", languageFrench: "Français", languagePolish: "Polski", languageSpanish: "Español (España)",
+      languageItalian: "Italiano", languageUkrainian: "Українська", languageDutch: "Nederlands", languagePortuguese: "Português (Portugal)",
+      languageCzech: "Čeština", languageRomanian: "Română", languageEstonian: "Eesti", languageLatvian: "Latviešu", languageLithuanian: "Lietuvių",
+    } as const;
+    for (const language of supportedLanguages) {
+      for (const [key, value] of Object.entries(nativeNames)) expect(translate(language, key as keyof typeof en)).toBe(value);
+    }
   });
 
   it("requires every registered language pack to match source keys and placeholders", () => {

@@ -59,7 +59,7 @@ The light theme uses white primary surfaces, a very light page background, visib
 
 ## Localization
 
-Repository language and UI language are separate concerns. Repository-facing content is English. American English (`en-US`) is the source catalog and mandatory fallback; British English (`en-GB`) and Norwegian Bokmal (`nb-NO`) are separate complete language packs. Missing keys must render the American English source text, never a mixture caused by hard-coded Norwegian text. Dates, times and numbers follow the configured locale and IANA time zone, while the clock and measurement systems follow explicit platform defaults. User-generated content is not translated automatically.
+Repository language and UI language are separate concerns. Repository-facing content is English. American English (`en-US`) is the source catalog and mandatory fallback; British English (`en-GB`) and Norwegian Bokmal (`nb-NO`) are reviewed alternatives, and the maintained language roster records the complete preview packs awaiting native review. Missing keys must render the American English source text, never a mixture caused by hard-coded text. Dates, times and numbers follow the configured locale and IANA time zone, while the clock and measurement systems follow explicit platform defaults. User-generated content is not translated automatically.
 
 Every change to user-visible text updates all complete bundled language packs atomically. The authoritative language roster, completeness rules and process for adding another locale are defined in [Localization and language packs](LOCALIZATION.md).
 

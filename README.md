@@ -207,24 +207,39 @@ The [documentation portal](docs/README.md) is the maintained entry point.
 
 Repository-facing documentation is English. The product currently bundles American
 English (`en-US`) as its source/fallback catalog, with British English (`en-GB`) and
-Norwegian Bokmal (`nb-NO`) as complete language packs. The maintained
+Norwegian Bokmal (`nb-NO`) as reviewed language packs. Sixteen additional complete
+catalogs are bundled for interface preview and native-language review. The maintained
 [language roster and language-pack rules](docs/product/LOCALIZATION.md) define when
 additional translations become supported. Routes, API contracts, persistent
 identifiers and permalinks remain language-neutral.
 
-### Supported interface languages
+### Interface language roster
 
 | Language | Locale | Status |
 | --- | --- | --- |
 | English (United States) | `en-US` | Supported; source language and fallback |
 | English (United Kingdom) | `en-GB` | Supported regional variant |
 | Norwegian Bokmal | `nb-NO` | Supported language pack |
+| Swedish | `sv-SE` | Complete preview; native review pending |
+| Danish | `da-DK` | Complete preview; native review pending |
+| Finnish | `fi-FI` | Complete preview; native review pending |
+| German | `de-DE` | Complete preview; native review pending |
+| French | `fr-FR` | Complete preview; native review pending |
+| Polish | `pl-PL` | Complete preview; native review pending |
+| Spanish (Spain) | `es-ES` | Complete preview; native review pending |
+| Italian | `it-IT` | Complete preview; native review pending |
+| Ukrainian | `uk-UA` | Complete preview; native review pending |
+| Dutch | `nl-NL` | Complete preview; native review pending |
+| Portuguese (Portugal) | `pt-PT` | Complete preview; native review pending |
+| Czech | `cs-CZ` | Complete preview; native review pending |
+| Romanian | `ro-RO` | Complete preview; native review pending |
+| Estonian | `et-EE` | Complete preview; native review pending |
+| Latvian | `lv-LV` | Complete preview; native review pending |
+| Lithuanian | `lt-LT` | Complete preview; native review pending |
 
-Swedish, Danish, Finnish, German, French, Polish, Spanish, Italian, Ukrainian,
-Dutch, Portuguese, Czech, Romanian, Estonian, Latvian, Lithuanian and Icelandic
-are planned in the maintained [translation priority](docs/product/LOCALIZATION.md),
-but are not advertised as supported until each complete pack has passed review
-and acceptance testing.
+Preview packs are selectable for evaluation and pass the same automated key,
+placeholder, locale and build checks as reviewed packs. They must receive
+native-language review before being advertised as publicly supported.
 
 ## Issues, contributions, license and brand
 

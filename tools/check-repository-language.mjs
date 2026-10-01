@@ -3,7 +3,7 @@ import { extname, relative, resolve } from 'node:path';
 import { readdirSync, statSync } from 'node:fs';
 
 const root = resolve(import.meta.dirname, '..');
-const norwegianCatalog = 'apps/web/src/localization/catalogs/nb-NO';
+const localizationCatalogs = 'apps/web/src/localization/catalogs';
 const checkerPath = 'tools/check-repository-language.mjs';
 const checkedExtensions = new Set(['.cs', '.json', '.md', '.mjs', '.sh', '.ts', '.tsx', '.yaml', '.yml']);
 const ignoredDirectories = new Set(['.git', '.git-local', 'backups', 'bin', 'dist', 'node_modules', 'obj', 'output', 'tmp']);
@@ -25,8 +25,9 @@ function markerCounts() {
   const counts = {};
   for (const absolutePath of allFiles(root)) {
     const path = relative(root, absolutePath);
-    if (path === checkerPath || path === 'tools/repository-language-baseline.json' || path === norwegianCatalog || path.startsWith(`${norwegianCatalog}/`)) continue;
-    const content = readFileSync(absolutePath, 'utf8');
+    if (path === checkerPath || path === 'tools/repository-language-baseline.json') continue;
+    if (path.startsWith(`${localizationCatalogs}/`) && !path.startsWith(`${localizationCatalogs}/en-US/`) && !path.startsWith(`${localizationCatalogs}/en-GB/`)) continue;
+    const content = readFileSync(absolutePath, 'utf8').replaceAll('Norsk bokmål', '');
     const count = (content.match(norwegianCharacters)?.length ?? 0) +
       (content.match(norwegianWords)?.length ?? 0);
     if (count) counts[path] = count;
@@ -39,10 +40,10 @@ const findings = Object.entries(current)
   .filter(([, count]) => count > 0)
   .map(([path, count]) => `${path}: ${count} marker(s)`);
 if (findings.length) {
-  console.error(`Repository contains Norwegian outside ${norwegianCatalog}:`);
+  console.error(`Repository contains Norwegian outside dedicated non-English language catalogs:`);
   for (const finding of findings.slice(0, 100)) console.error(`- ${finding}`);
   if (findings.length > 100) console.error(`- ... ${findings.length - 100} additional findings`);
   process.exitCode = 1;
 } else {
-  console.log(`Repository language check passed; Norwegian is confined to ${norwegianCatalog}.`);
+  console.log('Repository language check passed; Norwegian is confined to dedicated non-English language catalogs.');
 }

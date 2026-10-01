@@ -40,5 +40,9 @@ describe("appearance administration", () => {
     expect(html).toContain("Language and regional settings");
     expect(html).toContain("12-hour clock");
     expect(html).toContain("Measurement system");
+    for (const locale of ["sv-SE", "da-DK", "fi-FI", "de-DE", "fr-FR", "pl-PL", "es-ES", "it-IT", "uk-UA", "nl-NL", "pt-PT", "cs-CZ", "ro-RO", "et-EE", "lv-LV", "lt-LT"])
+      expect(html).toContain(`value="${locale}"`);
+    for (const nativeName of ["Svenska", "Dansk", "Suomi", "Deutsch", "Français", "Polski", "Español (España)", "Italiano", "Українська", "Nederlands", "Português (Portugal)", "Čeština", "Română", "Eesti", "Latviešu", "Lietuvių"])
+      expect(html).toContain(nativeName);
   });
 });

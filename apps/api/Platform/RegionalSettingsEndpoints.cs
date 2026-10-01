@@ -25,8 +25,7 @@ public static class RegionalSettingsEndpoints
             if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest();
 
             var language = RegionalSettings.NormalizeLanguage(request.DefaultLanguage);
-            if (!string.Equals(request.DefaultLanguage?.Trim(), language, StringComparison.OrdinalIgnoreCase) &&
-                !new[] { "en", "nb", "no", "no-NO" }.Contains(request.DefaultLanguage?.Trim(), StringComparer.OrdinalIgnoreCase))
+            if (!RegionalSettings.IsSupportedLanguage(request.DefaultLanguage))
                 return Validation("defaultLanguage", "Choose a supported language.");
 
             var timeZone = (request.TimeZone ?? "").Trim();
