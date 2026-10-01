@@ -10,13 +10,13 @@ describe("markdownToEditorHtml", () => {
   });
 
   it("keeps unordered and ordered lists as separate blocks", () => {
-    expect(markdownToEditorHtml("- Punkt 1\n- Punkt 2\n\n1. Første\n2. Andre"))
-      .toBe("<ul><li>Punkt 1</li><li>Punkt 2</li></ul><p><br></p><ol><li>Første</li><li>Andre</li></ol>");
+    expect(markdownToEditorHtml("- Item 1\n- Item 2\n\n1. First\n2. Second"))
+      .toBe("<ul><li>Item 1</li><li>Item 2</li></ul><p><br></p><ol><li>First</li><li>Second</li></ol>");
   });
 
   it("starts a new ordered list after a heading", () => {
-    expect(markdownToEditorHtml("1. Første\n2. Andre\n## Ny del\n1. Ny første"))
-      .toBe("<ol><li>Første</li><li>Andre</li></ol><h2>Ny del</h2><ol><li>Ny første</li></ol>");
+    expect(markdownToEditorHtml("1. First\n2. Second\n## New section\n1. New first"))
+      .toBe("<ol><li>First</li><li>Second</li></ol><h2>New section</h2><ol><li>New first</li></ol>");
   });
 
   it("renders stored active-content payloads as inert text", () => {

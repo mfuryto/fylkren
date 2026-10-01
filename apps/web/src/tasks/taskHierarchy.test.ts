@@ -27,7 +27,7 @@ const unit = (values: Partial<TaskUnit>): TaskUnit => ({
 });
 
 describe("taskHierarchy", () => {
-  it("bygger hele oppdragskjeden fra roten og sorterer søsken kronologisk", () => {
+  it("builds the complete task chain from the root and sorts siblings chronologically", () => {
     const root = item({ id: "root" });
     const later = item({ id: "later", parentWorkItemId: "root", createdAt: "2026-01-03T00:00:00Z" });
     const earlier = item({ id: "earlier", parentWorkItemId: "root", createdAt: "2026-01-02T00:00:00Z" });

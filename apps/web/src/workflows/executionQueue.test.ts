@@ -16,12 +16,12 @@ const unit = (values: Partial<TaskUnit>): TaskUnit => ({
 });
 
 describe("executionQueue", () => {
-  it("presenterer kjente utførelsesstatuser", () => {
+  it("presents known execution statuses", () => {
     expect(executionStatus(item())).toBe("Tilgjengelig");
     expect(executionStatus(item({ run: { id: "run", definitionId: null, definitionName: null, claimedByPersonId: "person", claimedBy: "Test", status: "in_progress", currentStep: 0, timelineStartedOn: null, steps: [] } }))).toBe("Under utførelse");
   });
 
-  it("finner bare direkte underenheter på riktig site", () => {
+  it("finds only direct subunits in the correct site", () => {
     const assigned = item({ assignedUnitId: "section" });
     const child = unit({ id: "child", parentId: "section" });
     const nested = unit({ id: "nested", parentId: "child" });

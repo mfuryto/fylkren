@@ -21,7 +21,7 @@ describe("apiGetCached", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it("tømmer hurtiglageret etter en vellykket endring", async () => {
+  it("clears the cache after a successful mutation", async () => {
     const fetchMock = vi.fn(async (input: string | URL | Request) => {
       const path = typeof input === "string" ? input : input.toString();
       if (path === "/api/security/antiforgery") {
@@ -42,7 +42,7 @@ describe("apiGetCached", () => {
 });
 
 describe("apiRequest", () => {
-  it("bruker ett konsistent JSON-svarformat uten å overskrive øvrige headere", async () => {
+  it("uses one consistent JSON response format without overwriting other headers", async () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
     vi.stubGlobal("fetch", fetchMock);
 
@@ -54,7 +54,7 @@ describe("apiRequest", () => {
     expect(headers.get("X-Test")).toBe("behold");
   });
 
-  it("viser trygg, konkret problemårsak fra API-et", async () => {
+  it("shows a safe and specific problem reason from the API", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({
       errors: { email: ["E-postadressen er allerede i bruk."] },
     }), { status: 409, headers: { "Content-Type": "application/problem+json" } })));

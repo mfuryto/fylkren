@@ -5,7 +5,7 @@ import { canSendSideRequestAtStatus, effectiveTaskStatus, getTaskNextActions, ha
 const item = (values: Partial<WorkItem>): WorkItem => ({
   id: "item", siteId: "site", parentWorkItemId: null, parentTitle: null, workItemTypeId: null, workItemTypeName: null,
   sourceTypeId: null, sourceTypeName: null, senderId: null, senderName: null, senderSiteName: null, senderPersonName: null,
-  requestBasisSnapshot: null, isCrossSiteView: false, title: "Oppdrag", description: "", recommendation: null,
+  requestBasisSnapshot: null, isCrossSiteView: false, title: "Task", description: "", recommendation: null,
   referenceUrl: null, priority: "normal", status: "registered", dueAt: null, assignedUnitId: null, unitName: null,
   isAssignedToMe: false, hasPlan: false, workflowCurrentStep: null, workflowStepCount: 0, workflowStepName: null,
   executionStatus: null, executionWorkflowName: null, executionCurrentStep: null, executionStepCount: 0,
@@ -17,33 +17,33 @@ const item = (values: Partial<WorkItem>): WorkItem => ({
 });
 
 describe("taskPolicy", () => {
-  it("tilbyr ikke ny anmodning på Oppgaver mens utførelse pågår", () => {
+  it("does not offer a new request from Tasks while execution is in progress", () => {
     expect(canSendSideRequestAtStatus("under_review")).toBe(true);
     expect(canSendSideRequestAtStatus("execution")).toBe(false);
   });
-  it("beholder en utgående anmodning aktiv til svaret er klart", () => {
+  it("keeps an outgoing request active until its answer is ready", () => {
     expect(effectiveTaskStatus(item({ isOutgoingRequest: true, status: "assigned", requestProgressStatus: "execution" }))).toBe("in_progress");
     expect(effectiveTaskStatus(item({ isOutgoingRequest: true, status: "assigned", requestProgressStatus: "completed" }))).toBe("in_review");
   });
 
-  it("regner bare ikke-avsluttede direkte barn som aktive", () => {
+  it("counts only unfinished direct children as active", () => {
     const parent = item({ id: "parent" });
     expect(hasActiveDirectChildren(parent, [parent, item({ id: "child", parentWorkItemId: "parent", status: "completed" })])).toBe(false);
     expect(hasActiveDirectChildren(parent, [parent, item({ id: "child", parentWorkItemId: "parent", status: "execution" })])).toBe(true);
   });
 
-  it("finner tittelen på rotoppdraget", () => {
-    const root = item({ id: "root", title: "Hovedoppdrag" });
-    const child = item({ id: "child", parentWorkItemId: "root", title: "Deloppdrag" });
-    expect(rootWorkTitle(child, [root, child])).toBe("Hovedoppdrag");
+  it("finds the root task title", () => {
+    const root = item({ id: "root", title: "Main task" });
+    const child = item({ id: "child", parentWorkItemId: "root", title: "Subtask" });
+    expect(rootWorkTitle(child, [root, child])).toBe("Main task");
   });
 
-  it("tilbyr planlegging og utførelse når et fordelt oppdrag ikke har aktive barn", () => {
+  it("offers planning and execution when an assigned task has no active children", () => {
     const work = item({ id: "work", status: "assigned" });
     expect(getTaskNextActions(work, [work], { isLeader: true, isOperational: true, canManage: true }).map(action => action.status)).toEqual(["planning", "execution"]);
   });
 
-  it("gir lederen Avvent og Iverksett etter godkjenning uten å sende automatisk", () => {
+  it("offers Hold and Start to the leader after approval without sending automatically", () => {
     const work = item({ status: "planning_approved", hasPlan: true });
     expect(getTaskNextActions(work, [work], { isLeader: true, isOperational: true, canManage: true })).toEqual([
       { status: "on_hold", label: "Avvent" }, { status: "release", label: "Iverksett" },
@@ -51,12 +51,12 @@ describe("taskPolicy", () => {
     expect(getTaskNextActions(work, [work], { isLeader: false, isOperational: true, canManage: false })).toEqual([]);
   });
 
-  it("lar blokkert godkjent plan avventes, men ikke iverksettes", () => {
+  it("allows a blocked approved plan to be held but not started", () => {
     const work = item({ status: "planning_approved", hasPlan: true, isBlocked: true });
     expect(getTaskNextActions(work, [work], { isLeader: true, isOperational: true, canManage: true })).toEqual([{ status: "on_hold", label: "Avvent" }]);
   });
 
-  it("sender et oppdrag til kontroll når alle direkte barn er ferdige", () => {
+  it("sends a task for review when all direct children are complete", () => {
     const parent = item({ id: "parent", status: "in_progress" });
     const child = item({ id: "child", parentWorkItemId: "parent", status: "completed" });
     expect(getTaskNextActions(parent, [parent, child], { isLeader: true, isOperational: true, canManage: true })).toEqual([
@@ -65,12 +65,12 @@ describe("taskPolicy", () => {
     ]);
   });
 
-  it("viser ingen fremdriftshandlinger når oppdraget er blokkert av en avhengighet", () => {
+  it("shows no progress actions when a task is blocked by a dependency", () => {
     const blocked = item({ status: "assigned", isBlocked: true, blockingDependencyCount: 1 });
     expect(getTaskNextActions(blocked, [blocked], { isLeader: true, isOperational: true, canManage: true })).toEqual([]);
   });
 
-  it("lar avsender fullføre en ferdigbehandlet anmodning", () => {
+  it("allows the sender to complete a processed request", () => {
     const request = item({ isOutgoingRequest: true, status: "assigned", requestProgressStatus: "completed" });
     expect(getTaskNextActions(request, [request], { isLeader: true, isOperational: true, canManage: false })).toEqual([{ status: "completed", label: "Fullfør anmodning" }]);
   });

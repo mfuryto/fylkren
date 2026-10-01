@@ -12,7 +12,7 @@ const site = (values: Partial<TaskSite> = {}): TaskSite => ({
 });
 
 describe("taskScope", () => {
-  it("presenterer toppnivåets underenheter uten ekstra innrykk", () => {
+  it("presents top-level subunits without additional indentation", () => {
     const leadership = unit({ id: "leadership", name: "Ledelse", isSiteLeadership: true });
     const section = unit({ id: "section", name: "Seksjon", parentId: "leadership", sortOrder: 2 });
     const staff = unit({ id: "staff", name: "Stab", parentId: "leadership", sortOrder: 1 });
@@ -22,7 +22,7 @@ describe("taskScope", () => {
     expect(scope.directChildUnits.map(value => value.name)).toEqual(["Stab", "Seksjon"]);
   });
 
-  it("bruker lederrettigheten på valgt arbeidsnivå", () => {
+  it("uses leader access on the selected work level", () => {
     const section = unit({ id: "section", isLeader: true });
     const scope = buildTaskScope([section], "site", "section", site({ isTopLevelLeader: false }));
     expect(scope.canManageScope).toBe(true);

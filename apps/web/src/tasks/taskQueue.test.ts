@@ -11,7 +11,7 @@ const item = (values: Partial<WorkItem>): WorkItem => ({
 } as WorkItem);
 
 describe("taskQueue", () => {
-  it("viser ikke samme interne deloppdrag separat på mottakernivået", () => {
+  it("does not show the same internal subtask separately at the recipient level", () => {
     const root = item({ id: "root", assignedUnitId: "unit" });
     const child = item({ id: "child", parentWorkItemId: "root", assignedUnitId: "unit" });
     expect(selectScopedItems([root, child], "unit").map(value => value.id)).toEqual(["root"]);

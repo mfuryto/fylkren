@@ -8,7 +8,7 @@ const run = (values: Partial<PlanningRun> = {}): PlanningRun => ({
   claimedByPersonId: null, claimedBy: null, proposedUnitId: null, proposedUnit: null,
   proposedPriority: null, proposedDueAt: null, resultNote: null, allocations: [], requests: [], rfi: [],
   ancestors: [], item: { id: "item", parentWorkItemId: null, parentTitle: null,
-    parentDescription: null, assignedUnitId: null, assignedUnitName: null, title: "Oppdrag",
+    parentDescription: null, assignedUnitId: null, assignedUnitName: null, title: "Task",
     description: "", referenceUrl: null, workItemTypeName: null, sourceTypeName: null,
     senderName: null, requestBasisSnapshot: null, priority: "normal", dueAt: null,
     decisionNote: null, finalReport: null, finalReportWrittenBy: null,
@@ -17,29 +17,29 @@ const run = (values: Partial<PlanningRun> = {}): PlanningRun => ({
 });
 
 const unit = (values: Partial<TaskUnit>): TaskUnit => ({
-  id: "unit", siteId: "site", name: "Enhet", parentId: null, isSiteLeadership: false,
+  id: "unit", siteId: "site", name: "Unit", parentId: null, isSiteLeadership: false,
   sortOrder: 0, assignedToMe: true, isLeader: false, ...values,
 });
 
 describe("planningQueue", () => {
-  it("lager unike og alfabetiske arbeidsnivåer og filtrerer toppnivå", () => {
+  it("creates unique alphabetized work levels and filters the top level", () => {
     const top = run({ id: "top" });
-    const section = run({ id: "section", item: { ...run().item, assignedUnitId: "section", assignedUnitName: "Seksjon" } });
-    expect(buildPlanningLevels([section, top, section])).toEqual([["section", "Seksjon"], ["top", "Toppnivå"]]);
+    const section = run({ id: "section", item: { ...run().item, assignedUnitId: "section", assignedUnitName: "Section" } });
+    expect(buildPlanningLevels([section, top, section])).toEqual([["section", "Section"], ["top", "Toppnivå"]]);
     expect(filterPlanningRuns([section, top], "top")).toEqual([top]);
   });
 
-  it("finner bare direkte underenheter på riktig site", () => {
-    const current = run({ item: { ...run().item, assignedUnitId: "section", assignedUnitName: "Seksjon" } });
-    const first = unit({ id: "first", name: "Første", parentId: "section", sortOrder: 1 });
-    const second = unit({ id: "second", name: "Andre", parentId: "section", sortOrder: 2 });
+  it("finds only direct subunits in the correct site", () => {
+    const current = run({ item: { ...run().item, assignedUnitId: "section", assignedUnitName: "Section" } });
+    const first = unit({ id: "first", name: "First", parentId: "section", sortOrder: 1 });
+    const second = unit({ id: "second", name: "Second", parentId: "section", sortOrder: 2 });
     const nested = unit({ id: "nested", parentId: "first" });
     const foreign = unit({ id: "foreign", siteId: "other", parentId: "section" });
     expect(planningAllocationUnits([second, nested, foreign, first], "site", current).map(value => value.id))
       .toEqual(["first", "second"]);
   });
 
-  it("viser mottakende child-site sammen med interne underenheter", () => {
+  it("shows a receiving child site together with internal subunits", () => {
     const own = unit({ id: "own", parentId: null });
     const childSite = unit({ id: "child", name: "Child-site", parentId: null, receivingSiteId: "other-site" });
     const leadership = unit({ id: "leadership", isSiteLeadership: true, parentId: null });
@@ -47,12 +47,12 @@ describe("planningQueue", () => {
       .toEqual(["child", "own"]);
   });
 
-  it("oppretter et redigerbart utkast fra eksisterende plan", () => {
+  it("creates an editable draft from an existing plan", () => {
     const source = run({ proposedPriority: "high", proposedDueAt: "2026-09-20T23:59:59Z", allocations: [
-      { stepId: "step", unitId: "unit", instruction: "Utfør" },
+      { stepId: "step", unitId: "unit", instruction: "Execute" },
     ] });
     expect(createPlanningDraft(source)).toEqual({ priority: "high", dueAt: "2026-09-20", allocations: [
-      { stepId: "step", unitId: "unit", instruction: "Utfør" },
+      { stepId: "step", unitId: "unit", instruction: "Execute" },
     ] });
   });
 });

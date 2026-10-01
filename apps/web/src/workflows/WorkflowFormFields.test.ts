@@ -16,7 +16,7 @@ describe("WorkflowFormFields", () => {
     expect(workflowStepNames(" Analyse \n\n Plan \n")).toEqual(["Analyse", "Plan"]);
   });
 
-  it("lar utførelse bruke maler fra eget nivå og overordnede nivåer", () => {
+  it("allows execution to use templates from its own and parent levels", () => {
     const form = { ...emptyWorkflowForm(), ownerUnitId: "team" };
     const units = [unit({ id: "section" }), unit({ id: "team", parentId: "section" })];
     expect(isWorkflowTemplateApplicable(template(null), form, units)).toBe(true);
