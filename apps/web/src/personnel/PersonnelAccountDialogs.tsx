@@ -1,5 +1,6 @@
 import type React from "react";
 import { Modal } from "../components/Modal";
+import { useTranslation } from "../localization/LocalizationProvider";
 import type { DirectoryProviderSummary, DirectoryUserSummary, ExistingUserSummary, MemberSummary } from "../siteAdmin/models";
 import type { PersonnelUnit } from "./personnelHierarchy";
 import { PersonnelUnitOptions } from "./PersonnelUnitOptions";
@@ -22,21 +23,22 @@ export function DirectoryUserDialog({ open, localEnabled, providers, provider, q
   onSubmit: (event: React.FormEvent) => void;
   onClose: () => void;
 }) {
+  const t = useTranslation();
   if (!open) return null;
-  return <Modal title={localEnabled ? "Legg til personell fra AD/LDAP" : "Legg til bruker"} onClose={onClose}>
+  return <Modal title={localEnabled ? t("addDirectoryPersonnel") : t("addUser")} onClose={onClose}>
     <form className="stacked-form" onSubmit={onSubmit}>
-      {providers.length === 0 ? <p className="status-message">Ingen AD- eller LDAP-leverandør er aktivert av Platform Manager.</p> : <>
-        <p className="muted modal-note">Bare personen du velger legges til i siten. Katalogen populerer ikke personellregisteret automatisk.</p>
-        <div className="field"><label htmlFor="directory-provider">Katalog</label><select id="directory-provider" value={provider} onChange={(event) => onProviderChange(event.target.value)}>{providers.map((value) => <option key={value.key} value={value.key}>{value.name}</option>)}</select></div>
+      {providers.length === 0 ? <p className="status-message">{t("noDirectoryProvider")}</p> : <>
+        <p className="muted modal-note">{t("directoryPersonOnly")}</p>
+        <div className="field"><label htmlFor="directory-provider">{t("directory")}</label><select id="directory-provider" value={provider} onChange={(event) => onProviderChange(event.target.value)}>{providers.map((value) => <option key={value.key} value={value.key}>{value.name}</option>)}</select></div>
         <div className="field">
-          <label htmlFor="directory-person-search">Finn person</label>
-          <input id="directory-person-search" type="search" autoComplete="off" placeholder="Søk på navn, e-post eller brukernavn" value={query} onChange={(event) => onQueryChange(event.target.value)} />
-          {query.trim().length > 0 && query.trim().length < 2 && <p className="muted modal-note">Skriv minst to tegn.</p>}
-          {results.length > 0 && !selectedUser && <div className="person-search-results" role="listbox" aria-label="Katalogtreff">{results.map((person) => <button key={`${person.provider}:${person.stableId}`} type="button" role="option" aria-selected="false" onClick={() => onSelectUser(person)}><strong>{person.displayName || person.username}</strong><small>{[person.username, person.email].filter(Boolean).join(" · ")}</small></button>)}</div>}
+          <label htmlFor="directory-person-search">{t("findPerson")}</label>
+          <input id="directory-person-search" type="search" autoComplete="off" placeholder={t("searchPersonPlaceholder")} value={query} onChange={(event) => onQueryChange(event.target.value)} />
+          {query.trim().length > 0 && query.trim().length < 2 && <p className="muted modal-note">{t("minimumTwoCharacters")}</p>}
+          {results.length > 0 && !selectedUser && <div className="person-search-results" role="listbox" aria-label={t("directoryResults")}>{results.map((person) => <button key={`${person.provider}:${person.stableId}`} type="button" role="option" aria-selected="false" onClick={() => onSelectUser(person)}><strong>{person.displayName || person.username}</strong><small>{[person.username, person.email].filter(Boolean).join(" · ")}</small></button>)}</div>}
         </div>
-        <div className="field"><label htmlFor="directory-person-unit">Underenhet</label><select id="directory-person-unit" required value={unitId} onChange={(event) => onUnitChange(event.target.value)}><PersonnelUnitOptions units={units} /></select></div>
+        <div className="field"><label htmlFor="directory-person-unit">{t("subunit")}</label><select id="directory-person-unit" required value={unitId} onChange={(event) => onUnitChange(event.target.value)}><PersonnelUnitOptions units={units} /></select></div>
       </>}
-      <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>Avbryt</button>{providers.length > 0 && <button className="primary-button" disabled={busy || !selectedUser || !unitId}>Legg til personell</button>}</div>
+      <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>{t("cancel")}</button>{providers.length > 0 && <button className="primary-button" disabled={busy || !selectedUser || !unitId}>{t("addPersonnel")}</button>}</div>
     </form>
   </Modal>;
 }
@@ -55,19 +57,20 @@ export function ExistingUserDialog({ open, query, results, selectedUser, unitId,
   onSubmit: (event: React.FormEvent) => void;
   onClose: () => void;
 }) {
+  const t = useTranslation();
   if (!open) return null;
-  return <Modal title="Legg til eksisterende lokal bruker" onClose={onClose}>
+  return <Modal title={t("addExistingLocalUser")} onClose={onClose}>
     <form className="stacked-form" onSubmit={onSubmit}>
-      <p className="muted modal-note">Mottakende site søker etter en person som allerede har lokal konto i en annen site. Identitet og profil gjenbrukes, mens enhet og roller forvaltes separat her.</p>
+      <p className="muted modal-note">{t("existingLocalUserIntro")}</p>
       <div className="field">
-        <label htmlFor="existing-local-user-search">Finn bruker</label>
-        <input id="existing-local-user-search" type="search" autoComplete="off" placeholder="Søk på navn, e-post eller brukernavn" value={query} onChange={(event) => onQueryChange(event.target.value)} />
-        {query.trim().length > 0 && query.trim().length < 2 && <p className="muted modal-note">Skriv minst to tegn.</p>}
-        {results.length > 0 && !selectedUser && <div className="person-search-results" role="listbox" aria-label="Eksisterende lokale brukere">{results.map((person) => <button key={person.id} type="button" role="option" onClick={() => onSelectUser(person)}><strong>{person.displayName}</strong><small>E-post: {person.email ?? "Ikke registrert"} · Brukernavn: {person.username}</small></button>)}</div>}
-        {selectedUser && <div className="site-detail-block"><strong>{selectedUser.displayName}</strong><dl className="detail-list"><div><dt>E-post</dt><dd>{selectedUser.email ?? "Ikke registrert"}</dd></div><div><dt>Brukernavn</dt><dd>{selectedUser.username}</dd></div><div><dt>Nåværende site</dt><dd>{selectedUser.sites.join(", ")}</dd></div></dl></div>}
+        <label htmlFor="existing-local-user-search">{t("findUser")}</label>
+        <input id="existing-local-user-search" type="search" autoComplete="off" placeholder={t("searchPersonPlaceholder")} value={query} onChange={(event) => onQueryChange(event.target.value)} />
+        {query.trim().length > 0 && query.trim().length < 2 && <p className="muted modal-note">{t("minimumTwoCharacters")}</p>}
+        {results.length > 0 && !selectedUser && <div className="person-search-results" role="listbox" aria-label={t("existingLocalUsers")}>{results.map((person) => <button key={person.id} type="button" role="option" onClick={() => onSelectUser(person)}><strong>{person.displayName}</strong><small>{t("emailValue", { email: person.email ?? t("notRegistered") })} · {t("usernameValue", { username: person.username })}</small></button>)}</div>}
+        {selectedUser && <div className="site-detail-block"><strong>{selectedUser.displayName}</strong><dl className="detail-list"><div><dt>{t("emailAddress")}</dt><dd>{selectedUser.email ?? t("notRegistered")}</dd></div><div><dt>{t("username")}</dt><dd>{selectedUser.username}</dd></div><div><dt>{t("currentSite")}</dt><dd>{selectedUser.sites.join(", ")}</dd></div></dl></div>}
       </div>
-      <div className="field"><label htmlFor="existing-local-user-unit">Underenhet i denne siten</label><select id="existing-local-user-unit" required value={unitId} onChange={(event) => onUnitChange(event.target.value)}><PersonnelUnitOptions units={units} /></select></div>
-      <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>Avbryt</button><button className="primary-button" disabled={busy || !selectedUser || !unitId}>Legg til i siten</button></div>
+      <div className="field"><label htmlFor="existing-local-user-unit">{t("subunitInSite")}</label><select id="existing-local-user-unit" required value={unitId} onChange={(event) => onUnitChange(event.target.value)}><PersonnelUnitOptions units={units} /></select></div>
+      <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>{t("cancel")}</button><button className="primary-button" disabled={busy || !selectedUser || !unitId}>{t("addToSite")}</button></div>
     </form>
   </Modal>;
 }
@@ -78,11 +81,12 @@ export function PasswordResetDialog({ value, busy, onSubmit, onClose }: {
   onSubmit: (event: React.FormEvent) => void;
   onClose: () => void;
 }) {
+  const t = useTranslation();
   if (!value) return null;
-  return <Modal title="Tilbakestill passord" onClose={onClose}>
+  return <Modal title={t("resetPassword")} onClose={onClose}>
     <form className="stacked-form" onSubmit={onSubmit}>
-      {value.resetCode ? <><p>Gi engangskoden til <strong>{value.displayName}</strong> gjennom en sikker kanal. Koden vises bare her og utløper etter 30 minutter.</p><div className="field"><label htmlFor="reset-person-code">Engangskode</label><input id="reset-person-code" readOnly value={value.resetCode} onFocus={(event) => event.currentTarget.select()} /></div></> : <p className="muted modal-note">Opprett en engangskode for <strong>{value.displayName}</strong>. Brukeren velger selv sitt nye passord på innloggingssiden.</p>}
-      <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>{value.resetCode ? "Lukk" : "Avbryt"}</button>{!value.resetCode && <button className="primary-button" disabled={busy}>{busy ? "Oppretter …" : "Opprett engangskode"}</button>}</div>
+      {value.resetCode ? <><p>{t("resetCodeDelivery", { name: value.displayName })}</p><div className="field"><label htmlFor="reset-person-code">{t("oneTimeCode")}</label><input id="reset-person-code" readOnly value={value.resetCode} onFocus={(event) => event.currentTarget.select()} /></div></> : <p className="muted modal-note">{t("resetPasswordCodeIntro", { name: value.displayName })}</p>}
+      <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>{value.resetCode ? t("close") : t("cancel")}</button>{!value.resetCode && <button className="primary-button" disabled={busy}>{busy ? t("creating") : t("createOneTimeCode")}</button>}</div>
     </form>
   </Modal>;
 }
@@ -93,10 +97,11 @@ export function RemoveMemberDialog({ member, busy, onConfirm, onClose }: {
   onConfirm: (member: MemberSummary) => void;
   onClose: () => void;
 }) {
+  const t = useTranslation();
   if (!member) return null;
-  return <Modal title="Fjern bruker" onClose={onClose}>
-    <p>Vil du fjerne <strong>{member.displayName}</strong> fra siten?</p>
-    <p className="muted">Innlogging i denne siten og aktive rolletildelinger deaktiveres. Historikken beholdes.</p>
-    <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>Avbryt</button><button className="danger-button" type="button" disabled={busy} onClick={() => onConfirm(member)}>Fjern bruker</button></div>
+  return <Modal title={t("removeUser")} onClose={onClose}>
+    <p>{t("removeUserQuestion", { name: member.displayName })}</p>
+    <p className="muted">{t("removeUserImpact")}</p>
+    <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>{t("cancel")}</button><button className="danger-button" type="button" disabled={busy} onClick={() => onConfirm(member)}>{t("removeUser")}</button></div>
   </Modal>;
 }

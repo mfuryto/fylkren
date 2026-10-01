@@ -21,21 +21,23 @@ export function PersonnelPageHeader({
   onAddDirectoryUser,
   onCreateRole,
 }: PersonnelPageHeaderProps) {
+  const t = useTranslation();
   return (
     <header className="page-header">
       <div>
-        <h1>Personell</h1>
-        <p className="muted">Brukere, roller og bemanning.</p>
+        <h1>{t("personnel")}</h1>
+        <p className="muted">{t("personnelIntro")}</p>
       </div>
-      <div className="task-actions" aria-label="Personellhandlinger">
-        <button className="help-button" type="button" onClick={onHelp}><i aria-hidden="true">?</i><span>Hjelp</span></button>
+      <div className="task-actions" aria-label={t("personnelActions")}>
+        <button className="help-button" type="button" onClick={onHelp}><i aria-hidden="true">?</i><span>{t("help")}</span></button>
         {canManage && <>
-          {localEnabled && <button className="primary-button" type="button" onClick={onCreateLocalUser}>Legg til lokal bruker</button>}
-          {localEnabled && <button className="secondary-button" type="button" disabled={!hasUnits} onClick={onAddExistingUser}>Legg til eksisterende bruker</button>}
-          {directoryEnabled && <button className={localEnabled ? "secondary-button" : "primary-button"} type="button" disabled={!hasUnits} onClick={onAddDirectoryUser}>{localEnabled ? "Legg til fra AD/LDAP" : "Legg til bruker"}</button>}
-          <button className="secondary-button" type="button" disabled={!hasUnits} onClick={onCreateRole}>Opprett arbeidsrolle</button>
+          {localEnabled && <button className="primary-button" type="button" onClick={onCreateLocalUser}>{t("addLocalUser")}</button>}
+          {localEnabled && <button className="secondary-button" type="button" disabled={!hasUnits} onClick={onAddExistingUser}>{t("addExistingUser")}</button>}
+          {directoryEnabled && <button className={localEnabled ? "secondary-button" : "primary-button"} type="button" disabled={!hasUnits} onClick={onAddDirectoryUser}>{localEnabled ? t("addDirectoryPersonnel") : t("addUser")}</button>}
+          <button className="secondary-button" type="button" disabled={!hasUnits} onClick={onCreateRole}>{t("createWorkRole")}</button>
         </>}
       </div>
     </header>
   );
 }
+import { useTranslation } from "../localization/LocalizationProvider";

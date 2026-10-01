@@ -12,8 +12,10 @@ import { PersonnelPageHeader } from "./PersonnelPageHeader";
 import { LocalUserDialog, RoleCreateDialog } from "./PersonnelCreateDialogs";
 import { DirectoryUserDialog, ExistingUserDialog, PasswordResetDialog, RemoveMemberDialog } from "./PersonnelAccountDialogs";
 import { MemberEditDialog, RoleEditDialog } from "./PersonnelRoleDialogs";
+import { useTranslation } from "../localization/LocalizationProvider";
 
 export function PersonnelPage({ session, configuration }: { session: Session; configuration: PublicConfiguration }) {
+  const t = useTranslation();
   const [helpOpen, setHelpOpen] = useState(false);
   const [sites, setSites] = useState<SiteSummary[]>([]);
   const [selectedSiteId, setSelectedSiteId] = useState("");
@@ -95,7 +97,7 @@ export function PersonnelPage({ session, configuration }: { session: Session; co
           : (nextAccess.roles[0]?.id ?? ""),
       }));
     } catch (problem) {
-      setError(errorMessage(problem,"Personelldata kunne ikke lastes."));
+      setError(errorMessage(problem, t("personnelLoadFailed")));
     }
   }
 
@@ -118,7 +120,7 @@ export function PersonnelPage({ session, configuration }: { session: Session; co
         setSites(managed);
         setSelectedSiteId(managed[0]?.id ?? "");
       })
-      .catch(() => setError("Sites kunne ikke lastes."));
+      .catch(() => setError(t("sitesLoadFailed")));
   }, []);
   useEffect(() => {
     void loadData(selectedSiteId);
@@ -127,14 +129,14 @@ export function PersonnelPage({ session, configuration }: { session: Session; co
     if (!directoryCreatorOpen || !selectedSiteId) return;
     loadDirectoryProviders(selectedSiteId)
       .then((providers) => { setDirectoryProviders(providers); setDirectoryProvider((current) => providers.some((provider) => provider.key === current) ? current : (providers[0]?.key ?? "")); })
-      .catch(() => setError("Katalogleverandørene kunne ikke lastes."));
+      .catch(() => setError(t("directoryProvidersLoadFailed")));
   }, [directoryCreatorOpen, selectedSiteId]);
   useEffect(() => {
     if (!directoryCreatorOpen || !directoryProvider || directoryQuery.trim().length < 2) { setDirectoryResults([]); return; }
     const timer = window.setTimeout(() => {
       searchDirectoryUsers(selectedSiteId, directoryProvider, directoryQuery.trim())
         .then(setDirectoryResults)
-        .catch(() => setError("Katalogsøket kunne ikke fullføres."));
+        .catch(() => setError(t("directorySearchFailed")));
     }, 300);
     return () => window.clearTimeout(timer);
   }, [directoryCreatorOpen, directoryProvider, directoryQuery, selectedSiteId]);
@@ -143,7 +145,7 @@ export function PersonnelPage({ session, configuration }: { session: Session; co
     const timer = window.setTimeout(() => {
       searchExistingUsers(selectedSiteId, existingUserQuery.trim())
         .then(setExistingUserResults)
-        .catch(() => setError("Søket etter eksisterende brukere kunne ikke fullføres."));
+        .catch(() => setError(t("existingUsersSearchFailed")));
     }, 300);
     return () => window.clearTimeout(timer);
   }, [existingUserCreatorOpen, existingUserQuery, selectedSiteId]);
@@ -165,7 +167,7 @@ export function PersonnelPage({ session, configuration }: { session: Session; co
       const result = await mutate<{ resetCode: string }>("local-users", "POST", userForm);
       setUserForm((current) => ({ ...current, resetCode: result.resetCode }));
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Brukeren kunne ikke opprettes.");
+      setError(problem instanceof Error ? problem.message : t("localUserCreateFailed"));
     }
     setBusy(false);
   }
@@ -176,7 +178,7 @@ export function PersonnelPage({ session, configuration }: { session: Session; co
     try {
       await mutate("directory-users", "POST", { ...selectedDirectoryUser, organizationUnitId: directoryUnitId });
       setDirectoryCreatorOpen(false); setDirectoryQuery(""); setDirectoryResults([]); setSelectedDirectoryUser(null);
-    } catch (problem) { setError(problem instanceof Error ? problem.message : "Katalogbrukeren kunne ikke legges til."); }
+    } catch (problem) { setError(problem instanceof Error ? problem.message : t("directoryUserAddFailed")); }
     setBusy(false);
   }
   async function addExistingLocalUser(event: React.FormEvent) {
@@ -186,7 +188,7 @@ export function PersonnelPage({ session, configuration }: { session: Session; co
     try {
       await mutate("existing-local-users", "POST", { personId: selectedExistingUser.id, organizationUnitId: existingUserUnitId });
       setExistingUserCreatorOpen(false); setExistingUserQuery(""); setExistingUserResults([]); setSelectedExistingUser(null);
-    } catch (problem) { setError(problem instanceof Error ? problem.message : "Den eksisterende brukeren kunne ikke legges til i siten."); }
+    } catch (problem) { setError(problem instanceof Error ? problem.message : t("existingUserAddFailed")); }
     setBusy(false);
   }
   async function createRole(event: React.FormEvent) {
@@ -202,7 +204,7 @@ export function PersonnelPage({ session, configuration }: { session: Session; co
       }));
       setRoleCreatorOpen(false);
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Rollen kunne ikke opprettes.");
+      setError(problem instanceof Error ? problem.message : t("roleCreateFailed"));
     }
     setBusy(false);
   }
@@ -221,7 +223,7 @@ export function PersonnelPage({ session, configuration }: { session: Session; co
       });
       setAssignmentForm((current) => ({ ...current, validTo: "", canLeadParentLevel: false }));
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Rollen kunne ikke tildeles.");
+      setError(problem instanceof Error ? problem.message : t("roleAssignFailed"));
     }
     setBusy(false);
   }
@@ -239,7 +241,7 @@ export function PersonnelPage({ session, configuration }: { session: Session; co
       });
       setMemberEditor(null);
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Brukeren kunne ikke oppdateres.");
+      setError(problem instanceof Error ? problem.message : t("memberUpdateFailed"));
     }
     setBusy(false);
   }
@@ -251,7 +253,7 @@ export function PersonnelPage({ session, configuration }: { session: Session; co
       const result = await mutate<{ resetCode: string; expiresAt: string }>(`members/${passwordReset.id}/password-reset`, "POST");
       setPasswordReset({ ...passwordReset, ...result });
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Passordet kunne ikke tilbakestilles.");
+      setError(problem instanceof Error ? problem.message : t("memberPasswordResetFailed"));
     }
     setBusy(false);
   }
@@ -261,7 +263,7 @@ export function PersonnelPage({ session, configuration }: { session: Session; co
       await mutate(`members/${member.id}`, "DELETE");
       setMemberToRemove(null);
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Brukeren kunne ikke fjernes.");
+      setError(problem instanceof Error ? problem.message : t("memberRemoveFailed"));
     }
     setBusy(false);
   }
@@ -270,7 +272,7 @@ export function PersonnelPage({ session, configuration }: { session: Session; co
     try {
       await mutate(`role-assignments/${assignment.id}`, "DELETE");
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Rolletildelingen kunne ikke fjernes.");
+      setError(problem instanceof Error ? problem.message : t("roleAssignmentRemoveFailed"));
     }
     setBusy(false);
   }
@@ -284,7 +286,7 @@ export function PersonnelPage({ session, configuration }: { session: Session; co
         canLeadParentLevel: enabled,
       });
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Fullmakten kunne ikke oppdateres.");
+      setError(problem instanceof Error ? problem.message : t("parentLeadershipUpdateFailed"));
     }
     setBusy(false);
   }
@@ -301,7 +303,7 @@ export function PersonnelPage({ session, configuration }: { session: Session; co
       });
       setRoleEditor(null);
     } catch (problem) {
-      setError(problem instanceof Error ? problem.message : "Rollen kunne ikke oppdateres.");
+      setError(problem instanceof Error ? problem.message : t("roleUpdateFailed"));
     }
     setBusy(false);
   }
@@ -314,8 +316,8 @@ export function PersonnelPage({ session, configuration }: { session: Session; co
     } catch (problem) {
       setError(
         problem instanceof Error ? problem.message : roleEditor.assignments.length
-          ? "Fjern aktive rolletildelinger før rollen slettes."
-          : "Rollen kunne ikke slettes.",
+          ? t("roleDeleteAssignmentsFirst")
+          : t("roleDeleteFailed"),
       );
     }
     setBusy(false);
@@ -355,9 +357,9 @@ export function PersonnelPage({ session, configuration }: { session: Session; co
       {sites.length === 0 ? (
         <section className="panel empty-state">
           <div>
-            <h2>Ingen tilgjengelige organisasjonsområder</h2>
+            <h2>{t("personnelAreaUnavailable")}</h2>
             <p className="muted">
-              Du må være leder eller Site Manager for å se personell.
+              {t("personnelAreaUnavailableIntro")}
             </p>
           </div>
         </section>
@@ -385,7 +387,7 @@ export function PersonnelPage({ session, configuration }: { session: Session; co
             </p>
           )}
           {!canManageSelectedSite && (
-            <p className="muted status-message">Skrivebeskyttet visning for ditt nivå og underliggende enheter.</p>
+            <p className="muted status-message">{t("personnelReadOnly")}</p>
           )}
           <PersonnelLists
             access={access}
@@ -404,7 +406,7 @@ export function PersonnelPage({ session, configuration }: { session: Session; co
           />
         </>
       )}
-      {helpOpen && <SectionHelp title="Slik bruker du Personell" intro="Personell samler sitens utvalgte brukere, organisatoriske tilknytninger, arbeidsroller og bemanning." steps={[{title:"Finn riktig person eller enhet.",text:"Velg site ved behov og bruk oversikten til å se hvor personen hører til og hvilke roller vedkommende har."},{title:"Legg til riktig type bruker.",text:"Site Manager kan opprette en lokal bruker eller søke fram én bestemt person fra aktivert AD/LDAP. Katalogen importeres aldri automatisk."},{title:"Plasser personen i organisasjonen.",text:"En person knyttes til en intern enhet uten å måtte få en arbeidsrolle. Tilknytningen kan senere endres."},{title:"Opprett og fordel arbeidsroller.",text:"Roller opprettes på riktig nivå og fordeles til aktuelle personer. Tidsavgrensning og delegerte lederfullmakter brukes ved behov."},{title:"Forstå eierskapet til data.",text:"Enhet og roller styres lokalt. For AD-/LDAP-personell styres navn, e-post, brukernavn og passord av katalogen."}]} note="Ledere kan se personell på eget nivå og nedover. Administrasjon av brukere, roller og tilknytninger utføres på site-nivå." onClose={() => setHelpOpen(false)} />}
+      {helpOpen && <SectionHelp title={t("personnelHelpTitle")} intro={t("personnelHelpIntro")} steps={[{title:t("personnelHelpFindTitle"),text:t("personnelHelpFindText")},{title:t("personnelHelpAddTitle"),text:t("personnelHelpAddText")},{title:t("personnelHelpPlaceTitle"),text:t("personnelHelpPlaceText")},{title:t("personnelHelpRolesTitle"),text:t("personnelHelpRolesText")},{title:t("personnelHelpOwnershipTitle"),text:t("personnelHelpOwnershipText")}]} note={t("personnelHelpNote")} onClose={() => setHelpOpen(false)} />}
       <LocalUserDialog open={canManageSelectedSite && userCreatorOpen} units={personnelUnits} form={userForm} busy={busy} onChange={setUserForm} onSubmit={createUser} onClose={() => { setUserCreatorOpen(false); setUserForm({ displayName: "", email: "", username: "", organizationUnitId: personnelUnits[0]?.unit.id ?? "" }); }} />
       <DirectoryUserDialog
         open={canManageSelectedSite && directoryCreatorOpen}

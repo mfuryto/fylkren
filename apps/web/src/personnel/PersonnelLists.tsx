@@ -5,6 +5,7 @@ import type {
   RoleSummary,
 } from "../siteAdmin/models";
 import type { PersonnelUnit } from "./personnelHierarchy";
+import { useLanguage, useTranslation } from "../localization/LocalizationProvider";
 
 type Props = {
   access: AccessSummary;
@@ -29,6 +30,8 @@ export function PersonnelLists({
   onRemoveAssignment,
   onEditRole,
 }: Props) {
+  const t = useTranslation();
+  const language = useLanguage();
   const knownUnitIds = new Set(units.map(({ unit }) => unit.id));
   const unplacedMembers = access.members.filter(
     (member) =>
@@ -43,7 +46,7 @@ export function PersonnelLists({
           {member.email} · {member.username}
           {member.directoryProvider
             ? ` · ${member.directoryProvider.toUpperCase()}`
-            : " · Lokal"}
+            : ` · ${t("localAccount")}`}
         </span>
       </div>
       <div className="assignment-chips">
@@ -56,7 +59,7 @@ export function PersonnelLists({
                 {canManage && (
                   <button
                     type="button"
-                    aria-label={`Fjern rollen ${role.name}`}
+                    aria-label={t("removeNamedRole", { name: role.name })}
                     disabled={busy}
                     onClick={() => onRemoveAssignment(assignment)}
                   >
@@ -73,9 +76,9 @@ export function PersonnelLists({
               role.assignments.some(
                 (assignment) => assignment.personId === member.id,
               ),
-          ) && <span className="muted">Ingen rolle</span>}
+          ) && <span className="muted">{t("noRole")}</span>}
         {!member.organizationUnitId && (
-          <span className="muted">Ingen enhet</span>
+          <span className="muted">{t("noUnit")}</span>
         )}
       </div>
       {canManage && (
@@ -85,7 +88,7 @@ export function PersonnelLists({
             type="button"
             onClick={() => onEditMember(member)}
           >
-            Rediger
+            {t("edit")}
           </button>
           {!member.directoryProvider && (
             <button
@@ -93,7 +96,7 @@ export function PersonnelLists({
               type="button"
               onClick={() => onResetPassword(member)}
             >
-              Tilbakestill passord
+              {t("resetPassword")}
             </button>
           )}
           <button
@@ -101,7 +104,7 @@ export function PersonnelLists({
             type="button"
             onClick={() => onRemoveMember(member)}
           >
-            Fjern
+            {t("remove")}
           </button>
         </div>
       )}
@@ -112,7 +115,7 @@ export function PersonnelLists({
     <>
       <section className="panel personnel-list">
         <div className="section-heading">
-          <h2>Brukere</h2>
+          <h2>{t("users")}</h2>
           <span className="muted">{access.members.length}</span>
         </div>
         {units.flatMap(({ unit, depth }) => {
@@ -131,7 +134,7 @@ export function PersonnelLists({
                 {unit.name}
               </strong>
               <span className="muted">
-                {members.length} bruker{members.length === 1 ? "" : "e"}
+                {members.length === 1 ? t("userCountOne") : t("userCountMany", { count: members.length })}
               </span>
             </div>,
             ...members.map(renderMember),
@@ -140,8 +143,8 @@ export function PersonnelLists({
         {unplacedMembers.length > 0 && (
           <>
             <div className="hierarchy-group-heading">
-              <strong>Uten aktiv enhet</strong>
-              <span className="muted">Flytt brukeren til en aktiv enhet</span>
+              <strong>{t("withoutActiveUnit")}</strong>
+              <span className="muted">{t("moveUserToActiveUnit")}</span>
             </div>
             {unplacedMembers.map(renderMember)}
           </>
@@ -149,7 +152,7 @@ export function PersonnelLists({
       </section>
       <section className="panel role-list">
         <div className="section-heading">
-          <h2>Roller</h2>
+          <h2>{t("roles")}</h2>
           <span className="muted">{access.roles.length}</span>
         </div>
         {units.flatMap(({ unit, depth }) => {
@@ -158,7 +161,7 @@ export function PersonnelLists({
             .sort(
               (left, right) =>
                 Number(right.isLeader) - Number(left.isLeader) ||
-                left.name.localeCompare(right.name, "nb"),
+                left.name.localeCompare(right.name, language),
             );
           const membersWithoutRole = access.members.filter(
             (member) =>
@@ -180,7 +183,7 @@ export function PersonnelLists({
                 {unit.name}
               </strong>
               <span className="muted">
-                {roles.length} rolle{roles.length === 1 ? "" : "r"}
+                {roles.length === 1 ? t("roleCountOne") : t("roleCountMany", { count: roles.length })}
               </span>
             </div>,
             ...roles.map((role) => (
@@ -193,10 +196,10 @@ export function PersonnelLists({
                   <strong>{role.name}</strong>
                   <span className="muted">
                     {role.isLeader
-                      ? "Lederrolle"
+                      ? t("leaderRole")
                       : role.hasLeaderAccess
-                        ? "Arbeidsrolle med ledertilgang"
-                        : "Arbeidsrolle"}
+                        ? t("workRoleWithLeaderAccess")
+                        : t("workRole")}
                   </span>
                 </div>
                 <div className="role-assignees">
@@ -205,17 +208,17 @@ export function PersonnelLists({
                       <span key={assignment.id}>
                         {assignment.displayName}
                         {assignment.canLeadParentLevel
-                          ? " · leder overordnet"
+                          ? ` · ${t("parentLeaderShort")}`
                           : ""}
                       </span>
                     ))
                   ) : (
-                    <span className="muted">Ikke bemannet</span>
+                    <span className="muted">{t("unstaffed")}</span>
                   )}
                 </div>
                 {!canManage || role.isLeader ? (
                   <span className="muted protected-label">
-                    {canManage ? "Beskyttet" : "Kun visning"}
+                    {canManage ? t("protected") : t("viewOnly")}
                   </span>
                 ) : (
                   <button
@@ -223,7 +226,7 @@ export function PersonnelLists({
                     type="button"
                     onClick={() => onEditRole(role)}
                   >
-                    Rediger
+                    {t("edit")}
                   </button>
                 )}
               </article>
@@ -235,8 +238,8 @@ export function PersonnelLists({
                     key={`${unit.id}-without-role`}
                   >
                     <div style={{ paddingLeft: `${(depth + 2) * 20}px` }}>
-                      <strong>Ingen rolle</strong>
-                      <span className="muted">Enhetstilknytning</span>
+                      <strong>{t("noRole")}</strong>
+                      <span className="muted">{t("unitMembership")}</span>
                     </div>
                     <div className="role-assignees">
                       {membersWithoutRole.map((member) => (

@@ -3,7 +3,7 @@ import { extname, relative, resolve } from 'node:path';
 import { readdirSync, statSync } from 'node:fs';
 
 const root = resolve(import.meta.dirname, '..');
-const norwegianCatalog = 'apps/web/src/localization/catalogs/nb-NO/index.ts';
+const norwegianCatalog = 'apps/web/src/localization/catalogs/nb-NO';
 const baselinePath = resolve(root, 'tools/repository-language-baseline.json');
 const checkedExtensions = new Set(['.cs', '.json', '.md', '.mjs', '.sh', '.ts', '.tsx', '.yaml', '.yml']);
 const ignoredDirectories = new Set(['.git', '.git-local', 'backups', 'bin', 'dist', 'node_modules', 'obj', 'output', 'tmp']);
@@ -25,7 +25,7 @@ function markerCounts() {
   const counts = {};
   for (const absolutePath of allFiles(root)) {
     const path = relative(root, absolutePath);
-    if (path === norwegianCatalog) continue;
+    if (path === norwegianCatalog || path.startsWith(`${norwegianCatalog}/`)) continue;
     const content = readFileSync(absolutePath, 'utf8');
     const count = (content.match(norwegianCharacters)?.length ?? 0) +
       (content.match(norwegianWords)?.length ?? 0);
