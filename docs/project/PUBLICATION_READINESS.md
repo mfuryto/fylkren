@@ -44,6 +44,8 @@ The current personal private-repository plan does not provide branch protection,
 - [ ] Security contact/private reporting and supported-version policy are published.
 - [ ] Third-party notices and dependency/license scan are reviewed.
 - [ ] Repository safety, docs, builds and isolated E2E checks pass on the exact release candidate.
+- [ ] The `staging` branch, immutable staging deployment and recorded promotion gate in `RELEASE_VERSIONING.md` are operational; the accepted commit is promoted unchanged to `main`.
+- [ ] GitHub rules protect `staging` and `main`, require the maintained status checks, prevent deletion/force-push and restrict `main` updates to the owner or narrowly scoped release automation without enabling public pull requests.
 - [ ] `VERSION`, application version, `CHANGELOG.md`, signed `v1.0.0` tag, GitHub Release and published artifact digests identify the same accepted commit.
 - [ ] Final Community/Enterprise acceptance and independent security verification are evidenced.
 - [ ] GitHub description/topics, issue templates, branch protection and visibility are reviewed by the owner.
