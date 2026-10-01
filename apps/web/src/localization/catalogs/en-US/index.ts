@@ -11,8 +11,10 @@ import { reportsEn } from "./sections/reports";
 import { risksEn } from "./sections/risks";
 import { personnelEn } from "./sections/personnel";
 import { workTemplatesEn } from "./sections/workTemplates";
+import { workEn } from "./sections/work";
 
 export const en = {
+  ...workEn,
   ...workTemplatesEn,
   ...personnelEn,
   ...risksEn,

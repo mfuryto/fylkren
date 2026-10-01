@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { apiGet } from "../api/client";
+import { useTranslation } from "../localization/LocalizationProvider";
 
 export type RequestRecipient = {
   id: string;
@@ -23,6 +24,7 @@ export function useRequestRecipientSearch({
   recipientSelected?: boolean;
   onError: (message: string) => void;
 }) {
+  const t = useTranslation();
   const [recipients, setRecipients] = useState<RequestRecipient[]>([]);
 
   useEffect(() => {
@@ -38,7 +40,7 @@ export function useRequestRecipientSearch({
         : "";
       void apiGet<RequestRecipient[]>(
         `/api/work/sites/${siteId}/request-recipients?${source}search=${encodeURIComponent(query.trim())}`,
-        "Mottakere kunne ikke søkes opp.",
+        t("requestRecipientSearchFailed"),
         { signal: controller.signal },
       )
         .then(setRecipients)
@@ -48,7 +50,7 @@ export function useRequestRecipientSearch({
           onError(
             problem instanceof Error
               ? problem.message
-              : "Mottakere kunne ikke søkes opp.",
+              : t("requestRecipientSearchFailed"),
           );
         });
     }, 200);
@@ -57,7 +59,7 @@ export function useRequestRecipientSearch({
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [enabled, onError, query, recipientSelected, siteId, sourceUnitId]);
+  }, [enabled, onError, query, recipientSelected, siteId, sourceUnitId, t]);
 
   return [recipients, setRecipients] as const;
 }
