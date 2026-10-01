@@ -12,11 +12,11 @@ const unit = (values: Partial<TaskUnit>): TaskUnit => ({
 });
 
 describe("TemplateModels", () => {
-  it("bruker lederens nivå som standard for en lokal mal", () => {
+  it("uses the leader's level as the default for a local template", () => {
     expect(defaultTemplateOwnerUnitId(site(), [unit({ id: "member" }), unit({ id: "leader", isLeader: true })])).toBe("leader");
   });
 
-  it("lar Site Manager opprette site-felles mal", () => {
+  it("allows the Site Manager to create a site-wide template", () => {
     expect(defaultTemplateOwnerUnitId(site({ isSiteManager: true }), [unit({ id: "leader", isLeader: true })])).toBe("");
     expect(defaultTemplateOwnerUnitId(site({ isTopLevelLeader: true }), [unit({ id: "leader", isLeader: true })])).toBe("leader");
     expect(emptyTemplateForm()).toEqual({ id: "", name: "", content: "", ownerUnitId: "" });

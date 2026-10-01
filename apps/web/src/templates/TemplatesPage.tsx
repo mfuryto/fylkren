@@ -6,8 +6,10 @@ import { SectionHelp } from "../components/SectionHelp";
 import type { TaskSite, TaskUnit } from "../work/WorkContextModels";
 import { TemplateLibrary } from "./TemplateLibrary";
 import { defaultTemplateOwnerUnitId, emptyTemplateForm, type FinalReportTemplate, type TemplateForm, type TemplateSummary } from "./TemplateModels";
+import { useTranslation } from "../localization/LocalizationProvider";
 
 export function TemplatesPage() {
+  const t = useTranslation();
   const [helpOpen, setHelpOpen] = useState(false);
   const [sites, setSites] = useState<TaskSite[]>([]),
     [templates, setTemplates] = useState<TemplateSummary[]>([]);
@@ -19,7 +21,7 @@ export function TemplatesPage() {
   const [viewer, setViewer] = useState<TemplateSummary | null>(null);
   const [error, setError] = useState("");
   useEffect(() => {
-    apiGet<{ sites: TaskSite[]; units: TaskUnit[] }>("/api/work/context", "Malkonteksten kunne ikke lastes.")
+    apiGet<{ sites: TaskSite[]; units: TaskUnit[] }>("/api/work/context", t("templateContextLoadFailed"))
       .then((d: { sites: TaskSite[]; units: TaskUnit[] }) => {
         const values = d.sites;
         setSites(values);
@@ -27,19 +29,19 @@ export function TemplatesPage() {
         const firstSite = values[0];
         setSiteId(firstSite?.siteId ?? "");
         setForm(emptyTemplateForm(defaultTemplateOwnerUnitId(firstSite, d.units)));
-      }).catch((problem) => setError(problem instanceof Error ? problem.message : "Malkonteksten kunne ikke lastes."));
+      }).catch((problem) => setError(problem instanceof Error ? problem.message : t("templateContextLoadFailed")));
   }, []);
   async function load() {
     if (!siteId) return;
     try {
       const [templatesResponse, finalReportResponse] = await Promise.all([
-        apiGet<TemplateSummary[]>(`/api/templates/sites/${siteId}`, "Malene kunne ikke lastes."),
-        apiGet<{ content: string | null; canEdit: boolean }>(`/api/templates/sites/${siteId}/final-report`, "Sluttrapportmalen kunne ikke lastes."),
+        apiGet<TemplateSummary[]>(`/api/templates/sites/${siteId}`, t("workTemplatesLoadFailed")),
+        apiGet<{ content: string | null; canEdit: boolean }>(`/api/templates/sites/${siteId}/final-report`, t("finalReportTemplateLoadFailed")),
       ]);
       setTemplates(templatesResponse);
       setFinalReportTemplate({ content: finalReportResponse.content ?? "", canEdit: finalReportResponse.canEdit });
       setError("");
-    } catch (problem) { setError(problem instanceof Error ? problem.message : "Malene kunne ikke lastes."); }
+    } catch (problem) { setError(problem instanceof Error ? problem.message : t("workTemplatesLoadFailed")); }
   }
   useEffect(() => {
     const selected = sites.find((site) => site.siteId === siteId);
@@ -53,38 +55,35 @@ export function TemplatesPage() {
       form.id ? `/api/templates/${form.id}` : `/api/templates/sites/${siteId}`,
       form.id ? "PUT" : "POST",
       { name: form.name, content: form.content, ownerUnitId: form.ownerUnitId || null },
-      "Malen kunne ikke lagres. Kontroller at navnet er unikt.");
+      t("workTemplateSaveConflict"));
       const selected = sites.find((site) => site.siteId === siteId);
       setForm(emptyTemplateForm(defaultTemplateOwnerUnitId(selected, units)));
       await load();
-    } catch (problem) { setError(problem instanceof Error ? problem.message : "Malen kunne ikke lagres."); }
+    } catch (problem) { setError(problem instanceof Error ? problem.message : t("workTemplateSaveFailed")); }
   }
   async function remove(id: string) {
     try {
-      await apiMutate(`/api/templates/${id}`, "DELETE", undefined, "Malen kunne ikke slettes.");
+      await apiMutate(`/api/templates/${id}`, "DELETE", undefined, t("workTemplateDeleteFailed"));
       if (form.id === id) setForm(emptyTemplateForm());
       await load();
-    } catch (problem) { setError(problem instanceof Error ? problem.message : "Malen kunne ikke slettes."); }
+    } catch (problem) { setError(problem instanceof Error ? problem.message : t("workTemplateDeleteFailed")); }
   }
   async function saveFinalReportTemplate(event: React.FormEvent) {
     event.preventDefault();
     try {
-      await apiMutate(`/api/templates/sites/${siteId}/final-report`, "PUT", { content: finalReportTemplate.content }, "Sluttrapportmalen kunne ikke lagres.");
+      await apiMutate(`/api/templates/sites/${siteId}/final-report`, "PUT", { content: finalReportTemplate.content }, t("finalReportTemplateSaveFailed"));
       setFinalReportTemplateOpen(false);
       await load();
-    } catch (problem) { setError(problem instanceof Error ? problem.message : "Sluttrapportmalen kunne ikke lagres."); }
+    } catch (problem) { setError(problem instanceof Error ? problem.message : t("finalReportTemplateSaveFailed")); }
   }
   return (
     <div className="page">
       <header className="page-header">
         <div>
-          <h1>Maler</h1>
-          <p className="muted">
-            Forvalt sitens gjenbrukbare startinnhold. Malen knyttes til et steg
-            når arbeidsflyten konfigureres.
-          </p>
+          <h1>{t("workTemplates")}</h1>
+          <p className="muted">{t("workTemplatesIntro")}</p>
         </div>
-        <button className="help-button" type="button" onClick={() => setHelpOpen(true)}><i aria-hidden="true">?</i><span>Hjelp</span></button>
+        <button className="help-button" type="button" onClick={() => setHelpOpen(true)}><i aria-hidden="true">?</i><span>{t("help")}</span></button>
       </header>
       {error && <p className="error-message">{error}</p>}
       {sites.length > 1 && <section className="panel personnel-site">
@@ -102,11 +101,11 @@ export function TemplatesPage() {
       <section className="panel template-final-report-summary">
         <div className="admin-list-row">
           <span>
-            <strong>Sluttrapportmal</strong>
-            <small className="muted">{finalReportTemplate.content ? "Opprettet · felles for hele siten" : "Ikke opprettet"}</small>
+            <strong>{t("finalReportTemplate")}</strong>
+            <small className="muted">{finalReportTemplate.content ? t("finalReportTemplateCreated") : t("notCreated")}</small>
           </span>
           <button className={finalReportTemplate.canEdit ? "primary-button" : "secondary-button"} type="button" onClick={() => setFinalReportTemplateOpen(true)}>
-            {finalReportTemplate.canEdit ? (finalReportTemplate.content ? "Rediger" : "Opprett") : "Vis"}
+            {finalReportTemplate.canEdit ? (finalReportTemplate.content ? t("edit") : t("create")) : t("view")}
           </button>
         </div>
       </section>
@@ -118,16 +117,16 @@ export function TemplatesPage() {
           onRemove={template => { void remove(template.id); }}
         />
         {sites.find((site) => site.siteId === siteId)?.isSiteManager && <form className="panel stacked-form" onSubmit={save}>
-          <h2>{form.id ? "Rediger mal" : "Ny mal"}</h2>
+          <h2>{form.id ? t("editTemplatePlain") : t("newTemplate")}</h2>
           <div className="field">
-            <label>Omfang</label>
+            <label>{t("scope")}</label>
             <select disabled={Boolean(form.id)} value={form.ownerUnitId} onChange={(e) => setForm({ ...form, ownerUnitId: e.target.value })}>
-              <option value="">Felles for siten og planlegging</option>
+              <option value="">{t("sharedSitePlanning")}</option>
               {units.filter((unit) => unit.siteId === siteId && unit.isLeader).map((unit) => <option key={unit.id} value={unit.id}>{unit.name}</option>)}
             </select>
           </div>
           <div className="field">
-            <label>Navn</label>
+            <label>{t("name")}</label>
             <input
               required
               minLength={2}
@@ -137,55 +136,53 @@ export function TemplatesPage() {
             />
           </div>
           <div className="field">
-            <label>Startinnhold</label>
+            <label>{t("startingContent")}</label>
             <RichTextEditor
               value={form.content}
               onChange={(content) => setForm({ ...form, content })}
             />
           </div>
-          <p className="muted">
-            Velg malen for ønsket steg på siden Arbeidsflyter.
-          </p>
-          <button className="primary-button">Lagre mal</button>
+          <p className="muted">{t("selectTemplateInWorkflows")}</p>
+          <button className="primary-button">{t("saveWorkTemplate")}</button>
           {form.id && (
             <button
               className="secondary-button"
               type="button"
               onClick={() => setForm(emptyTemplateForm(defaultTemplateOwnerUnitId(sites.find(site => site.siteId === siteId), units)))}
             >
-              Avbryt redigering
+              {t("cancelEditing")}
             </button>
           )}
         </form>}
       </div>
-      {helpOpen && <SectionHelp title="Slik arbeider du med maler" intro="Maler gir gjenbrukbart startinnhold til arbeidsflytsteg og sluttrapporter. De endrer ikke innhold som allerede er tatt i bruk." steps={[{title:"Velg riktig maltype.",text:"Vanlige maler brukes som startinnhold i valgte arbeidsflytsteg. Sluttrapportmalen er én egen, site-felles mal for alle nivåer."},{title:"Velg omfang.",text:"En mal kan være felles for siten og planleggingen eller eies av et internt nivå for lokale utførelsesflyter."},{title:"Skriv startinnholdet.",text:"Bruk overskrifter, lister og vanlig tekst for å gi en ryddig struktur som brukeren kan fylle ut videre."},{title:"Knytt malen til arbeidsflyten.",text:"Koblingen gjøres i konfigurasjonen av det aktuelle arbeidsflytsteget, ikke mens oppdraget behandles."},{title:"Forvalt lokalt innhold.",text:"Sjef og bemyndiget leder kan opprette og redigere maler som eies av deres nivå. Site Manager forvalter site-felles maler og sluttrapportmalen."}]} note="Alle nivåer kan se malene i siten. Bare eiernivået kan endre eller slette dem." onClose={() => setHelpOpen(false)} />}
+      {helpOpen && <SectionHelp title={t("workTemplateHelpTitle")} intro={t("workTemplateHelpIntro")} steps={[{title:t("workTemplateHelpTypeTitle"),text:t("workTemplateHelpTypeText")},{title:t("workTemplateHelpScopeTitle"),text:t("workTemplateHelpScopeText")},{title:t("workTemplateHelpContentTitle"),text:t("workTemplateHelpContentText")},{title:t("workTemplateHelpLinkTitle"),text:t("workTemplateHelpLinkText")},{title:t("workTemplateHelpManageTitle"),text:t("workTemplateHelpManageText")}]} note={t("workTemplateHelpNote")} onClose={() => setHelpOpen(false)} />}
       {viewer && (
         <Modal title={viewer.name} onClose={() => setViewer(null)}>
-          <RichTextContent value={viewer.content} empty="Tomt startinnhold" />
+          <RichTextContent value={viewer.content} empty={t("emptyStartingContent")} />
           <div className="modal-actions">
-            <button className="secondary-button" type="button" onClick={() => setViewer(null)}>Lukk</button>
-            {viewer.canEdit && <button className="primary-button" type="button" onClick={() => { const selected=viewer; setViewer(null); setForm({ ...selected, ownerUnitId: selected.ownerUnitId ?? "" }); }}>Rediger</button>}
+            <button className="secondary-button" type="button" onClick={() => setViewer(null)}>{t("close")}</button>
+            {viewer.canEdit && <button className="primary-button" type="button" onClick={() => { const selected=viewer; setViewer(null); setForm({ ...selected, ownerUnitId: selected.ownerUnitId ?? "" }); }}>{t("edit")}</button>}
           </div>
         </Modal>
       )}
       {finalReportTemplateOpen && (
-        <Modal title="Sluttrapportmal" onClose={() => setFinalReportTemplateOpen(false)}>
+        <Modal title={t("finalReportTemplate")} onClose={() => setFinalReportTemplateOpen(false)}>
           {finalReportTemplate.canEdit ? (
             <form className="stacked-form" onSubmit={saveFinalReportTemplate}>
-              <p className="muted modal-note">Malen brukes som startinnhold i nye sluttrapporter på alle nivåer i siten.</p>
+              <p className="muted modal-note">{t("finalReportTemplateIntro")}</p>
               <div className="field">
-                <label>Startinnhold</label>
+                <label>{t("startingContent")}</label>
                 <RichTextEditor value={finalReportTemplate.content} onChange={(content) => setFinalReportTemplate({ ...finalReportTemplate, content })} />
               </div>
               <div className="modal-actions">
-                <button className="secondary-button" type="button" onClick={() => setFinalReportTemplateOpen(false)}>Avbryt</button>
-                <button className="primary-button">Lagre mal</button>
+                <button className="secondary-button" type="button" onClick={() => setFinalReportTemplateOpen(false)}>{t("cancel")}</button>
+                <button className="primary-button">{t("saveWorkTemplate")}</button>
               </div>
             </form>
           ) : (
             <div className="stacked-form">
-              <RichTextContent value={finalReportTemplate.content} empty="Ingen sluttrapportmal er opprettet." />
-              <div className="modal-actions"><button className="secondary-button" type="button" onClick={() => setFinalReportTemplateOpen(false)}>Lukk</button></div>
+              <RichTextContent value={finalReportTemplate.content} empty={t("noFinalReportTemplate")} />
+              <div className="modal-actions"><button className="secondary-button" type="button" onClick={() => setFinalReportTemplateOpen(false)}>{t("close")}</button></div>
             </div>
           )}
         </Modal>
