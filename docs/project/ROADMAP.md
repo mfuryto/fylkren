@@ -83,6 +83,26 @@ Requirements include:
 
 Existing `nb-NO` behavior must remain compatible during migration. Norwegian text is permitted only inside the dedicated `nb-NO` language resources; source, comments, tests, examples and documentation remain English.
 
+## Human-readable work references after internationalization
+
+After the internationalization gate is complete, introduce a Jira-inspired human-readable reference for every work item, including parent work, delegated child work, requests and federated work. The database UUID remains the canonical internal identifier; the reference is a durable operator-facing identifier used in navigation, search, notifications, reports, exports, audit presentation and supported APIs.
+
+Platform Manager must administer the installation-wide reference policy in the GUI. This includes allowed prefix syntax and length, reserved prefixes, namespace rules, sequence behavior and collision diagnostics. Site Manager must configure the permitted reference prefix and related presentation settings for each site in the GUI. Configuration changes and reference allocation are audited. Numbers are allocated transactionally, never reused, and remain stable when a site is renamed, moved, deactivated or restored. Changing a prefix must not silently rewrite historical references; retained aliases or an explicit migration policy must preserve existing links and searches.
+
+The design must include:
+
+- a readable form such as `OPS-1234`, without treating that text as the authorization or tenancy boundary;
+- deterministic, concurrency-safe allocation and a documented migration for existing work items;
+- exact and partial reference search, direct navigation and clear display throughout Tasks, Planning, Execution, Reports and approval history;
+- validation and preview in Platform Manager and Site Manager before a policy is activated;
+- backup, restore, portable export, API, webhook, notification and audit coverage;
+- explicit behavior for child work, requests, cancellation, reassignment, site moves and prefix changes;
+- accessibility and localization of surrounding labels while the reference itself remains language-neutral.
+
+Federation must not assume that a display reference is globally unique. The stable origin tuple `(originInstanceId, originSiteId, originResourceId)` remains the cross-installation identity and idempotency key. Federated presentation must retain both the origin reference and the receiving installation's local reference when one is allocated. A compact instance/site namespace or qualified display form may be added for people, but collisions must be detected and shown rather than resolved by silently changing a remote reference. Mixed-version delivery, retries, site moves, peer replacement, restore and export/import must preserve provenance and both references.
+
+Before implementation, record the final prefix, alias, sequence and federated presentation decisions in the architecture decision register and extend the end-to-end matrix with concurrency and collision scenarios.
+
 ## Community and Enterprise release gate
 
 The [edition architecture](../architecture/EDITION_ENTITLEMENTS.md) is part of the 1.0 production design, not a post-release product split. Before final system testing, complete private issuer key management, review software-license compatibility and prior history, and validate server-side entitlement enforcement, UI state, offline activation, expiry and customer-data access using the same API/web images and schema that will ship.
