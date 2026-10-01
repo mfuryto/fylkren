@@ -12,7 +12,7 @@ import { AppContent, preloadOperationalPages } from "./app/AppContent";
 import { getDescendantWorkload, getOverviewWorkItems, getTaskContext } from "./tasks/taskApi";
 import { applyBrandingFavicon } from "./branding/favicon";
 import { LocalizationProvider } from "./localization/LocalizationProvider";
-import { translate } from "./localization";
+import { regionalDisplayLocale, translate } from "./localization";
 
 function warmAuthenticatedExperience(session: Session, location = currentAppLocation()) {
   if (!session.authenticated) return;
@@ -119,16 +119,14 @@ function App() {
   const activeRegionalSettings = configuration ?? loginConfiguration;
   const displayTimeZone = activeRegionalSettings?.timeZone ?? "UTC";
   const baseLanguage = activeRegionalSettings?.defaultLanguage ?? "en";
-  const displayLanguage = new Intl.Locale(baseLanguage, {
-    hourCycle: activeRegionalSettings?.clockFormat === "12-hour" ? "h12" : "h23",
-  }).toString();
+  const displayLanguage = regionalDisplayLocale(baseLanguage, activeRegionalSettings?.clockFormat ?? "24-hour");
 
   useEffect(() => {
     document.documentElement.lang = baseLanguage;
   }, [baseLanguage]);
 
   if (session === null || loginConfiguration === null)
-    return <LocalizationProvider language={baseLanguage}><div className="login-page">Loading…</div></LocalizationProvider>;
+    return <LocalizationProvider language={displayLanguage}><div className="login-page">Loading…</div></LocalizationProvider>;
   const brandedStyle = {
     "--brand": branding.primaryColor,
     "--accent": branding.accentColor,
@@ -143,7 +141,7 @@ function App() {
         : "";
   if (!session.authenticated)
     return (
-      <LocalizationProvider language={baseLanguage}><div className={themeClass} style={brandedStyle}>
+      <LocalizationProvider language={displayLanguage}><div className={themeClass} style={brandedStyle}>
         {branding.customCss && <style id="customer-css-overrides">{branding.customCss}</style>}
         <LoginPage
           onSignedIn={(nextSession) => {
@@ -182,7 +180,7 @@ function App() {
   }
 
   if (configuration === null)
-    return <LocalizationProvider language={baseLanguage}><div className="login-page">{configurationError
+    return <LocalizationProvider language={displayLanguage}><div className="login-page">{configurationError
       ? <div><p>Configuration could not be loaded.</p><button type="button" onClick={() => {
           setConfigurationError(false);
           void apiGet<PublicConfiguration>("/api/configuration", "Configuration could not be loaded.")
@@ -223,7 +221,7 @@ function App() {
   };
 
   return (
-    <LocalizationProvider language={baseLanguage}><div className={themeClass} style={brandedStyle}>
+    <LocalizationProvider language={displayLanguage}><div className={themeClass} style={brandedStyle}>
       {branding.customCss && <style id="customer-css-overrides">{branding.customCss}</style>}
       <ProductShell
         activeItem={effectiveItem}

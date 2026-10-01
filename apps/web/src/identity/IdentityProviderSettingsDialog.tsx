@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import type React from "react";
 import { errorMessage } from "../api/errors";
 import { Modal } from "../components/Modal";
-import { useTranslation } from "../localization/LocalizationProvider";
+import { useLanguage, useTranslation } from "../localization/LocalizationProvider";
 import { loadIdentityProviderSettings, saveIdentityProviderSettings, testIdentityProvider } from "./identityApi";
 import type { IdentityProvider, IdentityProviderSettings } from "./models";
 
 export function IdentityProviderSettingsDialog({ provider, onClose, onSaved }: { provider: IdentityProvider; onClose: () => void; onSaved: () => Promise<void> }) {
   const t = useTranslation();
+  const language = useLanguage();
   const [settings, setSettings] = useState<IdentityProviderSettings | null>(null), [secret, setSecret] = useState(""), [clearSecret, setClearSecret] = useState(false), [busy, setBusy] = useState(false), [message, setMessage] = useState("");
   useEffect(() => { void loadIdentityProviderSettings(provider.key).then(setSettings).catch(problem => setMessage(errorMessage(problem, t("providerSettingsLoadFailed")))); }, [provider.key]);
   if (!settings) return <Modal title={t("configureProvider", { provider: provider.name })} onClose={onClose}><p className="status-message">{message || t("loading")}</p></Modal>;
@@ -34,7 +35,7 @@ export function IdentityProviderSettingsDialog({ provider, onClose, onSaved }: {
       {provider.key === "saml" && <><div className="field"><label>{t("metadataUrl")}</label><input required={settings.enabled} type="url" maxLength={1000} value={config.metadataUrl ?? ""} onChange={event => setConfig({ metadataUrl: event.target.value })} /></div><div className="field"><label>{t("fylkrenSpEntityId")}</label><input required={settings.enabled} maxLength={1000} value={config.entityId ?? ""} onChange={event => setConfig({ entityId: event.target.value })} /></div><div className="field"><label>{t("idpEntityId")}</label><input required={settings.enabled} maxLength={1000} value={config.identityProviderEntityId ?? ""} onChange={event => setConfig({ identityProviderEntityId: event.target.value })} /></div><div className="field"><label>{t("modulePath")}</label><input required value={config.modulePath} onChange={event => setConfig({ modulePath: event.target.value })} /></div></>}
       {provider.key === "local" && <><div className="field"><label>{t("defaultSignInPage")}</label><select value={config.ssoAutoRedirectProvider ?? ""} onChange={event => setConfig({ ssoAutoRedirectProvider: event.target.value || null })}><option value="">{t("showSignInMethods")}</option><option value="oidc">{t("goDirectlyOidc")}</option><option value="saml">{t("goDirectlySaml")}</option></select></div><p className="status-message">{t("ssoEmergencyAccess")}</p><p className="muted">{t("localEmergencyRecommendation")}</p></>}
       {(directory || provider.key === "oidc") && <><div className="field"><label>{provider.key === "oidc" ? t("clientSecret") : t("bindPassword")}</label><input type="password" maxLength={2000} autoComplete="new-password" value={secret} placeholder={settings.hasSecret ? t("storedSecretPlaceholder") : t("notProvided")} onChange={event => setSecret(event.target.value)} /></div>{settings.hasSecret && <label className="checkbox-row"><input type="checkbox" checked={clearSecret} onChange={event => setClearSecret(event.target.checked)} /><span>{t("removeStoredSecret")}</span></label>}</>}
-      {settings.lastTestedAt && <p className={settings.lastTestSucceeded ? "status-message" : "status-message error-message"}>{t("lastTested", { date: new Date(settings.lastTestedAt).toLocaleString(), result: settings.lastTestSucceeded ? t("successful") : settings.lastTestError || t("unsuccessful") })}</p>}
+      {settings.lastTestedAt && <p className={settings.lastTestSucceeded ? "status-message" : "status-message error-message"}>{t("lastTested", { date: new Date(settings.lastTestedAt).toLocaleString(language), result: settings.lastTestSucceeded ? t("successful") : settings.lastTestError || t("unsuccessful") })}</p>}
       {message && <p className="status-message">{message}</p>}
       <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>{t("close")}</button>{provider.key !== "local" && <button className="secondary-button" type="button" disabled={busy} onClick={() => void test()}>{t("testStoredConfiguration")}</button>}<button className="primary-button" disabled={busy}>{t("saveAndApply")}</button></div>
     </form>

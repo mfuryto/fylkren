@@ -10,7 +10,14 @@ export function normalizeLanguage(value: string): SupportedLanguage {
 }
 
 export type MessageVariables = Record<string, string | number>;
+export type ClockFormat = "12-hour" | "24-hour";
 let activeLanguage: SupportedLanguage = "en";
+
+export function regionalDisplayLocale(language: string, clockFormat: ClockFormat): string {
+  return new Intl.Locale(normalizeLanguage(language), {
+    hourCycle: clockFormat === "12-hour" ? "h12" : "h23",
+  }).toString();
+}
 
 export function setActiveLanguage(language: string) {
   activeLanguage = normalizeLanguage(language);

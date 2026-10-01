@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { errorMessage } from "../api/errors";
 import { Modal } from "../components/Modal";
 import { EnterpriseRequiredNotice } from "../components/EnterpriseRequiredNotice";
-import { useTranslation } from "../localization/LocalizationProvider";
+import { useLanguage, useTranslation } from "../localization/LocalizationProvider";
 import { loadSites } from "../siteAdmin/siteAdminApi";
 import type { SiteSummary } from "../siteAdmin/models";
 import {
@@ -21,6 +21,7 @@ import {
 
 export function FederationPage({ canManage }: { canManage: boolean }) {
   const t = useTranslation();
+  const language = useLanguage();
   const [identity, setIdentity] = useState<FederationIdentity | null>(null);
   const [routing, setRouting] = useState<FederationRouting | null>(null);
   const [peers, setPeers] = useState<FederationPeer[]>([]);
@@ -269,11 +270,11 @@ export function FederationPage({ canManage }: { canManage: boolean }) {
       {!deliveries || deliveries.items.length === 0 ? <p className="empty-state">{t("noFederationDeliveries")}</p> : <div className="admin-list">
         {deliveries.items.map(delivery => <div className="admin-list-row notification-delivery-row" key={delivery.messageId}>
           <span><strong>{delivery.messageType}</strong>
-            <small>{t("createdMessage", { date: new Date(delivery.createdAt).toLocaleString(), id: delivery.messageId })}</small>
+            <small>{t("createdMessage", { date: new Date(delivery.createdAt).toLocaleString(language), id: delivery.messageId })}</small>
             <small>{delivery.status === "delivered" && delivery.deliveredAt
-              ? t("deliveredDate", { date: new Date(delivery.deliveredAt).toLocaleString() })
+              ? t("deliveredDate", { date: new Date(delivery.deliveredAt).toLocaleString(language) })
               : delivery.status === "failed" ? t("noAutomaticRetries")
-                : t("nextAttemptDate", { date: new Date(delivery.nextAttemptAt).toLocaleString() })}</small>
+                : t("nextAttemptDate", { date: new Date(delivery.nextAttemptAt).toLocaleString(language) })}</small>
             {delivery.lastErrorCode && <small className="delivery-error">{t("errorCode", { code: delivery.lastErrorCode })}</small>}
           </span>
           <span><strong className={`delivery-status ${delivery.status}`}>{delivery.status === "pending" ? t("pending") : delivery.status === "retrying" ? t("retrying") : delivery.status === "delivered" ? t("delivered") : t("failed")}{delivery.attemptCount > 0 ? ` · ${t("attempts", { count: delivery.attemptCount })}` : ""}</strong>
