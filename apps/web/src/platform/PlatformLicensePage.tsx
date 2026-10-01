@@ -4,7 +4,7 @@ import { errorMessage } from "../api/errors";
 import { Modal } from "../components/Modal";
 import issuerMark from "../assets/thunold-olsen-licensing-mark.png";
 import { useLanguage, useTranslation } from "../localization/LocalizationProvider";
-import type { MessageKey } from "../localization/en";
+import type { MessageKey } from "../localization";
 
 type LicenseStatus = {
   edition: "community" | "enterprise";

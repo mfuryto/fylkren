@@ -15,7 +15,7 @@ describe("appearance administration", () => {
       customCss: ".panel { border-radius: 8px; }",
       hasLogo: false,
     }} regionalSettings={{
-      defaultLanguage: "en",
+      defaultLanguage: "en-US",
       timeZone: "UTC",
       clockFormat: "24-hour",
       measurementSystem: "metric",
@@ -33,7 +33,7 @@ describe("appearance administration", () => {
       topBarColor: "#202020", topBarTextColor: "#ffffff",
       customCss: "", hasLogo: false,
     }} regionalSettings={{
-      defaultLanguage: "en", timeZone: "UTC", clockFormat: "24-hour",
+      defaultLanguage: "en-US", timeZone: "UTC", clockFormat: "24-hour",
       measurementSystem: "metric",
     }} onChanged={() => undefined} onRegionalChanged={() => undefined} />);
 

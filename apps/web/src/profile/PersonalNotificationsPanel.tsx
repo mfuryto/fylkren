@@ -7,7 +7,7 @@ import {
 } from "../notifications/notificationApi";
 import { errorMessage } from "../api/errors";
 import { useTranslation } from "../localization/LocalizationProvider";
-import type { MessageKey } from "../localization/en";
+import type { MessageKey } from "../localization";
 
 const notificationLabels: Record<keyof NotificationSettings, MessageKey> = {
   newWorkItems: "personalNotificationNewWork",

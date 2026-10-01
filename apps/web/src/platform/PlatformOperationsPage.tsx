@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { apiGet } from "../api/client";
 import { errorMessage } from "../api/errors";
 import { useLanguage, useTranslation } from "../localization/LocalizationProvider";
-import type { MessageKey } from "../localization/en";
+import type { MessageKey } from "../localization";
 import type { MessageVariables } from "../localization";
 
 type Translator = (key: MessageKey, variables?: MessageVariables) => string;

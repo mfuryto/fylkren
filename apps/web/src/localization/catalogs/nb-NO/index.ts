@@ -1,4 +1,4 @@
-import type { MessageKey } from "./en";
+import type { MessageKey } from "../en-US";
 
 export const nbNO: Record<MessageKey, string> = {
   risksLoadFailed: "Risikoene kunne ikke lastes.", riskUpdateFailed: "Risikoen kunne ikke oppdateres.", riskSaveFailed: "Risikoen kunne ikke lagres.", mitigationSaveFailed: "Tiltaket kunne ikke lagres.", mitigationCompleteFailed: "Tiltaket kunne ikke fullføres.", riskAndMitigations: "Risiko og tiltak", noRisks: "Ingen risikoer er registrert.", riskLevelLow: "Lav", riskLevelModerate: "Moderat", riskLevelHigh: "Høy", riskLevelCritical: "Kritisk", riskProbability: "Sannsynlighet", riskImpact: "Konsekvens", riskOwner: "Eier", riskStatus: "Status", residualRisk: "Gjenværende risiko", mitigations: "Tiltak", noMitigations: "Ingen tiltak er registrert.", mitigationDue: "frist {date}", completeMitigation: "Fullfør", editRisk: "Rediger risiko", newMitigation: "Nytt tiltak", registerRisk: "Registrer risiko", riskTitle: "Tittel", riskDescription: "Beskrivelse", riskDueDate: "Frist", riskStatusIdentified: "Identifisert", riskStatusActive: "Aktiv", riskStatusMitigating: "Tiltak pågår", riskStatusAccepted: "Akseptert", riskStatusClosed: "Lukket", mitigationStatusPlanned: "Planlagt", mitigationStatusInProgress: "Pågår", mitigationStatusCompleted: "Fullført", residualRiskAfterMitigation: "Gjenværende risiko etter tiltak", residualProbability: "Gjenværende sannsynlighet", residualImpact: "Gjenværende konsekvens", notAssessed: "Ikke vurdert", riskEditVersionHelp: "Endringen lagres som en ny historisk versjon.", riskOwnerHelp: "Du settes som risikoeier.", riskCalculationHelp: "Risikonivå beregnes av sannsynlighet × konsekvens. Gjenværende risiko oppgis først når begge verdiene er vurdert.", cancelEditing: "Avbryt redigering", saveNewVersion: "Lagre ny versjon", registerMitigation: "Registrer risikoreduserende tiltak", mitigationAction: "Tiltak", mitigationOwnerHelp: "Du settes som ansvarlig. Tiltaket kan følges til fullført status.", saveMitigation: "Lagre tiltak",
@@ -442,7 +442,8 @@ export const nbNO: Record<MessageKey, string> = {
   regionalTitle: "Språk og regionale innstillinger",
   regionalIntro: "Standardene gjelder hele plattformen umiddelbart og krever ikke omstart av serveren.",
   language: "Språk",
-  languageEnglish: "Engelsk",
+  languageEnglishUK: "Engelsk (Storbritannia)",
+  languageEnglishUS: "Engelsk (USA)",
   languageNorwegian: "Norsk bokmål",
   timeZone: "Tidssone",
   clockFormat: "Klokkeformat",

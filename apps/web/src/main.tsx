@@ -71,7 +71,7 @@ function App() {
       .catch(() =>
         setLoginConfiguration({
           setupRequired: false,
-          defaultLanguage: "en",
+          defaultLanguage: "en-US",
           timeZone: "UTC",
           clockFormat: "24-hour",
           measurementSystem: "metric",
@@ -118,7 +118,7 @@ function App() {
 
   const activeRegionalSettings = configuration ?? loginConfiguration;
   const displayTimeZone = activeRegionalSettings?.timeZone ?? "UTC";
-  const baseLanguage = activeRegionalSettings?.defaultLanguage ?? "en";
+  const baseLanguage = activeRegionalSettings?.defaultLanguage ?? "en-US";
   const displayLanguage = regionalDisplayLocale(baseLanguage, activeRegionalSettings?.clockFormat ?? "24-hour");
 
   useEffect(() => {

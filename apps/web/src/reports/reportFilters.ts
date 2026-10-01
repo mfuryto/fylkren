@@ -1,6 +1,6 @@
 import type { TaskUnit } from "../work/WorkContextModels";
 
-export function availableReportUnits(units: TaskUnit[], siteId: string, language = "en") {
+export function availableReportUnits(units: TaskUnit[], siteId: string, language = "en-US") {
   return units
     .filter(unit => unit.siteId === siteId && !unit.isSiteLeadership && unit.assignedToMe)
     .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, language));

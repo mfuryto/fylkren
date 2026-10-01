@@ -14,7 +14,7 @@ public sealed class RegionalSettings
     }
 
     public Guid Id { get; private set; }
-    public string DefaultLanguage { get; private set; } = "en";
+    public string DefaultLanguage { get; private set; } = "en-US";
     public string TimeZone { get; private set; } = "UTC";
     public string ClockFormat { get; private set; } = "24-hour";
     public string MeasurementSystem { get; private set; } = "metric";
@@ -35,7 +35,9 @@ public sealed class RegionalSettings
             language.Equals("no", StringComparison.OrdinalIgnoreCase) ||
             language.Equals("no-NO", StringComparison.OrdinalIgnoreCase))
             return "nb-NO";
-        return "en";
+        if (language.Equals("en-GB", StringComparison.OrdinalIgnoreCase))
+            return "en-GB";
+        return "en-US";
     }
 
     private static string NormalizeTimeZone(string? value)

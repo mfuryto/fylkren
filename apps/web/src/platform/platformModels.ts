@@ -128,4 +128,4 @@ export function apiClientExpiryDate(days = 90) {
 export function formatPlatformDateTime(value: string | null, language: string, timeZone: string, emptyValue = "Never") {
   return value ? new Date(value).toLocaleString(language, { timeZone }) : emptyValue;
 }
-import type { MessageKey } from "../localization/en";
+import type { MessageKey } from "../localization";

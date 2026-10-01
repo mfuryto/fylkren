@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { errorMessage } from "../api/errors";
-import type { MessageKey } from "../localization/en";
+import type { MessageKey } from "../localization";
 import { useTranslation } from "../localization/LocalizationProvider";
 import { loadNotificationSites, loadSiteNotificationSettings, saveSiteNotificationSettings, type NotificationSettings, type NotificationSite } from "./notificationApi";
 

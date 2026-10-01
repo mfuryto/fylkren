@@ -1,14 +1,14 @@
-import { platformApiEn } from "./platformApi.en";
-import { federationEn } from "./federation.en";
-import { identityEn } from "./identity.en";
-import { notificationsEn } from "./notifications.en";
-import { sitesEn } from "./sites.en";
-import { siteAuditEn } from "./siteAudit.en";
-import { profileEn } from "./profile.en";
-import { overviewEn } from "./overview.en";
-import { organizationEn } from "./organization.en";
-import { reportsEn } from "./reports.en";
-import { risksEn } from "./risks.en";
+import { platformApiEn } from "./sections/platformApi";
+import { federationEn } from "./sections/federation";
+import { identityEn } from "./sections/identity";
+import { notificationsEn } from "./sections/notifications";
+import { sitesEn } from "./sections/sites";
+import { siteAuditEn } from "./sections/siteAudit";
+import { profileEn } from "./sections/profile";
+import { overviewEn } from "./sections/overview";
+import { organizationEn } from "./sections/organization";
+import { reportsEn } from "./sections/reports";
+import { risksEn } from "./sections/risks";
 
 export const en = {
   ...risksEn,
@@ -412,7 +412,8 @@ export const en = {
   regionalTitle: "Language and regional settings",
   regionalIntro: "These defaults apply across the platform immediately and do not require a server restart.",
   language: "Language",
-  languageEnglish: "English",
+  languageEnglishUK: "English (United Kingdom)",
+  languageEnglishUS: "English (United States)",
   languageNorwegian: "Norwegian (Bokmal)",
   timeZone: "Time zone",
   clockFormat: "Clock format",

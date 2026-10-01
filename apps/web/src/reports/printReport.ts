@@ -12,7 +12,7 @@ export function reportPrintPageStyles(classification: string) {
   }`;
 }
 
-export function printReportDocument(language = "en", title = "Report", frameTitle = "Report print view") {
+export function printReportDocument(language = "en-US", title = "Report", frameTitle = "Report print view") {
   const report = document.getElementById("printable-report");
   if (!report) return;
 

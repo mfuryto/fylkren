@@ -34,7 +34,7 @@ services:
       Fylkren__Federation__RetentionDays: ${FYLKREN_FEDERATION_RETENTION_DAYS:-2555}
       # Legacy values are imported only when the database has no regional settings.
       # All later changes are made in Platform Manager without restarting containers.
-      Fylkren__Localization__DefaultLanguage: ${FYLKREN_DEFAULT_LANGUAGE:-en}
+      Fylkren__Localization__DefaultLanguage: ${FYLKREN_DEFAULT_LANGUAGE:-en-US}
       Fylkren__Localization__TimeZone: ${FYLKREN_TIME_ZONE:-UTC}
       Fylkren__Operations__HostStatusPath: /run/fylkren-host-status/host-status.json
       Fylkren__Operations__HostStatusMaximumAgeMinutes: ${FYLKREN_HOST_STATUS_MAXIMUM_AGE_MINUTES:-15}

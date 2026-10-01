@@ -236,7 +236,7 @@ Classification definitions are created, ordered, edited, deleted and activated c
 
 Under **Appearance**, Platform Manager configures names, theme colors and logo. The **Custom CSS overrides** box below Logo accepts up to 20,000 characters and applies the saved rules after Fylkren's standard theme on every page, including sign-in. External resources through `url()` and `@import` are rejected so a style override cannot introduce an additional network dependency. Clearing the box and saving restores the standard CSS without changing the other appearance settings.
 
-The **Language and regional settings** box stores the platform defaults for UI language, IANA time zone, 12/24-hour clock and metric/imperial measurements. Changes apply immediately without restarting the server. English is the source language and fallback. Timestamps remain stored in UTC, and changing presentation units never reinterprets stored values.
+The **Language and regional settings** box stores the platform defaults for UI language, IANA time zone, 12/24-hour clock and metric/imperial measurements. Changes apply immediately without restarting the server. American English is the source language and fallback, while British English is selected separately where its wording or locale conventions differ. Timestamps remain stored in UTC, and changing presentation units never reinterprets stored values.
 
 ### Federering mellom installasjoner
 

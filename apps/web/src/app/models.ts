@@ -13,7 +13,7 @@ export type Branding = {
 };
 
 export type RegionalSettings = {
-  defaultLanguage: "en" | "nb-NO";
+  defaultLanguage: "en-GB" | "en-US" | "nb-NO";
   timeZone: string;
   clockFormat: "12-hour" | "24-hour";
   measurementSystem: "metric" | "imperial";

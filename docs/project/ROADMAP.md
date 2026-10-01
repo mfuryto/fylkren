@@ -69,7 +69,7 @@ Use the [security test plan](../security/SECURITY_TEST_PLAN.md), [threat model](
 
 ## Internationalization
 
-Internationalization is an active pre-release gate. Move all user-visible text from source code into language resources. English is the complete source catalog and mandatory fallback; Norwegian Bokmål is a separate complete catalog.
+Internationalization is an active pre-release gate. Move all user-visible text from source code into language resources. American English (`en-US`) is the complete source catalog and mandatory fallback; British English (`en-GB`) is a distinct complete regional variant, and Norwegian Bokmål is a separate complete catalog.
 
 Requirements include:
 
@@ -83,7 +83,7 @@ Requirements include:
 
 Existing `nb-NO` behavior must remain compatible during migration. Norwegian text is permitted only inside the dedicated `nb-NO` language resources; source, comments, tests, examples and documentation remain English.
 
-When the English migration and full repository-language check are complete, stop before beginning further translations and obtain explicit product-owner approval. The subsequent planned packs, in approved order, are Swedish (`sv-SE`), Danish (`da-DK`), Finnish (`fi-FI`), German (`de-DE`), French (`fr-FR`), Polish (`pl-PL`), Spanish (`es-ES`), Italian (`it-IT`) and Ukrainian (`uk-UA`). They remain planned rather than supported until delivered and accepted individually under the [language-pack requirements](../product/LOCALIZATION.md).
+When the English migration and full repository-language check are complete, stop before beginning further translations and obtain explicit product-owner approval. The subsequent planned packs, in approved order, are Swedish (`sv-SE`), Danish (`da-DK`), Finnish (`fi-FI`), German (`de-DE`), French (`fr-FR`), Polish (`pl-PL`), Spanish (`es-ES`), Italian (`it-IT`), Ukrainian (`uk-UA`), Dutch (`nl-NL`), Portuguese (`pt-PT`), Czech (`cs-CZ`), Romanian (`ro-RO`), Estonian (`et-EE`), Latvian (`lv-LV`), Lithuanian (`lt-LT`) and Icelandic (`is-IS`). The first nine form the initial translation phase; the remaining languages follow the documented priority tiers. They remain planned rather than supported until delivered and accepted individually under the [language-pack requirements](../product/LOCALIZATION.md).
 
 ## Human-readable work references after internationalization
 

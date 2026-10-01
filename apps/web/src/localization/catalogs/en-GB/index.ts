@@ -1,0 +1,35 @@
+import { en, type MessageKey } from "../en-US";
+
+// The existing English catalogue is the complete US source/fallback wording.
+// This catalogue records the terms that differ in British English.
+export const enGB = {
+  ...en,
+  navOrganization: "Organisation",
+  redirectingToOrganization: "Redirecting to your organisation's sign-in…",
+  passwordSignInDisabled: "Password-based sign-in is disabled for this installation. Use one of your organisation's sign-in methods below.",
+  oidcSignIn: "Sign in with an organisation account (OIDC)",
+  samlSignIn: "Sign in with an organisation account (SAML)",
+  appearanceIntro: "Product identity, logo, theme, colours and regional defaults.",
+  visualIdentityIntro: "Product naming, theme and the colours used throughout the interface.",
+  colors: "Colours",
+  primaryColor: "Primary colour",
+  accentColor: "Accent colour",
+  topBarColor: "Top bar",
+  topBarTextColor: "Top bar text",
+  languageEnglishUK: "English (United Kingdom)",
+  languageEnglishUS: "English (United States)",
+  organizationTitle: "Organisation",
+  organizationIntro: "Internal structure, roles and staffing at your organisational level.",
+  loadingOrganization: "Loading organisation…",
+  organizationLoadFailed: "Organisation data could not be loaded.",
+  noOrganizationAreas: "No organisation areas are available",
+  selectedSiteOrganization: "Internal organisation in the selected site",
+  organizationHelpTitle: "How to use Organisation",
+  organizationHelpIntro: "Organisation shows the site's internal structure, roles and staffing within the area you can access.",
+  organizationHelpSelectText: "If you can access multiple sites, first select which organisation to display.",
+  organizationHelpLeadershipText: "The leader and authorised leader can view the organisation at their own level and below as a basis for operational management.",
+  organizationHelpPersonnelText: "Users, organisational affiliation, work roles and role assignments are managed on the Personnel page.",
+  organizationHelpNote: "Operational write access for the leader and authorised leader is unaffected by organisation structure being administered at site level.",
+  newUnitIntro: "The unit becomes part of the internal organisation in {site}. Create a New site for an independent organisational level.",
+  organizationStructureIntro: "Units are shown in organisational order.",
+} satisfies Record<MessageKey, string>;

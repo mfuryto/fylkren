@@ -205,12 +205,27 @@ The [documentation portal](docs/README.md) is the maintained entry point.
 | [Get Enterprise](docs/operations/GET_ENTERPRISE_LICENSE.md) | [System requirements](docs/operations/SYSTEM_REQUIREMENTS.md) | [Roadmap](docs/project/ROADMAP.md) |
 | [API overview](docs/api/API.md) | [Backup and offline deployment](docs/operations/DEPLOYMENT_AND_OFFLINE.md) | [Security verification](docs/security/SECURITY_VERIFICATION.md) |
 
-Repository-facing documentation is English. The product currently bundles English
-as its source/fallback catalog and Norwegian Bokmål as a complete language pack;
+Repository-facing documentation is English. The product currently bundles American
+English (`en-US`) as its source/fallback catalog, with British English (`en-GB`) and
+Norwegian Bokmål (`nb-NO`) as complete language packs;
 migration of remaining legacy hard-coded UI text is in progress. The maintained
 [language roster and language-pack rules](docs/product/LOCALIZATION.md) define when
 additional translations become supported. Routes, API contracts, persistent
 identifiers and permalinks remain language-neutral.
+
+### Supported interface languages
+
+| Language | Locale | Status |
+| --- | --- | --- |
+| English (United States) | `en-US` | Supported; source language and fallback |
+| English (United Kingdom) | `en-GB` | Supported regional variant |
+| Norwegian Bokmal | `nb-NO` | Supported language pack |
+
+Swedish, Danish, Finnish, German, French, Polish, Spanish, Italian, Ukrainian,
+Dutch, Portuguese, Czech, Romanian, Estonian, Latvian, Lithuanian and Icelandic
+are planned in the maintained [translation priority](docs/product/LOCALIZATION.md),
+but are not advertised as supported until each complete pack has passed review
+and acceptance testing.
 
 ## Issues, contributions, license and brand
 

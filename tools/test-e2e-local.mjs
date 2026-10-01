@@ -63,7 +63,7 @@ assert.deepEqual({
   timeZone: configuration.body.timeZone,
   clockFormat: configuration.body.clockFormat,
   measurementSystem: configuration.body.measurementSystem,
-}, { defaultLanguage: 'en', timeZone: 'UTC', clockFormat: '24-hour', measurementSystem: 'metric' });
+}, { defaultLanguage: 'en-US', timeZone: 'UTC', clockFormat: '24-hour', measurementSystem: 'metric' });
 const unauthenticatedDetails = await platform.request('/api/configuration');
 assert.equal(unauthenticatedDetails.status, 401, 'Detailed configuration requires a session');
 
@@ -124,7 +124,7 @@ const changedPublicRegional = await platform.request('/api/configuration/public'
 assert.equal(changedPublicRegional.body.defaultLanguage, 'nb-NO');
 assert.equal(changedPublicRegional.body.clockFormat, '12-hour');
 assert.equal((await platform.put('/api/platform/regional-settings', {
-  defaultLanguage: 'en', timeZone: 'UTC',
+  defaultLanguage: 'en-US', timeZone: 'UTC',
   clockFormat: '24-hour', measurementSystem: 'metric',
 })).status, 200);
 const platformOperations = await platform.request('/api/platform/operations');

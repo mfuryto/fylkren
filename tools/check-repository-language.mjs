@@ -3,7 +3,7 @@ import { extname, relative, resolve } from 'node:path';
 import { readdirSync, statSync } from 'node:fs';
 
 const root = resolve(import.meta.dirname, '..');
-const norwegianCatalog = 'apps/web/src/localization/nb-NO.ts';
+const norwegianCatalog = 'apps/web/src/localization/catalogs/nb-NO/index.ts';
 const baselinePath = resolve(root, 'tools/repository-language-baseline.json');
 const checkedExtensions = new Set(['.cs', '.json', '.md', '.mjs', '.sh', '.ts', '.tsx', '.yaml', '.yml']);
 const ignoredDirectories = new Set(['.git', '.git-local', 'backups', 'bin', 'dist', 'node_modules', 'obj', 'output', 'tmp']);

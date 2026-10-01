@@ -1,7 +1,7 @@
 import type { WorkItem } from "../work/WorkItemModels";
 import type { TaskSite, TaskUnit } from "../work/WorkContextModels";
 import type { AppPage } from "../navigation/permalinks";
-import type { MessageKey } from "../localization/en";
+import type { MessageKey } from "../localization";
 
 const terminalStatuses = ["completed", "rejected", "cancelled", "reassigned"];
 const actionStatuses = ["registered", "assigned", "under_review", "planning_approval", "planning_approved", "in_review"];

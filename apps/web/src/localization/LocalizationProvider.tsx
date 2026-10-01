@@ -1,13 +1,13 @@
 import { createContext, useContext, useMemo, type PropsWithChildren } from "react";
 import { setActiveLanguage, translate, type MessageVariables } from ".";
-import type { MessageKey } from "./en";
+import type { MessageKey } from "./catalogs/en-US";
 
 type Translator = (key: MessageKey, variables?: MessageVariables) => string;
 type LocalizationValue = { language: string; translate: Translator };
 
 const LocalizationContext = createContext<LocalizationValue>({
-  language: "en",
-  translate: (key, variables) => translate("en", key, variables),
+  language: "en-US",
+  translate: (key, variables) => translate("en-US", key, variables),
 });
 
 export function LocalizationProvider({ language, children }: PropsWithChildren<{ language: string }>) {

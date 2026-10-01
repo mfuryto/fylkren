@@ -3,7 +3,7 @@ import { SectionHelp } from "../components/SectionHelp";
 import { errorMessage } from "../api/errors";
 import { loadAuditSites, loadSiteAudit, type AuditSite, type SiteAuditRow } from "./siteAuditApi";
 import { useTranslation } from "../localization/LocalizationProvider";
-import type { MessageKey } from "../localization/en";
+import type { MessageKey } from "../localization";
 
 export function SiteAuditPage({ language: displayLanguage, timeZone: displayTimeZone }: { language: string; timeZone: string }) {
   const t = useTranslation();

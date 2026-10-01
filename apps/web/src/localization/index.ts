@@ -1,21 +1,27 @@
-import { en, type MessageKey } from "./en";
-import { nbNO } from "./nb-NO";
+import { en, type MessageKey } from "./catalogs/en-US";
+import { enGB } from "./catalogs/en-GB";
+import { nbNO } from "./catalogs/nb-NO";
 
-export const supportedLanguages = ["en", "nb-NO"] as const;
+export type { MessageKey } from "./catalogs/en-US";
+
+export const supportedLanguages = ["en-US", "en-GB", "nb-NO"] as const;
 export type SupportedLanguage = (typeof supportedLanguages)[number];
 export const languageCatalogs: Record<SupportedLanguage, Record<MessageKey, string>> = {
-  en,
+  "en-GB": enGB,
+  "en-US": en,
   "nb-NO": nbNO,
 };
 
 export function normalizeLanguage(value: string): SupportedLanguage {
   const normalized = value.toLowerCase();
-  return normalized.startsWith("nb") || normalized.startsWith("no") ? "nb-NO" : "en";
+  if (normalized.startsWith("nb") || normalized.startsWith("no")) return "nb-NO";
+  if (normalized.startsWith("en-gb")) return "en-GB";
+  return "en-US";
 }
 
 export type MessageVariables = Record<string, string | number>;
 export type ClockFormat = "12-hour" | "24-hour";
-let activeLanguage: SupportedLanguage = "en";
+let activeLanguage: SupportedLanguage = "en-US";
 
 export function regionalDisplayLocale(language: string, clockFormat: ClockFormat): string {
   return new Intl.Locale(normalizeLanguage(language), {

@@ -4,7 +4,7 @@ import { errorMessage } from "../api/errors";
 import { Modal } from "../components/Modal";
 import type { WorkItem } from "../work/WorkItemModels";
 import { useTranslation } from "../localization/LocalizationProvider";
-import type { MessageKey } from "../localization/en";
+import type { MessageKey } from "../localization";
 
 type Risk = { id:string; current:{version:number;title:string;description:string;probability:number;impact:number;score:number;level:string;ownerPersonId:string;ownerNameSnapshot:string;status:string;dueDate:string|null;residualProbability:number|null;residualImpact:number|null;residualScore:number|null;residualLevel:string|null};mitigations:Array<{id:string;version:number;action:string;ownerNameSnapshot:string;status:string;dueDate:string|null}> };
 const levelKeys:Record<string,MessageKey>={low:"riskLevelLow",moderate:"riskLevelModerate",high:"riskLevelHigh",critical:"riskLevelCritical"};

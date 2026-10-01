@@ -112,7 +112,7 @@ public sealed class FylkrenOptions
 
 public sealed class LocalizationOptions
 {
-    public string DefaultLanguage { get; set; } = "en";
+    public string DefaultLanguage { get; set; } = "en-US";
     public string TimeZone { get; set; } = "UTC";
 }
 

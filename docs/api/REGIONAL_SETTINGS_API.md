@@ -13,15 +13,16 @@ The request and response contract is:
 
 ```json
 {
-  "defaultLanguage": "en",
+  "defaultLanguage": "en-US",
   "timeZone": "UTC",
   "clockFormat": "24-hour",
   "measurementSystem": "metric"
 }
 ```
 
-Supported languages are `en` and `nb-NO`. English is the source catalog and
-mandatory fallback. Clock format is `12-hour` or `24-hour`; measurement system
+Supported languages are `en-US`, `en-GB` and `nb-NO`. American English is the
+source catalog and mandatory fallback. The legacy value `en` normalizes to
+`en-US`. Clock format is `12-hour` or `24-hour`; measurement system
 is `metric` or `imperial`. The time zone must be an IANA identifier available
 inside the application container.
 
