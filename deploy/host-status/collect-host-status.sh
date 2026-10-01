@@ -42,7 +42,7 @@ collect_service() {
     service_name=$2
     container_id=$(compose_ps_id "$service_key" 2>/dev/null || true)
     status=down
-    detail="Containeren kjører ikke."
+    detail="The container is not running."
     restarts=0
     if [ -n "$container_id" ]; then
         state=$(docker inspect --format '{{.State.Status}}' "$container_id" 2>/dev/null || printf unknown)
@@ -51,13 +51,13 @@ collect_service() {
         case "$restarts" in *[!0-9]*|'') restarts=0 ;; esac
         if [ "$state" = running ] && { [ "$health" = healthy ] || [ "$health" = none ]; }; then
             status=healthy
-            detail="Containeren kjører."
+            detail="The container is running."
         elif [ "$state" = running ] && [ "$health" = starting ]; then
             status=degraded
-            detail="Containeren starter og er ikke klar ennå."
+            detail="The container is starting and is not ready yet."
         elif [ "$state" = running ]; then
             status=down
-            detail="Containeren kjører, men helsekontrollen feiler."
+            detail="The container is running, but its health check is failing."
         else
             detail="Containerstatus: $state."
         fi
@@ -71,7 +71,7 @@ if command -v docker >/dev/null 2>&1; then
     collect_service api "API-container"
     collect_service postgres "PostgreSQL-container"
 else
-    service_json='{"key":"docker","name":"Docker","status":"down","detail":"Docker-kommandoen er ikke tilgjengelig.","restartCount":0}'
+    service_json='{"key":"docker","name":"Docker","status":"down","detail":"The Docker command is unavailable.","restartCount":0}'
 fi
 
 cat >"$temporary_file" <<EOF

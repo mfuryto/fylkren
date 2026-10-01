@@ -7,7 +7,7 @@ import './demo.css';
 function Demo() {
   const summaries = [
     ['Aktive', '8'],
-    ['Nær frist', '3'],
+    ['Near deadline', '3'],
     ['Blokkerte', '1'],
     ['Krever oppmerksomhet', '2']
   ] as const;
@@ -18,7 +18,7 @@ function Demo() {
         <header className="page-header">
           <div>
             <h1>Arbeidsoversikt</h1>
-            <p className="muted">Syntetiske eksempeldata. Innholdet kan ikke endres.</p>
+            <p className="muted">Synthetic sample data. Content cannot be changed.</p>
           </div>
         </header>
         <div className="summary-grid" aria-label="Oppgavesammendrag">
