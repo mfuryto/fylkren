@@ -62,9 +62,8 @@ export function TaskQueueList({ items, visibleItems, totalItems, page, openItemI
       const itemChildren = items.filter(child => child.parentWorkItemId === item.id);
       const itemChildUnits = childUnits(item);
       return <article className={taskCardClassName(item, openItemId === item.id)} key={item.id}>
-        <TaskCardHeader item={item} open={openItemId === item.id} language={language} timeZone={timeZone} onToggle={() => onToggle(item.id)} />
-        <div className="task-card-content" hidden={openItemId !== item.id}>
-          <div className="permalink-action-row"><button className="task-icon-action permalink-action" type="button" title={translateActive("tasksTaskQueueListCopyLinkToTheTask")} aria-label={translateActive("tasksTaskQueueListCopyLinkToTheTask")} onClick={() => onCopyLink(item.id)}><i aria-hidden="true">🔗</i></button></div>
+        <TaskCardHeader item={item} open={openItemId === item.id} language={language} timeZone={timeZone} onToggle={() => onToggle(item.id)} onCopyLink={() => onCopyLink(item.id)} />
+        <div id={`task-content-${item.id}`} className="task-card-content" hidden={openItemId !== item.id}>
           <TaskBasis item={item} canManage={canManage(item)} onShowContext={() => onShowContext(item)} onShowPlan={() => onShowPlan(item)} onDependencies={() => onDependencies(item)} onDecisions={() => onDecisions(item)} onRisks={() => onRisks(item)} onVersions={() => onVersions(item)} />
           {workflowProgress(item) && <p className="delegation-progress">{workflowProgress(item)}</p>}
           {item.decisionNote && <p className="task-decision-note"><strong>{item.status === "cancelled" ? translateActive("cancellationBasis") : item.status === "reassigned" ? translateActive("tasksTaskDelegationTreeReassigning") : translateActive("latestDecisionBasis")}</strong> {item.decisionNote}</p>}

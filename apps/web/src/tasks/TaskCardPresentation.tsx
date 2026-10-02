@@ -16,18 +16,17 @@ export function taskCardClassName(item: WorkItem, open: boolean) {
   return `${variant} process-card${open ? "" : " minimized"}`;
 }
 
-export function TaskCardHeader({ item, open, language, timeZone, onToggle }: {
-  item: WorkItem; open: boolean; language: string; timeZone: string; onToggle: () => void;
+export function TaskCardHeader({ item, open, language, timeZone, onToggle, onCopyLink }: {
+  item: WorkItem; open: boolean; language: string; timeZone: string; onToggle: () => void; onCopyLink: () => void;
 }) {
   return <>
     {item.parentWorkItemId && <div className="delegation-parent"><strong>{translateActive("tasksTaskCardPresentationSubtaskUnder")}</strong> {item.parentTitle}</div>}
-    <div className="task-card-heading task-reference-heading"><WorkReference referenceCode={item.referenceCode}/><div className="task-title-cell"><TaskClassifiers item={item} /><h2 title={item.title}>{item.title}</h2><div className="task-card-summary-meta">
+    <div className="task-card-heading task-reference-heading task-interactive-heading" onClick={event => { if (!(event.target as HTMLElement).closest("button, a")) onToggle(); }}><WorkReference referenceCode={item.referenceCode}/><div className="task-title-cell"><TaskClassifiers item={item} /><h2><button className="task-heading-toggle" type="button" title={item.title} aria-expanded={open} aria-controls={`task-content-${item.id}`} aria-label={`${open ? translateActive("tasksTaskCardPresentationCloseTask") : translateActive("tasksTaskCardPresentationOpenTask")}: ${item.title}`} onClick={onToggle}><i aria-hidden="true">{open ? "▾" : "▸"}</i><span>{item.title}</span></button></h2><div className="task-card-summary-meta">
       {item.originReference && <span><strong>{translateActive("originReferenceLabel")}</strong> {item.originReference}</span>}
       <span><strong>{translateActive("tasksTaskCardPresentationReceivedRegistered")}</strong> {new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short", timeZone }).format(new Date(item.createdAt))}</span>
       <span><strong>{translateActive("tasksTaskCardPresentationDueDate")}</strong> {item.dueAt ? new Intl.DateTimeFormat(language, { dateStyle: "medium", timeZone }).format(new Date(item.dueAt)) : translateActive("none")}</span>
       <span><strong>{translateActive("tasksTaskCardPresentationRegisteredBy")}</strong> {item.createdBy}</span>
-    </div></div><div className="task-card-statuses">{item.isBlocked && <span className="task-status blocked">{translateActive("tasksTaskCardPresentationBlocked")}</span>}<span className={`task-status ${effectiveTaskStatus(item)}`}>{item.isOutgoingRequest ? requestProgressLabel(item.requestProgressStatus ?? "registered") : taskStatusLabel(item.status)}</span></div></div>
-    <button className="task-card-toggle process-card-toggle" type="button" aria-expanded={open} onClick={onToggle}><i aria-hidden="true">▱</i><span>{open ? translateActive("tasksTaskCardPresentationCloseTask") : translateActive("tasksTaskCardPresentationOpenTask")}</span></button>
+    </div></div><div className="task-header-actions"><div className="task-card-statuses">{item.isBlocked && <span className="task-status blocked">{translateActive("tasksTaskCardPresentationBlocked")}</span>}<span className={`task-status ${effectiveTaskStatus(item)}`}>{item.isOutgoingRequest ? requestProgressLabel(item.requestProgressStatus ?? "registered") : taskStatusLabel(item.status)}</span></div>{open && <button className="task-icon-action permalink-action" type="button" title={translateActive("tasksTaskQueueListCopyLinkToTheTask")} aria-label={translateActive("tasksTaskQueueListCopyLinkToTheTask")} onClick={onCopyLink}><i aria-hidden="true">🔗</i></button>}</div></div>
   </>;
 }
 

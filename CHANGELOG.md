@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Tasks now open and close from the heading with keyboard support; the copy-link action sits beside the status in the same header instead of occupying a separate row.
+
 - Further compacted collapsed and expanded Tasks, Planning and Execution cards, including metadata, action controls and nested work details.
 
 - Made Overview task statistics content-sized inline counters instead of full-width cards, with wrapping labels and compact spacing.
