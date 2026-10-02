@@ -27,7 +27,7 @@ internal static class ExecutionDocumentEndpoints
             if (document is null) db.ExecutionStepDocuments.Add(new ExecutionStepDocument(Guid.NewGuid(), runId, stepId, content, now)); else document.Update(content, now);
             db.ExecutionTimelineEvents.RemoveRange(await db.ExecutionTimelineEvents.Where(x => x.RunId == runId && x.StepId == stepId).ToListAsync(ct));
             for (var index = 0; index < events.Count; index++) db.ExecutionTimelineEvents.Add(new ExecutionTimelineEvent(Guid.NewGuid(), runId, stepId, events[index].Date, events[index].Description!.Trim(), index));
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "execution.step-documented", "execution-step", stepId, now));
+            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "execution.step-documented", "execution-run", run.Id, now));
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });

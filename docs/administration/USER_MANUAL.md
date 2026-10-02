@@ -220,7 +220,7 @@ Site Manager alone sees and edits:
 - Notifications;
 - Site Audit.
 
-Workflow/template definitions are administration-only, but active eligible users can use configured content during processing. Site audit excludes Platform Manager actions and other sites.
+Workflow/template definitions are administration-only, but active eligible users can use configured content during processing. Site audit excludes Platform Manager actions and other sites. Task-related events display the task reference and title, including planning/execution claims, releases and newly recorded step documentation. Search accepts task references and titles as well as events and actors. Older step events identified only a shared workflow-definition step, so they cannot always be assigned to a specific task reliably. New dependency changes identify the dependent task even after the dependency is removed. References provide audit context; Site Manager status does not grant operational task access.
 
 A new Site receives editable English planning, execution and final-report defaults. These are copied into the Site when it is created; they are not live system translations. Site Manager may translate or otherwise revise them, and application updates preserve the Site's stored versions. Editing a workflow creates a new active version so work already using an earlier version retains its original structure.
 

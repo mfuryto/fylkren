@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { WorkReference } from "../components/WorkReference";
 import { SectionHelp } from "../components/SectionHelp";
 import { errorMessage } from "../api/errors";
 import { loadAuditSites, loadSiteAudit, type AuditSite, type SiteAuditRow } from "./siteAuditApi";
@@ -53,7 +54,7 @@ export function SiteAuditPage({ language: displayLanguage, timeZone: displayTime
     </form>
     <section className="panel audit-list-panel">
       <div className="section-heading"><div><h2>{t("events")}</h2><p className="muted">{t("recordedCount",{count:total})}</p></div></div>
-      {rows.length===0?<p className="empty-list-message">{t("noAuditMatches")}</p>:<div className="audit-list">{rows.map(row=><article className="audit-row" key={row.id}><time>{new Date(row.occurredAt).toLocaleString(displayLanguage,{timeZone:displayTimeZone})}</time><span><strong>{eventLabel(row.eventType)}</strong><small>{entityLabel(row.entityType)}{row.entityName?` · ${row.entityName}`:""}</small></span><span className="audit-actor"><small>{t("performedBy")}</small><b>{row.actor}</b></span></article>)}</div>}
+      {rows.length===0?<p className="empty-list-message">{t("noAuditMatches")}</p>:<div className="audit-list">{rows.map(row=><article className="audit-row" key={row.id}><time>{new Date(row.occurredAt).toLocaleString(displayLanguage,{timeZone:displayTimeZone})}</time><span><strong>{eventLabel(row.eventType)}</strong><small>{row.workReference ? <><WorkReference referenceCode={row.workReference}/> · {row.workTitle}</> : <>{entityLabel(row.entityType)}{row.entityName?` · ${row.entityName}`:""}</>}</small></span><span className="audit-actor"><small>{t("performedBy")}</small><b>{row.actor}</b></span></article>)}</div>}
       <div className="pagination"><button className="secondary-button" type="button" disabled={page<=1} onClick={()=>void load(page-1).catch(problem=>setError(errorMessage(problem,t("previousPageLoadFailed"))))}>{t("previous")}</button><span>{t("pageOf",{page,totalPages})}</span><button className="secondary-button" type="button" disabled={page>=totalPages} onClick={()=>void load(page+1).catch(problem=>setError(errorMessage(problem,t("nextPageLoadFailed"))))}>{t("next")}</button></div>
     </section>
     {helpOpen&&<SectionHelp title={t("siteAuditHelpTitle")} intro={t("siteAuditHelpIntro")} steps={[{title:t("siteAuditHelpSiteTitle"),text:t("siteAuditHelpSiteText")},{title:t("siteAuditHelpScopeTitle"),text:t("siteAuditHelpScopeText")},{title:t("siteAuditHelpSearchTitle"),text:t("siteAuditHelpSearchText")},{title:t("siteAuditHelpReadTitle"),text:t("siteAuditHelpReadText")}]} note={t("siteAuditHelpNote")} onClose={()=>setHelpOpen(false)}/>} 

@@ -399,6 +399,15 @@ assert.equal(documentExecution.status, 204, `document execution: ${JSON.stringif
 const submitExecution = await leader.account.post(`/api/execution/${executionRun.id}/submit`, {});
 assert.equal(submitExecution.status, 204, `submit execution: ${JSON.stringify(submitExecution.body)}`);
 assert.equal(await taskStatus(), 'in_review');
+const auditByReference = await siteManager.account.request(`/api/site-audit/sites/${siteId}?search=${encodeURIComponent(taskReference)}`);
+assert.equal(auditByReference.status, 200, JSON.stringify(auditByReference.body));
+for (const eventType of ['work-item.registered', 'workflow.claimed', 'execution.claimed', 'execution.step-documented']) {
+  const event = auditByReference.body.events.find(value => value.eventType === eventType);
+  assert.ok(event, `Audit reference search missing ${eventType}`);
+  assert.equal(event.workReference, taskReference);
+  assert.equal(event.workTitle, 'Synthetic E2E task');
+}
+
 
 const prematureComplete = await leader.account.put(`/api/work/sites/${siteId}/items/${task.body.id}/status`, {
   status: 'completed', assignedUnitId: null, decisionNote: null, priority: null,

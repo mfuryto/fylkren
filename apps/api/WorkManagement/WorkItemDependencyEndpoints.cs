@@ -97,7 +97,7 @@ internal static class WorkItemDependencyEndpoints
         var now = DateTimeOffset.UtcNow;
         var dependency = new WorkItemDependency(Guid.NewGuid(), siteId, request.PredecessorWorkItemId, itemId, type, personId, now);
         db.WorkItemDependencies.Add(dependency);
-        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.dependency-added", "work-item-dependency", dependency.Id, now));
+        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.dependency-added", "work-item", itemId, now));
         await db.SaveChangesAsync(ct);
         return Results.Created($"/api/work/sites/{siteId}/items/{itemId}/dependencies/{dependency.Id}", new { dependency.Id });
     }
@@ -114,7 +114,7 @@ internal static class WorkItemDependencyEndpoints
         var dependency = await db.WorkItemDependencies.SingleOrDefaultAsync(value => value.Id == dependencyId && value.SiteId == siteId && value.DependentWorkItemId == itemId, ct);
         if (dependency is null) return Results.NotFound();
         db.WorkItemDependencies.Remove(dependency);
-        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.dependency-removed", "work-item-dependency", dependency.Id, DateTimeOffset.UtcNow));
+        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.dependency-removed", "work-item", itemId, DateTimeOffset.UtcNow));
         await db.SaveChangesAsync(ct);
         return Results.NoContent();
     }

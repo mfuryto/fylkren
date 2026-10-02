@@ -38,12 +38,26 @@ public static class SiteAuditEndpoints
             if (!string.IsNullOrWhiteSpace(eventType)) query = query.Where(value => value.EventType == eventType.Trim());
             if (from is not null) query = query.Where(value => value.OccurredAt >= new DateTimeOffset(from.Value.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero));
             if (to is not null) query = query.Where(value => value.OccurredAt < new DateTimeOffset(to.Value.AddDays(1).ToDateTime(TimeOnly.MinValue), TimeSpan.Zero));
+            var contextual = query.Select(value => new
+            {
+                Event = value,
+                WorkItemId = value.EntityType == "work-item" ? (Guid?)value.EntityId :
+                    value.EntityType == "workflow-run" ? database.WorkflowRuns.Where(run => run.Id == value.EntityId && run.WorkItem.SiteId == siteId).Select(run => (Guid?)run.WorkItemId).FirstOrDefault() :
+                    value.EntityType == "execution-run" ? database.ExecutionRuns.Where(run => run.Id == value.EntityId && run.WorkItem.SiteId == siteId).Select(run => (Guid?)run.WorkItemId).FirstOrDefault() :
+                    value.EntityType == "execution-external-request" ? database.ExecutionExternalRequests.Where(request => request.Id == value.EntityId && request.Run.WorkItem.SiteId == siteId).Select(request => (Guid?)request.Run.WorkItemId).FirstOrDefault() :
+                    value.EntityType == "work-item-dependency" ? database.WorkItemDependencies.Where(dependency => dependency.Id == value.EntityId && dependency.DependentWorkItem.SiteId == siteId).Select(dependency => (Guid?)dependency.DependentWorkItemId).FirstOrDefault() : null
+            });
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var pattern = RequestQueryPolicy.LikePattern(search);
-                query = query.Where(value => EF.Functions.ILike(value.EventType, pattern, "\\") || EF.Functions.ILike(value.EntityType, pattern, "\\") || database.People.Any(person => person.Id == value.ActorPersonId && EF.Functions.ILike(person.DisplayName, pattern, "\\")) || value.ActorSiteName != null && EF.Functions.ILike(value.ActorSiteName, pattern, "\\"));
+                contextual = contextual.Where(value => EF.Functions.ILike(value.Event.EventType, pattern, "\\") ||
+                    EF.Functions.ILike(value.Event.EntityType, pattern, "\\") ||
+                    database.People.Any(person => person.Id == value.Event.ActorPersonId && EF.Functions.ILike(person.DisplayName, pattern, "\\")) ||
+                    value.Event.ActorSiteName != null && EF.Functions.ILike(value.Event.ActorSiteName, pattern, "\\") ||
+                    database.WorkItems.Any(item => item.Id == value.WorkItemId && item.SiteId == siteId &&
+                        (EF.Functions.ILike(item.ReferenceCode, pattern, "\\") || EF.Functions.ILike(item.Title, pattern, "\\"))));
+                query = contextual.Select(value => value.Event);
             }
-
             var total = await query.CountAsync(cancellationToken);
             var eventTypes = await database.AuditEvents.AsNoTracking().Where(value =>
                 value.SiteId == siteId && !value.ActorWasPlatformManager)
@@ -71,7 +85,11 @@ public static class SiteAuditEndpoints
             AddNames(await database.WorkItems.AsNoTracking().Where(value => entityIds.Contains(value.Id)).Select(value => new KeyValuePair<Guid, string>(value.Id, value.Title)).ToListAsync(cancellationToken));
             AddNames(await database.Decisions.AsNoTracking().Where(value => entityIds.Contains(value.Id)).Select(value => new KeyValuePair<Guid, string>(value.Id, value.Revisions.OrderByDescending(revision => revision.RevisionNumber).Select(revision => revision.Title).First())).ToListAsync(cancellationToken));
             AddNames(await database.WorkflowDefinitions.AsNoTracking().Where(value => entityIds.Contains(value.Id)).Select(value => new KeyValuePair<Guid, string>(value.Id, value.Name)).ToListAsync(cancellationToken));
-            var rows = rawRows.Select(value => new { value.Id, value.OccurredAt, value.EventType, value.EntityType, value.EntityId, value.actor, entityName = names.GetValueOrDefault(value.EntityId) }).ToList();
+            var contextRows = await contextual.Where(value => entityIds.Contains(value.Event.EntityId))
+                .Select(value => new { value.Event.Id, work = database.WorkItems.Where(item => item.Id == value.WorkItemId && item.SiteId == siteId)
+                    .Select(item => new { item.ReferenceCode, item.Title }).FirstOrDefault() }).ToListAsync(cancellationToken);
+            var workContext = contextRows.ToDictionary(value => value.Id, value => value.work);
+            var rows = rawRows.Select(value => new { value.Id, value.OccurredAt, value.EventType, value.EntityType, value.EntityId, value.actor, entityName = names.GetValueOrDefault(value.EntityId), workReference = workContext.GetValueOrDefault(value.Id)?.ReferenceCode, workTitle = workContext.GetValueOrDefault(value.Id)?.Title }).ToList();
             return Results.Ok(new { events = rows, eventTypes, page = pageNumber, pageSize, total, totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)pageSize)) });
         });
 

@@ -46,3 +46,5 @@ The [task-comments run](2026-10-02-task-comments.md) records unassigned-reader c
 The [visual risk-workspace run](2026-10-02-visual-risk-workspace.md) records the numbered register, mitigation-first editing, 5 × 5 initial/residual map, real browser clicks and dragging, and atomic risk/action creation.
 
 The [pending-work navigation run](2026-10-02-pending-navigation-counts.md) records compact navigation labels, removal of the Overview action list and authorized pending-work counts.
+
+The [Site audit work-context run](2026-10-02-site-audit-work-context.md) records task references, titles and reference search for operational audit events.
