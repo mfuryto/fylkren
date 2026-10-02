@@ -1,0 +1,58 @@
+/* Shared screen density. Printed reports retain their document layout. */
+@media screen {
+  :root { --compact-gap: 10px; --compact-padding: 12px; --compact-control-height: 32px; }
+  .page { padding: 18px clamp(16px, 2vw, 24px); }
+  .page-header { gap: 14px; margin-bottom: 14px; }
+  .page-header h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .panel:not(:where(.organization-list, .personnel-list, .role-list, .audit-list-panel, .report-list-panel)) { padding: var(--compact-padding); }
+  .section-heading { gap: var(--compact-gap); margin-bottom: 10px; }
+  .section-heading p { margin-top: 4px; margin-bottom: 0; }
+  .field { gap: 4px; }
+  .field :is(input, select):not(:where([type="checkbox"], [type="radio"])) { min-height: var(--compact-control-height); padding-block: 5px; }
+  .field textarea { padding: 8px 10px; }
+  :is(.primary-button, .secondary-button, .danger-button, .help-button) { min-height: var(--compact-control-height); padding: 5px 10px; }
+  .checkbox-field:not(.compact-checkbox) { min-height: var(--compact-control-height); }
+  :is(.inline-actions, .modal-actions) { gap: 6px; flex-wrap: wrap; }
+  :is(.stacked-form, .smtp-settings-form, .login-form, .process-help, .task-detail-view) { gap: var(--compact-gap); }
+  :is(.form-row, .smtp-settings-grid, .site-workspace, .access-grid, .profile-forms, .profile-authentication-grid, .notification-options, .workflow-layout, .personnel-layout, .sites-layout, .identity-provider-grid) { gap: var(--compact-gap); }
+  :is(.platform-admin-page, .report-api-settings, .workload-chart-panel) { gap: 12px; }
+  :is(.inline-form, .report-toolbar, .personnel-toolbar) { gap: var(--compact-gap); margin-bottom: 12px; }
+  :is(.site-workspace, .personnel-layout, .identity-provider-grid) { margin-bottom: 12px; }
+  :is(.access-grid, .role-list, .type-list) { margin-top: 12px; }
+  .summary-grid { gap: 8px; margin-bottom: 12px; }
+  .summary-card { padding: 10px 12px; }
+  .summary-card strong { margin-top: 5px; font-size: 1.35rem; }
+  .empty-state { min-height: 120px; padding: 18px; }
+  :is(.status-message, .empty-list) { padding: 9px 12px; }
+  .enterprise-required-notice { gap: 12px; padding: 12px; }
+  :is(.task-list, .domain-risk-list, .planning-rfi-list) { gap: 8px; }
+  :is(.task-card, .risk-card, .identity-provider-card, .identity-migration) { gap: 8px; }
+  .risk-card { padding: 10px 12px; }
+  :is(.admin-list-row, .type-row, .role-row, .platform-user-row, .approval-version-row) { gap: 10px; padding-block: 7px; }
+  .admin-list-row { min-height: 40px; }
+  .organization-row { gap: 10px; padding: 9px 12px; }
+  .site-tree-row { gap: 8px; padding: 9px 12px 9px calc(12px + var(--site-depth) * 24px); }
+  .audit-row { gap: 8px 12px; padding: 8px 12px; }
+  .report-list-row { padding-inline: 12px; }
+  :is(.personnel-list, .role-list) .section-heading { padding: 12px 12px 0; }
+  :is(.audit-list-panel, .report-list-panel) .section-heading { padding: 12px 12px 8px; }
+  .pagination { gap: 8px; padding: 10px 12px; }
+  .modal-card { padding: 18px; }
+  .modal-header { gap: 10px; margin-bottom: 12px; padding-bottom: 10px; }
+  .login-panel { padding: 20px; }
+  .login-form { margin-top: 16px; }
+  .side-navigation { padding-block: 10px; }
+  .navigation-item { padding-block: 7px; }
+}
+@media screen and (max-width: 720px) {
+  .page-header, .section-heading { flex-wrap: wrap; }
+}
+@media screen and (max-width: 520px) {
+  .page { padding: 14px 12px; }
+  .modal-card { padding: 14px; }
+  .pagination { gap: 7px; padding-inline: 6px; }
+}
+@media screen and (pointer: coarse) {
+  :is(.page, .modal-card, .login-panel) .field :is(input, select):not(:where([type="checkbox"], [type="radio"])) { min-height: 40px; }
+  :is(.primary-button, .secondary-button, .danger-button, .help-button) { min-height: 40px; }
+}

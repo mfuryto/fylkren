@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Applied compact screen spacing throughout shared panels, forms, buttons, lists and dialogs. Touch controls retain larger targets and printed report layout remains unchanged.
+
 - Reduced Overview header, summary cards, subordinate cards and statistics spacing across all overview designs, with compact controls and responsive mobile headings.
 
 - Compacted the Tasks queue controls: view, search and sorting share one desktop row, status counts use small inline cards, and successful registration preserves the current filter and search.
