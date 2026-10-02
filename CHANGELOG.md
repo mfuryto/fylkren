@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Documented learning as continuous operational feedback after status, and added an illustrated workspace gallery and user-manual examples for Overview, Tasks, Planning with its timeline ruler, Execution, report archives and final-report presentation.
+
 - Added separate internal learning points to final-report writing and a compact Learning queue with task references, priorities, comments, accountable treatment, deadlines, immutable history and pending navigation counts. Learning stays within the reporting work level and is excluded from final-report forwarding.
 
 - Added localized help buttons and keyboard-accessible help dialogs to Workload, Reports, Intake and Notifications.

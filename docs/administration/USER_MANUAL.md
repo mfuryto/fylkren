@@ -8,6 +8,11 @@ The operational chain is:
 
 **Task or request → optional planning → execution → final report**
 
+Throughout that chain: **Priority → delegation → status → learning → …**
+Learning feeds into subsequent assessment, planning and execution. It is an ongoing operational process, rather than a final administrative step. The Learning workspace turns internal observations into prioritized actions and retained outcomes; it does not append those observations to forwarded final reports.
+
+The interface examples in this manual use fictional data and configurable workflows.
+
 A **site** is an independent administrative and access boundary. Inside a site, each operational organizational unit has its own work level. The designated top-leadership unit represents the site top level and is not a separate extra level.
 
 Superior levels assign work, follow aggregate capacity/status and receive formal reports. Subordinate levels control their internal planning and execution. Internally created subordinate tasks remain actionable at their owning level and contribute upward through aggregate workload rather than appearing as superior action items.
@@ -52,6 +57,8 @@ Every data list has a visible sorting control. The available fields depend on th
 
 ## 5. Overview and workload
 
+![Operational overview with fictional workload and annual statistics](images/overview.png)
+
 The Overview heading is the current site name. It presents:
 
 - a **Requires action** summary counter for work the current person/leader can actually act on at the selected level;
@@ -72,6 +79,8 @@ The annual statistics include sent requests even when they are side branches of 
 Leaders also have a 12-month workload-history view based only on work recorded in the platform.
 
 ## 6. Tasks
+
+![Compact task list with references, deadlines and pending work](images/tasks.png)
 
 ### Registering work
 
@@ -120,6 +129,10 @@ See [Tasks and operational flow](WORKFLOW_AND_TASKS.md) for the complete state/r
 
 ## 7. Planning
 
+![Planning workspace with a timeline ruler and editable milestones](images/planning.png)
+
+The timeline ruler places dated milestones relative to the workflow start date. The rows below it edit the same events; changing a date or description updates the ruler and autosaves the plan. This example uses a customer-configured three-step planning workflow.
+
 Planning is optional at every receiving level. The queue is a newest-first paginated list. A qualified user takes responsibility; leaders at the same level may release or reassign responsibility without deleting saved work.
 
 The planning workspace shows the assignment text, relevant approved upstream plans and explicitly shared prior information. It does not duplicate its own plan template above the editable fields.
@@ -139,6 +152,8 @@ Submitting a plan sends it to the level's task view for leader approval. The lea
 
 ## 8. Execution
 
+![Execution workspace with responsibility and step documentation](images/execution.png)
+
 Every assignment is executed at the level that received it, whether or not it was planned first. Execution uses a newest-first paginated queue. Any active member of the level can read the queue and take responsibility; level leaders may release or reassign it.
 
 The user selects an eligible execution workflow. The default **Standard** workflow contains:
@@ -152,6 +167,12 @@ Execution fields, links, timeline and internal external-follow-up records autosa
 Only completed execution can be sent to control. `Send to control` is not an alternative to execution.
 
 ## 9. Final reports
+
+![Year-filtered report archive with task references](images/reports.png)
+
+Open a report by selecting its title. The viewer retains the assignment reference, reporting unit and approval metadata alongside the report content.
+
+![Final-report viewer with fictional results and follow-up](images/report-document.png)
 
 Each operational level writes its own final report after its execution and all direct child reports are complete. The default site-managed template contains:
 

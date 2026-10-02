@@ -51,6 +51,8 @@ Before public publication, run `bash tools/security/verify-repository-safety.sh 
 - [Tasks and operational flow](administration/WORKFLOW_AND_TASKS.md)
 - [Workflows and templates](administration/WORKFLOWS_AND_TEMPLATES.md)
 - [Risk and mitigation management](administration/RISK_MANAGEMENT.md)
+- [Continuous internal learning](administration/LEARNING.md)
+- [Interface examples and screenshot reproduction](administration/INTERFACE_EXAMPLES.md)
 - [Versioning and formal approvals](architecture/FORMAL_APPROVALS.md)
 - [End-to-end test matrix](testing/END_TO_END_TEST_MATRIX.md)
 
@@ -99,5 +101,3 @@ Before public publication, run `bash tools/security/verify-repository-safety.sh 
 - Examples must use synthetic names and data. Commands must distinguish first installation, routine upgrade and destructive development-only operations.
 - API documents are versioned contracts. UI labels and screenshots are supporting material, not authorization or protocol definitions.
 - Security and test records describe evidence and remaining verification; they must not claim completion without reproducible results.
-
-- [Internal experience-based learning](administration/LEARNING.md)

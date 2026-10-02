@@ -62,8 +62,14 @@ Task or request
       ▼
 Assessment ──► optional planning ──► execution ──► final report
       │                 │                 │               │
-      └──── priority ───┴── delegation ───┴── status ─────┘
+      └──── priority ───┴── delegation ───┴── status ─────┴──► learning ──►
 ```
+
+Learning is a continuous operational process. Practices worth repeating and
+improvements feed back into the next assessment, plan and execution. Closing a
+task or a learning point does not end that cycle. Internal learning stays at its
+own work level, separate from the final report sent upwards. See the
+[learning guide](docs/administration/LEARNING.md).
 
 New work follows the current organization. Work already in progress retains its
 original routing and reporting path, even if sites or units are reorganized.
@@ -78,10 +84,25 @@ internal processing.
 | **Planning and execution** | Optional planning, reusable workflows, step templates, timelines, rich text, decisions, dependencies, risks, mitigations and external follow-up |
 | **Organization and access** | Independent and hierarchical sites, internal units, personnel, local roles, work-level permissions and server-enforced authorization |
 | **Reports and records** | Level-owned final reports, approval versions, searchable archives, permanent request responses and print/PDF presentation |
+| **Continuous learning** | Internal numbered observations linked to assignments, priorities, discussion, action plans, deadlines, accountable treatment and searchable outcomes |
 | **Identity** | Local accounts, password policy, recovery, TOTP MFA, WebAuthn/passkeys, GUI-managed Enterprise AD/LDAP/OIDC/SAML, exact provider-bound links and automatic directory deprovisioning |
 | **Administration** | Platform and site administration, customer-defined classifications, appearance, notifications, audit, health and technical status |
 | **Integration** | Versioned administration/report APIs, signed webhooks, portable customer-data export and trusted Fylkren-to-Fylkren federation |
 | **Deployment** | Docker Compose, PostgreSQL, persistent cryptographic keys, offline operation, backup/restore and documented upgrades |
+
+### The workspace
+
+These screenshots show the actual interface with fictional example data.
+
+| Operational overview | Tasks and decisions |
+| --- | --- |
+| [![Overview with workload and statistics](docs/administration/images/overview.png)](docs/administration/USER_MANUAL.md#5-overview-and-workload) | [![Compact task list](docs/administration/images/tasks.png)](docs/administration/USER_MANUAL.md#6-tasks) |
+| Planning with the timeline ruler | Execution and follow-up |
+| [![Planning milestones and timeline](docs/administration/images/planning.png)](docs/administration/USER_MANUAL.md#7-planning) | [![Execution workflow](docs/administration/images/execution.png)](docs/administration/USER_MANUAL.md#8-execution) |
+| Risks before and after mitigation | Continuous internal learning |
+| [![Visual risk matrix and register](docs/administration/images/risk-workspace.png)](docs/administration/RISK_MANAGEMENT.md) | [![Internal learning queue](docs/administration/images/learning-list.png)](docs/administration/LEARNING.md) |
+| Report archive | Approved final report |
+| [![Searchable report archive](docs/administration/images/reports.png)](docs/administration/USER_MANUAL.md#9-final-reports) | [![Final report with task reference](docs/administration/images/report-document.png)](docs/administration/USER_MANUAL.md#9-final-reports) |
 
 ### Designed boundaries
 
@@ -108,6 +129,7 @@ use the name `Enterprise`; there is no separate “Pro” build.
 | Tasks, requests, planning and execution | ● | ● |
 | Workflows, templates and timelines | ● | ● |
 | Final reports, approvals, archive and PDF/print | ● | ● |
+| Internal learning, treatment history and pending counts | ● | ● |
 | Local identity, recovery, TOTP and passkeys | ● | ● |
 | Audit, notifications and portable customer-data export | ● | ● |
 | New AD/LDAP, OIDC and SAML links; directory import | — | ◈ |

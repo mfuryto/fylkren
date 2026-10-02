@@ -27,6 +27,10 @@ Fylkren does not require the whole organization to adopt the platform at once or
 
 Organizational changes control where new work is routed but never rewrite the return path of work already sent. Tasks preserve immutable snapshots of their type, source type, sender, sending site and registering person. The receiver's local registries remain unchanged, and final reports return through durable task links one level at a time.
 
+## Continuous operational learning
+
+Learning follows status in the operational chain and feeds forward into subsequent work: **priority → delegation → status → learning → …**. Positive practices and shortcomings become internal, assignment-linked observations that people discuss, prioritize and treat with actions, deadlines and recorded outcomes. This feedback is part of operational work, not only administration. Learning stays at the reporting level and remains separate from official reports sent upwards. Closing an assignment or a point preserves experience for future assessment, plans and execution.
+
 ## Deliberate boundaries
 
 - Fylkren is not a document archive; it stores references while final documents may remain outside the platform.

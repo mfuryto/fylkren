@@ -77,7 +77,8 @@ Platform
         ├── Planning / Execution instance
         ├── Timeline / Document reference
         ├── Activity event
-        └── Final report
+        ├── Final report
+        └── Internal learning point ── Treatment / comment history
 
 Platform and site administration ── Audit event
 Domain notification event ── Delivery queue ── Delivery attempt
@@ -94,3 +95,5 @@ The task risk register links numbered rows to a 5 × 5 before/after matrix. Numb
 ### Internal learning point and treatment history
 
 A learning point belongs to a Site, one reporting work level and a work item. It records a stable task-local number, positive/improvement category, immutable original text and author snapshot. Status, priority, action plan, deadline, responsible leader and outcome form its current treatment state. Immutable entries retain every comment and treatment revision; a version token rejects conflicting updates. Points survive task completion and remain internal to their level instead of following final-report propagation. Full Site export/backup includes them for recovery. See [internal learning](../administration/LEARNING.md).
+
+Operational feedback continues as **priority → delegation → status → learning → …**, informing future assessment, planning and execution. Learning is an operational record with its own treatment lifecycle, not an administrative task status or a terminal stage of the organization’s work. Closing a point preserves its outcome for reuse; it does not automatically create or alter a work item.

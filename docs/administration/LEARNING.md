@@ -2,6 +2,21 @@
 
 Learning points capture practices worth repeating and improvements worth pursuing. They are separate from the final report so operational experience can be discussed internally without being included in reports sent to higher levels or other sites.
 
+## Continuous operational feedback
+
+**Priority → delegation → status → learning → …** continues beyond the individual assignment. Learning is part of operational work: identify useful practices and gaps, prioritize them, agree an action and deadline, record the outcome, and apply the result to future assessment, plans, templates and execution. A completed task or closed point retains that experience; it does not end organizational learning.
+
+```mermaid
+flowchart LR
+    A[Assess and prioritize] --> P[Plan and delegate]
+    P --> E[Execute and follow status]
+    E --> R[Report and capture observations]
+    R --> L[Discuss and treat learning points]
+    L --> A
+```
+
+Points are currently captured when writing a final report. The feedback cycle describes how people use their observations and treatment outcomes; Fylkren does not automatically rewrite plans, change templates or create new assignments from a point.
+
 ## Register points with the final report
 
 The final-report editor contains two numbered lists: **What worked well?** and **What could be improved?**. Use **Add learning point** to add concrete observations. Unsaved points can be removed. Saving validates the report and points together and commits them in one transaction. Existing points remain visible in the editor and retain their original wording, category, author and task-local number. Their treatment continues on Learning after the task is completed.

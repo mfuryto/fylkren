@@ -12,6 +12,8 @@ Task or request
   → Final report, approval and completion
 ```
 
+Across this chain: **Priority → delegation → status → learning → …**. Learning is continuous operational feedback: observations lead to discussion, prioritized treatment and outcomes that inform future assessments, plans and execution. Learning points retain the assignment reference and remain internal to their reporting level; they are separate records, not another task status or content automatically forwarded with final reports. See [the learning guide](LEARNING.md).
+
 Planning may delegate work to one or more direct subordinate units or create side requests. Each receiver starts the same optional-planning/required-execution/reporting chain at its own level.
 
 ## Permanent task references
