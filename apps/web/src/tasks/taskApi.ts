@@ -41,8 +41,8 @@ export async function getWorkItemLookups(siteId: string) {
   return { sourceTypes, senders };
 }
 
-export async function taskMutation(path: string, method: "POST" | "PUT" | "DELETE", body: object | undefined, fallback: string) {
-  await apiMutate(path, method, body, fallback);
+export async function taskMutation<T = void>(path: string, method: "POST" | "PUT" | "DELETE", body: object | undefined, fallback: string) {
+  return apiMutate<T>(path, method, body, fallback);
 }
 
 export async function getTaskDetails(siteId: string, itemId: string) {

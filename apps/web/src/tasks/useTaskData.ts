@@ -1,8 +1,9 @@
 import { translateActive } from "../localization";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { TaskSite, TaskUnit } from "../work/WorkContextModels";
 import type { WorkItem, WorkItemType } from "../work/WorkItemModels";
 import { getTaskContext, getWorkItemLookups, getWorkItems, getWorkItemTypes } from "./taskApi";
+import type { LoadedTaskQuery } from "./taskPermalink";
 
 export function useTaskData(onError: (message: string) => void, personId: string | undefined, preferredSiteId: string | undefined, query: { unitId: string; filter: string; search: string; sort: string; page: number; focusItemId?: string }) {
   const [sites, setSites] = useState<TaskSite[]>([]);
@@ -15,11 +16,24 @@ export function useTaskData(onError: (message: string) => void, personId: string
   const [itemPage, setItemPage] = useState(1);
   const [itemSummary, setItemSummary] = useState({ active: 0, inProgress: 0, inReview: 0, overdue: 0 });
   const [selectedSiteId, setSelectedSiteId] = useState("");
+  const [loadedQuery, setLoadedQuery] = useState<LoadedTaskQuery | null>(null);
+  const itemRequestSequence = useRef(0);
 
   const loadItems = useCallback(async (siteId: string) => {
+    const requestSequence = ++itemRequestSequence.current;
+    const requestedQuery = { ...query, focusItemId: query.page === 1 ? query.focusItemId : undefined };
+    setLoadedQuery(null);
     if (!siteId) { setItems([]); return; }
-    try { const result = await getWorkItems(siteId, query); setItems(result.items); setItemTotal(result.total); setItemPage(result.page); setItemSummary(result.summary); onError(""); }
-    catch (problem) { onError(problem instanceof Error ? problem.message : translateActive("tasksTaskApiTasksCouldNotBeLoaded")); }
+    try {
+      const result = await getWorkItems(siteId, requestedQuery);
+      if (requestSequence !== itemRequestSequence.current) return;
+      setItems(result.items); setItemTotal(result.total); setItemPage(result.page); setItemSummary(result.summary);
+      setLoadedQuery({ siteId, ...requestedQuery }); onError("");
+    }
+    catch (problem) {
+      if (requestSequence !== itemRequestSequence.current) return;
+      onError(problem instanceof Error ? problem.message : translateActive("tasksTaskApiTasksCouldNotBeLoaded"));
+    }
   }, [onError, query.unitId, query.filter, query.search, query.sort, query.page, query.focusItemId]);
 
   const loadTypes = useCallback(async (siteId: string) => {
@@ -72,5 +86,5 @@ export function useTaskData(onError: (message: string) => void, personId: string
 
   useEffect(() => { void loadItems(selectedSiteId); }, [selectedSiteId, loadItems]);
 
-  return { sites, taskUnits, items, itemTotal, itemPage, itemSummary, types, sourceTypes, senders, selectedSiteId, setSelectedSiteId, loadItems, loadTypes, loadLookups };
+  return { sites, taskUnits, items, itemTotal, itemPage, itemSummary, types, sourceTypes, senders, selectedSiteId, setSelectedSiteId, loadedQuery, loadItems, loadTypes, loadLookups };
 }

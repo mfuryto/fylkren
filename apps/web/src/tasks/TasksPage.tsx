@@ -29,6 +29,7 @@ import { useTaskPlanDetails } from "./useTaskPlanDetails";
 import { copyPermalink, navigateToLocation, type AppLocation } from "../navigation/permalinks";
 import { errorMessage } from "../api/errors";
 import type { ListSort } from "../components/ListSortControl";
+import { isResolvedTaskPermalinkQuery } from "./taskPermalink";
 export function TasksPage({ personId, language: displayLanguage, timeZone: displayTimeZone, classificationMarkings, permalink }: { personId?: string; language: string; timeZone: string; classificationMarkings: ClassificationMarking[]; permalink: AppLocation }) {
   function ClassificationControls({ value, onChange }: { value: string; onChange: (value: string) => void }) {
     return <ClassificationControlFields value={value} onChange={onChange} markings={classificationMarkings} />;
@@ -67,8 +68,9 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
   const [reportEditor, setReportEditor] = useState<FinalReportEditor | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [permalinkError, setPermalinkError] = useState("");
   const [linkMessage, setLinkMessage] = useState("");
-  const { sites, taskUnits, items, itemTotal, itemPage, itemSummary, types, sourceTypes, senders, selectedSiteId, setSelectedSiteId, loadItems } = useTaskData(setError, personId, permalink.siteId, { unitId: selectedUnitId, filter, search: appliedSearch, sort, page: queuePage, focusItemId: permalink.itemId });
+  const { sites, taskUnits, items, itemTotal, itemPage, itemSummary, types, sourceTypes, senders, selectedSiteId, setSelectedSiteId, loadedQuery, loadItems } = useTaskData(setError, personId, permalink.siteId, { unitId: selectedUnitId, filter, search: appliedSearch, sort, page: queuePage, focusItemId: permalink.itemId });
   const { planDetails, clearPlanDetails } = useTaskPlanDetails(selectedSiteId, openItemId, items, setError);
   useEffect(() => { const timer = window.setTimeout(() => setAppliedSearch(search.trim()), 250); return () => window.clearTimeout(timer); }, [search]);
   useEffect(() => { if (itemPage !== queuePage) setQueuePage(itemPage); }, [itemPage, queuePage]);
@@ -113,9 +115,14 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
     setQueuePage(1);
   }, [permalink.itemId, permalink.unitId, permalink.taskFilter, permalink.taskSearch]);
   useEffect(() => {
-    if (!permalink.itemId || !items.length) return;
+    if (!permalink.itemId) { setPermalinkError(""); return; }
+    if (!isResolvedTaskPermalinkQuery(loadedQuery, {
+      siteId: selectedSiteId, unitId: selectedUnitId, filter, search: appliedSearch, itemId: permalink.itemId,
+    }))
+      return;
     const target = items.find(item => item.id === permalink.itemId);
-    if (!target) { setError(translateActive("tasksTasksPageTheTaskDoesNotExistOr")); return; }
+    if (!target) { setPermalinkError(translateActive("tasksTasksPageTheTaskDoesNotExistOr")); return; }
+    setPermalinkError("");
     let root = target;
     while (root.parentWorkItemId) {
       const parent = items.find(item => item.id === root.parentWorkItemId);
@@ -123,7 +130,7 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
       root = parent;
     }
     setSelectedUnitId(permalink.unitId ?? root.assignedUnitId ?? "");
-  }, [permalink.itemId, permalink.unitId, permalink.taskFilter, permalink.taskSearch, items]);
+  }, [permalink.itemId, permalink.unitId, permalink.taskFilter, permalink.taskSearch, items, loadedQuery, selectedSiteId, selectedUnitId, filter, appliedSearch]);
 
   async function executeTaskCommand({ path, method, body, fallback, onSuccess, refresh }: {
     path: string;
@@ -150,11 +157,16 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
 
   async function createItem(event: React.FormEvent) {
     event.preventDefault();
-    await executeTaskCommand({
-      path: `/api/work/sites/${selectedSiteId}/items`, method: "POST", body: taskCreatePayload(form, selectedUnitId), fallback: translateActive("tasksTasksPageTheTaskCouldNotBeRegistered"),
-      onSuccess: () => { setForm(emptyTaskCreateDraft()); setRequestRecipientQuery(""); setRequestRecipients([]); setCreatorOpen(false); },
-      refresh: () => loadItems(selectedSiteId),
-    });
+    setBusy(true); setError(""); setPermalinkError("");
+    try {
+      const created = await taskMutation<{ id: string; referenceCode: string }>(
+        `/api/work/sites/${selectedSiteId}/items`, "POST", taskCreatePayload(form, selectedUnitId), translateActive("tasksTasksPageTheTaskCouldNotBeRegistered"));
+      setForm(emptyTaskCreateDraft()); setRequestRecipientQuery(""); setRequestRecipients([]); setCreatorOpen(false);
+      setFilter("all"); setSearch(""); setAppliedSearch(""); setQueuePage(1);
+      navigateToLocation({ page: "Tasks", siteId: selectedSiteId, unitId: selectedUnitId || undefined, itemId: created.id, taskFilter: "all" }, true);
+    } catch (problem) {
+      setError(problem instanceof Error ? problem.message : translateActive("tasksTasksPageTheTaskCouldNotBeRegistered"));
+    } finally { setBusy(false); }
   }
   async function delegateItem(event: React.FormEvent) {
     event.preventDefault();
@@ -325,9 +337,9 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
         onHelpClose={() => setHelpOpen(false)}
         onCreate={() => setCreatorOpen(true)}
       />
-      {error && (
+      {(error || permalinkError) && (
         <p className="status-message error-message" role="alert">
-          {error}
+          {error || permalinkError}
         </p>
       )}
       {linkMessage && <p className="status-message" role="status">{linkMessage}</p>}

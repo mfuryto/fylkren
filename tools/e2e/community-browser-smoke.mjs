@@ -263,6 +263,11 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
   await evaluate('document.querySelector("#task-title").closest("form").requestSubmit()');
   await waitFor(`document.querySelector("#task-title") === null &&
     document.body.innerText.includes(${JSON.stringify(title)})`, 'registered task');
+  await pause(500);
+  assert.equal((await bodyText()).includes('The task does not exist, or you do not have access to it.'), false,
+    'Successful task registration left a stale missing-task error');
+  assert.match(await evaluate('window.location.hash'), /[?&]item=[0-9a-f-]{36}/,
+    'Successful task registration did not focus the returned task ID');
   await navigate('/#/');
   await waitForSummary('Requires action', 1);
   await waitForSummary('Active', 1);

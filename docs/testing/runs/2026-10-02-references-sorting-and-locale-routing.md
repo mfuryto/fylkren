@@ -11,7 +11,7 @@ when a clock-format Unicode locale extension is active.
 
 ## Results
 
-- The web suite passed 32 files and 106 tests, including complete catalog parity,
+- The web suite passed 33 files and 108 tests, including complete catalog parity,
   clock-format locale normalization, Swedish/Danish body-text regression cases
   and final-report coverage for local plus external reference metadata.
 - The production web build passed with all 19 registered regional language packs.
@@ -44,3 +44,8 @@ API logs automatically when an isolated E2E command fails.
 The configured clock format creates locales such as `sv-SE-u-hc-h23`. Catalog
 selection now resolves the locale base name before lookup, so the selected language
 applies to the complete interface instead of only the navigation.
+
+A rendered-registration follow-up found that an older list response could be
+compared with a newly requested task permalink. Registration now activates the ID
+returned by the creation endpoint, ignores superseded list responses and waits for
+the exact current Site/scope/filter/search response before declaring a task missing.
