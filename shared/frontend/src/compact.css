@@ -43,6 +43,19 @@
   .login-form { margin-top: 16px; }
   .side-navigation { padding-block: 10px; }
   .navigation-item { padding-block: 7px; }
+  .process-queue { gap: 5px; }
+  .process-queue .process-card { gap: 6px; padding: 8px 10px; }
+  .process-queue .process-card.minimized { gap: 8px; padding: 6px 10px; }
+  .process-queue .process-card.minimized .process-card-toggle { min-height: 30px; padding-block: 4px; }
+  .process-card .task-card-heading { gap: 8px; }
+  .process-card h2 { margin-top: 2px; font-size: 1rem; }
+  .process-card .task-card-summary-meta { gap: 3px 10px; margin-top: 3px; }
+  .process-card .task-card-content { gap: 8px; }
+  .process-card :is(.task-meta, .task-actions, .task-detail-links) { gap: 6px 10px; }
+  .process-card .task-icon-action:not(.permalink-action) { min-height: 30px; padding: 4px 8px; gap: 5px; }
+  .process-card .permalink-action-row { margin-top: -40px; }
+  .process-card :is(.planning-result, .planning-preview, .delegation-tree, .delegation-child) { padding: 9px 10px; gap: 8px; }
+  .process-card .returned-report > summary { padding: 7px 10px; }
 }
 @media screen and (max-width: 720px) {
   .page-header, .section-heading { flex-wrap: wrap; }
@@ -55,4 +68,6 @@
 @media screen and (pointer: coarse) {
   :is(.page, .modal-card, .login-panel) .field :is(input, select):not(:where([type="checkbox"], [type="radio"])) { min-height: 40px; }
   :is(.primary-button, .secondary-button, .danger-button, .help-button) { min-height: 40px; }
+  .process-queue .process-card.minimized .process-card-toggle,
+  .process-card .task-icon-action:not(.permalink-action) { min-height: 40px; }
 }

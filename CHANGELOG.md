@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Further compacted collapsed and expanded Tasks, Planning and Execution cards, including metadata, action controls and nested work details.
+
 - Made Overview task statistics content-sized inline counters instead of full-width cards, with wrapping labels and compact spacing.
 
 - Applied compact screen spacing throughout shared panels, forms, buttons, lists and dialogs. Touch controls retain larger targets and printed report layout remains unchanged.
