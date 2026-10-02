@@ -175,8 +175,8 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
       const created = await taskMutation<{ id: string; referenceCode: string }>(
         `/api/work/sites/${selectedSiteId}/items`, "POST", taskCreatePayload(form, selectedUnitId), translateActive("tasksTasksPageTheTaskCouldNotBeRegistered"));
       setForm(emptyTaskCreateDraft()); setRequestRecipientQuery(""); setRequestRecipients([]); setCreatorOpen(false);
-      setFilter("all"); setSearch(""); setAppliedSearch(""); setQueuePage(1);
-      navigateToLocation({ page: "Tasks", siteId: selectedSiteId, unitId: selectedUnitId || undefined, itemId: created.id, taskFilter: "all" }, true);
+      setQueuePage(1);
+      navigateToLocation({ page: "Tasks", siteId: selectedSiteId, unitId: selectedUnitId || undefined, itemId: created.id, taskFilter: filter, taskSearch: search || undefined }, true);
     } catch (problem) {
       setError(problem instanceof Error ? problem.message : translateActive("tasksTasksPageTheTaskCouldNotBeRegistered"));
     } finally { setBusy(false); }

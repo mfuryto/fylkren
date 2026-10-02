@@ -1,0 +1,10 @@
+.task-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr); gap: 10px 14px; margin-bottom: 10px; padding: 12px; }
+.task-scope-controls { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 10px 14px; }
+.task-scope-controls > .field { flex: 1 1 220px; }
+.task-toolbar .field { min-width: 0; gap: 4px; }
+.task-toolbar .field :is(input, select) { min-height: 32px; padding-top: 5px; padding-bottom: 5px; }
+.task-toolbar .list-sort-control { min-width: 0; }
+.task-summary { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.task-summary .summary-card { display: flex; align-items: baseline; gap: 8px; padding: 6px 10px; box-shadow: none; background: var(--surface); }
+.task-summary .summary-card span { font-size: .8rem; }
+.task-summary .summary-card strong { margin: 0; font-size: .95rem; }

@@ -1,3 +1,5 @@
+@import "./task-controls.css";
+
 :root {
   font-family: "Segoe UI", system-ui, sans-serif;
   font-size: 15px;
@@ -437,7 +439,6 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--brand); }
 .profile-forms { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 .file-button { display: inline-grid; place-items: center; cursor: pointer; }
 .file-button input { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; }
-.task-toolbar { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(180px, .4fr); gap: 16px; margin-bottom: 18px; }
 .task-list { display: grid; gap: 14px; }
 .task-card { display: grid; gap: 14px; overflow: hidden; border-radius: 3px; box-shadow: 0 1px 4px rgb(0 0 0 / 7%); }
 .delegated-task-card { margin-left: 22px; border-left: 4px solid var(--accent); }
