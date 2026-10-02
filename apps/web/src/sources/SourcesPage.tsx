@@ -1,3 +1,4 @@
+import { PageHelpButton } from "../components/PageHelpButton";
 import { useEffect, useState, type FormEvent } from "react";
 import { apiGet, apiMutate } from "../api/client";
 import { errorMessage } from "../api/errors";
@@ -61,7 +62,7 @@ export function SourcesPage() {
       .catch(problem => setError(errorMessage(problem, t("tasksTaskApiTheTaskContextCouldNotBe"))));
   }, [t]);
   return <div className="page source-settings-page">
-    <header className="page-header"><div><h1>{t("navIntakeSettings")}</h1><p className="muted">{t("intakeSettingsIntro")}</p></div></header>
+    <header className="page-header"><div><h1>{t("navIntakeSettings")}</h1><p className="muted">{t("intakeSettingsIntro")}</p></div><PageHelpButton title="navIntakeSettings" paragraphs={["intakeSettingsIntro"]}/></header>
     {error && <p className="status-message error-message" role="alert">{error}</p>}
     {sites.length > 1 && <section className="panel"><div className="field"><label htmlFor="source-settings-site">{t("site")}</label><select id="source-settings-site" value={siteId} onChange={event => setSiteId(event.target.value)}>{sites.map(site => <option value={site.siteId} key={site.siteId}>{site.name}</option>)}</select></div></section>}
     {siteId && <div className="source-settings-grid"><SourceList siteId={siteId} kind="source-type"/><SourceList siteId={siteId} kind="sender"/></div>}

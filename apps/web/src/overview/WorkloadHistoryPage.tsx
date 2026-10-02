@@ -1,3 +1,4 @@
+import { PageHelpButton } from "../components/PageHelpButton";
 import { useEffect, useMemo, useState } from "react";
 import type { TaskSite } from "../work/WorkContextModels";
 import { getTaskContext, getWorkloadHistory } from "../tasks/taskApi";
@@ -40,7 +41,7 @@ export function WorkloadHistoryPage({ language, timeZone, personId }: { language
   const y = (value: number) => 250 - value / maximum * 210;
 
   return <div className="page workload-history-page">
-    <header className="page-header"><div><h1>{t("workloadTitle")}</h1><p className="muted">{t("workloadIntro")}</p></div></header>
+    <header className="page-header"><div><h1>{t("workloadTitle")}</h1><p className="muted">{t("workloadIntro")}</p></div><PageHelpButton title="workloadTitle" paragraphs={["workloadIntro", "workloadChartIntro"]}/></header>
     {sites.length > 1 && <div className="field workload-site-select">
       <label htmlFor="workload-site">{t("site")}</label>
       <select id="workload-site" value={siteId} onChange={event => setSiteId(event.target.value)}>

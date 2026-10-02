@@ -40,7 +40,7 @@ Only leaf work that is actually being handled contributes to active workload. A 
 
 ### Site-managed metadata
 
-Task types, source types and senders are managed inside one site and may be deactivated for new work without breaking existing references. Cross-site transfers use immutable display snapshots and never populate or reuse the receiver's local registry IDs. `Request` / `REQ` is the initial system-managed request type. Site Manager may customize its name and abbreviation (for example, `Anmodning` / `ANM`) while its system identity and active state remain protected. Request routing uses the system marker, not the display name or abbreviation. Existing task reference codes and cross-site display snapshots are preserved.
+Task types, source types and senders are managed inside one site and may be deactivated for new work without breaking existing references. Cross-site transfers use immutable display snapshots and never populate or reuse the receiver's local registry IDs. `Request` / `REQ` is the initial system-managed request type. Site Manager may customize its name and abbreviation while its system identity and active state remain protected. Request routing uses the system marker, not the display name or abbreviation. Existing task reference codes and cross-site display snapshots are preserved.
 
 ### Planning and execution
 

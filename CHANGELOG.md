@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Added localized help buttons and keyboard-accessible help dialogs to Workload, Reports, Intake and Notifications.
+
 - Allowed Site Manager to rename and abbreviate the system request type while retaining its protected active state, routing identity and existing reference codes.
 
 - Restricted fallback Site code editing to Platform Manager's existing References page and removed the code section from Site Manager's References. Existing task references remain unchanged.
