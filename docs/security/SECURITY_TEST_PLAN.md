@@ -2,18 +2,18 @@
 
 This plan turns the security release gate in the [roadmap](../project/ROADMAP.md) into traceable work. The baseline is OWASP ASVS 5.0 Level 2, selected Level 3 requirements for security-critical identity, authorization, audit, and integrations, OWASP WSTG 4.2, and OWASP API Security Top 10 2023.
 
-## Phases
+## Execution method
 
-1. Freeze the requirement baseline and maintain the complete Level 2 traceability matrix.
-2. Verify anonymous exposure, reverse proxy, TLS, headers, caching, and safe errors.
-3. Verify authentication, sessions, local passwords, recovery, TOTP, and WebAuthn/passkeys with negative and concurrent tests.
-4. Verify platform, site, level, role, and object authorization against the access matrix.
-5. Verify browser mutations, CSRF, input limits, rich text, URLs, document references, print, and PDF output.
-6. Verify administration and report APIs against OWASP API Security Top 10.
-7. Verify operational history, audit isolation, notification failures, secret sanitization, backup, and restore.
-8. Run dependency, repository, container-image, and configuration scans; remediate and retest every finding; issue the final security report.
+[ASVS_5.0.0_L2_MATRIX.md](ASVS_5.0.0_L2_MATRIX.md) is the only requirement status matrix. Work follows its chapter and requirement order:
 
-Execute this plan through repeatable tests and requirement-level evidence in the ASVS matrix. An external review is optional when explicitly requested; the [federation security review brief](FEDERATION_SECURITY_REVIEW_BRIEF.md) is available as a handoff template and is not a prerequisite for this testing work.
+1. Read the next requirement and reconcile its existing evidence.
+2. Execute its missing positive, negative and boundary cases in the maintained test suites.
+3. Record discovered weaknesses in the finding register, correct them and rerun the failing cases.
+4. Record the executed result, tested target, test link, run evidence and remaining scope on that same ASVS row.
+5. Mark `Passed` only when the requirement is fully supported; retain explicit gaps on incomplete rows. Record deployment or user dependencies on the affected row before continuing with work that can proceed.
+6. Continue to the next requirement. At the end, evaluate the release conditions against this matrix and the finding register.
+
+Execution records support the matrix; they are not separate work lists. External review is optional when explicitly requested. The [federation security review brief](FEDERATION_SECURITY_REVIEW_BRIEF.md) is only a handoff template.
 
 ## Site reference authorization
 
@@ -27,7 +27,7 @@ The [ASVS matrix](ASVS_5.0.0_L2_MATRIX.md) is the single security-testing work l
 - Use synthetic data. Never store credentials, cookies, API keys, MFA material, or personal data in the repository.
 - Code review alone cannot produce `Passed` when a meaningful dynamic test is possible.
 - `Not applicable` requires a short, verifiable rationale.
-- Give every finding a stable `SV-*` ID, risk statement, remediation, and retest evidence in [Security verification](SECURITY_VERIFICATION.md).
+- Give every finding a stable `SV-*` ID, risk statement, remediation, and retest evidence in [finding register](SECURITY_VERIFICATION.md).
 - Automated tests must fail closed on unexpected responses. Manual tests require explicit steps and expected results.
 - Keep raw evidence outside Git when it can contain sensitive deployment information; reference it by controlled identifier.
 

@@ -672,6 +672,18 @@ try {
     identityProviderEntityId: authority,
     modulePath: '/api/auth/saml2',
   };
+  process.stdout.write('Checking ASVS 1.5.1 XML metadata boundaries...\n');
+  for (const variant of ['valid', 'external', 'internal', 'oversized']) {
+    const savedXml = await manager.put('/api/platform/identity/providers/saml', { enabled: false, clearSecret: false,
+      configuration: { ...samlConfiguration, metadataUrl: `${negativeAuthority}/metadata-xml?variant=${variant}`, identityProviderEntityId: negativeAuthority } });
+    assert.equal(savedXml.status, 204, `XML ${variant} configuration failed`);
+    const testedXml = await manager.post('/api/platform/identity/providers/saml/test', {});
+    assert.equal(testedXml.status, variant === 'valid' ? 204 : 502, `XML ${variant} validation returned ${testedXml.status}`);
+    if (variant !== 'valid') assert.doesNotMatch(JSON.stringify(testedXml.body), /DOCTYPE|SYNTHETIC_XML_CANARY|XmlException|stack trace/i);
+  }
+  const xmlProbes = compose(['exec', '-T', 'api', 'curl', '--fail', '--silent', '--show-error',
+    '--cacert', '/run/fylkren-identity-lab/ca.crt', `${negativeAuthority}/xml-probes`]);
+  assert.equal(JSON.parse(xmlProbes).xmlCanaryRequests, 0, 'XML parsing fetched an external entity');
   const samlSaved = await manager.put('/api/platform/identity/providers/saml', { enabled: false, clearSecret: false, configuration: samlConfiguration });
   assert.equal(samlSaved.status, 204, JSON.stringify(samlSaved.body));
   const samlTested = await manager.post('/api/platform/identity/providers/saml/test', {});
@@ -807,6 +819,8 @@ try {
     exactSamlEntityAndPersistentNameIdLink: 'passed',
     samlUnlinkAndRelink: 'passed',
     samlServerSideSession: 'passed',
+    xmlMetadataDtdAndExternalEntityRejection: 'passed',
+    xmlMetadataSizeBoundary: 'passed',
   }, null, 2)}\n`);
 } catch (error) {
   if (started) {

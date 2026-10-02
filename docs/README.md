@@ -70,8 +70,8 @@ Before public publication, run `bash tools/security/verify-repository-safety.sh 
 - [Security test plan](security/SECURITY_TEST_PLAN.md)
 - [Threat model](security/SECURITY_THREAT_MODEL.md)
 - [Independent-instance federation threat model](security/FEDERATION_THREAT_MODEL.md)
-- [Security verification record](security/SECURITY_VERIFICATION.md)
-- [OWASP ASVS 5.0 Level 2 matrix](security/ASVS_5.0.0_L2_MATRIX.md)
+- [Security finding register](security/SECURITY_VERIFICATION.md)
+- [ASVS security-testing matrix — the single status/evidence list](security/ASVS_5.0.0_L2_MATRIX.md)
 - [Offline password blocklist](security/PASSWORD_BLOCKLIST.md)
 - [Secrets and security logging](security/SECRETS_AND_SECURITY_LOGGING.md)
 

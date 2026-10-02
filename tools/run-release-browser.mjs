@@ -53,6 +53,8 @@ try {
   await start();
   if (authOnly) {
     command(process.execPath, [process.argv.includes('--webauthn-only') ? 'tools/e2e/webauthn-security.mjs' : 'tools/e2e/totp-security.mjs']);
+  } else if (process.argv.includes('--community-only')) {
+    command(process.execPath, ['tools/e2e/community-browser-smoke.mjs', '--task-flow', '--smtp', '--keyboard', '--classified-pdf']);
   } else {
     command(process.execPath, ['tools/e2e/community-browser-smoke.mjs', '--task-flow', '--smtp', '--keyboard', '--classified-pdf']);
     stop();

@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using System.Text;
 using Fylkren.Api.ActivityAudit;
 using Fylkren.Api.Persistence;
 using Microsoft.AspNetCore.Antiforgery;
@@ -14,7 +15,7 @@ public static partial class BrandingEndpoints
         endpoints.MapGet("/api/branding", async (FylkrenDbContext db, CancellationToken ct) =>
         {
             var value = await db.BrandingSettings.AsNoTracking().SingleAsync(x => x.Id == SettingsId, ct);
-            return Results.Ok(new { value.ProductName, value.InstanceName, value.Theme, value.PrimaryColor, value.AccentColor, value.TopBarColor, value.TopBarTextColor, value.CustomCss, hasLogo = value.Logo != null });
+            return Results.Ok(new { value.ProductName, value.InstanceName, value.Theme, value.PrimaryColor, value.AccentColor, value.TopBarColor, value.TopBarTextColor, customCss = IsSafeCss(value.CustomCss) ? value.CustomCss : "", hasLogo = value.Logo != null });
         }).AllowAnonymous();
         var admin = endpoints.MapGroup("/api/platform/branding").RequireAuthorization(policy => policy.RequireRole("PlatformManager"));
         admin.MapPut("/", async (UpdateBranding request, IAntiforgery antiforgery, HttpContext context, FylkrenDbContext db, CancellationToken ct) =>
@@ -25,7 +26,7 @@ public static partial class BrandingEndpoints
             var theme = request.Theme ?? ""; var primaryColor = request.PrimaryColor ?? ""; var accentColor = request.AccentColor ?? ""; var topBarColor = request.TopBarColor ?? ""; var topBarTextColor = request.TopBarTextColor ?? "";
             var customCss = request.CustomCss ?? "";
             if (name.Length is < 2 or > 80 || instanceName.Length is < 2 or > 80 || theme is not ("light" or "dark" or "system") || !HexColor().IsMatch(primaryColor) || !HexColor().IsMatch(accentColor) || !HexColor().IsMatch(topBarColor) || !HexColor().IsMatch(topBarTextColor)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["branding"] = ["Check the product name, installation name, theme and colors."] });
-            if (customCss.Length > 20_000 || UnsafeCss().IsMatch(customCss)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["customCss"] = ["CSS may contain at most 20,000 characters and cannot load external resources through url() or @import."] });
+            if (!IsSafeCss(customCss)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["customCss"] = ["CSS may contain at most 20,000 characters and cannot include escapes, executable content or resource-loading functions."] });
             var value = await db.BrandingSettings.SingleAsync(x => x.Id == SettingsId, ct); value.Update(name, instanceName, theme, primaryColor.ToLowerInvariant(), accentColor.ToLowerInvariant(), topBarColor.ToLowerInvariant(), topBarTextColor.ToLowerInvariant(), customCss); Record(db, context, "branding.updated"); await db.SaveChangesAsync(ct); return Results.NoContent();
         });
         admin.MapPut("/logo", async (IAntiforgery antiforgery, HttpContext context, FylkrenDbContext db, CancellationToken ct) =>
@@ -41,8 +42,36 @@ public static partial class BrandingEndpoints
     }
     [GeneratedRegex("^#[0-9a-fA-F]{6}$")]
     private static partial Regex HexColor();
-    [GeneratedRegex("(@import|url\\s*\\(|expression\\s*\\(|javascript\\s*:|</?style)", RegexOptions.IgnoreCase)]
+    [GeneratedRegex("(@import|(?:url|src|image|image-set|expression)\\s*\\(|javascript\\s*:|</?style)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
     private static partial Regex UnsafeCss();
+    private static bool IsSafeCss(string css) => css.Length <= 20_000 && !css.Contains('\\') && CssForInspection(css) is { } inspected && !UnsafeCss().IsMatch(inspected);
+    private static string? CssForInspection(string css)
+    {
+        var result = new StringBuilder(css.Length);
+        var quote = '\0';
+        for (var index = 0; index < css.Length; index++)
+        {
+            var current = css[index];
+            if (quote != '\0')
+            {
+                result.Append(current);
+                if (current == quote) quote = '\0';
+            }
+            else if (current is '\'' or '"')
+            {
+                quote = current;
+                result.Append(current);
+            }
+            else if (current == '/' && index + 1 < css.Length && css[index + 1] == '*')
+            {
+                var end = css.IndexOf("*/", index + 2, StringComparison.Ordinal);
+                if (end < 0) return null;
+                index = end + 1;
+            }
+            else result.Append(current);
+        }
+        return quote == '\0' ? result.ToString() : null;
+    }
     private static void Record(FylkrenDbContext db, HttpContext context, string eventType) { if (Guid.TryParse(context.User.FindFirst("fylkren:person_id")?.Value, out var actor)) db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), null, actor, eventType, "branding-settings", SettingsId, DateTimeOffset.UtcNow)); }
     private sealed record UpdateBranding(string? ProductName, string? InstanceName, string? Theme, string? PrimaryColor, string? AccentColor, string? TopBarColor, string? TopBarTextColor, string? CustomCss);
 }

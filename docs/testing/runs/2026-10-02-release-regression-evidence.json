@@ -394,6 +394,223 @@
         "No production deployment/test",
         "Remaining scope is tracked in the ASVS matrix"
       ]
+    },
+    {
+      "phase": "ASVS chapter 1",
+      "recordedAtUtc": "2026-10-02T19:35:14.962641+00:00",
+      "baseRevision": "ab7d12a04648c9fd281815311ad68a0883e7c40e",
+      "version": "0.70.0-dev.1",
+      "status": "recorded execution complete; remaining requirements open in matrix",
+      "unitResult": {
+        "testFilesPassed": 38,
+        "testsPassed": 137,
+        "newLiteralEncodingCases": 7
+      },
+      "unitSourceSha256": {
+        "apps/web/src/components/RichText.tsx": "805e51a425040f42f404f0945c2dbd4106fe70b48e52d9862e7caeeac6f12370",
+        "apps/web/src/components/RichText.test.ts": "2b72f787e713a83a410b43ee928f4ea7aea190b609e65aed53da38265c58c8c2"
+      },
+      "unitLogSha256": "108168796851517e3ab432b22d6247663e191bd5a2464bfe716fec8767cfba5c",
+      "limits": [
+        "No whole chapter or application pass claimed",
+        "Metadata DTD/XXE results do not cover all third-party SAML assertion parser boundaries",
+        "No new image vulnerability scan or production deployment/test",
+        "Remaining requirement scope is maintained only in the ASVS matrix"
+      ],
+      "sourceSha256": {
+        "apps/api/Platform/BrandingEndpoints.cs": "ce7850afc580b1cd4879847b1f25b617486b69b3066e9993753a4163d8d88d32",
+        "apps/api/WorkManagement/WorkLinkPolicy.cs": "9ab314cef302f7d0128c7d06a3de44e7fdf3aed95e98dff190141220cf642e8e",
+        "tools/e2e/encoding-security.mjs": "094a0b627df00e6b5fd73065a9dd7df4da63f6ff97e6ef571702844b8a9138a0",
+        "tools/test-e2e-local.mjs": "4b5de3d795c7a6f028fc61b4d69eb22c872615b398e93f811b6632327d225ec7",
+        "tools/run-e2e-editions.mjs": "1d2620629b14c003bf5e4a5b228859dca724f258fd9a621a551ac53361e23daf",
+        "tools/e2e/community-browser-smoke.mjs": "ed53e5152fbe10fb6abc531e94cf9dc0c89e34cf7026351450c180f2c9be72f8",
+        "tools/run-release-browser.mjs": "5e8ae8dbf7a0e18b71a774e1e62b53c78bb517a1fbb386f5160e8b25206df8f4",
+        "apps/api/Platform/IdentityProviderEndpoints.cs": "c17434f0588fe12daf0e035a1963754434dc325732898f9fb10d421ffd9fd909",
+        "tools/run-identity-sso-lab.mjs": "fdfa2509ed091be7a40c1bdb088c857c96ebe62deea75c79a58c24e5f9abbdad",
+        "tools/e2e/oidc-negative-provider.mjs": "86bb86cfd6dd03e54279db5d1776c77a333128ab2946e44827adcf7b47c8a3d5"
+      },
+      "focusedHttpResult": {
+        "customCssEncoding": "passed",
+        "unsafeCssRejected": 9,
+        "rejectedCssUnchanged": true,
+        "legacyUnsafeCssSuppressed": true,
+        "svgDeclaredTypesRejected": 4,
+        "literalPayloads": 7,
+        "unsafeLinksRejected": 9,
+        "allowedSchemes": 4
+      },
+      "browserResult": {
+        "topLevelTaskBrowserFlow": "passed",
+        "taskRegistration": true,
+        "leaderAssessment": true,
+        "directExecution": true,
+        "finalReport": true,
+        "reportArchive": true,
+        "overviewCounts": true,
+        "siteAudit": true,
+        "notificationQueue": true,
+        "classifiedReport": true,
+        "workloadPresentation": true,
+        "separateReportApprover": true,
+        "storedContentInjection": true,
+        "pdfOutput": true,
+        "multiPageClassifiedReport": true,
+        "keyboardModalNavigation": true,
+        "accessibleDialogTree": true,
+        "visibleKeyboardFocus": true,
+        "smtpHandoff": true,
+        "smtpRetry": true,
+        "mailboxReceipt": true,
+        "smtpHeaderInjectionRejected": true,
+        "chromium": "Chrome/152.0.7977.82",
+        "firstRunSetup": true,
+        "authenticatedShell": true,
+        "communityEdition": true,
+        "siteCreation": true,
+        "desktopOverflow": false,
+        "mobileOverflow": false,
+        "browserErrors": 0
+      },
+      "rawLogSha256": {
+        "fylkren-asvs-chapter1-before.log": "e02587a47001b57db6e85c266af99c164a93121a5efab30bf445f9751f8b90da",
+        "fylkren-asvs-chapter1-url-before.log": "7daeac60b6e8b2e46ff6cde838daaebff1a36efff6c5368d0157489935f50804",
+        "fylkren-asvs-chapter1-input-final.log": "b3d50bcaa2579ebb34109c7200cf2b8c9ae9fb9367a9152c07552950a6643cea",
+        "fylkren-asvs-chapter1-browser.log": "783baa4409334debbb0e50b31aba31bacb16850efb32665842d9e7e3808d07af",
+        "fylkren-asvs-chapter1-editions.log": "cd705b959899c2c9d515d52b318ae2392490c29a3ed828b70563a39aebfc76c8",
+        "fylkren-asvs-chapter1-xml.log": "93205a4ecb46c06520af5ac3dc6bed186d3d0c8b38db9a8a8f6c8427ac47846e",
+        "fylkren-asvs-chapter1-repository.log": "333a688ea627488544ada1b86f003e28d77c60f3803304a7ef26f04296cf89e0"
+      },
+      "sqlReview": {
+        "rawCallSites": 14,
+        "constantRawCalls": 4,
+        "interpolatedParameterizedCalls": 10,
+        "inventory": [
+          "apps/api/Persistence/FylkrenDbContext.cs:179:            .FromSqlRaw(\"SELECT * FROM platform_reference_settings WHERE key = 1 FOR UPDATE\").Single();",
+          "apps/api/Persistence/FylkrenDbContext.cs:191:                .FromSqlInterpolated($\"SELECT * FROM site_reference_settings WHERE site_id = {group.Key} FOR UPDATE\")",
+          "apps/api/Persistence/FylkrenDbContext.cs:209:            .FromSqlRaw(\"SELECT * FROM platform_reference_settings WHERE key = 1 FOR UPDATE\")",
+          "apps/api/Persistence/FylkrenDbContext.cs:223:                .FromSqlInterpolated($\"SELECT * FROM site_reference_settings WHERE site_id = {group.Key} FOR UPDATE\")",
+          "apps/api/Persistence/FylkrenDbContext.cs:251:                    var lockedParent = WorkItems.FromSqlInterpolated(",
+          "apps/api/Persistence/FylkrenDbContext.cs:287:                    var lockedParent = await WorkItems.FromSqlInterpolated(",
+          "apps/api/Identity/IdentityBootstrapEndpoints.cs:27:        await database.Database.ExecuteSqlRawAsync(\"SELECT pg_advisory_xact_lock(407959214679271);\", cancellationToken);",
+          "apps/api/Platform/ApiMaintenanceWorker.cs:62:        var removedOutbound = await database.Database.ExecuteSqlInterpolatedAsync($$\"\"\"",
+          "apps/api/Platform/ApiMaintenanceWorker.cs:74:        var removedReceipts = await database.Database.ExecuteSqlInterpolatedAsync($$\"\"\"",
+          "apps/api/Platform/ApiMaintenanceWorker.cs:86:        var removedAudit = await database.Database.ExecuteSqlInterpolatedAsync($$\"\"\"",
+          "apps/api/Identity/WebAuthnEndpoints.cs:365:        await db.Database.ExecuteSqlInterpolatedAsync($\"SELECT pg_advisory_xact_lock({key})\", ct);",
+          "apps/api/Identity/IdentityTotpEndpoints.cs:43:        await database.Database.ExecuteSqlInterpolatedAsync($\"SELECT pg_advisory_xact_lock({identityLockKey})\", cancellationToken);",
+          "apps/api/Licensing/SiteCapacityPolicy.cs:21:                await db.Database.ExecuteSqlRawAsync(\"SELECT pg_advisory_xact_lock(601128301)\", ct);",
+          "apps/api/Identity/IdentitySessionEndpoints.cs:115:        await database.Database.ExecuteSqlInterpolatedAsync($\"SELECT pg_advisory_xact_lock({identityLockKey})\", cancellationToken);"
+        ],
+        "sourceSha256": {
+          "apps/api/Identity/IdentityBootstrapEndpoints.cs": "f7d837be002c0a1a43de90e0f1db5572036c7223582a0f461a066f42b19b04c8",
+          "apps/api/Identity/IdentitySessionEndpoints.cs": "5ddb5d1fb0454b45f1fb734873326fa27d68a1157a9f0a1d9ac5e517d5f4bdcb",
+          "apps/api/Identity/IdentityTotpEndpoints.cs": "47b6bf242a00d04e5618421ddc8af28bc935fc3990643b95ead6b029d1030920",
+          "apps/api/Identity/WebAuthnEndpoints.cs": "2afe99e0702e2a70c665ba36744599f6078c2a76682942c89f795cfcebb3d1cc",
+          "apps/api/Licensing/SiteCapacityPolicy.cs": "08677de095e7c793ed597e2b76ed8bf066a9e0fb522ba4c58f5ea5ca33e8658a",
+          "apps/api/Persistence/FylkrenDbContext.cs": "e8c192a671536798e11a4856353a0518ea1017fbc7e9c4a4ebb6f072cbb1c292",
+          "apps/api/Platform/ApiMaintenanceWorker.cs": "93cfc30a283c707daf3e4b26283973755b4a35e594f1366cd5212437c1d4cc9b"
+        }
+      },
+      "apiImageIds": {
+        "editionRegression": "sha256:ab856a79290974c75a0bd2d2a338a1d19d28576103eb0fae6ecddbb2a75b9ace",
+        "communityBrowser": "sha256:b47dd3e952b2d7d5971c05ffa064128ad9c260e1328ac3422146012eb91d4957",
+        "ssoXml": "sha256:21c059af08f9493ab8d7ddaf13256baa2c336a94f55bff324c6eb50a85b34b3d"
+      },
+      "editionResult": {
+        "editionsAndTransitions": "passed",
+        "workloadLoad": {
+          "workloadLoad": "passed",
+          "createdTasks": 1000,
+          "metrics": [
+            {
+              "concurrency": 1,
+              "authorizedRequests": 100,
+              "unauthorizedRequestsRejected": 100,
+              "p50Ms": 10,
+              "p95Ms": 84,
+              "p99Ms": 94,
+              "maxMs": 94
+            },
+            {
+              "concurrency": 10,
+              "authorizedRequests": 100,
+              "unauthorizedRequestsRejected": 100,
+              "p50Ms": 17,
+              "p95Ms": 129,
+              "p99Ms": 136,
+              "maxMs": 145
+            },
+            {
+              "concurrency": 25,
+              "authorizedRequests": 100,
+              "unauthorizedRequestsRejected": 100,
+              "p50Ms": 60,
+              "p95Ms": 232,
+              "p99Ms": 266,
+              "maxMs": 273
+            }
+          ]
+        },
+        "bootstrap": "passed",
+        "operationalIsolation": "passed",
+        "authorizationBoundaries": "passed",
+        "administrationReportApis": "passed",
+        "dependencies": "passed",
+        "learning": "passed",
+        "learningPrivacy": "passed",
+        "learningTreatment": "passed",
+        "learningConcurrency": "passed",
+        "learningHistoryPagination": "passed",
+        "taskComments": "passed",
+        "decisionsRisksVersions": "passed",
+        "webhookFailureIsolation": "passed",
+        "portability": "passed"
+      },
+      "ssoXmlResult": {
+        "liveOidcHttpsMetadata": "passed",
+        "oidcSecretProtection": "passed",
+        "oidcAuthorizationCodeSignIn": "passed",
+        "oidcIssuerMismatchRejection": "passed",
+        "oidcForgedStateAndReplayRejection": "passed",
+        "oidcNonceMismatchRejection": "passed",
+        "oidcAudienceMismatchRejection": "passed",
+        "exactIssuerAndSubjectLink": "passed",
+        "oidcUnlinkAndRelink": "passed",
+        "directSsoAndLocalLockoutGuards": "passed",
+        "serverSideSessionWithoutBrowserTokens": "passed",
+        "liveSamlSignedAssertion": "passed",
+        "samlTamperedUnsignedAndReplayRejection": "passed",
+        "exactSamlEntityAndPersistentNameIdLink": "passed",
+        "samlUnlinkAndRelink": "passed",
+        "samlServerSideSession": "passed",
+        "xmlMetadataDtdAndExternalEntityRejection": "passed",
+        "xmlMetadataSizeBoundary": "passed"
+      },
+      "completedCommands": [
+        "pnpm --filter @fylkren/web test",
+        "pnpm typecheck",
+        "node tools/run-e2e-editions.mjs --asvs-input-only",
+        "node tools/run-release-browser.mjs --community-only",
+        "node tools/run-e2e-editions.mjs",
+        "node tools/run-identity-sso-lab.mjs",
+        "pnpm check:docs",
+        "pnpm check:structure",
+        "pnpm check:version",
+        "bash tools/security/verify-repository-safety.sh --history"
+      ],
+      "asvsTraceability": {
+        "total": 253,
+        "statuses": {
+          "In progress": 120,
+          "Passed": 23,
+          "Not applicable": 53,
+          "Not assessed": 57
+        },
+        "newPassedRequirements": [
+          "1.2.4",
+          "1.3.1",
+          "1.3.5"
+        ]
+      }
     }
   ]
 }

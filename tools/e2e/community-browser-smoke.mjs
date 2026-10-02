@@ -245,9 +245,14 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
   await configureTaskSmtp({ request, requestExpectingHttpError, enabled: smtpDelivery });
   await signInLocalActor({ request, navigate, waitFor, setInput, evaluate, actor: author });
 
-  const title = 'Synthetic direct execution task';
+  const title = 'Synthetic direct execution task {{7*7}}';
+  assert.equal(await evaluate(`(() => {
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync(${JSON.stringify(String.raw`.probe { background-image: u\72l("https://example.invalid/probe"); }`)});
+    return sheet.cssRules[0].style.backgroundImage.includes('url(');
+  })()`), true, 'CSS escape proof must be interpreted as url() by the real browser parser');
   const injectionMarker = 'fylkren-browser-xss-marker';
-  const description = `Complete the synthetic top-level browser lifecycle. <img data-${injectionMarker} src=x onerror="globalThis.__fylkrenXss=1"><script>globalThis.__fylkrenXss=2</script>`;
+  const description = `Complete the synthetic top-level browser lifecycle. <img data-${injectionMarker} src=x onerror="globalThis.__fylkrenXss=1"><script>globalThis.__fylkrenXss=2</script>\n&lt;img src=x onerror=synthetic()&gt;\n%3Cscript%3Esynthetic()%3C/script%3E\n%253Cscript%253Esynthetic()%253C/script%253E\n[link](javascript:synthetic())\n{{constructor.constructor("synthetic()")()}}`;
   const recommendation = 'Send directly to the standard execution workflow.';
   const referenceUrl = 'https://example.invalid/source-document';
   const dueDate = new Date(Date.now() + 7 * 86_400_000).toISOString().slice(0, 10);
@@ -291,6 +296,9 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
     ![...document.scripts].some(value => value.textContent.includes(${JSON.stringify('__fylkrenXss')})) &&
     globalThis.__fylkrenXss === undefined)()`), true,
   'Stored active-content payload was not rendered as inert text');
+  for (const literal of ['&lt;img', '%3Cscript%3E', '%253Cscript%253E', '[link](javascript:', '{{constructor.constructor']) {
+    assert.ok((await bodyText()).includes(literal), 'Stored encoded/expression input was decoded or lost');
+  }
   await clickButton('Take under review');
   await waitFor('document.querySelector("#review-priority") !== null', 'review dialog');
   assert.match(await bodyText(), new RegExp(recommendation.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
@@ -325,6 +333,20 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
   await waitFor('document.body.innerText.includes("Step 1 of")', 'execution workflow');
   for (let step = 1; step <= 10; step++) {
     await setRichText('document', `<h1>Execution step ${step}</h1><ul><li>Completed in Chromium</li></ul>`);
+    if (step === 1) {
+      assert.equal(await evaluate(`(() => {
+        const editor = document.querySelector('.workflow-document-editor');
+        const plain = 'SYNTHETIC_PASTE_LITERAL &lt;img&gt; %253Cscript%253E';
+        const clipboard = new DataTransfer(); clipboard.setData('text/plain', plain);
+        clipboard.setData('text/html', '<img data-asvs-paste src=x onerror="globalThis.__fylkrenXss=3">');
+        editor.focus(); editor.dispatchEvent(new ClipboardEvent('paste', { clipboardData: clipboard, bubbles: true, cancelable: true }));
+        const dropped = new DataTransfer(); dropped.setData('text/plain', 'SYNTHETIC_DROP_LITERAL');
+        dropped.setData('text/html', '<script>globalThis.__fylkrenXss=4</script>');
+        editor.dispatchEvent(new DragEvent('drop', { dataTransfer: dropped, bubbles: true, cancelable: true }));
+        return editor.textContent.includes(plain) && editor.textContent.includes('SYNTHETIC_DROP_LITERAL') &&
+          !editor.querySelector('img, script') && globalThis.__fylkrenXss === undefined;
+      })()`), true, 'Rich-text paste/drop must insert only literal plain text');
+    }
     const lastStep = await evaluate(`[...document.querySelectorAll('button')]
       .some(button => button.textContent.trim() === 'Send for review')`);
     await clickButton(lastStep ? 'Send for review' : 'Next step');

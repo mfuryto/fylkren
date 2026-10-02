@@ -93,6 +93,12 @@ try {
   run('docker', ['compose', '-p', project, 'exec', '-T', 'api', 'sh', '-c', 'test ! -e /var/run/docker.sock']);
   run('docker', ['compose', '-p', project, 'exec', '-T', 'postgres', 'sh', '-c', 'test "$(id -u)" -ne 0']);
   run('docker', ['compose', '-p', project, 'exec', '-T', 'postgres', 'awk', '/^NoNewPrivs:/ { if ($2 != 1) exit 1; privileges = 1 } /^CapEff:/ { if ($2 != "0000000000000000") exit 1; capabilities = 1 } END { if (!privileges || !capabilities) exit 1 }', '/proc/self/status']);
+  // Simulate unsafe CSS retained by an earlier version, only in this fresh lab.
+  run('docker', ['compose', '-p', project, 'exec', '-T', 'postgres', 'psql', '-v', 'ON_ERROR_STOP=1', '-U', 'fylkren', '-d', 'fylkren', '-c',
+    `UPDATE branding_settings SET custom_css = '.panel { background: image-set("https://example.invalid/probe" 1x); }'`]);
+  run(process.execPath, ['-e', `const r=await fetch('http://localhost:18081/api/branding');const b=await r.json();if(!r.ok||b.customCss!=='')throw new Error('Legacy unsafe CSS was exposed');console.log(JSON.stringify({legacyUnsafeCssSuppressed:true}));`]);
+  run('docker', ['compose', '-p', project, 'exec', '-T', 'postgres', 'psql', '-v', 'ON_ERROR_STOP=1', '-U', 'fylkren', '-d', 'fylkren', '-c',
+    "UPDATE branding_settings SET custom_css = ''"]);
   run('./deploy/compose/backup.sh', [backupRoot]);
   if (existsSync(oldestBackup)) throw new Error('Oldest completed backup was not pruned');
   if (!existsSync(retainedBackup)) throw new Error('Newest previous completed backup was pruned');
@@ -108,7 +114,7 @@ try {
   run('sha256sum', ['-c', 'SHA256SUMS'], { cwd: backupSet });
   run('./deploy/compose/restore.sh', [backupSet, '--confirm-destructive-restore']);
   run(process.execPath, ['-e', `const response=await fetch('http://localhost:18081/api/configuration/public');const body=await response.json();if(!response.ok||body.setupRequired!==true)throw new Error(JSON.stringify(body));`]);
-  run(process.execPath, ['tools/test-e2e-local.mjs']);
+  run(process.execPath, ['tools/test-e2e-local.mjs', ...(process.argv.includes('--asvs-input-only') ? ['--asvs-input-only'] : [])]);
 } finally {
   try {
     run('docker', ['compose', '-p', project, 'down', '-v']);

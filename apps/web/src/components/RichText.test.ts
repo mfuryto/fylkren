@@ -4,6 +4,22 @@ import { describe, expect, it } from "vitest";
 import { markdownToEditorHtml, RichTextContent } from "./RichText";
 
 describe("markdownToEditorHtml", () => {
+  it.each([
+    '<img src=x onerror="synthetic()">',
+    '&lt;img src=x onerror="synthetic()"&gt;',
+    '%3Cimg%20src=x%20onerror=synthetic()%3E',
+    '%253Cimg%2520src=x%2520onerror=synthetic()%253E',
+    '</script>\u2028<script>synthetic()</script>',
+    '[link](javascript:synthetic())',
+    '{{constructor.constructor("synthetic()")()}}',
+  ])("keeps literal input inert without decoding it: %s", (payload) => {
+    const html = renderToStaticMarkup(createElement(RichTextContent, { value: payload }));
+    expect(html).not.toMatch(/<(?:img|script|a)[\s>]/i);
+    expect(markdownToEditorHtml(payload)).not.toMatch(/<(?:img|script|a)[\s>]/i);
+    if (payload.startsWith('%') || payload.startsWith('[')) expect(html).toContain(payload);
+    if (payload.startsWith('{{')) expect(html).toContain('{{constructor.constructor(&quot;synthetic()&quot;)()}}');
+    if (payload.startsWith('&lt;')) expect(html).toContain('&amp;lt;');
+  });
   it("renders headings and escapes user supplied markup", () => {
     expect(markdownToEditorHtml("# Analysis\n<script>alert(1)</script>"))
       .toBe("<h1>Analysis</h1><p>&lt;script&gt;alert(1)&lt;/script&gt;</p>");

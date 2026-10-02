@@ -11,6 +11,7 @@ const { publicKey, privateKey } = generateKeyPairSync('rsa', { modulusLength: 20
 const publicJwk = publicKey.export({ format: 'jwk' });
 const codes = new Map();
 let mode = 'nonce';
+let xmlCanaryRequests = 0;
 
 const encoded = value => Buffer.from(JSON.stringify(value)).toString('base64url');
 function jwt(payload) {
@@ -34,6 +35,22 @@ createServer({
 }, async (request, response) => {
   const url = new URL(request.url, issuer);
   try {
+  if (url.pathname === '/xml-probes') return json(response, 200, { xmlCanaryRequests });
+  if (url.pathname === '/xml-canary') {
+    xmlCanaryRequests++;
+    response.writeHead(200, { 'Content-Type': 'text/plain' });
+    return response.end('SYNTHETIC_XML_CANARY');
+  }
+  if (url.pathname === '/metadata-xml') {
+    const variant = url.searchParams.get('variant');
+    const descriptor = `<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" entityID="${issuer}"><synthetic>TEXT</synthetic></EntityDescriptor>`;
+    let xml = descriptor;
+    if (variant === 'external') xml = `<!DOCTYPE EntityDescriptor [<!ENTITY probe SYSTEM "${issuer}/xml-canary">]>` + descriptor.replace('TEXT', '&probe;');
+    if (variant === 'internal') xml = '<!DOCTYPE EntityDescriptor [<!ENTITY a "synthetic"><!ENTITY b "&a;&a;&a;&a;">]>' + descriptor.replace('TEXT', '&b;');
+    if (variant === 'oversized') xml = 'x'.repeat(2_000_001);
+    response.writeHead(200, { 'Content-Type': 'application/xml', 'Content-Length': Buffer.byteLength(xml) });
+    return response.end(xml);
+  }
   if (url.pathname === '/.well-known/openid-configuration') return json(response, 200, {
     issuer,
     authorization_endpoint: `${issuer}/authorize`,

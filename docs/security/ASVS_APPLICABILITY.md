@@ -31,16 +31,8 @@ The OIDC relying-party requirements 10.1.1–10.1.2, 10.2.1 and 10.5.1–10.5.4
 remain applicable. They require implementation review and closed-environment
 testing against a controlled OpenID Provider.
 
-## Current totals
+## Applicability correction, 2026-10-02
 
-After this first cleanup pass, the Level 2 matrix contains 253 requirements:
+Requirement 1.3.6 is applicable: federation, identity-provider metadata and webhooks make outbound server requests. Administrative configuration access does not remove SSRF applicability. The matrix records the completed scope and missing destination/DNS/redirect cases.
 
-- 54 not applicable;
-- 24 passed or fulfilled;
-- 53 in progress;
-- 122 not assessed.
-
-This classification reduces the test inventory; it does not increase the
-number of verified controls. The remaining `Not assessed` requirements must
-still be evaluated individually as applicable, not applicable, or requiring a
-finding.
+Requirement status and totals are maintained only in [the ASVS matrix](ASVS_5.0.0_L2_MATRIX.md). This document records exclusion rationales and reopen conditions.
