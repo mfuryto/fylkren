@@ -153,24 +153,24 @@ export function ReferenceSettingsPage({ isPlatformManager }: { isPlatformManager
         </div>
         <div className="inline-actions"><button className="primary-button" type="button" disabled={busy} onClick={() => void savePlatform()}>{t("savePlatformReference")}</button></div>
       </section>}
-      <section className="panel">
+      {isPlatformManager && <section className="panel">
         <div className="section-heading"><div><h2>{t("siteReferenceTitle")}</h2><p className="muted">{t("siteReferenceIntro")}</p></div><ListSortControl id="site-reference-sort" value={sort} onChange={setSort} options={["name-asc", "name-desc", "reference-asc", "reference-desc"]}/></div>
         <div className="reference-site-list">{sortList(settings.sites, sort, { name: site => site.name, reference: site => site.prefix }).map(site => <article className="reference-site-card" key={site.siteId}>
           <div className="reference-site-heading"><div><h3>{site.name}</h3>{site.isActive === false && <span className="status-badge inactive">{t("inactive")}</span>}</div><code>{preview(site.prefix, settings.nextNumber, settings.minimumDigits)}</code></div>
           <div className="reference-settings-grid">
-            <div className="field"><label htmlFor={`reference-prefix-${site.siteId}`}>{t("siteCode")}</label><input id={`reference-prefix-${site.siteId}`} required minLength={2} maxLength={12} pattern="[A-Za-z][A-Za-z0-9]*" disabled={isPlatformManager || busy} value={site.prefix} onChange={event => updateSite(site.siteId, { prefix: event.target.value.toUpperCase() })}/></div>
-            {!isPlatformManager && <div className="inline-actions reference-site-action"><button className="secondary-button" type="button" disabled={busy} onClick={() => void saveSite(site)}>{t("saveSiteReference")}</button></div>}
+            <div className="field"><label htmlFor={`reference-prefix-${site.siteId}`}>{t("siteCode")}</label><input id={`reference-prefix-${site.siteId}`} required minLength={2} maxLength={12} pattern="[A-Za-z][A-Za-z0-9]*" disabled={busy} value={site.prefix} onChange={event => updateSite(site.siteId, { prefix: event.target.value.toUpperCase() })}/></div>
+            {isPlatformManager && <div className="inline-actions reference-site-action"><button className="secondary-button" type="button" disabled={busy} onClick={() => void saveSite(site)}>{t("saveSiteReference")}</button></div>}
           </div>
           {isPlatformManager && site.types && site.types.length > 0 && <div className="reference-type-summary">{site.types.map(type => <span className="status-badge" key={`${type.name}-${type.abbreviation}`}>{type.abbreviation} · {type.name}{type.isActive ? "" : ` · ${t("inactive")}`}</span>)}</div>}
         </article>)}</div>
         <p className="muted reference-history-note">{t("referenceHistoryNote")}</p>
-      </section>
+      </section>}
       {!isPlatformManager && settings.sites.length > 0 && <section className="panel">
-        <div className="section-heading"><div><h2>{t("tasksTaskLookupDialogsTaskTypes")}</h2><p className="muted">{t("siteReferenceIntro")}</p></div></div>
+        <div className="section-heading"><div><h2>{t("tasksTaskLookupDialogsTaskTypes")}</h2><p className="muted">{t("referencesIntro")}</p></div></div>
         {settings.sites.length > 1 && <div className="field"><label htmlFor="reference-type-site">{t("site")}</label><select id="reference-type-site" value={typeSiteId} onChange={event => setTypeSiteId(event.target.value)}>{settings.sites.map(site => <option key={site.siteId} value={site.siteId}>{site.name}</option>)}</select></div>}
         {typeSiteId && <TaskTypeReferenceSettings siteId={typeSiteId}/>} 
       </section>}
     </>}
-    {helpOpen && <Modal title={t("referencesTitle")} onClose={() => setHelpOpen(false)}><div className="process-help"><p>{t("referencesIntro")}</p><p>{t(isPlatformManager ? "platformReferenceIntro" : "siteReferenceIntro")}</p><p>{t("referenceHistoryNote")}</p></div><div className="modal-actions"><button className="primary-button" type="button" onClick={() => setHelpOpen(false)}>{t("close")}</button></div></Modal>}
+    {helpOpen && <Modal title={t("referencesTitle")} onClose={() => setHelpOpen(false)}><div className="process-help"><p>{t("referencesIntro")}</p>{isPlatformManager && <p>{t("platformReferenceIntro")}</p>}<p>{t("referenceHistoryNote")}</p></div><div className="modal-actions"><button className="primary-button" type="button" onClick={() => setHelpOpen(false)}>{t("close")}</button></div></Modal>}
   </div>;
 }

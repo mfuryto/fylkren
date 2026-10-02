@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Restricted fallback Site code editing to Platform Manager's existing References page and removed the code section from Site Manager's References. Existing task references remain unchanged.
+
 - Compacted Platform Manager status counters, service and log rows, action buttons, administration sections, delivery summaries and the licence certificate while retaining its branding and entitlement details.
 
 - Added a dedicated due-date column after the task title in the Tasks list, with localized dates and a compact stacked layout on narrow screens.

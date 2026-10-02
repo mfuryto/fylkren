@@ -17,7 +17,8 @@ public static class ReferenceSettingsEndpoints
         group.MapPut("/platform", UpdatePlatform)
             .RequireAuthorization(policy => policy.RequireRole("PlatformManager"));
         group.MapGet("/sites", GetManagedSites);
-        group.MapPut("/sites/{siteId:guid}", UpdateSite);
+        group.MapPut("/sites/{siteId:guid}", UpdateSite)
+            .RequireAuthorization(policy => policy.RequireRole("PlatformManager"));
         return endpoints;
     }
 
@@ -111,8 +112,7 @@ public static class ReferenceSettingsEndpoints
         FylkrenDbContext db, CancellationToken ct)
     {
         if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest();
-        if (!PersonId(user, out var actor) || !await db.SiteManagerAssignments.AnyAsync(value =>
-            value.SiteId == siteId && value.PersonId == actor && value.IsActive && value.Site.IsActive, ct))
+        if (!PersonId(user, out var actor) || !user.IsInRole("PlatformManager"))
             return Results.Problem(statusCode: 403);
         var settings = await db.SiteReferenceSettings.SingleOrDefaultAsync(value => value.SiteId == siteId, ct);
         if (settings is null) return Results.NotFound();

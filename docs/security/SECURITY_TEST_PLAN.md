@@ -15,6 +15,10 @@ This plan turns the security release gate in the [roadmap](../project/ROADMAP.md
 
 The federation portion is handed to the independent reviewer through the [federation security review brief](FEDERATION_SECURITY_REVIEW_BRIEF.md). It freezes the target, enumerates the externally reachable and management surfaces, defines the minimum adversarial coverage and separates maintained regression evidence from reviewer-owned tests.
 
+## Site reference authorization
+
+Only Platform Manager may update fallback Site codes through `PUT /api/references/sites/{siteId}`. Verify that a Site Manager with an active assignment receives HTTP 403, including for their own Site; Platform Manager must be able to update a valid code with CSRF protection, while duplicate and invalid codes remain rejected. Existing task references must remain unchanged. This boundary requires dynamic authorization evidence; a successful build is not that evidence.
+
 ## Evidence rules
 
 - Link every result to a commit, displayed version, date, environment, and stable ASVS/WSTG identifier.
