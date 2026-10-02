@@ -36,7 +36,7 @@ docker compose logs --tail=100 api
 
 `install.sh` creates `.env` only when absent, generates a random database password and applies mode `600`. Review public origin, proxy/HTTPS mode and authentication before starting. After the first Platform Manager signs in, configure language, IANA time zone, clock format and measurement system under **Appearance**; these values are stored in the database and do not require a restart.
 
-`FYLKREN_FEDERATION_RETENTION_DAYS` controls federation-history retention and defaults to 2,555 days (seven years); supported values are 365–3,650. Once per day, including shortly after API startup, maintenance removes bounded batches of delivered outbound messages and inbound receipts older than the cutoff only when their local work is terminal, and federation audit events older than the same cutoff. Pending, retrying and failed messages and active-work correlation records are retained. Archive evidence required beyond the configured period before lowering it; deleted history is not restored by later increasing the value.
+`FYLKREN_FEDERATION_RETENTION_DAYS` controls federation-history retention and defaults to 2,555 days (seven years); supported values are 365–3,650. Once per day, including shortly after API startup, maintenance removes bounded batches of delivered outbound messages and inbound receipts older than the cutoff only when their local work is terminal. Security audit records are retained independently and are not deleted by this transport-retention setting. Pending, retrying and failed messages and active-work correlation records are retained. Archive evidence required beyond the configured period before lowering it; deleted history is not restored by later increasing the value.
 
 Community starts without a license or network access. Fylkren already contains the production issuer's **public** SPKI verification key. To enable Enterprise features, Platform Manager imports a signed license on the License page without configuring a key, reinstalling, changing images or migrating data. An optional `FYLKREN_LICENSE_PUBLIC_KEY_SPKI` value adds another trusted public key for controlled rotation or isolated tests and requires an API restart. Never place the issuer's private key on this server. An absent or expired license leaves customer data accessible and disables only entitled actions. See [Community and Enterprise entitlements](../architecture/EDITION_ENTITLEMENTS.md) for feature allocation, issuance, transitions and recovery requirements.
 
@@ -137,11 +137,13 @@ cd /data/docker/fylkren
 git pull --ff-only
 git diff HEAD@{1} -- deploy/compose/.env.example compose.yaml
 docker compose build
+sudo ./deploy/compose/backup.sh
+docker compose stop web api
 docker compose up -d --force-recreate
 sudo ./deploy/host-status/install.sh
 ```
 
-Merge required new variables without replacing existing secrets. Do not interrupt API startup while migrations are running.
+Merge required new variables without replacing existing secrets before building and backing up. Run the backup while the current stack is still running; proceed only if it succeeds. Stop all old API/worker instances before starting the new version, including any replicas outside this Compose stack. This is required for the WorkItem activity/lifecycle cutover below. Do not interrupt API startup while migrations are running.
 
 The one-time destructive development baseline transition was completed at 0.55.0. It must never be repeated. Every later schema change is a forward, versioned EF Core migration that preserves installed data; installed migrations are not rewritten or removed.
 
