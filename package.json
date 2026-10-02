@@ -21,6 +21,10 @@
     "test:e2e:identity-ad": "node tools/run-identity-ad-lab.mjs",
     "test:e2e:identity-sso": "node tools/run-identity-sso-lab.mjs",
     "test:e2e:license-expiry": "node tools/run-license-expiry.mjs",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "test:e2e:browser": "node tools/run-release-browser.mjs",
+    "test:e2e:totp": "node tools/run-release-browser.mjs --totp-only",
+    "test:e2e:webauthn": "node tools/run-release-browser.mjs --webauthn-only",
+    "test:e2e:postgres-upgrade": "node tools/e2e/postgres-nonroot-upgrade.mjs"
   }
 }

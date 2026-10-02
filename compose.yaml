@@ -116,6 +116,10 @@ services:
       context: .
       dockerfile: apps/postgres/Dockerfile
     restart: unless-stopped
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     environment:
       POSTGRES_DB: fylkren
       POSTGRES_USER: fylkren

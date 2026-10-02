@@ -313,6 +313,7 @@ input, select, textarea { min-width: 0; max-width: 100%; }
 .field textarea { padding: 12px 14px; line-height: 1.5; }
 .field input:hover:not(:disabled), .field select:hover:not(:disabled), .field textarea:hover:not(:disabled) { border-color: #89959c; background-color: color-mix(in srgb, var(--control-bg) 72%, white); }
 .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--control-border); outline: 0; background-color: color-mix(in srgb, var(--control-bg) 75%, white); box-shadow: inset 0 -2px var(--accent), 0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent); }
+.field :is(input, select, textarea):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .field input::placeholder, .field textarea::placeholder { color: #69737a; opacity: 1; }
 .field :is(input, select, textarea):disabled { border-color: color-mix(in srgb, var(--control-border) 65%, transparent); color: #727b80; background-color: var(--control-disabled); box-shadow: none; opacity: 1; }
 input[type="checkbox"], input[type="radio"] { accent-color: var(--brand); }

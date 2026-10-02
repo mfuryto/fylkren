@@ -18,13 +18,15 @@ No control is promoted from **Implemented** to **Verified** solely because code 
 
 ## Current release-gate summary
 
+The [2026-10-02 release regression](../testing/runs/2026-10-02-release-regression.md) records the latest fresh local edition, browser/PDF/learning privacy, identity, license, workload, federation and restore evidence. This adds measured evidence without declaring the remaining ASVS or independent/production gates complete.
+
 | Area | Current status | Required completion evidence |
 | --- | --- | --- |
 | Public surface, proxy, TLS, and headers | Implemented | The 2026-09-28 production run passed TLS 6/6 and public surface 28/28, including wrong Host; retain this evidence per release and complete the explicit wrong-port deployment check |
 | Sessions, cookies, and CSRF | Implemented | Lifecycle and parallel-session invalidation passed; complete absolute/sliding expiry, mutation-matrix and external-IdP revocation evidence |
 | Local passwords and recovery | Implemented | Concurrent reset and session revocation passed; complete blocklist, reset-expiry and remaining boundary evidence |
-| TOTP and recovery codes | Implemented | Setup-token replay, time-window boundary, parallel code consumption, and clock-skew tests |
-| WebAuthn and passkeys | Implemented | Registration/sign-in challenge replay, origin/RP validation, counter behavior, and authenticator coverage |
+| TOTP and recovery codes | Implemented | The 2026-10-02 lab passed setup replay, adjacent-window rejection, concurrent TOTP/recovery single-use and sign-out challenge invalidation; expiry/clock-skew and remaining lifecycle boundaries still need evidence |
+| WebAuthn and passkeys | Implemented | The 2026-10-02 virtual CTAP2 lab passed registration/sign-in, replay, origin/RP and counter regression; hardware/platform authenticators, expiry and remaining lifecycle evidence still need coverage |
 | OIDC, SAML, AD, and LDAP | Implemented | The maintained 2026-09-29 laboratories now pass the complete E2E-14 functional and negative identity scope, including exact issuer/entity binding, nonce/audience, unsigned/tampered/replayed assertions, lifecycle fail-safe cases, unlink/relink and one-time environment import; repeat unchanged against the exact release candidate and representative customer IdPs |
 | Enterprise license lifecycle | Implemented | Real-time expiry, immediate entitlement closure, retained state and renewal without restart passed on 2026-09-29; repeat against the exact release candidate and verify production issuer/key custody |
 | Platform/site/level authorization | Implemented | Full role/object matrix through UI and direct HTTP calls, including cross-site and sibling isolation |
@@ -33,9 +35,9 @@ No control is promoted from **Implemented** to **Verified** solely because code 
 | Rich text, URLs, input, and output | Implemented | Injection payloads, protocol allowlist, field/body bounds, mail headers, print, and PDF |
 | Administration and report APIs | Implemented | Complete scope/grant/BOLA, ETag, idempotency, pagination, rate, and concurrency suite |
 | Audit, technical logs, and notifications | Implemented | Leakage, isolation, delivery failure, retry, retention, and tamper-boundary evidence |
-| Database, concurrency, and performance | Implemented | Transaction-race suite, query measurements, representative load, and recovery behavior |
+| Database, concurrency, and performance | Implemented | Clean concurrency/restore tests and the 1,000-task/25-reader and 50,000-row federation fixture passed on 2026-10-02; customer sizing and large learning/report datasets remain |
 | Backups and cryptographic keys | Implemented | Matched database/key backup and destructive restore passed in a disposable topology; verify protected production data in the formal restore rehearsal |
-| Dependencies, images, and repository | Implemented | Repeat locked dependency, image, secret, history, and configuration scans for release artifacts |
+| Dependencies, images, and repository | Finding | Fresh scans have no Critical/High vulnerabilities; vendor-unfixed API Medium/Low findings remain open as SV-055. Available PostgreSQL patch and non-root configuration are addressed in this change |
 | Retention and sanitization | Implemented | Bounded local backup retention and restore passed; authorized application-data sanitization and immutable-audit coverage remain |
 
 ## Implemented control inventory
@@ -134,6 +136,21 @@ Historical hardening changes before this maintained register remain traceable in
 | SV-050 | ASVS 10.5.3; Medium | The OIDC connection test accepted syntactically valid HTTPS metadata even when its issuer differed from the configured authority. A trusted or compromised endpoint could therefore approve metadata for another issuer. | Connection testing now requires exact canonical issuer binding and HTTPS authorization, token and JWKS endpoints. A dedicated trusted-TLS mismatch fixture returns `502`; valid Keycloak metadata and the complete browser flow still pass. See the [run record](../testing/runs/2026-09-29-live-oidc-saml-identity.md). | Closed and retested 2026-09-29 |
 | SV-051 | ASVS 10.1.2/10.2.1; High | A captured OIDC callback replay returned an error but could leave a local application session after the remote handler failed. This violated the rule that a rejected external transaction must never authenticate the browser. | Every OIDC remote failure now explicitly signs out partial local state before returning generic non-cacheable `400`. SAML signature and token-replay failures receive the same bounded handling. Clean-browser forged-state, callback replay, assertion tampering and assertion replay tests all return `400` with no session. See the [run record](../testing/runs/2026-09-29-live-oidc-saml-identity.md). | Closed and retested 2026-09-29 |
 | SV-052 | ASVS 7.4.1/10.1.2; High | In a long provider-switch and unlink/relink sequence, a rejected OIDC or SAML callback could return `400` while a partial application cookie from the remote handler survived. A rejection response was therefore not an atomic authentication failure boundary. | A callback-boundary middleware now registers final response handling and deletes the actual configured application cookie, including chunks, whenever an OIDC or SAML callback finishes with an error. The expanded live run repeats forged state, callback replay, wrong nonce/audience, unsigned/tampered SAML and assertion replay after provider switches and proves every rejection leaves an unauthenticated session. | Closed and retested 2026-09-29 |
+
+### Additional closed findings from the 2026-10-02 run
+
+| ID | Requirement and severity | Finding and impact | Remediation and retest | Status |
+| --- | --- | --- | --- | --- |
+| SV-053 | ASVS 7.4.1; TM-15; High | A pending TOTP challenge carried the identity and expiry but no security version. After explicit sign-out, the pre-sign-out password proof could still be completed with a valid remaining recovery code. | TOTP challenge protection v2 carries security version; completion checks it under the identity lock before consuming factor material. The fresh HTTP regression rejected the stale challenge and accepted the unused recovery code with a new challenge. Password/factor security-version changes use the same invalidation check. | Closed in the commit containing this record; retested 2026-10-02 |
+| SV-054 | Dependency maintenance; Medium | PostgreSQL image included nghttp2-libs 1.69.0-r0 with CVE-2026-58055 and an available fix. | Upgrade Alpine packages during image construction; installed 1.70.0-r0. Rebuilt image scan reported zero vulnerabilities. Fresh database/backup/restore regression passed. | Closed in the commit containing this record; retested 2026-10-02 |
+| SV-056 | Container least privilege; scanner DS-0002 High | PostgreSQL's Dockerfile inherited the root image user. Its entrypoint normally dropped the server process to postgres, but initialization and default container exec still started with root privileges. | Set USER postgres, drop all capabilities and prohibit privilege escalation. The fresh database/restore fixture asserts non-root UID, zero effective capabilities and NoNewPrivs=1. A separate existing-volume upgrade from the former root entrypoint preserved data under UID 70. The configuration rescan has zero findings. | Closed in the commit containing this record; retested 2026-10-02 |
+| SV-057 | TM-15; Low | Invalid/replayed WebAuthn verification responses escaped as unhandled 500 errors. The observed registration replay did not create another credential or bypass authentication, but produced a server failure instead of a controlled rejection. | Handle only Fido2VerificationException on WebAuthn routes; return bounded generic 400 for registration and 401 for login, without logging assertion/attestation material. The fresh virtual CTAP2 run rejected registration/assertion replay, validly signed wrong-origin/wrong-RP responses and counter regression; every failed login left no session. | Closed in the commit containing this record; retested 2026-10-02 |
+
+### Open residual findings
+
+| ID | Risk and affected environment | Owner and disposition |
+| --- | --- | --- |
+| SV-055 | API Ubuntu 24.04 image: nine Medium and five Low package occurrences, no vendor FixedVersion available in the 2026-10-02 Trivy database. Seven distinct Medium and three distinct Low CVEs are listed in the run record. No Critical/High image vulnerabilities or embedded secrets were reported. Runtime exposure and exploitability are not inferred from the scanner alone. | Maintainer monitors upstream fixes; responsible security authority must assess exposure and explicitly accept remaining Medium risk before release approval. Open, not accepted by this run. |
 
 ## Release decision
 

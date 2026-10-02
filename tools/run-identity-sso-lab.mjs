@@ -339,6 +339,12 @@ async function createCdpSession(url) {
     assert.equal(result.errorText, undefined, `Browser navigation failed: ${JSON.stringify(result)}`);
   }
   async function clearCookies(origin) {
+    // Stop the application before clearing cookies: pending authenticated page
+    // requests can otherwise renew the old cookie after the cleanup completes.
+    await call('Page.stopLoading');
+    await navigate(`${origin}/api/configuration/public`);
+    await waitFor('location.pathname === "/api/configuration/public" && document.readyState === "complete"',
+      'inert public document before cookie cleanup');
     await call('Network.clearBrowserCookies');
     await call('Storage.clearDataForOrigin', { origin, storageTypes: 'cookies' });
     const { cookies } = await call('Network.getAllCookies');
@@ -364,6 +370,10 @@ async function createCdpSession(url) {
 let started = false;
 try {
   createCertificates();
+  // Keycloak runs as UID 1000; the workstation user may have a different UID.
+  // Keep the disposable key private rather than making it world-readable.
+  command('docker', ['run', '--rm', '-v', `${labDirectory}:/lab`, 'node:24-alpine',
+    'chown', '1000:0', '/lab/keycloak.key']);
   createRealm();
   process.stdout.write('Building and starting the isolated OIDC/SAML identity lab...\n');
   started = true;

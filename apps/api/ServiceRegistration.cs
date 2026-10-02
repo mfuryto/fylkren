@@ -66,6 +66,7 @@ internal static class ServiceRegistration
         builder.Services.AddSingleton(new ApiMachineAuthenticationLimiter(trustForwardedHeaders));
 
         builder.Services.AddExceptionHandler<ExternalAuthenticationExceptionHandler>();
+        builder.Services.AddExceptionHandler<WebAuthnVerificationExceptionHandler>();
         builder.Services.AddExceptionHandler<ConcurrencyExceptionHandler>();
         builder.Services.AddProblemDetails();
         builder.WebHost.ConfigureKestrel(options =>

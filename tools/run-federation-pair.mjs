@@ -253,11 +253,9 @@ async function assertProxyLoadControls(receiver) {
       `${path} did not reject a body above ${limit} bytes: ${JSON.stringify(result.body)}`);
   }
 
-  // Endpoint-specific size rejection runs inside the rate-limit middleware and
-  // legitimately consumes permits. Reset once so the rate boundary below has
-  // an isolated, deterministic 20-request window.
-  compose(['restart', 'api-b']);
-  compose(['up', '-d', '--no-build', '--wait', 'api-b', 'web-b', 'tls']);
+  // Body-limit probes can consume the same client permits. Let the real fixed
+  // window replenish before measuring its boundary through the proxy.
+  await new Promise(resolve => setTimeout(resolve, 61_000));
 
   const requesterInstanceId = randomUUID();
   const samples = await Promise.all(Array.from({ length: 20 }, async () => {
@@ -426,14 +424,23 @@ async function runRestorePair() {
   receiverServicesDown(true);
   restoreDatabaseBackup(dumpPath);
   replaceKeyRing();
-  receiverServicesUp();
-  const wrongKeyApi = await signInAfterRestore('https://localhost:18444', b.credentials);
-  const wrongKeyIdentity = await expectStatus(wrongKeyApi.request(
-    '/api/platform/federation/identity'), 200, 'inspect database-only restore');
-  assert.equal(wrongKeyIdentity.instanceId, b.instanceId);
-  assert.equal(wrongKeyIdentity.publicKeySpki, b.publicKeySpki);
-  assert.equal(wrongKeyIdentity.keyUsable, false,
-    'Database-only restore unexpectedly decrypted the federation private key');
+  // Provider settings are protected too: the current API refuses startup when
+  // the matching key ring is missing, before any local login or signing can occur.
+  compose(['up', '-d', '--no-build', 'api-b']);
+  const wrongKeyContainer = commandOutput('docker', ['compose', '-p', project, '-f', composeFile, 'ps', '-aq', 'api-b']);
+  let wrongKeyState;
+  for (let attempt = 0; attempt < 60; attempt++) {
+    wrongKeyState = JSON.parse(commandOutput('docker', ['inspect', '--format', '{{json .State}}', wrongKeyContainer]));
+    if (wrongKeyState.Status === 'exited') break;
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
+  assert.equal(wrongKeyState.Status, 'exited', 'Database-only restore did not fail closed');
+  assert.notEqual(wrongKeyState.ExitCode, 0);
+  const wrongKeyLog = commandOutput('docker', ['logs', wrongKeyContainer], { stdio: ['ignore', 'pipe', 'pipe'] });
+  // Docker writes the unhandled exception to stderr; inspect the complete log privately.
+  const failureLog = spawnSync('docker', ['logs', wrongKeyContainer], { env, encoding: 'utf8' });
+  assert.match(wrongKeyLog + failureLog.stderr, /CryptographicException/);
+  assert.match(wrongKeyLog + failureLog.stderr, /IdentityProviderConfigurationService/);
 
   receiverServicesDown(true);
   restoreDatabaseBackup(dumpPath);
@@ -456,7 +463,7 @@ async function runRestorePair() {
   assert.ok(delivered.counterpartId, 'Matched restore did not accept new federated work');
 
   process.stdout.write(`${JSON.stringify({ federationMatchedRestore: 'passed',
-    databaseOnlyKeyUsable: false, matchedKeyUsable: true, instanceIdPreserved: true,
+    databaseOnlyStartupRejected: true, databaseOnlyKeyUsable: false, matchedKeyUsable: true, instanceIdPreserved: true,
     publicKeyPreserved: true, peerReapprovalRequired: false, postBackupMutationRemoved: true,
     bilateralProbeAfterRestore: true, deliveryAfterRestore: true })}\n`);
 }
@@ -718,6 +725,8 @@ async function runProductionBoundaryPair() {
   assert.equal(enabledB.enabled, true);
   const delivered = await assertQueuedOutboundDelivery(a, b, leaderA);
   assert.ok(delivered.originWorkItemId);
+  const leaderB = await makeSiteLeader(b, 'https://localhost:18444');
+  await assertOperationalReturnPath(a, b, delivered, leaderA, leaderB);
   assert.equal(sqlValue('postgres-a', `SELECT COUNT(*) FROM audit_events
     WHERE event_type = 'federation-routing.enabled'`), '1');
   assert.equal(sqlValue('postgres-b', `SELECT COUNT(*) FROM audit_events
@@ -734,7 +743,7 @@ async function runProductionBoundaryPair() {
   process.stdout.write(`${JSON.stringify({ federationProductionBoundary: 'passed',
     environment: 'Production', administrativeFoundationAvailable: true,
     routingDisabledByDefault: true, activatedThroughPlatformApi: true,
-    productionWorkDelivered: true, deactivationVerified: true,
+    productionWorkDelivered: true, ordinaryReportReturned: true, privateLearningExcludedFromFederation: true, deactivationVerified: true,
     peerWorkRoutesGatedWhileDisabled: peerWorkRoutes.length,
     syntheticRoutesAbsent: syntheticRoutes.length,
     remoteRecipientSelectionAbsentBeforeActivation: true,
@@ -1500,13 +1509,13 @@ async function assertOfficialAnswerDelivered(sender, receiver, link, queued, rep
     WHERE local_work_item_id = '${link.originWorkItemId}' AND direction = 'outgoing'`),
   classification ?? '');
   assert.equal(sqlValue('postgres-a', `SELECT official_answer_site_name FROM federation_work_links
-    WHERE local_work_item_id = '${link.originWorkItemId}'`), 'Synthetic Root b');
+    WHERE local_work_item_id = '${link.originWorkItemId}'`), receiver.siteName);
   assert.equal(sqlValue('postgres-a', `SELECT COUNT(*) FROM federation_inbound_receipts
     WHERE message_id = '${queued.messageId}' AND local_work_item_id = '${link.originWorkItemId}'`), '1');
   const receiverReports = await expectStatus(receiverLeader.request(
     `/api/work/sites/${receiver.siteId}/reports`), 200, 'receiver report archive');
   assert.ok(receiverReports.reports.some(row => row.id === link.counterpartId &&
-    row.finalReport === report && row.siteName === 'Synthetic Root b'),
+    row.finalReport === report && row.siteName === receiver.siteName),
   'Official response was not archived at receiving site');
   const beforeAcceptance = await expectStatus(senderLeader.request(
     `/api/work/sites/${sender.siteId}/reports`), 200, 'sender report archive before acceptance');
@@ -1525,8 +1534,8 @@ async function assertOfficialAnswerDelivered(sender, receiver, link, queued, rep
   const senderReports = await expectStatus(senderLeader.request(
     `/api/work/sites/${sender.siteId}/reports`), 200, 'sender report archive after acceptance');
   assert.ok(senderReports.reports.some(row => row.id === link.originWorkItemId &&
-    row.finalReport === report && row.siteName === 'Synthetic Root b' &&
-    row.writtenBy === 'Synthetic Root b'),
+    row.finalReport === report && row.siteName === receiver.siteName &&
+    row.writtenBy === receiver.siteName),
   'Sender archive lost the receiving site as official report header');
   const senderReport = senderReports.reports.find(row => row.id === link.originWorkItemId);
   const receiverReport = receiverReports.reports.find(row => row.id === link.counterpartId);
@@ -1551,7 +1560,7 @@ async function assertOfficialAnswerDelivered(sender, receiver, link, queued, rep
   await expectStatus(receiver.api.post(
     `/api/platform/federation/test/answer/${link.counterpartId}`,
     { officialReport: 'A second answer must not replace the first' }),
-  409, 'second official answer rejected');
+  productionBoundary ? 404 : 409, 'second official answer rejected or synthetic route absent');
   sql('postgres-b', `UPDATE federation_outbound_messages SET status = 'retrying',
     next_attempt_at = NOW() - INTERVAL '1 second' WHERE message_id = '${queued.messageId}'`);
   for (let attempt = 0; attempt < 30; attempt++) {
@@ -1587,10 +1596,14 @@ async function assertOperationalReturnPath(sender, receiver, link, senderLeader,
   await expectStatus(receiver.api.put('/api/platform/classifications/settings', {
     enabled: true,
   }), 204, 'enable classifications on receiver');
+  const definitions = await expectStatus(receiver.api.request('/api/platform/classifications/'), 200, 'read receiver classification definitions');
+  if (!definitions.items.some(value => value.abbreviation === 'SECRET' && value.isActive))
+    await expectStatus(receiver.api.post('/api/platform/classifications/', { name: 'SECRET', abbreviation: 'SECRET', sortOrder: 50, isActive: true }), 201, 'create synthetic receiver classification');
   const report = 'Official answer completed through ordinary work commands';
+  const privateLearning = { id: randomUUID(), kind: 'improvement', text: 'PRIVATE_FEDERATED_LEARNING_SENTINEL' };
   await expectStatus(receiverLeader.put(
     `/api/work/sites/${receiver.siteId}/items/${link.counterpartId}/final-report`, {
-      content: report, classification: 'SECRET',
+      content: report, classification: 'SECRET', lessons: [privateLearning],
     }), 204, 'write ordinary federated final report');
   await expectStatus(receiverLeader.post(
     `/api/work/sites/${receiver.siteId}/items/${link.counterpartId}/final-report/approve`, {}),
@@ -1604,6 +1617,11 @@ async function assertOperationalReturnPath(sender, receiver, link, senderLeader,
       AND origin_resource_id = '${link.originWorkItemId}' ORDER BY created_at DESC LIMIT 1`);
   await assertOfficialAnswerDelivered(sender, receiver, link, { messageId: answerId }, report,
     senderLeader, receiverLeader, true, 'SECRET');
+  const localLessons = await expectStatus(receiverLeader.request(`/api/work/learning?workItemId=${link.counterpartId}&view=all`), 200, 'read receiver internal learning');
+  assert.ok(localLessons.items.some(value => value.id === privateLearning.id && value.text === privateLearning.text));
+  const remoteLessons = await expectStatus(senderLeader.request(`/api/work/learning?workItemId=${link.originWorkItemId}&view=all`), 200, 'read sender learning');
+  assert.equal(remoteLessons.total, 0, 'Receiver internal learning was copied to sender');
+  assert.equal(sqlValue('postgres-b', `SELECT count(*) FROM federation_outbound_messages WHERE payload_json LIKE '%${privateLearning.text}%'`), '0', 'Internal learning leaked into federation messages');
 }
 
 async function moveSiteBelowNewParent(owner, siteName, parentName) {

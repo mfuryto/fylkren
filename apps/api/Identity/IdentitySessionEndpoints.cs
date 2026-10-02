@@ -89,7 +89,7 @@ public static partial class IdentityEndpoints
         }
         await database.SaveChangesAsync(cancellationToken);
 
-        if (options.Authentication.MfaEnabled && identity.TotpEnabled) return Results.Accepted(value: new { requiresTwoFactor = true, challengeToken = totp.CreateChallenge(identity.Id, TimeSpan.FromMinutes(5)) });
+        if (options.Authentication.MfaEnabled && identity.TotpEnabled) return Results.Accepted(value: new { requiresTwoFactor = true, challengeToken = totp.CreateChallenge(identity.Id, identity.SecurityVersion, TimeSpan.FromMinutes(5)) });
         identity.RecordSignIn(now);
         await database.SaveChangesAsync(cancellationToken);
         var principal = CreatePrincipal(identity);
@@ -107,14 +107,14 @@ public static partial class IdentityEndpoints
         if (string.IsNullOrWhiteSpace(request.ChallengeToken) || request.ChallengeToken.Length > 4096 ||
             string.IsNullOrWhiteSpace(request.Code) || request.Code.Length > 128)
             return Results.Problem(statusCode: 401, title: "Invalid or expired two-factor challenge.");
-        Guid identityId;
-        try { identityId = totp.ReadChallenge(request.ChallengeToken); }
+        (Guid IdentityId, long SecurityVersion) challenge;
+        try { challenge = totp.ReadChallenge(request.ChallengeToken); }
         catch { return Results.Problem(statusCode: 401, title: "Invalid or expired two-factor challenge."); }
         await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
-        var identityLockKey = BitConverter.ToInt64(identityId.ToByteArray(), 0);
+        var identityLockKey = BitConverter.ToInt64(challenge.IdentityId.ToByteArray(), 0);
         await database.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock({identityLockKey})", cancellationToken);
-        var identity = await database.LoginIdentities.Include(value => value.Person).SingleOrDefaultAsync(value => value.Id == identityId && value.IsActive && value.Person.IsActive && value.TotpEnabled, cancellationToken);
-        if (identity?.TotpSecret is null || (!identity.IsPlatformManager && !await HasActiveAccess(identity.PersonId, database, cancellationToken))) return Results.Problem(statusCode: 401, title: "Invalid two-factor code.");
+        var identity = await database.LoginIdentities.Include(value => value.Person).SingleOrDefaultAsync(value => value.Id == challenge.IdentityId && value.IsActive && value.Person.IsActive && value.TotpEnabled, cancellationToken);
+        if (identity?.TotpSecret is null || identity.SecurityVersion != challenge.SecurityVersion || (!identity.IsPlatformManager && !await HasActiveAccess(identity.PersonId, database, cancellationToken))) return Results.Problem(statusCode: 401, title: "Invalid two-factor code.");
         var valid = false;
         try
         {

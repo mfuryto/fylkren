@@ -8,13 +8,14 @@ import { writeReportPdf } from './report-pdf.mjs';
 import { configureTaskSmtp, verifyTaskMail } from './smtp-browser.mjs';
 import { verifyMultiPageClassifiedPdf } from './verify-classified-report-pdf.mjs';
 import { verifyWorkloadPresentation } from './workload-browser.mjs';
+import { addPrivateLearning, verifyPrivateLearning, verifyPrivateLearningPdf } from './learning-report-privacy.mjs';
 
 const endpoint = process.env.FYLKREN_BROWSER_CDP_URL ?? 'http://127.0.0.1:19224';
 const targetUrl = process.env.FYLKREN_BROWSER_TARGET_URL ?? 'http://web:8080/';
 const enterpriseTransition = process.argv.includes('--enterprise'), taskFlow = process.argv.includes('--task-flow');
 const smtpDelivery = process.argv.includes('--smtp');
 const keyboardAccessibility = process.argv.includes('--keyboard');
-const reportPdfPath = process.argv.includes('--classified-pdf') ? 'output/pdf/e2e-01-classified-report.pdf' : process.env.FYLKREN_BROWSER_REPORT_PDF;
+const reportPdfPath = process.env.FYLKREN_BROWSER_REPORT_PDF ?? (process.argv.includes('--classified-pdf') ? 'output/pdf/e2e-01-classified-report.pdf' : undefined);
 const licensePath = process.env.FYLKREN_BROWSER_LICENSE_PATH ?? '/test/license-upload-fixture.json';
 assert.ok(!(enterpriseTransition && taskFlow), 'Choose either --enterprise or --task-flow');
 assert.ok(!smtpDelivery || taskFlow, '--smtp requires --task-flow');
@@ -57,7 +58,7 @@ async function evaluate(expression) {
   const result = await call('Runtime.evaluate', {
     expression, awaitPromise: true, returnByValue: true,
   });
-  if (result.exceptionDetails) throw new Error(result.exceptionDetails.text);
+  if (result.exceptionDetails) throw new Error(result.exceptionDetails.exception?.description ?? result.exceptionDetails.text);
   return result.result.value;
 }
 async function bodyText() { return evaluate('document.body.innerText'); }
@@ -157,7 +158,7 @@ async function waitForSummary(label, expected, scope = '.summary-card') {
 }
 async function assertCommunityBoundary() {
   await navigate('/#/license');
-  await waitFor('document.body.innerText.includes("No Enterprise entitlements are active")',
+  await waitFor('document.body.innerText.includes("Community features without Enterprise add-ons.")',
     'Community license page');
   const licenseText = await bodyText();
   assert.match(licenseText, /the same software for Community and Enterprise/);
@@ -185,13 +186,14 @@ async function importEnterpriseLicense() {
   'Enterprise license activation');
 }
 async function removeEnterpriseLicense() {
+  await waitFor(`[...document.querySelectorAll('button')].some(button => button.textContent.trim() === 'Remove license')`, 'loaded license removal control');
   await evaluate(`[...document.querySelectorAll('button')]
     .find(button => button.textContent.trim() === 'Remove license').click()`);
   await waitFor(`document.querySelector('[role="dialog"]') !== null`, 'license removal dialog');
   await evaluate(`[...document.querySelectorAll('[role="dialog"] button')]
     .find(button => button.textContent.trim() === 'Remove license').click()`);
   await waitFor(`document.body.innerText.includes("Enterprise entitlements are disabled") &&
-    document.body.innerText.includes("No Enterprise entitlements are active")`,
+    document.body.innerText.includes("Community features without Enterprise add-ons.")`,
   'Community downgrade');
 }
 async function runTopLevelTaskFlow(suffix, platformCredentials) {
@@ -274,8 +276,8 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
   await verifyWorkloadPresentation({ navigate, waitFor, request, evaluate, assertNoOverflow, siteId: site.id, expected: 1 });
   await navigate('/#/tasks');
   await waitFor(`document.body.innerText.includes(${JSON.stringify(title)})`, 'registered task queue');
-  if (!(await bodyText()).includes('Move to assessment')) await clickButton('Open task');
-  await waitFor('document.body.innerText.includes("Move to assessment")', 'registered task actions');
+  if (!(await bodyText()).includes('Take under review')) await clickButton(title);
+  await waitFor('document.body.innerText.includes("Take under review")', 'registered task actions');
   await evaluate(`(() => {
     const summary = [...document.querySelectorAll('summary')]
       .find(value => value.textContent.includes('Description'));
@@ -289,7 +291,7 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
     ![...document.scripts].some(value => value.textContent.includes(${JSON.stringify('__fylkrenXss')})) &&
     globalThis.__fylkrenXss === undefined)()`), true,
   'Stored active-content payload was not rendered as inert text');
-  await clickButton('Move to assessment');
+  await clickButton('Take under review');
   await waitFor('document.querySelector("#review-priority") !== null', 'review dialog');
   assert.match(await bodyText(), new RegExp(recommendation.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   await setSelect('#review-priority', 'high');
@@ -303,7 +305,7 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
 
   await navigate('/#/execution');
   await waitFor(`document.body.innerText.includes(${JSON.stringify(title)})`, 'execution queue');
-  await clickButton('Open execution');
+  await clickButton(title);
   await clickButton('Claim responsibility for the task');
   await waitFor('document.body.innerText.includes("Select execution workflow")', 'claimed execution');
   const definition = await evaluate(`(() => {
@@ -324,8 +326,8 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
   for (let step = 1; step <= 10; step++) {
     await setRichText('document', `<h1>Execution step ${step}</h1><ul><li>Completed in Chromium</li></ul>`);
     const lastStep = await evaluate(`[...document.querySelectorAll('button')]
-      .some(button => button.textContent.trim() === 'Submit for review')`);
-    await clickButton(lastStep ? 'Submit for review' : 'Next step');
+      .some(button => button.textContent.trim() === 'Send for review')`);
+    await clickButton(lastStep ? 'Send for review' : 'Next step');
     if (lastStep) break;
     await waitFor(`document.body.innerText.includes("Step ${step + 1} of")`,
       `execution step ${step + 1}`);
@@ -334,7 +336,7 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
 
   await navigate('/#/tasks');
   await waitFor(`document.body.innerText.includes(${JSON.stringify(title)})`, 'task review queue');
-  if (!(await bodyText()).includes('Write final report')) await clickButton('Open task');
+  if (!(await bodyText()).includes('Write final report')) await clickButton(title);
   await waitFor('document.body.innerText.includes("Write final report")', 'final report action');
   await clickButton('Write final report');
   await waitFor('document.querySelector("[role=dialog] .workflow-document-editor") !== null',
@@ -344,13 +346,14 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
       : '<h1>Summary</h1><p>Task completed.</p><h1>Conclusion</h1><p>Accepted.</p>');
   await assertClassificationOrder(evaluate);
   await setSelect('#final-report-classification', 'CONF');
+  await addPrivateLearning({ evaluate, setInput, waitFor });
   await clickButton('Save final report', 'document.querySelector("[role=dialog]")');
   await waitFor('document.body.innerText.includes("Approve final report")',
     'saved final report');
   await signInLocalActor({ request, navigate, waitFor, setInput, evaluate, actor: approver });
   await navigate('/#/tasks');
   await waitFor(`document.body.innerText.includes(${JSON.stringify(title)})`, 'approver task queue');
-  if (!(await bodyText()).includes('Approve final report')) await clickButton('Open task');
+  if (!(await bodyText()).includes('Approve final report')) await clickButton(title);
   await waitFor('document.body.innerText.includes("Approve final report")', 'separate approval action');
   await clickButton('Approve final report');
   await waitFor(`[...document.querySelectorAll('button')]
@@ -375,18 +378,19 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
   assert.equal(completed?.finalReportApprovedBy, approver.displayName, JSON.stringify(completed));
   assert.ok(completed?.finalReportApprovedAt, 'Approved final report missing');
   await signInLocalActor({ request, navigate, waitFor, setInput, evaluate, actor: author });
+  await verifyPrivateLearning({ request, siteId: site.id, itemId: completed.id, completed });
 
   await navigate('/#/');
   await waitForSummary('Requires action', 0);
   await waitForSummary('Active', 0);
-  await waitForSummary('Registered and received tasks', 1, '.overview-stat-card');
-  await waitForSummary('Completed tasks', 1, '.overview-stat-card');
+  await waitForSummary('Registered and received work items', 1, '.overview-stat-card');
+  await waitForSummary('Completed work items', 1, '.overview-stat-card');
   await verifyWorkloadPresentation({ navigate, waitFor, request, evaluate, assertNoOverflow, siteId: site.id, expected: 0 });
 
   await navigate('/#/reports');
   await waitFor(`document.body.innerText.includes(${JSON.stringify(title)}) &&
-    document.body.innerText.includes("1 report")`, 'report archive');
-  await clickButton('View report');
+    [...document.querySelectorAll('select option')].some(option => option.textContent.includes('(1)'))`, 'report archive');
+  await clickButton(title);
   await waitFor(`document.body.innerText.includes("Task completed.") &&
     document.body.innerText.includes("CONFIDENTIAL") &&
     document.body.innerText.includes(${JSON.stringify(author.displayName)}) &&
@@ -395,6 +399,7 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
   if (reportPdfPath) {
     await writeReportPdf({ call, evaluate, outputPath: reportPdfPath, targetUrl });
     verifyMultiPageClassifiedPdf(reportPdfPath);
+    verifyPrivateLearningPdf(reportPdfPath);
   }
   await assertNoOverflow('Completed report archive');
   await call('Emulation.setDeviceMetricsOverride', {
@@ -406,8 +411,8 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
   });
 
   await navigate('/#/audit');
-  await waitFor(`document.body.innerText.includes("Traceable events in sites you administer") &&
-    document.body.innerText.includes("Task registered") &&
+  await waitFor(`document.body.innerText.includes("Traceable events in Sites you administer") &&
+    document.body.innerText.includes("Work registered") &&
     document.body.innerText.includes("Execution submitted for review") &&
     document.body.innerText.includes("Final report approved")`, 'site audit chain');
 
@@ -464,15 +469,15 @@ try {
   await assertNoOverflow('Authenticated shell');
 
   await navigate('/#/sites');
-  await waitFor('document.body.innerText.includes("No sites have been created")', 'empty Sites page');
-  assert.match(await bodyText(), /Community: 0 of 3 active sites/);
+  await waitFor('document.body.innerText.includes("No Sites have been created")', 'empty Sites page');
+  assert.match(await bodyText(), /Community: 0 of 3 active Sites/);
   await evaluate(`[...document.querySelectorAll('button')]
-    .find(button => button.textContent.trim() === 'New site').click()`);
+    .find(button => button.textContent.trim() === 'New Site').click()`);
   await waitFor('document.querySelector("#new-site-name") !== null', 'new-site dialog');
   await setInput('#new-site-name', 'Synthetic Browser Site');
   await evaluate('document.querySelector("#new-site-name").closest("form").requestSubmit()');
   await waitFor(`document.body.innerText.includes("Synthetic Browser Site") &&
-    document.body.innerText.includes("Community: 1 of 3 active sites")`, 'created site');
+    document.body.innerText.includes("Community: 1 of 3 active Sites")`, 'created site');
 
   const taskEvidence = taskFlow
     ? await runTopLevelTaskFlow(suffix, { username, password }) : {};
@@ -496,7 +501,7 @@ try {
 
     await navigate('/#/sites');
     await waitFor(`document.body.innerText.includes("Synthetic Browser Site") &&
-      document.body.innerText.includes("Community: 1 of 3 active sites")`,
+      document.body.innerText.includes("Community: 1 of 3 active Sites")`,
     'site preserved after Community downgrade');
     await assertCommunityBoundary();
   }

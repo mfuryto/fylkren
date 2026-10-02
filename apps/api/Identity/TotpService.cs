@@ -8,7 +8,7 @@ namespace Fylkren.Api.Identity;
 public sealed class TotpService(IDataProtectionProvider dataProtectionProvider)
 {
     private readonly IDataProtector secretProtector = dataProtectionProvider.CreateProtector("Fylkren.TotpSecret.v1");
-    private readonly IDataProtector challengeProtector = dataProtectionProvider.CreateProtector("Fylkren.TotpChallenge.v1");
+    private readonly IDataProtector challengeProtector = dataProtectionProvider.CreateProtector("Fylkren.TotpChallenge.v2");
     private readonly IDataProtector setupProtector = dataProtectionProvider.CreateProtector("Fylkren.TotpSetup.v2");
 
     public string CreateSecret() => Base32(RandomNumberGenerator.GetBytes(20));
@@ -25,12 +25,12 @@ public sealed class TotpService(IDataProtectionProvider dataProtectionProvider)
             throw new CryptographicException();
         return (identityId, securityVersion, values[2]);
     }
-    public string CreateChallenge(Guid identityId, TimeSpan lifetime) => challengeProtector.Protect($"{identityId:N}|{DateTimeOffset.UtcNow.Add(lifetime).ToUnixTimeSeconds()}");
-    public Guid ReadChallenge(string challenge)
+    public string CreateChallenge(Guid identityId, long securityVersion, TimeSpan lifetime) => challengeProtector.Protect($"{identityId:N}|{securityVersion}|{DateTimeOffset.UtcNow.Add(lifetime).ToUnixTimeSeconds()}");
+    public (Guid IdentityId, long SecurityVersion) ReadChallenge(string challenge)
     {
         var values = challengeProtector.Unprotect(challenge).Split('|');
-        if (values.Length != 2 || !Guid.TryParseExact(values[0], "N", out var identityId) || !long.TryParse(values[1], out var expires) || expires < DateTimeOffset.UtcNow.ToUnixTimeSeconds()) throw new CryptographicException();
-        return identityId;
+        if (values.Length != 3 || !Guid.TryParseExact(values[0], "N", out var identityId) || !long.TryParse(values[1], out var securityVersion) || !long.TryParse(values[2], out var expires) || expires < DateTimeOffset.UtcNow.ToUnixTimeSeconds()) throw new CryptographicException();
+        return (identityId, securityVersion);
     }
     public bool Verify(string secret, string code) => TryVerify(secret, code, out _);
     public bool TryVerify(string secret, string code, out long matchedTimeStep)

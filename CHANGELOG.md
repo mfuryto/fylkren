@@ -4,6 +4,16 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Bound pending TOTP sign-in challenges to the account security version so logout, password changes and factor changes invalidate earlier challenges.
+
+- Added repeatable release browser/authenticator and workload verification, private-learning exclusion checks for PDF/federation, and updated security evidence.
+
+- Handled rejected WebAuthn authenticator responses with bounded authentication errors instead of server errors.
+
+- Run PostgreSQL directly as its dedicated user with dropped capabilities and no privilege escalation.
+
+- Upgraded Alpine packages in the PostgreSQL image to remove an available dependency vulnerability, and added a clear keyboard focus outline to form fields.
+
 - Aligned the Tasks due-date column across rows by giving reference and status columns consistent widths, including when a task is opened.
 
 - Made individual learning-point treatment clearer with clickable status controls for leaders, explicit opening instructions and an explanation for users with read-only treatment access.

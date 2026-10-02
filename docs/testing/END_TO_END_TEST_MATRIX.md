@@ -261,6 +261,8 @@ Save positive and improvement points with a final-report draft. Verify atomic va
 
 ## Current baseline
 
+The [2026-10-02 release regression](runs/2026-10-02-release-regression.md) records the fresh API/edition, browser/report/privacy, identity, license, backup and federation runs, together with workload and image-scan evidence and explicit remaining release gates.
+
 E2E-01 through E2E-13 were exercised with synthetic data during development, and discovered defects were corrected and regression-tested. That development evidence does not replace a clean release run. Before a production-ready release, execute this complete matrix against the release candidate from reset fixtures and retain an evidence record for every scenario.
 
 The former E2E-14 multi-theme scenario is intentionally retired because the additional overview design was removed.

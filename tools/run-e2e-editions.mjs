@@ -91,6 +91,8 @@ try {
     DELETE FROM sites WHERE id IN ('${legacySiteId}', '${customSiteId}');
   `]);
   run('docker', ['compose', '-p', project, 'exec', '-T', 'api', 'sh', '-c', 'test ! -e /var/run/docker.sock']);
+  run('docker', ['compose', '-p', project, 'exec', '-T', 'postgres', 'sh', '-c', 'test "$(id -u)" -ne 0']);
+  run('docker', ['compose', '-p', project, 'exec', '-T', 'postgres', 'awk', '/^NoNewPrivs:/ { if ($2 != 1) exit 1; privileges = 1 } /^CapEff:/ { if ($2 != "0000000000000000") exit 1; capabilities = 1 } END { if (!privileges || !capabilities) exit 1 }', '/proc/self/status']);
   run('./deploy/compose/backup.sh', [backupRoot]);
   if (existsSync(oldestBackup)) throw new Error('Oldest completed backup was not pruned');
   if (!existsSync(retainedBackup)) throw new Error('Newest previous completed backup was pruned');

@@ -1,0 +1,272 @@
+{
+  "recordedAtUtc": "2026-10-02T18:25:30.618867+00:00",
+  "baseRevision": "01b5673b3962053b8f4057d016d21df873efa1f4",
+  "version": "0.70.0-dev.1",
+  "sourceSha256": {
+    "apps/api/Identity/IdentitySessionEndpoints.cs": "5ddb5d1fb0454b45f1fb734873326fa27d68a1157a9f0a1d9ac5e517d5f4bdcb",
+    "apps/api/Identity/TotpService.cs": "2c1911c354114610fa53db430063b984b8ee3292ef2bcc4452302ea0d4e3469e",
+    "apps/api/Identity/WebAuthnVerificationExceptionHandler.cs": "6c7b4b60372c68a74387b2a843ee2ac30b58d79dcc1cdf41a63ee35b7215d641",
+    "apps/api/ServiceRegistration.cs": "854ace08686f57bd94dd2d119617193a91719b4cf7a2a1fb7c08a4d165950b1f",
+    "apps/postgres/Dockerfile": "0997ec12bcd8f17823eb54117a6ba83aa75eb55e9a3fde489b43a6e5ed8ecfe8",
+    "compose.yaml": "8e1db678ba0927cbe21b22db80cba33ea6af0e5c17ae9b1eac9c2b90dae2ca2b",
+    "shared/frontend/src/theme.css": "871b0f67c777a83f3f3dc1ddddedc26fa333027b12637b9445286db2f747a2e4",
+    "tools/run-release-browser.mjs": "81d7b5b9c568aeec88347308682c7c69dcd4d27574d5b7f4e739f298be79ef9b",
+    "tools/e2e/community-browser-smoke.mjs": "5fd54234ca576bbd12b8d3237932b45e65b49346d92406964ae7615db978e4de",
+    "tools/e2e/learning-report-privacy.mjs": "b336910ef6bf4e00b24acf1e943d51913a80bb72626c16aec8c1e644750449a2",
+    "tools/e2e/totp-security.mjs": "819716129fdc097afdad843639b980a02b0583f0514d77ec0aac269eb6cd3527",
+    "tools/e2e/webauthn-security.mjs": "c0ef8c3597d8548147bc159a29e0498be21284a82cc84251d1d631a56d4f0208",
+    "tools/e2e/postgres-nonroot-upgrade.mjs": "d00cbf94e8701865ea71a1ffd5ed8d6f1b73939cd8c0a90753abc41cfd7cc1d4",
+    "tools/e2e/workload-load.mjs": "945f45cffee5c70da381a98e4257dd41354044de478ddb4bdad6f1fecfc0ef33",
+    "tools/run-e2e-editions.mjs": "86d60a38c2f160f9bbf4b238379719de5d5d9e73d15085b3424dffae9adb8c8f",
+    "tools/test-e2e-local.mjs": "c815c141797fedc301a1683da0ad31fa6f922cdeb122cb3ae435fb26389da531",
+    "tools/run-federation-pair.mjs": "06c586b07475492a98ba244e7c20fdae0296e5af6327fa90d274cff45a0c651a",
+    "tools/run-identity-sso-lab.mjs": "4dff29b39d3905125d10e92f42563f67633a992dc68a44ea921be8ae15304927",
+    "tools/run-identity-directory-lab.mjs": "49eca8cfc647937b9a251cb6dadf9e1dc53ed5d45828f0873cce8a241de6011e",
+    "tools/run-identity-ad-lab.mjs": "081ef66d4620bfcdfd743bbdff82b739eb5cba0f08bb528d559f25575ce6b029",
+    "tools/run-license-expiry.mjs": "6a97d92d2938fab3d272a63c873b842fa285996b77dd72edef5f62ad9e4e8837",
+    "pnpm-lock.yaml": "8a01498617e2430fb29d61836ff5c67aa34f50d2024e86baa4cf834727878152",
+    "Directory.Packages.props": "5209cd9aa7a6a86941e14d5c33aa2fad1ab935d273d55f3b57e4a82303a68305"
+  },
+  "browserResults": [
+    {
+      "topLevelTaskBrowserFlow": "passed",
+      "taskRegistration": true,
+      "leaderAssessment": true,
+      "directExecution": true,
+      "finalReport": true,
+      "reportArchive": true,
+      "overviewCounts": true,
+      "siteAudit": true,
+      "notificationQueue": true,
+      "classifiedReport": true,
+      "workloadPresentation": true,
+      "separateReportApprover": true,
+      "storedContentInjection": true,
+      "pdfOutput": true,
+      "multiPageClassifiedReport": true,
+      "keyboardModalNavigation": true,
+      "accessibleDialogTree": true,
+      "visibleKeyboardFocus": true,
+      "smtpHandoff": true,
+      "smtpRetry": true,
+      "mailboxReceipt": true,
+      "smtpHeaderInjectionRejected": true,
+      "chromium": "Chrome/152.0.7977.82",
+      "firstRunSetup": true,
+      "authenticatedShell": true,
+      "communityEdition": true,
+      "siteCreation": true,
+      "desktopOverflow": false,
+      "mobileOverflow": false,
+      "browserErrors": 0
+    },
+    {
+      "enterpriseBrowserTransition": "passed",
+      "licenseFileInput": true,
+      "enterpriseControls": true,
+      "communityDowngrade": true,
+      "sitePreserved": true,
+      "chromium": "Chrome/152.0.7977.82",
+      "firstRunSetup": true,
+      "authenticatedShell": true,
+      "communityEdition": true,
+      "siteCreation": true,
+      "licensePage": true,
+      "federationReadOnlyBoundary": true,
+      "desktopOverflow": false,
+      "mobileOverflow": false,
+      "browserErrors": 0
+    },
+    {
+      "totpSecurity": "passed",
+      "passwordReauthentication": true,
+      "setupReplayRejected": true,
+      "adjacentWindowsRejected": true,
+      "parallelRecoverySingleUse": true,
+      "staleChallengeAfterSignOutRejected": true,
+      "parallelTotpSingleUse": true,
+      "tamperedChallengeRejected": true
+    },
+    {
+      "webAuthnSecurity": "passed",
+      "virtualCtap2Authenticator": true,
+      "passwordReauthentication": true,
+      "registrationReplayRejected": true,
+      "signIn": true,
+      "assertionReplayRejected": true,
+      "wrongOriginRejected": true,
+      "wrongRpIdRejected": true,
+      "regressedCounterRejected": true,
+      "failedFlowsLeaveNoSession": true
+    }
+  ],
+  "workloadLoad": {
+    "workloadLoad": "passed",
+    "createdTasks": 1000,
+    "metrics": [
+      {
+        "concurrency": 1,
+        "authorizedRequests": 100,
+        "unauthorizedRequestsRejected": 100,
+        "p50Ms": 10,
+        "p95Ms": 86,
+        "p99Ms": 92,
+        "maxMs": 96
+      },
+      {
+        "concurrency": 10,
+        "authorizedRequests": 100,
+        "unauthorizedRequestsRejected": 100,
+        "p50Ms": 16,
+        "p95Ms": 130,
+        "p99Ms": 148,
+        "maxMs": 149
+      },
+      {
+        "concurrency": 25,
+        "authorizedRequests": 100,
+        "unauthorizedRequestsRejected": 100,
+        "p50Ms": 61,
+        "p95Ms": 235,
+        "p99Ms": 257,
+        "maxMs": 288
+      }
+    ]
+  },
+  "scans": {
+    "image-api-final": {
+      "artifact": "fylkren-edition-e2e-api:latest",
+      "imageId": "sha256:7f2d10f26bfcdab7fec1acff5da58c334ae9bb2c7e7054ddde424d9a71386329",
+      "vulnerabilityCounts": {
+        "MEDIUM": 9,
+        "LOW": 5
+      },
+      "secrets": 0,
+      "configurationFailures": 0,
+      "findings": [
+        {
+          "cve": "CVE-2026-18374",
+          "package": "libc-bin",
+          "version": "2.39-0ubuntu8.9",
+          "severity": "MEDIUM",
+          "fixedVersion": null
+        },
+        {
+          "cve": "CVE-2026-89092",
+          "package": "libc-bin",
+          "version": "2.39-0ubuntu8.9",
+          "severity": "MEDIUM",
+          "fixedVersion": null
+        },
+        {
+          "cve": "CVE-2026-18374",
+          "package": "libc6",
+          "version": "2.39-0ubuntu8.9",
+          "severity": "MEDIUM",
+          "fixedVersion": null
+        },
+        {
+          "cve": "CVE-2026-89092",
+          "package": "libc6",
+          "version": "2.39-0ubuntu8.9",
+          "severity": "MEDIUM",
+          "fixedVersion": null
+        },
+        {
+          "cve": "CVE-2025-5222",
+          "package": "libicu74",
+          "version": "74.2-1ubuntu3.1",
+          "severity": "LOW",
+          "fixedVersion": null
+        },
+        {
+          "cve": "CVE-2026-86145",
+          "package": "libpcre2-8-0",
+          "version": "10.42-4ubuntu2.1",
+          "severity": "MEDIUM",
+          "fixedVersion": null
+        },
+        {
+          "cve": "CVE-2026-89161",
+          "package": "libpcre2-8-0",
+          "version": "10.42-4ubuntu2.1",
+          "severity": "MEDIUM",
+          "fixedVersion": null
+        },
+        {
+          "cve": "CVE-2026-40228",
+          "package": "libsystemd0",
+          "version": "255.4-1ubuntu8.17",
+          "severity": "LOW",
+          "fixedVersion": null
+        },
+        {
+          "cve": "CVE-2026-40228",
+          "package": "libudev1",
+          "version": "255.4-1ubuntu8.17",
+          "severity": "LOW",
+          "fixedVersion": null
+        },
+        {
+          "cve": "CVE-2024-56433",
+          "package": "login",
+          "version": "1:4.13+dfsg1-4ubuntu3.2",
+          "severity": "LOW",
+          "fixedVersion": null
+        },
+        {
+          "cve": "CVE-2024-56433",
+          "package": "passwd",
+          "version": "1:4.13+dfsg1-4ubuntu3.2",
+          "severity": "LOW",
+          "fixedVersion": null
+        },
+        {
+          "cve": "CVE-2026-18477",
+          "package": "tar",
+          "version": "1.35+dfsg-3ubuntu0.4",
+          "severity": "MEDIUM",
+          "fixedVersion": null
+        },
+        {
+          "cve": "CVE-2026-18508",
+          "package": "tar",
+          "version": "1.35+dfsg-3ubuntu0.4",
+          "severity": "MEDIUM",
+          "fixedVersion": null
+        },
+        {
+          "cve": "CVE-2026-85091",
+          "package": "zlib1g",
+          "version": "1:1.3.dfsg-3.1ubuntu2.2",
+          "severity": "MEDIUM",
+          "fixedVersion": null
+        }
+      ]
+    },
+    "image-web-final": {
+      "artifact": "fylkren-edition-e2e-web:latest",
+      "imageId": "sha256:ac9dec901c8394547de5dba0d1cc7a72b6687a39db6def4cac478a0472e59618",
+      "vulnerabilityCounts": {},
+      "secrets": 0,
+      "configurationFailures": 0,
+      "findings": []
+    },
+    "image-postgres-final": {
+      "artifact": "fylkren-postgres:latest",
+      "imageId": "sha256:30f0b5001aa64a6f2c8dcbc646b230c435e2faa7bb4a3f241cb9af5fd9a6223c",
+      "vulnerabilityCounts": {},
+      "secrets": 0,
+      "configurationFailures": 0,
+      "findings": []
+    },
+    "trivy-fs-final": {
+      "artifact": ".",
+      "imageId": null,
+      "vulnerabilityCounts": {},
+      "secrets": 0,
+      "configurationFailures": 0,
+      "findings": []
+    }
+  }
+}
