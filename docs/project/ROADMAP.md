@@ -83,27 +83,13 @@ Requirements include:
 
 Existing `nb-NO` behavior must remain compatible during migration. Norwegian text is permitted only inside the dedicated `nb-NO` language resources; source, comments, tests, examples and documentation remain English.
 
-The English migration and full repository-language check are complete, and the product owner approved the subsequent translation phase. Complete preview packs are bundled for Swedish (`sv-SE`), Danish (`da-DK`), Finnish (`fi-FI`), German (`de-DE`), French (`fr-FR`), Polish (`pl-PL`), Spanish (`es-ES`), Italian (`it-IT`), Ukrainian (`uk-UA`), Dutch (`nl-NL`), Portuguese (`pt-PT`), Czech (`cs-CZ`), Romanian (`ro-RO`), Estonian (`et-EE`), Latvian (`lv-LV`) and Lithuanian (`lt-LT`). Native-language review remains required before each is publicly advertised as supported. Icelandic was removed from the approved roster.
+The English migration and full repository-language check are complete. Complete packs are bundled for Swedish (`sv-SE`), Danish (`da-DK`), Finnish (`fi-FI`), German (`de-DE`), French (`fr-FR`), Polish (`pl-PL`), Spanish (`es-ES`), Italian (`it-IT`), Ukrainian (`uk-UA`), Dutch (`nl-NL`), Portuguese (`pt-PT`), Czech (`cs-CZ`), Romanian (`ro-RO`), Estonian (`et-EE`), Latvian (`lv-LV`) and Lithuanian (`lt-LT`). They are governed by the automated linguistic and technical acceptance process in the localization policy rather than a requirement to recruit a reviewer for every language. Icelandic was removed from the approved roster.
 
-## Human-readable work references after internationalization
+## Human-readable work references
 
-After the internationalization gate is complete, introduce a Jira-inspired human-readable reference for every work item, including parent work, delegated child work, requests and federated work. The database UUID remains the canonical internal identifier; the reference is a durable operator-facing identifier used in navigation, search, notifications, reports, exports, audit presentation and supported APIs.
+Implemented after the internationalization gate. Root work uses a customer-managed task type abbreviation or Site fallback code plus one installation-wide forward-only number, such as `OPS-000123`. Delegated work and requests extend the parent reference with sibling numbers, such as `OPS-000123-1` and `OPS-000123-1-1`. Allocation is transactional and concurrency-safe; references are immutable, searchable and carried through planning, execution, reports and formal approval history. Platform Manager and Site Manager configuration is available under the single **References** menu. Site Managers maintain manual source and sender registries separately under **Intake**; externally received values remain snapshots.
 
-Platform Manager must administer the installation-wide reference policy in the GUI. This includes allowed prefix syntax and length, reserved prefixes, namespace rules, sequence behavior and collision diagnostics. Site Manager must configure the permitted reference prefix and related presentation settings for each site in the GUI. Configuration changes and reference allocation are audited. Numbers are allocated transactionally, never reused, and remain stable when a site is renamed, moved, deactivated or restored. Changing a prefix must not silently rewrite historical references; retained aliases or an explicit migration policy must preserve existing links and searches.
-
-The design must include:
-
-- a readable form such as `OPS-1234`, without treating that text as the authorization or tenancy boundary;
-- deterministic, concurrency-safe allocation and a documented migration for existing work items;
-- exact and partial reference search, direct navigation and clear display throughout Tasks, Planning, Execution, Reports and approval history;
-- validation and preview in Platform Manager and Site Manager before a policy is activated;
-- backup, restore, portable export, API, webhook, notification and audit coverage;
-- explicit behavior for child work, requests, cancellation, reassignment, site moves and prefix changes;
-- accessibility and localization of surrounding labels while the reference itself remains language-neutral.
-
-Federation must not assume that a display reference is globally unique. The stable origin tuple `(originInstanceId, originSiteId, originResourceId)` remains the cross-installation identity and idempotency key. Federated presentation must retain both the origin reference and the receiving installation's local reference when one is allocated. A compact instance/site namespace or qualified display form may be added for people, but collisions must be detected and shown rather than resolved by silently changing a remote reference. Mixed-version delivery, retries, site moves, peer replacement, restore and export/import must preserve provenance and both references.
-
-Before implementation, record the final prefix, alias, sequence and federated presentation decisions in the architecture decision register and extend the end-to-end matrix with concurrency and collision scenarios.
+Federated work retains the signed origin reference and receives a separate local reference. The stable origin identity tuple remains the protocol identity and idempotency key; a display reference is never treated as a global authorization boundary.
 
 ## Community and Enterprise release gate
 

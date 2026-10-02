@@ -2,10 +2,11 @@ import { translateActive } from "../localization";
 import type { Dispatch, SetStateAction } from "react";
 import type { TaskSite } from "../work/WorkContextModels";
 import type { TaskUnitWithDepth } from "./taskScope";
+import { ListSortControl, type ListSort } from "../components/ListSortControl";
 
 export type TaskQueueSummary = { active: number; inProgress: number; inReview: number; overdue: number };
 
-export function TaskQueueControls({ sites, selectedSite, selectedSiteId, setSelectedSiteId, selectedUnitId, setSelectedUnitId, selectableUnits, taskLevelCount, filter, setFilter, search, setSearch, summary }: {
+export function TaskQueueControls({ sites, selectedSite, selectedSiteId, setSelectedSiteId, selectedUnitId, setSelectedUnitId, selectableUnits, taskLevelCount, filter, setFilter, search, setSearch, sort, setSort, summary }: {
   sites: TaskSite[];
   selectedSite?: TaskSite;
   selectedSiteId: string;
@@ -18,6 +19,8 @@ export function TaskQueueControls({ sites, selectedSite, selectedSiteId, setSele
   setFilter: Dispatch<SetStateAction<string>>;
   search: string;
   setSearch: Dispatch<SetStateAction<string>>;
+  sort: ListSort;
+  setSort: Dispatch<SetStateAction<ListSort>>;
   summary: TaskQueueSummary;
 }) {
   return <>
@@ -28,6 +31,7 @@ export function TaskQueueControls({ sites, selectedSite, selectedSiteId, setSele
         <option value="active">{translateActive("activePlural")}</option><option value="unassigned">{translateActive("tasksTaskQueueControlsUnallocatedMeetingProcessing")}</option><option value="all">{translateActive("all")}</option><option value="registered">{translateActive("taskStatusRegistered")}</option><option value="under_review">{translateActive("taskStatusUnderReview")}</option><option value="on_hold">{translateActive("taskStatusOnHold")}</option><option value="planning">{translateActive("taskStatusPlanning")}</option><option value="execution">{translateActive("taskStatusExecution")}</option><option value="assigned">{translateActive("requestProgressAssigned")}</option><option value="in_progress">{translateActive("taskStatusInProgress")}</option><option value="in_review">{translateActive("taskStatusInReview")}</option><option value="rejected">{translateActive("taskStatusRejected")}</option><option value="completed">{translateActive("taskStatusCompleted")}</option><option value="cancelled">{translateActive("taskStatusCancelled")}</option><option value="reassigned">{translateActive("taskStatusReassigned")}</option>
       </select></div>
       <div className="field task-search"><label htmlFor="task-search">{translateActive("tasksTaskQueueControlsSearchTasks")}</label><input id="task-search" type="search" value={search} placeholder={translateActive("tasksTaskQueueControlsTitleContentSenderOrName")} onChange={event => setSearch(event.target.value)} /></div>
+      <ListSortControl id="task-sort" value={sort} onChange={setSort} options={["newest", "oldest", "name-asc", "name-desc", "reference-asc", "reference-desc"]}/>
     </section>
     <div className="summary-grid">
       <div className="summary-card"><span>{translateActive("activePlural")}</span><strong>{summary.active}</strong></div>

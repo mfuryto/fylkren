@@ -77,6 +77,7 @@ internal static class PrimaryWorkItemCreationEndpoints
             if (request.SourceTypeId is Guid sourceId && !await db.WorkItemLookups.AnyAsync(x => x.Id == sourceId && x.SiteId == siteId && x.Kind == "source-type" && x.IsActive, ct) || request.SenderId is Guid senderId && !await db.WorkItemLookups.AnyAsync(x => x.Id == senderId && x.SiteId == siteId && x.Kind == "sender" && x.IsActive, ct)) return Results.ValidationProblem(new Dictionary<string, string[]> { { "lookup", ["Select an active source type and sender in the site."] } });
             var sourceTypeName = request.SourceTypeId is Guid requestSourceId ? await db.WorkItemLookups.Where(x => x.Id == requestSourceId).Select(x => x.Name).SingleOrDefaultAsync(ct) : null;
             var senderName = request.SenderId is Guid requestSenderId ? await db.WorkItemLookups.Where(x => x.Id == requestSenderId).Select(x => x.Name).SingleOrDefaultAsync(ct) : null;
+            await using var transaction = await db.Database.BeginTransactionAsync(ct);
             var now = DateTimeOffset.UtcNow; var item = new WorkItem(Guid.NewGuid(), siteId, personId, title, description, referenceUrl, "normal", request.DueAt, now, workItemTypeId: request.WorkItemTypeId, sourceTypeId: request.SourceTypeId, senderId: request.SenderId, recommendation: recommendation, sourceTypeNameSnapshot: sourceTypeName, senderNameSnapshot: senderName); db.WorkItems.Add(item);
             if (request.AssignedUnitId is Guid assignedUnitId) item.RegisterAtUnit(assignedUnitId, now);
             db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, isRequest ? "work-item.request-sent" : "work-item.registered", "work-item", item.Id, now));
@@ -106,7 +107,9 @@ internal static class PrimaryWorkItemCreationEndpoints
                 db.WorkItems.Add(received); item.TransitionWithinLevel("in_progress", $"The request has been sent to {internalRecipient.Name} and is awaiting processing and reporting.", now);
                 db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.internal-request-received", "work-item", received.Id, now));
             }
-            await db.SaveChangesAsync(ct); return Results.Created($"/api/work/sites/{siteId}/items/{item.Id}", new { item.Id });
+            await db.SaveChangesAsync(ct);
+            await transaction.CommitAsync(ct);
+            return Results.Created($"/api/work/sites/{siteId}/items/{item.Id}", new { item.Id, item.ReferenceCode });
         });
     }
 }

@@ -1,6 +1,7 @@
 import { PaginationNav } from "../components/PaginationNav";
 import type { ArchivedReport } from "./ReportViewer";
 import { useTranslation } from "../localization/LocalizationProvider";
+import { WorkReference } from "../components/WorkReference";
 
 type ReportArchiveListProps = {
   reports: ArchivedReport[];
@@ -24,7 +25,8 @@ export function ReportArchiveList({ reports, loading, total, page, language, tim
     {!loading && reports.length === 0 && <p className="empty-list-message">{t("noReportsMatch")}</p>}
     <div className="admin-list">
       {reports.map(report => <div className="admin-list-row report-list-row" key={report.id}>
-        <span><strong>{report.title}</strong><small className="muted">{date(report.finalReportApprovedAt)} · {t("reportApprovedBySummary", { name: report.approvedBy })}</small></span>
+        <WorkReference referenceCode={report.referenceCode}/>
+        <span className="report-list-title"><strong title={report.title}>{report.title}</strong><small className="muted">{date(report.finalReportApprovedAt)} · {t("reportApprovedBySummary", { name: report.approvedBy })}{report.originReference ? ` · ${t("originReferenceLabel")}: ${report.originReference}` : ""}</small></span>
         <button className="secondary-button" type="button" onClick={() => onSelect(report)}>{t("viewReport")}</button>
       </div>)}
     </div>

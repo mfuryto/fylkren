@@ -1,4 +1,7 @@
 import type { MessageKey } from "../en-US";
+import type { ReferenceMessageKey } from "../supplements/references";
+import type { SortingMessageKey } from "../supplements/sorting";
+import type { IntakeMessageKey } from "../supplements/intake";
 import { federationEsES } from "./sections/federation";
 import { identityEsES } from "./sections/identity";
 import { notificationsEsES } from "./sections/notifications";
@@ -16,7 +19,7 @@ import { workEsES } from "./sections/work";
 import { workTemplatesEsES } from "./sections/workTemplates";
 import { workflowsEsES } from "./sections/workflows";
 
-export const esES: Record<MessageKey, string> = {
+export const esES: Record<Exclude<MessageKey, ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
   ...federationEsES,
   ...identityEsES,
   ...notificationsEsES,

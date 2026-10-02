@@ -1,4 +1,7 @@
 import type { MessageKey } from "../en-US";
+import type { ReferenceMessageKey } from "../supplements/references";
+import type { SortingMessageKey } from "../supplements/sorting";
+import type { IntakeMessageKey } from "../supplements/intake";
 import { federationRoRO } from "./sections/federation";
 import { identityRoRO } from "./sections/identity";
 import { notificationsRoRO } from "./sections/notifications";
@@ -16,7 +19,7 @@ import { workRoRO } from "./sections/work";
 import { workTemplatesRoRO } from "./sections/workTemplates";
 import { workflowsRoRO } from "./sections/workflows";
 
-export const roRO: Record<MessageKey, string> = {
+export const roRO: Record<Exclude<MessageKey, ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
   ...federationRoRO,
   ...identityRoRO,
   ...notificationsRoRO,

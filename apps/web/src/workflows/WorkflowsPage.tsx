@@ -6,6 +6,7 @@ import { SectionHelp } from "../components/SectionHelp";
 import type { TaskSite, TaskUnit } from "../work/WorkContextModels";
 import { WorkflowFormFields } from "./WorkflowFormFields";
 import { emptyWorkflowForm, type WorkflowDefinitionSummary, type WorkflowForm, type WorkflowTemplateSummary } from "./WorkflowModels";
+import { ListSortControl, sortList, type ListSort } from "../components/ListSortControl";
 
 export function WorkflowsPage() {
   const [helpOpen, setHelpOpen] = useState(false);
@@ -21,6 +22,7 @@ export function WorkflowsPage() {
   >(null);
   const [viewer, setViewer] = useState<WorkflowDefinitionSummary | null>(null);
   const [error, setError] = useState("");
+  const [sort, setSort] = useState<ListSort>("name-asc");
   const selectedSite = sites.find((x) => x.siteId === siteId);
   useEffect(() => {
     apiGet<{ sites: TaskSite[]; units: TaskUnit[] }>("/api/work/context", translateActive("workflowsWorkflowsPageTheWorkflowContextCouldNotBe"))
@@ -163,9 +165,9 @@ export function WorkflowsPage() {
       </section>}
       <div className="workflow-layout">
         <section className="panel">
-          <h2>{translateActive("workflowsWorkflowsPageActiveWorkflows")}</h2>
+          <div className="section-heading"><h2>{translateActive("workflowsWorkflowsPageActiveWorkflows")}</h2><ListSortControl id="workflow-sort" value={sort} onChange={setSort} options={["name-asc", "name-desc"]}/></div>
           <div className="admin-list">
-            {flows.map((f) => (
+            {sortList(flows, sort, { name: flow => flow.name }).map((f) => (
               <div className="admin-list-row" key={f.id}>
                 <span>
                   <strong>{f.name}</strong>

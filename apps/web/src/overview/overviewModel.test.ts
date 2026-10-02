@@ -4,7 +4,7 @@ import { buildOverviewMetrics, canLoadDescendantWorkload, isReceivedRequest, ove
 import type { TaskSite, TaskUnit } from "../work/WorkContextModels";
 
 const item = (values: Partial<WorkItem>): WorkItem => ({
-  id: "item", siteId: "site", parentWorkItemId: null, parentTitle: null, workItemTypeId: null,
+  id: "item", siteId: "site", referenceCode: "INC-000001", originReference: null, parentWorkItemId: null, parentTitle: null, workItemTypeId: null,
   workItemTypeName: null, sourceTypeId: null, sourceTypeName: null, senderId: null, senderName: null,
   senderSiteName: null, senderPersonName: null, requestBasisSnapshot: null, isCrossSiteView: false,
   title: "Work item", description: "", recommendation: null, referenceUrl: null, priority: "normal",

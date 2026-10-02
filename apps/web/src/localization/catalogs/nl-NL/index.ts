@@ -1,4 +1,7 @@
 import type { MessageKey } from "../en-US";
+import type { ReferenceMessageKey } from "../supplements/references";
+import type { SortingMessageKey } from "../supplements/sorting";
+import type { IntakeMessageKey } from "../supplements/intake";
 import { federationNlNL } from "./sections/federation";
 import { identityNlNL } from "./sections/identity";
 import { notificationsNlNL } from "./sections/notifications";
@@ -16,7 +19,7 @@ import { workNlNL } from "./sections/work";
 import { workTemplatesNlNL } from "./sections/workTemplates";
 import { workflowsNlNL } from "./sections/workflows";
 
-export const nlNL: Record<MessageKey, string> = {
+export const nlNL: Record<Exclude<MessageKey, ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
   ...federationNlNL,
   ...identityNlNL,
   ...notificationsNlNL,

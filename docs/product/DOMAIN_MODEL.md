@@ -34,6 +34,8 @@ A site membership connects a person to a site. Organizational placement records 
 
 The persisted task tree uses work items for primary tasks, delegated assignments, internal requests and cross-site request counterparts. A work item records durable and display metadata such as title, description, type/source/sender snapshots, owning site and level, priority, status, deadline and timestamps. Parent-child links preserve delegation and reporting paths.
 
+Every work item has an internal UUID plus an immutable human-readable reference. Root references consist of the selected Site-owned task type abbreviation, or the Site fallback code when no type is selected, and an installation-wide forward-only number such as `INC-000123`. Delegations and requests append a sibling path such as `INC-000123-1` and `INC-000123-1-1`. The same value follows the work item through planning, execution, approval and its final report. Federated inbound work receives a local reference while preserving the origin instance ID and origin reference as provenance.
+
 Only leaf work that is actually being handled contributes to active workload. A superior tracking item waiting for an active child is not counted as a second workload item.
 
 ### Site-managed metadata

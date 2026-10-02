@@ -18,10 +18,12 @@ internal static class FederationOutboundWorkQueue
             localInstanceId == Guid.Empty || peerInstanceId == localInstanceId)
             return null;
         if (!await AuthorizedAsync(work.SiteId, peerInstanceId, destinationSiteId, db, ct)) return null;
+        await db.AssignPendingWorkItemReferencesAsync(ct);
 
         var payload = new FederationAssignmentPayload("request", work.Title, work.Description,
             work.Priority, work.DueAt, work.RequestBasisSnapshot,
-            work.SourceTypeNameSnapshot, work.SenderNameSnapshot);
+            work.SourceTypeNameSnapshot, work.SenderNameSnapshot,
+            string.IsNullOrWhiteSpace(work.ReferenceCode) ? null : work.ReferenceCode);
         var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions(JsonSerializerDefaults.Web));
         var messageId = Guid.NewGuid();
         var envelope = new FederationWorkEnvelope(FederationWorkProtocol.SchemaVersion,

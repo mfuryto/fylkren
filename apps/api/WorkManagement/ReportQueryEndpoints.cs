@@ -11,7 +11,7 @@ internal static class ReportQueryEndpoints
 {
     internal static void Map(RouteGroupBuilder group)
     {
-        group.MapGet("/sites/{siteId:guid}/reports", async (Guid siteId, Guid? unitId, int? year, string? search, int? page, ClaimsPrincipal user, FylkrenDbContext db, CancellationToken ct) =>
+        group.MapGet("/sites/{siteId:guid}/reports", async (Guid siteId, Guid? unitId, int? year, string? search, string? sort, int? page, ClaimsPrincipal user, FylkrenDbContext db, CancellationToken ct) =>
         {
             if (!PersonId(user, out var personId) || !await CanReadReportsAtLevel(siteId, unitId, personId, db, ct)) return Results.Problem(statusCode: 403);
             if (RequestQueryPolicy.Validate(page, search) is { } queryError) return queryError;
@@ -28,19 +28,29 @@ internal static class ReportQueryEndpoints
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var pattern = RequestQueryPolicy.LikePattern(search);
-                query = query.Where(x => EF.Functions.ILike(x.Title, pattern, "\\") || EF.Functions.ILike(x.FinalReport!, pattern, "\\") || x.CreatedByPerson != null && EF.Functions.ILike(x.CreatedByPerson.DisplayName, pattern, "\\") || x.SenderSiteName != null && EF.Functions.ILike(x.SenderSiteName, pattern, "\\") || x.FinalReportWrittenByPerson != null && EF.Functions.ILike(x.FinalReportWrittenByPerson.DisplayName, pattern, "\\"));
+                query = query.Where(x => EF.Functions.ILike(x.ReferenceCode, pattern, "\\") || EF.Functions.ILike(x.Title, pattern, "\\") || EF.Functions.ILike(x.FinalReport!, pattern, "\\") || x.CreatedByPerson != null && EF.Functions.ILike(x.CreatedByPerson.DisplayName, pattern, "\\") || x.SenderSiteName != null && EF.Functions.ILike(x.SenderSiteName, pattern, "\\") || x.FinalReportWrittenByPerson != null && EF.Functions.ILike(x.FinalReportWrittenByPerson.DisplayName, pattern, "\\"));
             }
             var total = await query.CountAsync(ct);
             var siteName = await db.Sites.Where(x => x.Id == siteId).Select(x => x.Name).SingleAsync(ct);
             var organizationUnits = await OrganizationPath.Load(siteId, db, ct);
             var organizationPath = OrganizationPath.Build(unitId, organizationUnits);
-            var rows = await query
-                .OrderByDescending(x => x.FinalReportApprovedAt)
+            var orderedReports = sort switch
+            {
+                "oldest" => query.OrderBy(x => x.FinalReportApprovedAt).ThenBy(x => x.Id),
+                "name-asc" => query.OrderBy(x => x.Title).ThenBy(x => x.Id),
+                "name-desc" => query.OrderByDescending(x => x.Title).ThenBy(x => x.Id),
+                "reference-asc" => query.OrderBy(x => x.ReferenceCode).ThenBy(x => x.Id),
+                "reference-desc" => query.OrderByDescending(x => x.ReferenceCode).ThenBy(x => x.Id),
+                _ => query.OrderByDescending(x => x.FinalReportApprovedAt).ThenBy(x => x.Id),
+            };
+            var rows = await orderedReports
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .Select(x => new
                 {
                     x.Id,
+                    x.ReferenceCode,
+                    x.OriginReference,
                     x.Title,
                     federatedAnswerSiteName = db.FederationWorkLinks
                         .Where(link => link.Direction == "outgoing" &&
@@ -83,6 +93,8 @@ internal static class ReportQueryEndpoints
             var reports = rows.Select(x => new
             {
                 x.Id,
+                x.ReferenceCode,
+                x.OriginReference,
                 siteName = x.federatedAnswerSiteName ??
                     (x.isOutgoingRequest ? x.response?.SiteName ?? siteName : siteName),
                 organizationPath = x.isOutgoingRequest

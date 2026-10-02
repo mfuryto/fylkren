@@ -1,4 +1,7 @@
 import type { MessageKey } from "../en-US";
+import type { ReferenceMessageKey } from "../supplements/references";
+import type { SortingMessageKey } from "../supplements/sorting";
+import type { IntakeMessageKey } from "../supplements/intake";
 import { personnelNbNO } from "./sections/personnel";
 import { workTemplatesNbNO } from "./sections/workTemplates";
 import { workNbNO } from "./sections/work";
@@ -16,7 +19,7 @@ import { risksNbNO } from "./sections/risks";
 import { siteAuditNbNO } from "./sections/siteAudit";
 import { sitesNbNO } from "./sections/sites";
 
-export const nbNO: Record<MessageKey, string> = {
+export const nbNO: Record<Exclude<MessageKey, ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
   ...federationNbNO,
   ...identityNbNO,
   ...notificationsNbNO,

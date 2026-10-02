@@ -7,7 +7,7 @@ const run = (values: Partial<PlanningRun> = {}): PlanningRun => ({
   id: "run", status: "available", canManage: true, currentStep: 0, timelineStartedOn: null,
   claimedByPersonId: null, claimedBy: null, proposedUnitId: null, proposedUnit: null,
   proposedPriority: null, proposedDueAt: null, resultNote: null, allocations: [], requests: [], rfi: [],
-  ancestors: [], item: { id: "item", parentWorkItemId: null, parentTitle: null,
+  ancestors: [], item: { id: "item", referenceCode: "INC-000001", originReference: null, parentWorkItemId: null, parentTitle: null,
     parentDescription: null, assignedUnitId: null, assignedUnitName: null, title: "Task",
     description: "", referenceUrl: null, workItemTypeName: null, sourceTypeName: null,
     senderName: null, requestBasisSnapshot: null, priority: "normal", dueAt: null,

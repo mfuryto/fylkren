@@ -14,6 +14,12 @@ Task or request
 
 Planning may delegate work to one or more direct subordinate units or create side requests. Each receiver starts the same optional-planning/required-execution/reporting chain at its own level.
 
+## Permanent task references
+
+The database UUID remains the internal identity and authorization boundary. Every work item also has an immutable human-readable reference. A root task uses its task type abbreviation when available, otherwise its Site fallback code, followed by the installation-wide forward-only number, for example `INC-000123`. A child assignment or request appends its sibling number (`INC-000123-1`); deeper delegation extends the same path (`INC-000123-1-1`). Allocation locks the global counter or parent row in the same database transaction as creation, so concurrent registration and delegation cannot issue duplicates.
+
+References are shown and searchable through Tasks, Planning, Execution and Reports. Formal approval snapshots and final reports retain the work item's reference. Changing a task type abbreviation, Site fallback code or number padding affects only new root tasks. Existing references are never rewritten or reused.
+
 ## Ownership and visibility
 
 - A work item is owned by one site and operational level.

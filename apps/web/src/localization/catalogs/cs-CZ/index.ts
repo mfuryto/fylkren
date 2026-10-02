@@ -1,4 +1,7 @@
 import type { MessageKey } from "../en-US";
+import type { ReferenceMessageKey } from "../supplements/references";
+import type { SortingMessageKey } from "../supplements/sorting";
+import type { IntakeMessageKey } from "../supplements/intake";
 import { federationCsCZ } from "./sections/federation";
 import { identityCsCZ } from "./sections/identity";
 import { notificationsCsCZ } from "./sections/notifications";
@@ -16,7 +19,7 @@ import { workCsCZ } from "./sections/work";
 import { workTemplatesCsCZ } from "./sections/workTemplates";
 import { workflowsCsCZ } from "./sections/workflows";
 
-export const csCZ: Record<MessageKey, string> = {
+export const csCZ: Record<Exclude<MessageKey, ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
   ...federationCsCZ,
   ...identityCsCZ,
   ...notificationsCsCZ,

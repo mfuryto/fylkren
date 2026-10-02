@@ -8,6 +8,7 @@ import { EnterpriseRequiredNotice } from "../components/EnterpriseRequiredNotice
 import { IdentityProviderSettingsDialog } from "./IdentityProviderSettingsDialog";
 import type { IdentityProvider } from "./models";
 import { useTranslation } from "../localization/LocalizationProvider";
+import { ListSortControl, sortList, type ListSort } from "../components/ListSortControl";
 
 export function IdentityProvidersPage({ language: displayLanguage, timeZone: displayTimeZone, canManageExternalIdentity }: { language: string; timeZone: string; canManageExternalIdentity: boolean }) {
   const t = useTranslation();
@@ -24,6 +25,7 @@ export function IdentityProvidersPage({ language: displayLanguage, timeZone: dis
   const [notice, setNotice] = useState("");
   const [userRefreshToken, setUserRefreshToken] = useState(0);
   const [providerEditor,setProviderEditor]=useState<IdentityProvider|null>(null);
+  const [providerSort,setProviderSort]=useState<ListSort>("name-asc"),[linkSort,setLinkSort]=useState<ListSort>("name-asc");
 
   async function reloadConfiguration(){setData(await loadIdentityConfiguration());}
 
@@ -62,7 +64,7 @@ export function IdentityProvidersPage({ language: displayLanguage, timeZone: dis
         <section className="panel">{t("loading")}</section>
       ) : (
         <>
-          <section className="identity-provider-grid">
+          <div className="section-heading"><h2>{t("provider")}</h2><ListSortControl id="identity-provider-sort" value={providerSort} onChange={setProviderSort} options={["name-asc","name-desc"]}/></div><section className="identity-provider-grid">
             <article className="panel identity-provider-card">
               <div>
                 <h2>{t("localAccount")}</h2>
@@ -78,7 +80,7 @@ export function IdentityProvidersPage({ language: displayLanguage, timeZone: dis
               </strong>
               <button className="secondary-button" type="button" onClick={()=>setProviderEditor({name:t("localAccount"),key:"local",enabledRequested:data.local.enabled,configurationPresent:true,operational:data.local.operational,stableIdentifier:"internal person ID",lastTestedAt:null,lastTestSucceeded:null})}>{t("configure")}</button>
             </article>
-            {data.providers.map((provider) => (
+            {sortList(data.providers,providerSort,{name:provider=>provider.name}).map((provider) => (
               <article
                 className="panel identity-provider-card"
                 key={provider.key}
@@ -105,21 +107,21 @@ export function IdentityProvidersPage({ language: displayLanguage, timeZone: dis
             ))}
           </section>
           <section className="panel identity-migration">
-            <h2>{t("existingUserLinks")}</h2>
+            <div className="section-heading"><h2>{t("existingUserLinks")}</h2><ListSortControl id="identity-link-sort" value={linkSort} onChange={setLinkSort} options={["name-asc","name-desc"]}/></div>
             <p>{t("identityMigrationPrinciple")}</p>
             <p className="muted">{t("identityUsernameMatching")}</p>
             <p className="status-message">{t("externalIdentityLinkNotice")}</p>
             {!canManageExternalIdentity&&<EnterpriseRequiredNotice>{t("externalIdentityEnterpriseNotice")}</EnterpriseRequiredNotice>}
             {data.providers.some(provider=>provider.key==="ad"&&provider.operational)||data.providers.some(provider=>provider.key==="ldap"&&provider.operational) ? <>
               <form className="stacked-form" onSubmit={addDirectoryLink}><h3>{t("linkDirectoryIdentity")}</h3><div className="field"><label>{t("provider")}</label><select disabled={!canManageExternalIdentity} value={directoryLink.provider} onChange={event=>setDirectoryLink({...directoryLink,provider:event.target.value})}>{data.providers.filter(provider=>(provider.key==="ad"||provider.key==="ldap")&&provider.operational).map(provider=><option key={provider.key} value={provider.key}>{provider.name}</option>)}</select></div><div className="field"><label>{t("existingLocalUsername")}</label><input required disabled={!canManageExternalIdentity} value={directoryLink.localUsername} onChange={event=>setDirectoryLink({...directoryLink,localUsername:event.target.value})}/></div><div className="field"><label>{t("directoryUsername")}</label><input required maxLength={256} disabled={!canManageExternalIdentity} value={directoryLink.directoryUsername} onChange={event=>setDirectoryLink({...directoryLink,directoryUsername:event.target.value})}/></div><button className="primary-button" disabled={!canManageExternalIdentity}>{t("linkDirectoryIdentity")}</button></form>
-              <div className="type-list">{directoryLinks.map(link=><div className="type-row" key={link.id}><span><strong>{link.displayName}</strong><small className="muted">{link.provider.toUpperCase()} · {link.directoryUsername} · {link.subjectId}</small><small className={!link.accessEnabled?"error-message":link.lifecycleStatus==="active"?"status-active":"muted"}>{lifecycleLabel(link.lifecycleStatus)} · {t("lastChecked",{date:formatTimestamp(link.lastCheckedAt)})}</small></span><button className="link-button danger" type="button" onClick={() => removeDirectoryLink(link.id)}>{t("removeLink")}</button></div>)}</div>
+              <div className="type-list">{sortList(directoryLinks,linkSort,{name:link=>link.displayName}).map(link=><div className="type-row" key={link.id}><span><strong>{link.displayName}</strong><small className="muted">{link.provider.toUpperCase()} · {link.directoryUsername} · {link.subjectId}</small><small className={!link.accessEnabled?"error-message":link.lifecycleStatus==="active"?"status-active":"muted"}>{lifecycleLabel(link.lifecycleStatus)} · {t("lastChecked",{date:formatTimestamp(link.lastCheckedAt)})}</small></span><button className="link-button danger" type="button" onClick={() => removeDirectoryLink(link.id)}>{t("removeLink")}</button></div>)}</div>
               <div className="status-message"><strong>{t("directoryLifecycle")}</strong><br/>{t("directoryLifecycleIntro")}</div>
               <div className="inline-actions"><button className="primary-button" type="button" disabled={synchronizingDirectory} onClick={synchronizeDirectories}>{synchronizingDirectory?t("synchronizing"):t("synchronizeNow")}</button>{data.providers.filter(provider=>(provider.key==="ad"||provider.key==="ldap")&&provider.operational).map(provider=><button className="secondary-button" type="button" disabled={Boolean(testingDirectory)||!canManageExternalIdentity} key={provider.key} onClick={()=>testDirectory(provider.key)}>{testingDirectory===provider.key?t("testing"):t("testProvider",{provider:provider.name})}</button>)}</div>
             </> : null}
             <form className="stacked-form" onSubmit={addOidcLink}><h3>{t("linkOidcIdentity")}</h3><div className="field"><label>{t("existingLocalUsername")}</label><input required disabled={!canManageExternalIdentity} value={oidcLink.username} onChange={event=>setOidcLink({...oidcLink,username:event.target.value})}/></div><div className="field"><label>{t("oidcSubject")}</label><input required maxLength={256} disabled={!canManageExternalIdentity} value={oidcLink.subjectId} onChange={event=>setOidcLink({...oidcLink,subjectId:event.target.value})}/></div><button className="primary-button" disabled={!canManageExternalIdentity}>{t("linkIdentity")}</button></form>
-            <div className="type-list">{oidcLinks.map(link=><div className="type-row" key={link.id}><span><strong>{link.displayName}</strong><small className="muted">{link.username} · sub: {link.subjectId}</small><small className="muted">{t("issuer")}: {link.providerInstanceId}</small></span><button className="link-button danger" type="button" onClick={()=>removeOidcLink(link.id)}>{t("removeLink")}</button></div>)}</div>
+            <div className="type-list">{sortList(oidcLinks,linkSort,{name:link=>link.displayName}).map(link=><div className="type-row" key={link.id}><span><strong>{link.displayName}</strong><small className="muted">{link.username} · sub: {link.subjectId}</small><small className="muted">{t("issuer")}: {link.providerInstanceId}</small></span><button className="link-button danger" type="button" onClick={()=>removeOidcLink(link.id)}>{t("removeLink")}</button></div>)}</div>
             <form className="stacked-form" onSubmit={addSamlLink}><h3>{t("linkSamlIdentity")}</h3><div className="field"><label>{t("existingLocalUsername")}</label><input required disabled={!canManageExternalIdentity} value={samlLink.username} onChange={event=>setSamlLink({...samlLink,username:event.target.value})}/></div><div className="field"><label>{t("permanentNameId")}</label><input required maxLength={256} disabled={!canManageExternalIdentity} value={samlLink.nameId} onChange={event=>setSamlLink({...samlLink,nameId:event.target.value})}/></div><p className="muted">{t("nameIdHelp")}</p><button className="primary-button" disabled={!canManageExternalIdentity}>{t("linkIdentity")}</button></form>
-            <div className="type-list">{samlLinks.map(link=><div className="type-row" key={link.id}><span><strong>{link.displayName}</strong><small className="muted">{link.username} · NameID: {link.subjectId}</small><small className="muted">{t("idpEntity")}: {link.providerInstanceId}</small></span><button className="link-button danger" type="button" onClick={()=>removeSamlLink(link.id)}>{t("removeLink")}</button></div>)}</div>
+            <div className="type-list">{sortList(samlLinks,linkSort,{name:link=>link.displayName}).map(link=><div className="type-row" key={link.id}><span><strong>{link.displayName}</strong><small className="muted">{link.username} · NameID: {link.subjectId}</small><small className="muted">{t("idpEntity")}: {link.providerInstanceId}</small></span><button className="link-button danger" type="button" onClick={()=>removeSamlLink(link.id)}>{t("removeLink")}</button></div>)}</div>
           </section>
         </>
       )}

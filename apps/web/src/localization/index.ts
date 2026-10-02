@@ -18,31 +18,46 @@ import { etEE } from "./catalogs/et-EE";
 import { lvLV } from "./catalogs/lv-LV";
 import { ltLT } from "./catalogs/lt-LT";
 import { normalizeReservedTerms } from "./reservedTerms";
+import { referenceTranslations, type ReferenceMessageKey } from "./catalogs/supplements/references";
+import { sortingTranslations, type SortingMessageKey } from "./catalogs/supplements/sorting";
+import { intakeTranslations, type IntakeMessageKey } from "./catalogs/supplements/intake";
 
 export type { MessageKey } from "./catalogs/en-US";
 
 export const supportedLanguages = ["en-US", "en-GB", "nb-NO", "sv-SE", "da-DK", "fi-FI", "de-DE", "fr-FR", "pl-PL", "es-ES", "it-IT", "uk-UA", "nl-NL", "pt-PT", "cs-CZ", "ro-RO", "et-EE", "lv-LV", "lt-LT"] as const;
 export type SupportedLanguage = (typeof supportedLanguages)[number];
+type AddedMessageKey = ReferenceMessageKey | SortingMessageKey | IntakeMessageKey;
+type BaseCatalog = Record<Exclude<MessageKey, AddedMessageKey>, string>;
+
+function withReferenceMessages(language: SupportedLanguage, catalog: BaseCatalog) {
+  return {
+    ...catalog,
+    ...referenceTranslations[language],
+    ...sortingTranslations[language],
+    ...intakeTranslations[language],
+  } as Record<MessageKey, string>;
+}
+
 export const languageCatalogs: Record<SupportedLanguage, Record<MessageKey, string>> = {
   "en-GB": normalizeReservedTerms("en-GB", en, enGB),
   "en-US": normalizeReservedTerms("en-US", en, en),
-  "nb-NO": normalizeReservedTerms("nb-NO", en, nbNO),
-  "sv-SE": normalizeReservedTerms("sv-SE", en, svSE),
-  "da-DK": normalizeReservedTerms("da-DK", en, daDK),
-  "fi-FI": normalizeReservedTerms("fi-FI", en, fiFI),
-  "de-DE": normalizeReservedTerms("de-DE", en, deDE),
-  "fr-FR": normalizeReservedTerms("fr-FR", en, frFR),
-  "pl-PL": normalizeReservedTerms("pl-PL", en, plPL),
-  "es-ES": normalizeReservedTerms("es-ES", en, esES),
-  "it-IT": normalizeReservedTerms("it-IT", en, itIT),
-  "uk-UA": normalizeReservedTerms("uk-UA", en, ukUA),
-  "nl-NL": normalizeReservedTerms("nl-NL", en, nlNL),
-  "pt-PT": normalizeReservedTerms("pt-PT", en, ptPT),
-  "cs-CZ": normalizeReservedTerms("cs-CZ", en, csCZ),
-  "ro-RO": normalizeReservedTerms("ro-RO", en, roRO),
-  "et-EE": normalizeReservedTerms("et-EE", en, etEE),
-  "lv-LV": normalizeReservedTerms("lv-LV", en, lvLV),
-  "lt-LT": normalizeReservedTerms("lt-LT", en, ltLT),
+  "nb-NO": normalizeReservedTerms("nb-NO", en, withReferenceMessages("nb-NO", nbNO)),
+  "sv-SE": normalizeReservedTerms("sv-SE", en, withReferenceMessages("sv-SE", svSE)),
+  "da-DK": normalizeReservedTerms("da-DK", en, withReferenceMessages("da-DK", daDK)),
+  "fi-FI": normalizeReservedTerms("fi-FI", en, withReferenceMessages("fi-FI", fiFI)),
+  "de-DE": normalizeReservedTerms("de-DE", en, withReferenceMessages("de-DE", deDE)),
+  "fr-FR": normalizeReservedTerms("fr-FR", en, withReferenceMessages("fr-FR", frFR)),
+  "pl-PL": normalizeReservedTerms("pl-PL", en, withReferenceMessages("pl-PL", plPL)),
+  "es-ES": normalizeReservedTerms("es-ES", en, withReferenceMessages("es-ES", esES)),
+  "it-IT": normalizeReservedTerms("it-IT", en, withReferenceMessages("it-IT", itIT)),
+  "uk-UA": normalizeReservedTerms("uk-UA", en, withReferenceMessages("uk-UA", ukUA)),
+  "nl-NL": normalizeReservedTerms("nl-NL", en, withReferenceMessages("nl-NL", nlNL)),
+  "pt-PT": normalizeReservedTerms("pt-PT", en, withReferenceMessages("pt-PT", ptPT)),
+  "cs-CZ": normalizeReservedTerms("cs-CZ", en, withReferenceMessages("cs-CZ", csCZ)),
+  "ro-RO": normalizeReservedTerms("ro-RO", en, withReferenceMessages("ro-RO", roRO)),
+  "et-EE": normalizeReservedTerms("et-EE", en, withReferenceMessages("et-EE", etEE)),
+  "lv-LV": normalizeReservedTerms("lv-LV", en, withReferenceMessages("lv-LV", lvLV)),
+  "lt-LT": normalizeReservedTerms("lt-LT", en, withReferenceMessages("lt-LT", ltLT)),
 };
 
 const normalizedLanguages: Record<string, SupportedLanguage> = {
@@ -55,7 +70,14 @@ const normalizedLanguages: Record<string, SupportedLanguage> = {
 };
 
 export function normalizeLanguage(value: string): SupportedLanguage {
-  const normalized = value.toLowerCase();
+  let normalized = value.toLowerCase();
+  try {
+    // Formatting locales may include Unicode extensions such as `-u-hc-h23`.
+    // Translation catalog selection must use the underlying language/region.
+    normalized = new Intl.Locale(value).baseName.toLowerCase();
+  } catch {
+    // Invalid or unknown locale values intentionally fall through to English.
+  }
   if (normalized.startsWith("nb") || normalized.startsWith("no")) return "nb-NO";
   if (normalized.startsWith("en-gb")) return "en-GB";
   if (normalizedLanguages[normalized]) return normalizedLanguages[normalized];

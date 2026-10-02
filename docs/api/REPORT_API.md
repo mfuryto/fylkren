@@ -42,7 +42,7 @@ Accept: application/json
 | `siteId` | Yes | Must match the exact site grant |
 | `unitId` | No | Omit for site top level; otherwise must match the exact level grant |
 | `year` | No | Approval year |
-| `search` | No | Searches task title and final-report content; maximum 200 characters |
+| `search` | No | Searches local reference, external origin reference, task title and final-report content; maximum 200 characters |
 | `page` | No | 1–1,000,000; default 1 |
 | `pageSize` | No | 1–100; default 50 |
 
@@ -53,6 +53,8 @@ Invalid bounds return `400`; they are not silently rewritten. Results contain on
   "items": [
     {
       "id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "referenceCode": "INS-000123",
+      "originReference": "REQ-004291",
       "title": "Emergency power inspection",
       "siteId": "11111111-1111-1111-1111-111111111111",
       "siteName": "North Operations",
@@ -89,6 +91,8 @@ The detail response contains the list fields plus `finalReport`:
 ```json
 {
   "id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+  "referenceCode": "INS-000123",
+  "originReference": "REQ-004291",
   "title": "Emergency power inspection",
   "siteId": "11111111-1111-1111-1111-111111111111",
   "siteName": "North Operations",
@@ -105,7 +109,7 @@ The detail response contains the list fields plus `finalReport`:
 }
 ```
 
-`finalReport` is stored rich text. Treat it as untrusted data and sanitize it before rendering as HTML.
+`referenceCode` is the permanent local reference assigned by this installation. `originReference` is the signed external reference retained for federated inbound work and is `null` for work without one. Both fields remain attached to the approved report. `finalReport` is stored rich text. Treat it as untrusted data and sanitize it before rendering as HTML.
 
 `organizationPath` contains names from the first internal level through the report's authoring level. It excludes the hidden technical site root and the designated top leadership unit because that unit represents site top level. A top-level report therefore has an empty path. `organizationUnitId` is the stable reference; path names are display data.
 

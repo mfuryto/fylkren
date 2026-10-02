@@ -2996,6 +2996,71 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.ToTable("execution_timeline_events", (string)null);
                 });
 
+            modelBuilder.Entity("Fylkren.Api.WorkManagement.PlatformReferenceSettings", b =>
+                {
+                    b.Property<int>("Key")
+                        .HasColumnType("integer")
+                        .HasColumnName("key");
+
+                    b.Property<int>("MinimumDigits")
+                        .HasColumnType("integer")
+                        .HasColumnName("minimum_digits");
+
+                    b.Property<long>("NextNumber")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("next_number");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Key");
+
+                    b.ToTable("platform_reference_settings", (string)null);
+                });
+
+            modelBuilder.Entity("Fylkren.Api.WorkManagement.SiteReferenceSettings", b =>
+                {
+                    b.Property<Guid>("SiteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("site_id");
+
+                    b.Property<string>("Prefix")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("character varying(12)")
+                        .HasColumnName("prefix");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("SiteId");
+
+                    b.HasIndex("Prefix")
+                        .IsUnique();
+
+                    b.ToTable("site_reference_settings", (string)null);
+                });
+
+            modelBuilder.Entity("Fylkren.Api.WorkManagement.SiteReferenceSettings", b =>
+                {
+                    b.HasOne("Fylkren.Api.Organization.Site", null)
+                        .WithOne()
+                        .HasForeignKey("Fylkren.Api.WorkManagement.SiteReferenceSettings", "SiteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Fylkren.Api.WorkManagement.WorkItem", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3064,6 +3129,15 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("parent_work_item_id");
 
+                    b.Property<Guid?>("OriginReferenceInstanceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("origin_reference_instance_id");
+
+                    b.Property<string>("OriginReference")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("origin_reference");
+
                     b.Property<string>("Priority")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -3079,6 +3153,16 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasMaxLength(2048)
                         .HasColumnType("character varying(2048)")
                         .HasColumnName("reference_url");
+
+                    b.Property<string>("ReferenceCode")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("reference_code");
+
+                    b.Property<long>("ReferenceNumber")
+                        .HasColumnType("bigint")
+                        .HasColumnName("reference_number");
 
                     b.Property<string>("RequestBasisSnapshot")
                         .HasMaxLength(100000)
@@ -3164,6 +3248,9 @@ namespace Fylkren.Api.Persistence.Migrations
 
                     b.HasIndex("ParentWorkItemId");
 
+                    b.HasIndex("ReferenceCode")
+                        .IsUnique();
+
                     b.HasIndex("SenderId");
 
                     b.HasIndex("SourceTypeId");
@@ -3171,6 +3258,8 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.HasIndex("WorkItemTypeId");
 
                     b.HasIndex("SiteId", "Status", "CreatedAt");
+
+                    b.HasIndex("SiteId", "ReferenceNumber");
 
                     b.HasIndex("SiteId", "Status", "DueAt");
 
@@ -3319,6 +3408,12 @@ namespace Fylkren.Api.Persistence.Migrations
 
             modelBuilder.Entity("Fylkren.Api.WorkManagement.WorkItemType", b =>
                 {
+                    b.Property<string>("Abbreviation")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("character varying(12)")
+                        .HasColumnName("abbreviation");
+
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
@@ -3355,6 +3450,9 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("SiteId", "NormalizedName")
+                        .IsUnique();
+
+                    b.HasIndex("SiteId", "Abbreviation")
                         .IsUnique();
 
                     b.ToTable("work_item_types", (string)null);

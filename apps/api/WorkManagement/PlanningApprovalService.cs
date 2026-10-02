@@ -30,6 +30,7 @@ internal static class PlanningApprovalService
         Guid localInstanceId, FylkrenDbContext db, CancellationToken ct)
     {
         if (run.Status != "approved" || run.WorkItem.Status != "planning_approved") throw new InvalidOperationException("The plan is not ready for initiation.");
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
         var now = DateTimeOffset.UtcNow;
         var allocations = await db.WorkflowPlanAllocations.Include(x => x.Step).Include(x => x.Unit).Where(x => x.RunId == run.Id).OrderBy(x => x.Step.SortOrder).ThenBy(x => x.Unit.Name).ToListAsync(ct);
         var requests = await db.WorkflowPlanRequests.Include(x => x.Step).Include(x => x.TargetSite).Where(x => x.RunId == run.Id).OrderBy(x => x.Step.SortOrder).ThenBy(x => x.TargetSite == null ? x.TargetSiteNameSnapshot : x.TargetSite.Name).ToListAsync(ct);
@@ -95,6 +96,7 @@ internal static class PlanningApprovalService
         run.WorkItem.TransitionWithinLevel("in_progress", "The approved plan has been initiated.", now);
         db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.released", "workflow-run", run.Id, now));
         await db.SaveChangesAsync(ct);
+        await transaction.CommitAsync(ct);
         return null;
     }
 
@@ -112,7 +114,7 @@ internal static class PlanningApprovalService
             .Select(x => new { x.Id, x.Who, x.What, x.DueOn, x.Answered, x.Answer, x.CreatedAt, x.UpdatedAt }).ToListAsync(ct);
         return new
         {
-            task = new { run.WorkItem.Id, run.WorkItem.Title, run.WorkItem.Description, run.WorkItem.Priority, run.WorkItem.DueAt, run.WorkItem.AssignedUnitId },
+            task = new { run.WorkItem.Id, run.WorkItem.ReferenceCode, run.WorkItem.OriginReference, run.WorkItem.Title, run.WorkItem.Description, run.WorkItem.Priority, run.WorkItem.DueAt, run.WorkItem.AssignedUnitId },
             plan = new { run.Id, run.DefinitionId, run.ProposedPriority, run.ProposedDueAt, run.ProposedUnitId, run.TimelineStartedOn },
             steps, documents, links, timeline, rfi,
             allocations = allocations.Select(x => new { x.Id, x.StepId, x.UnitId, unit = x.Unit.Name, x.Instruction }),

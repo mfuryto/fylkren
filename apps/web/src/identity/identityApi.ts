@@ -7,8 +7,8 @@ export const loadIdentityConfiguration = () => apiGet<IdentityConfiguration>(roo
 export const loadOidcLinks = () => apiGet<FederatedIdentityLink[]>(`${root}/oidc-links`, translateActive("oidcLinksLoadFailed"));
 export const loadSamlLinks = () => apiGet<FederatedIdentityLink[]>(`${root}/saml-links`, translateActive("samlLinksLoadFailed"));
 export const loadDirectoryLinks = () => apiGet<DirectoryIdentityLink[]>(`${root}/directory-links`, translateActive("directoryLinksLoadFailed"));
-export const loadGlobalUsers = (page: number, pageSize: number, query: string, siteId: string) => {
-  const parameters = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+export const loadGlobalUsers = (page: number, pageSize: number, query: string, siteId: string, sort: string) => {
+  const parameters = new URLSearchParams({ page: String(page), pageSize: String(pageSize), sort });
   if (query.trim()) parameters.set("q", query.trim());
   if (siteId) parameters.set("siteId", siteId);
   return apiGet<GlobalUserPage>(`${root}/users?${parameters}`, translateActive("globalUsersLoadFailed"));

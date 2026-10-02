@@ -7,6 +7,7 @@ import { ReportViewer, type ArchivedReport } from "./ReportViewer";
 import { availableReportUnits } from "./reportFilters";
 import { copyPermalink, navigateToLocation, type AppLocation } from "../navigation/permalinks";
 import { useTranslation } from "../localization/LocalizationProvider";
+import type { ListSort } from "../components/ListSortControl";
 
 type ClassificationMarking = { name: string; abbreviation: string };
 
@@ -22,6 +23,7 @@ export function ReportsPage({ language, timeZone, classificationMarkings, permal
   const [search, setSearch] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [sort, setSort] = useState<ListSort>("newest");
   const [total, setTotal] = useState(0);
   const [selected, setSelected] = useState<ArchivedReport | null>(null);
   const [loading, setLoading] = useState(true);
@@ -60,7 +62,7 @@ export function ReportsPage({ language, timeZone, classificationMarkings, permal
   useEffect(() => {
     if (!selectedSiteId || (selectedSite && !selectedSite.hasTopLevelAccess && !selectedUnitId)) return;
     setLoading(true);
-    const parameters = new URLSearchParams({ page: page.toString() });
+    const parameters = new URLSearchParams({ page: page.toString(), sort });
     if (selectedUnitId) parameters.set("unitId", selectedUnitId);
     if (year) parameters.set("year", year);
     if (appliedSearch) parameters.set("search", appliedSearch);
@@ -79,7 +81,7 @@ export function ReportsPage({ language, timeZone, classificationMarkings, permal
       })
       .catch(problem => setError(problem instanceof Error ? problem.message : t("reportsLoadFailed")))
       .finally(() => setLoading(false));
-  }, [selectedSiteId, selectedUnitId, year, appliedSearch, page, permalink.reportId]);
+  }, [selectedSiteId, selectedUnitId, year, appliedSearch, sort, page, permalink.reportId]);
 
   return <div className="page reports-page">
     <header className="page-header"><div><h1>{t("reportsTitle")}</h1><p className="muted">{t("reportsIntro")}</p></div></header>
@@ -91,9 +93,11 @@ export function ReportsPage({ language, timeZone, classificationMarkings, permal
       <ReportToolbar
         sites={sites} units={availableUnits} selectedSiteId={selectedSiteId} selectedUnitId={selectedUnitId}
         hasTopLevelAccess={Boolean(selectedSite?.hasTopLevelAccess)} year={year} years={years} search={search}
+        sort={sort}
         onSiteChange={value => { setSelectedSiteId(value); setSelectedUnitId(""); setPage(1); }}
         onUnitChange={value => { setSelectedUnitId(value); setPage(1); }}
         onYearChange={value => { setYear(value); setPage(1); }} onSearchChange={setSearch}
+        onSortChange={value => { setSort(value); setPage(1); }}
         onSubmit={event => { event.preventDefault(); setPage(1); setAppliedSearch(search.trim()); }}
       />
       <ReportArchiveList reports={reports} loading={loading} total={total} page={page} language={language} timeZone={timeZone} onSelect={report => { setSelected(report); navigateToLocation({ page: "Reports", siteId: selectedSiteId, unitId: selectedUnitId || undefined, reportId: report.id, year }); }} onPageChange={setPage}/>

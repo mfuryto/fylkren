@@ -5,6 +5,7 @@ import { StepDocumentLinks, WorkflowTimeline } from "../workflows/WorkflowFields
 import { ExecutionHistoryDetails, type ExecutionHistory } from "./ExecutionHistory";
 import { TaskClassifiers } from "./TaskClassifiers";
 import { effectiveTaskStatus, requestProgressLabel, taskStatusLabel, workflowProgress } from "./taskPolicy";
+import { WorkReference } from "../components/WorkReference";
 
 export type ChildHistory = { details: WorkItemDetails | null; execution: ExecutionHistory | null; loading: boolean; loaded: boolean };
 type NextAction = { status: string; label: string };
@@ -29,7 +30,7 @@ export function TaskDelegationTree({ children, history, language, busy, canReass
     const plan=childHistory?.details?.plan;
     const execution=childHistory?.execution;
     return <article className={`delegation-child ${child.status === "completed" ? "delegation-child-returned" : ["reassigned", "cancelled", "rejected"].includes(child.status) ? "delegation-child-history" : "delegation-child-active"}`} key={child.id}>
-      <div><strong>{child.isOutgoingRequest ? child.requestRecipientSiteName ?? translateActive("receivingSite") : child.unitName ?? child.title}</strong><TaskClassifiers item={child} delegation /></div>
+      <div><WorkReference referenceCode={child.referenceCode}/><strong title={child.title}>{child.isOutgoingRequest ? child.requestRecipientSiteName ?? translateActive("receivingSite") : child.unitName ?? child.title}</strong><TaskClassifiers item={child} delegation />{child.originReference && <small className="muted"><strong>{translateActive("originReferenceLabel")}:</strong> {child.originReference}</small>}</div>
       <span className={`task-status ${effectiveTaskStatus(child)}`}>{child.isOutgoingRequest ? requestProgressLabel(child.requestProgressStatus ?? "registered") : taskStatusLabel(child.status)}</span>
       {workflowProgress(child) && <p className="delegation-progress">{workflowProgress(child)}</p>}
       <details className="delegation-record-details" onToggle={event => { if (event.currentTarget.open) onLoadHistory(child); }}><summary>{translateActive("tasksTaskDelegationTreeShowTaskBasisAndPreviousProcessing")}</summary><div className="delegation-record-content">

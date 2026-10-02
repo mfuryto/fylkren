@@ -1,4 +1,7 @@
 import type { MessageKey } from "../en-US";
+import type { ReferenceMessageKey } from "../supplements/references";
+import type { SortingMessageKey } from "../supplements/sorting";
+import type { IntakeMessageKey } from "../supplements/intake";
 import { federationSvSE } from "./sections/federation";
 import { identitySvSE } from "./sections/identity";
 import { notificationsSvSE } from "./sections/notifications";
@@ -16,7 +19,7 @@ import { workSvSE } from "./sections/work";
 import { workTemplatesSvSE } from "./sections/workTemplates";
 import { workflowsSvSE } from "./sections/workflows";
 
-export const svSE: Record<MessageKey, string> = {
+export const svSE: Record<Exclude<MessageKey, ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
   ...federationSvSE,
   ...identitySvSE,
   ...notificationsSvSE,

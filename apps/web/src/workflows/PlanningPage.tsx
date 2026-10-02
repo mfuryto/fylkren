@@ -18,6 +18,7 @@ import { usePlanningStepDrafts } from "./usePlanningStepDrafts";
 import { useSerializedWorkflowSave } from "./useWorkflowAutosave";
 import { copyPermalink, navigateToLocation, type AppLocation } from "../navigation/permalinks";
 import { getTaskContext } from "../tasks/taskApi";
+import type { ListSort } from "../components/ListSortControl";
 
 export function PlanningPage({
   session,
@@ -42,6 +43,7 @@ export function PlanningPage({
   const [totalRuns, setTotalRuns] = useState(0);
   const [openRunId, setOpenRunId] = useState<string | null>(null);
   const [queuePage, setQueuePage] = useState(1);
+  const [sort, setSort] = useState<ListSort>("newest");
   const [preview, setPreview] = useState<string | null>(null);
   const [planDrafts, setPlanDrafts] = useState<Record<string, PlanningDraft>>({});
   const allocationSaveTimers = useRef<Map<string, number>>(new Map());
@@ -65,7 +67,7 @@ export function PlanningPage({
   async function load(requestedPage = queuePage) {
     if (!siteId) return;
     try {
-      const parameters = new URLSearchParams({ page: String(requestedPage) });
+      const parameters = new URLSearchParams({ page: String(requestedPage), sort });
       if (levelFilter === "top") parameters.set("topLevel", "true");
       else if (levelFilter !== "all") parameters.set("levelId", levelFilter);
       if (permalink.runId && requestedPage === 1) parameters.set("focusRunId", permalink.runId);
@@ -90,7 +92,7 @@ export function PlanningPage({
   }
   useEffect(() => {
     void load();
-  }, [siteId, levelFilter, queuePage, permalink.runId]);
+  }, [siteId, levelFilter, sort, queuePage, permalink.runId]);
   async function mutate(path: string, body?: object) {
     await apiMutate(path, "POST", body, translateActive("siteActionFailed"));
     await load();
@@ -199,6 +201,8 @@ export function PlanningPage({
         levelFilter={levelFilter}
         onSiteChange={value => { setSiteId(value); setLevelFilter("all"); }}
         onLevelChange={setLevelFilter}
+        sort={sort}
+        onSortChange={value => { setSort(value); setQueuePage(1); }}
       />
       <PlanningQueueList
         runs={runs}

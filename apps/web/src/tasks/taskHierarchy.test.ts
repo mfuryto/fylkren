@@ -4,7 +4,7 @@ import type { TaskUnit } from "../work/WorkContextModels";
 import { buildReportUnitPath, buildWorkContextTree } from "./taskHierarchy";
 
 const item = (values: Partial<WorkItem>): WorkItem => ({
-  id: "item", siteId: "site", parentWorkItemId: null, parentTitle: null,
+  id: "item", siteId: "site", referenceCode: "INC-000001", originReference: null, parentWorkItemId: null, parentTitle: null,
   workItemTypeId: null, workItemTypeName: null, sourceTypeId: null, sourceTypeName: null,
   senderId: null, senderName: null, senderSiteName: null, senderPersonName: null,
   requestBasisSnapshot: null, isCrossSiteView: false, title: "Task", description: "",

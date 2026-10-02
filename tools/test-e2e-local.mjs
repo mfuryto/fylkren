@@ -292,14 +292,23 @@ const assignment = await siteManager.account.post(`/api/sites/${siteId}/access/r
 });
 assert.equal(assignment.status, 201, JSON.stringify(assignment.body));
 
-await testLookupSorting({ manager: siteManager.account, reader: leader.account, siteId });
+const { taskTypeId } = await testLookupSorting({ manager: siteManager.account, reader: leader.account, siteId });
+
+const referenceSettings = await platform.request('/api/references/platform');
+assert.equal(referenceSettings.status, 200, JSON.stringify(referenceSettings.body));
+assert.ok(referenceSettings.body.nextNumber >= 1, 'Global task-reference sequence is missing');
+const managedReferenceSites = await siteManager.account.request('/api/references/sites');
+assert.equal(managedReferenceSites.status, 200, JSON.stringify(managedReferenceSites.body));
+assert.ok(managedReferenceSites.body.sites.some(value => value.siteId === siteId), 'Site reference configuration is missing');
 
 const task = await leader.account.post(`/api/work/sites/${siteId}/items`, {
   title: 'Synthetic E2E task', description: 'Verify initial task transition', recommendation: 'Assess locally',
-  referenceUrl: null, dueAt: null, workItemTypeId: null, sourceTypeId: null, senderId: null,
+  referenceUrl: null, dueAt: null, workItemTypeId: taskTypeId, sourceTypeId: null, senderId: null,
   targetSiteId: null, targetUnitId: null, assignedUnitId: leadership.body.id,
 });
 assert.equal(task.status, 201, JSON.stringify(task.body));
+assert.match(task.body.referenceCode, /^EXE0-\d{6,10}$/, 'Root reference must use the task-type abbreviation');
+const taskReference = task.body.referenceCode;
 const platformWorkView = await platform.request(`/api/work/sites/${siteId}/items/overview`);
 assert.equal(platformWorkView.status, 403, 'Platform Manager must not see operational tasks');
 const underReview = await leader.account.put(`/api/work/sites/${siteId}/items/${task.body.id}/status`, {
@@ -315,6 +324,7 @@ const queue = await leader.account.request(`/api/workflows/planning/sites/${site
 assert.equal(queue.status, 200, `queue: ${JSON.stringify(queue.body)}`);
 const run = queue.body.items.find(item => item.item.id === task.body.id);
 assert.ok(run, `Planning run not visible: ${JSON.stringify(queue.body)}`);
+assert.equal(run.item.referenceCode, taskReference, 'Planning changed the task reference');
 const claim = await leader.account.post(`/api/workflows/planning/${run.id}/claim`, {});
 assert.equal(claim.status, 204, `claim: ${JSON.stringify(claim.body)}`);
 const submit = await leader.account.post(`/api/workflows/planning/${run.id}/submit`, {
@@ -344,6 +354,7 @@ assert.equal(toExecution.status, 204, `execution: ${JSON.stringify(toExecution.b
 const executionQueue = await leader.account.request(`/api/execution/sites/${siteId}`);
 assert.equal(executionQueue.status, 200, `execution queue: ${JSON.stringify(executionQueue.body)}`);
 assert.ok(executionQueue.body.items.some(item => item.id === task.body.id), 'Task missing from execution queue');
+assert.equal(executionQueue.body.items.find(item => item.id === task.body.id).referenceCode, taskReference, 'Execution changed the task reference');
 const definition = executionQueue.body.definitions.find(value => value.name === 'Standard');
 assert.ok(definition, 'Default execution workflow missing');
 const claimExecution = await leader.account.post(`/api/execution/items/${task.body.id}/claim`, {});
@@ -383,6 +394,35 @@ assert.equal(await taskStatus(), 'completed');
 const reports = await leader.account.request(`/api/work/sites/${siteId}/reports?unitId=${leadership.body.id}`);
 assert.equal(reports.status, 200, `report archive: ${JSON.stringify(reports.body)}`);
 assert.ok(reports.body.reports.some(item => item.id === task.body.id), `Completed report missing from archive: ${JSON.stringify(reports.body)}`);
+assert.equal(reports.body.reports.find(item => item.id === task.body.id).referenceCode, taskReference, 'Final report changed the task reference');
+const reportByReference = await leader.account.request(`/api/work/sites/${siteId}/reports?unitId=${leadership.body.id}&search=${encodeURIComponent(taskReference)}`);
+assert.equal(reportByReference.status, 200, JSON.stringify(reportByReference.body));
+assert.ok(reportByReference.body.reports.some(item => item.id === task.body.id), 'Task reference search did not find the final report');
+
+const concurrentReferences = await Promise.all(Array.from({ length: 4 }, async (_, index) => {
+  const created = await leader.account.post(`/api/work/sites/${siteId}/items`, {
+    title: `Concurrent reference ${index + 1}`, description: 'Verify serialized global reference allocation', recommendation: null,
+    referenceUrl: null, dueAt: null, workItemTypeId: taskTypeId, sourceTypeId: null, senderId: null,
+    targetSiteId: null, targetUnitId: null, assignedUnitId: leadership.body.id,
+  });
+  assert.equal(created.status, 201, `concurrent reference ${index + 1}: ${JSON.stringify(created.body)}`);
+  return created.body;
+}));
+assert.equal(new Set(concurrentReferences.map(value => value.referenceCode)).size, concurrentReferences.length,
+  'Concurrent root creation issued duplicate references');
+assert.ok(concurrentReferences.every(value => /^EXE0-\d{6,10}$/.test(value.referenceCode)),
+  `Concurrent roots used an unexpected reference prefix: ${JSON.stringify(concurrentReferences)}`);
+const referenceSortedTasks = await leader.account.request(`/api/work/sites/${siteId}/items?filter=all&sort=reference-asc&page=1`);
+assert.equal(referenceSortedTasks.status, 200, JSON.stringify(referenceSortedTasks.body));
+const sortedReferenceCodes = referenceSortedTasks.body.items.map(value => value.referenceCode);
+assert.deepEqual(sortedReferenceCodes, [...sortedReferenceCodes].sort((left, right) => left.localeCompare(right, 'en-US', { numeric: true })),
+  'Task reference sorting did not apply to the complete page');
+for (const created of concurrentReferences) {
+  const cancelled = await leader.account.post(`/api/work/sites/${siteId}/items/${created.id}/cancel`, {
+    decisionNote: 'Synthetic concurrency cleanup',
+  });
+  assert.equal(cancelled.status, 200, `concurrent cleanup: ${JSON.stringify(cancelled.body)}`);
+}
 
 async function createUnit(name, parentId, worksAtParentLevel = false) {
   const result = await siteManager.account.post(`/api/sites/${siteId}/organization-units`, {
@@ -475,6 +515,7 @@ await updateStatus(leader.account, mainTask.body.id, 'under_review', null, 'norm
 await updateStatus(leader.account, mainTask.body.id, 'assigned', sectionId);
 const sectionTask = await childOf(sectionLeader, mainTask.body.id);
 assert.equal(sectionTask.assignedUnitId, sectionId);
+assert.equal(sectionTask.referenceCode, `${mainTask.body.referenceCode}-1`, 'Delegation did not extend the parent reference');
 
 await updateStatus(sectionLeader, sectionTask.id, 'planning');
 const sectionQueue = await sectionLeader.request(`/api/workflows/planning/sites/${siteId}`);
@@ -499,6 +540,7 @@ const sectionRelease = await sectionLeader.post(`/api/workflows/planning/${secti
 assert.equal(sectionRelease.status, 204, `section release: ${JSON.stringify(sectionRelease.body)}`);
 const teamTask = await childOf(teamLeader, sectionTask.id);
 assert.equal(teamTask.description, 'Team Alpha: execute the assigned part.');
+assert.equal(teamTask.referenceCode, `${mainTask.body.referenceCode}-1-1`, 'Deeper delegation did not preserve the reference path');
 
 await executeDefault(teamLeader, teamTask.id);
 const superiorReportAttempt = await leader.account.put(`/api/work/sites/${siteId}/items/${teamTask.id}/final-report`, {

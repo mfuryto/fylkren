@@ -11,6 +11,7 @@ import {
 } from "./identityApi";
 import type { PasswordResetCode } from "./identityApi";
 import { useTranslation } from "../localization/LocalizationProvider";
+import { ListSortControl, type ListSort } from "../components/ListSortControl";
 
 export function GlobalUserAdministration({
   language: displayLanguage,
@@ -33,6 +34,7 @@ export function GlobalUserAdministration({
   const [userPage,setUserPage]=useState(1);
   const [userTotal,setUserTotal]=useState(0);
   const [usersLoading,setUsersLoading]=useState(true);
+  const [sort,setSort]=useState<ListSort>("name-asc");
   const [movingUser,setMovingUser]=useState<GlobalUser|null>(null);
   const [moveSourceSiteId,setMoveSourceSiteId]=useState("");
   const [moveTargetSiteId,setMoveTargetSiteId]=useState("");
@@ -46,10 +48,10 @@ export function GlobalUserAdministration({
   const [bulkTargetSiteId,setBulkTargetSiteId]=useState("");
   const [bulkBusy,setBulkBusy]=useState(false);
   const userPageSize=25;
-  async function loadUsers(nextPage=1,query=userQuery,siteFilter=userSiteFilter){
+  async function loadUsers(nextPage=1,query=userQuery,siteFilter=userSiteFilter,requestedSort=sort){
     setUsersLoading(true);
     try {
-      const result=await loadGlobalUsers(nextPage,userPageSize,query,siteFilter);
+      const result=await loadGlobalUsers(nextPage,userPageSize,query,siteFilter,requestedSort);
       setUsers(result.items);setUserSites(result.sites);setUserTotal(result.total);setUserPage(result.page);setSelectedUserIds(new Set());
     } finally {
       setUsersLoading(false);
@@ -77,7 +79,7 @@ export function GlobalUserAdministration({
   return (
     <>
       <section className="panel platform-user-overview">
-        <div className="section-heading"><div><h2>{t("userDirectory")}</h2><p className="muted">{t("userDirectoryIntro")}</p></div><span className="muted">{t("results",{count:userTotal})}</span></div>
+        <div className="section-heading"><div><h2>{t("userDirectory")}</h2><p className="muted">{t("userDirectoryIntro")}</p></div><div className="inline-actions"><ListSortControl id="global-user-sort" value={sort} onChange={value=>{setSort(value);void loadUsers(1,userQuery,userSiteFilter,value);}}/><span className="muted">{t("results",{count:userTotal})}</span></div></div>
         <form className="platform-user-search" onSubmit={event=>{event.preventDefault();void loadUsers(1).catch(problem=>setError(problem instanceof Error?problem.message:t("userSearchFailed")));}}><div className="field"><label htmlFor="global-user-search">{t("searchUserFields")}</label><input id="global-user-search" type="search" value={userQuery} onChange={event=>setUserQuery(event.target.value)} placeholder={t("searchForUser")}/></div><div className="field"><label htmlFor="global-user-site-filter">{t("site")}</label><select id="global-user-site-filter" value={userSiteFilter} onChange={event=>setUserSiteFilter(event.target.value)}><option value="">{t("noSiteFilter")}</option>{userSites.map(site=><option key={site.id} value={site.id}>{site.name}</option>)}</select></div><button className="secondary-button" type="submit">{t("search")}</button>{(userQuery||userSiteFilter)&&<button className="text-button" type="button" onClick={()=>{setUserQuery("");setUserSiteFilter("");void loadUsers(1,"","");}}>{t("clearSearch")}</button>}</form>
         {!usersLoading&&selectableUsers.length>0&&<div className="platform-user-bulk"><label><input type="checkbox" checked={selectableUsers.every(user=>selectedUserIds.has(user.id))} onChange={event=>selectAll(event.target.checked)}/> {t("selectPage")}</label><span>{t("selectedCount",{count:selectedUsers.length})}</span><button className="secondary-button" type="button" disabled={selectedUsers.length===0} onClick={()=>{setPasswordResetCodes([]);setBulkPasswordOpen(true);}}>{t("resetPassword")}</button>{selectedUsers.length>0&&selectedUsers.length===selectedOrphans.length&&<><button className="secondary-button" type="button" onClick={()=>beginAssign(selectedOrphans.map(user=>user.id))}>{t("assignSite")}</button><button className="danger-button" type="button" onClick={()=>beginDelete(selectedOrphans.map(user=>user.id))}>{t("delete")}</button></>}</div>}
         {!usersLoading&&users.length>0&&<div className="platform-user-columns" aria-hidden="true"><span/><span>{t("user")}</span><span>{t("userIdentity")}</span><span>{t("site")}</span><span>{t("lastSignedIn")}</span><span>{t("actions")}</span></div>}

@@ -4,7 +4,7 @@ import { translateActive } from "../localization";
 export type AuditSite = { id: string; name: string };
 export type SiteAuditRow = { id: string; occurredAt: string; eventType: string; entityType: string; entityId: string; entityName: string | null; actor: string };
 export type SiteAuditPage = { events: SiteAuditRow[]; eventTypes: string[]; page: number; totalPages: number; total: number };
-export type SiteAuditFilters = { area: string; eventType: string; from: string; to: string; search: string };
+export type SiteAuditFilters = { area: string; eventType: string; from: string; to: string; search: string; sort: string };
 
 export const loadAuditSites = () => apiGet<AuditSite[]>("/api/site-audit/sites", translateActive("notificationSitesLoadFailed"));
 export const loadSiteAudit = (siteId: string, page: number, filters: SiteAuditFilters) => {
@@ -14,5 +14,6 @@ export const loadSiteAudit = (siteId: string, page: number, filters: SiteAuditFi
   if (filters.from) query.set("from", filters.from);
   if (filters.to) query.set("to", filters.to);
   if (filters.search.trim()) query.set("search", filters.search.trim());
+  query.set("sort", filters.sort);
   return apiGet<SiteAuditPage>(`/api/site-audit/sites/${siteId}?${query}`, translateActive("auditLogLoadFailed"));
 };

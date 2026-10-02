@@ -32,7 +32,11 @@ const savedMarkers = new Map(backupMarkers.map(path => [path, existsSync(path) ?
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, { env, stdio: 'inherit', ...options });
   if (result.error) throw result.error;
-  if (result.status !== 0) throw new Error(`${command} exited with ${result.status}`);
+  if (result.status !== 0) {
+    spawnSync('docker', ['compose', '-p', project, 'logs', '--no-color', '--tail', '250', 'api'],
+      { env, stdio: 'inherit' });
+    throw new Error(`${command} exited with ${result.status}`);
+  }
 }
 try {
   run('docker', ['compose', '-p', project, 'up', '-d', '--build', '--wait']);

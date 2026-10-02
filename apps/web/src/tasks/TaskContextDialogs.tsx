@@ -4,6 +4,7 @@ import { RichTextContent } from "../components/RichText";
 import type { WorkItem, WorkItemDetails } from "../work/WorkItemModels";
 import { StepDocumentLinks, WorkflowTimeline } from "../workflows/WorkflowFields";
 import { priorityLabel, taskStatusLabel } from "./taskPolicy";
+import { WorkReference } from "../components/WorkReference";
 
 export function TaskPlanContent({ details, language }: { details: WorkItemDetails; language: string }) {
   const { task, plan } = details;
@@ -34,8 +35,10 @@ export function TaskPlanDialog({ details, language, timeZone, onClose }: {
   const { task } = details;
   return <Modal title={translateActive("planLabel")} onClose={onClose}>
     <article className="task-detail-view">
+      <WorkReference referenceCode={task.referenceCode}/>
       <h3>{task.title}</h3>
       <div className="task-meta">
+        {task.originReference && <span><strong>{translateActive("originReferenceLabel")}:</strong> {task.originReference}</span>}
         <span><strong>{translateActive("tasksTaskCardPresentationUnit")}</strong> {task.unitName ?? translateActive("topLevel")}</span>
         <span><strong>{translateActive("approvalStatus")}:</strong> {taskStatusLabel(task.status)}</span>
         <span><strong>{translateActive("tasksTaskContextDialogsPriority")}</strong> {priorityLabel(task.priority)}</span>
@@ -56,6 +59,7 @@ export function TaskWorkContextDialog({ selectedItem, tree, onClose, onShowPlan 
   return <Modal title={translateActive("tasksTaskContextDialogsPrimaryTaskSubtasksAndPlans")} onClose={onClose}>
     <div className="work-context-tree">{tree.map(({ item, depth }) => <article className="delegation-child" key={item.id} style={{ marginLeft: `${Math.min(depth, 6) * 1.25}rem` }}>
       <div>
+        <WorkReference referenceCode={item.referenceCode}/>
         <strong>{item.title}</strong>
         {item.id === selectedItem.id && <span className="task-type-badge">{translateActive("tasksTaskContextDialogsYourReceivedTask")}</span>}
         <div className="task-classifiers">
@@ -68,7 +72,7 @@ export function TaskWorkContextDialog({ selectedItem, tree, onClose, onShowPlan 
           {item.referenceUrl && <a className="task-info-badge task-document-badge" href={item.referenceUrl} target="_blank" rel="noopener noreferrer"><i aria-hidden="true">▤</i>{translateActive("tasksTaskClassifiersPrimaryDocument")}</a>}
         </div>
       </div>
-      <div className="task-meta"><span>{item.unitName ?? translateActive("topLevel")}</span><span>{taskStatusLabel(item.status)}</span></div>
+      <div className="task-meta">{item.originReference && <span><strong>{translateActive("originReferenceLabel")}:</strong> {item.originReference}</span>}<span>{item.unitName ?? translateActive("topLevel")}</span><span>{taskStatusLabel(item.status)}</span></div>
       {item.description && <details className="returned-report task-description-section"><summary><span>{translateActive("approvalDescription")}</span><small>{translateActive("tasksTaskCardPresentationShowTheTaskText")}</small></summary><div className="returned-report-content"><p>{item.description}</p></div></details>}
       {item.status === "cancelled" && item.decisionNote && <p className="task-decision-note"><strong>{translateActive("tasksTaskContextDialogsCancelled")}</strong> {item.decisionNote}</p>}
       {item.finalReport && <section className="planning-result"><h4>{translateActive("approvalFinalReport")}</h4><RichTextContent value={item.finalReport} /></section>}

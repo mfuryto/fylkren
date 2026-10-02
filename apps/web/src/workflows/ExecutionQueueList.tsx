@@ -5,6 +5,7 @@ import { RichTextContent } from "../components/RichText";
 import type { TaskUnit } from "../work/WorkContextModels";
 import type { ExecutionItem } from "./ExecutionModels";
 import { executionStatus } from "./executionQueue";
+import { WorkReference } from "../components/WorkReference";
 
 type ExecutionQueueListProps = {
   items: ExecutionItem[];
@@ -59,8 +60,9 @@ export function ExecutionQueueList({
       const expanded = expandedItemId === item.id;
       const units = childUnits(item);
       return <article className={`panel task-card process-card${open ? "" : " minimized"}`} key={item.id}>
-        <div className="task-card-heading">
-          <div><h2>{item.title}</h2><span className="muted">{item.assignedUnitName ?? translateActive("topLevel")}</span></div>
+        <div className="task-card-heading task-reference-heading">
+          <WorkReference referenceCode={item.referenceCode}/>
+          <div className="task-title-cell"><h2 title={item.title}>{item.title}</h2><span className="muted">{item.assignedUnitName ?? translateActive("topLevel")}</span></div>
           <span className="task-status execution">{executionStatus(item)}</span>
         </div>
         <button className="task-card-toggle process-card-toggle" type="button" aria-expanded={open} onClick={() => onToggle(item.id)}>
@@ -69,6 +71,7 @@ export function ExecutionQueueList({
         {open && <div className="permalink-action-row"><button className="task-icon-action permalink-action" type="button" title={translateActive("workflowsExecutionQueueListCopyLinkToExecution")} aria-label={translateActive("workflowsExecutionQueueListCopyLinkToExecution")} onClick={() => onCopyLink(item.id)}><i aria-hidden="true">🔗</i></button></div>}
         <button className="link-button" type="button" onClick={() => onToggleDetails(item.id)}>{expanded ? translateActive("workflowsExecutionQueueListHideTask") : translateActive("workflowsExecutionQueueListReadTask")}</button>
         {expanded && <div className="planning-preview">
+          {item.originReference && <p className="muted"><strong>{translateActive("originReferenceLabel")}:</strong> {item.originReference}</p>}
           {item.requestBasisSnapshot && <details className="returned-report treatment-history-section"><summary><span>{translateActive("tasksTaskCardPresentationTaskBasisFromSender")}</span><small>{translateActive("tasksTaskCardPresentationShowFrozenDescriptionAndApprovedPlan")}</small></summary><div className="returned-report-content"><RichTextContent value={item.requestBasisSnapshot}/></div></details>}
           {item.description && <details className="returned-report task-description-section"><summary><span>{translateActive("approvalDescription")}</span><small>{translateActive("tasksTaskCardPresentationShowTheTaskText")}</small></summary><div className="returned-report-content"><p>{item.description}</p></div></details>}
           {item.referenceUrl && <a href={item.referenceUrl} target="_blank" rel="noopener noreferrer">{translateActive("workflowsExecutionQueueListOpenSourceLink")}</a>}

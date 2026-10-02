@@ -1,6 +1,7 @@
 export type WorkItemType = {
   id: string;
   name: string;
+  abbreviation?: string;
   isActive: boolean;
   isSystemManaged?: boolean;
   inUse: boolean;
@@ -8,6 +9,8 @@ export type WorkItemType = {
 export type WorkItem = {
   id: string;
   siteId: string;
+  referenceCode: string;
+  originReference: string | null;
   parentWorkItemId: string | null;
   parentTitle: string | null;
   workItemTypeId: string | null;

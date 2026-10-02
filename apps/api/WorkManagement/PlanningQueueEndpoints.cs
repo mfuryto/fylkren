@@ -10,7 +10,7 @@ internal static class PlanningQueueEndpoints
 {
     internal static void Map(RouteGroupBuilder group)
     {
-        group.MapGet("/planning/sites/{siteId:guid}", async (Guid siteId, int? page, Guid? levelId, bool? topLevel, Guid? focusRunId, ClaimsPrincipal user, FylkrenDbContext db, CancellationToken ct) =>
+        group.MapGet("/planning/sites/{siteId:guid}", async (Guid siteId, int? page, Guid? levelId, bool? topLevel, Guid? focusRunId, string? sort, ClaimsPrincipal user, FylkrenDbContext db, CancellationToken ct) =>
         {
             const int pageSize = 20;
             if (!Pid(user, out var personId) ||
@@ -56,9 +56,16 @@ internal static class PlanningQueueEndpoints
             }
             var totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)pageSize));
             pageNumber = Math.Min(pageNumber, totalPages);
-            var runs = await baseQuery
-                .OrderByDescending(x => x.StartedAt)
-                .ThenBy(x => x.Id)
+            var orderedRuns = sort switch
+            {
+                "oldest" => baseQuery.OrderBy(x => x.StartedAt).ThenBy(x => x.Id),
+                "name-asc" => baseQuery.OrderBy(x => x.WorkItem.Title).ThenBy(x => x.Id),
+                "name-desc" => baseQuery.OrderByDescending(x => x.WorkItem.Title).ThenBy(x => x.Id),
+                "reference-asc" => baseQuery.OrderBy(x => x.WorkItem.ReferenceCode).ThenBy(x => x.Id),
+                "reference-desc" => baseQuery.OrderByDescending(x => x.WorkItem.ReferenceCode).ThenBy(x => x.Id),
+                _ => baseQuery.OrderByDescending(x => x.StartedAt).ThenBy(x => x.Id),
+            };
+            var runs = await orderedRuns
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .Select(x => new
@@ -78,6 +85,8 @@ internal static class PlanningQueueEndpoints
                     item = new
                     {
                         x.WorkItem.Id,
+                        x.WorkItem.ReferenceCode,
+                        x.WorkItem.OriginReference,
                         x.WorkItem.ParentWorkItemId,
                         parentTitle = x.WorkItem.ParentWorkItem == null ? null : x.WorkItem.ParentWorkItem.Title,
                         parentDescription = x.WorkItem.ParentWorkItem == null ? null : x.WorkItem.ParentWorkItem.Description,

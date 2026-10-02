@@ -1,7 +1,8 @@
-# Complete language-pack previews - 2026-10-01
+# Initial complete language-pack generation - 2026-10-01
 
-Run ID: `language-pack-previews-2026-10-01`. This run records the first complete
-preview catalogs produced after the English source migration gate passed.
+Run ID: `language-pack-previews-2026-10-01`. This historical run records the first
+complete catalogs produced after the English source migration gate passed. The
+later localization quality audit supersedes its initial acceptance boundary.
 
 ## Scope
 
@@ -9,7 +10,7 @@ The run covers Swedish, Danish, Finnish, German, French, Polish, Spanish,
 Italian, Ukrainian, Dutch, Portuguese, Czech, Romanian, Estonian, Latvian and
 Lithuanian. Icelandic is intentionally outside the approved roster.
 
-Every preview mirrors the `en-US` section structure and contains all 2,006
+Every catalog mirrors the `en-US` section structure and contains all 2,006
 source messages. Dynamic placeholders are kept outside machine translation and
 reinserted in their original order. A maintained terminology pass replaces
 ambiguous short translations for primary navigation, Enterprise licensing and
@@ -30,10 +31,10 @@ sign-in/sign-out actions. Language choices are displayed by native name.
 | API build | Pass; zero warnings and zero errors |
 | Repository language, documentation-link, structure and version checks | Pass |
 
-## Acceptance boundary
+## Acceptance result
 
-The catalogs are bundled and selectable so the product owner and language
-reviewers can evaluate the complete interface. They are not advertised as
-publicly supported until a native-language reviewer has approved terminology,
-grammar, accessibility wording, email, reports and PDF output for that locale.
-Technical completeness does not replace linguistic acceptance.
+This initial run established technical completeness but did not by itself establish
+linguistic acceptance. The subsequent maintained quality audit added terminology,
+source-language leakage, semantic, locale and interface checks. The current support
+claim is governed by that reproducible automated process and does not require an
+individual reviewer for every language.

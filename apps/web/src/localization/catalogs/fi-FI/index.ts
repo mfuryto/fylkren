@@ -1,4 +1,7 @@
 import type { MessageKey } from "../en-US";
+import type { ReferenceMessageKey } from "../supplements/references";
+import type { SortingMessageKey } from "../supplements/sorting";
+import type { IntakeMessageKey } from "../supplements/intake";
 import { federationFiFI } from "./sections/federation";
 import { identityFiFI } from "./sections/identity";
 import { notificationsFiFI } from "./sections/notifications";
@@ -16,7 +19,7 @@ import { workFiFI } from "./sections/work";
 import { workTemplatesFiFI } from "./sections/workTemplates";
 import { workflowsFiFI } from "./sections/workflows";
 
-export const fiFI: Record<MessageKey, string> = {
+export const fiFI: Record<Exclude<MessageKey, ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
   ...federationFiFI,
   ...identityFiFI,
   ...notificationsFiFI,

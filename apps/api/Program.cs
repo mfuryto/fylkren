@@ -107,6 +107,7 @@ app.MapOrganizationEndpoints();
 app.MapAccessEndpoints();
 app.MapIdentityEndpoints();
 app.MapWorkItemEndpoints();
+app.MapReferenceSettingsEndpoints();
 app.MapDecisionEndpoints();
 app.MapWorkflowEndpoints();
 app.MapExecutionEndpoints();

@@ -1,4 +1,7 @@
 import type { MessageKey } from "../en-US";
+import type { ReferenceMessageKey } from "../supplements/references";
+import type { SortingMessageKey } from "../supplements/sorting";
+import type { IntakeMessageKey } from "../supplements/intake";
 import { federationLtLT } from "./sections/federation";
 import { identityLtLT } from "./sections/identity";
 import { notificationsLtLT } from "./sections/notifications";
@@ -16,7 +19,7 @@ import { workLtLT } from "./sections/work";
 import { workTemplatesLtLT } from "./sections/workTemplates";
 import { workflowsLtLT } from "./sections/workflows";
 
-export const ltLT: Record<MessageKey, string> = {
+export const ltLT: Record<Exclude<MessageKey, ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
   ...federationLtLT,
   ...identityLtLT,
   ...notificationsLtLT,

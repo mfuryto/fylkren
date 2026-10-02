@@ -48,7 +48,7 @@ internal static class WorkItemCompletionEndpoints
             item.ApproveFinalReport(personId, now);
             await FormalApprovalService.Approve(db, siteId, "final_report", item.Id, item.Id, $"Final report for {item.Title}", new
             {
-                task = new { item.Id, item.Title, item.Description, item.AssignedUnitId, item.CreatedAt, item.DueAt },
+                task = new { item.Id, item.ReferenceCode, item.OriginReference, item.Title, item.Description, item.AssignedUnitId, item.CreatedAt, item.DueAt },
                 report = new { content = item.FinalReport, classification = item.FinalReportClassification, writtenByPersonId = item.FinalReportWrittenByPersonId, writtenAt = item.FinalReportUpdatedAt }
             }, personId, now, ct);
             db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.final-report-approved", "work-item", item.Id, now));

@@ -29,7 +29,7 @@ internal static class WorkItemLookupEndpoints
             .Where(type => type.SiteId == siteId)
             .OrderByDescending(type => type.CreatedAt)
             .ThenByDescending(type => type.Id)
-            .Select(type => new { type.Id, type.Name, type.IsActive, type.IsSystemManaged, inUse = type.WorkItems.Any() })
+            .Select(type => new { type.Id, type.Name, type.Abbreviation, type.IsActive, type.IsSystemManaged, inUse = type.WorkItems.Any() })
             .ToListAsync(ct);
         return Results.Ok(values);
     }
@@ -43,7 +43,12 @@ internal static class WorkItemLookupEndpoints
         if (!ValidName(name) || await db.WorkItemTypes.AnyAsync(type =>
                 type.SiteId == siteId && type.NormalizedName == name.ToUpperInvariant(), ct))
             return InvalidName();
-        var type = new WorkItemType(Guid.NewGuid(), siteId, name, DateTimeOffset.UtcNow);
+        string abbreviation;
+        try { abbreviation = ReferenceCodePolicy.NormalizeCode(request.Abbreviation, 2, 12); }
+        catch (ArgumentException exception) { return InvalidAbbreviation(exception.Message); }
+        if (await db.WorkItemTypes.AnyAsync(value => value.SiteId == siteId && value.Abbreviation == abbreviation, ct))
+            return InvalidAbbreviation("The abbreviation must be unique within the Site.");
+        var type = new WorkItemType(Guid.NewGuid(), siteId, name, abbreviation, DateTimeOffset.UtcNow);
         db.WorkItemTypes.Add(type);
         AddAudit(db, siteId, personId, "work-item-type.created", "work-item-type", type.Id);
         await db.SaveChangesAsync(ct);
@@ -63,7 +68,12 @@ internal static class WorkItemLookupEndpoints
         if (!ValidName(name) || await db.WorkItemTypes.AnyAsync(value =>
                 value.SiteId == siteId && value.Id != typeId && value.NormalizedName == name.ToUpperInvariant(), ct))
             return InvalidName();
-        type.Update(name);
+        string abbreviation;
+        try { abbreviation = ReferenceCodePolicy.NormalizeCode(request.Abbreviation, 2, 12); }
+        catch (ArgumentException exception) { return InvalidAbbreviation(exception.Message); }
+        if (await db.WorkItemTypes.AnyAsync(value => value.SiteId == siteId && value.Id != typeId && value.Abbreviation == abbreviation, ct))
+            return InvalidAbbreviation("The abbreviation must be unique within the Site.");
+        type.Update(name, abbreviation);
         SetActive(type, request.IsActive);
         AddAudit(db, siteId, personId, "work-item-type.updated", "work-item-type", type.Id);
         await db.SaveChangesAsync(ct);
@@ -135,7 +145,8 @@ internal static class WorkItemLookupEndpoints
     private static string NormalizeName(string? name) => (name ?? "").Trim();
     private static bool ValidName(string name) => name.Length is >= 2 and <= 100;
     private static IResult InvalidName() => Results.ValidationProblem(new Dictionary<string, string[]> { ["name"] = ["The name must be unique and between 2 and 100 characters."] });
+    private static IResult InvalidAbbreviation(string message) => Results.ValidationProblem(new Dictionary<string, string[]> { ["abbreviation"] = [message] });
     private static bool LookupKind(string kind) => kind is "source-type" or "sender";
 
-    private sealed record TypeRequest(string? Name, bool IsActive = true);
+    private sealed record TypeRequest(string? Name, string? Abbreviation = null, bool IsActive = true);
 }

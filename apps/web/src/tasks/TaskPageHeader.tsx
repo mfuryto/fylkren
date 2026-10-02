@@ -3,25 +3,17 @@ import { Modal } from "../components/Modal";
 
 type TaskPageHeaderProps = {
   helpOpen: boolean;
-  isSiteManager: boolean;
   canCreate: boolean;
   onHelpOpen: () => void;
   onHelpClose: () => void;
-  onTypeManagerOpen: () => void;
-  onSourceTypeManagerOpen: () => void;
-  onSenderManagerOpen: () => void;
   onCreate: () => void;
 };
 
 export function TaskPageHeader({
   helpOpen,
-  isSiteManager,
   canCreate,
   onHelpOpen,
   onHelpClose,
-  onTypeManagerOpen,
-  onSourceTypeManagerOpen,
-  onSenderManagerOpen,
   onCreate,
 }: TaskPageHeaderProps) {
   return <>
@@ -32,11 +24,6 @@ export function TaskPageHeader({
       </div>
       <div className="task-actions">
         <button className="help-button" type="button" onClick={onHelpOpen}><i aria-hidden="true">?</i><span>{translateActive("help")}</span></button>
-        {isSiteManager && <>
-          <button className="secondary-button" type="button" onClick={onTypeManagerOpen}>{translateActive("tasksTaskLookupDialogsTaskTypes")}</button>
-          <button className="secondary-button" type="button" onClick={onSourceTypeManagerOpen}>{translateActive("tasksTaskLookupDialogsSourceTypes")}</button>
-          <button className="secondary-button" type="button" onClick={onSenderManagerOpen}>{translateActive("tasksTaskLookupDialogsSenders")}</button>
-        </>}
         {canCreate && <button className="primary-button" type="button" onClick={onCreate}>{translateActive("templateNewWork")}</button>}
       </div>
     </header>

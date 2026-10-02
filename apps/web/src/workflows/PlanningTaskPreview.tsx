@@ -14,6 +14,8 @@ export function PlanningTaskPreview({
   return (
     <div className="planning-preview">
       <div className="task-meta">
+        <span className="task-reference">{item.referenceCode}</span>
+        {item.originReference && <span>{translateActive("originReferenceLabel")}: {item.originReference}</span>}
         {item.workItemTypeName && <span>{translateActive("taskTypeLabel")}: {item.workItemTypeName}</span>}
         {item.sourceTypeName && <span>{translateActive("workflowsPlanningTaskPreviewSource")} {item.sourceTypeName}</span>}
         {item.senderName && <span>{translateActive("workflowsPlanningTaskPreviewSender")} {item.senderName}</span>}

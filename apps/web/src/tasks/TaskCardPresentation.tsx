@@ -2,6 +2,7 @@ import { translateActive } from "../localization";
 import { RichTextContent } from "../components/RichText";
 import type { WorkItem } from "../work/WorkItemModels";
 import { TaskClassifiers } from "./TaskClassifiers";
+import { WorkReference } from "../components/WorkReference";
 import { effectiveTaskStatus, isReceivedRequest, requestProgressLabel, taskStatusLabel } from "./taskPolicy";
 
 export function taskCardClassName(item: WorkItem, open: boolean) {
@@ -20,7 +21,8 @@ export function TaskCardHeader({ item, open, language, timeZone, onToggle }: {
 }) {
   return <>
     {item.parentWorkItemId && <div className="delegation-parent"><strong>{translateActive("tasksTaskCardPresentationSubtaskUnder")}</strong> {item.parentTitle}</div>}
-    <div className="task-card-heading"><div><TaskClassifiers item={item} /><h2>{item.title}</h2><div className="task-card-summary-meta">
+    <div className="task-card-heading task-reference-heading"><WorkReference referenceCode={item.referenceCode}/><div className="task-title-cell"><TaskClassifiers item={item} /><h2 title={item.title}>{item.title}</h2><div className="task-card-summary-meta">
+      {item.originReference && <span><strong>{translateActive("originReferenceLabel")}</strong> {item.originReference}</span>}
       <span><strong>{translateActive("tasksTaskCardPresentationReceivedRegistered")}</strong> {new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short", timeZone }).format(new Date(item.createdAt))}</span>
       <span><strong>{translateActive("tasksTaskCardPresentationDueDate")}</strong> {item.dueAt ? new Intl.DateTimeFormat(language, { dateStyle: "medium", timeZone }).format(new Date(item.dueAt)) : translateActive("none")}</span>
       <span><strong>{translateActive("tasksTaskCardPresentationRegisteredBy")}</strong> {item.createdBy}</span>

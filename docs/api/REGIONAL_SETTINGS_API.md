@@ -20,11 +20,10 @@ The request and response contract is:
 }
 ```
 
-Reviewed languages are `en-US`, `en-GB` and `nb-NO`. Complete preview catalogs are
-available for `sv-SE`, `da-DK`, `fi-FI`, `de-DE`, `fr-FR`, `pl-PL`, `es-ES`,
+Bundled language catalogs are available for `en-US`, `en-GB`, `nb-NO`, `sv-SE`,
+`da-DK`, `fi-FI`, `de-DE`, `fr-FR`, `pl-PL`, `es-ES`,
 `it-IT`, `uk-UA`, `nl-NL`, `pt-PT`, `cs-CZ`, `ro-RO`, `et-EE`, `lv-LV` and
-`lt-LT`. American English is the
-source catalog and mandatory fallback. The legacy value `en` normalizes to
+`lt-LT`. American English is the source catalog and mandatory fallback. The legacy value `en` normalizes to
 `en-US`. Clock format is `12-hour` or `24-hour`; measurement system
 is `metric` or `imperial`. The time zone must be an IANA identifier available
 inside the application container.

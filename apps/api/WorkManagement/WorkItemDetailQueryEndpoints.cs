@@ -87,6 +87,8 @@ internal static class WorkItemDetailQueryEndpoints
                 .Select(x => new
                 {
                     x.Id,
+                    x.ReferenceCode,
+                    x.OriginReference,
                     x.ParentWorkItemId,
                     x.Title,
                     x.Description,

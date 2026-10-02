@@ -74,7 +74,7 @@ internal processing.
 
 | Area | What Fylkren provides |
 | --- | --- |
-| **Tasks and requests** | Registration, receipt, assessment, priority, deadlines, hold, rejection, reopening, cancellation, internal delegation and cross-site requests |
+| **Tasks and requests** | Registration, permanent searchable task references, receipt, assessment, priority, deadlines, hold, rejection, reopening, cancellation, internal delegation and cross-site requests |
 | **Planning and execution** | Optional planning, reusable workflows, step templates, timelines, rich text, decisions, dependencies, risks, mitigations and external follow-up |
 | **Organization and access** | Independent and hierarchical sites, internal units, personnel, local roles, work-level permissions and server-enforced authorization |
 | **Reports and records** | Level-owned final reports, approval versions, searchable archives, permanent request responses and print/PDF presentation |

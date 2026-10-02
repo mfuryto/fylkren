@@ -46,7 +46,7 @@ internal static class FederationAnswerAcceptanceTestEndpoints
         await FormalApprovalService.Approve(db, siteId, "final_report", work.Id, work.Id,
             $"Response to request: {work.Title}", new
             {
-                task = new { work.Id, work.Title, work.Description, work.AssignedUnitId,
+                task = new { work.Id, work.ReferenceCode, work.OriginReference, work.Title, work.Description, work.AssignedUnitId,
                     work.CreatedAt, work.DueAt },
                 report = new { content = work.FinalReport,
                     classification = work.FinalReportClassification,

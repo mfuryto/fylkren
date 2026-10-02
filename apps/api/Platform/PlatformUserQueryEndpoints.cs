@@ -13,6 +13,7 @@ public static partial class PlatformUserEndpoints
     private static async Task<IResult> GetUsers(
         string? q,
         Guid? siteId,
+        string? sort,
         int? page,
         int? pageSize,
         HttpContext context,
@@ -53,9 +54,14 @@ public static partial class PlatformUserEndpoints
         }
 
         var total = await query.CountAsync(cancellationToken);
-        var people = await query
-            .OrderBy(person => person.DisplayName)
-            .ThenBy(person => person.Id)
+        var ordered = sort switch
+        {
+            "newest" => query.OrderByDescending(person => person.CreatedAt).ThenBy(person => person.Id),
+            "oldest" => query.OrderBy(person => person.CreatedAt).ThenBy(person => person.Id),
+            "name-desc" => query.OrderByDescending(person => person.DisplayName).ThenBy(person => person.Id),
+            _ => query.OrderBy(person => person.DisplayName).ThenBy(person => person.Id),
+        };
+        var people = await ordered
             .Skip((currentPage - 1) * size)
             .Take(size)
             .Select(person => new { person.Id, person.DisplayName, person.Email, person.IsActive, person.CreatedAt })

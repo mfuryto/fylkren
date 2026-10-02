@@ -4,7 +4,7 @@ import type { ExecutionItem } from "./ExecutionModels";
 import { executionChildUnits, executionDefinitionOptions, executionStatus } from "./executionQueue";
 
 const item = (values: Partial<ExecutionItem> = {}): ExecutionItem => ({
-  id: "item", parentWorkItemId: null, assignedUnitId: null, assignedUnitName: null,
+  id: "item", referenceCode: "INC-000001", originReference: null, parentWorkItemId: null, assignedUnitId: null, assignedUnitName: null,
   title: "Task", description: "", requestBasisSnapshot: null, recommendation: null,
   referenceUrl: null, priority: "normal", dueAt: null, decisionNote: null, createdBy: "Test",
   createdAt: "2026-01-01T00:00:00Z", hasPlan: false, run: null, ...values,

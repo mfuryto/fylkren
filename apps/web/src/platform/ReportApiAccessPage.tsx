@@ -3,6 +3,7 @@ import { apiGet, apiMutate } from "../api/client";
 import { errorMessage } from "../api/errors";
 import { SectionHelp } from "../components/SectionHelp";
 import { useTranslation } from "../localization/LocalizationProvider";
+import { ListSortControl, sortList, type ListSort } from "../components/ListSortControl";
 
 type Site = { siteId: string; name: string };
 type Client = { id: string; name: string; keyId: string };
@@ -15,6 +16,7 @@ export function ReportApiAccessPage({ embedded = false, canManage = true }: { em
   const [clients, setClients] = useState<Client[]>([]), [units, setUnits] = useState<Unit[]>([]), [grants, setGrants] = useState<Grant[]>([]);
   const [clientId, setClientId] = useState(""), [unitId, setUnitId] = useState(""), [classified, setClassified] = useState(false);
   const [message, setMessage] = useState(""), [busy, setBusy] = useState(false), [helpOpen, setHelpOpen] = useState(false);
+  const [sort, setSort] = useState<ListSort>("name-asc");
   useEffect(() => { apiGet<Site[]>("/api/report-api/sites", t("sitesLoadFailed")).then(value => { setSites(value); setSiteId(value[0]?.siteId ?? ""); }).catch(error => setMessage(errorMessage(error, t("sitesLoadFailed")))); }, []);
   async function load(id: string) {
     if (!id) return;
@@ -46,8 +48,8 @@ export function ReportApiAccessPage({ embedded = false, canManage = true }: { em
         <label className="checkbox-row"><input type="checkbox" disabled={!canManage} checked={classified} onChange={event => setClassified(event.target.checked)} /><span>{t("allowClassifiedReports")}</span></label>
         <div><button className="primary-button" type="button" disabled={busy || !clientId || !siteId || !canManage} onClick={() => void save()}>{t("saveAccess")}</button></div>
       </div>}</section>
-    <section className="panel"><div className="section-heading"><div><h2>{t("assignedReportAccess")}</h2><p className="muted">{t("assignedReportAccessIntro")}</p></div></div>
-      <div className="admin-list">{grants.length === 0 ? <p className="empty-state">{t("noReportAccess")}</p> : grants.map(grant => <div className="admin-list-row" key={grant.id}><span><strong>{grant.clientName}</strong><small>{t("keyId")}: {grant.keyId} · {levelName(grant.organizationUnitId)} · {grant.includeClassified ? t("includesClassified") : t("unclassifiedOnly")}</small></span><button className="secondary-button danger" type="button" disabled={busy} onClick={() => void remove(grant.id)}>{t("remove")}</button></div>)}</div>
+    <section className="panel"><div className="section-heading"><div><h2>{t("assignedReportAccess")}</h2><p className="muted">{t("assignedReportAccessIntro")}</p></div><ListSortControl id="report-access-sort" value={sort} onChange={setSort} options={["name-asc", "name-desc"]}/></div>
+      <div className="admin-list">{grants.length === 0 ? <p className="empty-state">{t("noReportAccess")}</p> : sortList(grants, sort, { name: grant => grant.clientName }).map(grant => <div className="admin-list-row" key={grant.id}><span><strong>{grant.clientName}</strong><small>{t("keyId")}: {grant.keyId} · {levelName(grant.organizationUnitId)} · {grant.includeClassified ? t("includesClassified") : t("unclassifiedOnly")}</small></span><button className="secondary-button danger" type="button" disabled={busy} onClick={() => void remove(grant.id)}>{t("remove")}</button></div>)}</div>
     </section>
     {helpOpen && <SectionHelp title={t("reportApiHelpTitle")} intro={t("reportApiHelpIntro")} steps={[{ title: t("reportApiHelpClientTitle"), text: t("reportApiHelpClientText") }, { title: t("reportApiHelpLevelTitle"), text: t("reportApiHelpLevelText") }, { title: t("reportApiHelpClassifiedTitle"), text: t("reportApiHelpClassifiedText") }, { title: t("reportApiHelpRemoveTitle"), text: t("reportApiHelpRemoveText") }]} note={t("reportApiHelpNote")} onClose={() => setHelpOpen(false)} />}
   </div>;

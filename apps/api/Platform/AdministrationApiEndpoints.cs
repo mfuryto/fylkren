@@ -137,7 +137,7 @@ public static class AdministrationApiEndpoints
         db.Sites.Add(site);
         db.OrganizationUnits.Add(new OrganizationUnit(
             Guid.NewGuid(), site.Id, null, site.Name, false, now, true));
-        DefaultSiteWorkConfiguration.Add(db, site.Id, now);
+        DefaultSiteWorkConfiguration.Add(db, site.Id, site.Name, now);
         db.ApiIdempotencyRecords.Add(new ApiIdempotencyRecord(
             Guid.NewGuid(), machineId, key, requestHash, site.Id, now));
         AddMachineAudit(db, machineId, site.Id, "site.created", site.Id, context, now);

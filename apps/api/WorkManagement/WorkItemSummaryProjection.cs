@@ -19,6 +19,8 @@ internal static class WorkItemSummaryProjection
             .Select(item => new WorkItemSummary(
                 item.Id,
                 item.SiteId,
+                item.ReferenceCode,
+                item.OriginReference,
                 item.ParentWorkItem != null && item.ParentWorkItem.SiteId != siteId && item.SiteId == siteId ? null : item.ParentWorkItemId,
                 item.ParentWorkItem == null ? null : item.ParentWorkItem.Title,
                 item.WorkItemTypeId,

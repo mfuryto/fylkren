@@ -46,6 +46,8 @@ public static class ReportApiEndpoints
         {
             var pattern = RequestQueryPolicy.LikePattern(search);
             query = query.Where(item =>
+                EF.Functions.ILike(item.ReferenceCode, pattern, "\\") ||
+                item.OriginReference != null && EF.Functions.ILike(item.OriginReference, pattern, "\\") ||
                 EF.Functions.ILike(item.Title, pattern, "\\") ||
                 EF.Functions.ILike(item.FinalReport!, pattern, "\\"));
         }
@@ -61,6 +63,8 @@ public static class ReportApiEndpoints
             .Select(item => new
             {
                 item.Id,
+                item.ReferenceCode,
+                item.OriginReference,
                 item.Title,
                 item.FinalReportClassification,
                 ReportCreatedAt = item.FinalReportCreatedAt ?? item.FinalReportUpdatedAt,
@@ -77,6 +81,8 @@ public static class ReportApiEndpoints
         var items = rows.Select(row => new
         {
             row.Id,
+            row.ReferenceCode,
+            row.OriginReference,
             row.Title,
             siteId,
             siteName,
@@ -116,6 +122,8 @@ public static class ReportApiEndpoints
                 item.Id,
                 item.SiteId,
                 item.AssignedUnitId,
+                item.ReferenceCode,
+                item.OriginReference,
                 item.Title,
                 item.FinalReport,
                 item.FinalReportClassification,
@@ -144,6 +152,8 @@ public static class ReportApiEndpoints
             row.Id,
             row.SiteId,
             organizationUnitId = row.AssignedUnitId,
+            row.ReferenceCode,
+            row.OriginReference,
             row.Title,
             row.FinalReport,
             row.FinalReportClassification,

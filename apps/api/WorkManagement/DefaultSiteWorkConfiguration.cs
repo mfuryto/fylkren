@@ -4,9 +4,11 @@ namespace Fylkren.Api.WorkManagement;
 
 internal static class DefaultSiteWorkConfiguration
 {
-    public static void Add(FylkrenDbContext database, Guid siteId, DateTimeOffset createdAt)
+    public static void Add(FylkrenDbContext database, Guid siteId, string siteName, DateTimeOffset createdAt)
     {
-        database.WorkItemTypes.Add(new WorkItemType(Guid.NewGuid(), siteId, "Request", createdAt, true));
+        database.SiteReferenceSettings.Add(new SiteReferenceSettings(siteId,
+            ReferenceCodePolicy.DefaultSitePrefix(siteName, siteId), createdAt, null));
+        database.WorkItemTypes.Add(new WorkItemType(Guid.NewGuid(), siteId, "Request", "REQ", createdAt, true));
 
         var planning = new WorkflowDefinition(Guid.NewGuid(), siteId, null, "Standard", "planning", false);
         database.WorkflowDefinitions.Add(planning);

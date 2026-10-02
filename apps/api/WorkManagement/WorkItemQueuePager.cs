@@ -15,6 +15,7 @@ internal static class WorkItemQueuePager
         Guid? unitId,
         string filter,
         string? search,
+        string sort,
         int requestedPage,
         Guid? focusItemId,
         FylkrenDbContext database,
@@ -26,7 +27,9 @@ internal static class WorkItemQueuePager
             item.ParentWorkItem != null && item.ParentWorkItem.SiteId != siteId && item.SiteId == siteId ? null : item.ParentWorkItemId,
             item.ParentWorkItem == null ? null : item.ParentWorkItem.Title,
             item.AssignedUnitId,
-            includeSearchText ? item.Title : "",
+            item.ReferenceCode,
+            includeSearchText ? item.OriginReference : null,
+            item.Title,
             includeSearchText ? item.Description : "",
             includeSearchText ? item.Recommendation : null,
             includeSearchText ? item.WorkItemType == null ? item.WorkItemTypeNameSnapshot : item.WorkItemType.Name : null,
@@ -52,7 +55,7 @@ internal static class WorkItemQueuePager
             : node.ParentId is null && !(node.IsOutgoingRequest && node.ParentTitle is not null)).ToList();
 
         var normalizedSearch = search?.Trim() ?? string.Empty;
-        var filtered = scoped.Where(node => MatchesFilter(node, filter) && SubtreeMatches(node, normalizedSearch, children)).OrderByDescending(node => node.CreatedAt).ThenBy(node => node.Id).ToList();
+        var filtered = Sort(scoped.Where(node => MatchesFilter(node, filter) && SubtreeMatches(node, normalizedSearch, children)), sort).ToList();
         var page = Math.Max(requestedPage, 1);
         if (focusItemId is Guid focusedId)
         {
@@ -65,11 +68,22 @@ internal static class WorkItemQueuePager
         var totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)PageSize));
         page = Math.Min(page, totalPages);
         var roots = filtered.Skip((page - 1) * PageSize).Take(PageSize).Select(node => node.Id).ToList();
-        var selectedIds = IncludeDescendants(roots, children);
+        var orderedItemIds = IncludeDescendantsInOrder(roots, children);
+        var selectedIds = orderedItemIds.ToHashSet();
         var active = scoped.Where(node => !TerminalStatuses.Contains(EffectiveStatus(node))).ToList();
         var summary = new Summary(active.Count, scoped.Count(node => EffectiveStatus(node) == "in_progress"), scoped.Count(node => EffectiveStatus(node) == "in_review"), active.Count(node => node.DueAt is not null && node.DueAt < DateTimeOffset.UtcNow));
-        return new Result(selectedIds, total, page, PageSize, totalPages, summary);
+        return new Result(selectedIds, orderedItemIds, total, page, PageSize, totalPages, summary);
     }
+
+    private static IOrderedEnumerable<Node> Sort(IEnumerable<Node> nodes, string sort) => sort switch
+    {
+        "oldest" => nodes.OrderBy(node => node.CreatedAt).ThenBy(node => node.Id),
+        "name-asc" => nodes.OrderBy(node => node.Title, StringComparer.CurrentCultureIgnoreCase).ThenBy(node => node.Id),
+        "name-desc" => nodes.OrderByDescending(node => node.Title, StringComparer.CurrentCultureIgnoreCase).ThenBy(node => node.Id),
+        "reference-asc" => nodes.OrderBy(node => node.ReferenceCode, StringComparer.OrdinalIgnoreCase).ThenBy(node => node.Id),
+        "reference-desc" => nodes.OrderByDescending(node => node.ReferenceCode, StringComparer.OrdinalIgnoreCase).ThenBy(node => node.Id),
+        _ => nodes.OrderByDescending(node => node.CreatedAt).ThenBy(node => node.Id),
+    };
 
     private static bool MatchesFilter(Node node, string filter)
     {
@@ -100,7 +114,7 @@ internal static class WorkItemQueuePager
 
     private static IEnumerable<string?> SearchValues(Node node) =>
     [
-        node.Title, node.Description, node.Recommendation, node.WorkItemTypeName, node.SourceTypeName,
+        node.ReferenceCode, node.OriginReference, node.Title, node.Description, node.Recommendation, node.WorkItemTypeName, node.SourceTypeName,
         node.SenderName, node.SenderSiteName, node.SenderPersonName, node.UnitName, node.CreatedBy,
         node.ParentTitle, node.FinalReport, node.RequestResponse, StatusLabel(EffectiveStatus(node)),
     ];
@@ -139,19 +153,26 @@ internal static class WorkItemQueuePager
         return current;
     }
 
-    private static HashSet<Guid> IncludeDescendants(IEnumerable<Guid> roots, IReadOnlyDictionary<Guid, List<Node>> children)
+    private static List<Guid> IncludeDescendantsInOrder(IEnumerable<Guid> roots, IReadOnlyDictionary<Guid, List<Node>> children)
     {
-        var selected = roots.ToHashSet();
-        var pending = new Stack<Guid>(selected);
-        while (pending.TryPop(out var parentId))
+        var ordered = new List<Guid>();
+        var selected = new HashSet<Guid>();
+
+        void Add(Guid itemId)
         {
-            if (!children.TryGetValue(parentId, out var descendants)) continue;
-            foreach (var descendant in descendants) if (selected.Add(descendant.Id)) pending.Push(descendant.Id);
+            if (!selected.Add(itemId)) return;
+            ordered.Add(itemId);
+            if (!children.TryGetValue(itemId, out var descendants)) return;
+            foreach (var descendant in descendants.OrderBy(node => node.CreatedAt).ThenBy(node => node.Id))
+                Add(descendant.Id);
         }
-        return selected;
+
+        foreach (var root in roots) Add(root);
+        return ordered;
     }
 
-    internal sealed record Result(HashSet<Guid> ItemIds, int Total, int Page, int PageSize, int TotalPages, Summary Summary);
+    internal sealed record Result(HashSet<Guid> ItemIds, IReadOnlyList<Guid> OrderedItemIds,
+        int Total, int Page, int PageSize, int TotalPages, Summary Summary);
     internal sealed record Summary(int Active, int InProgress, int InReview, int Overdue);
-    private sealed record Node(Guid Id, Guid? ParentId, string? ParentTitle, Guid? AssignedUnitId, string Title, string Description, string? Recommendation, string? WorkItemTypeName, string? SourceTypeName, string? SenderName, string? SenderSiteName, string? SenderPersonName, string? UnitName, string CreatedBy, string? FinalReport, string Status, DateTimeOffset CreatedAt, DateTimeOffset? DueAt, bool IsOutgoingRequest, string? RequestProgressStatus, string? RequestResponse);
+    private sealed record Node(Guid Id, Guid? ParentId, string? ParentTitle, Guid? AssignedUnitId, string ReferenceCode, string? OriginReference, string Title, string Description, string? Recommendation, string? WorkItemTypeName, string? SourceTypeName, string? SenderName, string? SenderSiteName, string? SenderPersonName, string? UnitName, string CreatedBy, string? FinalReport, string Status, DateTimeOffset CreatedAt, DateTimeOffset? DueAt, bool IsOutgoingRequest, string? RequestProgressStatus, string? RequestResponse);
 }

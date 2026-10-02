@@ -10,7 +10,7 @@ internal static class ExecutionQueryEndpoints
 {
     internal static void Map(RouteGroupBuilder group)
     {
-        group.MapGet("/sites/{siteId:guid}", async (Guid siteId, int? page, Guid? focusItemId, ClaimsPrincipal user, FylkrenDbContext db, CancellationToken ct) =>
+        group.MapGet("/sites/{siteId:guid}", async (Guid siteId, int? page, Guid? focusItemId, string? sort, ClaimsPrincipal user, FylkrenDbContext db, CancellationToken ct) =>
         {
             const int pageSize = 20;
             if (!PersonId(user, out var personId) ||
@@ -46,14 +46,23 @@ internal static class ExecutionQueryEndpoints
             }
             var totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)pageSize));
             pageNumber = Math.Min(pageNumber, totalPages);
-            var items = await baseQuery
-                .OrderByDescending(x => x.CreatedAt)
-                .ThenBy(x => x.Id)
+            var orderedItems = sort switch
+            {
+                "oldest" => baseQuery.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id),
+                "name-asc" => baseQuery.OrderBy(x => x.Title).ThenBy(x => x.Id),
+                "name-desc" => baseQuery.OrderByDescending(x => x.Title).ThenBy(x => x.Id),
+                "reference-asc" => baseQuery.OrderBy(x => x.ReferenceCode).ThenBy(x => x.Id),
+                "reference-desc" => baseQuery.OrderByDescending(x => x.ReferenceCode).ThenBy(x => x.Id),
+                _ => baseQuery.OrderByDescending(x => x.CreatedAt).ThenBy(x => x.Id),
+            };
+            var items = await orderedItems
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .Select(x => new
                 {
                     x.Id,
+                    x.ReferenceCode,
+                    x.OriginReference,
                     x.ParentWorkItemId,
                     x.AssignedUnitId,
                     assignedUnitName = x.AssignedUnit == null ? null : x.AssignedUnit.Name,

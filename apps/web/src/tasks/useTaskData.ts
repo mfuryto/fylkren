@@ -4,7 +4,7 @@ import type { TaskSite, TaskUnit } from "../work/WorkContextModels";
 import type { WorkItem, WorkItemType } from "../work/WorkItemModels";
 import { getTaskContext, getWorkItemLookups, getWorkItems, getWorkItemTypes } from "./taskApi";
 
-export function useTaskData(onError: (message: string) => void, personId: string | undefined, preferredSiteId: string | undefined, query: { unitId: string; filter: string; search: string; page: number; focusItemId?: string }) {
+export function useTaskData(onError: (message: string) => void, personId: string | undefined, preferredSiteId: string | undefined, query: { unitId: string; filter: string; search: string; sort: string; page: number; focusItemId?: string }) {
   const [sites, setSites] = useState<TaskSite[]>([]);
   const [taskUnits, setTaskUnits] = useState<TaskUnit[]>([]);
   const [items, setItems] = useState<WorkItem[]>([]);
@@ -20,7 +20,7 @@ export function useTaskData(onError: (message: string) => void, personId: string
     if (!siteId) { setItems([]); return; }
     try { const result = await getWorkItems(siteId, query); setItems(result.items); setItemTotal(result.total); setItemPage(result.page); setItemSummary(result.summary); onError(""); }
     catch (problem) { onError(problem instanceof Error ? problem.message : translateActive("tasksTaskApiTasksCouldNotBeLoaded")); }
-  }, [onError, query.unitId, query.filter, query.search, query.page, query.focusItemId]);
+  }, [onError, query.unitId, query.filter, query.search, query.sort, query.page, query.focusItemId]);
 
   const loadTypes = useCallback(async (siteId: string) => {
     if (!siteId) { setTypes([]); return; }

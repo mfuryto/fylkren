@@ -12,12 +12,35 @@ internal static class WorkItemModelConfiguration
 {
     internal static void ConfigureWorkItems(this ModelBuilder modelBuilder)
     {
+        var platformReferences = modelBuilder.Entity<PlatformReferenceSettings>();
+        platformReferences.ToTable("platform_reference_settings");
+        platformReferences.HasKey(value => value.Key);
+        platformReferences.Property(value => value.Key).HasColumnName("key").ValueGeneratedNever();
+        platformReferences.Property(value => value.MinimumDigits).HasColumnName("minimum_digits").IsRequired();
+        platformReferences.Property(value => value.NextNumber).HasColumnName("next_number").IsConcurrencyToken();
+        platformReferences.Property(value => value.UpdatedAt).HasColumnName("updated_at").IsRequired();
+        platformReferences.Property(value => value.UpdatedBy).HasColumnName("updated_by");
+
+        var siteReferences = modelBuilder.Entity<SiteReferenceSettings>();
+        siteReferences.ToTable("site_reference_settings");
+        siteReferences.HasKey(value => value.SiteId);
+        siteReferences.Property(value => value.SiteId).HasColumnName("site_id").ValueGeneratedNever();
+        siteReferences.Property(value => value.Prefix).HasColumnName("prefix").HasMaxLength(12).IsRequired();
+        siteReferences.Property(value => value.UpdatedAt).HasColumnName("updated_at").IsRequired();
+        siteReferences.Property(value => value.UpdatedBy).HasColumnName("updated_by");
+        siteReferences.HasIndex(value => value.Prefix).IsUnique();
+        siteReferences.HasOne<Site>().WithOne().HasForeignKey<SiteReferenceSettings>(value => value.SiteId).OnDelete(DeleteBehavior.Restrict);
+
         var workItem = modelBuilder.Entity<WorkItem>();
         workItem.ToTable("work_items", table => table.HasCheckConstraint("CK_work_items_external_creator",
             "created_by_person_id IS NOT NULL OR NULLIF(BTRIM(sender_site_name), '') IS NOT NULL"));
         workItem.HasKey(value => value.Id);
         workItem.Property(value => value.Id).HasColumnName("id");
         workItem.Property(value => value.SiteId).HasColumnName("site_id");
+        workItem.Property(value => value.ReferenceCode).HasColumnName("reference_code").HasMaxLength(80).IsRequired();
+        workItem.Property(value => value.ReferenceNumber).HasColumnName("reference_number").IsRequired();
+        workItem.Property(value => value.OriginReference).HasColumnName("origin_reference").HasMaxLength(80);
+        workItem.Property(value => value.OriginReferenceInstanceId).HasColumnName("origin_reference_instance_id");
         workItem.Property(value => value.ParentWorkItemId).HasColumnName("parent_work_item_id");
         workItem.Property(value => value.WorkItemTypeId).HasColumnName("work_item_type_id");
         workItem.Property(value => value.SourceTypeId).HasColumnName("source_type_id");
@@ -50,6 +73,8 @@ internal static class WorkItemModelConfiguration
         workItem.Property(value => value.UpdatedAt).HasColumnName("updated_at");
         workItem.Property<uint>("xmin").IsRowVersion();
         workItem.HasIndex(value => new { value.SiteId, value.Status, value.DueAt });
+        workItem.HasIndex(value => value.ReferenceCode).IsUnique();
+        workItem.HasIndex(value => new { value.SiteId, value.ReferenceNumber });
         workItem.HasIndex(value => new { value.SiteId, value.Status, value.CreatedAt });
         workItem.HasIndex(value => new { value.SiteId, value.AssignedUnitId, value.Status, value.FinalReportApprovedAt });
         workItem.HasOne(value => value.Site).WithMany().HasForeignKey(value => value.SiteId).OnDelete(DeleteBehavior.Restrict);
@@ -65,10 +90,12 @@ internal static class WorkItemModelConfiguration
         workItemType.Property(x => x.SiteId).HasColumnName("site_id");
         workItemType.Property(x => x.Name).HasColumnName("name").HasMaxLength(100);
         workItemType.Property(x => x.NormalizedName).HasColumnName("normalized_name").HasMaxLength(100);
+        workItemType.Property(x => x.Abbreviation).HasColumnName("abbreviation").HasMaxLength(12);
         workItemType.Property(x => x.IsActive).HasColumnName("is_active");
         workItemType.Property(x => x.IsSystemManaged).HasColumnName("is_system_managed");
         workItemType.Property(x => x.CreatedAt).HasColumnName("created_at");
         workItemType.HasIndex(x => new { x.SiteId, x.NormalizedName }).IsUnique();
+        workItemType.HasIndex(x => new { x.SiteId, x.Abbreviation }).IsUnique();
         workItemType.HasOne(x => x.Site).WithMany().HasForeignKey(x => x.SiteId).OnDelete(DeleteBehavior.Restrict);
 
         var lookup = modelBuilder.Entity<WorkItemLookup>();

@@ -10,6 +10,7 @@ import { loadPlacementOptions, loadSites as fetchSites, mutateSiteAccess, search
 import { buildSiteHierarchy, filterSites } from "./siteHierarchy";
 import { SiteDialogs, type ManagerUserForm } from "./SiteDialogs";
 import { useTranslation } from "../localization/LocalizationProvider";
+import { ListSortControl, type ListSort } from "../components/ListSortControl";
 
 export function SitesPage({ configuration }: { configuration: PublicConfiguration }) {
   const t = useTranslation();
@@ -21,6 +22,7 @@ export function SitesPage({ configuration }: { configuration: PublicConfiguratio
   const [selectedManagerId, setSelectedManagerId] = useState("");
   const [managerQuery, setManagerQuery] = useState("");
   const [query, setQuery] = useState("");
+  const [sort,setSort]=useState<ListSort>("name-asc");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
@@ -211,7 +213,7 @@ export function SitesPage({ configuration }: { configuration: PublicConfiguratio
     setBusy(false);
   }
 
-  const { orderedSites, placementById, siteDepths, childSitesByParent } = buildSiteHierarchy(sites, placements);
+  const { orderedSites, placementById, siteDepths, childSitesByParent } = buildSiteHierarchy(sites, placements, sort === "name-desc" ? "desc" : "asc");
   const visibleSites = filterSites(orderedSites, placementById, query);
   const selectedSite = sites.find((site) => site.id === selectedSiteId);
   const selectedPlacement = selectedSite?.parentOrganizationUnitId
@@ -292,7 +294,7 @@ export function SitesPage({ configuration }: { configuration: PublicConfiguratio
       ) : (
         <div className="sites-layout">
           <section className="panel site-directory">
-            <div className="field">
+            <div className="inline-actions"><div className="field">
               <label htmlFor="site-search">{t("findSite")}</label>
               <input
                 id="site-search"
@@ -301,7 +303,7 @@ export function SitesPage({ configuration }: { configuration: PublicConfiguratio
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
               />
-            </div>
+            </div><ListSortControl id="site-directory-sort" value={sort} onChange={setSort} options={["name-asc","name-desc"]}/></div>
             <div className="site-tree" role="list">
               {visibleSites.map((site) => {
                 const placement = site.parentOrganizationUnitId

@@ -10,6 +10,8 @@ Once two installations have approved and tested each other and **Oppdragsrouting
 
 The receiving installation owns all internal assessment, planning, delegation and execution. The sender receives only coarse progress, cancellation handling and the approved official top-level response. Internal organization, people, plans, execution details and subordinate reports do not cross the boundary.
 
+The signed assignment includes the sender's display reference. The receiver allocates its own local root reference and shows the sender's value separately as **Origin reference**. Neither value is assumed globally unique: the signed origin instance/resource identity remains the protocol and idempotency boundary. The receiver's local child assignments extend its local reference family normally. Returned reports preserve the reference of the task that authored them.
+
 ## Responsibility and prerequisites
 
 Platform Manager performs all application setup on **Federation**. Site Managers do not configure federation. The menu and complete page remain visible without Enterprise, but a single **Requires an Enterprise license** notice disables mutations.

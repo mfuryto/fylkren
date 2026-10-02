@@ -2,6 +2,7 @@ import type { FormEvent } from "react";
 import type { TaskSite, TaskUnit } from "../work/WorkContextModels";
 import { availableReportYears } from "./reportFilters";
 import { useTranslation } from "../localization/LocalizationProvider";
+import { ListSortControl, type ListSort } from "../components/ListSortControl";
 
 type ReportToolbarProps = {
   sites: TaskSite[];
@@ -17,9 +18,11 @@ type ReportToolbarProps = {
   onYearChange: (year: string) => void;
   onSearchChange: (search: string) => void;
   onSubmit: (event: FormEvent) => void;
+  sort: ListSort;
+  onSortChange: (sort: ListSort) => void;
 };
 
-export function ReportToolbar({ sites, units, selectedSiteId, selectedUnitId, hasTopLevelAccess, year, years, search, onSiteChange, onUnitChange, onYearChange, onSearchChange, onSubmit }: ReportToolbarProps) {
+export function ReportToolbar({ sites, units, selectedSiteId, selectedUnitId, hasTopLevelAccess, year, years, search, sort, onSiteChange, onUnitChange, onYearChange, onSearchChange, onSortChange, onSubmit }: ReportToolbarProps) {
   const t = useTranslation();
   return <form className="panel report-toolbar" onSubmit={onSubmit}>
     {sites.length > 1 && <div className="field">
@@ -46,6 +49,7 @@ export function ReportToolbar({ sites, units, selectedSiteId, selectedUnitId, ha
       <label htmlFor="report-search">{t("search")}</label>
       <input id="report-search" type="search" value={search} placeholder={t("reportSearchPlaceholder")} onChange={event => onSearchChange(event.target.value)}/>
     </div>
+    <ListSortControl id="report-sort" value={sort} onChange={onSortChange} options={["newest", "oldest", "name-asc", "name-desc", "reference-asc", "reference-desc"]}/>
     <button className="primary-button" type="submit">{t("search")}</button>
   </form>;
 }

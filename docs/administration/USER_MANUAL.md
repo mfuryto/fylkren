@@ -72,7 +72,11 @@ Leaders also have a 12-month workload-history view based only on work recorded i
 ### Registering work
 
 Users with registration authority choose **New task** at their current level and provide title, description, optional recommendation, deadline, main-document reference and site-managed metadata such as task type, source type and sender.
-Task types default to newest first in both their management list and the new-task selector. Source types and senders default to alphabetical order in the active interface language. Each list exposes its available sort choices and direction. Deactivated values remain visible in management lists but are not offered for new tasks.
+Task types default to newest first in both their management list and the new-task selector. A Site Manager maintains them under **References**, where the abbreviation is shown in a separate column and a new type initially proposes the first three valid letters of its name. Source types and senders for manual registration are maintained under the separate **Intake** administration page and default to alphabetical order in the active interface language. A sender received through a request or federation remains an immutable snapshot on that task and is not automatically added to the Site registry. Deactivated values remain visible in management lists but are not offered for new tasks. Operational users can select these values but cannot change the registries.
+
+Every task receives a permanent operator-facing reference when it is created. The task type abbreviation is used when available, for example `INC-000123`; a Site-managed fallback code is used only when no task type is selected. Internal delegation and requests remain in the same reference family: the first child is `INC-000123-1`, its first child is `INC-000123-1-1`, and the next direct child is `INC-000123-2`. The reference is the first field on task, planning, execution and report rows. It is searchable and remains unchanged through planning, execution, approval, completion, reassignment, Site rename and configuration changes. A final report uses the exact reference of the task whose report it is.
+
+Site Managers maintain task types, their abbreviations and the fallback Site code under **References**. Platform Manager uses **References** to choose the minimum number of digits, advance the shared next unused number and inspect every Site fallback code. The number sequence is installation-wide and forward-only, so identical type abbreviations in different Sites cannot produce duplicate references. Intentional gaps are allowed and used numbers are never reused. Existing references are never rewritten by these settings.
 
 Recommendation is decision support for the first leader assessment only; it does not follow the task through later processing. Priority is a leader decision set when the task is accepted for handling.
 
@@ -99,6 +103,8 @@ Use **Versions and approvals** on a task to inspect approved plan, report and de
 ### Internal delegation
 
 Delegation creates a child assignment at the receiving level while the parent tracking task remains. The receiver can plan, execute and delegate further. The parent sees controlled status and eventually the receiver's approved final report.
+
+The child keeps the parent reference plus a concurrency-safe sibling number. The same rule applies to side requests and plan-created assignments, so every branch can be recognized without inspecting an internal UUID.
 
 When a task was created internally at a subordinate level, it stays in that level's task/action queue. Superior levels see recursive workload, not an ordinary duplicate task.
 
@@ -152,6 +158,8 @@ Each operational level writes its own final report after its execution and all d
 The author can inspect collapsed execution history and subordinate reports while writing. A qualified leader approves the report before completion. An approved report cannot be returned. Reporting proceeds upward one level at a time until the primary task closes.
 
 Reports are stored at the level that authored them and appear in a searchable, year-filtered, paginated report list. Printing/PDF starts at the top of the first page and repeats the report's full classification label in the header/footer of every page when present.
+
+The report header always includes the report author's local task reference. Federated inbound work also includes the signed external origin reference as a separate metadata field. Both references are retained in the archived report, print/PDF output, immutable approval version and Report API; customer-edited report body templates cannot remove this system metadata.
 
 Organization headers contain site plus the authoring unit path. For an official cross-site response, only the originating site is exposed. Both sender and receiver archive the accepted official response; the receiver copy acts as a receipt.
 
@@ -236,7 +244,7 @@ Classification definitions are created, ordered, edited, deleted and activated c
 
 Under **Appearance**, Platform Manager configures names, theme colors and logo. The **Custom CSS overrides** box below Logo accepts up to 20,000 characters and applies the saved rules after Fylkren's standard theme on every page, including sign-in. External resources through `url()` and `@import` are rejected so a style override cannot introduce an additional network dependency. Clearing the box and saving restores the standard CSS without changing the other appearance settings.
 
-The **Language and regional settings** box stores the platform defaults for UI language, IANA time zone, 12/24-hour clock and metric/imperial measurements. Changes apply immediately without restarting the server. American English is the source language and fallback, while British English and Norwegian Bokmal are reviewed alternatives. Sixteen additional complete preview catalogs can be selected for evaluation; the language roster identifies which packs still require native-language review. Timestamps remain stored in UTC, and changing presentation units never reinterprets stored values.
+The **Language and regional settings** box stores the platform defaults for UI language, IANA time zone, 12/24-hour clock and metric/imperial measurements. Changes apply immediately without restarting the server. American English is the source language and fallback. British English, Norwegian Bokmal and the sixteen additional languages in the maintained roster are complete bundled interface packs governed by the same automated acceptance rules. The selected language applies to the complete interface while the configured clock format independently controls time presentation. Timestamps remain stored in UTC, and changing presentation units never reinterprets stored values.
 
 ### Federation between installations
 

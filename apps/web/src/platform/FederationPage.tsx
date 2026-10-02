@@ -18,6 +18,7 @@ import {
   type FederationPeer, type FederationPeerDiscovery, type FederationRouting,
   type FederationRemoteSite,
 } from "./federationApi";
+import { ListSortControl, sortList, type ListSort } from "../components/ListSortControl";
 
 export function FederationPage({ canManage }: { canManage: boolean }) {
   const t = useTranslation();
@@ -39,6 +40,7 @@ export function FederationPage({ canManage }: { canManage: boolean }) {
   const [message, setMessage] = useState("");
   const [routingConfirmed, setRoutingConfirmed] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [localSiteSort,setLocalSiteSort]=useState<ListSort>("name-asc"),[remoteSiteSort,setRemoteSiteSort]=useState<ListSort>("name-asc"),[deliverySort,setDeliverySort]=useState<ListSort>("newest");
 
   const selected = peers.find(peer => peer.instanceId === selectedId);
   const topSites = sites.filter(site => site.isActive && site.parentOrganizationUnitId === null);
@@ -224,14 +226,14 @@ export function FederationPage({ canManage }: { canManage: boolean }) {
 
     {selected && <section id="federation-sites" className="panel stacked-form">
       <h2>{t("sites")}</h2>
-      <h3>{t("localTopLevelSites")}</h3>
+      <div className="section-heading"><h3>{t("localTopLevelSites")}</h3><ListSortControl id="federation-local-site-sort" value={localSiteSort} onChange={setLocalSiteSort} options={["name-asc","name-desc"]}/></div>
       <p className="muted">{t("localTopLevelSitesIntro")}</p>
       {topSites.length === 0 ? <p className="empty-state">{t("noActiveTopLevelSites")}</p> : <div className="admin-list">
-        {topSites.map(site => <div className="admin-list-row" key={site.id}><span><strong>{site.name}</strong><small>{t("automaticallyVisible")}</small></span></div>)}
+        {sortList(topSites,localSiteSort,{name:site=>site.name}).map(site => <div className="admin-list-row" key={site.id}><span><strong>{site.name}</strong><small>{t("automaticallyVisible")}</small></span></div>)}
       </div>}
-      <h3>{t("peerSites")}</h3>
+      <div className="section-heading"><h3>{t("peerSites")}</h3><ListSortControl id="federation-remote-site-sort" value={remoteSiteSort} onChange={setRemoteSiteSort} options={["name-asc","name-desc"]}/></div>
       {selected.isActive && selected.lastProofAt && <div><button className="secondary-button" type="button" disabled={busy || !canManage} onClick={() => void act(() => syncFederationCatalog(selectedId), t("siteCatalogueUpdated"), true)}>{t("refreshSiteCatalogue")}</button></div>}
-      <div className="admin-list">{remoteSites.length === 0 ? <p className="empty-state">{t("noRemoteSites")}</p> : remoteSites.map(site => <div className="admin-list-row" key={site.siteId}><span><strong>{site.name}</strong><small>{site.siteId} · {t("revision", { revision: site.catalogRevision })}</small></span><span>{site.isActive ? t("active") : t("withdrawn")}</span></div>)}</div>
+      <div className="admin-list">{remoteSites.length === 0 ? <p className="empty-state">{t("noRemoteSites")}</p> : sortList(remoteSites,remoteSiteSort,{name:site=>site.name}).map(site => <div className="admin-list-row" key={site.siteId}><span><strong>{site.name}</strong><small>{site.siteId} · {t("revision", { revision: site.catalogRevision })}</small></span><span>{site.isActive ? t("active") : t("withdrawn")}</span></div>)}</div>
     </section>}
 
     <section id="federation-routing" className="panel stacked-form">
@@ -259,8 +261,7 @@ export function FederationPage({ canManage }: { canManage: boolean }) {
     </section>
 
     {selected && <section className="panel stacked-form">
-      <h2>{t("deliveryQueue")}</h2>
-      <p className="muted">{t("deliveryQueueIntro")}</p>
+      <div className="section-heading"><div><h2>{t("deliveryQueue")}</h2><p className="muted">{t("deliveryQueueIntro")}</p></div><ListSortControl id="federation-delivery-sort" value={deliverySort} onChange={setDeliverySort}/></div>
       {deliveries && <div className="notification-delivery-summary">
         <span><strong>{deliveries.pending}</strong><small>{t("pending")}</small></span>
         <span><strong>{deliveries.retrying}</strong><small>{t("retrying")}</small></span>
@@ -268,7 +269,7 @@ export function FederationPage({ canManage }: { canManage: boolean }) {
         <span><strong>{deliveries.delivered}</strong><small>{t("delivered")}</small></span>
       </div>}
       {!deliveries || deliveries.items.length === 0 ? <p className="empty-state">{t("noFederationDeliveries")}</p> : <div className="admin-list">
-        {deliveries.items.map(delivery => <div className="admin-list-row notification-delivery-row" key={delivery.messageId}>
+        {sortList(deliveries.items,deliverySort,{name:delivery=>delivery.messageType,createdAt:delivery=>delivery.createdAt}).map(delivery => <div className="admin-list-row notification-delivery-row" key={delivery.messageId}>
           <span><strong>{delivery.messageType}</strong>
             <small>{t("createdMessage", { date: new Date(delivery.createdAt).toLocaleString(language), id: delivery.messageId })}</small>
             <small>{delivery.status === "delivered" && delivery.deliveredAt

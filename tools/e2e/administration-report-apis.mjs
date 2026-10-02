@@ -209,6 +209,8 @@ export async function testAdministrationReportApis({ platform, leader, siteId, c
   assert.ok(!topReports.body.items.some(value => value.id === classifiedTask.body.id), 'Classified report leaked without grant');
   const topDetail = await machineRequest(full.token, `${reports}/${topReportId}`);
   assert.equal(topDetail.status, 200, `Top report detail: ${JSON.stringify(topDetail.body)}`);
+  assert.ok(topDetail.body.referenceCode, 'Final-report detail omitted its local reference');
+  assert.ok(Object.hasOwn(topDetail.body, 'originReference'), 'Final-report detail omitted its external reference field');
   assert.deepEqual(topDetail.body.organizationPath, []);
   assert.equal((await machineRequest(full.token, `${reports}/${classifiedTask.body.id}`)).status, 404,
     'Classified report detail leaked without classified permission');

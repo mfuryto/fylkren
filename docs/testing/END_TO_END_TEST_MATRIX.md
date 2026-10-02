@@ -22,6 +22,16 @@ A scenario passes only when:
 
 A correct final status does not compensate for a defect during the chain. After a fix, rerun the complete affected scenario from clean fixtures, plus adjacent regression scenarios.
 
+### Permanent reference and list-ordering checks
+
+- create task types with explicit abbreviations and verify the management list defaults to newest first;
+- verify a new type proposes the first three valid letters in the Site Manager interface while still allowing an explicit abbreviation;
+- create root tasks in more than one Site and verify the installation-wide counter prevents duplicate references even when the same abbreviation is used;
+- create concurrent roots, sibling delegations, side requests and a deeper delegation; verify unique `TYPE-000001`, `TYPE-000001-1`, `TYPE-000001-2` and `TYPE-000001-1-1` shapes;
+- verify the same reference is searchable and displayed first in Tasks, Planning, Execution and Reports and retained in the final report;
+- verify a federated receiver preserves origin instance and origin reference while allocating its own local reference;
+- exercise every visible sort option against the complete result set, including paginated queues, and verify ordered process structures keep their configured semantic order.
+
 ## Standard fixture
 
 ```text

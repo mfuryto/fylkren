@@ -90,7 +90,7 @@ Before public publication, run `bash tools/security/verify-repository-safety.sh 
 
 - Repository documentation, source comments, test descriptions and examples are written in English.
 - `pnpm check:language` rejects Norwegian added outside dedicated non-English catalogs. `pnpm check:language:full` is the final migration gate and must pass before the release candidate is frozen.
-- UI localization is separate from repository language. American English (`en-US`) is the source catalog and mandatory fallback; the maintained language roster distinguishes reviewed packs from complete previews awaiting native review.
+- UI localization is separate from repository language. American English (`en-US`) is the source catalog and mandatory fallback; every language in the maintained roster is a complete bundled pack governed by the same automated acceptance rules.
 - Every user-visible text change must update every complete bundled language pack in the same commit; the maintained [language roster and pack requirements](product/LOCALIZATION.md) are authoritative.
 - Routes, API contracts, persistent identifiers and permalinks remain language-neutral.
 - Documentation must describe current behavior. Planned behavior belongs in the roadmap, and released changes belong in the changelog.

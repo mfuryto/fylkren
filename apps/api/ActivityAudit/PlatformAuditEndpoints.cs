@@ -8,7 +8,7 @@ public static class PlatformAuditEndpoints
     public static IEndpointRouteBuilder MapPlatformAuditEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("/api/platform-audit").RequireAuthorization(policy => policy.RequireRole("PlatformManager"));
-        group.MapGet("", async (string? eventType, string? search, int? page, FylkrenDbContext database, CancellationToken cancellationToken) =>
+        group.MapGet("", async (string? eventType, string? search, string? sort, int? page, FylkrenDbContext database, CancellationToken cancellationToken) =>
         {
             if (RequestQueryPolicy.Validate(page, search) is { } queryError) return queryError;
             var pageNumber = Math.Max(page ?? 1, 1);
@@ -69,22 +69,23 @@ public static class PlatformAuditEndpoints
             });
             var pageOffset = (pageNumber - 1) * pageSize;
             var candidateCount = pageOffset + pageSize;
-            var personCandidates = await personRows
-                .OrderByDescending(value => value.OccurredAt)
-                .ThenBy(value => value.Id)
+            var personOrdered = sort == "oldest"
+                ? personRows.OrderBy(value => value.OccurredAt).ThenBy(value => value.Id)
+                : personRows.OrderByDescending(value => value.OccurredAt).ThenBy(value => value.Id);
+            var machineOrdered = sort == "oldest"
+                ? machineRows.OrderBy(value => value.OccurredAt).ThenBy(value => value.Id)
+                : machineRows.OrderByDescending(value => value.OccurredAt).ThenBy(value => value.Id);
+            var personCandidates = await personOrdered
                 .Take(candidateCount)
                 .ToArrayAsync(cancellationToken);
-            var machineCandidates = await machineRows
-                .OrderByDescending(value => value.OccurredAt)
-                .ThenBy(value => value.Id)
+            var machineCandidates = await machineOrdered
                 .Take(candidateCount)
                 .ToArrayAsync(cancellationToken);
-            var rawRows = personCandidates.Concat(machineCandidates)
-                .OrderByDescending(value => value.OccurredAt)
-                .ThenBy(value => value.Id)
-                .Skip(pageOffset)
-                .Take(pageSize)
-                .ToArray();
+            var combined = personCandidates.Concat(machineCandidates);
+            var rawRows = (sort == "oldest"
+                    ? combined.OrderBy(value => value.OccurredAt).ThenBy(value => value.Id)
+                    : combined.OrderByDescending(value => value.OccurredAt).ThenBy(value => value.Id))
+                .Skip(pageOffset).Take(pageSize).ToArray();
             var personIds = rawRows.Where(value => value.ActorPersonId != null)
                 .Select(value => value.ActorPersonId!.Value).Distinct().ToArray();
             var machineIds = rawRows.Where(value => value.MachineIdentityId != null)

@@ -15,11 +15,13 @@ import { getTaskContext } from "../tasks/taskApi";
 import { TaskSideRequestDialog, type TaskSideRequestDraft } from "../tasks/TaskRoutingDialogs";
 import { useRequestRecipientSearch } from "../work/useRequestRecipientSearch";
 import type { ClassificationMarking } from "../components/ClassificationControls";
+import { ListSortControl, type ListSort } from "../components/ListSortControl";
 
 export function ExecutionPage({ session, language, classificationMarkings, permalink }: { session: Session; language: string; classificationMarkings: ClassificationMarking[]; permalink: AppLocation }) {
   const [helpOpen, setHelpOpen] = useState(false);
   const [openItemId, setOpenItemId] = useState<string | null>(null);
   const [queuePage, setQueuePage] = useState(1);
+  const [sort, setSort] = useState<ListSort>("newest");
   const [sites, setSites] = useState<TaskSite[]>([]);
   const [units, setUnits] = useState<TaskUnit[]>([]);
   const [siteId, setSiteId] = useState("");
@@ -59,7 +61,7 @@ export function ExecutionPage({ session, language, classificationMarkings, perma
   async function load(requestedPage = queuePage) {
     if (!siteId) return;
     try {
-      const parameters = new URLSearchParams({ page: String(requestedPage) });
+      const parameters = new URLSearchParams({ page: String(requestedPage), sort });
       if (permalink.itemId && requestedPage === 1) parameters.set("focusItemId", permalink.itemId);
       const data = await apiGet<{ items: ExecutionItem[]; definitions: ExecutionDefinition[]; managedItemIds: string[]; planContextIds?: Record<string, string>; total: number; page: number }>(`/api/execution/sites/${siteId}?${parameters}`, translateActive("workflowsExecutionPageTheExecutionQueueCouldNotBe"));
       setItems(data.items);
@@ -78,7 +80,7 @@ export function ExecutionPage({ session, language, classificationMarkings, perma
     setQueuePage(1);
     setOpenItemId(null);
   }, [siteId]);
-  useEffect(() => { void load(); }, [siteId, queuePage, permalink.itemId]);
+  useEffect(() => { void load(); }, [siteId, sort, queuePage, permalink.itemId]);
   useEffect(() => {
     if (!permalink.itemId || !items.some(item => item.id === permalink.itemId)) return;
     setOpenItemId(permalink.itemId); setExpandedItemId(permalink.itemId);
@@ -150,12 +152,12 @@ export function ExecutionPage({ session, language, classificationMarkings, perma
     />
     {error && <p className="status-message error-message">{error}</p>}
     {linkMessage && <p className="status-message" role="status">{linkMessage}</p>}
-    {sites.length > 1 && <section className="panel personnel-site"><div className="field">
+    <section className="panel personnel-site">{sites.length > 1 && <div className="field">
       <label htmlFor="execution-site">{translateActive("site")}</label>
       <select id="execution-site" value={siteId} onChange={event => setSiteId(event.target.value)}>
         {sites.map(site => <option key={site.siteId} value={site.siteId}>{site.name}</option>)}
       </select>
-    </div></section>}
+    </div>}<ListSortControl id="execution-sort" value={sort} onChange={value => { setSort(value); setQueuePage(1); }}/></section>
     <ExecutionQueueList
       items={items}
       totalItems={totalItems}

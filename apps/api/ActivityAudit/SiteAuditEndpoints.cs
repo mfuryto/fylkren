@@ -23,7 +23,7 @@ public static class SiteAuditEndpoints
             return Results.Ok(sites);
         });
 
-        group.MapGet("/sites/{siteId:guid}", async (Guid siteId, string? area, string? eventType, DateOnly? from, DateOnly? to, string? search, int? page, ClaimsPrincipal user, FylkrenDbContext database, CancellationToken cancellationToken) =>
+        group.MapGet("/sites/{siteId:guid}", async (Guid siteId, string? area, string? eventType, DateOnly? from, DateOnly? to, string? search, string? sort, int? page, ClaimsPrincipal user, FylkrenDbContext database, CancellationToken cancellationToken) =>
         {
             if (!PersonId(user, out var personId) || !await database.SiteManagerAssignments.AnyAsync(value => value.SiteId == siteId && value.PersonId == personId && value.IsActive && value.Site.IsActive, cancellationToken))
                 return Results.Problem(statusCode: 403);
@@ -48,7 +48,10 @@ public static class SiteAuditEndpoints
             var eventTypes = await database.AuditEvents.AsNoTracking().Where(value =>
                 value.SiteId == siteId && !value.ActorWasPlatformManager)
                 .Select(value => value.EventType).Distinct().OrderBy(value => value).ToListAsync(cancellationToken);
-            var rawRows = await query.OrderByDescending(value => value.OccurredAt).Skip((pageNumber - 1) * pageSize).Take(pageSize)
+            var ordered = sort == "oldest"
+                ? query.OrderBy(value => value.OccurredAt).ThenBy(value => value.Id)
+                : query.OrderByDescending(value => value.OccurredAt).ThenBy(value => value.Id);
+            var rawRows = await ordered.Skip((pageNumber - 1) * pageSize).Take(pageSize)
                 .Select(value => new
                 {
                     value.Id,

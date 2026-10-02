@@ -11,7 +11,9 @@ export type SiteHierarchy = {
 export function buildSiteHierarchy(
   sites: SiteSummary[],
   placements: PlacementOption[],
+  direction: "asc" | "desc" = "asc",
 ): SiteHierarchy {
+  const compare = (a: SiteSummary, b: SiteSummary) => compareActiveLanguage(a.name, b.name) * (direction === "desc" ? -1 : 1);
   const placementById = new Map(placements.map((placement) => [placement.id, placement]));
   const parentSiteBySite = new Map(
     sites.map((site) => [
@@ -31,7 +33,7 @@ export function buildSiteHierarchy(
     ]);
   });
   childSitesByParent.forEach((children) =>
-    children.sort((a, b) => compareActiveLanguage(a.name, b.name)),
+    children.sort(compare),
   );
 
   const siteById = new Map(sites.map((site) => [site.id, site]));
@@ -64,10 +66,10 @@ export function buildSiteHierarchy(
       const parentId = parentSiteBySite.get(site.id);
       return !parentId || !siteById.has(parentId);
     })
-    .sort((a, b) => compareActiveLanguage(a.name, b.name))
+    .sort(compare)
     .forEach(appendSiteBranch);
   [...sites]
-    .sort((a, b) => compareActiveLanguage(a.name, b.name))
+    .sort(compare)
     .forEach(appendSiteBranch);
 
   return { orderedSites, placementById, siteDepths, childSitesByParent };

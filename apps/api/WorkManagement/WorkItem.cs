@@ -6,14 +6,18 @@ namespace Fylkren.Api.WorkManagement;
 public sealed class WorkItem
 {
     private WorkItem() { }
-    public WorkItem(Guid id, Guid siteId, Guid? createdByPersonId, string title, string description, string? referenceUrl, string priority, DateTimeOffset? dueAt, DateTimeOffset createdAt, Guid? parentWorkItemId = null, Guid? workItemTypeId = null, Guid? sourceTypeId = null, Guid? senderId = null, string? recommendation = null, string? senderSiteName = null, string? senderPersonName = null, string? sourceTypeNameSnapshot = null, string? workItemTypeNameSnapshot = null, string? senderNameSnapshot = null, Guid? upstreamPlanWorkItemId = null, string? requestBasisSnapshot = null)
+    public WorkItem(Guid id, Guid siteId, Guid? createdByPersonId, string title, string description, string? referenceUrl, string priority, DateTimeOffset? dueAt, DateTimeOffset createdAt, Guid? parentWorkItemId = null, Guid? workItemTypeId = null, Guid? sourceTypeId = null, Guid? senderId = null, string? recommendation = null, string? senderSiteName = null, string? senderPersonName = null, string? sourceTypeNameSnapshot = null, string? workItemTypeNameSnapshot = null, string? senderNameSnapshot = null, Guid? upstreamPlanWorkItemId = null, string? requestBasisSnapshot = null, string? originReference = null, Guid? originReferenceInstanceId = null)
     {
         if (createdByPersonId is null && string.IsNullOrWhiteSpace(senderSiteName))
             throw new ArgumentException("An externally created work item requires a sender-site snapshot.");
-        Id = id; SiteId = siteId; ParentWorkItemId = parentWorkItemId; WorkItemTypeId = workItemTypeId; SourceTypeId = sourceTypeId; SenderId = senderId; SenderSiteName = senderSiteName; SenderPersonName = senderPersonName; SourceTypeNameSnapshot = sourceTypeNameSnapshot; WorkItemTypeNameSnapshot = workItemTypeNameSnapshot; SenderNameSnapshot = senderNameSnapshot; UpstreamPlanWorkItemId = upstreamPlanWorkItemId; RequestBasisSnapshot = string.IsNullOrWhiteSpace(requestBasisSnapshot) ? null : requestBasisSnapshot.Trim(); CreatedByPersonId = createdByPersonId; Title = title.Trim(); Description = description.Trim(); Recommendation = string.IsNullOrWhiteSpace(recommendation) ? null : recommendation.Trim(); ReferenceUrl = string.IsNullOrWhiteSpace(referenceUrl) ? null : referenceUrl.Trim(); Priority = priority; DueAt = dueAt; Status = "registered"; CreatedAt = createdAt; UpdatedAt = createdAt;
+        Id = id; SiteId = siteId; ParentWorkItemId = parentWorkItemId; WorkItemTypeId = workItemTypeId; SourceTypeId = sourceTypeId; SenderId = senderId; SenderSiteName = senderSiteName; SenderPersonName = senderPersonName; SourceTypeNameSnapshot = sourceTypeNameSnapshot; WorkItemTypeNameSnapshot = workItemTypeNameSnapshot; SenderNameSnapshot = senderNameSnapshot; UpstreamPlanWorkItemId = upstreamPlanWorkItemId; RequestBasisSnapshot = string.IsNullOrWhiteSpace(requestBasisSnapshot) ? null : requestBasisSnapshot.Trim(); OriginReference = string.IsNullOrWhiteSpace(originReference) ? null : originReference.Trim().ToUpperInvariant(); OriginReferenceInstanceId = originReferenceInstanceId; CreatedByPersonId = createdByPersonId; Title = title.Trim(); Description = description.Trim(); Recommendation = string.IsNullOrWhiteSpace(recommendation) ? null : recommendation.Trim(); ReferenceUrl = string.IsNullOrWhiteSpace(referenceUrl) ? null : referenceUrl.Trim(); Priority = priority; DueAt = dueAt; Status = "registered"; CreatedAt = createdAt; UpdatedAt = createdAt;
     }
     public Guid Id { get; private set; }
     public Guid SiteId { get; private set; }
+    public string ReferenceCode { get; private set; } = string.Empty;
+    public long ReferenceNumber { get; private set; }
+    public string? OriginReference { get; private set; }
+    public Guid? OriginReferenceInstanceId { get; private set; }
     public Guid? ParentWorkItemId { get; private set; }
     public Guid? WorkItemTypeId { get; private set; }
     public Guid? SourceTypeId { get; private set; }
@@ -56,6 +60,15 @@ public sealed class WorkItem
     public Person? CreatedByPerson { get; private set; }
     public Person? FinalReportWrittenByPerson { get; private set; }
     public Person? FinalReportApprovedByPerson { get; private set; }
+    internal void AssignReference(string referenceCode, long referenceNumber)
+    {
+        if (!string.IsNullOrEmpty(ReferenceCode) || ReferenceNumber != 0)
+            throw new InvalidOperationException("A task reference is immutable once assigned.");
+        if (string.IsNullOrWhiteSpace(referenceCode) || referenceCode.Length > 80 || referenceNumber < 1)
+            throw new ArgumentOutOfRangeException(nameof(referenceCode));
+        ReferenceCode = referenceCode;
+        ReferenceNumber = referenceNumber;
+    }
     public static WorkItem CreateDelegated(Guid id, WorkItem parent, Guid createdByPersonId, Guid assignedUnitId, string assignedUnitName, string instruction, DateTimeOffset createdAt, string? requestBasisSnapshot = null)
     {
         var child = new WorkItem(id, parent.SiteId, createdByPersonId, parent.Title, instruction, parent.ReferenceUrl, parent.Priority, parent.DueAt, createdAt, parent.Id, parent.WorkItemTypeId, parent.SourceTypeId, parent.SenderId, recommendation: parent.Recommendation, requestBasisSnapshot: requestBasisSnapshot ?? parent.RequestBasisSnapshot);

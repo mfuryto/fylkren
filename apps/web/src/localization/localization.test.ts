@@ -53,10 +53,32 @@ describe("localization catalogs", () => {
     expect(twentyFourHour).not.toMatch(/AM|PM/i);
   });
 
+  it("keeps the selected translation catalog when the clock format extends the locale", () => {
+    const swedishDisplayLocale = regionalDisplayLocale("sv-SE", "24-hour");
+    const danishDisplayLocale = regionalDisplayLocale("da-DK", "12-hour");
+
+    expect(normalizeLanguage(swedishDisplayLocale)).toBe("sv-SE");
+    expect(normalizeLanguage(danishDisplayLocale)).toBe("da-DK");
+    expect(translate(swedishDisplayLocale, "tasksTaskPageHeaderReceiptAssessmentAndFollowUpOf")).toBe(
+      translate("sv-SE", "tasksTaskPageHeaderReceiptAssessmentAndFollowUpOf"),
+    );
+    expect(translate(danishDisplayLocale, "tasksTasksPageNoAvailableSites")).toBe(
+      translate("da-DK", "tasksTasksPageNoAvailableSites"),
+    );
+    expect(translate(swedishDisplayLocale, "tasksTaskPageHeaderReceiptAssessmentAndFollowUpOf")).not.toBe(
+      translate("en-US", "tasksTaskPageHeaderReceiptAssessmentAndFollowUpOf"),
+    );
+    expect(translate(danishDisplayLocale, "tasksTasksPageNoAvailableSites")).not.toBe(
+      translate("en-US", "tasksTasksPageNoAvailableSites"),
+    );
+  });
+
   it("provides working date, number, plural and sorting behavior for every locale", () => {
     const instant = new Date("2026-10-01T18:30:00Z");
     for (const language of supportedLanguages) {
       const locale = regionalDisplayLocale(language, "24-hour");
+      expect(normalizeLanguage(locale)).toBe(language);
+      expect(translate(locale, "loading")).toBe(translate(language, "loading"));
       expect(new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "UTC" }).format(instant)).not.toHaveLength(0);
       expect(new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(1234.5)).not.toHaveLength(0);
       expect(new Intl.PluralRules(locale).select(2)).toMatch(/^(zero|one|two|few|many|other)$/);

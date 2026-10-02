@@ -65,6 +65,7 @@ internal static class SideRequestCreationEndpoints
                     if (recipient is null) return Results.ValidationProblem(new Dictionary<string, string[]> { ["targetSiteId"] = ["Select another active site that is not subordinate to the sender's site."] });
                 }
             }
+            await using var transaction = await db.Database.BeginTransactionAsync(ct);
             var requestType = await db.WorkItemTypes.SingleAsync(x => x.SiteId == siteId && x.IsSystemManaged, ct);
             var now = DateTimeOffset.UtcNow;
             var sourceSite = await db.Sites.SingleAsync(x => x.Id == siteId, ct);
@@ -76,7 +77,7 @@ internal static class SideRequestCreationEndpoints
                 .OrderByDescending(x => x.StartedAt)
                 .FirstOrDefaultAsync(ct);
             var requestBasis = approvedPlan is null
-                ? $"# Task basis\n\n## Primary task description\n{source.Description}" + (string.IsNullOrWhiteSpace(source.ReferenceUrl) ? "" : $"\n\nHoveddokument: {source.ReferenceUrl}")
+                ? $"# Task basis\n\n## Primary task description\n{source.Description}" + (string.IsNullOrWhiteSpace(source.ReferenceUrl) ? "" : $"\n\nPrimary document: {source.ReferenceUrl}")
                 : await PlanningApprovalService.BuildRequestBasis(approvedPlan, db, ct);
             var tracking = new WorkItem(Guid.NewGuid(), siteId, personId, title, description,
                 source.ReferenceUrl, source.Priority, source.DueAt, now, source.Id, requestType.Id,
@@ -106,7 +107,8 @@ internal static class SideRequestCreationEndpoints
                 db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), received.SiteId, personId, internalRecipient is null ? "work-item.request-received" : "work-item.internal-request-received", "work-item", received.Id, now));
             }
             await db.SaveChangesAsync(ct);
-            return Results.Created($"/api/work/sites/{siteId}/items/{tracking.Id}", new { tracking.Id });
+            await transaction.CommitAsync(ct);
+            return Results.Created($"/api/work/sites/{siteId}/items/{tracking.Id}", new { tracking.Id, tracking.ReferenceCode });
         });
     }
 }

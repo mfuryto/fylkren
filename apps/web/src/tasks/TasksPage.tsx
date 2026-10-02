@@ -10,7 +10,6 @@ import { TaskPlanDialog, TaskWorkContextDialog } from "./TaskContextDialogs";
 import { PlanDecisionDialog, ReviewDecisionDialog, TaskDecisionDialog, type PlanDecision } from "./TaskDecisionDialogs";
 import type { ChildHistory } from "./TaskDelegationTree";
 import { TaskFinalReportDialog, type FinalReportEditor } from "./TaskFinalReportDialog";
-import { TaskLookupManagerDialog, TaskTypeManagerDialog, type TaskLookupDraft } from "./TaskLookupDialogs";
 import { TaskPageHeader } from "./TaskPageHeader";
 import { TaskQueueControls } from "./TaskQueueControls";
 import { TaskQueueList } from "./TaskQueueList";
@@ -29,6 +28,7 @@ import { useTaskData } from "./useTaskData";
 import { useTaskPlanDetails } from "./useTaskPlanDetails";
 import { copyPermalink, navigateToLocation, type AppLocation } from "../navigation/permalinks";
 import { errorMessage } from "../api/errors";
+import type { ListSort } from "../components/ListSortControl";
 export function TasksPage({ personId, language: displayLanguage, timeZone: displayTimeZone, classificationMarkings, permalink }: { personId?: string; language: string; timeZone: string; classificationMarkings: ClassificationMarking[]; permalink: AppLocation }) {
   function ClassificationControls({ value, onChange }: { value: string; onChange: (value: string) => void }) {
     return <ClassificationControlFields value={value} onChange={onChange} markings={classificationMarkings} />;
@@ -39,14 +39,13 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
   const [selectedUnitId, setSelectedUnitId] = useState("");
   const [filter, setFilter] = useState("active");
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<ListSort>("newest");
   const [appliedSearch, setAppliedSearch] = useState("");
   const [creatorOpen, setCreatorOpen] = useState(false);
   const [form, setForm] = useState<TaskCreateDraft>(emptyTaskCreateDraft);
   const [requestRecipientQuery, setRequestRecipientQuery] = useState("");
   const [sideRequest, setSideRequest] = useState<TaskSideRequestDraft | null>(null);
   const [sideRequestRecipientQuery, setSideRequestRecipientQuery] = useState("");
-  const [typeManagerOpen, setTypeManagerOpen] = useState(false);
-  const [lookupManager, setLookupManager] = useState<"source-type" | "sender" | null>(null);
   const [delegation, setDelegation] = useState<TaskDelegationDraft | null>(null);
   const [reassignment, setReassignment] = useState<TaskReassignmentDraft | null>(null);
   const [details, setDetails] = useState<{ data: WorkItemDetails } | null>(null);
@@ -56,12 +55,6 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
   const [riskItem, setRiskItem] = useState<WorkItem | null>(null);
   const [versionItem, setVersionItem] = useState<WorkItem | null>(null);
   const [childHistory, setChildHistory] = useState<Record<string, ChildHistory>>({});
-  const [typeForm, setTypeForm] = useState<TaskLookupDraft>({
-    id: "",
-    name: "",
-    isActive: true,
-  });
-  const [lookupForm, setLookupForm] = useState<TaskLookupDraft>({ id: "", name: "", isActive: true });
   const [decision, setDecision] = useState<{
     item: WorkItem;
     status: "assigned" | "on_hold" | "rejected" | "cancelled";
@@ -75,13 +68,14 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [linkMessage, setLinkMessage] = useState("");
-  const { sites, taskUnits, items, itemTotal, itemPage, itemSummary, types, sourceTypes, senders, selectedSiteId, setSelectedSiteId, loadItems, loadTypes, loadLookups } = useTaskData(setError, personId, permalink.siteId, { unitId: selectedUnitId, filter, search: appliedSearch, page: queuePage, focusItemId: permalink.itemId });
+  const { sites, taskUnits, items, itemTotal, itemPage, itemSummary, types, sourceTypes, senders, selectedSiteId, setSelectedSiteId, loadItems } = useTaskData(setError, personId, permalink.siteId, { unitId: selectedUnitId, filter, search: appliedSearch, sort, page: queuePage, focusItemId: permalink.itemId });
   const { planDetails, clearPlanDetails } = useTaskPlanDetails(selectedSiteId, openItemId, items, setError);
   useEffect(() => { const timer = window.setTimeout(() => setAppliedSearch(search.trim()), 250); return () => window.clearTimeout(timer); }, [search]);
   useEffect(() => { if (itemPage !== queuePage) setQueuePage(itemPage); }, [itemPage, queuePage]);
   useEffect(() => {
     setSelectedUnitId("");
   }, [selectedSiteId]);
+  useEffect(() => { setQueuePage(1); }, [sort]);
   const selectedSite = sites.find((site) => site.siteId === selectedSiteId);
   const requestTypeSelected = types.some((type) => type.id === form.workItemTypeId && type.isSystemManaged);
   const [requestRecipients, setRequestRecipients] = useRequestRecipientSearch({
@@ -161,14 +155,6 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
       onSuccess: () => { setForm(emptyTaskCreateDraft()); setRequestRecipientQuery(""); setRequestRecipients([]); setCreatorOpen(false); },
       refresh: () => loadItems(selectedSiteId),
     });
-  }
-  async function saveType(event: React.FormEvent) {
-    event.preventDefault();
-    await executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/types${typeForm.id ? `/${typeForm.id}` : ""}`, method: typeForm.id ? "PUT" : "POST", body: { name: typeForm.name, isActive: typeForm.isActive }, fallback: translateActive("tasksTasksPageTheTaskTypeCouldNotBe"), onSuccess: () => setTypeForm({ id: "", name: "", isActive: true }), refresh: () => loadTypes(selectedSiteId) });
-  }
-  async function saveLookup(event: React.FormEvent) {
-    event.preventDefault(); if (!lookupManager) return;
-    await executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/lookups/${lookupManager}${lookupForm.id ? `/${lookupForm.id}` : ""}`, method: lookupForm.id ? "PUT" : "POST", body: { name: lookupForm.name, isActive: lookupForm.isActive }, fallback: translateActive("tasksTasksPageTheValueCouldNotBeSaved"), onSuccess: () => setLookupForm({ id: "", name: "", isActive: true }), refresh: () => loadLookups(selectedSiteId) });
   }
   async function delegateItem(event: React.FormEvent) {
     event.preventDefault();
@@ -334,13 +320,9 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
     <div className="page">
       <TaskPageHeader
         helpOpen={helpOpen}
-        isSiteManager={Boolean(selectedSite?.isSiteManager)}
         canCreate={Boolean(canManageScope || (!selectedUnitId && selectedSite?.hasTopLevelAccess))}
         onHelpOpen={() => setHelpOpen(true)}
         onHelpClose={() => setHelpOpen(false)}
-        onTypeManagerOpen={() => setTypeManagerOpen(true)}
-        onSourceTypeManagerOpen={() => { setLookupManager("source-type"); setLookupForm({ id: "", name: "", isActive: true }); }}
-        onSenderManagerOpen={() => { setLookupManager("sender"); setLookupForm({ id: "", name: "", isActive: true }); }}
         onCreate={() => setCreatorOpen(true)}
       />
       {error && (
@@ -360,7 +342,7 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
         </section>
       ) : (
         <>
-          <TaskQueueControls sites={sites} selectedSite={selectedSite} selectedSiteId={selectedSiteId} setSelectedSiteId={setSelectedSiteId} selectedUnitId={selectedUnitId} setSelectedUnitId={setSelectedUnitId} selectableUnits={selectableUnits} taskLevelCount={taskLevelCount} filter={filter} setFilter={setFilter} search={search} setSearch={setSearch} summary={itemSummary} />
+          <TaskQueueControls sites={sites} selectedSite={selectedSite} selectedSiteId={selectedSiteId} setSelectedSiteId={setSelectedSiteId} selectedUnitId={selectedUnitId} setSelectedUnitId={setSelectedUnitId} selectableUnits={selectableUnits} taskLevelCount={taskLevelCount} filter={filter} setFilter={setFilter} search={search} setSearch={setSearch} sort={sort} setSort={setSort} summary={itemSummary} />
           <TaskQueueList
             items={items} visibleItems={topLevelVisibleItems} totalItems={itemTotal} page={queuePage}
             openItemId={openItemId} language={displayLanguage} timeZone={displayTimeZone} busy={busy} history={childHistory} planDetails={planDetails}
@@ -417,30 +399,6 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
           busy={busy}
           onClose={() => setCreatorOpen(false)}
           onSubmit={createItem}
-        />
-      )}
-      {typeManagerOpen && (
-        <TaskTypeManagerDialog
-          form={typeForm}
-          setForm={setTypeForm}
-          types={types}
-          busy={busy}
-          onSubmit={saveType}
-          onClose={() => {
-            setTypeManagerOpen(false);
-            setTypeForm({ id: "", name: "", isActive: true });
-          }}
-        />
-      )}
-      {lookupManager && (
-        <TaskLookupManagerDialog
-          kind={lookupManager}
-          form={lookupForm}
-          setForm={setLookupForm}
-          values={lookupManager === "source-type" ? sourceTypes : senders}
-          busy={busy}
-          onSubmit={saveLookup}
-          onClose={() => setLookupManager(null)}
         />
       )}
       {delegation && (

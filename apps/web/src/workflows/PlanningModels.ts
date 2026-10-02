@@ -87,6 +87,8 @@ export type PlanningRun = {
   ancestors: Array<{ id: string; title: string; distance: number }>;
   item: {
     id: string;
+    referenceCode: string;
+    originReference: string | null;
     parentWorkItemId: string | null;
     parentTitle: string | null;
     parentDescription: string | null;

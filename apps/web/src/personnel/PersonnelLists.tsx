@@ -6,6 +6,8 @@ import type {
 } from "../siteAdmin/models";
 import type { PersonnelUnit } from "./personnelHierarchy";
 import { useLanguage, useTranslation } from "../localization/LocalizationProvider";
+import { useState } from "react";
+import { ListSortControl, sortList, type ListSort } from "../components/ListSortControl";
 
 type Props = {
   access: AccessSummary;
@@ -32,6 +34,7 @@ export function PersonnelLists({
 }: Props) {
   const t = useTranslation();
   const language = useLanguage();
+  const [memberSort,setMemberSort]=useState<ListSort>("name-asc"),[roleSort,setRoleSort]=useState<ListSort>("name-asc");
   const knownUnitIds = new Set(units.map(({ unit }) => unit.id));
   const unplacedMembers = access.members.filter(
     (member) =>
@@ -116,12 +119,12 @@ export function PersonnelLists({
       <section className="panel personnel-list">
         <div className="section-heading">
           <h2>{t("users")}</h2>
-          <span className="muted">{access.members.length}</span>
+          <div className="inline-actions"><ListSortControl id="personnel-user-sort" value={memberSort} onChange={setMemberSort} options={["name-asc","name-desc"]}/><span className="muted">{access.members.length}</span></div>
         </div>
         {units.flatMap(({ unit, depth }) => {
-          const members = access.members.filter(
+          const members = sortList(access.members.filter(
             (member) => member.organizationUnitId === unit.id,
-          );
+          ),memberSort,{name:member=>member.displayName},language);
           if (!members.length) return [];
           return [
             <div
@@ -146,23 +149,18 @@ export function PersonnelLists({
               <strong>{t("withoutActiveUnit")}</strong>
               <span className="muted">{t("moveUserToActiveUnit")}</span>
             </div>
-            {unplacedMembers.map(renderMember)}
+            {sortList(unplacedMembers,memberSort,{name:member=>member.displayName},language).map(renderMember)}
           </>
         )}
       </section>
       <section className="panel role-list">
         <div className="section-heading">
           <h2>{t("roles")}</h2>
-          <span className="muted">{access.roles.length}</span>
+          <div className="inline-actions"><ListSortControl id="personnel-role-sort" value={roleSort} onChange={setRoleSort} options={["name-asc","name-desc"]}/><span className="muted">{access.roles.length}</span></div>
         </div>
         {units.flatMap(({ unit, depth }) => {
-          const roles = access.roles
-            .filter((role) => role.organizationUnitId === unit.id)
-            .sort(
-              (left, right) =>
-                Number(right.isLeader) - Number(left.isLeader) ||
-                left.name.localeCompare(right.name, language),
-            );
+          const roles = sortList(access.roles
+            .filter((role) => role.organizationUnitId === unit.id),roleSort,{name:role=>role.name},language);
           const membersWithoutRole = access.members.filter(
             (member) =>
               member.organizationUnitId === unit.id &&

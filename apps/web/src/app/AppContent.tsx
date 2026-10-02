@@ -33,6 +33,8 @@ const SitesPage = lazy(() => import("../sites/SitesPage").then((module) => ({ de
 const OrganizationPage = lazy(() => import("../organization/OrganizationPage").then((module) => ({ default: module.OrganizationPage })));
 const PersonnelPage = lazy(() => import("../personnel/PersonnelPage").then((module) => ({ default: module.PersonnelPage })));
 const ProfilePage = lazy(() => import("../profile/ProfilePage").then((module) => ({ default: module.ProfilePage })));
+const ReferenceSettingsPage = lazy(() => import("../references/ReferenceSettingsPage").then((module) => ({ default: module.ReferenceSettingsPage })));
+const SourcesPage = lazy(() => import("../sources/SourcesPage").then((module) => ({ default: module.SourcesPage })));
 
 export function preloadOperationalPages() {
   void Promise.allSettled([
@@ -88,6 +90,9 @@ export function AppContent({
   if (effectiveItem === "Templates" && session.managesSites) return <TemplatesPage />;
   if (effectiveItem === "Identity" && session.isPlatformManager)
     return <IdentityProvidersPage language={language} timeZone={timeZone} canManageExternalIdentity={configuration.entitlements.includes("external-identity")} />;
+  if (effectiveItem === "References" && (session.isPlatformManager || session.managesSites))
+    return <ReferenceSettingsPage isPlatformManager={session.isPlatformManager} />;
+  if (effectiveItem === "Sources" && session.managesSites) return <SourcesPage />;
   if (effectiveItem === "API" && session.isPlatformManager)
     return <PlatformApiPage language={language} timeZone={timeZone} entitlements={configuration.entitlements} />;
   if (effectiveItem === "Federation" && session.isPlatformManager)

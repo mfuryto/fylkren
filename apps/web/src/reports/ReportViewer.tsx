@@ -6,6 +6,8 @@ import { useTranslation } from "../localization/LocalizationProvider";
 
 export type ArchivedReport = {
   id: string;
+  referenceCode: string;
+  originReference: string | null;
   siteName: string;
   organizationPath: string[];
   title: string;
@@ -44,6 +46,8 @@ export function ReportViewer({ report, language, timeZone, classificationMarking
       <h1>{report.siteName}</h1>
       {report.organizationPath.map((name, index) => createElement(`h${Math.min(index + 2, 6)}`, { key: `${index}-${name}`, className: "report-organization-heading" }, name))}
       <dl className="report-metadata">
+        <div><dt>{t("referenceLabel")}</dt><dd>{report.referenceCode}</dd></div>
+        {report.originReference && <div><dt>{t("originReferenceLabel")}</dt><dd>{report.originReference}</dd></div>}
         <div><dt>{t("workItemLabel")}</dt><dd>{report.title}</dd></div>
         <div><dt>{t("dateLabel")}</dt><dd>{date(report.reportCreatedAt)}</dd></div>
         <div><dt>{t("workReceived")}</dt><dd>{date(report.workReceivedAt)}</dd></div>

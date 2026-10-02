@@ -7,7 +7,7 @@ namespace Fylkren.Api.Federation;
 // sender's local users, units, lookup IDs, plans and internal history do not.
 internal sealed record FederationAssignmentPayload(string Kind, string Title, string Instruction,
     string Priority, DateTimeOffset? DueAt, string? RequestBasis,
-    string? SourceTypeName, string? SenderName);
+    string? SourceTypeName, string? SenderName, string? ReferenceCode = null);
 
 internal static class FederationAssignmentContract
 {
@@ -34,7 +34,8 @@ internal static class FederationAssignmentContract
                 payload.Priority is not ("low" or "normal" or "high" or "critical") ||
                 payload.RequestBasis is { Length: > 100_000 } ||
                 payload.SourceTypeName is { Length: > 200 } ||
-                payload.SenderName is { Length: > 200 })
+                payload.SenderName is { Length: > 200 } ||
+                payload.ReferenceCode is { Length: > 80 })
             {
                 payload = null;
                 return false;

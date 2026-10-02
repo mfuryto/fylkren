@@ -212,11 +212,11 @@ function App() {
   const navigationLabels: Record<AppPage, Parameters<typeof translate>[1]> = {
     Overview: "navOverview", Tasks: "navTasks", Workload: "navWorkload",
     Planning: "navPlanning", Execution: "navExecution", Reports: "navReports",
-    Platform: "navPlatform", Sites: "navSites", Identity: "navIdentity",
+    Platform: "navPlatform", Sites: "navSites", Identity: "navIdentity", References: "navReferences",
     Classifications: "navClassification", API: "navApi", Federation: "navFederation",
     License: "navLicense", Email: "navEmail", Appearance: "navAppearance",
     Audit: "navAudit", Organization: "navOrganization", Personnel: "navPersonnel",
-    Workflows: "navWorkflows", Templates: "navTemplates", Notifications: "navNotifications",
+    Sources: "navIntakeSettings", Workflows: "navWorkflows", Templates: "navTemplates", Notifications: "navNotifications",
     Profile: "profile",
   };
 

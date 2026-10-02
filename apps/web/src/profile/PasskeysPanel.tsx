@@ -6,6 +6,7 @@ import {
   type PasskeySummary,
 } from "../api/authClient";
 import { useTranslation } from "../localization/LocalizationProvider";
+import { ListSortControl, sortList, type ListSort } from "../components/ListSortControl";
 
 export function PasskeysPanel() {
   const t = useTranslation();
@@ -13,6 +14,7 @@ export function PasskeysPanel() {
   const [name, setName] = useState(() => t("defaultPasskeyName"));
   const [currentPassword, setCurrentPassword] = useState("");
   const [error, setError] = useState("");
+  const [sort, setSort] = useState<ListSort>("newest");
 
   async function load() {
     setKeys(await listPasskeys());
@@ -53,7 +55,7 @@ export function PasskeysPanel() {
 
   return (
     <section className="panel stacked-form two-factor-panel">
-      <h2>{t("passkeys")}</h2>
+      <div className="section-heading"><h2>{t("passkeys")}</h2><ListSortControl id="passkey-sort" value={sort} onChange={setSort} options={["newest", "oldest", "name-asc", "name-desc"]}/></div>
       <p>{t("passkeysIntro")}</p>
       {error && <p className="error-message">{error}</p>}
       <div className="field">
@@ -85,7 +87,7 @@ export function PasskeysPanel() {
       >
         {t("addPasskey")}
       </button>
-      {keys.map((key) => (
+      {sortList(keys, sort, { name: key => key.name, createdAt: key => key.createdAt }).map((key) => (
         <div className="type-row" key={key.id}>
           <span>
             <strong>{key.name}</strong>

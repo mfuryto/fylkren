@@ -1,5 +1,6 @@
 import { translateActive } from "../localization";
 import type { TaskSite } from "../work/WorkContextModels";
+import { ListSortControl, type ListSort } from "../components/ListSortControl";
 
 type PlanningScopeControlsProps = {
   sites: TaskSite[];
@@ -8,6 +9,8 @@ type PlanningScopeControlsProps = {
   levelFilter: string;
   onSiteChange: (siteId: string) => void;
   onLevelChange: (levelId: string) => void;
+  sort: ListSort;
+  onSortChange: (sort: ListSort) => void;
 };
 
 export function PlanningScopeControls({
@@ -17,9 +20,9 @@ export function PlanningScopeControls({
   levelFilter,
   onSiteChange,
   onLevelChange,
+  sort,
+  onSortChange,
 }: PlanningScopeControlsProps) {
-  if (sites.length <= 1 && levels.length <= 1) return null;
-
   return <section className="panel personnel-site">
     {sites.length > 1 && <div className="field">
       <label htmlFor="planning-site">{translateActive("site")}</label>
@@ -34,5 +37,6 @@ export function PlanningScopeControls({
         {levels.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
       </select>
     </div>}
+    <ListSortControl id="planning-sort" value={sort} onChange={onSortChange} options={["newest", "oldest", "name-asc", "name-desc", "reference-asc", "reference-desc"]}/>
   </section>;
 }

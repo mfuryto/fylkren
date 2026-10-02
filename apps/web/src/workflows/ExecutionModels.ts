@@ -31,6 +31,8 @@ export type ExecutionRun = {
 
 export type ExecutionItem = {
   id: string;
+  referenceCode: string;
+  originReference: string | null;
   parentWorkItemId: string | null;
   assignedUnitId: string | null;
   assignedUnitName: string | null;

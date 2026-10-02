@@ -51,7 +51,7 @@ public static class OrganizationEndpoints
             var siteRoot = new OrganizationUnit(Guid.NewGuid(), site.Id, null, site.Name, false, now, true);
             database.Sites.Add(site);
             database.OrganizationUnits.Add(siteRoot);
-            DefaultSiteWorkConfiguration.Add(database, site.Id, now);
+            DefaultSiteWorkConfiguration.Add(database, site.Id, site.Name, now);
             database.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), site.Id, actorPersonId, "site.created", "site", site.Id, now));
             await database.SaveChangesAsync(cancellationToken);
             await capacity.CommitAsync(cancellationToken);

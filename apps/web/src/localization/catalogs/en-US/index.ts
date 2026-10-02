@@ -14,8 +14,14 @@ import { workTemplatesEn } from "./sections/workTemplates";
 import { workEn } from "./sections/work";
 import { tasksEn } from "./sections/tasks";
 import { workflowsEn } from "./sections/workflows";
+import { referencesEn } from "../supplements/references";
+import { sortingEn } from "../supplements/sorting";
+import { intakeEn } from "../supplements/intake";
 
 export const en = {
+  ...referencesEn,
+  ...sortingEn,
+  ...intakeEn,
   ...workflowsEn,
   ...tasksEn,
   ...workEn,

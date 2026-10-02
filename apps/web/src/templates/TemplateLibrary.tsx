@@ -1,5 +1,7 @@
 import type { TemplateSummary } from "./TemplateModels";
 import { useTranslation } from "../localization/LocalizationProvider";
+import { useState } from "react";
+import { ListSortControl, sortList, type ListSort } from "../components/ListSortControl";
 
 type TemplateLibraryProps = {
   templates: TemplateSummary[];
@@ -10,11 +12,13 @@ type TemplateLibraryProps = {
 
 export function TemplateLibrary({ templates, onView, onEdit, onRemove }: TemplateLibraryProps) {
   const t = useTranslation();
+  const [sort, setSort] = useState<ListSort>("name-asc");
+  const sortedTemplates = sortList(templates, sort, { name: template => template.name });
   return <section className="panel">
-    <h2>{t("templateLibrary")}</h2>
+    <div className="section-heading"><h2>{t("templateLibrary")}</h2><ListSortControl id="template-sort" value={sort} onChange={setSort} options={["name-asc", "name-desc"]}/></div>
     {templates.length === 0 && <p className="muted">{t("noWorkTemplates")}</p>}
     <div className="admin-list">
-      {templates.map(template => <div className="admin-list-row" key={template.id}>
+      {sortedTemplates.map(template => <div className="admin-list-row" key={template.id}>
         <span>
           <strong>{template.name}</strong>
           <small className="muted">{template.ownerUnitName ? t("localLevelTemplate", { name: template.ownerUnitName }) : t("sharedSitePlanning")}</small>

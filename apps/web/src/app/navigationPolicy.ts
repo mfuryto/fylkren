@@ -5,6 +5,7 @@ const platformNavigation: AppPage[] = [
   "Platform",
   "Sites",
   "Identity",
+  "References",
   "Classifications",
   "API",
   "Federation",
@@ -16,6 +17,8 @@ const platformNavigation: AppPage[] = [
 const siteAdministrationNavigation: AppPage[] = ["Organization", "Personnel"];
 const siteManagerNavigation: AppPage[] = [
   ...siteAdministrationNavigation,
+  "References",
+  "Sources",
   "Workflows",
   "Templates",
   "Notifications",

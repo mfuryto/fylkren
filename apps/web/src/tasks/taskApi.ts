@@ -17,8 +17,8 @@ export type WorkItemPage = {
   summary: { active: number; inProgress: number; inReview: number; overdue: number };
 };
 
-export async function getWorkItems(siteId: string, query: { unitId: string; filter: string; search: string; page: number; focusItemId?: string }) {
-  const parameters = new URLSearchParams({ filter: query.filter, page: String(query.page) });
+export async function getWorkItems(siteId: string, query: { unitId: string; filter: string; search: string; sort: string; page: number; focusItemId?: string }) {
+  const parameters = new URLSearchParams({ filter: query.filter, sort: query.sort, page: String(query.page) });
   if (query.unitId) parameters.set("unitId", query.unitId);
   if (query.search) parameters.set("search", query.search);
   if (query.focusItemId && query.page === 1) parameters.set("focusItemId", query.focusItemId);

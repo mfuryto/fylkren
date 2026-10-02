@@ -1,4 +1,7 @@
 import type { MessageKey } from "../en-US";
+import type { ReferenceMessageKey } from "../supplements/references";
+import type { SortingMessageKey } from "../supplements/sorting";
+import type { IntakeMessageKey } from "../supplements/intake";
 import { federationDeDE } from "./sections/federation";
 import { identityDeDE } from "./sections/identity";
 import { notificationsDeDE } from "./sections/notifications";
@@ -16,7 +19,7 @@ import { workDeDE } from "./sections/work";
 import { workTemplatesDeDE } from "./sections/workTemplates";
 import { workflowsDeDE } from "./sections/workflows";
 
-export const deDE: Record<MessageKey, string> = {
+export const deDE: Record<Exclude<MessageKey, ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
   ...federationDeDE,
   ...identityDeDE,
   ...notificationsDeDE,

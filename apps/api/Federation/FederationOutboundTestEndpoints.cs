@@ -143,10 +143,10 @@ internal static class FederationOutboundTestEndpoints
         var work = new WorkItem(Guid.NewGuid(), request.SourceSiteId, actor,
             request.Title, request.Instruction, null, "normal", null, now);
         await using var transaction = await db.Database.BeginTransactionAsync(ct);
+        db.WorkItems.Add(work);
         var outbound = await FederationOutboundWorkQueue.EnqueueAssignmentAsync(work,
             request.PeerInstanceId, request.DestinationSiteId, localId, db, ct);
         if (outbound is null) return Results.Conflict(new { error = "federation_outbound_not_authorized" });
-        db.WorkItems.Add(work);
         var audit = new AuditEvent(Guid.NewGuid(), request.SourceSiteId, actor,
             "federation-test.assignment-queued", "work-item", work.Id, now);
         audit.SnapshotActorRole(true);

@@ -4,6 +4,7 @@ import { errorMessage } from "../api/errors";
 import { loadAuditSites, loadSiteAudit, type AuditSite, type SiteAuditRow } from "./siteAuditApi";
 import { useTranslation } from "../localization/LocalizationProvider";
 import type { MessageKey } from "../localization";
+import { ListSortControl, type ListSort } from "../components/ListSortControl";
 
 export function SiteAuditPage({ language: displayLanguage, timeZone: displayTimeZone }: { language: string; timeZone: string }) {
   const t = useTranslation();
@@ -16,13 +17,14 @@ export function SiteAuditPage({ language: displayLanguage, timeZone: displayTime
   const [from,setFrom]=useState("");
   const [to,setTo]=useState("");
   const [search,setSearch]=useState("");
+  const [sort,setSort]=useState<ListSort>("newest");
   const [page,setPage]=useState(1);
   const [totalPages,setTotalPages]=useState(1);
   const [total,setTotal]=useState(0);
   const [error,setError]=useState("");
   const [helpOpen,setHelpOpen]=useState(false);
   useEffect(()=>{loadAuditSites().then(values=>{setSites(values);setSiteId(values[0]?.id??"");}).catch(problem=>setError(errorMessage(problem,t("notificationSitesLoadFailed"))));},[]);
-  async function load(nextPage=page,reset=false){if(!siteId)return;const data=await loadSiteAudit(siteId,nextPage,reset?{area:"",eventType:"",from:"",to:"",search:""}:{area,eventType,from,to,search});setRows(data.events??[]);setEventTypes(data.eventTypes??[]);setPage(data.page??1);setTotalPages(data.totalPages??1);setTotal(data.total??0);setError("");}
+  async function load(nextPage=page,reset=false){if(!siteId)return;const data=await loadSiteAudit(siteId,nextPage,reset?{area:"",eventType:"",from:"",to:"",search:"",sort:"newest"}:{area,eventType,from,to,search,sort});setRows(data.events??[]);setEventTypes(data.eventTypes??[]);setPage(data.page??1);setTotalPages(data.totalPages??1);setTotal(data.total??0);setError("");}
   useEffect(()=>{if(siteId)void load(1).catch(problem=>setError(errorMessage(problem,t("auditLogLoadFailed"))));},[siteId]);
   const eventLabels:Record<string,MessageKey>={
     "local-user.created":"auditLocalUserCreated","local-user.updated":"auditUserUpdated","local-user.password-reset-initiated":"auditPasswordReset","site-member.deactivated":"auditSiteMemberDeactivated","identity.ad.person-added":"auditAdUserAdded","identity.ldap.person-added":"auditLdapUserAdded",
@@ -45,8 +47,9 @@ export function SiteAuditPage({ language: displayLanguage, timeZone: displayTime
       <div className="field"><label>{t("fromDate")}</label><input type="date" value={from} onChange={event=>setFrom(event.target.value)}/></div>
       <div className="field"><label>{t("toDate")}</label><input type="date" value={to} min={from||undefined} onChange={event=>setTo(event.target.value)}/></div>
       <div className="field"><label>{t("search")}</label><input value={search} onChange={event=>setSearch(event.target.value)} placeholder={t("auditSearchPlaceholder")}/></div>
+      <ListSortControl id="site-audit-sort" value={sort} onChange={setSort} options={["newest","oldest"]}/>
       <button className="secondary-button" type="submit">{t("filter")}</button>
-      <button className="text-button" type="button" onClick={()=>{setArea("");setEventType("");setFrom("");setTo("");setSearch("");void load(1,true).catch(problem=>setError(errorMessage(problem,t("auditResetFailed"))));}}>{t("clearSearch")}</button>
+      <button className="text-button" type="button" onClick={()=>{setArea("");setEventType("");setFrom("");setTo("");setSearch("");setSort("newest");void load(1,true).catch(problem=>setError(errorMessage(problem,t("auditResetFailed"))));}}>{t("clearSearch")}</button>
     </form>
     <section className="panel audit-list-panel">
       <div className="section-heading"><div><h2>{t("events")}</h2><p className="muted">{t("recordedCount",{count:total})}</p></div></div>

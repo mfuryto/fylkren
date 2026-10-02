@@ -4,6 +4,7 @@ import { PaginationNav } from "../components/PaginationNav";
 import type { TaskUnit } from "../work/WorkContextModels";
 import type { PlanningRun } from "./PlanningModels";
 import { PlanningTaskPreview } from "./PlanningTaskPreview";
+import { WorkReference } from "../components/WorkReference";
 
 type PlanningQueueListProps = {
   runs: PlanningRun[];
@@ -63,8 +64,9 @@ export function PlanningQueueList({
       const childUnits = allocationUnits(run);
       const open = openRunId === run.id;
       return <article className={`panel task-card process-card${open ? "" : " minimized"}`} key={run.id}>
-        <div className="task-card-heading">
-          <h2>{run.item.title}</h2>
+        <div className="task-card-heading task-reference-heading">
+          <WorkReference referenceCode={run.item.referenceCode}/>
+          <h2 title={run.item.title}>{run.item.title}</h2>
           <span className={`task-status ${run.status === "cancelled" ? "cancelled" : "planning"}`}>{planningStatus(run)}</span>
         </div>
         <button className="task-card-toggle process-card-toggle" type="button" aria-expanded={open} onClick={() => onToggle(run.id)}>
@@ -75,6 +77,7 @@ export function PlanningQueueList({
           <strong>{translateActive("workflowsPlanningQueueListTheTaskWasCancelledByThe")}</strong> {run.item.decisionNote}
         </p>}
         <div className="task-meta">
+          {run.item.originReference && <span><strong>{translateActive("originReferenceLabel")}:</strong> {run.item.originReference}</span>}
           <span><strong>{translateActive("workflowsPlanningQueueListWorkLevel")}</strong> {run.item.assignedUnitName ?? translateActive("topLevel")}</span>
           <span>{run.claimedBy ? `Assignee: ${run.claimedBy}` : translateActive("workflowsPlanningQueueListNoOneHasClaimedResponsibility")}</span>
           <span>{translateActive("workflowsExecutionWorkflowEditorStep")} {Math.min(run.currentStep + 1, run.steps.length)} {translateActive("workflowsExecutionWorkflowEditorOf")} {run.steps.length}</span>

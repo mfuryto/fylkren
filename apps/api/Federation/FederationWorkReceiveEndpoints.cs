@@ -104,7 +104,9 @@ internal static class FederationWorkReceiveEndpoints
                     sourceTypeNameSnapshot: payload.SourceTypeName,
                     workItemTypeNameSnapshot: payload.Kind == "request" ? "Request" : null,
                     senderNameSnapshot: payload.SenderName,
-                    requestBasisSnapshot: payload.RequestBasis);
+                    requestBasisSnapshot: payload.RequestBasis,
+                    originReference: payload.ReferenceCode,
+                    originReferenceInstanceId: payload.ReferenceCode is null ? null : request.OriginInstanceId);
                 db.WorkItems.Add(item);
                 db.FederationWorkLinks.Add(new FederationWorkLink(Guid.NewGuid(), localWorkId,
                     peer.InstanceId, request.SourceSiteId, request.OriginInstanceId,
