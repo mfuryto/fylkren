@@ -61,7 +61,7 @@
   .process-card :is(.planning-result, .planning-preview, .delegation-tree, .delegation-child) { padding: 9px 10px; gap: 8px; }
   .process-card .returned-report > summary { padding: 7px 10px; }
   .process-queue.work-queue .process-card.minimized { grid-template-columns: minmax(0, 1fr); }
-  .process-queue.work-queue .process-card .task-reference-heading { grid-template-columns: 9rem minmax(0, 1fr) 9rem 11rem; align-items: center; }
+  .process-queue.work-queue .process-card .task-reference-heading { grid-template-columns: 9rem minmax(0, 1fr) 9rem 11rem; align-items: center; padding-left: 9px; }
   .work-queue .task-header-actions { min-width: 0; }
   .work-queue .task-card-statuses { min-width: 0; overflow-wrap: anywhere; }
   .work-queue .task-reference { min-width: 0; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
