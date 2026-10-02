@@ -167,6 +167,10 @@ Then verify:
 
 Record source and target versions, time, operator, restore point, non-secret configuration changes, migrations and result in the organization's operations log.
 
+## WorkItem activity/lifecycle cutover
+
+For `20261002220000_WorkActivityArchiveGuards`, stop every old API/worker instance before starting the new API that applies migrations. The schema rejects old writers of WorkItem-owned content lacking the supported transaction capability. The additive foundation is reversible before cutover; after contextual activity has been recorded, schema downgrade is blocked. Use a forward fix or restore the matched database/configuration/key/image set. Never remove guards or alter migration history to run an old writer. Remote installations retain the existing versioned federation contract and do not share this schema gate. See [delivery and recovery scope](../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md#deployment-and-recovery).
+
 ## Failure and rollback
 
 Preserve evidence and do not delete containers, volumes or database files:

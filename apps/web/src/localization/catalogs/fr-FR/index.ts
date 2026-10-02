@@ -1,3 +1,4 @@
+import type { ActivityMessageKey } from "../supplements/activity";
 import { learning } from "./sections/learning";
 import type { MessageKey } from "../en-US";
 import type { ReferenceMessageKey } from "../supplements/references";
@@ -20,7 +21,7 @@ import { workFrFR } from "./sections/work";
 import { workTemplatesFrFR } from "./sections/workTemplates";
 import { workflowsFrFR } from "./sections/workflows";
 
-export const frFR: Record<Exclude<MessageKey, ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
+export const frFR: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
   ...learning,
   ...federationFrFR,
   ...identityFrFR,

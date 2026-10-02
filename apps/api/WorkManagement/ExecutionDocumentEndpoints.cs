@@ -27,7 +27,7 @@ internal static class ExecutionDocumentEndpoints
             if (document is null) db.ExecutionStepDocuments.Add(new ExecutionStepDocument(Guid.NewGuid(), runId, stepId, content, now)); else document.Update(content, now);
             db.ExecutionTimelineEvents.RemoveRange(await db.ExecutionTimelineEvents.Where(x => x.RunId == runId && x.StepId == stepId).ToListAsync(ct));
             for (var index = 0; index < events.Count; index++) db.ExecutionTimelineEvents.Add(new ExecutionTimelineEvent(Guid.NewGuid(), runId, stepId, events[index].Date, events[index].Description!.Trim(), index));
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "execution.step-documented", "execution-run", run.Id, now));
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "execution.step-documented", "execution-run", run.Id, now), "execution.updated", null);
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });
@@ -42,7 +42,7 @@ internal static class ExecutionDocumentEndpoints
             if (request.Step < 0 || request.Step >= count) return Results.ValidationProblem(new Dictionary<string, string[]> { ["step"] = ["Invalid step."] });
             var now = DateTimeOffset.UtcNow;
             run.Advance(request.Step, now);
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "execution.step-changed", "execution-run", run.Id, now));
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "execution.step-changed", "execution-run", run.Id, now), "execution.updated", null);
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });

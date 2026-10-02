@@ -1,3 +1,4 @@
+import type { ActivityMessageKey } from "../supplements/activity";
 import { learning } from "./sections/learning";
 import type { MessageKey } from "../en-US";
 import type { ReferenceMessageKey } from "../supplements/references";
@@ -20,7 +21,7 @@ import { workDaDK } from "./sections/work";
 import { workTemplatesDaDK } from "./sections/workTemplates";
 import { workflowsDaDK } from "./sections/workflows";
 
-export const daDK: Record<Exclude<MessageKey, ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
+export const daDK: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
   ...learning,
   ...federationDaDK,
   ...identityDaDK,

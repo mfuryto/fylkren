@@ -1,3 +1,4 @@
+import type { ActivityMessageKey } from "../supplements/activity";
 import { learning } from "./sections/learning";
 import type { MessageKey } from "../en-US";
 import type { ReferenceMessageKey } from "../supplements/references";
@@ -20,7 +21,7 @@ import { workLvLV } from "./sections/work";
 import { workTemplatesLvLV } from "./sections/workTemplates";
 import { workflowsLvLV } from "./sections/workflows";
 
-export const lvLV: Record<Exclude<MessageKey, ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
+export const lvLV: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
   ...learning,
   ...federationLvLV,
   ...identityLvLV,

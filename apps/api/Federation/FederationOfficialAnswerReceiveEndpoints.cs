@@ -102,9 +102,9 @@ internal static class FederationOfficialAnswerReceiveEndpoints
                     request.DestinationSiteId, request.OriginInstanceId, request.OriginSiteId,
                     request.OriginResourceId, request.CorrelationId, request.CausationId,
                     hash, link.LocalWorkItemId, now));
-                db.AuditEvents.Add(AuditEvent.FromFederatedPeer(Guid.NewGuid(),
+                Fylkren.Api.DomainEvents.WorkActivity.Add(db, AuditEvent.FromFederatedPeer(Guid.NewGuid(),
                     request.DestinationSiteId, peer.InstanceId, request.SourceSiteId, sourceName,
-                    "work-item.official-answer-received", "work-item", link.LocalWorkItemId, now));
+                    "work-item.official-answer-received", "work-item", link.LocalWorkItemId, now), "report.received", null, sourceMessageId: request.MessageId, correlationId: request.CorrelationId);
             }
             db.FederationProbeNonces.Add(new FederationProbeNonce(peer.InstanceId, request.Nonce, now));
             try

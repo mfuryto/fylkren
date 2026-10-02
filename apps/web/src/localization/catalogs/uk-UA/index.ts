@@ -1,3 +1,4 @@
+import type { ActivityMessageKey } from "../supplements/activity";
 import { learning } from "./sections/learning";
 import type { MessageKey } from "../en-US";
 import type { ReferenceMessageKey } from "../supplements/references";
@@ -20,7 +21,7 @@ import { workUkUA } from "./sections/work";
 import { workTemplatesUkUA } from "./sections/workTemplates";
 import { workflowsUkUA } from "./sections/workflows";
 
-export const ukUA: Record<Exclude<MessageKey, ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
+export const ukUA: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
   ...learning,
   ...federationUkUA,
   ...identityUkUA,

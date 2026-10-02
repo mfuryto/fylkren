@@ -23,7 +23,7 @@ internal static class ExecutionCompletionEndpoints
             var now = DateTimeOffset.UtcNow;
             run.Submit(now);
             run.WorkItem.TransitionWithinLevel("in_review", null, now);
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "execution.submitted-for-review", "execution-run", run.Id, now));
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "execution.submitted-for-review", "execution-run", run.Id, now), "execution.submitted", "execution-completed");
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });

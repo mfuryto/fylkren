@@ -1,3 +1,4 @@
+using Fylkren.Api.DomainEvents;
 using System.Security.Claims;
 using Fylkren.Api.ActivityAudit;
 using Fylkren.Api.Persistence;
@@ -51,7 +52,7 @@ internal static class WorkItemRoutingEndpoints
             var workItemTypeName = item.WorkItemTypeId is Guid workItemTypeId ? await db.WorkItemTypes.Where(x => x.Id == workItemTypeId).Select(x => x.Name).SingleOrDefaultAsync(ct) : item.WorkItemTypeNameSnapshot;
             var originalSenderName = item.SenderId is Guid senderId ? await db.WorkItemLookups.Where(x => x.Id == senderId).Select(x => x.Name).SingleOrDefaultAsync(ct) : item.SenderNameSnapshot;
             child = WorkItem.CreateTransferred(Guid.NewGuid(), item, target.SiteId, personId, source.Name, actor.DisplayName, sourceTypeName, workItemTypeName, originalSenderName, await db.WorkflowRuns.AnyAsync(x => x.WorkItemId == item.Id, ct) ? item.Id : item.UpstreamPlanWorkItemId, instruction, now);
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), target.SiteId, personId, "work-item.received-from-parent-site", "work-item", child.Id, now));
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), target.SiteId, personId, "work-item.received-from-parent-site", "work-item", child.Id, now), "assignment.received", "new-work-item", originSiteId: siteId);
         }
         db.WorkItems.Add(child);
         item.TransitionWithinLevel("in_progress", $"Processing at this level was closed and the task was routed to {target.Name}.", now);
@@ -65,7 +66,8 @@ internal static class WorkItemRoutingEndpoints
             var executionRuns = await db.ExecutionRuns.Where(x => x.WorkItemId == item.Id && x.Status != "submitted" && x.Status != "cancelled").ToListAsync(ct);
             foreach (var run in executionRuns) run.Cancel(now);
         }
-        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, target.SiteId == siteId ? previousStatus is "planning" or "planning_approval" or "execution" ? "work-item.processing-delegated" : "work-item.delegated" : "work-item.transferred-to-child-site", "work-item", child.Id, now));
+        Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, personId, target.SiteId == siteId ? previousStatus is "planning" or "planning_approval" or "execution" ? "work-item.processing-delegated" : "work-item.delegated" : "work-item.transferred-to-child-site", "work-item", child.Id, now), "assignment.created", "new-work-item", originSiteId: siteId);
+        WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, personId, "assignment.sent", "work-item", item.Id, now), "assignment.sent");
         await db.SaveChangesAsync(ct);
         return Results.Created($"/api/work/sites/{siteId}/items/{child.Id}", new { child.Id });
     }
@@ -112,8 +114,8 @@ internal static class WorkItemRoutingEndpoints
             if (ancestor.ParentWorkItemId is not Guid ancestorParentId) break;
             ancestor = await db.WorkItems.SingleAsync(x => x.Id == ancestorParentId, ct);
         }
-        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), item.SiteId, personId, "work-item.reassigned", "work-item", item.Id, now));
-        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), replacement.SiteId, personId, replacement.SiteId == parent.SiteId ? "work-item.reassignment-created" : "work-item.received-from-parent-site", "work-item", replacement.Id, now));
+        Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), item.SiteId, personId, "work-item.reassigned", "work-item", item.Id, now), "assignment.reassigned", null);
+        Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), replacement.SiteId, personId, replacement.SiteId == parent.SiteId ? "work-item.reassignment-created" : "work-item.received-from-parent-site", "work-item", replacement.Id, now), "assignment.created", "new-work-item", originSiteId: siteId);
         await db.SaveChangesAsync(ct);
         return Results.Created($"/api/work/sites/{siteId}/items/{replacement.Id}", new { replacement.Id });
     }

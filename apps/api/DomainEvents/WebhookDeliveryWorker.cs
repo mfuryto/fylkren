@@ -30,14 +30,22 @@ internal sealed class WebhookDeliveryWorker(IServiceScopeFactory scopes, IHttpCl
     private async Task Project(CancellationToken ct)
     {
         await using var scope = scopes.CreateAsyncScope(); var db = scope.ServiceProvider.GetRequiredService<FylkrenDbContext>();
-        var events = await db.DomainEvents.Where(x => x.WebhooksProjectedAt == null).OrderBy(x => x.OccurredAt).ThenBy(x => x.Id).Take(200).ToListAsync(ct);
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+        var events = await db.DomainEvents.FromSqlRaw("SELECT e.* FROM domain_events e WHERE (e.source = 'legacy' AND e.webhooks_projected_at IS NULL) OR EXISTS (SELECT 1 FROM event_projections p WHERE p.domain_event_id = e.id AND p.consumer = 'webhooks' AND p.status IN ('pending','processing') AND p.next_attempt_at <= now() AND (p.lease_expires_at IS NULL OR p.lease_expires_at <= now())) ORDER BY e.occurred_at, e.id LIMIT 200 FOR UPDATE OF e SKIP LOCKED").ToListAsync(ct);
         foreach (var e in events)
         {
             var subscriptions = await db.WebhookSubscriptions.AsNoTracking().Where(x => x.SiteId == e.SiteId && x.IsActive && x.CreatedAt <= e.OccurredAt && !db.WebhookDeliveries.Any(d => d.SubscriptionId == x.Id && d.DomainEventId == e.Id)).ToListAsync(ct);
-            foreach (var s in subscriptions.Where(x => x.SelectedEventTypes().Contains(e.EventType))) db.WebhookDeliveries.Add(new WebhookDelivery(Guid.NewGuid(), s.Id, e.Id, DateTimeOffset.UtcNow));
+            foreach (var s in subscriptions.Where(x => x.SelectedEventTypes().Contains(e.EventType) && (e.Source == "legacy" || e.ResourceType != "work_item"))) db.WebhookDeliveries.Add(new WebhookDelivery(Guid.NewGuid(), s.Id, e.Id, DateTimeOffset.UtcNow));
+            var projection = await db.EventProjections.SingleOrDefaultAsync(x => x.Consumer == "webhooks" && x.DomainEventId == e.Id, ct);
+            if (projection is not null)
+            {
+                var owner = Guid.NewGuid(); projection.Claim(owner, DateTimeOffset.UtcNow);
+                projection.Complete(owner, DateTimeOffset.UtcNow, !DomainEventTypes.ExternallySupported.Contains(e.EventType));
+            }
             e.MarkWebhooksProjected(DateTimeOffset.UtcNow);
         }
         await db.SaveChangesAsync(ct);
+        await transaction.CommitAsync(ct);
     }
     private async Task Deliver(CancellationToken ct)
     {
@@ -47,7 +55,11 @@ internal sealed class WebhookDeliveryWorker(IServiceScopeFactory scopes, IHttpCl
     }
     private async Task DeliverOne(FylkrenDbContext db, Guid id, CancellationToken ct)
     {
-        var delivery = await db.WebhookDeliveries.Include(x => x.Subscription).Include(x => x.DomainEvent).SingleAsync(x => x.Id == id, ct); var started = DateTimeOffset.UtcNow; delivery.Start(started); await db.SaveChangesAsync(ct);
+        var started = DateTimeOffset.UtcNow;
+        var claimed = await DeliveryClaims.Webhook(db, id, started, ct);
+        if (claimed != 1) return;
+        var delivery = await db.WebhookDeliveries.Include(x => x.Subscription).Include(x => x.DomainEvent).SingleAsync(x => x.Id == id, ct);
+        await db.Entry(delivery).ReloadAsync(ct);
         int? status = null; string? error = null; var watch = Stopwatch.StartNew();
         try
         {

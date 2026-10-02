@@ -81,9 +81,11 @@ public static class SmtpEndpoints
         var cursor = await database.NotificationProjectionCursors.AsNoTracking()
             .SingleAsync(value => value.Id == ProjectionCursorId, cancellationToken);
         var projectionBacklog = await database.AuditEvents.AsNoTracking().CountAsync(value =>
-            value.OccurredAt > cursor.LastOccurredAt ||
-            value.OccurredAt == cursor.LastOccurredAt && value.Id.CompareTo(cursor.LastAuditEventId) > 0,
+            value.DomainEventId == null && (value.OccurredAt > cursor.LastOccurredAt ||
+            value.OccurredAt == cursor.LastOccurredAt && value.Id.CompareTo(cursor.LastAuditEventId) > 0),
             cancellationToken);
+        projectionBacklog += await database.EventProjections.AsNoTracking().CountAsync(value =>
+            value.Consumer == "notifications" && value.Status != "completed" && value.Status != "skipped", cancellationToken);
         var query = database.NotificationOutboxMessages.AsNoTracking();
         if (!string.IsNullOrEmpty(normalizedStatus))
             query = query.Where(message => message.Status == normalizedStatus);

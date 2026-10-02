@@ -1,3 +1,4 @@
+import { ActivityButton } from "../components/ActivityTimeline";
 import { useEffect, useMemo, useState } from "react";
 import type { TaskSite, TaskUnit } from "../work/WorkContextModels";
 import type { WorkItem } from "../work/WorkItemModels";
@@ -107,6 +108,7 @@ export function WorkOverview({ language: displayLanguage, timeZone: displayTimeZ
           <h1>{selectedSite?.name ?? t("overviewTitle")}</h1>
           <p className="muted">{t("overviewIntro")}</p>
         </div>
+        {selectedSiteId && <ActivityButton siteId={selectedSiteId} title={selectedSite?.name} timeZone={displayTimeZone} />}
       </header>
       {error && <p className="status-message error-message">{error}</p>}
       {(sites.length > 1 || levelCount > 1) && <section className="panel context-bar">

@@ -29,6 +29,7 @@ internal static class WorkItemStatusEndpoints
         if (item is null) return Results.NotFound();
         var outgoingRequest = await IsOutgoingRequest(item.Id, siteId, db, ct);
         var now = DateTimeOffset.UtcNow;
+        var activityPreviousStatus = item.Status;
         var manager = await CanManageItem(item, personId, db, ct);
         var assigned = item.AssignedUnitId is { } assignedUnitId && await db.RoleAssignments.AnyAsync(x => x.Role.OrganizationUnitId == assignedUnitId && x.PersonId == personId && x.IsActive && x.ValidFrom <= now && (x.ValidTo == null || x.ValidTo > now), ct);
         if (!manager && !assigned) return Results.Problem(statusCode: 403);
@@ -70,8 +71,8 @@ internal static class WorkItemStatusEndpoints
                             remoteApprovedAt = federated.OfficialAnswerApprovedAt,
                             acceptedAt = now }
                     }, personId, now, ct);
-                db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId,
-                    "work-item.federated-answer-accepted", "work-item", item.Id, now));
+                Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, personId,
+                    "work-item.federated-answer-accepted", "work-item", item.Id, now), "assignment.completed", null);
                 DomainEventRecorder.Record(db, "task.completed", siteId, personId,
                     "task", item.Id, new { taskId = item.Id, status = "completed" }, now);
                 await db.SaveChangesAsync(ct);
@@ -91,7 +92,7 @@ internal static class WorkItemStatusEndpoints
                 }, personId, now, ct);
             }
             item.TransitionWithinLevel("completed", "The request was closed by the sender.", now);
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.request-closed", "work-item", item.Id, now));
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.request-closed", "work-item", item.Id, now), "assignment.completed", null);
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         }
@@ -99,7 +100,7 @@ internal static class WorkItemStatusEndpoints
         {
             if (!manager || request.Status != "completed") return Results.Conflict(new { error = "A withdrawn request can only be acknowledged as completed by the receiving manager." });
             item.TransitionWithinLevel("completed", item.DecisionNote, now);
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.request-cancellation-acknowledged", "work-item", item.Id, now));
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.request-cancellation-acknowledged", "work-item", item.Id, now), "assignment.cancelled", null);
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         }
@@ -155,12 +156,13 @@ internal static class WorkItemStatusEndpoints
                 var workItemTypeName = item.WorkItemTypeId is Guid workItemTypeId ? await db.WorkItemTypes.Where(x => x.Id == workItemTypeId).Select(x => x.Name).SingleOrDefaultAsync(ct) : item.WorkItemTypeNameSnapshot;
                 var senderName = item.SenderId is Guid senderId ? await db.WorkItemLookups.Where(x => x.Id == senderId).Select(x => x.Name).SingleOrDefaultAsync(ct) : item.SenderNameSnapshot;
                 child = WorkItem.CreateTransferred(Guid.NewGuid(), item, requestedAssignment.SiteId, personId, source.Name, actor.DisplayName, sourceTypeName, workItemTypeName, senderName, item.UpstreamPlanWorkItemId, item.Description, now);
-                db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), requestedAssignment.SiteId, personId, "work-item.received-from-parent-site", "work-item", child.Id, now));
+                Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), requestedAssignment.SiteId, personId, "work-item.received-from-parent-site", "work-item", child.Id, now), "assignment.received", "new-work-item", originSiteId: siteId);
             }
             db.WorkItems.Add(child);
             DomainEventRecorder.Record(db, "assignment.created", child.SiteId, child.SiteId == siteId ? personId : null, "task", child.Id, new { taskId = child.Id, parentTaskId = child.SiteId == siteId ? item.Id : (Guid?)null, assignedUnitId = child.AssignedUnitId }, now);
             item.TransitionWithinLevel("in_progress", decisionNote, now);
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, requestedAssignment.SiteId == siteId ? "work-item.delegated" : "work-item.transferred-to-child-site", "work-item", child.Id, now));
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, personId, requestedAssignment.SiteId == siteId ? "work-item.delegated" : "work-item.transferred-to-child-site", "work-item", child.Id, now), "assignment.created", "new-work-item", originSiteId: siteId);
+        WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, personId, "assignment.sent", "work-item", item.Id, now), "assignment.sent");
         }
         else
         {
@@ -175,7 +177,7 @@ internal static class WorkItemStatusEndpoints
             var initialDocuments = await db.WorkflowSteps.AsNoTracking().Where(x => x.DefinitionId == planningDefinition.Id && x.TemplateId != null && x.Template != null).Select(x => new { x.Id, Content = x.Template!.Content }).ToListAsync(ct);
             foreach (var document in initialDocuments) db.WorkflowStepDocuments.Add(new WorkflowStepDocument(Guid.NewGuid(), run.Id, document.Id, document.Content, now));
         }
-        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, $"work-item.{request.Status}", "work-item", item.Id, now));
+        Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, personId, $"work-item.{request.Status}", "work-item", item.Id, now), request.Status == "completed" ? "assignment.completed" : request.Status is "in_progress" or "execution" ? "assignment.started" : activityPreviousStatus == "registered" && request.Status == "under_review" ? "assignment.accepted" : activityPreviousStatus is "rejected" or "on_hold" && request.Status == "under_review" ? "assignment.reopened" : "assignment.updated", request.Status == "completed" ? "child-work-completed" : request.Status is "assigned" or "under_review" or "in_progress" or "planning" or "execution" or "on_hold" or "rejected" ? "work-item-changed" : null);
         string? federationError;
         if (request.Status == "completed")
         {

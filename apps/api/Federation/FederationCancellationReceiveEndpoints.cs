@@ -98,6 +98,7 @@ internal static class FederationCancellationReceiveEndpoints
                     return Results.Conflict(new { error = "receiver_work_already_closed" });
                 // The conditional UPDATE serializes cancellation against a
                 // concurrent final report/closure without overwriting it.
+                await db.Database.ExecuteSqlRawAsync("SELECT set_config('fylkren.activity_writer', '1', true)", ct);
                 var changed = await db.WorkItems.Where(value => value.Id == work.Id &&
                         value.SiteId == request.DestinationSiteId &&
                         value.Status != "completed" && value.Status != "rejected" &&
@@ -114,9 +115,9 @@ internal static class FederationCancellationReceiveEndpoints
                     request.DestinationSiteId, request.OriginInstanceId, request.OriginSiteId,
                     request.OriginResourceId, request.CorrelationId, request.CausationId,
                     hash, work.Id, now));
-                db.AuditEvents.Add(AuditEvent.FromFederatedPeer(Guid.NewGuid(),
+                Fylkren.Api.DomainEvents.WorkActivity.Add(db, AuditEvent.FromFederatedPeer(Guid.NewGuid(),
                     request.DestinationSiteId, peer.InstanceId, request.SourceSiteId, sourceName,
-                    "work-item.request-cancelled-by-sender", "work-item", work.Id, now));
+                    "work-item.request-cancelled-by-sender", "work-item", work.Id, now), "assignment.cancelled", "work-item-changed", sourceMessageId: request.MessageId, correlationId: request.CorrelationId);
             }
             db.FederationProbeNonces.Add(new FederationProbeNonce(peer.InstanceId, request.Nonce, now));
             try

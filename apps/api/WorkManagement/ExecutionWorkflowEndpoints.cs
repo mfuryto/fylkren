@@ -27,7 +27,7 @@ internal static class ExecutionWorkflowEndpoints
             run.Start(definition.Id, now);
             if (definition.Steps.Any(x => x.HasTimeline)) run.InitializeTimeline(DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(now, TimeZoneInfo.FindSystemTimeZoneById(options.Localization.TimeZone)).DateTime));
             foreach (var step in definition.Steps.Where(x => x.Template != null)) db.ExecutionStepDocuments.Add(new ExecutionStepDocument(Guid.NewGuid(), run.Id, step.Id, step.Template!.Content, now));
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "execution.workflow-started", "execution-run", run.Id, now));
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "execution.workflow-started", "execution-run", run.Id, now), "execution.started", null);
             DomainEventRecorder.Record(db, "execution.started", run.WorkItem.SiteId, personId, "execution", run.Id, new { executionId = run.Id, taskId = run.WorkItemId, definitionId = definition.Id }, now);
             await db.SaveChangesAsync(ct);
             return Results.NoContent();

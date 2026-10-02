@@ -1,3 +1,4 @@
+import { activityTranslations, type ActivityMessageKey } from "./catalogs/supplements/activity";
 import { en, type MessageKey } from "./catalogs/en-US";
 import { enGB } from "./catalogs/en-GB";
 import { nbNO } from "./catalogs/nb-NO";
@@ -26,12 +27,13 @@ export type { MessageKey } from "./catalogs/en-US";
 
 export const supportedLanguages = ["en-US", "en-GB", "nb-NO", "sv-SE", "da-DK", "fi-FI", "de-DE", "fr-FR", "pl-PL", "es-ES", "it-IT", "uk-UA", "nl-NL", "pt-PT", "cs-CZ", "ro-RO", "et-EE", "lv-LV", "lt-LT"] as const;
 export type SupportedLanguage = (typeof supportedLanguages)[number];
-type AddedMessageKey = ReferenceMessageKey | SortingMessageKey | IntakeMessageKey;
+type AddedMessageKey = ActivityMessageKey | ReferenceMessageKey | SortingMessageKey | IntakeMessageKey;
 type BaseCatalog = Record<Exclude<MessageKey, AddedMessageKey>, string>;
 
 function withReferenceMessages(language: SupportedLanguage, catalog: BaseCatalog) {
   return {
     ...catalog,
+    ...activityTranslations[language],
     ...referenceTranslations[language],
     ...sortingTranslations[language],
     ...intakeTranslations[language],

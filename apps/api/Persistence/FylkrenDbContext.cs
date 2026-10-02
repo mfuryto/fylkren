@@ -15,8 +15,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fylkren.Api.Persistence;
 
-public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options) : DbContext(options)
+public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options, FylkrenOptions? activityOptions = null, IHttpContextAccessor? activityHttp = null) : DbContext(options)
 {
+    internal List<WorkActivityIntent> PendingWorkActivities { get; } = [];
+    internal string? ActivityRequestId => activityHttp?.HttpContext?.TraceIdentifier;
+    internal Guid ActivityOperationId { get; } = Guid.NewGuid();
     public DbSet<Site> Sites => Set<Site>();
     internal DbSet<InstanceIdentity> InstanceIdentities => Set<InstanceIdentity>();
     internal DbSet<FederationPeer> FederationPeers => Set<FederationPeer>();
@@ -99,11 +102,13 @@ public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options)
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
         var pendingReferences = PendingReferences();
-        using var transaction = pendingReferences.Length > 0 && Database.CurrentTransaction is null
+        using var transaction = Database.CurrentTransaction is null
             ? Database.BeginTransaction()
             : null;
         try
         {
+            Database.ExecuteSqlRaw("SELECT set_config('fylkren.activity_writer', '1', true)");
+            if (PendingWorkActivities.Count > 0) throw new InvalidOperationException("Work activity requires asynchronous transactional save.");
             if (pendingReferences.Length > 0) AssignReferences(pendingReferences);
             ProtectActivityFacts();
             ProtectFormalApprovalHistory();
@@ -124,17 +129,24 @@ public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options)
         CancellationToken cancellationToken = default)
     {
         var pendingReferences = PendingReferences();
-        await using var transaction = pendingReferences.Length > 0 && Database.CurrentTransaction is null
+        await using var transaction = Database.CurrentTransaction is null
             ? await Database.BeginTransactionAsync(cancellationToken)
             : null;
         try
         {
+            await Database.ExecuteSqlRawAsync("SELECT set_config('fylkren.activity_writer', '1', true)", cancellationToken);
             if (pendingReferences.Length > 0)
                 await AssignReferencesAsync(pendingReferences, cancellationToken);
             ProtectActivityFacts();
             ProtectFormalApprovalHistory();
+            await WorkActivity.Prepare(this, cancellationToken);
             await SnapshotAuditActorsAsync(cancellationToken);
             var result = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+            if (PendingWorkActivities.Count > 0)
+            {
+                await WorkActivity.ProjectNotifications(this, activityOptions?.PublicUrl ?? "http://localhost:8080", cancellationToken);
+                await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+            }
             if (transaction is not null) await transaction.CommitAsync(cancellationToken);
             return result;
         }

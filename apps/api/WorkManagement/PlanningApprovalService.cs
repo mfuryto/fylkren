@@ -20,7 +20,7 @@ internal static class PlanningApprovalService
         run.Approve();
         run.WorkItem.ApplyApprovedPlan(run.ProposedPriority, run.ProposedDueAt, null, now);
         run.WorkItem.TransitionWithinLevel("planning_approved", null, now);
-        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.approved", "workflow-run", run.Id, now));
+        Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.approved", "workflow-run", run.Id, now), "plan.published", null);
         await FormalApprovalService.Approve(db, run.WorkItem.SiteId, "plan", run.Id, run.WorkItemId, $"Plan for {run.WorkItem.Title}", approvalSnapshot, personId, now, ct);
         DomainEventRecorder.Record(db, "plan.approved", run.WorkItem.SiteId, personId, "plan", run.Id, new { planId = run.Id, taskId = run.WorkItemId }, now);
         await db.SaveChangesAsync(ct);
@@ -56,7 +56,7 @@ internal static class PlanningApprovalService
                 : WorkItem.CreateTransferred(Guid.NewGuid(), run.WorkItem, allocation.Unit.SiteId, personId, source.Name, actor.DisplayName, sourceTypeName, workItemTypeName, senderName, run.WorkItem.Id, allocation.Instruction, now);
             db.WorkItems.Add(child);
             DomainEventRecorder.Record(db, "assignment.created", child.SiteId, child.SiteId == run.WorkItem.SiteId ? personId : null, "task", child.Id, new { taskId = child.Id, parentTaskId = child.SiteId == run.WorkItem.SiteId ? run.WorkItem.Id : (Guid?)null, assignedUnitId = child.AssignedUnitId }, now);
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), child.SiteId, personId, allocation.Unit.SiteId == run.WorkItem.SiteId ? "work-item.delegated" : "work-item.received-from-parent-site", "work-item", child.Id, now));
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), child.SiteId, personId, allocation.Unit.SiteId == run.WorkItem.SiteId ? "work-item.delegated" : "work-item.received-from-parent-site", "work-item", child.Id, now), allocation.Unit.SiteId == run.WorkItem.SiteId ? "assignment.created" : "assignment.received", "new-work-item", originSiteId: run.WorkItem.SiteId);
         }
         foreach (var plannedRequest in requests)
         {
@@ -72,15 +72,15 @@ internal static class PlanningApprovalService
                 ? $"The request has been sent to {recipientName} and is awaiting processing and a response."
                 : $"The request has been queued for delivery to {recipientName}.", now);
             db.WorkItems.Add(tracking);
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "work-item.request-sent-from-level", "work-item", tracking.Id, now));
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "work-item.request-sent-from-level", "work-item", tracking.Id, now), "task.created", null);
             if (plannedRequest.TargetInstanceId is Guid peerInstanceId &&
                 plannedRequest.RemoteSiteId is Guid remoteSiteId)
             {
                 var outbound = await FederationOutboundWorkQueue.EnqueueAssignmentAsync(tracking,
                     peerInstanceId, remoteSiteId, localInstanceId, db, ct);
                 if (outbound is null) return "federation_outbound_not_authorized";
-                db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId,
-                    "work-item.federated-request-queued", "work-item", tracking.Id, now));
+                Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId,
+                    "work-item.federated-request-queued", "work-item", tracking.Id, now), "assignment.dispatch_queued", null);
             }
             else
             {
@@ -89,12 +89,12 @@ internal static class PlanningApprovalService
                     sourceTypeName, "Request", senderName, null, plannedRequest.Instruction,
                     now, requestBasis);
                 db.WorkItems.Add(received);
-                db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), plannedRequest.TargetSiteId.Value,
-                    personId, "work-item.request-received", "work-item", received.Id, now));
+                Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), plannedRequest.TargetSiteId.Value,
+                    personId, "work-item.request-received", "work-item", received.Id, now), "assignment.received", "new-work-item");
             }
         }
         run.WorkItem.TransitionWithinLevel("in_progress", "The approved plan has been initiated.", now);
-        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.released", "workflow-run", run.Id, now));
+        Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.released", "workflow-run", run.Id, now), "assignment.released", null);
         await db.SaveChangesAsync(ct);
         await transaction.CommitAsync(ct);
         return null;

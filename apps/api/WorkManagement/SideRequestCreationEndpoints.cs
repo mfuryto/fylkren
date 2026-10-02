@@ -89,14 +89,14 @@ internal static class SideRequestCreationEndpoints
                 ? $"The request has been sent to {recipientName} and is awaiting processing and a response."
                 : $"The request has been queued for delivery to {recipientName}.", now);
             db.WorkItems.Add(tracking);
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.request-sent-from-level", "work-item", tracking.Id, now));
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.request-sent-from-level", "work-item", tracking.Id, now), "task.created", null);
             if (remoteRecipient is not null)
             {
                 var outbound = await FederationOutboundWorkQueue.EnqueueAssignmentAsync(tracking,
                     remoteRecipient.InstanceId, remoteRecipient.SiteId, localInstanceId, db, ct);
                 if (outbound is null) return Results.Conflict(new { error = "federation_outbound_not_authorized" });
-                db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId,
-                    "work-item.federated-request-queued", "work-item", tracking.Id, now));
+                Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, personId,
+                    "work-item.federated-request-queued", "work-item", tracking.Id, now), "assignment.dispatch_queued", null);
             }
             else
             {
@@ -104,8 +104,10 @@ internal static class SideRequestCreationEndpoints
                     ? WorkItem.CreateTransferred(Guid.NewGuid(), tracking, recipient!.Id, personId, sourceSite.Name, actor.DisplayName, sourceTypeName, "Request", senderName, null, description, now, requestBasis)
                     : WorkItem.CreateInternalRequest(Guid.NewGuid(), tracking, personId, internalRecipient.Id, sourceSite.Name, actor.DisplayName, sourceTypeName, senderName, description, now, requestBasis);
                 db.WorkItems.Add(received);
-                db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), received.SiteId, personId, internalRecipient is null ? "work-item.request-received" : "work-item.internal-request-received", "work-item", received.Id, now));
+                Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), received.SiteId, personId, internalRecipient is null ? "work-item.request-received" : "work-item.internal-request-received", "work-item", received.Id, now), "assignment.received", "new-work-item", originSiteId: siteId);
             }
+            if (remoteRecipient is null)
+                Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, personId, "assignment.sent", "work-item", tracking.Id, now), "assignment.sent");
             await db.SaveChangesAsync(ct);
             await transaction.CommitAsync(ct);
             return Results.Created($"/api/work/sites/{siteId}/items/{tracking.Id}", new { tracking.Id, tracking.ReferenceCode });

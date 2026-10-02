@@ -116,10 +116,10 @@ internal static class FederationWorkReceiveEndpoints
                     request.DestinationSiteId, request.OriginInstanceId, request.OriginSiteId,
                     request.OriginResourceId, request.CorrelationId, request.CausationId,
                     payloadHash, localWorkId, now));
-                db.AuditEvents.Add(AuditEvent.FromFederatedPeer(Guid.NewGuid(),
+                WorkActivity.Add(db, AuditEvent.FromFederatedPeer(Guid.NewGuid(),
                     request.DestinationSiteId, peer.InstanceId, request.SourceSiteId, sourceName,
                     payload.Kind == "request" ? "work-item.request-received" : "work-item.received-from-parent-site",
-                    "work-item", localWorkId, now));
+                    "work-item", localWorkId, now), "assignment.received", "new-work-item", sourceMessageId: request.MessageId, correlationId: request.CorrelationId);
                 DomainEventRecorder.Record(db, "assignment.created", request.DestinationSiteId,
                     null, "task", localWorkId, new { taskId = localWorkId, status = item.Status }, now);
             }

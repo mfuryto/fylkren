@@ -19,7 +19,7 @@ public sealed record DomainEventContext(
             "machine" => Source == "local" && ActorMachineId is { } machine && machine != Guid.Empty &&
                 ActorPersonId is null && ActorSystem is null && ActorInstanceId is null && ActorSiteId is null,
             "system" => Source == "system" && ActorSystem is { Length: > 0 and <= 100 } &&
-                !ActorSystem.Any(char.IsControl) && ActorPersonId is null && ActorMachineId is null && ActorInstanceId is null && ActorSiteId is null,
+                !string.IsNullOrWhiteSpace(ActorSystem) && !ActorSystem.Any(char.IsControl) && ActorPersonId is null && ActorMachineId is null && ActorInstanceId is null && ActorSiteId is null,
             "federated-site" => Source == "federated" && ActorInstanceId is { } instance && instance != Guid.Empty &&
                 ActorSiteId is { } site && site != Guid.Empty && ActorPersonId is null && ActorMachineId is null && ActorSystem is null,
             _ => false

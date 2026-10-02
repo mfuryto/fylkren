@@ -131,7 +131,7 @@ try {
       console.log(JSON.stringify({restoredCandidateImage:service,image:actual}));
     }`]);
   run(process.execPath, ['-e', `const response=await fetch('http://localhost:18081/api/configuration/public');const body=await response.json();if(!response.ok||body.setupRequired!==true)throw new Error(JSON.stringify(body));`]);
-  run(process.execPath, ['tools/test-e2e-local.mjs', ...(process.argv.includes('--asvs-input-only') ? ['--asvs-input-only'] : [])]);
+  run(process.execPath, ['tools/test-e2e-local.mjs', ...['--asvs-input-only', '--workload-only'].filter(flag => process.argv.includes(flag))]);
 } finally {
   try {
     run('docker', ['compose', '-p', project, 'down', '-v']);

@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddHttpContextAccessor();
 var startupSettings = builder.AddFylkrenServices();
 var fylkrenOptions = startupSettings.Options;
 var trustForwardedHeaders = startupSettings.TrustForwardedHeaders;
@@ -128,6 +129,8 @@ app.MapSiteNotificationEndpoints();
 app.MapAdministrationApiEndpoints();
 app.MapReportApiEndpoints();
 app.MapWebhookManagementEndpoints();
+app.MapActivityQueryEndpoints();
+Fylkren.Api.InformationLifecycle.WorkLifecycleEndpoints.MapWorkLifecycleEndpoints(app);
 app.MapRiskEndpoints();
 app.MapPortabilityEndpoints();
 app.MapFormalApprovalEndpoints();

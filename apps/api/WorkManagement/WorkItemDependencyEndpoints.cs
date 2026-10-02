@@ -97,7 +97,7 @@ internal static class WorkItemDependencyEndpoints
         var now = DateTimeOffset.UtcNow;
         var dependency = new WorkItemDependency(Guid.NewGuid(), siteId, request.PredecessorWorkItemId, itemId, type, personId, now);
         db.WorkItemDependencies.Add(dependency);
-        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.dependency-added", "work-item", itemId, now));
+        Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.dependency-added", "work-item", itemId, now), "assignment.updated", null);
         await db.SaveChangesAsync(ct);
         return Results.Created($"/api/work/sites/{siteId}/items/{itemId}/dependencies/{dependency.Id}", new { dependency.Id });
     }
@@ -114,7 +114,7 @@ internal static class WorkItemDependencyEndpoints
         var dependency = await db.WorkItemDependencies.SingleOrDefaultAsync(value => value.Id == dependencyId && value.SiteId == siteId && value.DependentWorkItemId == itemId, ct);
         if (dependency is null) return Results.NotFound();
         db.WorkItemDependencies.Remove(dependency);
-        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.dependency-removed", "work-item", itemId, DateTimeOffset.UtcNow));
+        Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.dependency-removed", "work-item", itemId, DateTimeOffset.UtcNow), "assignment.updated", null);
         await db.SaveChangesAsync(ct);
         return Results.NoContent();
     }

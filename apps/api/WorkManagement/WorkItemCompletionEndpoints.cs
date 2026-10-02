@@ -31,7 +31,7 @@ internal static class WorkItemCompletionEndpoints
             var now = DateTimeOffset.UtcNow;
             if (await Fylkren.Api.Learning.LearningCreation.AddDrafts(request.Lessons, item, personId, db, now, ct) is { } lessonError) return lessonError;
             item.UpdateFinalReport(report, classification, personId, now);
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.final-report-updated", "work-item", item.Id, now));
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.final-report-updated", "work-item", item.Id, now), "report.updated", "decision-required");
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });
@@ -52,7 +52,7 @@ internal static class WorkItemCompletionEndpoints
                 task = new { item.Id, item.ReferenceCode, item.OriginReference, item.Title, item.Description, item.AssignedUnitId, item.CreatedAt, item.DueAt },
                 report = new { content = item.FinalReport, classification = item.FinalReportClassification, writtenByPersonId = item.FinalReportWrittenByPersonId, writtenAt = item.FinalReportUpdatedAt }
             }, personId, now, ct);
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.final-report-approved", "work-item", item.Id, now));
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.final-report-approved", "work-item", item.Id, now), "report.approved", null);
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });
@@ -82,7 +82,7 @@ internal static class WorkItemCompletionEndpoints
                 var receiver = await db.WorkItems.SingleOrDefaultAsync(x => x.ParentWorkItemId == root.Id && x.SenderSiteName != null && (x.SiteId != root.SiteId || x.AssignedUnitId != root.AssignedUnitId), ct);
                 if (receiver is null) return Results.Conflict(new { error = "The recipient side of the request no longer exists." });
                 receiver.TransitionWithinLevel("request_cancelled", $"The request was withdrawn by {await db.Sites.Where(x => x.Id == siteId).Select(x => x.Name).SingleAsync(ct)}: {note}", requestNow);
-                db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.request-cancelled", "work-item", root.Id, requestNow)); db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), receiver.SiteId, personId, "work-item.request-cancelled-by-sender", "work-item", receiver.Id, requestNow)); await db.SaveChangesAsync(ct); return Results.Ok(new { affected = 2 });
+                Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.request-cancelled", "work-item", root.Id, requestNow), "assignment.cancelled", null); Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), receiver.SiteId, personId, "work-item.request-cancelled-by-sender", "work-item", receiver.Id, requestNow), "assignment.cancelled", "work-item-changed"); await db.SaveChangesAsync(ct); return Results.Ok(new { affected = 2 });
             }
             if (root.ParentWorkItemId is not null) return Results.Conflict(new { error = "The entire chain must be cancelled from the primary task." });
             if (root.Status is "completed" or "cancelled") return Results.Conflict(new { error = "A closed primary task cannot be cancelled." });
@@ -94,8 +94,8 @@ internal static class WorkItemCompletionEndpoints
             foreach (var run in runs) run.Cancel();
             var executionRuns = await db.ExecutionRuns.Where(x => affectedIds.Contains(x.WorkItemId) && x.Status != "submitted" && x.Status != "cancelled").ToListAsync(ct);
             foreach (var run in executionRuns) run.Cancel(now);
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item-chain.cancelled", "work-item", root.Id, now));
-            foreach (var affectedSiteId in items.Select(x => x.SiteId).Distinct().Where(x => x != siteId)) db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), affectedSiteId, personId, "work-item-chain.cancelled-by-parent-site", "work-item", root.Id, now));
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item-chain.cancelled", "work-item", root.Id, now), "assignment.cancelled", null);
+            foreach (var affectedSiteId in items.Select(x => x.SiteId).Distinct().Where(x => x != siteId)) Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), affectedSiteId, personId, "work-item-chain.cancelled-by-parent-site", "work-item", root.Id, now), "assignment.cancelled", null);
             await db.SaveChangesAsync(ct);
             return Results.Ok(new { affected = affectedIds.Count });
         });

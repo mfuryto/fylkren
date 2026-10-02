@@ -5,7 +5,7 @@ namespace Fylkren.Api.DomainEvents;
 public static class ActivityEventCatalog
 {
     public static readonly string[] Types = ["task.created", "task.completed", "assignment.created", "assignment.dispatch_queued",
-        "assignment.sent", "assignment.received", "assignment.accepted", "assignment.started", "assignment.updated",
+        "assignment.progress_received", "assignment.cancellation_queued", "report.received", "assignment.sent", "assignment.received", "assignment.accepted", "assignment.started", "assignment.updated",
         "assignment.completed", "assignment.cancelled", "assignment.reassigned", "assignment.reopened", "assignment.claimed", "assignment.released",
         "plan.published", "plan.updated", "plan.submitted", "execution.started", "execution.updated", "execution.submitted",
         "decision.created", "decision.updated", "risk.created", "risk.updated", "risk.closed", "measure.created", "measure.updated", "measure.completed",

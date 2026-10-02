@@ -98,6 +98,7 @@ async function clickButton(label, root = 'document') {
   await evaluate(`(() => {
     const button = [...${root}.querySelectorAll('button')]
       .find(value => value.textContent.trim() === ${JSON.stringify(label)} ||
+        value.getAttribute('aria-label') === ${JSON.stringify(label)} ||
         [...value.querySelectorAll('span')]
           .some(span => span.textContent.trim() === ${JSON.stringify(label)}));
     if (!button) throw new Error('Missing button: ' + ${JSON.stringify(label)});
@@ -380,6 +381,13 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
   await clickButton('Approve final report');
   await waitFor(`[...document.querySelectorAll('button')]
     .some(button => button.textContent.trim() === 'Complete')`, 'approved final report');
+  await clickButton('Activity');
+  await waitFor('document.querySelector("[role=dialog]")?.innerText.includes("Final report approved")', 'object activity timeline');
+  assert.equal(await evaluate('document.querySelector("[role=dialog]").innerText.includes("History before this feature may be incomplete.")'), true);
+  await waitFor('document.querySelector("[role=dialog]")?.contains(document.activeElement)', 'activity dialog keyboard focus');
+  await call('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+  await call('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+  await waitFor('document.querySelector("[role=dialog]") === null', 'keyboard close activity timeline');
   await clickButton('Complete');
 
   let completed;
@@ -407,6 +415,10 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
   await waitForSummary('Active', 0);
   await waitForSummary('Registered and received work items', 1, '.overview-stat-card');
   await waitForSummary('Completed work items', 1, '.overview-stat-card');
+  await clickButton('Activity');
+  await waitFor(`document.querySelector("[role=dialog]")?.innerText.includes(${JSON.stringify(completed.referenceCode)})`, 'site timeline work reference');
+  await assertNoOverflow('Site activity timeline');
+  await clickButton('Close', 'document.querySelector("[role=dialog]")');
   await verifyWorkloadPresentation({ navigate, waitFor, request, evaluate, assertNoOverflow, siteId: site.id, expected: 0 });
 
   await navigate('/#/reports');
@@ -543,7 +555,7 @@ try {
     ...(taskFlow
       ? { topLevelTaskBrowserFlow: 'passed', taskRegistration: true,
         leaderAssessment: true, directExecution: true, finalReport: true,
-        reportArchive: true, overviewCounts: true, siteAudit: true,
+        reportArchive: true, overviewCounts: true, siteAudit: true, objectActivityTimeline: true, siteActivityTimeline: true, activityKeyboard: true,
         notificationQueue: true, classifiedReport: true, workloadPresentation: true,
         separateReportApprover: true, storedContentInjection: true, pdfOutput: Boolean(reportPdfPath),
         multiPageClassifiedReport: Boolean(reportPdfPath), ...taskEvidence }

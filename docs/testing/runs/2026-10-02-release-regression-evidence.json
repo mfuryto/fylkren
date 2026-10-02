@@ -685,7 +685,7 @@
         "apps/web/src/reports/printReport.ts:58:  frame.srcdoc = `<!doctype html><html lang=\"${language.replace(/[^A-Za-z0-9-]/g, \"\") || \"en\"}\"><head><meta charset=\"UTF-8\"><title>${title.replace(/[<>&]/g, \"\")}</title>${styles}<style>",
         "apps/web/src/components/RichText.tsx:82:    element.innerHTML = markdownToEditorHtml(value);",
         "apps/web/src/components/RichText.tsx:87:  function emitChange() { const element = editor.current; if (!element) return; const next = editorHtmlToMarkdown(element); if (next.length > maxLength) { element.innerHTML = markdownToEditorHtml(value); return; } lastValue.current = next; onChange(next); rememberSelection(); }",
-        "apps/web/src/components/RichText.tsx:95:  return <div className=\"rich-text-editor\"><div className=\"rich-text-toolbar\" role=\"toolbar\" aria-label={t(\"textFormatting\")}><button className=\"secondary-button\" type=\"button\" onMouseDown={(event) => { event.preventDefault(); format(\"normal\"); }}>{t(\"normalText\")}</button><label><span className=\"sr-only\">{t(\"headingLevel\")}</span><select aria-label={t(\"headingLevel\")} value=\"\" onChange={(event) => format(event.target.value as \"h1\" | \"h2\" | \"h3\" | \"h4\")}><option value=\"\" disabled>{t(\"heading\")}</option><option value=\"h1\">H1</option><option value=\"h2\">H2</option><option value=\"h3\">H3</option><option value=\"h4\">H4</option></select></label><button className=\"secondary-button\" type=\"button\" onMouseDown={(event) => { event.preventDefault(); format(\"ul\"); }} aria-label={t(\"bulletedList\")}>\u2022 {t(\"list\")}</button><button className=\"secondary-button\" type=\"button\" onMouseDown={(event) => { event.preventDefault(); format(\"ol\"); }} aria-label={t(\"numberedList\")}>1. {t(\"list\")}</button></div><div ref={editor} className=\"workflow-document-editor\" contentEditable role=\"textbox\" aria-multiline=\"true\" data-placeholder={t(\"writeHere\")} style={{ minHeight: `${Math.max(180, rows * 24)}px` }} onInput={emitChange} onPaste={(event) => { event.preventDefault(); insertPlainText(event.clipboardData.getData(\"text/plain\")); }} onDrop={(event) => { event.preventDefault(); insertPlainText(event.dataTransfer.getData(\"text/plain\")); }} onDragOver={(event) => event.preventDefault()} onKeyUp={rememberSelection} onMouseUp={rememberSelection} onFocus={(event) => { if (!event.currentTarget.innerHTML) event.currentTarget.innerHTML = markdownToEditorHtml(value); rememberSelection(); }} /></div>;",
+        "apps/web/src/components/RichText.tsx:95:  return <div className=\"rich-text-editor\"><div className=\"rich-text-toolbar\" role=\"toolbar\" aria-label={t(\"textFormatting\")}><button className=\"secondary-button\" type=\"button\" onMouseDown={(event) => { event.preventDefault(); format(\"normal\"); }}>{t(\"normalText\")}</button><label><span className=\"sr-only\">{t(\"headingLevel\")}</span><select aria-label={t(\"headingLevel\")} value=\"\" onChange={(event) => format(event.target.value as \"h1\" | \"h2\" | \"h3\" | \"h4\")}><option value=\"\" disabled>{t(\"heading\")}</option><option value=\"h1\">H1</option><option value=\"h2\">H2</option><option value=\"h3\">H3</option><option value=\"h4\">H4</option></select></label><button className=\"secondary-button\" type=\"button\" onMouseDown={(event) => { event.preventDefault(); format(\"ul\"); }} aria-label={t(\"bulletedList\")}>• {t(\"list\")}</button><button className=\"secondary-button\" type=\"button\" onMouseDown={(event) => { event.preventDefault(); format(\"ol\"); }} aria-label={t(\"numberedList\")}>1. {t(\"list\")}</button></div><div ref={editor} className=\"workflow-document-editor\" contentEditable role=\"textbox\" aria-multiline=\"true\" data-placeholder={t(\"writeHere\")} style={{ minHeight: `${Math.max(180, rows * 24)}px` }} onInput={emitChange} onPaste={(event) => { event.preventDefault(); insertPlainText(event.clipboardData.getData(\"text/plain\")); }} onDrop={(event) => { event.preventDefault(); insertPlainText(event.dataTransfer.getData(\"text/plain\")); }} onDragOver={(event) => event.preventDefault()} onKeyUp={rememberSelection} onMouseUp={rememberSelection} onFocus={(event) => { if (!event.currentTarget.innerHTML) event.currentTarget.innerHTML = markdownToEditorHtml(value); rememberSelection(); }} /></div>;",
         "apps/web/src/api/authClient.ts:10:    atob(input.replace(/-/g, \"+\").replace(/_/g, \"/\")),",
         "apps/web/src/platform/federationApi.ts:80:const peerPath = (id: string) => `${base}/peers/${encodeURIComponent(id)}`;",
         "apps/web/src/platform/federationApi.ts:122:  apiMutate(`${peerPath(id)}/deliveries/${encodeURIComponent(messageId)}/retry`, \"POST\", undefined,",
@@ -1031,5 +1031,520 @@
         "SV-064"
       ]
     }
-  ]
+  ],
+  "activityLifecycleDelivery": {
+    "recordedAtUtc": "2026-10-02T23:35:31.694578+00:00",
+    "status": "verified-with-documented-navigation-sizing-follow-up",
+    "reviewCheckpoint": "8121fd760ba0837cf1c7c46c60b2498a08fe3c3b",
+    "foundationCheckpoint": "59d8130",
+    "candidateImages": {
+      "api": "sha256:aa664f1d79e1edcf6a226f971f284879bef9e377f53cd0aab03a2a0c6563e13e",
+      "web": "sha256:22e8e9e1fc71f7556c0b38d1eca050990b0d50941c07593d16e409cdbc0913a5"
+    },
+    "apiRegressionGatewayWebImage": "sha256:bcafb209a7d039a96632701756c1026b4599a73ea485542f76cf7e5f00e6f60c",
+    "gatewayScope": "API regression used the unchanged gateway configuration before the final activity-label-only web change. Final core browser tested the candidate API/web pair.",
+    "sourceSha256": {
+      "apps/api/ActivityAudit/AuditEvent.cs": "ab5f1b9c1d28723fad6bdcf98c3424cefeb91186edeee5aa215dd66ed263b271",
+      "apps/api/DomainEvents/ActivityEventCatalog.cs": "eb0bf85d3946a667ac4114b84031509b5d230866c2154c93b29d166766699035",
+      "apps/api/DomainEvents/ActivityQueryEndpoints.cs": "71bd1af1ad7d274f77bcdcad1b8ff6c11f5c1555af51717ec1b609fb887f6d1d",
+      "apps/api/DomainEvents/DomainEvent.cs": "a151bb9ada42ce726921e7f4bd917cfd9b44b0215d410092cb19e8a6c7aa94f8",
+      "apps/api/DomainEvents/DomainEventContext.cs": "72312478e883e152eb6f9c22490ae1578d3640a303d049662b7ae08e9abf456d",
+      "apps/api/DomainEvents/EventProjection.cs": "80237b8e6f176f538c404722b0b519b6c38fd2f7a531cd6257387421860fe4f8",
+      "apps/api/DomainEvents/WebhookDeliveryWorker.cs": "3d0b0f69f34201eee4e0cf0543199941dbafc657fb5cd5ab72642c2f6481c60c",
+      "apps/api/DomainEvents/WorkActivity.cs": "691816d2c3fe69cad838c032903089c5ed9a2a6022db3d36a70064e17e7a3807",
+      "apps/api/Federation/FederationCancellationReceiveEndpoints.cs": "35857154401f28984dc43c1202221d5d0338f18c8320bf2664886d80cfe4865c",
+      "apps/api/Federation/FederationOfficialAnswerReceiveEndpoints.cs": "1fb46f27bc50696313338eac38d938cef73e8d9abca96d60216f1521f8dc78e3",
+      "apps/api/Federation/FederationOutboundDeliveryWorker.cs": "d8b9fbd0a66f8278a8f89efeefec567f7ffa80b18fca283bf74b39aaf5ea958f",
+      "apps/api/Federation/FederationProgressReceiveEndpoints.cs": "658b1d3ce96b8f9d274f97d12be9cd015ffda5bf787c80636f6f4b9769f5a376",
+      "apps/api/Federation/FederationWorkReceiveEndpoints.cs": "7902379d3af1be2ca639e3cbbf787845d814ead68c9d9fff6454cd2e45f13032",
+      "apps/api/InformationLifecycle/InformationLifecycleRecord.cs": "ead5b3b358a69ba2eb93b5d808262ce16ae8656c9531add01cb303c5b6684b35",
+      "apps/api/InformationLifecycle/WorkLifecycleEndpoints.cs": "852a4764b3e060feaeb919ab4fd8dc95f0b5ecc6e7958546a29ff7175b690444",
+      "apps/api/Notifications/NotificationDeliveryWorker.cs": "0acda96d689cdabc0a83096d652006b052279cf15f949b19c0f34387bf973336",
+      "apps/api/Notifications/NotificationEventProjector.cs": "9a5d221a49dca3ccbb2f8e434bd9cbe3b63d970e362376523bcdb44c4a2eeef6",
+      "apps/api/Notifications/NotificationOutboxMessage.cs": "3628a86d503e209c360fddcd136bcb1ff14e43fcb349e0f344d2cafe0098dc33",
+      "apps/api/Persistence/ActivityFoundationModelConfiguration.cs": "cc75ad0486a0d0a2838c830c4a41ba93d133ab1f50d988801a208c331a86bdc3",
+      "apps/api/Persistence/AuditModelConfiguration.cs": "f954f0261126ab8307589e62fa693443e536fb9643ca10dc91a54b9f496410a3",
+      "apps/api/Persistence/ConcurrencyExceptionHandler.cs": "f8268ebf70dbcec5ec40923ad6158eababd57777328314dff57b584b9720f584",
+      "apps/api/Persistence/DeliveryClaims.cs": "d4ad71ddfd6a4590d858251e90b7ff0a8f38f8487884e2f69859f207747a44b0",
+      "apps/api/Persistence/FylkrenDbContext.cs": "83c68861403e1f960ef5f9b822a5e1757c1670beca0fdee7ffb55185562a4ee1",
+      "apps/api/Persistence/FylkrenDesignTimeFactory.cs": "17921a3796f471b673577af4970d1ceb8591654ed9b20f9fa83a4b00e8210e21",
+      "apps/api/Persistence/Migrations/20261002211913_AddActivityLifecycleFoundation.Designer.cs": "9d33935e36220aedce41eff202dc5348a54800f3d1991e57357e3d9f8ed58937",
+      "apps/api/Persistence/Migrations/20261002211913_AddActivityLifecycleFoundation.cs": "514201429df4c9ffabbec799e76ae4262803549ac194a29d26d620304596c54e",
+      "apps/api/Persistence/Migrations/20261002220000_WorkActivityArchiveGuards.cs": "d02843942b210cf2d58ba390c1add87620f4ad3af074148d140c16fdf00abac2",
+      "apps/api/Persistence/Migrations/FylkrenDbContextModelSnapshot.cs": "04332743545ae882d96a2fd2ba84a84294a1478d1637160d8d1d6ba287805b09",
+      "apps/api/Persistence/NotificationModelConfiguration.cs": "8403da74bbf67d919b4b1f1e8d6551acc967e1ce102f58f9b7ae58f3cb309a5e",
+      "apps/api/Platform/ApiMaintenanceWorker.cs": "2aa7a897c52fa6c3b9e68e763b51934fa115bc96ea951d898eedb15dfd03d441",
+      "apps/api/Platform/SmtpEndpoints.cs": "9e5378188b4caf507f554c2f3731681366a3baeb8800f6801d0d160dbaf24584",
+      "apps/api/Portability/PortableImportValidator.cs": "79b2a0c9264479e237d98ea88cd9822b6bd8f2088d9d3ef44b1ff807f7b1aaee",
+      "apps/api/Program.cs": "76ef0782af8cbbb1ffd1686a889cf3ca4524707677a3641db88e31b20a84e1b9",
+      "apps/api/Properties/AssemblyInfo.cs": "505c03ee4f01b90fb36d58b39e33eb64ec0b23972aae92bd3043500980ca3dbc",
+      "apps/api/WorkManagement/ExecutionAssignmentEndpoints.cs": "c972e68d11f30e832a20d49881e536d642364ed7cd6bf974fe76efedddbd8193",
+      "apps/api/WorkManagement/ExecutionCompletionEndpoints.cs": "57f4a2dd32c91e517af18882742f4ec68174c359ffbf6ca0f9ff63dbeb6765de",
+      "apps/api/WorkManagement/ExecutionDocumentEndpoints.cs": "6c5586242d0a132de704e015c997a32fee962786aec3a766f7a035aa474542f7",
+      "apps/api/WorkManagement/ExecutionWorkflowEndpoints.cs": "90a15d22d9892d185c299df750b0e8902ff9bd9df72caf0e3c0b0c2cafb4440a",
+      "apps/api/WorkManagement/PlanningApprovalService.cs": "b33874d65566075313f9b6e3f649270ce1c89fed62d729f5214adcb3a6ceed41",
+      "apps/api/WorkManagement/PlanningAssignmentEndpoints.cs": "a2c591ce17889be9fd57d2fe5fe3591315e18835303e2761b2309a0c4886c2ca",
+      "apps/api/WorkManagement/PlanningDecisionEndpoints.cs": "75dfd6b34878492c29ce17a892137f7c486ca7cebd782bafbc003c3229a58833",
+      "apps/api/WorkManagement/PlanningDocumentEndpoints.cs": "ccd277c6d59dd9942e7d701c3b5118e1bda0d08016f80feec8ff1518e3f03a08",
+      "apps/api/WorkManagement/PlanningSubmissionEndpoints.cs": "a6c80e158d824159407b30fd8cdadca027b7a302578d51b080c9ff3969f33319",
+      "apps/api/WorkManagement/PrimaryWorkItemCreationEndpoints.cs": "8c083d626afbfb9d90a8d219d4ad4fb3bd5b0acc5f1b8a148345631a743f4cad",
+      "apps/api/WorkManagement/SideRequestCreationEndpoints.cs": "1e91c58447c90fdf333b8ff1401401dd0451945d3a0aa974f587a4c3a37cdc13",
+      "apps/api/WorkManagement/WorkItemCompletionEndpoints.cs": "53340c9744a9ef2685f43c7be213074b42a0ba615cc763fb8f02fabe2f6f314a",
+      "apps/api/WorkManagement/WorkItemDependencyEndpoints.cs": "95fb0cc31d4dc25a29f793091ce90c6dcca7d898edf7d9319035034b6c389b96",
+      "apps/api/WorkManagement/WorkItemRoutingEndpoints.cs": "bcd95a5ad878ce61c63b1c6dcf41b024ac6c2b39c4ea130aff2b4d2df8f2a9d9",
+      "apps/api/WorkManagement/WorkItemStatusEndpoints.cs": "5d8c37f40a1fc08e266c8b6cf443d8a914f55bbd3e811241770075be32f0a57b",
+      "apps/web/src/components/ActivityTimeline.test.tsx": "2709c3803f63cbd17c9c6a7f92fe0ebe24f404240aabbead21548199f054e147",
+      "apps/web/src/components/ActivityTimeline.tsx": "6299d26cffa5f0b86c950234f2103a603724cb2e537960f89e610162560d3bf2",
+      "apps/web/src/components/WorkLifecycleButton.tsx": "9d940e3d78224189eb4a908cb1e9dfac45e4ba68967b744484e31cdaea0581fe",
+      "apps/web/src/localization/catalogs/cs-CZ/index.ts": "86ba6db4786789a8427ecb5d01e872e23c7faccb86f30aed47fea4c4ae6dfd99",
+      "apps/web/src/localization/catalogs/da-DK/index.ts": "88610ea7d016bb54f385e668449cc947bb4b136aeb3acea31073cac51d4b0461",
+      "apps/web/src/localization/catalogs/de-DE/index.ts": "3265bd654b48043baf40e6234eeb367496ecf6bc05158c4b403efdac0b92bdee",
+      "apps/web/src/localization/catalogs/en-US/index.ts": "39511ca41c0ec937863e0065a1077fbb17c02aaa3fa8f405b99426fc0fa73e9c",
+      "apps/web/src/localization/catalogs/es-ES/index.ts": "2d648fbc6310110323747e9c9b3caf46b5b07d58724e06bd92817ee76f9d8bc5",
+      "apps/web/src/localization/catalogs/et-EE/index.ts": "5a5ee1919daf03a50b86ee797c8a6036e3813a68d2a9881862ad89b4135179ae",
+      "apps/web/src/localization/catalogs/fi-FI/index.ts": "c241b9aa5b6c460cd6a44417735b29f8d081b0a514ce9b40a66d112c22bca78f",
+      "apps/web/src/localization/catalogs/fr-FR/index.ts": "445692e98e345f5bbc9182e4e65200065ef4364bc111b010c3f6f9041d243c7b",
+      "apps/web/src/localization/catalogs/it-IT/index.ts": "ae25fa747b3d36a8b0678889308eb4addab739c99be1a0f27d7d71f1b3c0689d",
+      "apps/web/src/localization/catalogs/lt-LT/index.ts": "f9ea3c0b7ebfcc7a3484373b136025f1affd55278eec59e19dbb0f70c708478e",
+      "apps/web/src/localization/catalogs/lv-LV/index.ts": "e5cb91d120eac16f7814fa231ede82a911bd7d276596611e830ea89ff9b13e3c",
+      "apps/web/src/localization/catalogs/nb-NO/index.ts": "7017607a03a8df70e998893069fa4e979f16218fddf2b5847eda3d867a7b9643",
+      "apps/web/src/localization/catalogs/nl-NL/index.ts": "1ad16063dba4191925a36855d0018bb327811fb881f1ebbe0f0fd8331f4b9c9b",
+      "apps/web/src/localization/catalogs/pl-PL/index.ts": "9809daebd0653f771a686dd5709ec37489475418969f91e2b140847b113bf49c",
+      "apps/web/src/localization/catalogs/pt-PT/index.ts": "9c71d8f58289289a3d10e06d11c3d1b2ba4fdab8a9d1a49ad559174736132f60",
+      "apps/web/src/localization/catalogs/ro-RO/index.ts": "9b20d796433386ef907db772128e4cbcb1be7984e08302f4e174bfaab27ab790",
+      "apps/web/src/localization/catalogs/supplements/activity.ts": "9b14b1a89185a2ec6efe35c1f88a05647b326cbc5cc53c269ad553bb633b1f88",
+      "apps/web/src/localization/catalogs/sv-SE/index.ts": "c93830bc9261b895c9a7ccf75a4b758bca108959aabb52112c50724e0e2f41f4",
+      "apps/web/src/localization/catalogs/uk-UA/index.ts": "6ae1b829271eb92024740d621e8a9a2bd1c64b76892e72d89cb85175dd4ae325",
+      "apps/web/src/localization/index.ts": "ae297661dba52681bc1c222600af11d0847fe87cf47ecb4e0c0318611c3116e2",
+      "apps/web/src/overview/OverviewPages.tsx": "f9ecb50616f7fd42087c6bd5e631ec142c15494b89812d8f32039c006bc43b9c",
+      "apps/web/src/tasks/TaskCardPresentation.tsx": "bc0cafc9541fa197455e9fbc92a3c57966045fc59d7e272b76c1be0d1aeca133",
+      "apps/web/src/workflows/ExecutionQueueList.tsx": "d174cea303eb51941e41aaa34677b1b9452df822ffb3ef8e5d0b0dd23e2cd6c0",
+      "apps/web/src/workflows/PlanningQueueList.tsx": "c7dc975a4e14aca1cb8dbff700340171e12376f7cb7a63036d313c61b99e84d2",
+      "tests/foundations/Fylkren.FoundationTests.csproj": "54a1ae6bcce7bbba4c49c64e647e53697a0c696a611107ac86f9bd5719453edd",
+      "tests/foundations/Program.cs": "edb4f464c990a58492e76fd6b838b239970afec79338c4b6b84d012043936826",
+      "tests/foundations/WorkSliceTests.cs": "6343331b69bdd6b2627a8ac8708e69339798424cff7f1aa3a81eefadf716970f",
+      "tools/e2e/activity-lifecycle.mjs": "e7b2c7b5877ab622b9e7ba1534894f0c724cff69ea7630bb01220704d9eec578",
+      "tools/e2e/community-browser-smoke.mjs": "eac1baee662713ca35eef226d02d10edd9ecaa7b795c3366e2a67517cb84b9e5",
+      "tools/e2e/workload-load.mjs": "4aa8ad86340d80b3db63faa5f562310485d3d670b537fb13ad407a1e75a9e268",
+      "tools/run-e2e-editions.mjs": "ddea3ee30d87112d707a49be9da182acaeb2c031fe2e1e877ed27befce056f72",
+      "tools/run-federation-pair.mjs": "01a1f46454022888af9eb4c214ed207f27ec5f9e57c44720a3a5a9ac32007c20",
+      "tools/run-foundation-tests.mjs": "b3961ac91e78f7b560c7172857159af5c597c5cfb0a751a35e077ffa1ff4ce86",
+      "tools/test-e2e-local.mjs": "aea336957d68a5ff5fd9fe8d7cf1602e76fb462ce9962ed3c5b4a745692fb0d3"
+    },
+    "foundationAndWorkItemDatabaseTests": "passed: migration/rollback, actor/metadata, immutable facts, state/audit/event/outbox/projection rollback, writer gates, same-owner archive/foreign-owner preservation, concurrent delivery claims/recovery, disabled disposal and downgrade boundaries",
+    "frontend": {
+      "passedTests": 151,
+      "testFiles": 39,
+      "typecheck": "passed",
+      "productionBuild": "passed"
+    },
+    "apiRegression": {
+      "editionsAndTransitions": "passed",
+      "activityTimeline": "passed",
+      "informationArchive": "passed",
+      "activityAccessBoundaries": "passed",
+      "localPlanningExecutionReport": "passed",
+      "crossSiteIsolation": "passed",
+      "authorizationBoundaries": "passed",
+      "dependencies": "passed",
+      "learning": "passed",
+      "taskComments": "passed",
+      "decisionsRisksVersions": "passed",
+      "webhookFailureIsolation": "passed",
+      "portability": "passed",
+      "portableParserBoundaries": "passed"
+    },
+    "coreBrowser": {
+      "topLevelTaskBrowserFlow": "passed",
+      "taskRegistration": true,
+      "leaderAssessment": true,
+      "directExecution": true,
+      "finalReport": true,
+      "reportArchive": true,
+      "overviewCounts": true,
+      "siteAudit": true,
+      "objectActivityTimeline": true,
+      "siteActivityTimeline": true,
+      "activityKeyboard": true,
+      "notificationQueue": true,
+      "classifiedReport": true,
+      "workloadPresentation": true,
+      "separateReportApprover": true,
+      "storedContentInjection": true,
+      "pdfOutput": true,
+      "multiPageClassifiedReport": true,
+      "keyboardModalNavigation": true,
+      "accessibleDialogTree": true,
+      "visibleKeyboardFocus": true,
+      "smtpHandoff": true,
+      "smtpRetry": true,
+      "mailboxReceipt": true,
+      "smtpHeaderInjectionRejected": true,
+      "templateExpressionsLiteral": true,
+      "templateValuesNotRecursivelyExpanded": true,
+      "templateRejectedUpdatesUnchanged": true,
+      "smtpDotContentPreserved": true,
+      "chromium": "Chrome/152.0.7977.82",
+      "firstRunSetup": true,
+      "authenticatedShell": true,
+      "communityEdition": true,
+      "siteCreation": true,
+      "desktopOverflow": false,
+      "mobileOverflow": false,
+      "browserErrors": 0
+    },
+    "additionalBrowserApiImage": "sha256:ffe564c1b2e1d74e7f2d159862c4443a50f3c26fcc2d57099288e24f4feac481",
+    "additionalBrowserWebImage": "sha256:bcafb209a7d039a96632701756c1026b4599a73ea485542f76cf7e5f00e6f60c",
+    "additionalBrowserScope": "Full Enterprise/TOTP/WebAuthn continuation before later owner/writer SQL guards and activity label correction; those changes do not alter identity or licensing code.",
+    "additionalBrowser": {
+      "enterpriseBrowserTransition": {
+        "enterpriseBrowserTransition": "passed",
+        "licenseFileInput": true,
+        "enterpriseControls": true,
+        "communityDowngrade": true,
+        "sitePreserved": true,
+        "chromium": "Chrome/152.0.7977.82",
+        "firstRunSetup": true,
+        "authenticatedShell": true,
+        "communityEdition": true,
+        "siteCreation": true,
+        "licensePage": true,
+        "federationReadOnlyBoundary": true,
+        "desktopOverflow": false,
+        "mobileOverflow": false,
+        "browserErrors": 0
+      },
+      "totpSecurity": {
+        "totpSecurity": "passed",
+        "passwordReauthentication": true,
+        "setupReplayRejected": true,
+        "adjacentWindowsRejected": true,
+        "parallelRecoverySingleUse": true,
+        "staleChallengeAfterSignOutRejected": true,
+        "parallelTotpSingleUse": true,
+        "tamperedChallengeRejected": true
+      },
+      "webAuthnSecurity": {
+        "webAuthnSecurity": "passed",
+        "virtualCtap2Authenticator": true,
+        "passwordReauthentication": true,
+        "staleRegistrationAfterSignOutRejected": true,
+        "parallelRegistrationSingleUse": true,
+        "parallelLoginSingleUse": true,
+        "registrationReplayRejected": true,
+        "signIn": true,
+        "assertionReplayRejected": true,
+        "wrongOriginRejected": true,
+        "wrongRpIdRejected": true,
+        "regressedCounterRejected": true,
+        "staleLoginAfterSignOutRejected": true,
+        "deletionReauthentication": true,
+        "deletedCredentialPendingLoginRejected": true,
+        "failedFlowsLeaveNoSession": true
+      }
+    },
+    "signedFederation": {
+      "operationalWorkActivity": "passed",
+      "signedReceiptAndRetry": "passed",
+      "activityFactDeduplication": "passed",
+      "progressAndOfficialAnswer": "passed",
+      "privateLearningBoundary": "passed",
+      "sideAndPlannedRequests": "passed",
+      "cancellation": "passed"
+    },
+    "productionRouteBoundary": {
+      "federationProductionBoundary": "passed",
+      "environment": "Production",
+      "administrativeFoundationAvailable": true,
+      "routingDisabledByDefault": true,
+      "activatedThroughPlatformApi": true,
+      "productionWorkDelivered": true,
+      "ordinaryReportReturned": true,
+      "privateLearningExcludedFromFederation": true,
+      "deactivationVerified": true,
+      "peerWorkRoutesGatedWhileDisabled": 4,
+      "syntheticRoutesAbsent": 5,
+      "remoteRecipientSelectionAbsentBeforeActivation": true,
+      "noFederationWorkCreatedBeforeActivation": true
+    },
+    "transportRetention": {
+      "federationRetention": "passed",
+      "retentionDays": 2555,
+      "expiredRowsRemoved": {
+        "outbound": 5000,
+        "receipts": 5000,
+        "audit": 0
+      },
+      "recentRowsRetained": {
+        "outbound": 50002,
+        "receipts": 50002,
+        "audit": 50000
+      },
+      "activeAndUnresolvedRowsRetained": true,
+      "securityAuditRetained": true,
+      "nonFederationAuditRetained": true,
+      "plans": {
+        "deliveryCounts": {
+          "executionMs": 7.721,
+          "indexes": [
+            "IX_federation_outbound_messages_peer_instance_id_status"
+          ]
+        },
+        "newestDeliveries": {
+          "executionMs": 0.134,
+          "indexes": [
+            "IX_federation_outbound_messages_peer_instance_id_created_at"
+          ]
+        },
+        "receiptLookup": {
+          "executionMs": 0.116,
+          "indexes": [
+            "PK_federation_inbound_receipts"
+          ]
+        },
+        "newestAudit": {
+          "executionMs": 48.926,
+          "indexes": [
+            "IX_audit_events_occurred_at_id"
+          ]
+        }
+      }
+    },
+    "workload": {
+      "workloadLoad": "passed",
+      "createdTasks": 1000,
+      "metrics": [
+        {
+          "concurrency": 1,
+          "authorizedRequests": 100,
+          "unauthorizedRequestsRejected": 100,
+          "p50Ms": 11,
+          "p95Ms": 3607,
+          "p99Ms": 4135,
+          "maxMs": 4380,
+          "byEndpoint": [
+            {
+              "endpoint": "/api/work/sites/{siteId}/items?filter=active",
+              "p95Ms": 35,
+              "maxMs": 38
+            },
+            {
+              "endpoint": "/api/work/navigation-counts",
+              "p95Ms": 4135,
+              "maxMs": 4380
+            },
+            {
+              "endpoint": "/api/work/learning?siteId={siteId}&view=all",
+              "p95Ms": 11,
+              "maxMs": 32
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/reports",
+              "p95Ms": 13,
+              "maxMs": 14
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/workload-history",
+              "p95Ms": 12,
+              "maxMs": 62
+            }
+          ]
+        },
+        {
+          "concurrency": 10,
+          "authorizedRequests": 100,
+          "unauthorizedRequestsRejected": 100,
+          "p50Ms": 25,
+          "p95Ms": 6990,
+          "p99Ms": 7437,
+          "maxMs": 7506,
+          "byEndpoint": [
+            {
+              "endpoint": "/api/work/learning?siteId={siteId}&view=all",
+              "p95Ms": 23,
+              "maxMs": 24
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/reports",
+              "p95Ms": 35,
+              "maxMs": 52
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/workload-history",
+              "p95Ms": 48,
+              "maxMs": 54
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/items?filter=active",
+              "p95Ms": 74,
+              "maxMs": 87
+            },
+            {
+              "endpoint": "/api/work/navigation-counts",
+              "p95Ms": 7437,
+              "maxMs": 7506
+            }
+          ]
+        },
+        {
+          "concurrency": 25,
+          "authorizedRequests": 100,
+          "unauthorizedRequestsRejected": 100,
+          "p50Ms": 80,
+          "p95Ms": 10742,
+          "p99Ms": 11522,
+          "maxMs": 11572,
+          "byEndpoint": [
+            {
+              "endpoint": "/api/work/learning?siteId={siteId}&view=all",
+              "p95Ms": 94,
+              "maxMs": 105
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/reports",
+              "p95Ms": 95,
+              "maxMs": 115
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/workload-history",
+              "p95Ms": 86,
+              "maxMs": 88
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/items?filter=active",
+              "p95Ms": 239,
+              "maxMs": 277
+            },
+            {
+              "endpoint": "/api/work/navigation-counts",
+              "p95Ms": 11522,
+              "maxMs": 11572
+            }
+          ]
+        }
+      ]
+    },
+    "workloadBaselineApiImage": "sha256:01c0c95fe6fc37591399681b8ad7f25673f6dc73c88ad1cccf158ef6093414bf",
+    "workloadBaseline": {
+      "workloadLoad": "passed",
+      "createdTasks": 1000,
+      "metrics": [
+        {
+          "concurrency": 1,
+          "authorizedRequests": 100,
+          "unauthorizedRequestsRejected": 100,
+          "p50Ms": 13,
+          "p95Ms": 87,
+          "p99Ms": 105,
+          "maxMs": 264,
+          "byEndpoint": [
+            {
+              "endpoint": "/api/work/sites/{siteId}/items?filter=active",
+              "p95Ms": 39,
+              "maxMs": 48
+            },
+            {
+              "endpoint": "/api/work/navigation-counts",
+              "p95Ms": 105,
+              "maxMs": 264
+            },
+            {
+              "endpoint": "/api/work/learning?siteId={siteId}&view=all",
+              "p95Ms": 19,
+              "maxMs": 38
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/reports",
+              "p95Ms": 11,
+              "maxMs": 72
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/workload-history",
+              "p95Ms": 17,
+              "maxMs": 75
+            }
+          ]
+        },
+        {
+          "concurrency": 10,
+          "authorizedRequests": 100,
+          "unauthorizedRequestsRejected": 100,
+          "p50Ms": 17,
+          "p95Ms": 4471,
+          "p99Ms": 5555,
+          "maxMs": 5579,
+          "byEndpoint": [
+            {
+              "endpoint": "/api/work/learning?siteId={siteId}&view=all",
+              "p95Ms": 18,
+              "maxMs": 25
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/reports",
+              "p95Ms": 19,
+              "maxMs": 19
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/workload-history",
+              "p95Ms": 21,
+              "maxMs": 25
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/items?filter=active",
+              "p95Ms": 46,
+              "maxMs": 48
+            },
+            {
+              "endpoint": "/api/work/navigation-counts",
+              "p95Ms": 5555,
+              "maxMs": 5579
+            }
+          ]
+        },
+        {
+          "concurrency": 25,
+          "authorizedRequests": 100,
+          "unauthorizedRequestsRejected": 100,
+          "p50Ms": 56,
+          "p95Ms": 9323,
+          "p99Ms": 9606,
+          "maxMs": 9722,
+          "byEndpoint": [
+            {
+              "endpoint": "/api/work/learning?siteId={siteId}&view=all",
+              "p95Ms": 61,
+              "maxMs": 69
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/reports",
+              "p95Ms": 55,
+              "maxMs": 89
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/workload-history",
+              "p95Ms": 85,
+              "maxMs": 94
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/items?filter=active",
+              "p95Ms": 171,
+              "maxMs": 247
+            },
+            {
+              "endpoint": "/api/work/navigation-counts",
+              "p95Ms": 9606,
+              "maxMs": 9722
+            }
+          ]
+        }
+      ]
+    },
+    "workloadComparisonLimit": "Baseline is the reset initial-role fixture with 1000 tasks; candidate is the complete hierarchy/workflow fixture plus 1000 tasks. Both reproduce slow navigation-count reads, so these are diagnostic observations rather than a controlled performance equivalence claim.",
+    "unchangedNavigationSourceSha256": "fbfdb7a0e75ea66af64ca68dcd4e5ce53d563ae4d59fd64c8f6e59a9b2ab5403",
+    "irreversibleDispositionEnabled": false,
+    "retentionPolicyExecutionEnabled": false,
+    "productionTouched": false,
+    "asvsStatusesChanged": false,
+    "remainingDelivery": "Risk/measure/decision and other activity coverage; Site/user custodianship; consistent comprehensive portability; configured policy/redaction/purge recovery; navigation-count query sizing."
+  }
 }

@@ -208,7 +208,11 @@ internal sealed class FederationOutboundDeliveryWorker(
                     row.Direction == "outgoing" && row.LocalWorkItemId == message.OriginResourceId &&
                     row.PeerInstanceId == message.PeerInstanceId &&
                     row.RemoteSiteId == message.DestinationSiteId, ct);
+                var alreadyAcknowledged = link.AcknowledgedAt is not null;
                 link.Acknowledge(receipt.LocalWorkItemId, DateTimeOffset.UtcNow);
+                if (!alreadyAcknowledged) Fylkren.Api.DomainEvents.WorkActivity.Add(db,
+                    ActivityAudit.AuditEvent.FromSystem(Guid.NewGuid(), "federation-delivery", "assignment.sent", "work-item", message.OriginResourceId, DateTimeOffset.UtcNow),
+                    "assignment.sent", workItemId: message.OriginResourceId, sourceMessageId: message.MessageId, correlationId: message.CorrelationId);
             }
             if (message.MessageType == "assignment.cancelled")
             {
@@ -224,10 +228,10 @@ internal sealed class FederationOutboundDeliveryWorker(
                         .Where(row => row.InstanceId == message.PeerInstanceId &&
                             row.SiteId == message.DestinationSiteId)
                         .Select(row => row.Name).SingleAsync(ct);
-                    db.AuditEvents.Add(ActivityAudit.AuditEvent.FromFederatedPeer(Guid.NewGuid(),
+                    Fylkren.Api.DomainEvents.WorkActivity.Add(db, ActivityAudit.AuditEvent.FromFederatedPeer(Guid.NewGuid(),
                         message.SourceSiteId, message.PeerInstanceId, message.DestinationSiteId,
                         peerName, "work-item.cancellation-acknowledged-by-peer", "work-item",
-                        work.Id, DateTimeOffset.UtcNow));
+                        work.Id, DateTimeOffset.UtcNow), "assignment.cancelled", sourceMessageId: message.MessageId, correlationId: message.CorrelationId);
                 }
             }
             message.MarkDelivered(DateTimeOffset.UtcNow);

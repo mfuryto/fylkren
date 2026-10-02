@@ -67,6 +67,8 @@ internal sealed class ApiMaintenanceWorker(
                 JOIN work_items work ON work.id = message.origin_resource_id
                 WHERE message.status = 'delivered' AND message.delivered_at < {{cutoff}}
                   AND work.status IN ('completed', 'rejected', 'cancelled', 'reassigned')
+                  AND NOT EXISTS (SELECT 1 FROM information_lifecycle life WHERE life.resource_type = 'work_item'
+                    AND life.resource_id = work.id AND (life.is_held OR life.stage <> 'active'))
                 ORDER BY message.delivered_at, message.message_id
                 LIMIT {{FederationRetentionBatchSize}}
             )
@@ -79,24 +81,16 @@ internal sealed class ApiMaintenanceWorker(
                 JOIN work_items work ON work.id = receipt.local_work_item_id
                 WHERE receipt.received_at < {{cutoff}}
                   AND work.status IN ('completed', 'rejected', 'cancelled', 'reassigned')
+                  AND NOT EXISTS (SELECT 1 FROM information_lifecycle life WHERE life.resource_type = 'work_item'
+                    AND life.resource_id = work.id AND (life.is_held OR life.stage <> 'active'))
                 ORDER BY receipt.received_at, receipt.peer_instance_id, receipt.message_id
                 LIMIT {{FederationRetentionBatchSize}}
             )
             """, ct);
-        var removedAudit = await database.Database.ExecuteSqlInterpolatedAsync($$"""
-            DELETE FROM audit_events
-            WHERE id IN (
-                SELECT id FROM audit_events
-                WHERE occurred_at < {{cutoff}}
-                  AND (actor_instance_id IS NOT NULL OR event_type LIKE 'federation-%'
-                       OR event_type LIKE 'work-item.federated-%')
-                ORDER BY occurred_at, id
-                LIMIT {{FederationRetentionBatchSize}}
-            )
-            """, ct);
-        if (removedOutbound + removedReceipts + removedAudit > 0)
+        // Protocol housekeeping never acts as the security audit retention policy.
+        if (removedOutbound + removedReceipts > 0)
             logger.LogInformation(
-                "Removed expired federation history: {OutboundCount} outbound, {ReceiptCount} receipts, {AuditCount} audit events",
-                removedOutbound, removedReceipts, removedAudit);
+                "Removed expired federation transport history: {OutboundCount} outbound, {ReceiptCount} receipts",
+                removedOutbound, removedReceipts);
     }
 }

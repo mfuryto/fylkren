@@ -21,11 +21,12 @@ export async function measureWorkload({ leader, platform, siteId, unitId, workIt
     `/api/work/sites/${siteId}/workload-history`];
   const metrics = [];
   for (const concurrency of [1, 10, 25]) {
-    let index = 0; const elapsed = [];
+    let index = 0; const elapsed = []; const byPath = new Map();
     await Promise.all(Array.from({ length: concurrency }, async () => {
       while (index < 100) {
         const path = paths[index++ % paths.length], start = performance.now();
-        const value = await leader.request(path); elapsed.push(performance.now() - start);
+        const value = await leader.request(path); const duration = performance.now() - start; elapsed.push(duration);
+        const samples = byPath.get(path) ?? []; samples.push(duration); byPath.set(path, samples);
         assert.equal(value.status, 200, `Load read failed at concurrency ${concurrency}`);
         const denied = await platform.request(`/api/work/sites/${siteId}/items`);
         assert.equal(denied.status, 403, 'Administrative identity gained operational access under load');
@@ -33,7 +34,8 @@ export async function measureWorkload({ leader, platform, siteId, unitId, workIt
     }));
     elapsed.sort((a, b) => a - b);
     metrics.push({ concurrency, authorizedRequests: elapsed.length, unauthorizedRequestsRejected: elapsed.length,
-      p50Ms: Math.round(elapsed[49]), p95Ms: Math.round(elapsed[94]), p99Ms: Math.round(elapsed[98]), maxMs: Math.round(elapsed.at(-1)) });
+      p50Ms: Math.round(elapsed[49]), p95Ms: Math.round(elapsed[94]), p99Ms: Math.round(elapsed[98]), maxMs: Math.round(elapsed.at(-1)),
+      byEndpoint: [...byPath].map(([path, samples]) => { samples.sort((a, b) => a - b); return { endpoint: path.replace(siteId, '{siteId}'), p95Ms: Math.round(samples[Math.ceil(samples.length * .95) - 1]), maxMs: Math.round(samples.at(-1)) }; }) });
   }
   return { workloadLoad: 'passed', createdTasks: count, metrics };
 }

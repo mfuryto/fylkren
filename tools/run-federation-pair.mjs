@@ -10,11 +10,12 @@ const composeFile = 'tools/e2e/federation-pair.compose.yaml';
 const currentImage = 'fylkren-federation-pair-test-api:local';
 const oldCommit = '152d0f2';
 const oldImage = `fylkren-federation-pair-test-api:mixed-${oldCommit}`;
+const operationalOnly = process.argv.includes('--operational-only');
 const loadOnly = process.argv.includes('--load-only');
 const restoreOnly = process.argv.includes('--restore-only');
 const retentionOnly = process.argv.includes('--retention-only');
 const productionBoundaryOnly = process.argv.includes('--production-boundary-only');
-if ([loadOnly, restoreOnly, retentionOnly, productionBoundaryOnly].filter(Boolean).length > 1)
+if ([loadOnly, restoreOnly, retentionOnly, productionBoundaryOnly, operationalOnly].filter(Boolean).length > 1)
   throw new Error('Federation pair modes are mutually exclusive');
 const project = `fylkren-pair-${randomBytes(4).toString('hex')}`;
 const temporary = mkdtempSync(join(tmpdir(), 'fylkren-federation-pair-'));
@@ -26,7 +27,7 @@ const env = {
   FYLKREN_PAIR_ISSUER_PUBLIC_KEY: publicKey.export({ type: 'spki', format: 'der' }).toString('base64'),
   FYLKREN_PAIR_API_B_IMAGE: currentImage,
 };
-const productionBoundary = productionBoundaryOnly || (!loadOnly && !restoreOnly && !retentionOnly);
+const productionBoundary = productionBoundaryOnly || (!loadOnly && !restoreOnly && !retentionOnly && !operationalOnly);
 if (productionBoundary) env.FYLKREN_PAIR_ASPNETCORE_ENVIRONMENT = 'Production';
 
 function command(executable, args, options = {}) {
@@ -511,8 +512,8 @@ async function runRetentionPair() {
 
   const terminal = await assertQueuedOutboundDelivery(a, b);
   const active = await assertQueuedOutboundDelivery(a, b);
-  sql('postgres-a', `UPDATE work_items SET status = 'completed' WHERE id = '${terminal.originWorkItemId}'`);
-  sql('postgres-b', `UPDATE work_items SET status = 'completed' WHERE id = '${terminal.counterpartId}'`);
+  sql('postgres-a', `BEGIN; SELECT set_config('fylkren.activity_writer','1',true); UPDATE work_items SET status = 'completed' WHERE id = '${terminal.originWorkItemId}'; COMMIT;`);
+  sql('postgres-b', `BEGIN; SELECT set_config('fylkren.activity_writer','1',true); UPDATE work_items SET status = 'completed' WHERE id = '${terminal.counterpartId}'; COMMIT;`);
   const activeDeliveredId = randomUUID();
   const oldFailedId = randomUUID();
   const oldPendingId = randomUUID();
@@ -623,10 +624,7 @@ async function runRetentionPair() {
         AND origin_resource_id = '${terminal.originWorkItemId}'`)) +
       Number(sqlValue('postgres-b', `SELECT COUNT(*) FROM federation_inbound_receipts
       WHERE received_at < NOW() - INTERVAL '2555 days'
-        AND local_work_item_id = '${terminal.counterpartId}'`)) +
-      Number(sqlValue('postgres-b', `SELECT COUNT(*) FROM audit_events
-      WHERE event_type = 'federation-retention-fixture'
-        AND occurred_at < NOW() - INTERVAL '2555 days'`));
+        AND local_work_item_id = '${terminal.counterpartId}'`));
     if (remaining === 0) break;
     await new Promise(resolve => setTimeout(resolve, 500));
   }
@@ -638,7 +636,7 @@ async function runRetentionPair() {
       AND local_work_item_id = '${terminal.counterpartId}'`), '0');
   assert.equal(sqlValue('postgres-b', `SELECT COUNT(*) FROM audit_events
     WHERE event_type = 'federation-retention-fixture'
-      AND occurred_at < NOW() - INTERVAL '2555 days'`), '0');
+      AND occurred_at < NOW() - INTERVAL '2555 days'`), '5000');
   assert.equal(sqlValue('postgres-a', `SELECT COUNT(*) FROM federation_outbound_messages
     WHERE message_id IN ('${activeDeliveredId}', '${oldFailedId}', '${oldPendingId}')`), '3');
   assert.equal(sqlValue('postgres-b', `SELECT COUNT(*) FROM federation_inbound_receipts
@@ -651,9 +649,9 @@ async function runRetentionPair() {
     WHERE received_at > NOW() - INTERVAL '2555 days'`), '50002');
 
   process.stdout.write(`${JSON.stringify({ federationRetention: 'passed', retentionDays: 2555,
-    expiredRowsRemoved: { outbound: 5000, receipts: 5000, audit: 5000 },
+    expiredRowsRemoved: { outbound: 5000, receipts: 5000, audit: 0 },
     recentRowsRetained: { outbound: 50002, receipts: 50002, audit: 50000 },
-    activeAndUnresolvedRowsRetained: true, nonFederationAuditRetained: true, plans })}\n`);
+    activeAndUnresolvedRowsRetained: true, securityAuditRetained: true, nonFederationAuditRetained: true, plans })}\n`);
 }
 
 async function runProductionBoundaryPair() {
@@ -1591,8 +1589,8 @@ async function assertOperationalReturnPath(sender, receiver, link, senderLeader,
   // The return integration is independent of execution workflow details. Put this
   // disposable pair fixture at the ordinary report-review boundary, then use only
   // the public report, approval and completion commands under test.
-  sql('postgres-b', `UPDATE work_items SET status = 'in_review'
-    WHERE id = '${link.counterpartId}'`);
+  sql('postgres-b', `BEGIN; SELECT set_config('fylkren.activity_writer','1',true); UPDATE work_items SET status = 'in_review'
+    WHERE id = '${link.counterpartId}'; COMMIT;`);
   await expectStatus(receiver.api.put('/api/platform/classifications/settings', {
     enabled: true,
   }), 204, 'enable classifications on receiver');
@@ -2147,6 +2145,55 @@ async function assertPopulatedUpgrade(owner) {
   END; $$`);
 }
 
+async function runWorkActivityPair() {
+  const a = await setup('https://localhost:18443', 'a');
+  const b = await setup('https://localhost:18444', 'b');
+  const aPeer = `/api/platform/federation/peers/${b.instanceId}`;
+  const bPeer = `/api/platform/federation/peers/${a.instanceId}`;
+  const discoveredB = await expectStatus(a.api.post('/api/platform/federation/peers/discover', {
+    baseUrl: 'https://tls:444',
+  }), 200, 'discover retention receiver');
+  const discoveredA = await expectStatus(b.api.post('/api/platform/federation/peers/discover', {
+    baseUrl: 'https://tls:443',
+  }), 200, 'discover retention sender');
+  await expectStatus(a.api.post('/api/platform/federation/peers', {
+    instanceId: b.instanceId, name: 'Retention B', baseUrl: discoveredB.baseUrl,
+    fingerprint: discoveredB.fingerprint,
+  }), 201, 'approve retention receiver');
+  await expectStatus(b.api.post('/api/platform/federation/peers', {
+    instanceId: a.instanceId, name: 'Retention A', baseUrl: discoveredA.baseUrl,
+    fingerprint: discoveredA.fingerprint,
+  }), 201, 'approve retention sender');
+  await expectStatus(a.api.post(`${aPeer}/probe`, {}), 200, 'probe retention receiver');
+  await expectStatus(b.api.post(`${bPeer}/probe`, {}), 200, 'probe retention sender');
+  await expectStatus(a.api.post(`${aPeer}/catalog/sync`, {}), 200, 'sync retention receiver');
+  await expectStatus(b.api.post(`${bPeer}/catalog/sync`, {}), 200, 'sync retention sender');
+  await expectStatus(a.api.put('/api/platform/federation/routing', { enabled: true }),
+    200, 'enable retention sender routing');
+  await expectStatus(b.api.put('/api/platform/federation/routing', { enabled: true }),
+    200, 'enable retention receiver routing');
+
+  const leaderA = await makeSiteLeader(a, 'https://localhost:18443');
+  const leaderB = await makeSiteLeader(b, 'https://localhost:18444');
+  const returned = await assertQueuedOutboundDelivery(a, b, leaderA);
+  assert.equal(sqlValue('postgres-a', `SELECT COUNT(*) FROM domain_events
+    WHERE activity_type = 'assignment.sent' AND source_message_id = '${returned.originalMessageId}'`), '1',
+    'Signed delivery retry duplicated the common activity fact');
+  assert.equal(sqlValue('postgres-b', `SELECT COUNT(*) FROM domain_events
+    WHERE activity_type = 'assignment.received' AND source_message_id = '${returned.originalMessageId}'
+      AND context_work_item_id = '${returned.counterpartId}' AND source = 'federated'`), '1',
+    'Signed receive retry duplicated or lost the federated activity fact');
+  await assertOperationalReturnPath(a, b, returned, leaderA, leaderB);
+  await assertOperationalSideRequest(a, b, leaderA);
+  await assertOperationalPlannedRequest(a, b, leaderA);
+  const cancelled = await assertQueuedOutboundDelivery(a, b, leaderA);
+  await assertQueuedCancellation(a, b, cancelled, null, false, leaderA);
+  process.stdout.write(JSON.stringify({ operationalWorkActivity: 'passed',
+    signedReceiptAndRetry: 'passed', activityFactDeduplication: 'passed',
+    progressAndOfficialAnswer: 'passed', privateLearningBoundary: 'passed',
+    sideAndPlannedRequests: 'passed', cancellation: 'passed' }) + '\n');
+}
+
 async function runPair() {
   const a = await setup('https://localhost:18443', 'a');
   const b = await setup('https://localhost:18444', 'b');
@@ -2353,7 +2400,8 @@ try {
   try
   {
     compose(['up', '-d', '--no-build', '--wait']);
-    if (loadOnly) await runLoadPair();
+    if (operationalOnly) await runWorkActivityPair();
+    else if (loadOnly) await runLoadPair();
     else if (restoreOnly) await runRestorePair();
     else if (retentionOnly) await runRetentionPair();
     else await runProductionBoundaryPair();

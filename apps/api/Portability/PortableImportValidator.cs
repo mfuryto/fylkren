@@ -56,7 +56,7 @@ internal static class PortableImportValidator
                 var entry = archive.GetEntry(dataset.Path);
                 if (entry is null) { errors.Add($"Missing dataset: {dataset.Path}"); continue; }
                 if (entry.Length != dataset.Bytes) errors.Add($"The file size does not match for {dataset.Path}.");
-                var result = await InspectJsonLines(entry, expectedSiteId, cancellationToken);
+                var result = await InspectJsonLines(entry, expectedSiteId, dataset.Name, cancellationToken);
                 inspections[dataset.Name] = result;
                 if (!string.Equals(result.Hash, dataset.Sha256, StringComparison.OrdinalIgnoreCase)) errors.Add($"The integrity check failed for {dataset.Path}.");
                 if (result.Count != dataset.RecordCount) errors.Add($"The record count does not match for {dataset.Path}.");
@@ -106,7 +106,7 @@ internal static class PortableImportValidator
                 value.Bytes >= 0 && value.Bytes <= PortableExportPackage.MaximumPackageBytes);
     }
 
-    private static async Task<DatasetInspection> InspectJsonLines(ZipArchiveEntry entry, Guid expectedSiteId, CancellationToken cancellationToken)
+    private static async Task<DatasetInspection> InspectJsonLines(ZipArchiveEntry entry, Guid expectedSiteId, string datasetName, CancellationToken cancellationToken)
     {
         var errors = new List<string>();
         var count = 0;
@@ -131,7 +131,10 @@ internal static class PortableImportValidator
             }
             if (document.RootElement.TryGetProperty("site_id", out var siteValue) && siteValue.ValueKind == JsonValueKind.String && Guid.TryParse(siteValue.GetString(), out var siteId) && siteId != expectedSiteId)
                 errors.Add($"Record {count} points to site {siteId} outside the import boundary.");
-            foreach (var property in document.RootElement.EnumerateObject().Where(value => value.Name.EndsWith("_id", StringComparison.Ordinal) && value.Value.ValueKind == JsonValueKind.String))
+            if (datasetName == "domain-events" && document.RootElement.TryGetProperty("request_id", out var requestId) && requestId.ValueKind != JsonValueKind.Null &&
+                (requestId.ValueKind != JsonValueKind.String || requestId.GetString() is { Length: > 200 } || requestId.GetString()!.Any(char.IsControl)))
+                errors.Add($"Record {count} has an invalid request identifier.");
+            foreach (var property in document.RootElement.EnumerateObject().Where(value => !(datasetName == "domain-events" && value.Name == "request_id") && value.Name.EndsWith("_id", StringComparison.Ordinal) && value.Value.ValueKind == JsonValueKind.String))
             {
                 if (!Guid.TryParse(property.Value.GetString(), out var reference)) { errors.Add($"Record {count} has an invalid reference in {property.Name}."); continue; }
                 if (!references.TryGetValue(property.Name, out var values)) references[property.Name] = values = [];

@@ -23,7 +23,7 @@ internal static class ExecutionAssignmentEndpoints
             var run = await db.ExecutionRuns.SingleOrDefaultAsync(x => x.WorkItemId == itemId, ct);
             if (run is null) { run = new ExecutionRun(Guid.NewGuid(), itemId, personId, now); db.ExecutionRuns.Add(run); }
             else { if (run.ClaimedByPersonId is not null && run.ClaimedByPersonId != personId) return Results.Conflict(new { error = "Another user has claimed execution." }); run.Claim(personId, now); }
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), item.SiteId, personId, "execution.claimed", "execution-run", run.Id, now));
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), item.SiteId, personId, "execution.claimed", "execution-run", run.Id, now), "assignment.claimed", null);
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });
@@ -37,7 +37,7 @@ internal static class ExecutionAssignmentEndpoints
             if (!await WorkLevelAuthorization.LeadsLevel(run.WorkItem.SiteId, run.WorkItem.AssignedUnitId, personId, db, ct)) return Results.Problem(statusCode: 403);
             var now = DateTimeOffset.UtcNow;
             run.Release(now);
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "execution.released", "execution-run", run.Id, now));
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "execution.released", "execution-run", run.Id, now), "assignment.released", null);
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });
@@ -65,7 +65,7 @@ internal static class ExecutionAssignmentEndpoints
             if (!await WorkLevelAuthorization.LeadsLevel(run.WorkItem.SiteId, run.WorkItem.AssignedUnitId, personId, db, ct) || !await WorkLevelAuthorization.BelongsToLevel(run.WorkItem.SiteId, run.WorkItem.AssignedUnitId, request.PersonId, db, ct)) return Results.Problem(statusCode: 403);
             var now = DateTimeOffset.UtcNow;
             run.Claim(request.PersonId, now);
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "execution.reassigned", "execution-run", run.Id, now));
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "execution.reassigned", "execution-run", run.Id, now), "assignment.reassigned", null);
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });

@@ -46,7 +46,7 @@ internal static class PlanningDocumentEndpoints
             }
             db.WorkflowTimelineEvents.RemoveRange(await db.WorkflowTimelineEvents.Where(x => x.RunId == runId && x.StepId == stepId).ToListAsync(ct));
             for (var index = 0; index < events.Count; index++) db.WorkflowTimelineEvents.Add(new WorkflowTimelineEvent(Guid.NewGuid(), runId, stepId, events[index].Date, events[index].Description!.Trim(), index));
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.step-documented", "workflow-run", run.Id, now));
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.step-documented", "workflow-run", run.Id, now), "plan.updated", null);
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });

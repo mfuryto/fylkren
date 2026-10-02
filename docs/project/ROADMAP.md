@@ -14,11 +14,15 @@ Each gate must be complete and evidenced before the next gate changes public con
 
 ## Event/activity and information lifecycle foundations
 
-The [source review and proposed architecture](../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md) is the single design/requirement/test reference for this work. The review is complete; runtime implementation and its acceptance cases are pending. This foundation work precedes the next security-testing continuation at the user's request. Existing external contracts remain unchanged during the review.
+The [source review and proposed architecture](../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md) is the single design/requirement/test reference for this work. The additive foundation and coherent WorkItem slice are implemented; their staged execution evidence and remaining coverage are recorded in that document. This foundation work precedes the next security-testing continuation at the user's request. Existing external contracts remain unchanged.
 
-Implement additively on the existing domain-event model, preserving authoritative state/revisions and independent security audit. First deliver the WorkItem/plan/report vertical slice, notification/webhook cutover using existing queues, authorized object/site timelines and guarded closed/archive state. Then extend risk/measure/decision and other activity coverage, site/user custodianship, snapshot portability and relationship-aware lifecycle adapters. Do not introduce a broker, duplicate activity writer, second audit stream or automatic purge/retention periods.
+Implement additively on the existing domain-event model, preserving authoritative state/revisions and independent security audit. The delivered WorkItem/plan/report slice establishes notification/webhook cutover using existing queues, authorized object/site timelines and guarded closed/archive state. Next extend risk/measure/decision and other activity coverage, site/user custodianship, snapshot portability and relationship-aware lifecycle adapters. Do not introduce a broker, duplicate activity writer, second audit stream or automatic purge/retention periods.
 
 Before enabling irreversible disposition, implement independent policy/hold gates, export-before-deletion, cross-owner reference protection, replay-horizon preservation and resumable redaction/purge recovery. Architecture requirement IDs and T01–T14 acceptance cases are maintained in the linked proposal, rather than duplicated here. Retest affected controls in the existing ASVS matrix after implementation; then resume incomplete chapter-1 requirements 1.3.3, 1.3.6 and 1.4.2 in the established workflow.
+
+## Navigation-count sizing follow-up
+
+The staged foundation verification reproduced multi-second `/api/work/navigation-counts` reads under 10/25 concurrent readers against both the additive checkpoint and the WorkItem candidate. The maintained workload harness now records per-endpoint measurements so this existing bottleneck can be isolated. Preserve role/level predicates and pending-count semantics when correcting it; do not hide it by changing the fixture or broadening visibility. Other measured reads remain separate. Reproduce query plans and qualify the correction against the full hierarchy fixture before production sizing approval. See the [existing staged run](../testing/runs/2026-10-02-release-regression.md#activity-and-lifecycle-delivery--2026-10-03).
 
 ## Repository readiness
 

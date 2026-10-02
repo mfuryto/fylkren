@@ -80,7 +80,7 @@ internal static class PrimaryWorkItemCreationEndpoints
             await using var transaction = await db.Database.BeginTransactionAsync(ct);
             var now = DateTimeOffset.UtcNow; var item = new WorkItem(Guid.NewGuid(), siteId, personId, title, description, referenceUrl, "normal", request.DueAt, now, workItemTypeId: request.WorkItemTypeId, sourceTypeId: request.SourceTypeId, senderId: request.SenderId, recommendation: recommendation, sourceTypeNameSnapshot: sourceTypeName, senderNameSnapshot: senderName); db.WorkItems.Add(item);
             if (request.AssignedUnitId is Guid assignedUnitId) item.RegisterAtUnit(assignedUnitId, now);
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, isRequest ? "work-item.request-sent" : "work-item.registered", "work-item", item.Id, now));
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, personId, isRequest ? "work-item.request-sent" : "work-item.registered", "work-item", item.Id, now), "task.created", isRequest ? null : "new-work-item");
             DomainEventRecorder.Record(db, "task.created", siteId, personId, "task", item.Id, new { item.Id, item.Title, status = item.Status }, now);
             if (requestRecipient is not null)
             {
@@ -89,7 +89,7 @@ internal static class PrimaryWorkItemCreationEndpoints
                 var received = WorkItem.CreateTransferred(Guid.NewGuid(), item, requestRecipient.Id, personId, sourceSite.Name, actor.DisplayName, sourceTypeName, "Request", senderName, null, description, now);
                 db.WorkItems.Add(received);
                 item.TransitionWithinLevel("in_progress", $"The request has been sent to {requestRecipient.Name} and is awaiting processing and reporting.", now);
-                db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), requestRecipient.Id, personId, "work-item.received-from-parent-site", "work-item", received.Id, now));
+                Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), requestRecipient.Id, personId, "work-item.received-from-parent-site", "work-item", received.Id, now), "assignment.received", "new-work-item", originSiteId: siteId);
             }
             else if (remoteRecipient is not null)
             {
@@ -97,16 +97,18 @@ internal static class PrimaryWorkItemCreationEndpoints
                     remoteRecipient.InstanceId, remoteRecipient.SiteId, localInstanceId, db, ct);
                 if (outbound is null) return Results.Conflict(new { error = "federation_outbound_not_authorized" });
                 item.TransitionWithinLevel("in_progress", $"The request has been queued for delivery to {remoteRecipient.Name}.", now);
-                db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId,
-                    "work-item.federated-request-queued", "work-item", item.Id, now));
+                Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, personId,
+                    "work-item.federated-request-queued", "work-item", item.Id, now), "assignment.dispatch_queued", null);
             }
             else if (internalRecipient is not null)
             {
                 var sourceSite = await db.Sites.SingleAsync(x => x.Id == siteId, ct); var actor = await db.People.SingleAsync(x => x.Id == personId, ct);
                 var received = WorkItem.CreateInternalRequest(Guid.NewGuid(), item, personId, internalRecipient.Id, sourceSite.Name, actor.DisplayName, sourceTypeName, senderName, description, now, description);
                 db.WorkItems.Add(received); item.TransitionWithinLevel("in_progress", $"The request has been sent to {internalRecipient.Name} and is awaiting processing and reporting.", now);
-                db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.internal-request-received", "work-item", received.Id, now));
+                Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.internal-request-received", "work-item", received.Id, now), "assignment.received", "new-work-item", originSiteId: siteId);
             }
+            if (requestRecipient is not null || internalRecipient is not null)
+                WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, personId, "assignment.sent", "work-item", item.Id, now), "assignment.sent");
             await db.SaveChangesAsync(ct);
             await transaction.CommitAsync(ct);
             return Results.Created($"/api/work/sites/{siteId}/items/{item.Id}", new { item.Id, item.ReferenceCode });

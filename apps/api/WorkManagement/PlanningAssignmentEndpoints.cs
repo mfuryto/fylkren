@@ -23,7 +23,7 @@ internal static class PlanningAssignmentEndpoints
             if (run.ClaimedByPersonId is not null && run.ClaimedByPersonId != personId) return Results.Conflict(new { error = "Another planner has claimed this work." });
             var now = DateTimeOffset.UtcNow;
             run.Claim(personId, now);
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.claimed", "workflow-run", run.Id, now));
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.claimed", "workflow-run", run.Id, now), "assignment.claimed", null);
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });
@@ -61,7 +61,7 @@ internal static class PlanningAssignmentEndpoints
             if (!await WorkLevelAuthorization.LeadsLevel(run.WorkItem.SiteId, run.WorkItem.AssignedUnitId, personId, db, ct)) return Results.Problem(statusCode: 403);
             var now = DateTimeOffset.UtcNow;
             run.Release();
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.released", "workflow-run", run.Id, now));
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.released", "workflow-run", run.Id, now), "assignment.released", null);
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });
@@ -76,7 +76,7 @@ internal static class PlanningAssignmentEndpoints
             if (!await WorkLevelAuthorization.LeadsLevel(run.WorkItem.SiteId, run.WorkItem.AssignedUnitId, personId, db, ct) || !await OrganizationAuthorization.CanPlanAtLevel(run.WorkItem.SiteId, run.WorkItem.AssignedUnitId, request.PersonId, db, ct)) return Results.Problem(statusCode: 403);
             var now = DateTimeOffset.UtcNow;
             run.Claim(request.PersonId, now);
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.reassigned", "workflow-run", run.Id, now));
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.reassigned", "workflow-run", run.Id, now), "assignment.reassigned", null);
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });

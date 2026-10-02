@@ -25,6 +25,8 @@ The in-process Platform Manager log is deliberately bounded to 300 warning-or-hi
 
 Successful authentication is emitted at `Information`; rejected authentication and authorization are emitted at `Warning`. Unexpected exceptions remain handled by the platform exception handler and are recorded without returning implementation details to the client.
 
+Security audit records remain separate from domain/activity facts. Covered WorkItem commands correlate the two by event and operation IDs without copying task text into activity metadata. Federation transport housekeeping no longer removes security audit using the protocol retention duration. No replacement security-audit store or new audit purge policy is introduced. Customer-defined audit retention and deployment collector controls remain future configuration. See the [activity/lifecycle architecture](../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md).
+
 ## Operational requirements
 
 - Restrict container logs, the database, backups, `.env`, and the Data Protection key volume to authorized operators.

@@ -4,6 +4,10 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Added authorized WorkItem and Site activity timelines over the existing event store, with correlated independent audit, notification/webhook projection and signed federation delivery.
+
+- Added explicit WorkItem information closure, archive and restoration with relationship checks and database guards. Irreversible deletion, anonymisation and retention-policy execution remain disabled.
+
 - Bound pending TOTP sign-in challenges to the account security version so logout, password changes and factor changes invalidate earlier challenges.
 
 - Added repeatable release browser/authenticator and workload verification, private-learning exclusion checks for PDF/federation, and updated security evidence.

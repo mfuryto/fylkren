@@ -52,9 +52,9 @@ internal static class PlanningDecisionEndpoints
             }
             if (string.IsNullOrWhiteSpace(request.Note) || request.Note.Trim().Length > 2000) return Results.ValidationProblem(new Dictionary<string, string[]> { ["note"] = ["A rationale is required and can contain at most 2,000 characters."] });
             var now = DateTimeOffset.UtcNow;
-            if (request.Action == "replan") { run.Return(); run.WorkItem.TransitionWithinLevel("planning", request.Note, now); db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.replanning-requested", "workflow-run", run.Id, now)); }
-            else if (request.Action == "hold") { run.WorkItem.TransitionWithinLevel("on_hold", request.Note, now); db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.put-on-hold", "workflow-run", run.Id, now)); }
-            else if (request.Action == "reject") { run.Reject(); run.WorkItem.TransitionWithinLevel("rejected", request.Note, now); db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.rejected", "workflow-run", run.Id, now)); }
+            if (request.Action == "replan") { run.Return(); run.WorkItem.TransitionWithinLevel("planning", request.Note, now); Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.replanning-requested", "workflow-run", run.Id, now), "plan.updated", null); }
+            else if (request.Action == "hold") { run.WorkItem.TransitionWithinLevel("on_hold", request.Note, now); Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.put-on-hold", "workflow-run", run.Id, now), "plan.updated", null); }
+            else if (request.Action == "reject") { run.Reject(); run.WorkItem.TransitionWithinLevel("rejected", request.Note, now); Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.rejected", "workflow-run", run.Id, now), "plan.updated", null); }
             else return Results.ValidationProblem(new Dictionary<string, string[]> { ["action"] = ["Invalid decision."] });
             await db.SaveChangesAsync(ct);
             return Results.NoContent();

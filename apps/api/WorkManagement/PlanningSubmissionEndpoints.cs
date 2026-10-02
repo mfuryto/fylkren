@@ -35,7 +35,7 @@ internal static class PlanningSubmissionEndpoints
             var now = DateTimeOffset.UtcNow;
             run.Submit(request.Allocations.FirstOrDefault()?.UnitId, request.Priority, request.DueAt);
             run.WorkItem.TransitionWithinLevel("planning_approval", null, now);
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.submitted-for-approval", "workflow-run", run.Id, now));
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.submitted-for-approval", "workflow-run", run.Id, now), "plan.submitted", "planning-completed");
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });

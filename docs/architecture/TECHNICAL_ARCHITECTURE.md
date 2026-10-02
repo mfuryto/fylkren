@@ -51,7 +51,7 @@ The static demo has a separate composition root, synthetic fixtures and no produ
 
 Business changes and their audit records are committed atomically when they belong to the same action. Audit is append-only through ordinary application behavior. Activity history, administrative audit and technical logs remain distinct.
 
-Operational notifications currently project selected `AuditEvent` records to a durable outbox-style delivery queue. Webhooks consume the separate `DomainEvent` stream. SMTP failure does not roll back the business action. Retry state, terminal error and sanitized diagnostic reason are retained for Platform Manager visibility.
+Covered WorkItem commands project common domain facts to the existing notification outbox within their business transaction; a shared adapter preserves recipient, preference and template behavior. Uncorrelated historical/uncovered audit records retain the legacy backlog path during cutover. Webhooks use the same domain facts and shared projection state while preserving the v1 representation. SMTP failure does not roll back the business action. Retry state, terminal error and sanitized diagnostic reason are retained for Platform Manager visibility.
 
 The [event/activity and information lifecycle review](EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md) documents the source inventory, conflicts and proposed convergence on the existing domain-event stream, with explicit lifecycle ownership and one reusable activity timeline. It is a design proposal; its fields, transitions and timeline APIs are not implemented. Security audit, domain revisions, workload state history and delivery receipts retain their distinct purposes.
 

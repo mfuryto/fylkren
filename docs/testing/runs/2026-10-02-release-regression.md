@@ -134,3 +134,46 @@ The trusted-TLS federation pair ran with the application environment set to Prod
 Twelve chapter-1 rows now have criterion-specific completed evidence rather than partial status. The only incomplete chapter-1 rows are 1.3.3 (dangerous-context integration limits), 1.3.6 (outbound destination/DNS/redirect/size boundaries, including the SAML library loader) and 1.4.2 (derived/aggregate arithmetic). Overall matrix: 35 Passed, 112 In progress, 53 Not assessed and 53 Not applicable. These counts do not certify completion of ASVS.
 
 Next session: implement the user's forthcoming architecture changes first, assess which recorded controls they affect, and reopen/retest those rows as needed. Then resume the three incomplete chapter-1 requirements in the same matrix and requirement-order workflow. No additional checklist or approval prerequisite is introduced.
+
+## Activity and lifecycle delivery — 2026-10-03
+
+The architecture continuation uses the [single foundation requirements/implementation/test reference](../../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md). The additive stage was verified and committed as `59d8130` before the WorkItem slice began. This continuation does not replace the ASVS matrix or infer completion of all architecture acceptance cases from a passing suite.
+
+The WorkItem slice extends the existing event store and existing delivery queues, preserves independent audit and versioned external/federation representations, and introduces only reversible closure/archive/restoration. No event sourcing, broker, second activity store, arbitrary retention duration, purge or anonymisation was enabled. Whole-Site/user custodianship, comprehensive lifecycle export and other domain activity coverage remain the next delivery.
+
+Reproduction uses the existing edition/browser/federation laboratories and the new package-free foundation database runner:
+
+```sh
+node tools/run-foundation-tests.mjs
+pnpm test
+pnpm typecheck
+node tools/run-e2e-editions.mjs --no-build
+node tools/run-release-browser.mjs --no-build
+node tools/run-federation-pair.mjs --operational-only --no-build
+node tools/run-federation-pair.mjs --production-boundary-only --no-build
+node tools/run-federation-pair.mjs --retention-only --no-build
+pnpm check:docs
+pnpm check:structure
+pnpm check:version
+```
+
+For `--no-build`, set `FYLKREN_E2E_API_IMAGE` and `FYLKREN_E2E_WEB_IMAGE` to the candidate images recorded in the manifest. Edition/browser laboratories share the repository environment fixture and run sequentially. Federation modes share TLS ports and run sequentially. All use disposable synthetic databases; production was neither changed nor scanned.
+
+Final candidate execution results are recorded below. Earlier failed browser attempts revealed a test helper that ignored accessible icon names, a missing wait for dialog keyboard focus, and an SMTP projection backlog metric that still counted migrated audits. These were corrected, without relaxing the assertions. Additional database ownership assertions found and corrected archive propagation through a foreign-owned WorkItem parent; the final guards protect same-owner descendants while preserving foreign ownership/reference. Forced signed receipt replay is explicitly checked to produce one sent/received activity fact.
+
+| Delivered scope | Executed result |
+| --- | --- |
+| PostgreSQL foundation and WorkItem slice | Passed actual upgrade/downgrade boundaries, immutable facts, actor/metadata validation, state/audit/event/outbox/projection rollback, old-writer rejection across owned content, archive/restore and independent foreign ownership, competing SMTP/webhook claims and recovery. |
+| API and compatibility | Full Community/Enterprise regression passed activity/lifecycle authorization, CSRF, pagination, closure/archive/restore plus existing routing, planning, execution, reports, comments, learning, risks/measures/decisions, webhooks, portability and matched backup restore. |
+| Frontend | 151 tests in 39 files, type checks and production image build passed. |
+| Final core Chromium flow | Object/Site activity, approved report event, root reference, incomplete-history notice, keyboard close, desktop/mobile overflow, PDF/private-learning exclusion and actual SMTP handoff/retry passed. |
+| Supplementary browser | Enterprise transitions, TOTP and WebAuthn passed before the later ownership/writer SQL guards and activity label correction. Identity/licensing code was unchanged; exact images are recorded in the manifest. |
+| Signed federation | Ordinary send/receive, forced replay with one activity fact, progress/report return, private learning isolation, side/planned requests, cancellation and Production default-off/activation/deactivation/hidden test routes passed. |
+| Transport housekeeping | Existing protocol duration removed 5,000 expired outbound and receipt rows each; all 5,000 old independent audit rows were retained. Recent, active and unresolved records remained. No new retention duration or purge policy was introduced. |
+| Repository gates | EF pending-model check, documentation/ASVS traceability, structure/language/version and repository/history safety checks passed. ASVS status counts remain 35 Passed, 112 In progress, 53 Not assessed, 53 Not applicable. |
+
+Candidate API and web IDs, 86 source/test hashes and safe outcome data are in the existing [manifest](2026-10-02-release-regression-evidence.json). The API regression used the unchanged gateway configuration before the final activity-label-only web change; the final core browser tested the final API/web pair.
+
+The full fixture plus 1,000 tasks returned every authorized read successfully and rejected all 300 administrative-only workload reads. Its navigation-count p95 at concurrency 1/10/25 was 4,135/7,437/11,522 ms; other endpoint p95 values were at most 239 ms. A reset initial-role fixture against the additive checkpoint also reproduced navigation-count p95 of 105/5,555/9,606 ms. The fixtures have different hierarchy complexity, so these are diagnostic observations, not a controlled performance-equivalence claim. Navigation implementation is unchanged and this sizing issue is explicitly retained in the roadmap. The existing workload harness now records endpoint-level measurements; `--workload-only` repeats its reset initial-role fixture without introducing another test list.
+
+Next architecture delivery is broader risk/measure/decision and other command activity, Site/user custodianship, consistent exit export and policy/hold adapters. Irreversible disposition remains disabled. Navigation-count query sizing is a separate outstanding release concern; security continuation still follows the one ASVS matrix.
