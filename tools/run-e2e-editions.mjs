@@ -39,7 +39,15 @@ function run(command, args, options = {}) {
   }
 }
 try {
-  run('docker', ['compose', '-p', project, 'up', '-d', '--build', '--wait']);
+  if (process.argv.includes('--no-build')) {
+    if (!env.FYLKREN_E2E_API_IMAGE || !env.FYLKREN_E2E_WEB_IMAGE) throw new Error('Set candidate API and web image IDs for --no-build.');
+    // The restore script deliberately uses the base compose file. Keep its
+    // default project tags bound to the same candidate as the initial startup.
+    run('docker', ['tag', env.FYLKREN_E2E_API_IMAGE, `${project}-api`]);
+    run('docker', ['tag', env.FYLKREN_E2E_WEB_IMAGE, `${project}-web`]);
+    env.COMPOSE_FILE = 'compose.yaml:tools/e2e/reuse-images.compose.yaml';
+  }
+  run('docker', ['compose', '-p', project, 'up', '-d', process.argv.includes('--no-build') ? '--no-build' : '--build', '--wait']);
   // A disposable, empty database only: bind the public test fixture to a reserved identity.
   run('docker', ['compose', '-p', project, 'exec', '-T', 'postgres', 'psql', '-U', 'fylkren', '-d', 'fylkren',
     '-c', `UPDATE instance_identity SET instance_id = '${fixture.instanceId}' WHERE key = 1`]);
@@ -113,6 +121,15 @@ try {
   if (existsSync(join(backupSet, 'INCOMPLETE'))) throw new Error('Completed backup retained its INCOMPLETE marker');
   run('sha256sum', ['-c', 'SHA256SUMS'], { cwd: backupSet });
   run('./deploy/compose/restore.sh', [backupSet, '--confirm-destructive-restore']);
+  if (process.argv.includes('--no-build')) run(process.execPath, ['-e', `
+    const {execFileSync}=await import('node:child_process');
+    for(const service of ['api','web']) {
+      const expected=process.env[service==='api'?'FYLKREN_E2E_API_IMAGE':'FYLKREN_E2E_WEB_IMAGE'];
+      const actual=execFileSync('docker',['inspect','--format','{{.Image}}','${project}-'+service+'-1'],{encoding:'utf8'}).trim();
+      const layers=ref=>execFileSync('docker',['image','inspect','--format','{{json .RootFS.Layers}}',ref],{encoding:'utf8'}).trim();
+      if(layers(actual)!==layers(expected))throw new Error('Restore changed the candidate '+service+' image');
+      console.log(JSON.stringify({restoredCandidateImage:service,image:actual}));
+    }`]);
   run(process.execPath, ['-e', `const response=await fetch('http://localhost:18081/api/configuration/public');const body=await response.json();if(!response.ok||body.setupRequired!==true)throw new Error(JSON.stringify(body));`]);
   run(process.execPath, ['tools/test-e2e-local.mjs', ...(process.argv.includes('--asvs-input-only') ? ['--asvs-input-only'] : [])]);
 } finally {

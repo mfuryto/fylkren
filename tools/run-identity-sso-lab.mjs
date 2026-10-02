@@ -684,6 +684,37 @@ try {
   const xmlProbes = compose(['exec', '-T', 'api', 'curl', '--fail', '--silent', '--show-error',
     '--cacert', '/run/fylkren-identity-lab/ca.crt', `${negativeAuthority}/xml-probes`]);
   assert.equal(JSON.parse(xmlProbes).xmlCanaryRequests, 0, 'XML parsing fetched an external entity');
+  const runtimeMetadata = compose(['exec', '-T', 'api', 'curl', '--fail', '--silent', '--show-error',
+    '--cacert', '/run/fylkren-identity-lab/ca.crt', `${authority}/protocol/saml/descriptor`]);
+  compose(['exec', '-T', 'api', 'curl', '--fail', '--silent', '--show-error',
+    '--cacert', '/run/fylkren-identity-lab/ca.crt', '-X', 'POST', '--data-binary', '@-', `${negativeAuthority}/metadata-body`], { input: runtimeMetadata });
+  for (const variant of ['external', 'internal']) {
+    const setMode = mode => compose(['exec', '-T', 'api', 'curl', '--fail', '--silent', '--show-error',
+      '--cacert', '/run/fylkren-identity-lab/ca.crt', '-X', 'POST', '-d', `value=${mode}`, `${negativeAuthority}/xml-mode`]);
+    setMode('valid');
+    const configuration = { ...samlConfiguration, metadataUrl: `${negativeAuthority}/metadata-runtime?revision=${variant}` };
+    assert.equal((await manager.put('/api/platform/identity/providers/saml', { enabled: false, clearSecret: false, configuration })).status, 204);
+    assert.equal((await manager.post('/api/platform/identity/providers/saml/test', {})).status, 204);
+    const stored = await manager.request('/api/platform/identity/providers/saml');
+    assert.equal((await manager.put('/api/platform/identity/providers/saml', { enabled: true, clearSecret: false, configuration: stored.body.configuration })).status, 204);
+    // Change metadata only after connection approval, before the library first loads it.
+    setMode(variant);
+    const runtimeBrowser = await createCdpSession('about:blank');
+    await runtimeBrowser.clearCookies(browserBase);
+    const start = runtimeBrowser.networkResponses.length;
+    await runtimeBrowser.navigate(`${browserBase}/api/auth/saml/login`);
+    const response = await runtimeBrowser.waitForResponse(value => value.url.includes('/api/auth/saml/login'), `runtime ${variant} metadata`, start);
+    assert.equal(response.status, 502, `Runtime ${variant} metadata was not rejected safely`);
+    const session = await runtimeBrowser.evaluate(`fetch('/api/session').then(async value => ({status:value.status,body:await value.json()}))`);
+    assert.equal(session.status, 200, 'Invalid SAML metadata blocked ordinary session requests');
+    assert.equal(session.body.authenticated, false);
+    assert.equal((await manager.request('/api/platform/identity/providers/saml')).status, 200, 'Invalid metadata blocked local administration');
+    await runtimeBrowser.close();
+    setMode('valid');
+  }
+  const runtimeProbes = compose(['exec', '-T', 'api', 'curl', '--fail', '--silent', '--show-error',
+    '--cacert', '/run/fylkren-identity-lab/ca.crt', `${negativeAuthority}/xml-probes`]);
+  assert.equal(JSON.parse(runtimeProbes).xmlCanaryRequests, 0, 'Runtime metadata parsing fetched an external entity');
   const samlSaved = await manager.put('/api/platform/identity/providers/saml', { enabled: false, clearSecret: false, configuration: samlConfiguration });
   assert.equal(samlSaved.status, 204, JSON.stringify(samlSaved.body));
   const samlTested = await manager.post('/api/platform/identity/providers/saml/test', {});
@@ -769,6 +800,49 @@ try {
   assert.equal(unsignedSession.authenticated, false, 'An unsigned SAML assertion must not establish a session');
   await unsignedSamlBrowser.close();
 
+  process.stdout.write('Checking SAML assertion DTD/XXE and single base64 decoding...\n');
+  for (const variant of ['external', 'internal', 'double-base64']) {
+    const xmlBrowser = await createCdpSession('about:blank');
+    await xmlBrowser.clearCookies(browserBase);
+    await xmlBrowser.navigate(`${browserBase}/api/auth/saml/login`);
+    await xmlBrowser.waitFor('document.querySelector("#username") !== null', `SAML ${variant} login form`);
+    let intercepted = false;
+    xmlBrowser.on('Fetch.requestPaused', async parameters => {
+      const form = new URLSearchParams(parameters.request.postData ?? '');
+      const encoded = form.get('SAMLResponse');
+      assert.ok(encoded);
+      const original = Buffer.from(encoded, 'base64').toString('utf8');
+      assert.ok(original.includes(externalSubject));
+      let changed;
+      if (variant === 'double-base64') changed = encoded;
+      else {
+        const declaration = original.match(/^\s*<\?xml[^?]*\?>/)?.[0] ?? '';
+        const document = original.slice(declaration.length);
+        const rootName = document.match(/^\s*<([\w:]+)/)?.[1];
+        assert.ok(rootName, 'Signed XML root not found');
+        const entity = variant === 'external'
+          ? `SYSTEM "${negativeAuthority}/xml-canary"`
+          : `"${externalSubject}"`;
+        changed = `${declaration}<!DOCTYPE ${rootName} [<!ENTITY synthetic ${entity}>]>${document.replace(externalSubject, '&synthetic;')}`;
+      }
+      form.set('SAMLResponse', Buffer.from(changed).toString('base64'));
+      intercepted = true;
+      await xmlBrowser.call('Fetch.continueRequest', { requestId: parameters.requestId,
+        postData: Buffer.from(form.toString()).toString('base64') });
+    });
+    await xmlBrowser.call('Fetch.enable', { patterns: [{ urlPattern: '*://localhost:18444/api/auth/saml2/Acs*', requestStage: 'Request' }] });
+    const responseStart = xmlBrowser.networkResponses.length;
+    await xmlBrowser.evaluate(`document.querySelector('#username').value = 'live-sso'; document.querySelector('#password').value = ${JSON.stringify(keycloakUserPassword)}; document.querySelector('#kc-login').click();`);
+    const rejected = await xmlBrowser.waitForResponse(response => response.url.includes('/api/auth/saml2/Acs'), `SAML ${variant} rejection`, responseStart);
+    assert.ok(intercepted);
+    assert.equal(rejected.status, 400, `SAML ${variant} was not rejected`);
+    assert.equal((await xmlBrowser.evaluate(`fetch('/api/session').then(value => value.json())`)).authenticated, false);
+    await xmlBrowser.close();
+  }
+  const assertionXmlProbes = compose(['exec', '-T', 'api', 'curl', '--fail', '--silent', '--show-error',
+    '--cacert', '/run/fylkren-identity-lab/ca.crt', `${negativeAuthority}/xml-probes`]);
+  assert.equal(JSON.parse(assertionXmlProbes).xmlCanaryRequests, 0, 'SAML assertion parsing fetched an external entity');
+
   process.stdout.write('Checking accepted signed SAML response and replay rejection...\n');
   const samlBrowser = await createCdpSession('about:blank');
   await samlBrowser.clearCookies(browserBase);
@@ -821,6 +895,10 @@ try {
     samlServerSideSession: 'passed',
     xmlMetadataDtdAndExternalEntityRejection: 'passed',
     xmlMetadataSizeBoundary: 'passed',
+    samlAssertionDtdAndExternalEntityRejection: 'passed',
+    samlSingleBase64Decoding: 'passed',
+    samlRuntimeMetadataDtdAndExternalEntityRejection: 'passed',
+    samlMetadataFailureIsolation: 'passed',
   }, null, 2)}\n`);
 } catch (error) {
   if (started) {

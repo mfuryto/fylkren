@@ -28,6 +28,7 @@ internal static class PortableImportValidator
             }
             foreach (var duplicate in archive.Entries.GroupBy(value => value.FullName, StringComparer.Ordinal).Where(group => group.Count() > 1))
                 errors.Add($"The ZIP package contains a duplicate path: {duplicate.Key}");
+            if (errors.Count > 0) return Invalid(errors, "The archive structure or size is invalid.");
 
             var manifestEntry = archive.GetEntry("manifest.json");
             if (manifestEntry is null)
@@ -35,7 +36,7 @@ internal static class PortableImportValidator
             PortableExportManifest? manifest;
             await using (var manifestStream = manifestEntry.Open())
                 manifest = await JsonSerializer.DeserializeAsync<PortableExportManifest>(manifestStream, new JsonSerializerOptions(JsonSerializerDefaults.Web), cancellationToken);
-            if (manifest is null) return Invalid(errors, "The manifest is invalid.");
+            if (manifest is null || !HasValidShape(manifest)) return Invalid(errors, "The manifest structure or field limits are invalid.");
             if (manifest.Format != PortableExportPackage.Format) errors.Add("The package is not a Fylkren portability format.");
             if (manifest.FormatVersion != PortableExportPackage.FormatVersion) errors.Add($"Format version {manifest.FormatVersion} is not supported by this installation.");
             if (manifest.Scope != "site") errors.Add("Only site-scoped packages are supported.");
@@ -88,6 +89,21 @@ internal static class PortableImportValidator
         {
             return Invalid(errors, "The package contains invalid JSON.");
         }
+    }
+
+    private static bool HasValidShape(PortableExportManifest manifest)
+    {
+        static bool Text(string? value) => !string.IsNullOrWhiteSpace(value) && value.Length <= 512;
+        static bool Hash(string? value) => value is { Length: 64 } && value.All(Uri.IsHexDigit);
+        return Text(manifest.Format) && Text(manifest.FormatVersion) && Text(manifest.ApplicationVersion) &&
+            Text(manifest.Scope) && Text(manifest.IntegrityAlgorithm) && manifest.Site is not null && Text(manifest.Site.Name) &&
+            manifest.Datasets is not null && manifest.Attachments is not null && manifest.Exclusions is not null &&
+            manifest.Datasets.Count <= PortableExportPackage.MaximumEntries && manifest.Attachments.Count <= PortableExportPackage.MaximumEntries &&
+            manifest.Exclusions.All(value => value is not null) &&
+            manifest.Datasets.All(value => value is not null && Text(value.Name) && Text(value.Path) && Text(value.MediaType) && Hash(value.Sha256) &&
+                value.RecordCount is >= 0 and <= 1_000_000 && value.Bytes >= 0 && value.Bytes <= PortableExportPackage.MaximumPackageBytes) &&
+            manifest.Attachments.All(value => value is not null && Text(value.Path) && Text(value.MediaType) && Text(value.OwnerType) && Hash(value.Sha256) &&
+                value.Bytes >= 0 && value.Bytes <= PortableExportPackage.MaximumPackageBytes);
     }
 
     private static async Task<DatasetInspection> InspectJsonLines(ZipArchiveEntry entry, Guid expectedSiteId, CancellationToken cancellationToken)

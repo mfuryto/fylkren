@@ -12,6 +12,8 @@ const publicJwk = publicKey.export({ format: 'jwk' });
 const codes = new Map();
 let mode = 'nonce';
 let xmlCanaryRequests = 0;
+let runtimeXmlMode = 'valid';
+let runtimeMetadataBody = '';
 
 const encoded = value => Buffer.from(JSON.stringify(value)).toString('base64url');
 function jwt(payload) {
@@ -36,6 +38,33 @@ createServer({
   const url = new URL(request.url, issuer);
   try {
   if (url.pathname === '/xml-probes') return json(response, 200, { xmlCanaryRequests });
+  if (url.pathname === '/metadata-body' && request.method === 'POST') {
+    runtimeMetadataBody = await body(request);
+    return json(response, 200, { ready: true });
+  }
+  if (url.pathname === '/xml-mode' && request.method === 'POST') {
+    const value = new URLSearchParams(await body(request)).get('value');
+    if (!['valid', 'external', 'internal'].includes(value)) return json(response, 400, {});
+    runtimeXmlMode = value;
+    return json(response, 200, { mode: value });
+  }
+  if (url.pathname === '/metadata-runtime') {
+    const original = runtimeMetadataBody;
+    let xml = original;
+    if (runtimeXmlMode !== 'valid') {
+      const declaration = original.match(/^\s*<\?xml[^?]*\?>/)?.[0] ?? '';
+      const document = original.slice(declaration.length);
+      const rootName = document.match(/^\s*<([\w:]+)/)?.[1];
+      const idp = 'https://keycloak.test:18443/realms/fylkren-lab';
+      const definition = runtimeXmlMode === 'external' ? `SYSTEM "${issuer}/xml-canary"` : `"${idp}"`;
+      const changed = runtimeXmlMode === 'external'
+        ? document.replace(/(<\/[\w:]+>\s*)$/, '<synthetic>&synthetic;</synthetic>$1')
+        : document.replace(idp, '&synthetic;');
+      xml = `${declaration}<!DOCTYPE ${rootName} [<!ENTITY synthetic ${definition}>]>${changed}`;
+    }
+    response.writeHead(200, { 'Content-Type': 'application/xml', 'Content-Length': Buffer.byteLength(xml) });
+    return response.end(xml);
+  }
   if (url.pathname === '/xml-canary') {
     xmlCanaryRequests++;
     response.writeHead(200, { 'Content-Type': 'text/plain' });

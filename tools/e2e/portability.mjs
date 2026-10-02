@@ -4,6 +4,57 @@ import { readZip, writeZip } from './zip.mjs';
 
 const digest = value => createHash('sha256').update(value).digest('hex');
 
+export async function testPortableParserBoundaries({ platform, siteManager, siteId, entries, manifest }) {
+  if (!entries) {
+    const exported = await siteManager.request(`/api/portability/sites/${siteId}/export`, { method: 'POST', binary: true });
+    assert.equal(exported.status, 200);
+    entries = readZip(exported.body);
+    manifest = JSON.parse(entries.get('manifest.json').toString('utf8'));
+  }
+  async function validate(edit) {
+    const copy = new Map(entries), metadata = structuredClone(manifest);
+    edit(metadata);
+    copy.set('manifest.json', Buffer.from(JSON.stringify(metadata)));
+    const form = new FormData();
+    form.append('package', new Blob([writeZip(copy)], { type: 'application/zip' }), 'synthetic-parser.zip');
+    const response = await platform.request(`/api/portability/sites/${siteId}/imports/validate`, { method: 'POST', body: form });
+    assert.equal(response.status, 200, 'Malformed portable metadata must produce a bounded validation result');
+    return response.body;
+  }
+  for (const siteName of ['&lt;script&gt;synthetic()&lt;/script&gt;', '%253Cscript%253E', String.raw`\u003cscript\u003e`]) {
+    const result = await validate(value => { value.site.name = siteName; });
+    assert.equal(result.valid, true); assert.equal(result.siteName, siteName, 'Import metadata was decoded again');
+  }
+  const typed = await validate(value => { value.$type = 'Synthetic.UntrustedType, Synthetic'; value.site.$type = 'Synthetic.OtherType'; });
+  assert.equal(typed.valid, true, 'Unknown type metadata must not select a runtime type');
+  const invalid = [
+    ['site null', value => { value.site = null; }],
+    ['datasets null', value => { value.datasets = null; }],
+    ['attachments null', value => { value.attachments = null; }],
+    ['exclusions null', value => { value.exclusions = null; }],
+    ['dataset null', value => { value.datasets[0] = null; }],
+    ['dataset name null', value => { value.datasets[0].name = null; }],
+    ['dataset path null', value => { value.datasets[0].path = null; }],
+    ['attachment null', value => { value.attachments.push(null); }],
+    ['attachment path null', value => { value.attachments.push({ path: null, bytes: 0 }); }],
+    ['record count overflow', value => { value.datasets[0].recordCount = 2147483648; }],
+    ['byte count overflow', value => { value.datasets[0].bytes = 1e30; }],
+    ['negative record count', value => { value.datasets[0].recordCount = -1; }],
+    ['negative byte count', value => { value.datasets[0].bytes = -1; }],
+    ['record count limit', value => { value.datasets[0].recordCount = 1_000_001; }],
+    ['byte count limit', value => { value.datasets[0].bytes = 512 * 1024 * 1024 + 1; }],
+    ['descriptor count limit', value => { value.datasets = Array.from({ length: 251 }, () => value.datasets[0]); }],
+    ['metadata text limit', value => { value.site.name = 'a'.repeat(513); }],
+    ['encoded site ID', value => { value.site.id = `%25${siteId}`; }],
+  ];
+  for (const [label, edit] of invalid) {
+    const result = await validate(edit);
+    assert.equal(result.valid, false, `Unsafe manifest accepted: ${label}`);
+    assert.doesNotMatch(JSON.stringify(result), /NullReferenceException|stack trace|System\.Runtime/i);
+  }
+  return { portableParserBoundaries: 'passed', literalMetadataCases: 3, rejectedManifestCases: invalid.length, clientTypeMetadataIgnored: true };
+}
+
 export async function testPortability({ platform, siteManager, leader, siteId, otherSiteId, taskId, decisionId, riskId }) {
   const endpoint = `/api/portability/sites/${siteId}`;
   const denied = await leader.request(`${endpoint}/export`, { method: 'POST' });
@@ -14,6 +65,7 @@ export async function testPortability({ platform, siteManager, leader, siteId, o
   const entries = readZip(exportResult.body);
   assert.ok(entries.has('manifest.json') && entries.has('README.txt'));
   const manifest = JSON.parse(entries.get('manifest.json').toString('utf8'));
+  const parserBoundaries = await testPortableParserBoundaries({ platform, siteManager, siteId, entries, manifest });
   assert.equal(manifest.format, 'fylkren-portable-export');
   assert.equal(manifest.formatVersion, '1.0');
   assert.equal(manifest.site.id, siteId);
@@ -96,5 +148,5 @@ export async function testPortability({ platform, siteManager, leader, siteId, o
   assert.equal(missingReference.valid, false, 'Missing person relationship accepted');
   const noApply = await platform.request(`/api/portability/sites/${siteId}/imports/apply`, { method: 'POST' });
   assert.equal(noApply.status, 404, 'Import-apply endpoint unexpectedly exists');
-  return { portableExportId: manifest.exportId, portableDatasetCount: manifest.datasets.length };
+  return { portableExportId: manifest.exportId, portableDatasetCount: manifest.datasets.length, ...parserBoundaries };
 }

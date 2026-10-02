@@ -12,12 +12,12 @@ import { testAdministrationReportApis } from './e2e/administration-report-apis.m
 import { testDependencies } from './e2e/dependencies.mjs';
 import { testDecisionsRisksVersions } from './e2e/decisions-risks-versions.mjs';
 import { testWebhookFailureIsolation } from './e2e/webhooks.mjs';
-import { testPortability } from './e2e/portability.mjs';
+import { testPortability, testPortableParserBoundaries } from './e2e/portability.mjs';
 import { testLookupSorting } from './e2e/lookup-sorting.mjs';
 import { testFederationCandidates } from './e2e/federation-candidates.mjs';
 import { testAuthenticationBoundary, testAuthSessionSecurity } from './e2e/auth-session-security.mjs';
 import { testIdentitySessionLifecycle } from './e2e/identity-session-lifecycle.mjs';
-import { testCustomCssEncoding, testStoredEncoding } from './e2e/encoding-security.mjs';
+import { testCustomCssEncoding, testStoredEncoding, testNumericInputBoundaries } from './e2e/encoding-security.mjs';
 
 const base = process.env.FYLKREN_E2E_BASE_URL ?? 'http://localhost:18080';
 function client() {
@@ -310,9 +310,11 @@ const assignment = await siteManager.account.post(`/api/sites/${siteId}/access/r
 assert.equal(assignment.status, 201, JSON.stringify(assignment.body));
 
 const { taskTypeId } = await testLookupSorting({ manager: siteManager.account, reader: leader.account, siteId });
+const numericInput = await testNumericInputBoundaries({ platform, leader: leader.account, siteManager: siteManager.account, siteId });
 if (process.argv.includes('--asvs-input-only')) {
   const storedEncoding = await testStoredEncoding({ leader: leader.account, siteId, unitId: leadership.body.id, workItemTypeId: taskTypeId });
-  console.log(JSON.stringify({ asvsEncoding: 'passed', ...customCssEncoding, ...storedEncoding }));
+  const portableParser = await testPortableParserBoundaries({ platform, siteManager: siteManager.account, siteId });
+  console.log(JSON.stringify({ asvsEncoding: 'passed', ...customCssEncoding, ...storedEncoding, ...portableParser, ...numericInput }));
   process.exit(0);
 }
 
@@ -962,7 +964,7 @@ assert.equal(taskAfterRemoval.status, 200, 'Customer-owned work must remain read
 await new Promise((resolve) => setTimeout(resolve, 61_000));
 const authenticationBoundary = await testAuthenticationBoundary({ base });
 const storedEncoding = await testStoredEncoding({ leader: leader.account, siteId, unitId: leadership.body.id, workItemTypeId: taskTypeId });
-console.log(JSON.stringify({ asvsEncoding: 'passed', ...customCssEncoding, ...storedEncoding }));
+console.log(JSON.stringify({ asvsEncoding: 'passed', ...customCssEncoding, ...storedEncoding, ...numericInput }));
 const workloadLoad = await measureWorkload({ leader: leader.account, platform, siteId, unitId: leadership.body.id, workItemTypeId: taskTypeId });
 
 console.log(JSON.stringify({ editionsAndTransitions: 'passed', workloadLoad, bootstrap: 'passed', ...authSessionSecurity, ...identitySessionLifecycle, ...authenticationBoundary, roleSetup: 'passed', lookupSorting: 'passed', operationalIsolation: 'passed', localPlanningExecutionReport: 'passed', threeLevelDistribution: 'passed', parentChildReporting: 'passed', crossSiteIsolation: 'passed', reportArchives: 'passed', activeSiteMoveRouting: 'passed', detachedSiteRouting: 'passed', placementValidation: 'passed', senderSnapshots: 'passed', threeSiteReporting: 'passed', recursiveSiteWorkload: 'passed', crossSiteRequestResponse: 'passed', crossSiteRequestCancellation: 'passed', combinedBranches: 'passed', transitionChains: 'passed', ...authorizationBoundaries, administrationReportApis: 'passed', dependencies: 'passed', ...learning, taskComments: 'passed', taskCommentsResult: taskComments, decisionsRisksVersions: 'passed', webhookFailureIsolation: 'passed', portability: 'passed', federationCandidates: 'passed', [process.env.FYLKREN_E2E_SMTP_HOST ? 'requestNotificationsDelivered' : 'requestNotificationsQueued']: 'passed', siteId, childSiteId, grandchildSiteId, newParentId, answeredRequestId: requests.answeredTrackingId, directMixedTaskId: combinedBranches.directSourceId, plannedMixedTaskId: combinedBranches.plannedSourceId, ...transitionChains, ...administrationReportApis, ...dependencies, ...decisionsRisksVersions, ...webhooks, ...portability, taskId: task.body.id, hierarchyTaskId: mainTask.body.id, parentTaskId: parentTask.body.id }));

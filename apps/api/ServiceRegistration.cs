@@ -186,6 +186,8 @@ internal static class ServiceRegistration
                 }
                 options.IdentityProviders.Add(identityProvider);
             });
+        builder.Services.AddHttpContextAccessor();
+        builder.Services.AddSingleton<IAuthenticationSchemeProvider, SamlRequestSchemeProvider>();
         builder.Services.AddAuthorization(options =>
         {
             options.FallbackPolicy = new AuthorizationPolicyBuilder()

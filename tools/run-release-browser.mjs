@@ -15,6 +15,7 @@ const env = { ...process.env, FYLKREN_DB_PASSWORD: 'synthetic-release-browser-on
   FYLKREN_BROWSER_CDP_URL: 'http://127.0.0.1:19224', FYLKREN_BROWSER_REPORT_PDF: 'output/pdf/release-classified-report.pdf', FYLKREN_BROWSER_LICENSE_PATH: '/work/tools/e2e/license-upload-fixture.json',
 };
 const files = ['-f', 'compose.yaml', '-f', 'tools/e2e/browser-smtp.compose.yaml'];
+if (process.argv.includes('--no-build')) files.push('-f', 'tools/e2e/reuse-images.compose.yaml');
 const originalEnvironment = existsSync('.env') ? readFileSync('.env') : null;
 if (originalEnvironment === null) writeFileSync('.env', 'FYLKREN_DB_PASSWORD=synthetic-release-browser-only\n', { mode: 0o600 });
 mkdirSync('output/pdf', { recursive: true });
@@ -28,7 +29,7 @@ function command(program, args) {
 }
 function compose(args) { command('docker', ['compose', ...files, '-p', project, ...args]); }
 async function start() {
-  compose(['up', '-d', '--build', '--wait']);
+  compose(['up', '-d', process.argv.includes('--no-build') ? '--no-build' : '--build', '--wait']);
   compose(['exec', '-T', 'postgres', 'psql', '-U', 'fylkren', '-d', 'fylkren', '-v', 'ON_ERROR_STOP=1', '-c',
     `UPDATE instance_identity SET instance_id = '${fixture.instanceId}' WHERE key = 1`]);
   command('docker', ['run', '--rm', '-d', '--name', browser, '--network', 'host', '--shm-size=256m',

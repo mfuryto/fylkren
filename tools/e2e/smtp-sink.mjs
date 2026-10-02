@@ -15,17 +15,19 @@ const messages = [];
 const attempts = [];
 
 function inspectMessage(content, recipient) {
-  const normalized = content.replace(/\r?\n[ \t]+/g, ' ');
-  const separator = normalized.search(/\r?\n\r?\n/);
-  const headers = separator >= 0 ? normalized.slice(0, separator) : normalized;
-  const encodedBody = separator >= 0 ? normalized.slice(separator).replace(/^\r?\n\r?\n/, '') : '';
+  const separator = content.search(/\r?\n\r?\n/);
+  const headers = (separator >= 0 ? content.slice(0, separator) : content).replace(/\r?\n[ \t]+/g, ' ');
+  const encodedBody = separator >= 0 ? content.slice(separator).replace(/^\r?\n\r?\n/, '') : '';
   const transferEncoding = headers.match(/^Content-Transfer-Encoding:\s*(.+)$/mi)?.[1].trim().toLowerCase();
   const body = transferEncoding === 'base64'
     ? Buffer.from(encodedBody.replace(/\s/g, ''), 'base64').toString('utf8')
-    : encodedBody;
+    : transferEncoding === 'quoted-printable'
+      ? Buffer.from(encodedBody.replace(/=\r?\n/g, '').replace(/=([0-9A-F]{2})/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16))), 'latin1').toString('utf8')
+      : encodedBody;
   return {
     recipient,
     bytes: Buffer.byteLength(content),
+    headers,
     subject: headers.match(/^Subject:\s*(.+)$/mi)?.[1].trim() ?? '',
     body,
   };
@@ -61,7 +63,7 @@ const smtp = net.createServer(socket => {
             socket.write('250 2.0.0 queued\r\n');
           }
         } else {
-          data += `${line}\n`;
+          data += `${line.startsWith("..") ? line.slice(1) : line}\n`;
         }
         continue;
       }

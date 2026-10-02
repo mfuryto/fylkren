@@ -1,0 +1,5 @@
+services:
+  api:
+    image: ${FYLKREN_E2E_API_IMAGE:?Set the already-built candidate API image ID}
+  web:
+    image: ${FYLKREN_E2E_WEB_IMAGE:?Set the already-built candidate web image ID}

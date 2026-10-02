@@ -56,6 +56,14 @@ export async function testStoredEncoding({ leader, siteId, unitId, workItemTypeI
     assert.ok(search.body.items.some(value => value.id === response.body.id), 'Query decoding lost the literal search payload');
     assert.ok(search.body.items.every(value => value.title.includes(payload)), 'Search payload changed predicate meaning');
   }
+  for (const literal of [String.raw`"\u003cscript\u003e"`, String.raw`"\\u003cscript\\u003e"`]) {
+    const body = JSON.stringify({ title: 'SYNTHETIC_JSON_MARKER', description: '', assignedUnitId: unitId, workItemTypeId })
+      .replace('"SYNTHETIC_JSON_MARKER"', literal);
+    const response = await leader.request(root, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+    assert.equal(response.status, 201);
+    const detail = await leader.request(`${root}/${response.body.id}/details`);
+    assert.equal(detail.body.task.title, JSON.parse(literal), 'JSON escape was decoded more than once');
+  }
   const unsafeLinks = ['javascript:alert(1)', 'JaVaScRiPt:alert(1)', 'data:text/html,<script>synthetic()</script>',
     'vbscript:synthetic()', '//example.invalid/path', 'https://name:password@example.invalid/',
     'https://example.invalid/\npath', 'java%73cript:synthetic()', 'javascript&#58;synthetic()'];
@@ -69,5 +77,29 @@ export async function testStoredEncoding({ leader, siteId, unitId, workItemTypeI
       referenceUrl, assignedUnitId: unitId, workItemTypeId });
     assert.equal(response.status, 201);
   }
-  return { storedEncoding: 'passed', literalPayloads: payloads.length, unsafeLinksRejected: unsafeLinks.length, allowedSchemes: 4 };
+  return { storedEncoding: 'passed', literalPayloads: payloads.length, singleJsonDecodingCases: 2, unsafeLinksRejected: unsafeLinks.length, allowedSchemes: 4 };
+}
+
+export async function testNumericInputBoundaries({ platform, leader, siteManager, siteId }) {
+  const routes = [[leader, `/api/work/sites/${siteId}/items`], [leader, `/api/work/sites/${siteId}/reports`],
+    [leader, `/api/workflows/planning/sites/${siteId}`], [leader, `/api/execution/sites/${siteId}`],
+    [siteManager, `/api/site-audit/sites/${siteId}`], [platform, '/api/platform-audit'], [platform, '/api/platform/smtp/deliveries'],
+    [platform, `/api/platform/webhooks/sites/${siteId}/deliveries`], [platform, '/api/platform/identity/users'], [leader, '/api/work/learning']];
+  for (const [actor, path] of routes) {
+    for (const page of ['1', '1000000']) assert.equal((await actor.request(`${path}?page=${page}`)).status, 200, `Valid numeric boundary ${path}`);
+    for (const page of ['2147483647', '2147483648', '0', '-1', '1000001']) {
+      assert.equal((await actor.request(`${path}?page=${page}`)).status, 400, `Invalid/overflow page ${path}: ${page}`);
+    }
+  }
+  for (const pageSize of ['0', '-1', '101', '2147483648']) {
+    assert.equal((await platform.request(`/api/platform/smtp/deliveries?pageSize=${pageSize}`)).status, 400);
+  }
+  const original = await platform.request('/api/references/platform');
+  assert.equal(original.status, 200);
+  for (const nextNumber of ['-1', '9223372036854775807', '9223372036854775808']) {
+    const body = `{"minimumDigits":${original.body.minimumDigits},"nextNumber":${nextNumber}}`;
+    assert.equal((await platform.request('/api/references/platform', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body })).status, 400);
+  }
+  assert.equal((await platform.request('/api/references/platform')).body.nextNumber, original.body.nextNumber);
+  return { numericInputBoundaries: 'passed', pagedEndpoints: routes.length, rejectedNumericCases: routes.length * 5 + 7 };
 }

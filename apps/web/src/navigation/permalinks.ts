@@ -26,13 +26,17 @@ export function parseAppLocation(hash: string): AppLocation {
   const raw = hash.replace(/^#\/?/, "");
   const [path = "", query = ""] = raw.split("?", 2);
   const parameters = new URLSearchParams(query);
+  const identifier = (key: string) => {
+    const value = parameters.get(key);
+    return value && /^[A-Za-z0-9-]+$/.test(value) ? value : undefined;
+  };
   return {
     page: pagesByPath[path.toLocaleLowerCase()] ?? "Overview",
-    siteId: parameters.get("site") ?? undefined,
-    unitId: parameters.get("unit") ?? undefined,
-    itemId: parameters.get("item") ?? undefined,
-    runId: parameters.get("run") ?? undefined,
-    reportId: parameters.get("report") ?? undefined,
+    siteId: identifier("site"),
+    unitId: identifier("unit"),
+    itemId: identifier("item"),
+    runId: identifier("run"),
+    reportId: identifier("report"),
     year: parameters.get("year") ?? undefined,
     taskFilter: parameters.get("view") ?? undefined,
     taskSearch: parameters.get("q") ?? undefined,

@@ -245,7 +245,7 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
   await configureTaskSmtp({ request, requestExpectingHttpError, enabled: smtpDelivery });
   await signInLocalActor({ request, navigate, waitFor, setInput, evaluate, actor: author });
 
-  const title = 'Synthetic direct execution task {{7*7}}';
+  const title = 'Synthetic direct execution task {{7*7}} {{recipientName}}';
   assert.equal(await evaluate(`(() => {
     const sheet = new CSSStyleSheet();
     sheet.replaceSync(${JSON.stringify(String.raw`.probe { background-image: u\72l("https://example.invalid/probe"); }`)});

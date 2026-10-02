@@ -40,9 +40,10 @@ internal static class WebhookManagementEndpoints
         if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest(); if (!Guid.TryParse(user.FindFirstValue("fylkren:person_id"), out var personId)) return Results.Problem(statusCode: 403);
         var value = await db.WebhookSubscriptions.SingleOrDefaultAsync(x => x.Id == id && x.SiteId == siteId, ct); if (value is null) return Results.NotFound(); value.Deactivate(DateTimeOffset.UtcNow); db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "webhook.deactivated", "webhook-subscription", id, DateTimeOffset.UtcNow)); await db.SaveChangesAsync(ct); return Results.NoContent();
     }
-    private static async Task<IResult> Deliveries(Guid siteId, int page, FylkrenDbContext db, CancellationToken ct)
+    private static async Task<IResult> Deliveries(Guid siteId, int? page, FylkrenDbContext db, CancellationToken ct)
     {
-        var safePage = Math.Max(1, page); const int size = 20; var query = db.WebhookDeliveries.AsNoTracking().Where(x => x.Subscription.SiteId == siteId).OrderByDescending(x => x.CreatedAt);
+        if (RequestQueryPolicy.Validate(page, null) is { } error) return error;
+        var safePage = page ?? 1; const int size = 20; var query = db.WebhookDeliveries.AsNoTracking().Where(x => x.Subscription.SiteId == siteId).OrderByDescending(x => x.CreatedAt);
         return Results.Ok(new { page = safePage, pageSize = size, total = await query.CountAsync(ct), items = await query.Skip((safePage - 1) * size).Take(size).Select(x => new { x.Id, x.SubscriptionId, subscriptionName = x.Subscription.Name, x.DomainEventId, eventType = x.DomainEvent.EventType, x.Status, x.AttemptCount, x.LastAttemptAt, x.CompletedAt, x.LastHttpStatus, x.LastError, x.CreatedAt }).ToListAsync(ct) });
     }
     private sealed record CreateWebhookRequest(string Name, string EndpointUrl, string[] EventTypes);

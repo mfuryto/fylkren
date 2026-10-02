@@ -1024,8 +1024,8 @@ async function assertSignedWorkReceive(receiver, syntheticPeer) {
 
 async function assertQueuedOutboundDelivery(sender, receiver, operationalLeader = null) {
   const before = sqlValue('postgres-a', 'SELECT COUNT(*) FROM federation_outbound_messages');
-  const operationalTitle = '(SECRET) Operational queued federated work';
-  const operationalInstruction = '(SECRET) Deliver through the ordinary request creation boundary';
+  const operationalTitle = '(SECRET) Operational queued federated work %253Cscript%253E';
+  const operationalInstruction = String.raw`(SECRET) Deliver literal &lt;script&gt; %253Cscript%253E \u003cscript\u003e {{7*7}} through the ordinary request creation boundary`;
   let queued;
   if (operationalLeader) {
     const candidates = await expectStatus(operationalLeader.request(
@@ -2345,7 +2345,11 @@ try {
     '-addext', 'basicConstraints=critical,CA:TRUE'], { stdio: 'ignore' });
   copyFileSync(join(temporary, 'server.pem'), join(temporary, 'ca.pem'));
   setDefaultCACertificates([...getCACertificates('default'), readFileSync(join(temporary, 'ca.pem'), 'utf8')]);
-  compose(['build', 'api-a', 'web-a']);
+  if (process.argv.includes('--no-build')) {
+    if (!env.FYLKREN_E2E_API_IMAGE || !env.FYLKREN_E2E_WEB_IMAGE) throw new Error('Set candidate API and web image IDs for --no-build.');
+    command('docker', ['tag', env.FYLKREN_E2E_API_IMAGE, 'fylkren-federation-pair-test-api:local']);
+    command('docker', ['tag', env.FYLKREN_E2E_WEB_IMAGE, 'fylkren-federation-pair-test-web:local']);
+  } else compose(['build', 'api-a', 'web-a']);
   try
   {
     compose(['up', '-d', '--no-build', '--wait']);
