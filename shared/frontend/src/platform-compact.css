@@ -1,0 +1,40 @@
+@media screen {
+  .platform-admin-page { gap: 10px; }
+  .platform-admin-page .page-header { gap: 10px; }
+  .platform-admin-page .section-heading { gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .platform-admin-page .panel > :is(h2, h3) { margin: 0; font-size: 1.05rem; }
+  .platform-admin-page .stacked-form > p { margin: 0; }
+  .platform-admin-page :is(.stacked-form > button, .field > button) { width: fit-content; max-width: 100%; justify-self: start; }
+  .platform-admin-page .summary-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+  .platform-admin-page .summary-card { display: flex; flex: 0 1 auto; align-items: baseline; gap: 8px; min-width: 0; padding: 6px 9px; box-shadow: none; }
+  .platform-admin-page .summary-card strong { margin: 0; font-size: .95rem; overflow-wrap: anywhere; }
+  .platform-admin-page .summary-card span { font-size: .8rem; }
+  .platform-admin-page .health-service-list { gap: 6px; }
+  .platform-admin-page .health-service { gap: 10px; padding: 8px 10px; }
+  .platform-admin-page .platform-signal-note { margin-top: 8px; }
+  .platform-admin-page .technical-log-list { gap: 6px; margin-top: 10px; }
+  .platform-admin-page .technical-log-entry { gap: 5px; padding: 8px 10px; }
+  .platform-admin-page .technical-log-list .empty-state { min-height: 60px; padding: 10px; }
+  .platform-admin-page .report-api-settings { gap: 10px; margin-top: 12px; padding-top: 12px; }
+  .platform-admin-page .smtp-settings-form + .inline-form { margin-top: 14px; }
+  .platform-admin-page .platform-user-overview { gap: 10px; margin-bottom: 12px; }
+  .platform-admin-page .platform-user-bulk { padding: 7px 9px; }
+  .platform-admin-page .notification-delivery-summary { gap: 6px; margin-block: 10px; }
+  .platform-admin-page .notification-delivery-summary > span { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; padding: 7px 9px; }
+  .platform-admin-page .notification-delivery-summary strong { font-size: 1rem; }
+  .platform-admin-page .license-certificate-frame { padding: 16px 20px; }
+  .platform-admin-page .license-certificate-issuer { gap: 10px; padding-bottom: 12px; }
+  .platform-admin-page .license-certificate-issuer img { width: 44px; height: 44px; }
+  .platform-admin-page .license-certificate-title { padding: 16px 8px; }
+  .platform-admin-page .license-certificate-title h2 { margin: 6px 0; font-size: clamp(1.6rem, 3vw, 2.4rem); }
+  .platform-admin-page .license-certificate-details > div { padding: 9px 12px; }
+  .platform-admin-page .license-certificate-rights { margin-top: 12px; }
+  .platform-admin-page .license-certificate-rights ul { gap: 5px; margin-top: 8px; }
+  .platform-admin-page .license-certificate-rights li { padding: 4px 8px; }
+  .platform-admin-page .license-certificate-footer { gap: 10px; margin-top: 16px; padding-top: 12px; }
+  .platform-admin-page .license-instance-row code { padding: 7px 9px; }
+}
+@media screen and (max-width: 720px) {
+  .platform-admin-page .summary-card { flex-wrap: wrap; }
+  .platform-admin-page .license-certificate-frame { padding: 12px; }
+}
