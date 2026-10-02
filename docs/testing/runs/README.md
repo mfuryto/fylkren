@@ -44,3 +44,5 @@ The [localization context follow-up](2026-10-02-localization-context-follow-up.m
 The [task-comments run](2026-10-02-task-comments.md) records unassigned-reader contributions, task access boundaries, antiforgery, persistence, pagination, export and safe text rendering.
 
 The [visual risk-workspace run](2026-10-02-visual-risk-workspace.md) records the numbered register, mitigation-first editing, 5 × 5 initial/residual map, real browser clicks and dragging, and atomic risk/action creation.
+
+The [pending-work navigation run](2026-10-02-pending-navigation-counts.md) records compact navigation labels, removal of the Overview action list and authorized pending-work counts.

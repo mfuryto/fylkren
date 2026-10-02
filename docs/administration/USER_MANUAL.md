@@ -38,7 +38,9 @@ Administrators issue a one-time reset code rather than choosing a permanent pass
 
 ## 4. Navigation and work context
 
-Desktop uses left navigation; mobile uses a hamburger-controlled overlay. Internal back/forward buttons return between application pages without leaving the application.
+Desktop uses left navigation; mobile uses a hamburger-controlled overlay. Internal back/forward buttons return between application pages without leaving the application. Workload appears immediately after Reports.
+
+Tasks, Planning and Execution display positive pending-work counts in parentheses after their labels. Counts cover the user's authorized work levels across active sites, independently of page filters and pagination. Tasks counts assessment, routing, approval and returned-work decisions for the responsible leader, including answered outgoing requests. Planning and Execution count available work that has not been claimed. Claimed work no longer contributes to those waiting counts; releasing it restores the count. These are pending-work counts, not unread indicators: opening a page does not clear them. Zero counts are hidden. Counts refresh after successful changes, on navigation or returning to the application, and every minute while visible.
 
 Below the Fylkren version in the left navigation, **Community** or **Enterprise** shows the installation's current effective edition. Community is the default. Importing or removing a license updates the label immediately; expiry appears on the next automatic status refresh (normally within one minute). The label follows the server's license status rather than a user role.
 
@@ -52,10 +54,12 @@ Every data list has a visible sorting control. The available fields depend on th
 
 The Overview heading is the current site name. It presents:
 
-- **Requires action** for work the current person/leader can actually act on at the selected level;
+- a **Requires action** summary counter for work the current person/leader can actually act on at the selected level;
 - active work, sent requests, approaching deadlines and overdue work;
 - direct subordinate units and child sites with recursively aggregated active workload/status;
 - annual task statistics appropriate to the level.
+
+The dynamic **Requires action** text list is omitted to keep Overview compact; pending work is signposted in the navigation instead. The summary counter remains and can also include urgency such as overdue or critical work, so it need not equal the sum of the pending-work navigation counts.
 
 Subordinate workload can use card or list view; the preference is personal. Workload bars show active task load on a scale with a minimum of five tasks, so one task is not displayed as 100 percent merely because it is currently the largest value.
 

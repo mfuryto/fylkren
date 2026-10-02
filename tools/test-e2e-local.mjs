@@ -322,6 +322,14 @@ const task = await leader.account.post(`/api/work/sites/${siteId}/items`, {
 assert.equal(task.status, 201, JSON.stringify(task.body));
 assert.match(task.body.referenceCode, /^EXE0-\d{6,10}$/, 'Root reference must use the task-type abbreviation');
 const taskReference = task.body.referenceCode;
+async function navigationCounts(account = leader.account) {
+  const result = await account.request('/api/work/navigation-counts');
+  assert.equal(result.status, 200, JSON.stringify(result.body));
+  return result.body;
+}
+assert.deepEqual(await navigationCounts(), { tasks: 1, planning: 0, execution: 0 });
+assert.deepEqual(await navigationCounts(siteManager.account), { tasks: 0, planning: 0, execution: 0 }, 'Administration must not imply operational counts');
+assert.deepEqual(await navigationCounts(platform), { tasks: 0, planning: 0, execution: 0 }, 'Platform Manager must not receive operational counts');
 const platformWorkView = await platform.request(`/api/work/sites/${siteId}/items/overview`);
 assert.equal(platformWorkView.status, 403, 'Platform Manager must not see operational tasks');
 const underReview = await leader.account.put(`/api/work/sites/${siteId}/items/${task.body.id}/status`, {
@@ -338,8 +346,10 @@ assert.equal(queue.status, 200, `queue: ${JSON.stringify(queue.body)}`);
 const run = queue.body.items.find(item => item.item.id === task.body.id);
 assert.ok(run, `Planning run not visible: ${JSON.stringify(queue.body)}`);
 assert.equal(run.item.referenceCode, taskReference, 'Planning changed the task reference');
+assert.deepEqual(await navigationCounts(), { tasks: 0, planning: 1, execution: 0 });
 const claim = await leader.account.post(`/api/workflows/planning/${run.id}/claim`, {});
 assert.equal(claim.status, 204, `claim: ${JSON.stringify(claim.body)}`);
+assert.deepEqual(await navigationCounts(), { tasks: 0, planning: 0, execution: 0 }, 'Claimed planning is no longer waiting');
 const submit = await leader.account.post(`/api/workflows/planning/${run.id}/submit`, {
   priority: 'normal', dueAt: null, allocations: [],
 });
@@ -370,8 +380,10 @@ assert.ok(executionQueue.body.items.some(item => item.id === task.body.id), 'Tas
 assert.equal(executionQueue.body.items.find(item => item.id === task.body.id).referenceCode, taskReference, 'Execution changed the task reference');
 const definition = executionQueue.body.definitions.find(value => value.name === 'Standard');
 assert.ok(definition, 'Default execution workflow missing');
+assert.deepEqual(await navigationCounts(), { tasks: 0, planning: 0, execution: 1 });
 const claimExecution = await leader.account.post(`/api/execution/items/${task.body.id}/claim`, {});
 assert.equal(claimExecution.status, 204, `claim execution: ${JSON.stringify(claimExecution.body)}`);
+assert.deepEqual(await navigationCounts(), { tasks: 0, planning: 0, execution: 0 }, 'Claimed execution is no longer waiting');
 const claimedExecutionQueue = await leader.account.request(`/api/execution/sites/${siteId}`);
 const executionRun = claimedExecutionQueue.body.items.find(item => item.id === task.body.id)?.run;
 assert.ok(executionRun?.id, 'Execution run missing after claim');

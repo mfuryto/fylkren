@@ -7,6 +7,7 @@ import { signOut as endSession } from "./api/authClient";
 import type { Session } from "./work/WorkContextModels";
 import type { Branding, LoginConfiguration, PublicConfiguration } from "./app/models";
 import { currentAppLocation, navigateToLocation, type AppPage } from "./navigation/permalinks";
+import { navigationCountLabel, useNavigationCounts } from "./app/useNavigationCounts";
 import { buildNavigation } from "./app/navigationPolicy";
 import { AppContent, preloadOperationalPages } from "./app/AppContent";
 import { getDescendantWorkload, getOverviewWorkItems, getTaskContext } from "./tasks/taskApi";
@@ -35,6 +36,7 @@ function App() {
   const navigationHistory = useRef<AppPage[]>(["Overview"]);
   const [navigationIndex, setNavigationIndex] = useState(0);
   const [session, setSession] = useState<Session | null>(null);
+  const navigationCounts = useNavigationCounts(session, activeItem);
   const [branding, setBranding] = useState<Branding>({
     productName: "Fylkren",
     instanceName: "Local installation",
@@ -228,7 +230,7 @@ function App() {
         onNavigate={(item) => navigateTo(item as AppPage)}
         navigationItems={navigationItems}
         navigationDividerBefore={administrationNavigation[0]}
-        navigationLabel={(item) => translate(baseLanguage, navigationLabels[item as AppPage] ?? "navOverview")}
+        navigationLabel={(item) => navigationCountLabel(translate(baseLanguage, navigationLabels[item as AppPage] ?? "navOverview"), item, navigationCounts)}
         labels={{
           demoReadOnly: translate(baseLanguage, "demoReadOnly"),
           visitedViews: translate(baseLanguage, "visitedViews"),

@@ -136,5 +136,5 @@ export function AppContent({
   if (effectiveItem === "Notifications" && session.managesSites) return <NotificationSettingsPage />;
   if (effectiveItem === "Audit" && session.managesSites)
     return <SiteAuditPage language={language} timeZone={timeZone} />;
-  return <WorkOverview onNavigate={onNavigate} language={language} timeZone={timeZone} personId={session.personId} />;
+  return <WorkOverview language={language} timeZone={timeZone} personId={session.personId} />;
 }

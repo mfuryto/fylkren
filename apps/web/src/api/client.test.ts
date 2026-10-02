@@ -21,7 +21,11 @@ describe("apiGetCached", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it("clears the cache after a successful mutation", async () => {
+  it("clears the cache and refreshes work counters after a successful mutation", async () => {
+    const browserEvents = new EventTarget();
+    const changed = vi.fn();
+    browserEvents.addEventListener("fylkren:work-changed", changed);
+    vi.stubGlobal("window", browserEvents);
     const fetchMock = vi.fn(async (input: string | URL | Request) => {
       const path = typeof input === "string" ? input : input.toString();
       if (path === "/api/security/antiforgery") {
@@ -36,6 +40,7 @@ describe("apiGetCached", () => {
     await apiMutate("/api/change", "POST", {}, "Error");
     await apiGetCached("context:user", "/api/work/context", "Error");
 
+    expect(changed).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledTimes(4);
     expect(fetchMock.mock.calls.filter(([path]) => path === "/api/work/context")).toHaveLength(2);
   });

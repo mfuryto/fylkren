@@ -201,7 +201,7 @@ internal static class PlanningQueueEndpoints
         });
     }
 
-    private static IQueryable<WorkflowRun> ActivePlanningRuns(FylkrenDbContext db, Guid siteId) =>
+    internal static IQueryable<WorkflowRun> ActivePlanningRuns(FylkrenDbContext db, Guid siteId) =>
         db.WorkflowRuns
             .AsNoTracking()
             .Where(run =>

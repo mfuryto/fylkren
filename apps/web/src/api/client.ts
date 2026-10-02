@@ -43,6 +43,7 @@ export async function apiMutate<T = void>(path: string, method: "POST" | "PUT" |
     body: body ? JSON.stringify(body) : undefined,
   });
   clearApiGetCache();
+  if (typeof window !== "undefined") window.dispatchEvent(new Event("fylkren:work-changed"));
   if (response.status === 204 || response.headers.get("content-length") === "0") return undefined as T;
   const contentType = response.headers.get("content-type") ?? "";
   return contentType.includes("application/json") ? response.json() as Promise<T> : undefined as T;
@@ -56,6 +57,7 @@ export async function apiFormMutate<T = void>(path: string, method: "POST" | "PU
     body,
   });
   clearApiGetCache();
+  if (typeof window !== "undefined") window.dispatchEvent(new Event("fylkren:work-changed"));
   if (response.status === 204 || response.headers.get("content-length") === "0") return undefined as T;
   const contentType = response.headers.get("content-type") ?? "";
   return contentType.includes("application/json") ? response.json() as Promise<T> : undefined as T;

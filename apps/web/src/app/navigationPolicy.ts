@@ -53,10 +53,10 @@ export function buildNavigation(session: Session, activeItem: AppPage) {
     ? []
     : [
         ...(session.hasOperationalRole ? ["Overview", "Tasks"] as AppPage[] : []),
-        ...(session.isTopLevelLeader ? ["Workload"] as AppPage[] : []),
         ...(session.canPlan || session.canApproveWork ? ["Planning"] as AppPage[] : []),
         ...(session.canExecute ? ["Execution"] as AppPage[] : []),
         ...(session.hasOperationalRole ? ["Reports"] as AppPage[] : []),
+        ...(session.isTopLevelLeader ? ["Workload"] as AppPage[] : []),
       ];
   const administrationNavigation = session.isPlatformManager
     ? platformNavigation

@@ -3,15 +3,13 @@ import type { TaskSite, TaskUnit } from "../work/WorkContextModels";
 import type { WorkItem } from "../work/WorkItemModels";
 import { getDescendantWorkload, getOverviewWorkItems, getTaskContext } from "../tasks/taskApi";
 import { buildTaskScope } from "../tasks/taskScope";
-import { buildOverviewMetrics, canLoadDescendantWorkload, isReceivedRequest, overviewStatusLabelKeys as statusLabelKeys, overviewWorkspaceFor as workspaceFor } from "./overviewModel";
-import type { AppPage } from "../navigation/permalinks";
+import { buildOverviewMetrics, canLoadDescendantWorkload, isReceivedRequest, overviewStatusLabelKeys as statusLabelKeys } from "./overviewModel";
 import { useTranslation } from "../localization/LocalizationProvider";
 import { errorMessage } from "../api/errors";
-import { WorkReference } from "../components/WorkReference";
 
 const emptyDescendantWorkload = { active: 0, nearDeadline: 0, overdue: 0, unitSummaries: [], siteSummaries: [] };
 
-export function WorkOverview({ onNavigate, language: displayLanguage, timeZone: displayTimeZone, personId }: { onNavigate: (item: AppPage) => void; language: string; timeZone: string; personId?: string }) {
+export function WorkOverview({ language: displayLanguage, timeZone: displayTimeZone, personId }: { language: string; timeZone: string; personId?: string }) {
   const t = useTranslation();
   const [items, setItems] = useState<WorkItem[]>([]);
   const [sites, setSites] = useState<TaskSite[]>([]);
@@ -142,14 +140,6 @@ export function WorkOverview({ onNavigate, language: displayLanguage, timeZone: 
           <strong>{loading ? "–" : selectedUnitId ? overdue.length : descendantWorkload.overdue}</strong>
         </div>
       </div>
-      {!loading && needsAction.length > 0 && <section className="panel overview-section overview-action-section">
-        <div className="section-heading"><div><h2>{t("requiresAction")}</h2><p className="muted">{t("newestFirst")}</p></div></div>
-        <div className="admin-list">{needsAction.slice(0, 8).map((item) => <div className="admin-list-row overview-work-row" key={item.id}>
-          <WorkReference referenceCode={item.referenceCode}/>
-          <span className="overview-work-title"><strong title={item.title}>{item.title}</strong><small className="muted"><b className={`overview-status-dot overview-status-${item.status}`} aria-hidden="true" />{item.isOutgoingRequest ? t("sentRequestStatus", { status: item.requestProgressStatus === "completed" ? t("answered") : ["rejected", "cancelled"].includes(item.requestProgressStatus ?? "") ? t("closed") : t("beingProcessed") }) : isReceivedRequest(item) ? t("receivedRequestStatus", { status: statusLabel(item.status) }) : statusLabel(item.status)}{item.dueAt ? ` · ${t("dueDate", { date: new Date(item.dueAt).toLocaleDateString(displayLanguage, { timeZone: displayTimeZone }) })}` : ""}{item.unitName ? ` · ${item.unitName}` : ""}{item.originReference ? ` · ${t("originReferenceLabel")}: ${item.originReference}` : ""}</small></span>
-          <button className="secondary-button" type="button" onClick={() => onNavigate(workspaceFor(item))}>{t("openInWorkspace", { workspace: t(workspaceFor(item) === "Planning" ? "navPlanning" : workspaceFor(item) === "Execution" ? "navExecution" : "navTasks") })}</button>
-        </div>)}</div>
-      </section>}
       {!loading && subordinateSummary.length > 0 && <section className="panel overview-section overview-units-section">
         <div className="section-heading"><div><h2>{t("subordinateWork")}</h2><p className="muted">{t("subordinateWorkIntro")}</p></div><div className="view-switch" role="group" aria-label={t("view")}><button className={subordinateView === "cards" ? "active" : ""} type="button" onClick={() => changeSubordinateView("cards")}>{t("cards")}</button><button className={subordinateView === "list" ? "active" : ""} type="button" onClick={() => changeSubordinateView("list")}>{t("listView")}</button></div></div>
         <div className={`overview-unit-grid overview-unit-${subordinateView}`}>{subordinateSummary.map(({ unit, active: activeCount, underway, statusCounts }) => <article className="overview-unit-card" key={unit.id}>
