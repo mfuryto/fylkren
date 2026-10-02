@@ -12,6 +12,14 @@ This roadmap contains approved future work and release gates. Current behavior b
 
 Each gate must be complete and evidenced before the next gate changes public contracts or distribution.
 
+## Event/activity and information lifecycle foundations
+
+The [source review and proposed architecture](../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md) is the single design/requirement/test reference for this work. The review is complete; runtime implementation and its acceptance cases are pending. This foundation work precedes the next security-testing continuation at the user's request. Existing external contracts remain unchanged during the review.
+
+Implement additively on the existing domain-event model, preserving authoritative state/revisions and independent security audit. First deliver the WorkItem/plan/report vertical slice, notification/webhook cutover using existing queues, authorized object/site timelines and guarded closed/archive state. Then extend risk/measure/decision and other activity coverage, site/user custodianship, snapshot portability and relationship-aware lifecycle adapters. Do not introduce a broker, duplicate activity writer, second audit stream or automatic purge/retention periods.
+
+Before enabling irreversible disposition, implement independent policy/hold gates, export-before-deletion, cross-owner reference protection, replay-horizon preservation and resumable redaction/purge recovery. Architecture requirement IDs and T01–T14 acceptance cases are maintained in the linked proposal, rather than duplicated here. Retest affected controls in the existing ASVS matrix after implementation; then resume incomplete chapter-1 requirements 1.3.3, 1.3.6 and 1.4.2 in the established workflow.
+
 ## Repository readiness
 
 Prepare the repository for possible public publication. Retain only material required to build, test, operate, understand, and maintain the product. Remove obsolete proposals, duplicate specifications, temporary work notes, workstation artifacts, generated content that can be reproduced, and synthetic data that is not a maintained fixture.

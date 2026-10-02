@@ -18,6 +18,7 @@ Before public publication, run `bash tools/security/verify-repository-safety.sh 
 - [Domain model](product/DOMAIN_MODEL.md)
 - [Site model](product/SITE_MODEL.md)
 - [Technical architecture](architecture/TECHNICAL_ARCHITECTURE.md)
+- [Event/activity and information lifecycle review and proposal](architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md)
 - [Independent-instance federation foundation](architecture/INSTANCE_FEDERATION.md)
 - [Community and Enterprise entitlements](architecture/EDITION_ENTITLEMENTS.md)
 - [Platform license API](api/PLATFORM_LICENSE_API.md)

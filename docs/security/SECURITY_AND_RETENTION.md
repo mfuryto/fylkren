@@ -1,6 +1,6 @@
 # Security and retention model
 
-This document defines the current security and retention behavior. Test status and outstanding evidence belong in the [security test plan](SECURITY_TEST_PLAN.md) and [verification record](SECURITY_VERIFICATION.md).
+This document defines the current security and retention behavior. Requirement-level test status and outstanding evidence belong only in the [ASVS matrix](ASVS_5.0.0_L2_MATRIX.md); the [security test plan](SECURITY_TEST_PLAN.md) defines the workflow and [verification record](SECURITY_VERIFICATION.md) holds findings.
 
 ## Identity and authentication
 
@@ -82,6 +82,8 @@ The operating organization determines legal basis and retention policy. Fylkren 
 - sanitize after a configured period.
 
 Active and completed tasks are not normally deleted. Completed work becomes historical and read-only and leaves operational queues.
+
+The source-reviewed current behavior and proposed common lifecycle are maintained in the [event/activity and information lifecycle review](../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md). Site DELETE currently deactivates access/routing and keeps records; person deletion clears authentication/contact/image data but retains historical identity/name references. A report archive is a query over completed approved work, not an explicit archive state. General aggregate retention, holds and controlled sanitization described below are preservation requirements, not implemented purge capabilities. Existing protocol cleanup includes fixed ephemeral windows and a configured federation duration; federation maintenance also deletes selected audit rows, which must be separated from customer-content retention in the proposed lifecycle integration. This review introduces no new duration or runtime retention change.
 
 ## Sanitization and historical integrity
 

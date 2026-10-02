@@ -56,11 +56,11 @@ Every operational level completes its own report after execution and subordinate
 
 ### Activity, audit and technical log
 
-Activity is the readable operational history. Audit records security and administrative mutations, actor context and relevant old/new values. Technical logs describe application operation. The three streams have different audiences and retention rules.
+Activity is the readable operational history. Audit records security, administrative and selected operational mutations with actor context, affected object and time. Detailed content/revisions remain in their domain records. Technical logs describe application operation. The three streams have different audiences and retention rules.
 
 ### Notification delivery
 
-Domain events project eligible notifications into a durable, deduplicated delivery queue. Delivery attempts and failure reasons are retained independently of the successful business transaction.
+Selected audit events currently project eligible notifications into a durable, deduplicated delivery queue; webhooks consume domain events separately. The [event/activity and information lifecycle proposal](../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md) defines convergence on the existing domain-event model without replacing authoritative domain state or security audit. Delivery attempts and failure reasons are retained independently of the successful business transaction.
 
 ## Relationship overview
 
