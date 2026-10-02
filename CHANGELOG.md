@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Reduced Overview header, summary cards, subordinate cards and statistics spacing across all overview designs, with compact controls and responsive mobile headings.
+
 - Compacted the Tasks queue controls: view, search and sorting share one desktop row, status counts use small inline cards, and successful registration preserves the current filter and search.
 
 - Prevented a successful task registration from showing a false unavailable-task warning by confirming direct task access instead of treating absence from one queue projection as an authorization result.

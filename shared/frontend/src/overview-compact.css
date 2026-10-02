@@ -1,0 +1,32 @@
+.overview-page .overview-header { min-height: 84px; padding: 14px 18px; margin-bottom: 12px; }
+.overview-page.overview-design-minimal .overview-header { min-height: auto; padding: 6px 0 12px; }
+.overview-page .overview-header h1 { font-size: 1.4rem; }
+.overview-page .overview-header p { margin: 4px 0 0; }
+.overview-page .overview-eyebrow { margin-bottom: 3px; }
+.overview-page .panel { padding: 12px; }
+.overview-page .context-bar { gap: 10px; margin-bottom: 12px; }
+.overview-page .field { gap: 4px; }
+.overview-page .field :is(input, select) { min-height: 32px; padding-top: 5px; padding-bottom: 5px; }
+.overview-page .summary-grid { gap: 8px; margin-bottom: 12px; }
+.overview-page .overview-summary-card { min-height: 72px; padding: 10px 12px; }
+.overview-page .overview-summary-card span { font-size: .8rem; gap: 5px; }
+.overview-page .overview-summary-card span i { width: 19px; height: 19px; font-size: .72rem; flex-shrink: 0; }
+.overview-page .summary-card strong { font-size: 1.35rem; padding-top: 5px; }
+.overview-page .overview-section { margin-bottom: 12px; }
+.overview-page .section-heading { gap: 10px; margin-bottom: 10px; }
+.overview-page .section-heading p { margin: 4px 0 0; }
+.overview-page .overview-work-row { padding: 8px 4px; }
+.overview-page .overview-unit-grid { gap: 8px; }
+.overview-page .overview-unit-card { gap: 6px; padding: 10px 12px; }
+.overview-page .overview-unit-list .overview-unit-card { gap: 10px; }
+.overview-page .overview-unit-heading { gap: 8px; }
+.overview-page .overview-unit-total { min-width: 30px; height: 30px; padding: 0 6px; font-size: .95rem; }
+.overview-page .overview-unit-load-label { margin-bottom: 3px; }
+.overview-page .overview-statistics { margin-top: 16px; }
+.overview-page .overview-statistics-grid { margin: 10px 0 0; }
+.overview-page .overview-stat-card { padding: 10px 12px; }
+@media (max-width: 520px) {
+  .overview-page .overview-header { min-height: auto; padding: 12px; }
+  .overview-page .section-heading { flex-wrap: wrap; }
+  .overview-page .overview-summary-card { min-height: 68px; padding: 8px 10px; }
+}
