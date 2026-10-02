@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Applied heading-based opening and closing with inline copy-link actions to Planning and Execution cards as well.
+
 - Tasks now open and close from the heading with keyboard support; the copy-link action sits beside the status in the same header instead of occupying a separate row.
 
 - Further compacted collapsed and expanded Tasks, Planning and Execution cards, including metadata, action controls and nested work details.

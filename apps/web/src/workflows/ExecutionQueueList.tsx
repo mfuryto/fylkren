@@ -51,7 +51,7 @@ export function ExecutionQueueList({
   onPageChange,
 }: ExecutionQueueListProps) {
   const managedIds = new Set(managedItemIds);
-  return <section className="task-list process-queue" aria-label={translateActive("workflowsExecutionQueueListExecutionQueueNewestFirst")}>
+  return <section className="task-list process-queue heading-toggle-queue" aria-label={translateActive("workflowsExecutionQueueListExecutionQueueNewestFirst")}>
     {totalItems === 0 && <div className="panel empty-state"><p className="muted">{translateActive("workflowsExecutionQueueListNoTasksInTheExecutionQueue")}</p></div>}
     {items.map(item => {
       const run = item.run;
@@ -60,15 +60,11 @@ export function ExecutionQueueList({
       const expanded = expandedItemId === item.id;
       const units = childUnits(item);
       return <article className={`panel task-card process-card${open ? "" : " minimized"}`} key={item.id}>
-        <div className="task-card-heading task-reference-heading">
+        <div className="task-card-heading task-reference-heading task-interactive-heading" onClick={event => { if (!(event.target as HTMLElement).closest("button, a")) onToggle(item.id); }}>
           <WorkReference referenceCode={item.referenceCode}/>
-          <div className="task-title-cell"><h2 title={item.title}>{item.title}</h2><span className="muted">{item.assignedUnitName ?? translateActive("topLevel")}</span></div>
-          <span className="task-status execution">{executionStatus(item)}</span>
+          <div className="task-title-cell"><h2><button className="task-heading-toggle" type="button" title={item.title} aria-expanded={open} aria-label={`${open ? translateActive("workflowsExecutionQueueListCloseExecution") : translateActive("workflowsExecutionQueueListOpenExecution")}: ${item.title}`} onClick={() => onToggle(item.id)}><i aria-hidden="true">{open ? "▾" : "▸"}</i><span>{item.title}</span></button></h2><span className="muted">{item.assignedUnitName ?? translateActive("topLevel")}</span></div>
+          <div className="task-header-actions"><span className="task-status execution">{executionStatus(item)}</span>{open && <button className="task-icon-action permalink-action" type="button" title={translateActive("workflowsExecutionQueueListCopyLinkToExecution")} aria-label={translateActive("workflowsExecutionQueueListCopyLinkToExecution")} onClick={() => onCopyLink(item.id)}><i aria-hidden="true">🔗</i></button>}</div>
         </div>
-        <button className="task-card-toggle process-card-toggle" type="button" aria-expanded={open} onClick={() => onToggle(item.id)}>
-          <i aria-hidden="true">▱</i><span>{open ? translateActive("workflowsExecutionQueueListCloseExecution") : translateActive("workflowsExecutionQueueListOpenExecution")}</span>
-        </button>
-        {open && <div className="permalink-action-row"><button className="task-icon-action permalink-action" type="button" title={translateActive("workflowsExecutionQueueListCopyLinkToExecution")} aria-label={translateActive("workflowsExecutionQueueListCopyLinkToExecution")} onClick={() => onCopyLink(item.id)}><i aria-hidden="true">🔗</i></button></div>}
         <button className="link-button" type="button" onClick={() => onToggleDetails(item.id)}>{expanded ? translateActive("workflowsExecutionQueueListHideTask") : translateActive("workflowsExecutionQueueListReadTask")}</button>
         {expanded && <div className="planning-preview">
           {item.originReference && <p className="muted"><strong>{translateActive("originReferenceLabel")}:</strong> {item.originReference}</p>}

@@ -57,6 +57,7 @@
   .process-card :is(.planning-result, .planning-preview, .delegation-tree, .delegation-child) { padding: 9px 10px; gap: 8px; }
   .process-card .returned-report > summary { padding: 7px 10px; }
   .process-queue.work-queue .process-card.minimized { grid-template-columns: minmax(0, 1fr); }
+  .process-queue.heading-toggle-queue .process-card.minimized { grid-template-columns: minmax(0, 1fr); }
   .task-interactive-heading { cursor: pointer; }
   .task-interactive-heading:hover { background: color-mix(in srgb, var(--brand) 4%, transparent); }
   .task-header-actions { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }

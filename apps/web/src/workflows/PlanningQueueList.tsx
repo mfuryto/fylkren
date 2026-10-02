@@ -56,7 +56,7 @@ export function PlanningQueueList({
   onClaim,
   onPageChange,
 }: PlanningQueueListProps) {
-  return <section className="task-list process-queue" aria-label={translateActive("workflowsPlanningQueueListPlanningQueueNewestFirst")}>
+  return <section className="task-list process-queue heading-toggle-queue" aria-label={translateActive("workflowsPlanningQueueListPlanningQueueNewestFirst")}>
     {totalItems === 0 && <div className="panel empty-state">
       <p className="muted">{translateActive("workflowsPlanningQueueListNoTasksInThePlanningQueue")}</p>
     </div>}
@@ -64,15 +64,11 @@ export function PlanningQueueList({
       const childUnits = allocationUnits(run);
       const open = openRunId === run.id;
       return <article className={`panel task-card process-card${open ? "" : " minimized"}`} key={run.id}>
-        <div className="task-card-heading task-reference-heading">
+        <div className="task-card-heading task-reference-heading task-interactive-heading" onClick={event => { if (!(event.target as HTMLElement).closest("button, a")) onToggle(run.id); }}>
           <WorkReference referenceCode={run.item.referenceCode}/>
-          <h2 title={run.item.title}>{run.item.title}</h2>
-          <span className={`task-status ${run.status === "cancelled" ? "cancelled" : "planning"}`}>{planningStatus(run)}</span>
+          <h2><button className="task-heading-toggle" type="button" title={run.item.title} aria-expanded={open} aria-label={`${open ? translateActive("workflowsPlanningQueueListClosePlanning") : translateActive("workflowsPlanningQueueListOpenPlanning")}: ${run.item.title}`} onClick={() => onToggle(run.id)}><i aria-hidden="true">{open ? "▾" : "▸"}</i><span>{run.item.title}</span></button></h2>
+          <div className="task-header-actions"><span className={`task-status ${run.status === "cancelled" ? "cancelled" : "planning"}`}>{planningStatus(run)}</span>{open && <button className="task-icon-action permalink-action" type="button" title={translateActive("workflowsPlanningQueueListCopyLinkToPlanning")} aria-label={translateActive("workflowsPlanningQueueListCopyLinkToPlanning")} onClick={() => onCopyLink(run.id)}><i aria-hidden="true">🔗</i></button>}</div>
         </div>
-        <button className="task-card-toggle process-card-toggle" type="button" aria-expanded={open} onClick={() => onToggle(run.id)}>
-          <i aria-hidden="true">▱</i><span>{open ? translateActive("workflowsPlanningQueueListClosePlanning") : translateActive("workflowsPlanningQueueListOpenPlanning")}</span>
-        </button>
-        {open && <div className="permalink-action-row"><button className="task-icon-action permalink-action" type="button" title={translateActive("workflowsPlanningQueueListCopyLinkToPlanning")} aria-label={translateActive("workflowsPlanningQueueListCopyLinkToPlanning")} onClick={() => onCopyLink(run.id)}><i aria-hidden="true">🔗</i></button></div>}
         {run.status === "cancelled" && <p className="task-decision-note">
           <strong>{translateActive("workflowsPlanningQueueListTheTaskWasCancelledByThe")}</strong> {run.item.decisionNote}
         </p>}
