@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Made individual learning-point treatment clearer with clickable status controls for leaders, explicit opening instructions and an explanation for users with read-only treatment access.
+
 - Restarted numbering separately for each final-report learning list and moved learning categories into a compact green/red indicator column before the observation text.
 
 - Documented learning as continuous operational feedback after status, and added an illustrated workspace gallery and user-manual examples for Overview, Tasks, Planning with its timeline ruler, Execution, report archives and final-report presentation.

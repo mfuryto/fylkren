@@ -1,7 +1,8 @@
 export const learning = {
+  "learningReadOnlyHint": "You can read and comment on this point. Only leaders at its work level can change status, priority and treatment.",
   "learningKind": "Category",
   "navLearning": "Learning",
-  "learningIntro": "Internal experience points, with priorities and follow-up at your work level.",
+  "learningIntro": "Select the point text to open one point at a time. Leaders can also select its status, choose a new status and save.",
   "learningInternal": "Internal learning points are stored separately and are not included in final reports or forwarded reports.",
   "learningPositive": "What worked well?",
   "learningImprovement": "What could be improved?",

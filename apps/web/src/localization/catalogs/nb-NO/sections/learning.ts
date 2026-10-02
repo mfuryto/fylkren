@@ -1,7 +1,8 @@
 export const learning = {
+  "learningReadOnlyHint": "Du kan lese og kommentere dette punktet. Bare leder på punktets arbeidsnivå kan endre status, prioritet og behandling.",
   "learningKind": "Kategori",
   "navLearning": "Læring",
-  "learningIntro": "Interne læringsmomenter med prioritering og oppfølging på ditt arbeidsnivå.",
+  "learningIntro": "Klikk på punktteksten for å åpne ett punkt om gangen. Leder kan også klikke på statusen, velge ny status og lagre.",
   "learningInternal": "Interne læringsmomenter lagres separat og tas ikke med i sluttrapporten eller rapportering oppover.",
   "learningPositive": "Hva fungerte bra?",
   "learningImprovement": "Hva fungerte ikke så bra?",

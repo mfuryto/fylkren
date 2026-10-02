@@ -1,7 +1,8 @@
 export const learning = {
+  "learningReadOnlyHint": "Varat lasīt un komentēt šo punktu. Tikai tā darba līmeņa vadītāji var mainīt statusu, prioritāti un apstrādi.",
   "learningKind": "Kategorija",
   "navLearning": "Mācīšanās",
-  "learningIntro": "Iekšējās atziņas ar prioritātēm un turpmākajām darbībām jūsu darba līmenī.",
+  "learningIntro": "Noklikšķiniet uz teksta, lai atvērtu vienu punktu. Vadītāji var arī noklikšķināt uz statusa, izvēlēties jaunu statusu un saglabāt.",
   "learningInternal": "Iekšējās atziņas glabā atsevišķi un neiekļauj gala ziņojumā vai ziņojumos augstākiem līmeņiem.",
   "learningPositive": "Kas izdevās labi?",
   "learningImprovement": "Ko varētu uzlabot?",

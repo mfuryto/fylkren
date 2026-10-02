@@ -1,7 +1,8 @@
 export const learning = {
+  "learningReadOnlyHint": "Voit lukea ja kommentoida tätä kohtaa. Vain kohdan työtason johtajat voivat muuttaa tilaa, prioriteettia ja käsittelyä.",
   "learningKind": "Luokka",
   "navLearning": "Oppiminen",
-  "learningIntro": "Sisäiset opit ja seuranta omalla työtasollasi.",
+  "learningIntro": "Avaa yksi kohta kerrallaan napsauttamalla sen tekstiä. Johtajat voivat myös napsauttaa tilaa, valita uuden tilan ja tallentaa.",
   "learningInternal": "Sisäiset opit tallennetaan erikseen, eikä niitä sisällytetä loppuraporttiin tai ylöspäin raportointiin.",
   "learningPositive": "Mikä onnistui?",
   "learningImprovement": "Mitä voisi parantaa?",

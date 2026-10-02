@@ -1,7 +1,8 @@
 export const learning = {
+  "learningReadOnlyHint": "Vous pouvez lire et commenter ce point. Seuls les responsables de son niveau de travail peuvent modifier son statut, sa priorité et son traitement.",
   "learningKind": "Catégorie",
   "navLearning": "Apprentissage",
-  "learningIntro": "Enseignements internes, priorités et suivi à votre niveau de travail.",
+  "learningIntro": "Cliquez sur le texte pour ouvrir un point à la fois. Les responsables peuvent aussi cliquer sur son statut, choisir un nouveau statut et enregistrer.",
   "learningInternal": "Les enseignements internes sont stockés séparément et exclus des rapports finaux et des rapports aux niveaux supérieurs.",
   "learningPositive": "Qu’est-ce qui a bien fonctionné ?",
   "learningImprovement": "Que peut-on améliorer ?",

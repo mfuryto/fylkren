@@ -29,6 +29,8 @@ Points accept 2–4,000 trimmed plain-text characters. A save can add up to 50 p
 
 **Learning** follows **Workload** in operational navigation. Users with access to their operational level can read points and comment; the leader at that level can prioritize and process them. A top-level leadership position alone does not grant access to subordinate internal learning. The menu counter counts **New** and **In progress** points at levels the current user can lead. Opening a page or adding a comment does not clear the counter.
 
+Each table row is one learning point, even when multiple rows have the same assignment reference. Select the point text to open its individual treatment and discussion. Selecting the assignment reference opens the task instead. Leaders can also select the row's status to open that point, change **Status** and choose **Save**. Choosing **In progress** requires an action plan and deadline; closing requires an outcome or rationale. Saving one point does not change other points from the assignment. Read-only users see an access explanation and can still comment on individual points.
+
 ![Synthetic internal learning queue](images/learning-list.png)
 
 The default queue shows pending points, sorted by high/normal/low priority, then deadline and creation time. Search matches point text, task title and reference before pagination. Filters select authorized sites/levels, category, priority and pending/closed/all records. Page size is 20. Clicking a point opens its full text, comments and treatment history; clicking the task reference opens the existing authorized task view.

@@ -1,7 +1,8 @@
 export const learning = {
+  "learningReadOnlyHint": "Pode ler e comentar este ponto. Apenas os responsáveis do seu nível de trabalho podem alterar o estado, a prioridade e o tratamento.",
   "learningKind": "Categoria",
   "navLearning": "Aprendizagem",
-  "learningIntro": "Lições internas com prioridades e acompanhamento no seu nível de trabalho.",
+  "learningIntro": "Clique no texto para abrir um ponto de cada vez. Os responsáveis também podem clicar no estado, escolher um novo estado e guardar.",
   "learningInternal": "As lições internas são guardadas separadamente e não são incluídas nos relatórios finais nem nos relatórios a níveis superiores.",
   "learningPositive": "O que correu bem?",
   "learningImprovement": "O que pode melhorar?",

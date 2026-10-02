@@ -1,7 +1,8 @@
 export const learning = {
+  "learningReadOnlyHint": "Galite skaityti ir komentuoti šį punktą. Tik jo darbo lygmens vadovai gali keisti būseną, prioritetą ir tvarkymą.",
   "learningKind": "Kategorija",
   "navLearning": "Mokymasis",
-  "learningIntro": "Vidinės pamokos su prioritetais ir tolesniais veiksmais jūsų darbo lygiu.",
+  "learningIntro": "Spustelėkite tekstą, kad atidarytumėte vieną punktą. Vadovai taip pat gali spustelėti būseną, pasirinkti naują būseną ir išsaugoti.",
   "learningInternal": "Vidinės pamokos saugomos atskirai ir neįtraukiamos į galutines ataskaitas ar ataskaitas aukštesniems lygiams.",
   "learningPositive": "Kas pavyko gerai?",
   "learningImprovement": "Ką būtų galima patobulinti?",

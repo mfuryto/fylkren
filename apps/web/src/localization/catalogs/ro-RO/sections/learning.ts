@@ -1,7 +1,8 @@
 export const learning = {
+  "learningReadOnlyHint": "Puteți citi și comenta acest punct. Doar liderii de la nivelul său de lucru pot modifica starea, prioritatea și tratarea.",
   "learningKind": "Categorie",
   "navLearning": "Învățare",
-  "learningIntro": "Lecții interne cu priorități și urmărire la nivelul dumneavoastră de lucru.",
+  "learningIntro": "Faceți clic pe text pentru a deschide câte un punct. Liderii pot selecta și starea, alege o stare nouă și salva.",
   "learningInternal": "Lecțiile interne sunt păstrate separat și nu sunt incluse în rapoartele finale sau în rapoartele către nivelurile superioare.",
   "learningPositive": "Ce a funcționat bine?",
   "learningImprovement": "Ce se poate îmbunătăți?",

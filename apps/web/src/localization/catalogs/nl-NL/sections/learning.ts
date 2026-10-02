@@ -1,7 +1,8 @@
 export const learning = {
+  "learningReadOnlyHint": "U kunt dit punt lezen en erop reageren. Alleen leidinggevenden op het werkniveau van het punt kunnen de status, prioriteit en behandeling wijzigen.",
   "learningKind": "Categorie",
   "navLearning": "Leren",
-  "learningIntro": "Interne leerpunten met prioriteiten en opvolging op uw werkniveau.",
+  "learningIntro": "Klik op de tekst om één punt tegelijk te openen. Leidinggevenden kunnen ook op de status klikken, een nieuwe status kiezen en opslaan.",
   "learningInternal": "Interne leerpunten worden apart opgeslagen en komen niet in eindrapporten of rapporten aan hogere niveaus.",
   "learningPositive": "Wat ging goed?",
   "learningImprovement": "Wat kan beter?",

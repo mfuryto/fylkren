@@ -19,6 +19,9 @@
 .learning-point-title { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; padding: 0; background: none; border: 0; text-align: left; color: inherit; font: inherit; cursor: pointer; white-space: pre-wrap; overflow-wrap: anywhere; }
 .learning-point-title:hover { text-decoration: underline; }
 .learning-point-title:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
+.learning-status-action { padding: 2px 5px; color: inherit; background: transparent; border: 1px solid var(--border); border-radius: 4px; font: inherit; cursor: pointer; white-space: nowrap; }
+.learning-status-action:hover { border-color: var(--brand); }
+.learning-status-action:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 .learning-priority { font-size: 11px; }
 .learning-priority-high, .learning-overdue { font-weight: 700; color: var(--danger, #ad2525); }
 .learning-priority-low { opacity: .75; }

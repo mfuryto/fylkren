@@ -8,7 +8,8 @@ import { navigationCountLabel, useNavigationCounts } from "../src/app/useNavigat
 import { apiMutate } from "../src/api/client";
 import "@fylkren/ui";
 const now = new Date().toISOString();
-const makeLesson = (id, number, kind, text) => ({ id, number, kind, text, siteId: "site", unitId: "unit", workItemId: "task", workReference: "OPS-000123", workTitle: "Synthetic coordination task", authorName: "Synthetic author", createdAt: now, updatedAt: now, status: "new", priority: "normal", actionPlan: "", treatmentNote: "", dueOn: null, ownerName: null, version: 1, canManage: true });
+const canManage = new URLSearchParams(location.search).get("role") !== "reader";
+const makeLesson = (id, number, kind, text) => ({ id, number, kind, text, siteId: "site", unitId: "unit", workItemId: "task", workReference: "OPS-000123", workTitle: "Synthetic coordination task", authorName: "Synthetic author", createdAt: now, updatedAt: now, status: "new", priority: "normal", actionPlan: "", treatmentNote: "", dueOn: null, ownerName: null, version: 1, canManage });
 let lessons = [makeLesson("point-one", 1, "positive", "Shared status updates helped coordinate work."), makeLesson("point-two", 2, "improvement", "Handover information arrived too late.")];
 const entries = new Map();
 window.testReportPayload = null;

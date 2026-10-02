@@ -1,7 +1,8 @@
 export const learning = {
+  "learningReadOnlyHint": "Saate seda punkti lugeda ja kommenteerida. Ainult selle töötasandi juhid saavad muuta olekut, prioriteeti ja käsitlust.",
   "learningKind": "Kategooria",
   "navLearning": "Õppimine",
-  "learningIntro": "Sisemised õppetunnid, prioriteedid ja järeltegevused teie töötasandil.",
+  "learningIntro": "Ühe punkti avamiseks klõpsake selle tekstil. Juhid saavad klõpsata ka olekul, valida uue oleku ja salvestada.",
   "learningInternal": "Sisemised õppetunnid salvestatakse eraldi ega kuulu lõpparuandesse või kõrgematele tasanditele esitatavasse aruandesse.",
   "learningPositive": "Mis toimis hästi?",
   "learningImprovement": "Mida saaks parandada?",

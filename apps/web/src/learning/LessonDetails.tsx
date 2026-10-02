@@ -48,6 +48,7 @@ export function LessonDetails({ lesson, language, timeZone, onClose, onReviewed 
       {error && <p className="status-message error-message" role="alert">{error}</p>}
       {lesson.canManage ? <form className="stacked-form learning-review" onSubmit={submitReview}>
         <h3>{t("learningReview")}</h3>
+        <p className="muted">{t("learningReviewHint")}</p>
         <div className="learning-review-fields">
           <div className="field"><label htmlFor="lesson-status">{t("approvalStatus")}</label><select id="lesson-status" disabled={busy} value={review.status} onChange={event => setReview({ ...review, status: event.target.value as LessonStatus, treatmentNote: ["implemented", "dismissed"].includes(lesson.status) && ["new", "in_progress"].includes(event.target.value) ? "" : review.treatmentNote })}>{Object.entries(lessonStatusKeys).map(([status, key]) => <option value={status} key={status}>{t(key)}</option>)}</select></div>
           <div className="field"><label htmlFor="lesson-priority">{t("learningPriority")}</label><select id="lesson-priority" disabled={busy} value={review.priority} onChange={event => setReview({ ...review, priority: event.target.value as LessonPriority })}>{Object.entries(lessonPriorityKeys).map(([priority, key]) => <option value={priority} key={priority}>{t(key)}</option>)}</select></div>
@@ -55,9 +56,8 @@ export function LessonDetails({ lesson, language, timeZone, onClose, onReviewed 
         </div>
         <div className="field"><label htmlFor="lesson-plan">{t("learningActionPlan")}</label><textarea id="lesson-plan" rows={2} maxLength={2000} disabled={busy} value={review.actionPlan} onChange={event => setReview({ ...review, actionPlan: event.target.value })}/></div>
         <div className="field"><label htmlFor="lesson-note">{t("learningTreatmentNote")}</label><textarea id="lesson-note" rows={2} maxLength={4000} disabled={busy} value={review.treatmentNote} onChange={event => setReview({ ...review, treatmentNote: event.target.value })}/></div>
-        <p className="muted">{t("learningReviewHint")}</p>
         <div><button className="primary-button" disabled={busy || !validLessonReview(review, lesson.status, lesson.treatmentNote)}>{t("save")}</button></div>
-      </form> : <div className="learning-current-review"><strong>{t(lessonStatusKeys[lesson.status])} · {t(lessonPriorityKeys[lesson.priority])}</strong><p className="learning-text">{lesson.actionPlan}</p><p className="learning-text">{lesson.treatmentNote}</p>{lesson.dueOn && <p>{t("riskDueDate")}: {lesson.dueOn}</p>}</div>}
+      </form> : <div className="learning-current-review"><p className="muted">{t("learningReadOnlyHint")}</p><strong>{t(lessonStatusKeys[lesson.status])} · {t(lessonPriorityKeys[lesson.priority])}</strong><p className="learning-text">{lesson.actionPlan}</p><p className="learning-text">{lesson.treatmentNote}</p>{lesson.dueOn && <p>{t("riskDueDate")}: {lesson.dueOn}</p>}</div>}
       <h3>{t("learningHistory")}</h3>
       {!entries ? <p className="muted">{t("loading")}</p> : <>
         <ol className="learning-history">{entries.items.map(entry => <li key={entry.id}>

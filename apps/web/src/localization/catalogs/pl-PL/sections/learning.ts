@@ -1,7 +1,8 @@
 export const learning = {
+  "learningReadOnlyHint": "Możesz czytać i komentować ten punkt. Tylko kierownicy na jego poziomie pracy mogą zmieniać status, priorytet i sposób obsługi.",
   "learningKind": "Kategoria",
   "navLearning": "Wnioski",
-  "learningIntro": "Wewnętrzne wnioski z priorytetami i monitorowaniem na Twoim poziomie pracy.",
+  "learningIntro": "Kliknij tekst, aby otworzyć jeden punkt naraz. Kierownicy mogą również kliknąć status, wybrać nowy status i zapisać.",
   "learningInternal": "Wewnętrzne wnioski są zapisywane oddzielnie i nie trafiają do raportów końcowych ani raportowania do wyższych poziomów.",
   "learningPositive": "Co zadziałało dobrze?",
   "learningImprovement": "Co można poprawić?",

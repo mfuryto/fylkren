@@ -1,7 +1,8 @@
 export const learning = {
+  "learningReadOnlyHint": "Tento bod můžete číst a komentovat. Pouze vedoucí na jeho pracovní úrovni mohou měnit stav, prioritu a zpracování.",
   "learningKind": "Kategorie",
   "navLearning": "Poučení",
-  "learningIntro": "Interní poznatky s prioritami a sledováním na vaší pracovní úrovni.",
+  "learningIntro": "Kliknutím na text otevřete vždy jeden bod. Vedoucí mohou také kliknout na stav, vybrat nový stav a uložit jej.",
   "learningInternal": "Interní poznatky se ukládají odděleně a nejsou součástí závěrečných zpráv ani hlášení vyšším úrovním.",
   "learningPositive": "Co fungovalo dobře?",
   "learningImprovement": "Co lze zlepšit?",

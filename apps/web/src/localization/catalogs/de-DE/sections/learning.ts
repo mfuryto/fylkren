@@ -1,7 +1,8 @@
 export const learning = {
+  "learningReadOnlyHint": "Sie können diesen Punkt lesen und kommentieren. Nur Führungskräfte auf seiner Arbeitsebene können Status, Priorität und Bearbeitung ändern.",
   "learningKind": "Kategorie",
   "navLearning": "Lernen",
-  "learningIntro": "Interne Erkenntnisse mit Prioritäten und Nachverfolgung auf Ihrer Arbeitsebene.",
+  "learningIntro": "Klicken Sie auf den Punkttext, um jeweils einen Punkt zu öffnen. Führungskräfte können auch den Status anklicken, einen neuen Status wählen und speichern.",
   "learningInternal": "Interne Erkenntnisse werden getrennt gespeichert und nicht in Abschlussberichte oder Berichte an höhere Ebenen aufgenommen.",
   "learningPositive": "Was lief gut?",
   "learningImprovement": "Was könnte verbessert werden?",

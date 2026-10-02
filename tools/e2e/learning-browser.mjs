@@ -39,7 +39,8 @@ try {
   await wait('document.querySelector("nav a[href$=learning]").textContent.includes("(2)")');
   await evaluate('document.querySelector("#preview-report").hidden = true');
   await mkdir(output, { recursive: true }); await screenshot('desktop-list');
-  await click('.learning-point-title');
+  await click('.learning-status-action');
+  assert.ok(await evaluate('document.querySelector(".learning-text").textContent.includes("Shared status")'), 'Status opens only its own point');
   await setInput('#lesson-status', 'in_progress');
   assert.equal(await evaluate('document.querySelector(".learning-review button").disabled'), true);
   await setInput('#lesson-plan', 'Publish the useful practice in the local handbook');
@@ -51,6 +52,7 @@ try {
   await screenshot('desktop-treatment');
   await evaluate('document.querySelector(".learning-review").requestSubmit()');
   await wait('document.querySelector(".modal-card") === null');
+  assert.equal(await evaluate('document.querySelectorAll(".learning-table tbody tr")[1].querySelector(".learning-status-action").textContent.trim()'), new URL(url).searchParams.get('language') === 'en-US' ? 'New ▾' : '\u004e\u0079\u0065 ▾', 'Treating one point leaves the other point unchanged');
   assert.ok(await evaluate('document.querySelector("nav a[href$=learning]").textContent.includes("(2)")'));
   await click('.learning-point-title');
   await setInput('#lesson-status', 'implemented');
@@ -87,6 +89,15 @@ try {
   await click('.learning-point-title');
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Mobile treatment overflow');
   await screenshot('mobile-treatment');
+  const readerUrl = new URL(url); readerUrl.searchParams.set('role', 'reader');
+  await call('Page.navigate', { url: readerUrl.toString() });
+  await wait('document.querySelectorAll(".learning-table tbody tr").length === 2');
+  assert.equal(await evaluate('document.querySelector(".learning-status-action") === null'), true, 'Readers cannot edit status');
+  await click('.learning-point-title');
+  await wait('document.querySelector(".learning-current-review") !== null');
+  assert.equal(await evaluate('document.querySelector("#lesson-status") === null'), true);
+  assert.ok(await evaluate('document.querySelector(".learning-current-review > p").textContent.length > 0'), 'Readers see an access explanation');
+  assert.ok(await evaluate('document.querySelector("#lesson-comment") !== null'), 'Readers retain individual comments');
   assert.deepEqual(errors, []);
   console.log(JSON.stringify({ learningList: 'passed', treatmentValidation: 'passed', commentHistory: 'passed', closureAndCounter: 'passed', reportSeparation: 'passed', mobileLayout: 'passed', browserErrors: 0, output }));
 } finally { socket.close(); await fetch(`${endpoint}/json/close/${target.id}`); }
