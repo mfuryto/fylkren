@@ -8,8 +8,12 @@
 .learning-table { width: 100%; min-width: 680px; border-collapse: collapse; font-size: 12px; }
 .learning-table th { text-align: left; padding: 6px 8px; white-space: nowrap; }
 .learning-table td { padding: 7px 8px; vertical-align: top; border-top: 1px solid var(--border); }
-.learning-table td:nth-child(3) { width: 100%; min-width: 220px; }
-.learning-table td:not(:nth-child(3)) { white-space: nowrap; }
+.learning-table td:nth-child(4) { width: 100%; min-width: 220px; }
+.learning-table td:not(:nth-child(4)) { white-space: nowrap; }
+.learning-table .learning-kind-cell { text-align: center; }
+.learning-kind-light { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; color: #fff; font-weight: 700; line-height: 1; }
+.learning-kind-positive { background: #267846; }
+.learning-kind-improvement { background: #ad2525; }
 .learning-table td small { display: block; margin-top: 3px; font-size: 11px; }
 .learning-table a { color: inherit; text-decoration: none; }
 .learning-point-title { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; padding: 0; background: none; border: 0; text-align: left; color: inherit; font: inherit; cursor: pointer; white-space: pre-wrap; overflow-wrap: anywhere; }

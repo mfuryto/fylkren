@@ -1,4 +1,5 @@
 export const learning = {
+  "learningKind": "Kategorija",
   "navLearning": "Mācīšanās",
   "learningIntro": "Iekšējās atziņas ar prioritātēm un turpmākajām darbībām jūsu darba līmenī.",
   "learningInternal": "Iekšējās atziņas glabā atsevišķi un neiekļauj gala ziņojumā vai ziņojumos augstākiem līmeņiem.",

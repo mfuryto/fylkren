@@ -1,4 +1,5 @@
 export const learning = {
+  "learningKind": "Kategorija",
   "navLearning": "Mokymasis",
   "learningIntro": "Vidinės pamokos su prioritetais ir tolesniais veiksmais jūsų darbo lygiu.",
   "learningInternal": "Vidinės pamokos saugomos atskirai ir neįtraukiamos į galutines ataskaitas ar ataskaitas aukštesniems lygiams.",

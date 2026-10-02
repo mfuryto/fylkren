@@ -1,4 +1,5 @@
 export const learning = {
+  "learningKind": "Kategori",
   "navLearning": "Lärande",
   "learningIntro": "Interna lärdomar med prioritering och uppföljning på din arbetsnivå.",
   "learningInternal": "Interna lärdomar lagras separat och ingår inte i slutrapporter eller rapportering uppåt.",

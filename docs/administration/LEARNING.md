@@ -21,6 +21,8 @@ Points are currently captured when writing a final report. The feedback cycle de
 
 The final-report editor contains two numbered lists: **What worked well?** and **What could be improved?**. Use **Add learning point** to add concrete observations. Unsaved points can be removed. Saving validates the report and points together and commits them in one transaction. Existing points remain visible in the editor and retain their original wording, category, author and task-local number. Their treatment continues on Learning after the task is completed.
 
+Each category in the editor starts its own list at 1; new points continue after the saved points in that category. These list positions are separate from the permanent task-local record numbers shown in the Learning queue. The queue places category before the point text: a green circle with **+** marks a useful practice, and a red circle with **!** marks an improvement point. Hover text and accessible labels explain both indicators. The category question is not repeated below each observation.
+
 Points accept 2–4,000 trimmed plain-text characters. A save can add up to 50 points; one task can have up to 100. Stable draft IDs prevent duplicate points if a report save is retried. Each point retains the task reference and the reporting work level where it was registered.
 
 ## Work through the queue

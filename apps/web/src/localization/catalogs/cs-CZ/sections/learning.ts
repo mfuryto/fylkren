@@ -1,4 +1,5 @@
 export const learning = {
+  "learningKind": "Kategorie",
   "navLearning": "Poučení",
   "learningIntro": "Interní poznatky s prioritami a sledováním na vaší pracovní úrovni.",
   "learningInternal": "Interní poznatky se ukládají odděleně a nejsou součástí závěrečných zpráv ani hlášení vyšším úrovním.",

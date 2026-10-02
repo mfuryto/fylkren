@@ -1,4 +1,5 @@
 export const learning = {
+  "learningKind": "Kategorie",
   "navLearning": "Lernen",
   "learningIntro": "Interne Erkenntnisse mit Prioritäten und Nachverfolgung auf Ihrer Arbeitsebene.",
   "learningInternal": "Interne Erkenntnisse werden getrennt gespeichert und nicht in Abschlussberichte oder Berichte an höhere Ebenen aufgenommen.",

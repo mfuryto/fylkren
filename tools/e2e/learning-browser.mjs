@@ -33,7 +33,11 @@ try {
   await call('Runtime.enable'); await call('Page.enable');
   await call('Emulation.setDeviceMetricsOverride', { width: 1360, height: 1000, deviceScaleFactor: 1, mobile: false });
   await wait('document.querySelectorAll(".learning-table tbody tr").length === 2');
+  assert.equal(await evaluate('document.querySelector(".learning-table tbody tr:first-child td:nth-child(3) .learning-kind-positive").getAttribute("role")'), 'img');
+  assert.ok(await evaluate('document.querySelector(".learning-kind-improvement").getAttribute("aria-label").length > 0'));
+  assert.equal(await evaluate('document.querySelector(".learning-table tbody tr:first-child td:nth-child(4) small") === null'), true, 'Category question must not be repeated below the point');
   await wait('document.querySelector("nav a[href$=learning]").textContent.includes("(2)")');
+  await evaluate('document.querySelector("#preview-report").hidden = true');
   await mkdir(output, { recursive: true }); await screenshot('desktop-list');
   await click('.learning-point-title');
   await setInput('#lesson-status', 'in_progress');
@@ -57,8 +61,16 @@ try {
   await wait('document.querySelector("nav a[href$=learning]").textContent.includes("(1)")');
   await setInput('#learning-view', 'closed');
   await wait('document.querySelector(".learning-point-title").textContent.includes("Shared status")');
+  await evaluate('document.querySelector("#preview-report").hidden = false');
   await click('#preview-report');
+  assert.deepEqual(await evaluate('Array.from(document.querySelectorAll(".learning-saved-points li"), e => e.value)'), [1, 1], 'Each saved category starts at one');
   await click('.learning-report-points fieldset:first-of-type > button');
+  await click('.learning-report-points fieldset:last-of-type > button');
+  await click('.learning-report-points fieldset:first-of-type > button');
+  assert.deepEqual(await evaluate('Array.from(document.querySelectorAll(".learning-report-points fieldset"), field => Array.from(field.querySelectorAll(".learning-draft-points li"), e => e.value))'), [[2, 3], [2]], 'Interleaved additions continue only within their own category');
+  await click('.learning-report-points fieldset:first-of-type .learning-draft-points li:first-child button');
+  assert.equal(await evaluate('document.querySelector(".learning-report-points fieldset:first-of-type .learning-draft-points li").value'), 2, 'Removing a draft renumbers its category');
+  await click('.learning-report-points fieldset:last-of-type .learning-draft-points li button');
   await setInput('.learning-report-points fieldset:first-of-type textarea', 'PRIVATE_BROWSER_LEARNING_SENTINEL');
   await screenshot('desktop-report');
   await evaluate('document.querySelector(".learning-report-points").closest("form").requestSubmit()');

@@ -1,4 +1,5 @@
 export const learning = {
+  "learningKind": "Kategoria",
   "navLearning": "Wnioski",
   "learningIntro": "Wewnętrzne wnioski z priorytetami i monitorowaniem na Twoim poziomie pracy.",
   "learningInternal": "Wewnętrzne wnioski są zapisywane oddzielnie i nie trafiają do raportów końcowych ani raportowania do wyższych poziomów.",

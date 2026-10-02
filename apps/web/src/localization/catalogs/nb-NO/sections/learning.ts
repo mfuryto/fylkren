@@ -1,4 +1,5 @@
 export const learning = {
+  "learningKind": "Kategori",
   "navLearning": "Læring",
   "learningIntro": "Interne læringsmomenter med prioritering og oppfølging på ditt arbeidsnivå.",
   "learningInternal": "Interne læringsmomenter lagres separat og tas ikke med i sluttrapporten eller rapportering oppover.",

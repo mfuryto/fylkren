@@ -1,4 +1,5 @@
 export const learning = {
+  "learningKind": "Category",
   "navLearning": "Learning",
   "learningIntro": "Internal experience points, with priorities and follow-up at your work level.",
   "learningInternal": "Internal learning points are stored separately and are not included in final reports or forwarded reports.",

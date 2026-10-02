@@ -1,4 +1,5 @@
 export const learning = {
+  "learningKind": "Categoria",
   "navLearning": "Apprendimento",
   "learningIntro": "Lezioni interne con priorità e monitoraggio al proprio livello di lavoro.",
   "learningInternal": "Le lezioni interne sono salvate separatamente e non sono incluse nei rapporti finali o nei rapporti ai livelli superiori.",

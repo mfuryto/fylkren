@@ -1,4 +1,5 @@
 export const learning = {
+  "learningKind": "Kategooria",
   "navLearning": "Õppimine",
   "learningIntro": "Sisemised õppetunnid, prioriteedid ja järeltegevused teie töötasandil.",
   "learningInternal": "Sisemised õppetunnid salvestatakse eraldi ega kuulu lõpparuandesse või kõrgematele tasanditele esitatavasse aruandesse.",

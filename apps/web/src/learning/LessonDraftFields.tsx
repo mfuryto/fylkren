@@ -9,8 +9,8 @@ export function LessonDraftFields({ drafts, saved, onChange, loading, error }: {
     {loading && <p className="muted">{t("loading")}</p>}
     {(["positive", "improvement"] as LessonKind[]).map(kind => <fieldset key={kind}>
       <legend>{t(kind === "positive" ? "learningPositive" : "learningImprovement")}</legend>
-      {saved.some(point => point.kind === kind) && <ol className="learning-saved-points" aria-label={t("learningSavedPoints")}>{saved.filter(point => point.kind === kind).map(point => <li key={point.id} value={point.number}>{point.text}</li>)}</ol>}
-      <ol className="learning-draft-points">{drafts.filter(point => point.kind === kind).map(point => <li key={point.id} value={Math.max(0, ...saved.map(value => value.number)) + drafts.findIndex(value => value.id === point.id) + 1}>
+      {saved.some(point => point.kind === kind) && <ol className="learning-saved-points" aria-label={t("learningSavedPoints")}>{saved.filter(point => point.kind === kind).sort((a, b) => a.number - b.number).map((point, index) => <li key={point.id} value={index + 1}>{point.text}</li>)}</ol>}
+      <ol className="learning-draft-points">{drafts.filter(point => point.kind === kind).map((point, index) => <li key={point.id} value={saved.filter(value => value.kind === kind).length + index + 1}>
         <textarea aria-label={t(kind === "positive" ? "learningPositive" : "learningImprovement")} value={point.text} required minLength={2} maxLength={4000} rows={2} onChange={event => onChange(drafts.map(value => value.id === point.id ? { ...value, text: event.target.value } : value))}/>
         <button className="text-button" type="button" onClick={() => onChange(drafts.filter(value => value.id !== point.id))}>{t("remove")}</button>
       </li>)}</ol>

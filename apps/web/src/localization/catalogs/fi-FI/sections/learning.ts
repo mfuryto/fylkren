@@ -1,4 +1,5 @@
 export const learning = {
+  "learningKind": "Luokka",
   "navLearning": "Oppiminen",
   "learningIntro": "Sisäiset opit ja seuranta omalla työtasollasi.",
   "learningInternal": "Sisäiset opit tallennetaan erikseen, eikä niitä sisällytetä loppuraporttiin tai ylöspäin raportointiin.",
