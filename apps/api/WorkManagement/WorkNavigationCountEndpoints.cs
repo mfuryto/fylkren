@@ -48,7 +48,8 @@ internal static class WorkNavigationCountEndpoints
                 execution += await items.CountAsync(item => executionLevels.Contains(item.AssignedUnitId) &&
                     item.Status == "execution" && (item.ExecutionRun == null || item.ExecutionRun.Status == "available"), ct);
             }
-            return Results.Ok(new { tasks, planning, execution });
+            var learning = await Fylkren.Api.Learning.LearningPolicy.PendingCount(personId, db, ct);
+            return Results.Ok(new { tasks, planning, execution, learning });
         });
     }
 }

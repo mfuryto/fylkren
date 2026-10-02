@@ -40,6 +40,7 @@ export function buildNavigation(session: Session, activeItem: AppPage) {
           !session.hasOperationalRole &&
           activeItem !== "Profile" &&
           activeItem !== "Execution" &&
+          activeItem !== "Learning" &&
           !siteManagerNavigation.includes(activeItem)
         ? "Execution"
         : session.managesSites &&
@@ -57,6 +58,7 @@ export function buildNavigation(session: Session, activeItem: AppPage) {
         ...(session.canExecute ? ["Execution"] as AppPage[] : []),
         ...(session.hasOperationalRole ? ["Reports"] as AppPage[] : []),
         ...(session.isTopLevelLeader ? ["Workload"] as AppPage[] : []),
+        ...(session.hasOperationalRole || session.canExecute ? ["Learning"] as AppPage[] : []),
       ];
   const administrationNavigation = session.isPlatformManager
     ? platformNavigation

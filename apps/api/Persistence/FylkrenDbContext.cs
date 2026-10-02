@@ -1,3 +1,4 @@
+using Fylkren.Api.Learning;
 using Fylkren.Api.Organization;
 using Fylkren.Api.Identity;
 using Fylkren.Api.ActivityAudit;
@@ -56,6 +57,8 @@ public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options)
     public DbSet<WorkItem> WorkItems => Set<WorkItem>();
     public DbSet<PlatformReferenceSettings> PlatformReferenceSettings => Set<PlatformReferenceSettings>();
     public DbSet<SiteReferenceSettings> SiteReferenceSettings => Set<SiteReferenceSettings>();
+    public DbSet<LearningLesson> LearningLessons => Set<LearningLesson>();
+    public DbSet<LearningEntry> LearningEntries => Set<LearningEntry>();
     public DbSet<WorkItemComment> WorkItemComments => Set<WorkItemComment>();
     public DbSet<WorkItemDependency> WorkItemDependencies => Set<WorkItemDependency>();
     public DbSet<WorkItemStateHistory> WorkItemStateHistory => Set<WorkItemStateHistory>();
@@ -144,6 +147,7 @@ public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options)
         modelBuilder.ConfigureAudit();
         modelBuilder.ConfigureWorkItems();
         modelBuilder.ConfigureWorkItemComments();
+        modelBuilder.ConfigureLearning();
         modelBuilder.ConfigureDecisions();
         modelBuilder.ConfigureDomainEvents();
         modelBuilder.ConfigureRisks();

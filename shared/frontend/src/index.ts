@@ -5,3 +5,5 @@ import './compact.css';
 import './platform-compact.css';
 
 import "./risk-workspace.css";
+
+import "./learning.css";

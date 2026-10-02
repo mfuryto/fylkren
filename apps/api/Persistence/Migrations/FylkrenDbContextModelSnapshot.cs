@@ -4966,6 +4966,64 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.HasOne("Fylkren.Api.WorkManagement.WorkItem", null).WithMany().HasForeignKey("WorkItemId").OnDelete(DeleteBehavior.Restrict).IsRequired();
                 });
 
+            modelBuilder.Entity("Fylkren.Api.Learning.LearningLesson", b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid").HasColumnName("id");
+                    b.Property<Guid>("SiteId").HasColumnType("uuid").HasColumnName("site_id");
+                    b.Property<Guid>("WorkItemId").HasColumnType("uuid").HasColumnName("work_item_id");
+                    b.Property<Guid>("UnitId").HasColumnType("uuid").HasColumnName("unit_id");
+                    b.Property<int>("Number").HasColumnType("integer").HasColumnName("number");
+                    b.Property<string>("Kind").IsRequired().HasMaxLength(20).HasColumnType("character varying(20)").HasColumnName("kind");
+                    b.Property<string>("Text").IsRequired().HasMaxLength(4000).HasColumnType("character varying(4000)").HasColumnName("text");
+                    b.Property<Guid>("AuthorPersonId").HasColumnType("uuid").HasColumnName("author_person_id");
+                    b.Property<string>("AuthorName").IsRequired().HasMaxLength(200).HasColumnType("character varying(200)").HasColumnName("author_name");
+                    b.Property<string>("Status").IsRequired().HasMaxLength(20).HasColumnType("character varying(20)").HasColumnName("status");
+                    b.Property<string>("Priority").IsRequired().HasMaxLength(20).HasColumnType("character varying(20)").HasColumnName("priority");
+                    b.Property<string>("ActionPlan").IsRequired().HasMaxLength(2000).HasColumnType("character varying(2000)").HasColumnName("action_plan");
+                    b.Property<string>("TreatmentNote").IsRequired().HasMaxLength(4000).HasColumnType("character varying(4000)").HasColumnName("treatment_note");
+                    b.Property<DateOnly?>("DueOn").HasColumnType("date").HasColumnName("due_on");
+                    b.Property<Guid?>("OwnerPersonId").HasColumnType("uuid").HasColumnName("owner_person_id");
+                    b.Property<string>("OwnerName").HasMaxLength(200).HasColumnType("character varying(200)").HasColumnName("owner_name");
+                    b.Property<DateTimeOffset>("CreatedAt").HasColumnType("timestamp with time zone").HasColumnName("created_at");
+                    b.Property<DateTimeOffset>("UpdatedAt").HasColumnType("timestamp with time zone").HasColumnName("updated_at");
+                    b.Property<long>("Version").IsConcurrencyToken().HasColumnType("bigint").HasColumnName("version");
+                    b.HasKey("Id");
+                    b.HasIndex("WorkItemId", "Number").IsUnique();
+                    b.HasIndex("UnitId", "Status", "Priority");
+                    b.HasIndex("SiteId");
+                    b.HasIndex("AuthorPersonId");
+                    b.HasIndex("OwnerPersonId");
+                    b.ToTable("learning_lessons");
+                    b.HasOne("Fylkren.Api.Organization.Site", null).WithMany().HasForeignKey("SiteId").OnDelete(DeleteBehavior.Restrict).IsRequired();
+                    b.HasOne("Fylkren.Api.WorkManagement.WorkItem", null).WithMany().HasForeignKey("WorkItemId").OnDelete(DeleteBehavior.Restrict).IsRequired();
+                    b.HasOne("Fylkren.Api.Organization.OrganizationUnit", null).WithMany().HasForeignKey("UnitId").OnDelete(DeleteBehavior.Restrict).IsRequired();
+                    b.HasOne("Fylkren.Api.Identity.Person", null).WithMany().HasForeignKey("AuthorPersonId").OnDelete(DeleteBehavior.Restrict).IsRequired();
+                    b.HasOne("Fylkren.Api.Identity.Person", null).WithMany().HasForeignKey("OwnerPersonId").OnDelete(DeleteBehavior.Restrict);
+                });
+            modelBuilder.Entity("Fylkren.Api.Learning.LearningEntry", b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid").HasColumnName("id");
+                    b.Property<Guid>("SiteId").HasColumnType("uuid").HasColumnName("site_id");
+                    b.Property<Guid>("LessonId").HasColumnType("uuid").HasColumnName("lesson_id");
+                    b.Property<Guid>("AuthorPersonId").HasColumnType("uuid").HasColumnName("author_person_id");
+                    b.Property<string>("AuthorName").IsRequired().HasMaxLength(200).HasColumnType("character varying(200)").HasColumnName("author_name");
+                    b.Property<string>("Kind").IsRequired().HasMaxLength(20).HasColumnType("character varying(20)").HasColumnName("kind");
+                    b.Property<string>("Text").IsRequired().HasMaxLength(4000).HasColumnType("character varying(4000)").HasColumnName("text");
+                    b.Property<string>("Status").HasMaxLength(20).HasColumnType("character varying(20)").HasColumnName("status");
+                    b.Property<string>("Priority").HasMaxLength(20).HasColumnType("character varying(20)").HasColumnName("priority");
+                    b.Property<string>("ActionPlan").HasMaxLength(2000).HasColumnType("character varying(2000)").HasColumnName("action_plan");
+                    b.Property<DateOnly?>("DueOn").HasColumnType("date").HasColumnName("due_on");
+                    b.Property<DateTimeOffset>("CreatedAt").HasColumnType("timestamp with time zone").HasColumnName("created_at");
+                    b.HasKey("Id");
+                    b.HasIndex("LessonId", "CreatedAt", "Id");
+                    b.HasIndex("SiteId");
+                    b.HasIndex("AuthorPersonId");
+                    b.ToTable("learning_entries");
+                    b.HasOne("Fylkren.Api.Organization.Site", null).WithMany().HasForeignKey("SiteId").OnDelete(DeleteBehavior.Restrict).IsRequired();
+                    b.HasOne("Fylkren.Api.Learning.LearningLesson", null).WithMany().HasForeignKey("LessonId").OnDelete(DeleteBehavior.Restrict).IsRequired();
+                    b.HasOne("Fylkren.Api.Identity.Person", null).WithMany().HasForeignKey("AuthorPersonId").OnDelete(DeleteBehavior.Restrict).IsRequired();
+                });
+
 #pragma warning restore 612, 618
         }
     }

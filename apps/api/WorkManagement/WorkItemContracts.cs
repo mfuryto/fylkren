@@ -6,7 +6,7 @@ internal sealed record StatusRequest(string Status, Guid? AssignedUnitId, string
 internal sealed record DelegateRequest(Guid AssignedUnitId, string Instruction);
 internal sealed record ReassignRequest(Guid AssignedUnitId);
 internal sealed record CancelRequest(string? DecisionNote);
-internal sealed record FinalReportRequest(string? Content, string? Classification);
+internal sealed record FinalReportRequest(string? Content, string? Classification, IReadOnlyList<Fylkren.Api.Learning.LessonDraft>? Lessons = null);
 internal sealed record WorkTreeNode(Guid Id, Guid? ParentWorkItemId);
 internal sealed record CreateDependencyRequest(Guid PredecessorWorkItemId, string? Type);
 internal sealed record WorkItemDependencySummary(Guid Id, string Type, Guid PredecessorWorkItemId, string PredecessorTitle, string PredecessorStatus, bool IsSatisfied, DateTimeOffset CreatedAt);

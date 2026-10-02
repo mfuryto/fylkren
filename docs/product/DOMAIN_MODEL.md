@@ -90,3 +90,7 @@ A comment belongs to one Site and work item and stores immutable plain text (1�
 ### Visual risk workspace
 
 The task risk register links numbered rows to a 5 × 5 before/after matrix. Numbering follows immutable risk creation order, and the map uses the existing probability × impact boundaries (4, 9 and 16). Circle placement within a cell separates coincident assessments without changing their stored coordinates. Dragging or selecting a cell changes a draft; saving creates the next risk revision. A missing residual pair is represented as unassessed, with no residual marker. Risk creation accepts an optional first mitigation and saves both entities and their audit events in the same database transaction. Existing risk creation without an initial mitigation remains supported. Completing a mitigation preserves its owner and does not calculate a residual assessment automatically.
+
+### Internal learning point and treatment history
+
+A learning point belongs to a Site, one reporting work level and a work item. It records a stable task-local number, positive/improvement category, immutable original text and author snapshot. Status, priority, action plan, deadline, responsible leader and outcome form its current treatment state. Immutable entries retain every comment and treatment revision; a version token rejects conflicting updates. Points survive task completion and remain internal to their level instead of following final-report propagation. Full Site export/backup includes them for recovery. See [internal learning](../administration/LEARNING.md).

@@ -16,6 +16,7 @@ public static class WorkItemEndpoints
         WorkItemDependencyEndpoints.Map(group);
         WorkItemCommentEndpoints.Map(group);
         WorkNavigationCountEndpoints.Map(group);
+        Fylkren.Api.Learning.LearningEndpoints.Map(group);
         return endpoints;
     }
 }

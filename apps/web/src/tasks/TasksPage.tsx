@@ -1,3 +1,4 @@
+import { getLearning } from "../learning/learningApi";
 import { translateActive } from "../localization";
 import { useEffect, useMemo, useState } from "react";
 import type React from "react";
@@ -254,7 +255,7 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
   async function saveFinalReport(event: React.FormEvent) {
     event.preventDefault();
     if (!reportEditor) return;
-    await executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/items/${reportEditor.item.id}/final-report`, method: "PUT", body: { content: reportEditor.content, classification: reportEditor.classification || null }, fallback: translateActive("tasksTasksPageTheFinalReportCouldNotBe"), onSuccess: () => setReportEditor(null), refresh: () => loadItems(selectedSiteId) });
+    await executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/items/${reportEditor.item.id}/final-report`, method: "PUT", body: { content: reportEditor.content, classification: reportEditor.classification || null, lessons: reportEditor.lessons }, fallback: translateActive("tasksTasksPageTheFinalReportCouldNotBe"), onSuccess: () => setReportEditor(null), refresh: () => loadItems(selectedSiteId) });
   }
   async function approveFinalReport(item: WorkItem) {
     await executeTaskCommand({ path: `/api/work/sites/${selectedSiteId}/items/${item.id}/final-report/approve`, method: "POST", fallback: translateActive("tasksTasksPageTheFinalReportCouldNotBeApproved"), refresh: () => loadItems(selectedSiteId) });
@@ -270,7 +271,15 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
   }
   async function openFinalReport(item: WorkItem) {
     const savedReport = item.finalReport?.trim() ? item.finalReport : null;
-    setReportEditor({ item, content: savedReport ?? "", classification: item.finalReportClassification ?? "", executionHistory: null, historyLoading: true });
+    setReportEditor({ item, content: savedReport ?? "", classification: item.finalReportClassification ?? "", executionHistory: null, historyLoading: true, lessons: [], savedLessons: [], lessonsLoading: true, lessonsError: "" });
+    const lessonsQuery = new URLSearchParams({ siteId: selectedSiteId, workItemId: item.id, view: "all" });
+    // Saved points remain internal; only new drafts are submitted with the report.
+    const lessonsRequest = getLearning(lessonsQuery).then(async first => {
+      const remaining = await Promise.all(Array.from({ length: first.totalPages - 1 }, (_, index) => getLearning(new URLSearchParams({ ...Object.fromEntries(lessonsQuery), page: String(index + 2) }))));
+      return [...first.items, ...remaining.flatMap(value => value.items)].sort((a, b) => a.number - b.number);
+    });
+    void lessonsRequest.then(savedLessons => setReportEditor(current => current?.item.id === item.id ? { ...current, savedLessons, lessonsLoading: false } : current))
+      .catch(problem => setReportEditor(current => current?.item.id === item.id ? { ...current, lessonsLoading: false, lessonsError: errorMessage(problem, translateActive("learningLoadFailed")) } : current));
     const [executionHistory, template] = await Promise.all([
       getExecutionHistory(item.id).catch(() => null),
       getFinalReportTemplate(selectedSiteId).catch(() => null),

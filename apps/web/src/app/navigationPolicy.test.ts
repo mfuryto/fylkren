@@ -18,6 +18,7 @@ describe("navigation policy", () => {
     expect(result.navigationItems).toContain("Sites");
     expect(result.navigationItems).toContain("Federation");
     expect(result.navigationItems).not.toContain("Tasks");
+    expect(result.navigationItems).not.toContain("Learning");
   });
 
   it("keeps site administration separate from operational navigation", () => {
@@ -28,6 +29,13 @@ describe("navigation policy", () => {
     expect(result.navigationItems).toContain("Personnel");
     expect(result.navigationItems).toContain("Workflows");
     expect(result.navigationItems).not.toContain("Tasks");
+    expect(result.navigationItems).not.toContain("Learning");
+  });
+
+  it("allows an execution-only member to open internal learning", () => {
+    const result = buildNavigation(session({ canExecute: true }), "Learning");
+    expect(result.effectiveItem).toBe("Learning");
+    expect(result.navigationItems).toContain("Learning");
   });
 
   it("forces password changes through the profile", () => {

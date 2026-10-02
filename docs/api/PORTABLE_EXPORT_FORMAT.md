@@ -26,7 +26,7 @@ Binary content is stored in its original format under `attachments/`. Fylkren cu
 
 ## Included data
 
-The site export includes the site record, organization and roles, site membership and relevant people, non-secret identity references, tasks and relationships, dependencies and state history, workflow definitions/templates/runs/content/links/timelines, planning RFI log entries, execution runs/content/follow-up/timelines, final reports embedded in tasks, decisions and immutable revisions, risks/mitigations and immutable revisions, site audit history, domain events, sanitized webhook configuration and delivery history, notification history and notification preferences. `data/planning-rfi-entries.jsonl` links each request and answer to its planning run through `run_id`.
+The site export includes the site record, organization and roles, site membership and relevant people, non-secret identity references, tasks and relationships, dependencies and state history, internal learning points and their comments/treatment history, workflow definitions/templates/runs/content/links/timelines, planning RFI log entries, execution runs/content/follow-up/timelines, final reports embedded in tasks, decisions and immutable revisions, risks/mitigations and immutable revisions, site audit history, domain events, sanitized webhook configuration and delivery history, notification history and notification preferences. `data/planning-rfi-entries.jsonl` links each request and answer to its planning run through `run_id`.
 
 Cross-site relationships can retain identifiers and sender snapshots needed to understand the record, but the package never follows such a relationship into another site's private data.
 
@@ -62,3 +62,5 @@ Adding an apply endpoint before these rules are implemented and tested is prohib
 ## Compatibility
 
 Readers must use the manifest rather than assume a fixed file list. A reader can accept a new minor format only when its compatibility rules are documented. An unsupported version is rejected by Fylkren's validator. Format documentation must remain available with public releases so historical exports remain interpretable.
+
+Internal learning uses `data/learning-lessons.jsonl` and `data/learning-entries.jsonl`. Points reference work items, work-level units, authors and responsible people; entries reference points and authors. These recovery datasets are separate from the public final-report payload and are never added to report exports or forwarded reports.

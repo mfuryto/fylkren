@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Added separate internal learning points to final-report writing and a compact Learning queue with task references, priorities, comments, accountable treatment, deadlines, immutable history and pending navigation counts. Learning stays within the reporting work level and is excluded from final-report forwarding.
+
 - Added localized help buttons and keyboard-accessible help dialogs to Workload, Reports, Intake and Notifications.
 
 - Allowed Site Manager to rename and abbreviate the system request type while retaining its protected active state, routing identity and existing reference codes.

@@ -1,3 +1,4 @@
+import { learning } from "./sections/learning";
 import type { MessageKey } from "../en-US";
 import type { ReferenceMessageKey } from "../supplements/references";
 import type { SortingMessageKey } from "../supplements/sorting";
@@ -20,6 +21,7 @@ import { workTemplatesLtLT } from "./sections/workTemplates";
 import { workflowsLtLT } from "./sections/workflows";
 
 export const ltLT: Record<Exclude<MessageKey, ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
+  ...learning,
   ...federationLtLT,
   ...identityLtLT,
   ...notificationsLtLT,

@@ -1,3 +1,4 @@
+import { learning } from "./sections/learning";
 import type { MessageKey } from "../en-US";
 import type { ReferenceMessageKey } from "../supplements/references";
 import type { SortingMessageKey } from "../supplements/sorting";
@@ -20,6 +21,7 @@ import { workTemplatesPlPL } from "./sections/workTemplates";
 import { workflowsPlPL } from "./sections/workflows";
 
 export const plPL: Record<Exclude<MessageKey, ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
+  ...learning,
   ...federationPlPL,
   ...identityPlPL,
   ...notificationsPlPL,

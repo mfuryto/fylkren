@@ -99,3 +99,5 @@ Before public publication, run `bash tools/security/verify-repository-safety.sh 
 - Examples must use synthetic names and data. Commands must distinguish first installation, routine upgrade and destructive development-only operations.
 - API documents are versioned contracts. UI labels and screenshots are supporting material, not authorization or protocol definitions.
 - Security and test records describe evidence and remaining verification; they must not claim completion without reproducible results.
+
+- [Internal experience-based learning](administration/LEARNING.md)

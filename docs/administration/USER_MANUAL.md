@@ -38,9 +38,9 @@ Administrators issue a one-time reset code rather than choosing a permanent pass
 
 ## 4. Navigation and work context
 
-Desktop uses left navigation; mobile uses a hamburger-controlled overlay. Internal back/forward buttons return between application pages without leaving the application. Workload appears immediately after Reports.
+Desktop uses left navigation; mobile uses a hamburger-controlled overlay. Internal back/forward buttons return between application pages without leaving the application. Workload appears immediately after Reports, followed by Learning for operational users.
 
-Tasks, Planning and Execution display positive pending-work counts in parentheses after their labels. Counts cover the user's authorized work levels across active sites, independently of page filters and pagination. Tasks counts assessment, routing, approval and returned-work decisions for the responsible leader, including answered outgoing requests. Planning and Execution count available work that has not been claimed. Claimed work no longer contributes to those waiting counts; releasing it restores the count. These are pending-work counts, not unread indicators: opening a page does not clear them. Zero counts are hidden. Counts refresh after successful changes, on navigation or returning to the application, and every minute while visible.
+Tasks, Planning, Execution and Learning display positive pending-work counts in parentheses after their labels. Counts cover the user's authorized work levels across active sites, independently of page filters and pagination. Tasks counts assessment, routing, approval and returned-work decisions for the responsible leader, including answered outgoing requests. Planning and Execution count available work that has not been claimed. Claimed work no longer contributes to those waiting counts; releasing it restores the count. These are pending-work counts, not unread indicators: opening a page does not clear them. Zero counts are hidden. Counts refresh after successful changes, on navigation or returning to the application, and every minute while visible.
 
 Below the Fylkren version in the left navigation, **Community** or **Enterprise** shows the installation's current effective edition. Community is the default. Importing or removing a license updates the label immediately; expiry appears on the next automatic status refresh (normally within one minute). The label follows the server's license status rather than a user role.
 
@@ -296,3 +296,7 @@ Comments are stored as plain text, recorded in the Site audit and included in Si
 ## Visual risk assessment
 
 Open **Risk** in the task detail links. The numbered register presents title, description, probability/impact before mitigation, actions, deadlines and residual probability/impact after mitigation. Its [interactive risk map](RISK_MANAGEMENT.md) connects the initial and residual circles for each risk. Select a risk to edit, click a map cell or drag the selected circle, then save the assessment. Enter mitigation actions before residual risk; actions can be edited and completed separately. The scale remains 1–5 with the established low, moderate, high and critical score boundaries.
+
+## Internal experience-based learning
+
+When writing a final report, add numbered learning points under **What worked well?** and **What could be improved?**. They are saved separately from report content and stay internal to the reporting work level. On **Learning**, leaders prioritize points, record an action plan and deadline, comment and close them with an outcome or rationale. Pending points contribute to the menu counter; closed points remain in searchable history. See [the learning guide](LEARNING.md) for access boundaries, workflow and examples.

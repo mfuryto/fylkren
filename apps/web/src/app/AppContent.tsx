@@ -10,6 +10,7 @@ const loadPlanningPage = () => import("../workflows/PlanningPage");
 const loadExecutionPage = () => import("../workflows/ExecutionPage");
 const loadReportsPage = () => import("../reports/ReportsPage");
 
+const LearningPage = lazy(() => import("../learning/LearningPage").then(module => ({ default: module.LearningPage })));
 const WorkOverview = lazy(() => loadWorkOverview().then((module) => ({ default: module.WorkOverview })));
 const WorkloadHistoryPage = lazy(() => import("../overview/WorkloadHistoryPage").then((module) => ({ default: module.WorkloadHistoryPage })));
 const ReportsPage = lazy(() => loadReportsPage().then((module) => ({ default: module.ReportsPage })));
@@ -85,6 +86,7 @@ export function AppContent({
   if (effectiveItem === "Execution") return <ExecutionPage session={session} language={language} classificationMarkings={classificationMarkings} permalink={location} />;
   if (effectiveItem === "Reports")
     return <ReportsPage language={language} timeZone={timeZone} classificationMarkings={classificationMarkings} permalink={location} />;
+  if (effectiveItem === "Learning" && (session.hasOperationalRole || session.canExecute)) return <LearningPage language={language} timeZone={timeZone} permalink={location}/>;
   if (effectiveItem === "Workload") return <WorkloadHistoryPage personId={session.personId} language={language} timeZone={timeZone} />;
   if (effectiveItem === "Workflows" && session.managesSites) return <WorkflowsPage />;
   if (effectiveItem === "Templates" && session.managesSites) return <TemplatesPage />;

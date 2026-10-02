@@ -48,3 +48,5 @@ The [visual risk-workspace run](2026-10-02-visual-risk-workspace.md) records the
 The [pending-work navigation run](2026-10-02-pending-navigation-counts.md) records compact navigation labels, removal of the Overview action list and authorized pending-work counts.
 
 The [Site audit work-context run](2026-10-02-site-audit-work-context.md) records task references, titles and reference search for operational audit events.
+
+The [internal learning run](2026-10-02-internal-learning.md) records report separation, exact-level access, accountable treatment, concurrent revision protection, retention, counters, browser interaction and portable recovery data.

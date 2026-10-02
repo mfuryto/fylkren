@@ -1,3 +1,4 @@
+import { learning } from "./sections/learning";
 import { platformApiEn } from "./sections/platformApi";
 import { federationEn } from "./sections/federation";
 import { identityEn } from "./sections/identity";
@@ -19,6 +20,7 @@ import { sortingEn } from "../supplements/sorting";
 import { intakeEn } from "../supplements/intake";
 
 export const en = {
+  ...learning,
   ...referencesEn,
   ...sortingEn,
   ...intakeEn,

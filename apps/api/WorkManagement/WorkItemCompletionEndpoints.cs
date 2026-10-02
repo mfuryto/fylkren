@@ -29,6 +29,7 @@ internal static class WorkItemCompletionEndpoints
             if (report.Length is < 2 or > 20000 || classification is { Length: > 20 }) return Results.ValidationProblem(new Dictionary<string, string[]> { ["content"] = ["Check the final report and classification."] });
             if (classification is not null && (!await db.ClassificationSettings.AnyAsync(x => x.Id == ClassificationEndpoints.SettingsId && x.IsEnabled, ct) || !await db.ClassificationDefinitions.AnyAsync(x => x.IsActive && x.Abbreviation == classification, ct))) return Results.ValidationProblem(new Dictionary<string, string[]> { ["classification"] = ["Select an active classification."] });
             var now = DateTimeOffset.UtcNow;
+            if (await Fylkren.Api.Learning.LearningCreation.AddDrafts(request.Lessons, item, personId, db, now, ct) is { } lessonError) return lessonError;
             item.UpdateFinalReport(report, classification, personId, now);
             db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.final-report-updated", "work-item", item.Id, now));
             await db.SaveChangesAsync(ct);

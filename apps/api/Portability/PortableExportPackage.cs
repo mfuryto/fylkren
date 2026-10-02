@@ -65,6 +65,8 @@ internal static class PortableExportPackage
         var approvedVersionIds = approvedVersions.Select(value => value.Id).ToHashSet();
         var approvalSignoffs = await db.FormalApprovalSignoffs.AsNoTracking().Where(value => approvedVersionIds.Contains(value.VersionId)).ToListAsync(cancellationToken);
 
+        var lessons = await db.LearningLessons.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken);
+        var learningEntries = await db.LearningEntries.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken);
         var comments = await db.WorkItemComments.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken);
         var personIds = memberships.Select(value => value.PersonId)
             .Concat(unitMemberships.Select(value => value.PersonId))
@@ -74,6 +76,9 @@ internal static class PortableExportPackage
             .Concat(workItems.Where(value => value.FinalReportWrittenByPersonId != null).Select(value => value.FinalReportWrittenByPersonId!.Value))
             .Concat(workItems.Where(value => value.FinalReportApprovedByPersonId != null).Select(value => value.FinalReportApprovedByPersonId!.Value))
             .Concat(comments.Select(value => value.AuthorPersonId))
+            .Concat(lessons.Select(value => value.AuthorPersonId))
+            .Concat(lessons.Where(value => value.OwnerPersonId != null).Select(value => value.OwnerPersonId!.Value))
+            .Concat(learningEntries.Select(value => value.AuthorPersonId))
             .Concat(decisions.Select(value => value.CreatedByPersonId))
             .Concat(webhookSubscriptions.Select(value => value.CreatedByPersonId))
             .Concat(approvedVersions.Select(value => value.CreatedByPersonId))
@@ -115,6 +120,8 @@ internal static class PortableExportPackage
         AddEntities(datasets, db, "work-item-lookups", await db.WorkItemLookups.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken));
         AddEntities(datasets, db, "work-items", workItems);
         AddEntities(datasets, db, "work-item-comments", comments);
+        AddEntities(datasets, db, "learning-lessons", lessons);
+        AddEntities(datasets, db, "learning-entries", learningEntries);
         AddEntities(datasets, db, "work-item-dependencies", await db.WorkItemDependencies.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken));
         AddEntities(datasets, db, "work-item-history", await db.WorkItemStateHistory.AsNoTracking().Where(value => value.SiteId == siteId).OrderBy(value => value.OccurredAt).ToListAsync(cancellationToken));
         AddEntities(datasets, db, "workflow-definitions", definitions);

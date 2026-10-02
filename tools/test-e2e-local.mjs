@@ -1,3 +1,4 @@
+import { testLearning } from "./e2e/learning.mjs";
 import { testTaskComments } from './e2e/task-comments.mjs';
 import assert from 'node:assert/strict';
 import { randomBytes, randomUUID } from 'node:crypto';
@@ -327,9 +328,9 @@ async function navigationCounts(account = leader.account) {
   assert.equal(result.status, 200, JSON.stringify(result.body));
   return result.body;
 }
-assert.deepEqual(await navigationCounts(), { tasks: 1, planning: 0, execution: 0 });
-assert.deepEqual(await navigationCounts(siteManager.account), { tasks: 0, planning: 0, execution: 0 }, 'Administration must not imply operational counts');
-assert.deepEqual(await navigationCounts(platform), { tasks: 0, planning: 0, execution: 0 }, 'Platform Manager must not receive operational counts');
+assert.deepEqual(await navigationCounts(), { tasks: 1, planning: 0, execution: 0, learning: 0 });
+assert.deepEqual(await navigationCounts(siteManager.account), { tasks: 0, planning: 0, execution: 0, learning: 0 }, 'Administration must not imply operational counts');
+assert.deepEqual(await navigationCounts(platform), { tasks: 0, planning: 0, execution: 0, learning: 0 }, 'Platform Manager must not receive operational counts');
 const platformWorkView = await platform.request(`/api/work/sites/${siteId}/items/overview`);
 assert.equal(platformWorkView.status, 403, 'Platform Manager must not see operational tasks');
 const underReview = await leader.account.put(`/api/work/sites/${siteId}/items/${task.body.id}/status`, {
@@ -346,10 +347,10 @@ assert.equal(queue.status, 200, `queue: ${JSON.stringify(queue.body)}`);
 const run = queue.body.items.find(item => item.item.id === task.body.id);
 assert.ok(run, `Planning run not visible: ${JSON.stringify(queue.body)}`);
 assert.equal(run.item.referenceCode, taskReference, 'Planning changed the task reference');
-assert.deepEqual(await navigationCounts(), { tasks: 0, planning: 1, execution: 0 });
+assert.deepEqual(await navigationCounts(), { tasks: 0, planning: 1, execution: 0, learning: 0 });
 const claim = await leader.account.post(`/api/workflows/planning/${run.id}/claim`, {});
 assert.equal(claim.status, 204, `claim: ${JSON.stringify(claim.body)}`);
-assert.deepEqual(await navigationCounts(), { tasks: 0, planning: 0, execution: 0 }, 'Claimed planning is no longer waiting');
+assert.deepEqual(await navigationCounts(), { tasks: 0, planning: 0, execution: 0, learning: 0 }, 'Claimed planning is no longer waiting');
 const submit = await leader.account.post(`/api/workflows/planning/${run.id}/submit`, {
   priority: 'normal', dueAt: null, allocations: [],
 });
@@ -380,10 +381,10 @@ assert.ok(executionQueue.body.items.some(item => item.id === task.body.id), 'Tas
 assert.equal(executionQueue.body.items.find(item => item.id === task.body.id).referenceCode, taskReference, 'Execution changed the task reference');
 const definition = executionQueue.body.definitions.find(value => value.name === 'Standard');
 assert.ok(definition, 'Default execution workflow missing');
-assert.deepEqual(await navigationCounts(), { tasks: 0, planning: 0, execution: 1 });
+assert.deepEqual(await navigationCounts(), { tasks: 0, planning: 0, execution: 1, learning: 0 });
 const claimExecution = await leader.account.post(`/api/execution/items/${task.body.id}/claim`, {});
 assert.equal(claimExecution.status, 204, `claim execution: ${JSON.stringify(claimExecution.body)}`);
-assert.deepEqual(await navigationCounts(), { tasks: 0, planning: 0, execution: 0 }, 'Claimed execution is no longer waiting');
+assert.deepEqual(await navigationCounts(), { tasks: 0, planning: 0, execution: 0, learning: 0 }, 'Claimed execution is no longer waiting');
 const claimedExecutionQueue = await leader.account.request(`/api/execution/sites/${siteId}`);
 const executionRun = claimedExecutionQueue.body.items.find(item => item.id === task.body.id)?.run;
 assert.ok(executionRun?.id, 'Execution run missing after claim');
@@ -413,11 +414,30 @@ const prematureComplete = await leader.account.put(`/api/work/sites/${siteId}/it
   status: 'completed', assignedUnitId: null, decisionNote: null, priority: null,
 });
 assert.equal(prematureComplete.status, 409, 'Completion without final report must be rejected');
+const learningDrafts = [
+  { id: randomUUID(), kind: 'positive', text: 'INTERNAL_LEARNING_POSITIVE_SENTINEL: collaboration worked well' },
+  { id: randomUUID(), kind: 'improvement', text: 'INTERNAL_LEARNING_IMPROVEMENT_SENTINEL: handover needs improvement' },
+];
+const invalidLearningReport = await leader.account.put(`/api/work/sites/${siteId}/items/${task.body.id}/final-report`, {
+  content: 'This draft must not be saved', classification: null, lessons: [{ ...learningDrafts[0], text: ' ' }],
+});
+assert.equal(invalidLearningReport.status, 400);
+const unsavedLearning = await leader.account.request(`/api/work/learning?workItemId=${task.body.id}&view=all`);
+assert.equal(unsavedLearning.status, 200, JSON.stringify(unsavedLearning.body));
+assert.equal(unsavedLearning.body.total, 0, 'Invalid report saved a partial learning point');
+const beforeValidReport = await leader.account.request(`/api/work/sites/${siteId}/items/overview`);
+assert.equal(beforeValidReport.body.find(value => value.id === task.body.id).finalReport, null, 'Invalid learning point changed the report');
 const report = await leader.account.put(`/api/work/sites/${siteId}/items/${task.body.id}/final-report`, {
   content: '# Summary\n\nSynthetic task completed.\n\n# Execution\n\nThe test execution was documented.\n\n# Conclusion\n\nCompleted.',
-  classification: null,
+  classification: null, lessons: learningDrafts,
 });
 assert.equal(report.status, 204, `write report: ${JSON.stringify(report.body)}`);
+const retryLearningReport = await leader.account.put(`/api/work/sites/${siteId}/items/${task.body.id}/final-report`, {
+  content: '# Summary\n\nSynthetic task completed.\n\n# Execution\n\nThe test execution was documented.\n\n# Conclusion\n\nCompleted.', classification: null, lessons: learningDrafts,
+});
+assert.equal(retryLearningReport.status, 204);
+assert.equal((await leader.account.request(`/api/work/learning?workItemId=${task.body.id}&view=all`)).body.total, 2, 'Report retry duplicated learning points');
+
 const approveReport = await leader.account.post(`/api/work/sites/${siteId}/items/${task.body.id}/final-report/approve`, {});
 assert.equal(approveReport.status, 204, `approve report: ${JSON.stringify(approveReport.body)}`);
 const complete = await leader.account.put(`/api/work/sites/${siteId}/items/${task.body.id}/status`, {
@@ -885,6 +905,12 @@ const taskComments = await testTaskComments({
   taskId: task.body.id, readerPersonId: commentReader.personId, base,
 });
 
+const learning = await testLearning({ leader: leader.account, reader: commentReader.account, sibling: sectionTwoLeader,
+  unrelated: newParentLeader, platform, siteManager: siteManager.account, sectionLeader,
+  siteId, otherSiteId: newParentId, sectionId, taskId: task.body.id, draftIds: learningDrafts.map(value => value.id),
+  base, executeDefault, updateStatus,
+});
+
 const webhooks = await testWebhookFailureIsolation({
   platform, leader: leader.account, unrelated: newParentLeader,
   siteId, otherSiteId: newParentId, taskId: task.body.id, suffix,
@@ -928,4 +954,4 @@ assert.equal(taskAfterRemoval.status, 200, 'Customer-owned work must remain read
 await new Promise((resolve) => setTimeout(resolve, 61_000));
 const authenticationBoundary = await testAuthenticationBoundary({ base });
 
-console.log(JSON.stringify({ editionsAndTransitions: 'passed', bootstrap: 'passed', ...authSessionSecurity, ...identitySessionLifecycle, ...authenticationBoundary, roleSetup: 'passed', lookupSorting: 'passed', operationalIsolation: 'passed', localPlanningExecutionReport: 'passed', threeLevelDistribution: 'passed', parentChildReporting: 'passed', crossSiteIsolation: 'passed', reportArchives: 'passed', activeSiteMoveRouting: 'passed', detachedSiteRouting: 'passed', placementValidation: 'passed', senderSnapshots: 'passed', threeSiteReporting: 'passed', recursiveSiteWorkload: 'passed', crossSiteRequestResponse: 'passed', crossSiteRequestCancellation: 'passed', combinedBranches: 'passed', transitionChains: 'passed', ...authorizationBoundaries, administrationReportApis: 'passed', dependencies: 'passed', taskComments: 'passed', taskCommentsResult: taskComments, decisionsRisksVersions: 'passed', webhookFailureIsolation: 'passed', portability: 'passed', federationCandidates: 'passed', [process.env.FYLKREN_E2E_SMTP_HOST ? 'requestNotificationsDelivered' : 'requestNotificationsQueued']: 'passed', siteId, childSiteId, grandchildSiteId, newParentId, answeredRequestId: requests.answeredTrackingId, directMixedTaskId: combinedBranches.directSourceId, plannedMixedTaskId: combinedBranches.plannedSourceId, ...transitionChains, ...administrationReportApis, ...dependencies, ...decisionsRisksVersions, ...webhooks, ...portability, taskId: task.body.id, hierarchyTaskId: mainTask.body.id, parentTaskId: parentTask.body.id }));
+console.log(JSON.stringify({ editionsAndTransitions: 'passed', bootstrap: 'passed', ...authSessionSecurity, ...identitySessionLifecycle, ...authenticationBoundary, roleSetup: 'passed', lookupSorting: 'passed', operationalIsolation: 'passed', localPlanningExecutionReport: 'passed', threeLevelDistribution: 'passed', parentChildReporting: 'passed', crossSiteIsolation: 'passed', reportArchives: 'passed', activeSiteMoveRouting: 'passed', detachedSiteRouting: 'passed', placementValidation: 'passed', senderSnapshots: 'passed', threeSiteReporting: 'passed', recursiveSiteWorkload: 'passed', crossSiteRequestResponse: 'passed', crossSiteRequestCancellation: 'passed', combinedBranches: 'passed', transitionChains: 'passed', ...authorizationBoundaries, administrationReportApis: 'passed', dependencies: 'passed', ...learning, taskComments: 'passed', taskCommentsResult: taskComments, decisionsRisksVersions: 'passed', webhookFailureIsolation: 'passed', portability: 'passed', federationCandidates: 'passed', [process.env.FYLKREN_E2E_SMTP_HOST ? 'requestNotificationsDelivered' : 'requestNotificationsQueued']: 'passed', siteId, childSiteId, grandchildSiteId, newParentId, answeredRequestId: requests.answeredTrackingId, directMixedTaskId: combinedBranches.directSourceId, plannedMixedTaskId: combinedBranches.plannedSourceId, ...transitionChains, ...administrationReportApis, ...dependencies, ...decisionsRisksVersions, ...webhooks, ...portability, taskId: task.body.id, hierarchyTaskId: mainTask.body.id, parentTaskId: parentTask.body.id }));

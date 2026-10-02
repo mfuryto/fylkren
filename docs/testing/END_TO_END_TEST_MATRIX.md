@@ -243,6 +243,10 @@ Verify the API container has no Docker socket and only a read-only snapshot
 mount. Repeat collection inside the Hyper-V Linux VM during the maintained
 Windows Server acceptance run.
 
+### E2E-20 — Internal experience-based learning
+
+Save positive and improvement points with a final-report draft. Verify atomic validation, stable numbering and retry deduplication. Keep original point text immutable while leaders prioritize and process it. Require an action plan and deadline for in-progress work, outcomes for closure and a fresh rationale for reopening. Check pending counts before and after treatment, searchable closed history, comment pagination, stale/concurrent save rejection and audit references. Deny administrative-only, sibling-level and unrelated-site reads/writes and missing-CSRF writes. A superior may read eligible formal report versions without reading subordinate internal learning. Verify absence of point text in report archives, print/PDF, approved report versions, delegation bases and federated official answers. Complete Site portability and backups must retain points, authors and treatment history. Check keyboard and mobile presentation in both Norwegian and English.
+
 ## Cross-cutting regression
 
 - server-side pagination with more than 20 items in Tasks, Planning, Execution, and Reports;

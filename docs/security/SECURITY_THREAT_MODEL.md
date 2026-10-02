@@ -16,6 +16,7 @@ Security objectives are to:
 
 | Asset | Impact if compromised |
 | --- | --- |
+| Internal learning and treatment discussion | Disclosure to higher levels or external report recipients, loss of follow-up accountability |
 | Tasks, plans, execution, and final reports | Unauthorized disclosure, incorrect direction, or loss of operational traceability |
 | Site, level, and role model | Cross-site access or unauthorized decision authority |
 | Identities and authenticators | Account takeover or persistent unauthorized access |
@@ -64,3 +65,7 @@ Supported operation assumes that an origin port is not exposed around the extern
 ## Residual risk
 
 Application controls cannot defend against complete compromise of the Docker host, database administrator, backup administrator, or customer identity provider. Tamper-resistant audit outside the application database, centralized secret management, high availability, and distributed key management require separate customer-operated controls or a separately assessed deployment architecture; they are not guaranteed by the current product. The final security report and deployment requirements must state these boundaries explicitly.
+
+## Internal learning disclosure boundary
+
+Learning points are internal to their reporting work level. Permission to read an approved subordinate report does not grant permission to read the subordinate learning queue or discussion. Creation validates and commits alongside report drafting but stores points in separate tables. Report/approval/forwarding code consumes final-report content rather than these tables. Learning read/comment/treatment endpoints recheck active Site membership and level access; only level leadership treats points, with CSRF and a version token for concurrent changes. Plain-text rendering escapes point/comment content. Administrative audit retains event and task identity without point text. Complete Site portability and database backups include internal learning as privileged recovery data. The [targeted functional/authorization run](../testing/runs/2026-10-02-internal-learning.md) does not replace the wider security verification gate.

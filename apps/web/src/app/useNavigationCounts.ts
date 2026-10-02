@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { apiGet } from "../api/client";
 import type { Session } from "../work/WorkContextModels";
 
-export type NavigationCounts = { tasks: number; planning: number; execution: number };
+export type NavigationCounts = { tasks: number; planning: number; execution: number; learning: number };
 
 export function navigationCountLabel(label: string, item: string, counts: NavigationCounts | null) {
-  const count = item === "Tasks" ? counts?.tasks : item === "Planning" ? counts?.planning : item === "Execution" ? counts?.execution : 0;
+  const count = item === "Tasks" ? counts?.tasks : item === "Planning" ? counts?.planning : item === "Execution" ? counts?.execution : item === "Learning" ? counts?.learning : 0;
   return count && count > 0 ? `${label} (${count})` : label;
 }
 
