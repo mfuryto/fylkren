@@ -47,6 +47,8 @@ public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options)
     public DbSet<DecisionRevision> DecisionRevisions => Set<DecisionRevision>();
     public DbSet<DecisionMaker> DecisionMakers => Set<DecisionMaker>();
     public DbSet<DecisionReference> DecisionReferences => Set<DecisionReference>();
+    public DbSet<EventProjection> EventProjections => Set<EventProjection>();
+    public DbSet<Fylkren.Api.InformationLifecycle.InformationLifecycleRecord> InformationLifecycles => Set<Fylkren.Api.InformationLifecycle.InformationLifecycleRecord>();
     public DbSet<DomainEvent> DomainEvents => Set<DomainEvent>();
     public DbSet<WebhookSubscription> WebhookSubscriptions => Set<WebhookSubscription>();
     public DbSet<WebhookDelivery> WebhookDeliveries => Set<WebhookDelivery>();
@@ -103,6 +105,7 @@ public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options)
         try
         {
             if (pendingReferences.Length > 0) AssignReferences(pendingReferences);
+            ProtectActivityFacts();
             ProtectFormalApprovalHistory();
             SnapshotAuditActors();
             var result = base.SaveChanges(acceptAllChangesOnSuccess);
@@ -128,6 +131,7 @@ public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options)
         {
             if (pendingReferences.Length > 0)
                 await AssignReferencesAsync(pendingReferences, cancellationToken);
+            ProtectActivityFacts();
             ProtectFormalApprovalHistory();
             await SnapshotAuditActorsAsync(cancellationToken);
             var result = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
@@ -150,12 +154,20 @@ public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options)
         modelBuilder.ConfigureLearning();
         modelBuilder.ConfigureDecisions();
         modelBuilder.ConfigureDomainEvents();
+        modelBuilder.ConfigureActivityFoundation();
         modelBuilder.ConfigureRisks();
         modelBuilder.ConfigureFormalApprovals();
         modelBuilder.ConfigurePlatform();
         modelBuilder.ConfigureNotifications();
         modelBuilder.ConfigureApi();
         modelBuilder.ConfigureWorkflows();
+    }
+
+    private void ProtectActivityFacts()
+    {
+        if (ChangeTracker.Entries<DomainEvent>().Any(entry => entry.State == EntityState.Deleted ||
+            entry.State == EntityState.Modified && entry.Properties.Any(property => property.IsModified && property.Metadata.Name != nameof(DomainEvent.WebhooksProjectedAt))))
+            throw new InvalidOperationException("Domain activity facts are immutable.");
     }
 
     private void ProtectFormalApprovalHistory()

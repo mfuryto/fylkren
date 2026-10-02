@@ -1,6 +1,6 @@
 # Event/activity and information lifecycle foundations
 
-Status: **architecture review and proposed implementation; not implemented**. Reviewed source: `f18cf8214f33ac359d02d39e68c60fd4f41962b5`, 2026-10-02. This document owns the requirements, current-state review, proposed model, migration and acceptance cases for these foundations. The [roadmap](../project/ROADMAP.md) links the delivery order. Existing API contracts remain authoritative until their versioned changes are implemented.
+Status: **additive foundation implemented and verified; WorkItem cutover not yet implemented**. Reviewed source: `f18cf8214f33ac359d02d39e68c60fd4f41962b5`, 2026-10-02. This document owns the requirements, current-state review, proposed model, migration and acceptance cases for these foundations. The [roadmap](../project/ROADMAP.md) links the delivery order. Existing API contracts remain authoritative until their versioned changes are implemented.
 
 The smallest coherent change is to extend the existing `DomainEvent` and recorder, move operational notification projection off `AuditEvent`, reuse existing delivery queues, and introduce one lifecycle policy/record for locally owned aggregates. Keep current domain state, revisions, approval evidence, state-history metrics and federation contracts. Build both activity views over the same authorized event query. No event sourcing, external broker, second audit log or generic replacement workflow engine is needed.
 
@@ -44,7 +44,7 @@ There is partial parallel implementation, not six completely interchangeable cop
 
 ## Requirements and implementation/test traceability
 
-IDs here are architectural requirements, not a second security-testing matrix. Proposed components/tests below are **planned**, not executed. Existing files identify extension points, not compliance with these new requirements. Test cases T01–T14 are defined later in this document; security execution/status continues solely in the [ASVS matrix](../security/ASVS_5.0.0_L2_MATRIX.md).
+IDs here are architectural requirements, not a second security-testing matrix. The delivery evidence below distinguishes verified foundation components from **planned** integration cases. A foundation assertion does not mark an entire acceptance case as passed. Existing files identify extension points, not compliance with these new requirements. Test cases T01–T14 are defined later in this document; security execution/status continues solely in the [ASVS matrix](../security/ASVS_5.0.0_L2_MATRIX.md).
 
 | ID | Requirement | Smallest implementation/extension point | Acceptance cases |
 | --- | --- | --- | --- |
@@ -245,3 +245,18 @@ Architecture review does not change current ASVS statuses. During implementation
 | T14 — Migration/backfill | Populated pre-change database upgrade; resume interrupted backfill, duplicate source rows/late commits, no retroactive deliveries, coverage notices; cutover marker/version gate; clean downgrade-before-cutover and forward recovery-after-cutover; counts/IDs/historical workload remain stable. | Edition upgrade/restore and federation mixed-version scenarios |
 
 Release evidence must identify the actual implementation commit, schema/cutover revision, positive/negative/boundary assertions, synthetic fixtures and observed outcomes. Planned case IDs are not passing evidence. Documentation-only checks for this review are local link validation, ASVS traceability integrity, repository language/structure/version consistency and whitespace checks. No runtime test was needed or claimed for this design-only change.
+
+## Delivery evidence — additive foundation, 2026-10-02
+
+Baseline: `8121fd760ba0837cf1c7c46c60b2498a08fe3c3b`. Schema: `20261002211913_AddActivityLifecycleFoundation`. This delivery is additive and has no command cutover, new delivery worker, backfill, timeline endpoint or archive endpoint. Existing events retain IDs, payloads, webhook names and unknown provenance. No historical consumer jobs are created.
+
+| Requirements | Implemented foundation | Executed coverage / remaining integration |
+| --- | --- | --- |
+| EA-01, EA-04 | [typed context](../../apps/api/DomainEvents/DomainEventContext.cs), [catalogue](../../apps/api/DomainEvents/ActivityEventCatalog.cs), extended DomainEvent and nullable audit correlation | T01 actor/source combinations, bounded allowlisted metadata and SQL actor constraints pass; command attribution/ownership/correlation remains for the vertical slice. |
+| EA-02, EA-03, MG-01 | Immutable tracked facts, unique operation/effect keys, [projection leases](../../apps/api/DomainEvents/EventProjection.cs), outbox event deduplication fields | T01 rollback; T03 competing lease writers, expiry and retry; T14 populated upgrade with unchanged legacy payload/ID and no jobs, downgrade before cutover and re-upgrade pass. Consumer integration and capability gate remain planned. |
+| LC-01, LC-03 | [lifecycle record](../../apps/api/InformationLifecycle/InformationLifecycleRecord.cs), restrictive owner/context FKs, optimistic version and hold guards | T09 allowed and forbidden transitions, competing writers and holds pass at foundation level. Only ACTIVE/CLOSED/ARCHIVED are permitted; retention, purge and anonymisation remain disabled. Graph checks and archive mutation enforcement remain planned. |
+| EA-05 and existing functionality | Existing command, audit, notification, webhook and federation paths remain unchanged | Existing full edition/API regression passes, including authorization, workflow chains, reports, learning, risks/decisions, webhook failure isolation, notifications and portability. This is regression evidence, not proof of the new federation adapter. |
+
+Reproduction: [foundation test runner](../../tools/run-foundation-tests.mjs) creates a disposable PostgreSQL 18 database; [assertions](../../tests/foundations/Program.cs) exercise real migrations, rollback, constraints and concurrency. `node tools/run-foundation-tests.mjs`, API build (zero warnings/errors), EF pending-model check (none), frontend tests (148 tests / 38 files) and `node tools/run-e2e-editions.mjs --no-build` passed. API image: `sha256:01c0c95fe6fc37591399681b8ad7f25673f6dc73c88ad1cccf158ef6093414bf`; unchanged web image: `sha256:f33bb6b2047f093bfc2c86e4b5ef7615fc56db8728b6e57f48b6c9f47144979f`. The API regression included 1,000 synthetic tasks and authorized/unauthorized load checks. All databases and fixtures were isolated; production was not touched.
+
+Next delivery remains the coherent WorkItem slice in step 3 above. T02, T05–T08 and T10–T13 have not been claimed as newly implemented or passed. Security verification continues in the existing ASVS matrix; no architecture-only status promotion is made.

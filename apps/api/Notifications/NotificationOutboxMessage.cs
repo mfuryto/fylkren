@@ -5,6 +5,9 @@ public sealed class NotificationOutboxMessage
     private NotificationOutboxMessage() { }
     public NotificationOutboxMessage(Guid id, Guid auditEventId, Guid siteId, Guid workItemId, Guid recipientPersonId, string recipientEmail, string recipientName, string subject, string body, string fromName, DateTimeOffset createdAt)
     { Id = id; AuditEventId = auditEventId; SiteId = siteId; WorkItemId = workItemId; RecipientPersonId = recipientPersonId; RecipientEmail = recipientEmail; RecipientName = recipientName; Subject = subject; Body = body; FromName = fromName; Status = "pending"; NextAttemptAt = createdAt; CreatedAt = createdAt; }
+    public Guid? DomainEventId { get; private set; }
+    public string? NotificationKind { get; private set; }
+    public void LinkEvent(Guid id, string kind) { DomainEventId = id; NotificationKind = kind; }
     public Guid Id { get; private set; }
     public Guid AuditEventId { get; private set; }
     public Guid SiteId { get; private set; }

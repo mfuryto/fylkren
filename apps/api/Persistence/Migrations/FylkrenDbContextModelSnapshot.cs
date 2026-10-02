@@ -41,19 +41,27 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("actor_site_id");
 
-                    b.Property<string>("ActorSystem")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("actor_system");
-
                     b.Property<string>("ActorSiteName")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
                         .HasColumnName("actor_site_name");
 
+                    b.Property<string>("ActorSystem")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("actor_system");
+
                     b.Property<bool>("ActorWasPlatformManager")
                         .HasColumnType("boolean")
                         .HasColumnName("actor_was_platform_manager");
+
+                    b.Property<Guid?>("CorrelationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<Guid?>("DomainEventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("domain_event_id");
 
                     b.Property<Guid>("EntityId")
                         .HasColumnType("uuid")
@@ -85,7 +93,7 @@ namespace Fylkren.Api.Persistence.Migrations
 
                     b.HasIndex("SiteId", "OccurredAt");
 
-                    b.ToTable("audit_events", (string)null, t =>
+                    b.ToTable("audit_events", null, t =>
                         {
                             t.HasCheckConstraint("CK_audit_events_actor_origin", "(actor_person_id IS NOT NULL AND actor_instance_id IS NULL AND actor_site_id IS NULL AND actor_site_name IS NULL AND actor_system IS NULL) OR (actor_person_id IS NULL AND actor_instance_id IS NOT NULL AND actor_site_id IS NOT NULL AND NULLIF(BTRIM(actor_site_name), '') IS NOT NULL AND actor_system IS NULL) OR (actor_person_id IS NULL AND actor_instance_id IS NOT NULL AND actor_site_id IS NULL AND actor_site_name IS NULL AND actor_system IS NULL) OR (actor_person_id IS NULL AND actor_instance_id IS NULL AND actor_site_id IS NULL AND actor_site_name IS NULL AND NULLIF(BTRIM(actor_system), '') IS NOT NULL)");
                         });
@@ -359,9 +367,63 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("ActivityMetadataJson")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("jsonb")
+                        .HasDefaultValue("{}")
+                        .HasColumnName("activity_metadata_json");
+
+                    b.Property<string>("ActivityType")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("activity_type");
+
+                    b.Property<Guid?>("ActorInstanceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("actor_instance_id");
+
+                    b.Property<string>("ActorKind")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasDefaultValue("legacy-unknown")
+                        .HasColumnName("actor_kind");
+
+                    b.Property<Guid?>("ActorMachineId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("actor_machine_id");
+
                     b.Property<Guid?>("ActorPersonId")
                         .HasColumnType("uuid")
                         .HasColumnName("actor_person_id");
+
+                    b.Property<Guid?>("ActorSiteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("actor_site_id");
+
+                    b.Property<string>("ActorSystem")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("actor_system");
+
+                    b.Property<Guid?>("CausationEventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("causation_event_id");
+
+                    b.Property<Guid?>("ContextWorkItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("context_work_item_id");
+
+                    b.Property<Guid?>("CorrelationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<string>("EffectKey")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("effect_key");
 
                     b.Property<string>("EventType")
                         .IsRequired()
@@ -373,10 +435,31 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("occurred_at");
 
+                    b.Property<Guid?>("OperationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("operation_id");
+
+                    b.Property<Guid?>("OriginInstanceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("origin_instance_id");
+
+                    b.Property<Guid?>("OriginSiteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("origin_site_id");
+
                     b.Property<string>("PayloadJson")
                         .IsRequired()
                         .HasColumnType("jsonb")
                         .HasColumnName("payload_json");
+
+                    b.Property<DateTimeOffset?>("RecordedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("recorded_at");
+
+                    b.Property<string>("RequestId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("request_id");
 
                     b.Property<Guid>("ResourceId")
                         .HasColumnType("uuid")
@@ -396,6 +479,18 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("site_id");
 
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("legacy")
+                        .HasColumnName("source");
+
+                    b.Property<Guid?>("SourceMessageId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_message_id");
+
                     b.Property<DateTimeOffset?>("WebhooksProjectedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("webhooks_projected_at");
@@ -408,7 +503,72 @@ namespace Fylkren.Api.Persistence.Migrations
 
                     b.HasIndex("SiteId", "OccurredAt");
 
-                    b.ToTable("domain_events", (string)null);
+                    b.HasIndex("SiteId", "ContextWorkItemId", "OccurredAt", "Id");
+
+                    b.HasIndex("SiteId", "ResourceType", "ResourceId", "OccurredAt", "Id");
+
+                    b.HasIndex("OperationId", "SiteId", "ResourceType", "ResourceId", "ActivityType", "EffectKey")
+                        .IsUnique();
+
+                    b.ToTable("domain_events", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_domain_events_activity_context", "source = 'legacy' OR (recorded_at IS NOT NULL AND origin_instance_id IS NOT NULL AND origin_site_id IS NOT NULL AND operation_id IS NOT NULL AND activity_type IS NOT NULL AND effect_key IS NOT NULL AND ((source = 'local' AND actor_kind = 'person' AND actor_person_id IS NOT NULL AND actor_machine_id IS NULL AND actor_system IS NULL AND actor_instance_id IS NULL AND actor_site_id IS NULL) OR (source = 'local' AND actor_kind = 'machine' AND actor_person_id IS NULL AND actor_machine_id IS NOT NULL AND actor_system IS NULL AND actor_instance_id IS NULL AND actor_site_id IS NULL) OR (source = 'system' AND actor_kind = 'system' AND actor_system IS NOT NULL AND actor_person_id IS NULL AND actor_machine_id IS NULL AND actor_instance_id IS NULL AND actor_site_id IS NULL) OR (source = 'federated' AND actor_kind = 'federated-site' AND actor_instance_id IS NOT NULL AND actor_site_id IS NOT NULL AND actor_person_id IS NULL AND actor_machine_id IS NULL AND actor_system IS NULL)))");
+                        });
+                });
+
+            modelBuilder.Entity("Fylkren.Api.DomainEvents.EventProjection", b =>
+                {
+                    b.Property<string>("Consumer")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("consumer");
+
+                    b.Property<Guid>("DomainEventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("domain_event_id");
+
+                    b.Property<int>("AttemptCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt_count");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("completed_at");
+
+                    b.Property<string>("LastError")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("last_error");
+
+                    b.Property<DateTimeOffset?>("LeaseExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("lease_expires_at");
+
+                    b.Property<Guid?>("LeaseOwner")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid")
+                        .HasColumnName("lease_owner");
+
+                    b.Property<DateTimeOffset>("NextAttemptAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("next_attempt_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.HasKey("Consumer", "DomainEventId");
+
+                    b.HasIndex("DomainEventId");
+
+                    b.HasIndex("Consumer", "Status", "NextAttemptAt");
+
+                    b.ToTable("event_projections", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_event_projections_state", "consumer IN ('notifications', 'webhooks') AND status IN ('pending', 'processing', 'completed', 'skipped') AND attempt_count >= 0 AND ((status = 'processing' AND lease_owner IS NOT NULL AND lease_expires_at IS NOT NULL) OR (status <> 'processing' AND lease_owner IS NULL AND lease_expires_at IS NULL))");
+                        });
                 });
 
             modelBuilder.Entity("Fylkren.Api.DomainEvents.WebhookDelivery", b =>
@@ -575,6 +735,581 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.HasIndex("SiteId", "IsActive");
 
                     b.ToTable("webhook_subscriptions", (string)null);
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Federation.FederationInboundReceipt", b =>
+                {
+                    b.Property<Guid>("PeerInstanceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("peer_instance_id");
+
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("message_id");
+
+                    b.Property<Guid?>("CausationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("causation_id");
+
+                    b.Property<Guid?>("CorrelationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<Guid>("DestinationSiteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("destination_site_id");
+
+                    b.Property<Guid>("LocalWorkItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("local_work_item_id");
+
+                    b.Property<string>("MessageType")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("message_type");
+
+                    b.Property<Guid>("OriginInstanceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("origin_instance_id");
+
+                    b.Property<Guid>("OriginResourceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("origin_resource_id");
+
+                    b.Property<Guid>("OriginSiteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("origin_site_id");
+
+                    b.Property<string>("PayloadSha256")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("payload_sha256");
+
+                    b.Property<DateTimeOffset>("ReceivedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("received_at");
+
+                    b.Property<Guid>("SourceSiteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_site_id");
+
+                    b.HasKey("PeerInstanceId", "MessageId");
+
+                    b.HasIndex("LocalWorkItemId");
+
+                    b.HasIndex("ReceivedAt");
+
+                    b.HasIndex("DestinationSiteId", "ReceivedAt");
+
+                    b.ToTable("federation_inbound_receipts", (string)null);
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Federation.FederationOutboundMessage", b =>
+                {
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("message_id");
+
+                    b.Property<int>("AttemptCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt_count");
+
+                    b.Property<Guid?>("CausationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("causation_id");
+
+                    b.Property<Guid?>("CorrelationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset?>("DeliveredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("delivered_at");
+
+                    b.Property<Guid>("DestinationSiteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("destination_site_id");
+
+                    b.Property<string>("LastErrorCode")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("last_error_code");
+
+                    b.Property<string>("MessageType")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("message_type");
+
+                    b.Property<DateTimeOffset>("NextAttemptAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("next_attempt_at");
+
+                    b.Property<Guid>("OriginInstanceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("origin_instance_id");
+
+                    b.Property<Guid>("OriginResourceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("origin_resource_id");
+
+                    b.Property<Guid>("OriginSiteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("origin_site_id");
+
+                    b.Property<string>("PayloadJson")
+                        .IsRequired()
+                        .HasMaxLength(1000000)
+                        .HasColumnType("character varying(1000000)")
+                        .HasColumnName("payload_json");
+
+                    b.Property<Guid>("PeerInstanceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("peer_instance_id");
+
+                    b.Property<int>("SchemaVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("schema_version");
+
+                    b.Property<Guid>("SourceSiteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_site_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("character varying(12)")
+                        .HasColumnName("status");
+
+                    b.HasKey("MessageId");
+
+                    b.HasIndex("SourceSiteId");
+
+                    b.HasIndex("PeerInstanceId", "CreatedAt");
+
+                    b.HasIndex("PeerInstanceId", "Status");
+
+                    b.HasIndex("Status", "DeliveredAt");
+
+                    b.HasIndex("Status", "NextAttemptAt");
+
+                    b.ToTable("federation_outbound_messages", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_federation_outbound_messages_status", "status IN ('pending', 'retrying', 'delivered', 'failed')");
+                        });
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Federation.FederationPeer", b =>
+                {
+                    b.Property<Guid>("InstanceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("instance_id");
+
+                    b.Property<string>("BaseUrl")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("base_url");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<DateTimeOffset?>("KeyRotationStagedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("key_rotation_staged_at");
+
+                    b.Property<Guid?>("LastCompletedKeyRotationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("last_completed_key_rotation_id");
+
+                    b.Property<DateTimeOffset?>("LastProofAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_proof_at");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid?>("PendingKeyRotationId")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid")
+                        .HasColumnName("pending_key_rotation_id");
+
+                    b.Property<string>("PendingPinnedPublicKeySpki")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("pending_pinned_public_key_spki");
+
+                    b.Property<string>("PinnedPublicKeySpki")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("pinned_public_key_spki");
+
+                    b.HasKey("InstanceId");
+
+                    b.HasIndex("PinnedPublicKeySpki")
+                        .IsUnique();
+
+                    b.ToTable("federation_peers", (string)null);
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Federation.FederationProbeNonce", b =>
+                {
+                    b.Property<Guid>("PeerInstanceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("peer_instance_id");
+
+                    b.Property<Guid>("Nonce")
+                        .HasColumnType("uuid")
+                        .HasColumnName("nonce");
+
+                    b.Property<DateTimeOffset>("ReceivedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("received_at");
+
+                    b.HasKey("PeerInstanceId", "Nonce");
+
+                    b.HasIndex("ReceivedAt");
+
+                    b.ToTable("federation_probe_nonces", (string)null);
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Federation.FederationRemoteSite", b =>
+                {
+                    b.Property<Guid>("InstanceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("instance_id");
+
+                    b.Property<Guid>("SiteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("site_id");
+
+                    b.Property<long>("CatalogRevision")
+                        .HasColumnType("bigint")
+                        .HasColumnName("catalog_revision");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("InstanceId", "SiteId");
+
+                    b.ToTable("federation_remote_sites", (string)null);
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Federation.FederationRoutingSettings", b =>
+                {
+                    b.Property<int>("Key")
+                        .HasColumnType("integer")
+                        .HasColumnName("key");
+
+                    b.Property<DateTimeOffset>("ChangedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("changed_at");
+
+                    b.Property<Guid?>("ChangedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("changed_by");
+
+                    b.Property<bool>("Enabled")
+                        .IsConcurrencyToken()
+                        .HasColumnType("boolean")
+                        .HasColumnName("enabled");
+
+                    b.HasKey("Key");
+
+                    b.ToTable("federation_routing_settings", (string)null);
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Federation.FederationSigningIdentity", b =>
+                {
+                    b.Property<int>("Key")
+                        .HasColumnType("integer")
+                        .HasColumnName("key");
+
+                    b.Property<Guid?>("ActiveRotationId")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid")
+                        .HasColumnName("active_rotation_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset?>("PendingCreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("pending_created_at");
+
+                    b.Property<string>("PendingProtectedPrivateKey")
+                        .HasMaxLength(4096)
+                        .HasColumnType("character varying(4096)")
+                        .HasColumnName("pending_protected_private_key");
+
+                    b.Property<string>("PendingPublicKeySpki")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("pending_public_key_spki");
+
+                    b.Property<Guid?>("PendingRotationId")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid")
+                        .HasColumnName("pending_rotation_id");
+
+                    b.Property<string>("ProtectedPrivateKey")
+                        .IsRequired()
+                        .HasMaxLength(4096)
+                        .HasColumnType("character varying(4096)")
+                        .HasColumnName("protected_private_key");
+
+                    b.Property<string>("PublicKeySpki")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("public_key_spki");
+
+                    b.Property<DateTimeOffset?>("RotationActivatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("rotation_activated_at");
+
+                    b.HasKey("Key");
+
+                    b.ToTable("federation_signing_identity", (string)null);
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Federation.FederationSiteGrant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Direction")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)")
+                        .HasColumnName("direction");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<Guid>("LocalSiteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("local_site_id");
+
+                    b.Property<Guid>("PeerInstanceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("peer_instance_id");
+
+                    b.Property<Guid>("RemoteSiteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("remote_site_id");
+
+                    b.Property<long>("Revision")
+                        .HasColumnType("bigint")
+                        .HasColumnName("revision");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LocalSiteId", "IsActive");
+
+                    b.HasIndex("PeerInstanceId", "LocalSiteId", "RemoteSiteId", "Direction")
+                        .IsUnique();
+
+                    b.ToTable("federation_site_grants", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_federation_site_grants_direction", "direction IN ('inbound', 'outbound')");
+                        });
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Federation.FederationSitePublication", b =>
+                {
+                    b.Property<Guid>("PeerInstanceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("peer_instance_id");
+
+                    b.Property<Guid>("LocalSiteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("local_site_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<long>("Revision")
+                        .HasColumnType("bigint")
+                        .HasColumnName("revision");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("PeerInstanceId", "LocalSiteId");
+
+                    b.HasIndex("LocalSiteId");
+
+                    b.ToTable("federation_site_publications", (string)null);
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Federation.FederationWorkLink", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("AcknowledgedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("acknowledged_at");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Direction")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)")
+                        .HasColumnName("direction");
+
+                    b.Property<Guid>("LocalWorkItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("local_work_item_id");
+
+                    b.Property<string>("OfficialAnswer")
+                        .HasMaxLength(100000)
+                        .HasColumnType("character varying(100000)")
+                        .HasColumnName("official_answer");
+
+                    b.Property<DateTimeOffset?>("OfficialAnswerApprovedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("official_answer_approved_at");
+
+                    b.Property<string>("OfficialAnswerClassification")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("official_answer_classification");
+
+                    b.Property<Guid?>("OfficialAnswerMessageId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("official_answer_message_id");
+
+                    b.Property<string>("OfficialAnswerSiteName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("official_answer_site_name");
+
+                    b.Property<Guid>("OriginInstanceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("origin_instance_id");
+
+                    b.Property<Guid>("OriginResourceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("origin_resource_id");
+
+                    b.Property<Guid>("OriginSiteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("origin_site_id");
+
+                    b.Property<Guid>("PeerInstanceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("peer_instance_id");
+
+                    b.Property<DateTimeOffset?>("RemoteProgressAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("remote_progress_at");
+
+                    b.Property<long>("RemoteProgressSequence")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("remote_progress_sequence");
+
+                    b.Property<string>("RemoteProgressStatus")
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)")
+                        .HasColumnName("remote_progress_status");
+
+                    b.Property<Guid>("RemoteSiteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("remote_site_id");
+
+                    b.Property<Guid?>("RemoteWorkItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("remote_work_item_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LocalWorkItemId")
+                        .IsUnique();
+
+                    b.HasIndex("OfficialAnswerMessageId")
+                        .IsUnique();
+
+                    b.HasIndex("PeerInstanceId");
+
+                    b.HasIndex("OriginInstanceId", "OriginSiteId", "OriginResourceId", "PeerInstanceId", "RemoteSiteId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_federation_work_links_origin_address");
+
+                    b.ToTable("federation_work_links", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_federation_work_links_direction", "direction IN ('incoming', 'outgoing')");
+                        });
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Federation.InstanceIdentity", b =>
+                {
+                    b.Property<int>("Key")
+                        .HasColumnType("integer")
+                        .HasColumnName("key");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("InstanceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("instance_id");
+
+                    b.HasKey("Key");
+
+                    b.HasIndex("InstanceId")
+                        .IsUnique();
+
+                    b.ToTable("instance_identity", (string)null);
                 });
 
             modelBuilder.Entity("Fylkren.Api.Identity.ExternalIdentityLink", b =>
@@ -945,6 +1680,311 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.ToTable("webauthn_flow_grants", (string)null);
                 });
 
+            modelBuilder.Entity("Fylkren.Api.InformationLifecycle.InformationLifecycleRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("ArchivedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("archived_at");
+
+                    b.Property<DateTimeOffset>("ChangedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("changed_at");
+
+                    b.Property<DateTimeOffset?>("ClosedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("closed_at");
+
+                    b.Property<Guid?>("ContextWorkItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("context_work_item_id");
+
+                    b.Property<DateTimeOffset?>("EligibleAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("eligible_at");
+
+                    b.Property<Guid?>("ExportId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("export_id");
+
+                    b.Property<bool>("IsHeld")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_held");
+
+                    b.Property<Guid?>("OwnerSiteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("owner_site_id");
+
+                    b.Property<Guid?>("PolicyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_id");
+
+                    b.Property<int?>("PolicyVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("policy_version");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("reason");
+
+                    b.Property<Guid>("ResourceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("resource_id");
+
+                    b.Property<string>("ResourceType")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("resource_type");
+
+                    b.Property<string>("Stage")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("stage");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContextWorkItemId");
+
+                    b.HasIndex("ResourceType", "ResourceId")
+                        .IsUnique()
+                        .HasFilter("owner_site_id IS NULL");
+
+                    b.HasIndex("OwnerSiteId", "ResourceType", "ResourceId")
+                        .IsUnique()
+                        .HasFilter("owner_site_id IS NOT NULL");
+
+                    b.ToTable("information_lifecycle", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_information_lifecycle_reversible", "stage IN ('active', 'closed', 'archived') AND version > 0 AND (owner_site_id IS NOT NULL OR context_work_item_id IS NULL)");
+                        });
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Learning.LearningEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ActionPlan")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("action_plan");
+
+                    b.Property<string>("AuthorName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("author_name");
+
+                    b.Property<Guid>("AuthorPersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("author_person_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateOnly?>("DueOn")
+                        .HasColumnType("date")
+                        .HasColumnName("due_on");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("kind");
+
+                    b.Property<Guid>("LessonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lesson_id");
+
+                    b.Property<string>("Priority")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("priority");
+
+                    b.Property<Guid>("SiteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("site_id");
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorPersonId");
+
+                    b.HasIndex("SiteId");
+
+                    b.HasIndex("LessonId", "CreatedAt", "Id");
+
+                    b.ToTable("learning_entries", (string)null);
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Learning.LearningLesson", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ActionPlan")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("action_plan");
+
+                    b.Property<string>("AuthorName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("author_name");
+
+                    b.Property<Guid>("AuthorPersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("author_person_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateOnly?>("DueOn")
+                        .HasColumnType("date")
+                        .HasColumnName("due_on");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("kind");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("integer")
+                        .HasColumnName("number");
+
+                    b.Property<string>("OwnerName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("owner_name");
+
+                    b.Property<Guid?>("OwnerPersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("owner_person_id");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("priority");
+
+                    b.Property<Guid>("SiteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("site_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("text");
+
+                    b.Property<string>("TreatmentNote")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("treatment_note");
+
+                    b.Property<Guid>("UnitId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("unit_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.Property<Guid>("WorkItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("work_item_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorPersonId");
+
+                    b.HasIndex("OwnerPersonId");
+
+                    b.HasIndex("SiteId");
+
+                    b.HasIndex("WorkItemId", "Number")
+                        .IsUnique();
+
+                    b.HasIndex("UnitId", "Status", "Priority");
+
+                    b.ToTable("learning_lessons", (string)null);
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Licensing.InstalledLicense", b =>
+                {
+                    b.Property<int>("Key")
+                        .HasColumnType("integer")
+                        .HasColumnName("key");
+
+                    b.Property<DateTimeOffset>("ImportedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("imported_at");
+
+                    b.Property<Guid>("ImportedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("imported_by");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasMaxLength(24000)
+                        .HasColumnType("character varying(24000)")
+                        .HasColumnName("payload");
+
+                    b.Property<string>("Signature")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("signature");
+
+                    b.HasKey("Key");
+
+                    b.ToTable("installed_license", (string)null);
+                });
+
             modelBuilder.Entity("Fylkren.Api.Notifications.NotificationOutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -970,6 +2010,10 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<Guid?>("DomainEventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("domain_event_id");
+
                     b.Property<string>("FromName")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -984,6 +2028,11 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.Property<DateTimeOffset>("NextAttemptAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("next_attempt_at");
+
+                    b.Property<string>("NotificationKind")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("notification_kind");
 
                     b.Property<string>("RecipientEmail")
                         .IsRequired()
@@ -1033,6 +2082,10 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.HasIndex("CreatedAt", "Id");
 
                     b.HasIndex("Status", "NextAttemptAt");
+
+                    b.HasIndex("DomainEventId", "RecipientPersonId", "NotificationKind")
+                        .IsUnique()
+                        .HasFilter("domain_event_id IS NOT NULL");
 
                     b.HasIndex("Status", "CreatedAt", "Id");
 
@@ -1706,625 +2759,6 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.ToTable("api_report_grants", (string)null);
                 });
 
-            modelBuilder.Entity("Fylkren.Api.Federation.FederationInboundReceipt", b =>
-                {
-                    b.Property<Guid>("PeerInstanceId")
-                        .ValueGeneratedNever()
-                        .HasColumnType("uuid")
-                        .HasColumnName("peer_instance_id");
-
-                    b.Property<Guid>("MessageId")
-                        .ValueGeneratedNever()
-                        .HasColumnType("uuid")
-                        .HasColumnName("message_id");
-
-                    b.Property<Guid?>("CausationId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("causation_id");
-
-                    b.Property<Guid?>("CorrelationId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("correlation_id");
-
-                    b.Property<Guid>("DestinationSiteId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("destination_site_id");
-
-                    b.Property<Guid>("LocalWorkItemId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("local_work_item_id");
-
-                    b.Property<string>("MessageType")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("character varying(80)")
-                        .HasColumnName("message_type");
-
-                    b.Property<Guid>("OriginInstanceId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("origin_instance_id");
-
-                    b.Property<Guid>("OriginResourceId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("origin_resource_id");
-
-                    b.Property<Guid>("OriginSiteId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("origin_site_id");
-
-                    b.Property<string>("PayloadSha256")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
-                        .HasColumnName("payload_sha256");
-
-                    b.Property<DateTimeOffset>("ReceivedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("received_at");
-
-                    b.Property<Guid>("SourceSiteId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("source_site_id");
-
-                    b.HasKey("PeerInstanceId", "MessageId");
-
-                    b.HasIndex("DestinationSiteId", "ReceivedAt");
-
-                    b.HasIndex("LocalWorkItemId");
-
-                    b.HasIndex("ReceivedAt");
-
-                    b.ToTable("federation_inbound_receipts", (string)null);
-                });
-
-            modelBuilder.Entity("Fylkren.Api.Federation.FederationOutboundMessage", b =>
-                {
-                    b.Property<Guid>("MessageId")
-                        .ValueGeneratedNever()
-                        .HasColumnType("uuid")
-                        .HasColumnName("message_id");
-
-                    b.Property<int>("AttemptCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("attempt_count");
-
-                    b.Property<Guid?>("CausationId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("causation_id");
-
-                    b.Property<Guid?>("CorrelationId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("correlation_id");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<Guid>("DestinationSiteId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("destination_site_id");
-
-                    b.Property<DateTimeOffset?>("DeliveredAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("delivered_at");
-
-                    b.Property<string>("LastErrorCode")
-                        .HasMaxLength(80)
-                        .HasColumnType("character varying(80)")
-                        .HasColumnName("last_error_code");
-
-                    b.Property<string>("MessageType")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("character varying(80)")
-                        .HasColumnName("message_type");
-
-                    b.Property<DateTimeOffset>("NextAttemptAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("next_attempt_at");
-
-                    b.Property<Guid>("OriginInstanceId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("origin_instance_id");
-
-                    b.Property<Guid>("OriginResourceId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("origin_resource_id");
-
-                    b.Property<Guid>("OriginSiteId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("origin_site_id");
-
-                    b.Property<string>("PayloadJson")
-                        .IsRequired()
-                        .HasMaxLength(1000000)
-                        .HasColumnType("character varying(1000000)")
-                        .HasColumnName("payload_json");
-
-                    b.Property<Guid>("PeerInstanceId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("peer_instance_id");
-
-                    b.Property<int>("SchemaVersion")
-                        .HasColumnType("integer")
-                        .HasColumnName("schema_version");
-
-                    b.Property<Guid>("SourceSiteId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("source_site_id");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(12)
-                        .HasColumnType("character varying(12)")
-                        .HasColumnName("status");
-
-                    b.HasKey("MessageId");
-
-                    b.HasIndex("PeerInstanceId", "CreatedAt");
-
-                    b.HasIndex("PeerInstanceId", "Status");
-
-                    b.HasIndex("SourceSiteId");
-
-                    b.HasIndex("Status", "DeliveredAt");
-
-                    b.HasIndex("Status", "NextAttemptAt");
-
-                    b.ToTable("federation_outbound_messages", t =>
-                        t.HasCheckConstraint("CK_federation_outbound_messages_status", "status IN ('pending', 'retrying', 'delivered', 'failed')"));
-                });
-
-            modelBuilder.Entity("Fylkren.Api.Federation.FederationPeer", b =>
-                {
-                    b.Property<Guid>("InstanceId")
-                        .ValueGeneratedNever()
-                        .HasColumnType("uuid")
-                        .HasColumnName("instance_id");
-
-                    b.Property<string>("BaseUrl")
-                        .IsRequired()
-                        .HasMaxLength(2048)
-                        .HasColumnType("character varying(2048)")
-                        .HasColumnName("base_url");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_active");
-
-                    b.Property<DateTimeOffset?>("KeyRotationStagedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("key_rotation_staged_at");
-
-                    b.Property<DateTimeOffset?>("LastProofAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_proof_at");
-
-                    b.Property<Guid?>("LastCompletedKeyRotationId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("last_completed_key_rotation_id");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(120)
-                        .HasColumnType("character varying(120)")
-                        .HasColumnName("name");
-
-                    b.Property<Guid?>("PendingKeyRotationId")
-                        .IsConcurrencyToken()
-                        .HasColumnType("uuid")
-                        .HasColumnName("pending_key_rotation_id");
-
-                    b.Property<string>("PinnedPublicKeySpki")
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
-                        .HasColumnName("pinned_public_key_spki");
-
-                    b.Property<string>("PendingPinnedPublicKeySpki")
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
-                        .HasColumnName("pending_pinned_public_key_spki");
-
-                    b.HasKey("InstanceId");
-
-                    b.HasIndex("PinnedPublicKeySpki")
-                        .IsUnique();
-
-                    b.ToTable("federation_peers", (string)null);
-                });
-
-            modelBuilder.Entity("Fylkren.Api.Federation.FederationProbeNonce", b =>
-                {
-                    b.Property<Guid>("PeerInstanceId")
-                        .ValueGeneratedNever()
-                        .HasColumnType("uuid")
-                        .HasColumnName("peer_instance_id");
-
-                    b.Property<Guid>("Nonce")
-                        .ValueGeneratedNever()
-                        .HasColumnType("uuid")
-                        .HasColumnName("nonce");
-
-                    b.Property<DateTimeOffset>("ReceivedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("received_at");
-
-                    b.HasKey("PeerInstanceId", "Nonce");
-
-                    b.HasIndex("ReceivedAt");
-
-                    b.ToTable("federation_probe_nonces", (string)null);
-                });
-
-            modelBuilder.Entity("Fylkren.Api.Federation.FederationRemoteSite", b =>
-                {
-                    b.Property<Guid>("InstanceId")
-                        .ValueGeneratedNever()
-                        .HasColumnType("uuid")
-                        .HasColumnName("instance_id");
-
-                    b.Property<Guid>("SiteId")
-                        .ValueGeneratedNever()
-                        .HasColumnType("uuid")
-                        .HasColumnName("site_id");
-
-                    b.Property<long>("CatalogRevision")
-                        .HasColumnType("bigint")
-                        .HasColumnName("catalog_revision");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_active");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("name");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("InstanceId", "SiteId");
-
-                    b.ToTable("federation_remote_sites", (string)null);
-                });
-
-            modelBuilder.Entity("Fylkren.Api.Federation.FederationRoutingSettings", b =>
-                {
-                    b.Property<int>("Key")
-                        .ValueGeneratedNever()
-                        .HasColumnType("integer")
-                        .HasColumnName("key");
-
-                    b.Property<DateTimeOffset>("ChangedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("changed_at");
-
-                    b.Property<Guid?>("ChangedBy")
-                        .HasColumnType("uuid")
-                        .HasColumnName("changed_by");
-
-                    b.Property<bool>("Enabled")
-                        .IsConcurrencyToken()
-                        .HasColumnType("boolean")
-                        .HasColumnName("enabled");
-
-                    b.HasKey("Key");
-
-                    b.ToTable("federation_routing_settings", (string)null);
-                });
-
-            modelBuilder.Entity("Fylkren.Api.Federation.FederationSigningIdentity", b =>
-                {
-                    b.Property<Guid?>("ActiveRotationId")
-                        .IsConcurrencyToken()
-                        .HasColumnType("uuid")
-                        .HasColumnName("active_rotation_id");
-
-                    b.Property<int>("Key")
-                        .ValueGeneratedNever()
-                        .HasColumnType("integer")
-                        .HasColumnName("key");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<DateTimeOffset?>("PendingCreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("pending_created_at");
-
-                    b.Property<string>("PendingProtectedPrivateKey")
-                        .HasMaxLength(4096)
-                        .HasColumnType("character varying(4096)")
-                        .HasColumnName("pending_protected_private_key");
-
-                    b.Property<string>("PendingPublicKeySpki")
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
-                        .HasColumnName("pending_public_key_spki");
-
-                    b.Property<Guid?>("PendingRotationId")
-                        .IsConcurrencyToken()
-                        .HasColumnType("uuid")
-                        .HasColumnName("pending_rotation_id");
-
-                    b.Property<string>("ProtectedPrivateKey")
-                        .IsRequired()
-                        .HasMaxLength(4096)
-                        .HasColumnType("character varying(4096)")
-                        .HasColumnName("protected_private_key");
-
-                    b.Property<string>("PublicKeySpki")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
-                        .HasColumnName("public_key_spki");
-
-                    b.Property<DateTimeOffset?>("RotationActivatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("rotation_activated_at");
-
-                    b.HasKey("Key");
-
-                    b.ToTable("federation_signing_identity", (string)null);
-                });
-
-            modelBuilder.Entity("Fylkren.Api.Federation.FederationSiteGrant", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedNever()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("PeerInstanceId")
-                        .ValueGeneratedNever()
-                        .HasColumnType("uuid")
-                        .HasColumnName("peer_instance_id");
-
-                    b.Property<Guid>("LocalSiteId")
-                        .ValueGeneratedNever()
-                        .HasColumnType("uuid")
-                        .HasColumnName("local_site_id");
-
-                    b.Property<Guid>("RemoteSiteId")
-                        .ValueGeneratedNever()
-                        .HasColumnType("uuid")
-                        .HasColumnName("remote_site_id");
-
-                    b.Property<string>("Direction")
-                        .IsRequired()
-                        .HasMaxLength(8)
-                        .HasColumnType("character varying(8)")
-                        .HasColumnName("direction");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_active");
-
-                    b.Property<long>("Revision")
-                        .HasColumnType("bigint")
-                        .HasColumnName("revision");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LocalSiteId", "IsActive");
-
-                    b.HasIndex("PeerInstanceId", "LocalSiteId", "RemoteSiteId", "Direction")
-                        .IsUnique();
-
-                    b.ToTable("federation_site_grants", t =>
-                        t.HasCheckConstraint("CK_federation_site_grants_direction", "direction IN ('inbound', 'outbound')"));
-                });
-
-            modelBuilder.Entity("Fylkren.Api.Federation.FederationSitePublication", b =>
-                {
-                    b.Property<Guid>("PeerInstanceId")
-                        .ValueGeneratedNever()
-                        .HasColumnType("uuid")
-                        .HasColumnName("peer_instance_id");
-
-                    b.Property<Guid>("LocalSiteId")
-                        .ValueGeneratedNever()
-                        .HasColumnType("uuid")
-                        .HasColumnName("local_site_id");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_active");
-
-                    b.Property<long>("Revision")
-                        .HasColumnType("bigint")
-                        .HasColumnName("revision");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("PeerInstanceId", "LocalSiteId");
-
-                    b.HasIndex("LocalSiteId");
-
-                    b.ToTable("federation_site_publications", (string)null);
-                });
-
-            modelBuilder.Entity("Fylkren.Api.Federation.FederationWorkLink", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedNever()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<DateTimeOffset?>("AcknowledgedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("acknowledged_at");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Direction")
-                        .IsRequired()
-                        .HasMaxLength(8)
-                        .HasColumnType("character varying(8)")
-                        .HasColumnName("direction");
-
-                    b.Property<Guid>("LocalWorkItemId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("local_work_item_id");
-
-                    b.Property<string>("OfficialAnswer")
-                        .HasMaxLength(100000)
-                        .HasColumnType("character varying(100000)")
-                        .HasColumnName("official_answer");
-
-                    b.Property<string>("OfficialAnswerClassification")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasColumnName("official_answer_classification");
-
-                    b.Property<DateTimeOffset?>("OfficialAnswerApprovedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("official_answer_approved_at");
-
-                    b.Property<string>("OfficialAnswerSiteName")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("official_answer_site_name");
-
-                    b.Property<Guid?>("OfficialAnswerMessageId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("official_answer_message_id");
-
-                    b.Property<Guid>("OriginInstanceId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("origin_instance_id");
-
-                    b.Property<Guid>("OriginResourceId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("origin_resource_id");
-
-                    b.Property<Guid>("OriginSiteId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("origin_site_id");
-
-                    b.Property<Guid>("PeerInstanceId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("peer_instance_id");
-
-                    b.Property<Guid>("RemoteSiteId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("remote_site_id");
-
-                    b.Property<Guid?>("RemoteWorkItemId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("remote_work_item_id");
-
-                    b.Property<long>("RemoteProgressSequence")
-                        .IsConcurrencyToken()
-                        .HasColumnType("bigint")
-                        .HasColumnName("remote_progress_sequence");
-
-                    b.Property<string>("RemoteProgressStatus")
-                        .HasMaxLength(24)
-                        .HasColumnType("character varying(24)")
-                        .HasColumnName("remote_progress_status");
-
-                    b.Property<DateTimeOffset?>("RemoteProgressAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("remote_progress_at");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LocalWorkItemId")
-                        .IsUnique();
-
-                    b.HasIndex("OfficialAnswerMessageId")
-                        .IsUnique();
-
-                    b.HasIndex("PeerInstanceId");
-
-                    b.HasIndex("OriginInstanceId", "OriginSiteId", "OriginResourceId", "PeerInstanceId", "RemoteSiteId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_federation_work_links_origin_address");
-
-                    b.ToTable("federation_work_links", t =>
-                        t.HasCheckConstraint("CK_federation_work_links_direction", "direction IN ('incoming', 'outgoing')"));
-                });
-
-            modelBuilder.Entity("Fylkren.Api.Federation.InstanceIdentity", b =>
-                {
-                    b.Property<int>("Key")
-                        .ValueGeneratedNever()
-                        .HasColumnType("integer")
-                        .HasColumnName("key");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<Guid>("InstanceId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("instance_id");
-
-                    b.HasKey("Key");
-
-                    b.HasIndex("InstanceId")
-                        .IsUnique();
-
-                    b.ToTable("instance_identity", (string)null);
-                });
-
-            modelBuilder.Entity("Fylkren.Api.Licensing.InstalledLicense", b =>
-                {
-                    b.Property<int>("Key")
-                        .ValueGeneratedNever()
-                        .HasColumnType("integer")
-                        .HasColumnName("key");
-
-                    b.Property<DateTimeOffset>("ImportedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("imported_at");
-
-                    b.Property<Guid>("ImportedBy")
-                        .HasColumnType("uuid")
-                        .HasColumnName("imported_by");
-
-                    b.Property<string>("Payload")
-                        .IsRequired()
-                        .HasMaxLength(24000)
-                        .HasColumnType("character varying(24000)")
-                        .HasColumnName("payload");
-
-                    b.Property<string>("Signature")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)")
-                        .HasColumnName("signature");
-
-                    b.HasKey("Key");
-
-                    b.ToTable("installed_license", (string)null);
-                });
-
             modelBuilder.Entity("Fylkren.Api.Platform.BrandingSettings", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2392,42 +2826,6 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("branding_settings", (string)null);
-                });
-
-            modelBuilder.Entity("Fylkren.Api.Platform.RegionalSettings", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<string>("ClockFormat")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("character varying(16)")
-                        .HasColumnName("clock_format");
-
-                    b.Property<string>("DefaultLanguage")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("character varying(16)")
-                        .HasColumnName("default_language");
-
-                    b.Property<string>("MeasurementSystem")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("character varying(16)")
-                        .HasColumnName("measurement_system");
-
-                    b.Property<string>("TimeZone")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("time_zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("regional_settings", (string)null);
                 });
 
             modelBuilder.Entity("Fylkren.Api.Platform.ClassificationDefinition", b =>
@@ -2517,6 +2915,42 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.HasKey("Provider");
 
                     b.ToTable("identity_provider_settings", (string)null);
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Platform.RegionalSettings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ClockFormat")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("clock_format");
+
+                    b.Property<string>("DefaultLanguage")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("default_language");
+
+                    b.Property<string>("MeasurementSystem")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("measurement_system");
+
+                    b.Property<string>("TimeZone")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("time_zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("regional_settings", (string)null);
                 });
 
             modelBuilder.Entity("Fylkren.Api.Platform.SmtpSettings", b =>
@@ -2996,6 +3430,58 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.ToTable("execution_timeline_events", (string)null);
                 });
 
+            modelBuilder.Entity("Fylkren.Api.WorkManagement.PlanningRfiEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Answer")
+                        .IsRequired()
+                        .HasMaxLength(10000)
+                        .HasColumnType("character varying(10000)")
+                        .HasColumnName("answer");
+
+                    b.Property<bool>("Answered")
+                        .HasColumnType("boolean")
+                        .HasColumnName("answered");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateOnly?>("DueOn")
+                        .HasColumnType("date")
+                        .HasColumnName("due_on");
+
+                    b.Property<Guid>("RunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("run_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("What")
+                        .IsRequired()
+                        .HasMaxLength(10000)
+                        .HasColumnType("character varying(10000)")
+                        .HasColumnName("what");
+
+                    b.Property<string>("Who")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)")
+                        .HasColumnName("who");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RunId", "CreatedAt");
+
+                    b.ToTable("planning_rfi_entries", (string)null);
+                });
+
             modelBuilder.Entity("Fylkren.Api.WorkManagement.PlatformReferenceSettings", b =>
                 {
                     b.Property<int>("Key")
@@ -3050,15 +3536,6 @@ namespace Fylkren.Api.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("site_reference_settings", (string)null);
-                });
-
-            modelBuilder.Entity("Fylkren.Api.WorkManagement.SiteReferenceSettings", b =>
-                {
-                    b.HasOne("Fylkren.Api.Organization.Site", null)
-                        .WithOne()
-                        .HasForeignKey("Fylkren.Api.WorkManagement.SiteReferenceSettings", "SiteId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Fylkren.Api.WorkManagement.WorkItem", b =>
@@ -3125,18 +3602,18 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("final_report_written_by_person_id");
 
-                    b.Property<Guid?>("ParentWorkItemId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("parent_work_item_id");
+                    b.Property<string>("OriginReference")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("origin_reference");
 
                     b.Property<Guid?>("OriginReferenceInstanceId")
                         .HasColumnType("uuid")
                         .HasColumnName("origin_reference_instance_id");
 
-                    b.Property<string>("OriginReference")
-                        .HasMaxLength(80)
-                        .HasColumnType("character varying(80)")
-                        .HasColumnName("origin_reference");
+                    b.Property<Guid?>("ParentWorkItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_work_item_id");
 
                     b.Property<string>("Priority")
                         .IsRequired()
@@ -3149,11 +3626,6 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("character varying(4000)")
                         .HasColumnName("recommendation");
 
-                    b.Property<string>("ReferenceUrl")
-                        .HasMaxLength(2048)
-                        .HasColumnType("character varying(2048)")
-                        .HasColumnName("reference_url");
-
                     b.Property<string>("ReferenceCode")
                         .IsRequired()
                         .HasMaxLength(80)
@@ -3163,6 +3635,11 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.Property<long>("ReferenceNumber")
                         .HasColumnType("bigint")
                         .HasColumnName("reference_number");
+
+                    b.Property<string>("ReferenceUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("reference_url");
 
                     b.Property<string>("RequestBasisSnapshot")
                         .HasMaxLength(100000)
@@ -3257,18 +3734,64 @@ namespace Fylkren.Api.Persistence.Migrations
 
                     b.HasIndex("WorkItemTypeId");
 
-                    b.HasIndex("SiteId", "Status", "CreatedAt");
-
                     b.HasIndex("SiteId", "ReferenceNumber");
+
+                    b.HasIndex("SiteId", "Status", "CreatedAt");
 
                     b.HasIndex("SiteId", "Status", "DueAt");
 
                     b.HasIndex("SiteId", "AssignedUnitId", "Status", "FinalReportApprovedAt");
 
-                    b.ToTable("work_items", t =>
+                    b.ToTable("work_items", null, t =>
                         {
                             t.HasCheckConstraint("CK_work_items_external_creator", "created_by_person_id IS NOT NULL OR NULLIF(BTRIM(sender_site_name), '') IS NOT NULL");
                         });
+                });
+
+            modelBuilder.Entity("Fylkren.Api.WorkManagement.WorkItemComment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AuthorName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("author_name");
+
+                    b.Property<Guid>("AuthorPersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("author_person_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("SiteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("site_id");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(10000)
+                        .HasColumnType("character varying(10000)")
+                        .HasColumnName("text");
+
+                    b.Property<Guid>("WorkItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("work_item_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorPersonId");
+
+                    b.HasIndex("SiteId");
+
+                    b.HasIndex("WorkItemId", "CreatedAt", "Id");
+
+                    b.ToTable("work_item_comments", (string)null);
                 });
 
             modelBuilder.Entity("Fylkren.Api.WorkManagement.WorkItemDependency", b =>
@@ -3408,16 +3931,16 @@ namespace Fylkren.Api.Persistence.Migrations
 
             modelBuilder.Entity("Fylkren.Api.WorkManagement.WorkItemType", b =>
                 {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
                     b.Property<string>("Abbreviation")
                         .IsRequired()
                         .HasMaxLength(12)
                         .HasColumnType("character varying(12)")
                         .HasColumnName("abbreviation");
-
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -3449,10 +3972,10 @@ namespace Fylkren.Api.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SiteId", "NormalizedName")
+                    b.HasIndex("SiteId", "Abbreviation")
                         .IsUnique();
 
-                    b.HasIndex("SiteId", "Abbreviation")
+                    b.HasIndex("SiteId", "NormalizedName")
                         .IsUnique();
 
                     b.ToTable("work_item_types", (string)null);
@@ -3539,58 +4062,6 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.ToTable("workflow_plan_allocations", (string)null);
                 });
 
-            modelBuilder.Entity("Fylkren.Api.WorkManagement.PlanningRfiEntry", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<string>("Answer")
-                        .IsRequired()
-                        .HasMaxLength(10000)
-                        .HasColumnType("character varying(10000)")
-                        .HasColumnName("answer");
-
-                    b.Property<bool>("Answered")
-                        .HasColumnType("boolean")
-                        .HasColumnName("answered");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<DateOnly?>("DueOn")
-                        .HasColumnType("date")
-                        .HasColumnName("due_on");
-
-                    b.Property<Guid>("RunId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("run_id");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("What")
-                        .IsRequired()
-                        .HasMaxLength(10000)
-                        .HasColumnType("character varying(10000)")
-                        .HasColumnName("what");
-
-                    b.Property<string>("Who")
-                        .IsRequired()
-                        .HasMaxLength(320)
-                        .HasColumnType("character varying(320)")
-                        .HasColumnName("who");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RunId", "CreatedAt");
-
-                    b.ToTable("planning_rfi_entries", (string)null);
-                });
-
             modelBuilder.Entity("Fylkren.Api.WorkManagement.WorkflowPlanRequest", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3604,6 +4075,10 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("character varying(2000)")
                         .HasColumnName("instruction");
 
+                    b.Property<Guid?>("RemoteSiteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("remote_site_id");
+
                     b.Property<Guid>("RunId")
                         .HasColumnType("uuid")
                         .HasColumnName("run_id");
@@ -3611,10 +4086,6 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.Property<Guid>("StepId")
                         .HasColumnType("uuid")
                         .HasColumnName("step_id");
-
-                    b.Property<Guid?>("RemoteSiteId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("remote_site_id");
 
                     b.Property<Guid?>("TargetInstanceId")
                         .HasColumnType("uuid")
@@ -3643,7 +4114,7 @@ namespace Fylkren.Api.Persistence.Migrations
                         .IsUnique()
                         .HasFilter("target_instance_id IS NOT NULL AND remote_site_id IS NOT NULL");
 
-                    b.ToTable("workflow_plan_requests", t =>
+                    b.ToTable("workflow_plan_requests", null, t =>
                         {
                             t.HasCheckConstraint("CK_workflow_plan_requests_recipient", "(target_site_id IS NOT NULL AND target_instance_id IS NULL AND remote_site_id IS NULL AND target_site_name_snapshot IS NULL) OR (target_site_id IS NULL AND target_instance_id IS NOT NULL AND remote_site_id IS NOT NULL AND NULLIF(BTRIM(target_site_name_snapshot), '') IS NOT NULL)");
                         });
@@ -4045,6 +4516,15 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.Navigation("RecordedByPerson");
                 });
 
+            modelBuilder.Entity("Fylkren.Api.DomainEvents.EventProjection", b =>
+                {
+                    b.HasOne("Fylkren.Api.DomainEvents.DomainEvent", null)
+                        .WithMany()
+                        .HasForeignKey("DomainEventId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Fylkren.Api.DomainEvents.WebhookDelivery", b =>
                 {
                     b.HasOne("Fylkren.Api.DomainEvents.DomainEvent", "DomainEvent")
@@ -4077,15 +4557,15 @@ namespace Fylkren.Api.Persistence.Migrations
 
             modelBuilder.Entity("Fylkren.Api.Federation.FederationInboundReceipt", b =>
                 {
-                    b.HasOne("Fylkren.Api.Federation.FederationPeer", null)
-                        .WithMany()
-                        .HasForeignKey("PeerInstanceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("Fylkren.Api.WorkManagement.WorkItem", null)
                         .WithMany()
                         .HasForeignKey("LocalWorkItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Fylkren.Api.Federation.FederationPeer", null)
+                        .WithMany()
+                        .HasForeignKey("PeerInstanceId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
@@ -4125,45 +4605,45 @@ namespace Fylkren.Api.Persistence.Migrations
 
             modelBuilder.Entity("Fylkren.Api.Federation.FederationSiteGrant", b =>
                 {
-                    b.HasOne("Fylkren.Api.Federation.FederationPeer", null)
-                        .WithMany()
-                        .HasForeignKey("PeerInstanceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("Fylkren.Api.Organization.Site", null)
                         .WithMany()
                         .HasForeignKey("LocalSiteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Fylkren.Api.Federation.FederationPeer", null)
+                        .WithMany()
+                        .HasForeignKey("PeerInstanceId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
             modelBuilder.Entity("Fylkren.Api.Federation.FederationSitePublication", b =>
                 {
-                    b.HasOne("Fylkren.Api.Federation.FederationPeer", null)
-                        .WithMany()
-                        .HasForeignKey("PeerInstanceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("Fylkren.Api.Organization.Site", null)
                         .WithMany()
                         .HasForeignKey("LocalSiteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Fylkren.Api.Federation.FederationPeer", null)
+                        .WithMany()
+                        .HasForeignKey("PeerInstanceId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
             modelBuilder.Entity("Fylkren.Api.Federation.FederationWorkLink", b =>
                 {
-                    b.HasOne("Fylkren.Api.Federation.FederationPeer", null)
-                        .WithMany()
-                        .HasForeignKey("PeerInstanceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("Fylkren.Api.WorkManagement.WorkItem", null)
                         .WithMany()
                         .HasForeignKey("LocalWorkItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Fylkren.Api.Federation.FederationPeer", null)
+                        .WithMany()
+                        .HasForeignKey("PeerInstanceId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
@@ -4210,6 +4690,72 @@ namespace Fylkren.Api.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Person");
+                });
+
+            modelBuilder.Entity("Fylkren.Api.InformationLifecycle.InformationLifecycleRecord", b =>
+                {
+                    b.HasOne("Fylkren.Api.WorkManagement.WorkItem", null)
+                        .WithMany()
+                        .HasForeignKey("ContextWorkItemId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Fylkren.Api.Organization.Site", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerSiteId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Learning.LearningEntry", b =>
+                {
+                    b.HasOne("Fylkren.Api.Identity.Person", null)
+                        .WithMany()
+                        .HasForeignKey("AuthorPersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Fylkren.Api.Learning.LearningLesson", null)
+                        .WithMany()
+                        .HasForeignKey("LessonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Fylkren.Api.Organization.Site", null)
+                        .WithMany()
+                        .HasForeignKey("SiteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Learning.LearningLesson", b =>
+                {
+                    b.HasOne("Fylkren.Api.Identity.Person", null)
+                        .WithMany()
+                        .HasForeignKey("AuthorPersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Fylkren.Api.Identity.Person", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerPersonId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Fylkren.Api.Organization.Site", null)
+                        .WithMany()
+                        .HasForeignKey("SiteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Fylkren.Api.Organization.OrganizationUnit", null)
+                        .WithMany()
+                        .HasForeignKey("UnitId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Fylkren.Api.WorkManagement.WorkItem", null)
+                        .WithMany()
+                        .HasForeignKey("WorkItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Fylkren.Api.Notifications.SiteNotificationSettings", b =>
@@ -4495,6 +5041,26 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.Navigation("Step");
                 });
 
+            modelBuilder.Entity("Fylkren.Api.WorkManagement.PlanningRfiEntry", b =>
+                {
+                    b.HasOne("Fylkren.Api.WorkManagement.WorkflowRun", "Run")
+                        .WithMany()
+                        .HasForeignKey("RunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Run");
+                });
+
+            modelBuilder.Entity("Fylkren.Api.WorkManagement.SiteReferenceSettings", b =>
+                {
+                    b.HasOne("Fylkren.Api.Organization.Site", null)
+                        .WithOne()
+                        .HasForeignKey("Fylkren.Api.WorkManagement.SiteReferenceSettings", "SiteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Fylkren.Api.WorkManagement.WorkItem", b =>
                 {
                     b.HasOne("Fylkren.Api.Organization.OrganizationUnit", "AssignedUnit")
@@ -4560,6 +5126,27 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.Navigation("SourceType");
 
                     b.Navigation("WorkItemType");
+                });
+
+            modelBuilder.Entity("Fylkren.Api.WorkManagement.WorkItemComment", b =>
+                {
+                    b.HasOne("Fylkren.Api.Identity.Person", null)
+                        .WithMany()
+                        .HasForeignKey("AuthorPersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Fylkren.Api.Organization.Site", null)
+                        .WithMany()
+                        .HasForeignKey("SiteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Fylkren.Api.WorkManagement.WorkItem", null)
+                        .WithMany()
+                        .HasForeignKey("WorkItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Fylkren.Api.WorkManagement.WorkItemDependency", b =>
@@ -4677,17 +5264,6 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.Navigation("Step");
 
                     b.Navigation("Unit");
-                });
-
-            modelBuilder.Entity("Fylkren.Api.WorkManagement.PlanningRfiEntry", b =>
-                {
-                    b.HasOne("Fylkren.Api.WorkManagement.WorkflowRun", "Run")
-                        .WithMany()
-                        .HasForeignKey("RunId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Run");
                 });
 
             modelBuilder.Entity("Fylkren.Api.WorkManagement.WorkflowPlanRequest", b =>
@@ -4947,83 +5523,6 @@ namespace Fylkren.Api.Persistence.Migrations
                 {
                     b.Navigation("Allocations");
                 });
-            modelBuilder.Entity("Fylkren.Api.WorkManagement.WorkItemComment", b =>
-                {
-                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid").HasColumnName("id");
-                    b.Property<Guid>("SiteId").HasColumnType("uuid").HasColumnName("site_id");
-                    b.Property<Guid>("WorkItemId").HasColumnType("uuid").HasColumnName("work_item_id");
-                    b.Property<Guid>("AuthorPersonId").HasColumnType("uuid").HasColumnName("author_person_id");
-                    b.Property<string>("AuthorName").IsRequired().HasMaxLength(200).HasColumnType("character varying(200)").HasColumnName("author_name");
-                    b.Property<string>("Text").IsRequired().HasMaxLength(10000).HasColumnType("character varying(10000)").HasColumnName("text");
-                    b.Property<DateTimeOffset>("CreatedAt").HasColumnType("timestamp with time zone").HasColumnName("created_at");
-                    b.HasKey("Id");
-                    b.HasIndex("SiteId");
-                    b.HasIndex("AuthorPersonId");
-                    b.HasIndex("WorkItemId", "CreatedAt", "Id");
-                    b.ToTable("work_item_comments");
-                    b.HasOne("Fylkren.Api.Organization.Site", null).WithMany().HasForeignKey("SiteId").OnDelete(DeleteBehavior.Restrict).IsRequired();
-                    b.HasOne("Fylkren.Api.Identity.Person", null).WithMany().HasForeignKey("AuthorPersonId").OnDelete(DeleteBehavior.Restrict).IsRequired();
-                    b.HasOne("Fylkren.Api.WorkManagement.WorkItem", null).WithMany().HasForeignKey("WorkItemId").OnDelete(DeleteBehavior.Restrict).IsRequired();
-                });
-
-            modelBuilder.Entity("Fylkren.Api.Learning.LearningLesson", b =>
-                {
-                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid").HasColumnName("id");
-                    b.Property<Guid>("SiteId").HasColumnType("uuid").HasColumnName("site_id");
-                    b.Property<Guid>("WorkItemId").HasColumnType("uuid").HasColumnName("work_item_id");
-                    b.Property<Guid>("UnitId").HasColumnType("uuid").HasColumnName("unit_id");
-                    b.Property<int>("Number").HasColumnType("integer").HasColumnName("number");
-                    b.Property<string>("Kind").IsRequired().HasMaxLength(20).HasColumnType("character varying(20)").HasColumnName("kind");
-                    b.Property<string>("Text").IsRequired().HasMaxLength(4000).HasColumnType("character varying(4000)").HasColumnName("text");
-                    b.Property<Guid>("AuthorPersonId").HasColumnType("uuid").HasColumnName("author_person_id");
-                    b.Property<string>("AuthorName").IsRequired().HasMaxLength(200).HasColumnType("character varying(200)").HasColumnName("author_name");
-                    b.Property<string>("Status").IsRequired().HasMaxLength(20).HasColumnType("character varying(20)").HasColumnName("status");
-                    b.Property<string>("Priority").IsRequired().HasMaxLength(20).HasColumnType("character varying(20)").HasColumnName("priority");
-                    b.Property<string>("ActionPlan").IsRequired().HasMaxLength(2000).HasColumnType("character varying(2000)").HasColumnName("action_plan");
-                    b.Property<string>("TreatmentNote").IsRequired().HasMaxLength(4000).HasColumnType("character varying(4000)").HasColumnName("treatment_note");
-                    b.Property<DateOnly?>("DueOn").HasColumnType("date").HasColumnName("due_on");
-                    b.Property<Guid?>("OwnerPersonId").HasColumnType("uuid").HasColumnName("owner_person_id");
-                    b.Property<string>("OwnerName").HasMaxLength(200).HasColumnType("character varying(200)").HasColumnName("owner_name");
-                    b.Property<DateTimeOffset>("CreatedAt").HasColumnType("timestamp with time zone").HasColumnName("created_at");
-                    b.Property<DateTimeOffset>("UpdatedAt").HasColumnType("timestamp with time zone").HasColumnName("updated_at");
-                    b.Property<long>("Version").IsConcurrencyToken().HasColumnType("bigint").HasColumnName("version");
-                    b.HasKey("Id");
-                    b.HasIndex("WorkItemId", "Number").IsUnique();
-                    b.HasIndex("UnitId", "Status", "Priority");
-                    b.HasIndex("SiteId");
-                    b.HasIndex("AuthorPersonId");
-                    b.HasIndex("OwnerPersonId");
-                    b.ToTable("learning_lessons");
-                    b.HasOne("Fylkren.Api.Organization.Site", null).WithMany().HasForeignKey("SiteId").OnDelete(DeleteBehavior.Restrict).IsRequired();
-                    b.HasOne("Fylkren.Api.WorkManagement.WorkItem", null).WithMany().HasForeignKey("WorkItemId").OnDelete(DeleteBehavior.Restrict).IsRequired();
-                    b.HasOne("Fylkren.Api.Organization.OrganizationUnit", null).WithMany().HasForeignKey("UnitId").OnDelete(DeleteBehavior.Restrict).IsRequired();
-                    b.HasOne("Fylkren.Api.Identity.Person", null).WithMany().HasForeignKey("AuthorPersonId").OnDelete(DeleteBehavior.Restrict).IsRequired();
-                    b.HasOne("Fylkren.Api.Identity.Person", null).WithMany().HasForeignKey("OwnerPersonId").OnDelete(DeleteBehavior.Restrict);
-                });
-            modelBuilder.Entity("Fylkren.Api.Learning.LearningEntry", b =>
-                {
-                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid").HasColumnName("id");
-                    b.Property<Guid>("SiteId").HasColumnType("uuid").HasColumnName("site_id");
-                    b.Property<Guid>("LessonId").HasColumnType("uuid").HasColumnName("lesson_id");
-                    b.Property<Guid>("AuthorPersonId").HasColumnType("uuid").HasColumnName("author_person_id");
-                    b.Property<string>("AuthorName").IsRequired().HasMaxLength(200).HasColumnType("character varying(200)").HasColumnName("author_name");
-                    b.Property<string>("Kind").IsRequired().HasMaxLength(20).HasColumnType("character varying(20)").HasColumnName("kind");
-                    b.Property<string>("Text").IsRequired().HasMaxLength(4000).HasColumnType("character varying(4000)").HasColumnName("text");
-                    b.Property<string>("Status").HasMaxLength(20).HasColumnType("character varying(20)").HasColumnName("status");
-                    b.Property<string>("Priority").HasMaxLength(20).HasColumnType("character varying(20)").HasColumnName("priority");
-                    b.Property<string>("ActionPlan").HasMaxLength(2000).HasColumnType("character varying(2000)").HasColumnName("action_plan");
-                    b.Property<DateOnly?>("DueOn").HasColumnType("date").HasColumnName("due_on");
-                    b.Property<DateTimeOffset>("CreatedAt").HasColumnType("timestamp with time zone").HasColumnName("created_at");
-                    b.HasKey("Id");
-                    b.HasIndex("LessonId", "CreatedAt", "Id");
-                    b.HasIndex("SiteId");
-                    b.HasIndex("AuthorPersonId");
-                    b.ToTable("learning_entries");
-                    b.HasOne("Fylkren.Api.Organization.Site", null).WithMany().HasForeignKey("SiteId").OnDelete(DeleteBehavior.Restrict).IsRequired();
-                    b.HasOne("Fylkren.Api.Learning.LearningLesson", null).WithMany().HasForeignKey("LessonId").OnDelete(DeleteBehavior.Restrict).IsRequired();
-                    b.HasOne("Fylkren.Api.Identity.Person", null).WithMany().HasForeignKey("AuthorPersonId").OnDelete(DeleteBehavior.Restrict).IsRequired();
-                });
-
 #pragma warning restore 612, 618
         }
     }

@@ -32,6 +32,9 @@ internal static class NotificationModelConfiguration
 
         var outbox = modelBuilder.Entity<NotificationOutboxMessage>();
         outbox.ToTable("notification_outbox");
+        outbox.Property(x => x.DomainEventId).HasColumnName("domain_event_id");
+        outbox.Property(x => x.NotificationKind).HasColumnName("notification_kind").HasMaxLength(50);
+        outbox.HasIndex(x => new { x.DomainEventId, x.RecipientPersonId, x.NotificationKind }).IsUnique().HasFilter("domain_event_id IS NOT NULL");
         outbox.HasKey(x => x.Id);
         outbox.Property(x => x.Id).HasColumnName("id");
         outbox.Property(x => x.AuditEventId).HasColumnName("audit_event_id");

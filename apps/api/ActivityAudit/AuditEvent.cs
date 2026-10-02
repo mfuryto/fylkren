@@ -56,6 +56,9 @@ public sealed class AuditEvent
         };
     }
 
+    public Guid? DomainEventId { get; private set; }
+    public Guid? CorrelationId { get; private set; }
+    public void Correlate(Guid eventId, Guid operationId) { DomainEventId = eventId; CorrelationId = operationId; }
     public Guid Id { get; private set; }
     public Guid? SiteId { get; private set; }
     public Guid? ActorPersonId { get; private set; }
