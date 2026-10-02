@@ -49,6 +49,9 @@ A rendered-registration follow-up found that an older list response could be
 compared with a newly requested task permalink. Registration now activates the ID
 returned by the creation endpoint, ignores superseded list responses and waits for
 the exact current Site/scope/filter/search response before declaring a task missing.
+The queue is presentation data rather than an authorization oracle: if the focused
+task is absent from that exact response, the client now confirms access through the
+direct task-details endpoint before it may show an unavailable-task warning.
 
 The upgrade harness also replays the Site-content preservation migration against
 synthetic pre-translation Sites. It requires complete legacy report/planning/execution

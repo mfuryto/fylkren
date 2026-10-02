@@ -29,7 +29,7 @@ import { useTaskPlanDetails } from "./useTaskPlanDetails";
 import { copyPermalink, navigateToLocation, type AppLocation } from "../navigation/permalinks";
 import { errorMessage } from "../api/errors";
 import type { ListSort } from "../components/ListSortControl";
-import { isResolvedTaskPermalinkQuery } from "./taskPermalink";
+import { isResolvedTaskPermalinkQuery, isUnavailableTaskPermalink } from "./taskPermalink";
 export function TasksPage({ personId, language: displayLanguage, timeZone: displayTimeZone, classificationMarkings, permalink }: { personId?: string; language: string; timeZone: string; classificationMarkings: ClassificationMarking[]; permalink: AppLocation }) {
   function ClassificationControls({ value, onChange }: { value: string; onChange: (value: string) => void }) {
     return <ClassificationControlFields value={value} onChange={onChange} markings={classificationMarkings} />;
@@ -121,7 +121,19 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
     }))
       return;
     const target = items.find(item => item.id === permalink.itemId);
-    if (!target) { setPermalinkError(translateActive("tasksTasksPageTheTaskDoesNotExistOr")); return; }
+    if (!target) {
+      let active = true;
+      setPermalinkError("");
+      void isUnavailableTaskPermalink(
+        items,
+        permalink.itemId,
+        () => getTaskDetails(selectedSiteId, permalink.itemId!),
+      ).then(unavailable => {
+        if (active)
+          setPermalinkError(unavailable ? translateActive("tasksTasksPageTheTaskDoesNotExistOr") : "");
+      });
+      return () => { active = false; };
+    }
     setPermalinkError("");
     let root = target;
     while (root.parentWorkItemId) {
@@ -130,6 +142,7 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
       root = parent;
     }
     setSelectedUnitId(permalink.unitId ?? root.assignedUnitId ?? "");
+    return undefined;
   }, [permalink.itemId, permalink.unitId, permalink.taskFilter, permalink.taskSearch, items, loadedQuery, selectedSiteId, selectedUnitId, filter, appliedSearch]);
 
   async function executeTaskCommand({ path, method, body, fallback, onSuccess, refresh }: {

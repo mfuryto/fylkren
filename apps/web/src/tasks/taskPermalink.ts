@@ -21,3 +21,17 @@ export function isResolvedTaskPermalinkQuery(loaded: LoadedTaskQuery | null, exp
     loaded.filter === expected.filter &&
     loaded.search === expected.search;
 }
+
+export async function isUnavailableTaskPermalink(
+  items: ReadonlyArray<{ id: string }>,
+  itemId: string,
+  confirmAccess: () => Promise<unknown>,
+) {
+  if (items.some(item => item.id === itemId)) return false;
+  try {
+    await confirmAccess();
+    return false;
+  } catch {
+    return true;
+  }
+}

@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { isResolvedTaskPermalinkQuery, type LoadedTaskQuery } from "./taskPermalink";
+import { describe, expect, it, vi } from "vitest";
+import { isResolvedTaskPermalinkQuery, isUnavailableTaskPermalink, type LoadedTaskQuery } from "./taskPermalink";
 
 const loaded: LoadedTaskQuery = {
   siteId: "site-a", unitId: "", filter: "all", search: "", sort: "newest", page: 1, focusItemId: "task-new",
@@ -19,5 +19,23 @@ describe("task permalink query state", () => {
     expect(isResolvedTaskPermalinkQuery(loaded, {
       siteId: "site-a", unitId: "", filter: "all", search: "", itemId: "task-new",
     })).toBe(true);
+  });
+
+  it("does not infer missing access from a queue response alone", async () => {
+    await expect(isUnavailableTaskPermalink([], "task-new", async () => ({ task: { id: "task-new" } })))
+      .resolves.toBe(false);
+  });
+
+  it("reports an unavailable task only after the direct access check fails", async () => {
+    await expect(isUnavailableTaskPermalink([], "task-missing", async () => {
+      throw new Error("Not found");
+    })).resolves.toBe(true);
+  });
+
+  it("does not request confirmation when the task is already in the queue", async () => {
+    const confirmAccess = vi.fn();
+    await expect(isUnavailableTaskPermalink([{ id: "task-new" }], "task-new", confirmAccess))
+      .resolves.toBe(false);
+    expect(confirmAccess).not.toHaveBeenCalled();
   });
 });
