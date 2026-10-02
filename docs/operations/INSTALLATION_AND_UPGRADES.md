@@ -145,6 +145,8 @@ Merge required new variables without replacing existing secrets. Do not interrup
 
 The one-time destructive development baseline transition was completed at 0.55.0. It must never be repeated. Every later schema change is a forward, versioned EF Core migration that preserves installed data; installed migrations are not rewritten or removed.
 
+Final-report templates, workflow templates and planning/execution workflow names and steps become Site-owned data when the Site is created. Upgrade migrations must not translate, reset or replace them. New defaults apply only to newly created Sites unless Site Manager explicitly saves a change. The guarded 0.70 development repair restores only complete legacy default sets affected by the earlier translation migration; any workflow with customized structure or labels and any differently customized report template is excluded.
+
 ## Post-upgrade verification
 
 ```bash

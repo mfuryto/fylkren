@@ -9,8 +9,6 @@ namespace Fylkren.Api.WorkManagement;
 
 public static class TemplateEndpoints
 {
-    private const string DefaultFinalReportTemplate = "# Summary\n\n# Execution\n\n# Conclusion";
-
     public static IEndpointRouteBuilder MapTemplateEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("/api/templates").RequireAuthorization();
@@ -114,7 +112,7 @@ public static class TemplateEndpoints
 
     private static string FinalReportTemplateContent(string? content) =>
         string.IsNullOrWhiteSpace(content)
-            ? DefaultFinalReportTemplate
+            ? DefaultSiteWorkConfiguration.FinalReportTemplate
             : content;
 
     private sealed record Request(string Name, string Content, Guid? OwnerUnitId);

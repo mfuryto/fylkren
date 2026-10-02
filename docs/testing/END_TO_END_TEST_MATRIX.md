@@ -30,6 +30,7 @@ A correct final status does not compensate for a defect during the chain. After 
 - create concurrent roots, sibling delegations, side requests and a deeper delegation; verify unique `TYPE-000001`, `TYPE-000001-1`, `TYPE-000001-2` and `TYPE-000001-1-1` shapes;
 - verify the same reference is searchable and displayed first in Tasks, Planning, Execution and Reports and retained in the final report;
 - verify a federated receiver preserves origin instance and origin reference while allocating its own local reference;
+- verify an upgrade restores only the complete legacy Site defaults affected by the historical translation migration, preserves customized workflow/template content, and creates new Sites with stored English defaults and real line breaks;
 - exercise every visible sort option against the complete result set, including paginated queues, and verify ordered process structures keep their configured semantic order.
 
 ## Standard fixture

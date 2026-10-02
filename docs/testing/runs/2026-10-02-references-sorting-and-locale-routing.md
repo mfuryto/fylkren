@@ -49,3 +49,9 @@ A rendered-registration follow-up found that an older list response could be
 compared with a newly requested task permalink. Registration now activates the ID
 returned by the creation endpoint, ignores superseded list responses and waits for
 the exact current Site/scope/filter/search response before declaring a task missing.
+
+The upgrade harness also replays the Site-content preservation migration against
+synthetic pre-translation Sites. It requires complete legacy report/planning/execution
+defaults to be restored, literal newline escapes to become real line breaks, a partly
+customized workflow and customized report template to remain unchanged, and new
+Sites to own stored English copies of every default.

@@ -218,6 +218,8 @@ Site Manager alone sees and edits:
 
 Workflow/template definitions are administration-only, but active eligible users can use configured content during processing. Site audit excludes Platform Manager actions and other sites.
 
+A new Site receives editable English planning, execution and final-report defaults. These are copied into the Site when it is created; they are not live system translations. Site Manager may translate or otherwise revise them, and application updates preserve the Site's stored versions. Editing a workflow creates a new active version so work already using an earlier version retains its original structure.
+
 ## 13. Platform Manager administration
 
 Platform Manager pages include platform Overview/operations, Sites, global Users/Identity, external identity providers, Email and templates, Classifications, Appearance, machine API clients and platform Audit.

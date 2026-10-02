@@ -43,6 +43,53 @@ try {
   // A disposable, empty database only: bind the public test fixture to a reserved identity.
   run('docker', ['compose', '-p', project, 'exec', '-T', 'postgres', 'psql', '-U', 'fylkren', '-d', 'fylkren',
     '-c', `UPDATE instance_identity SET instance_id = '${fixture.instanceId}' WHERE key = 1`]);
+  // Reapply the Site-content preservation migration to a simulated legacy database.
+  // Complete untouched defaults must be restored; customized Site data must remain byte-for-byte unchanged.
+  const legacySiteId = '10000000-0000-4000-8000-000000000001';
+  const customSiteId = '10000000-0000-4000-8000-000000000002';
+  const legacyPlanningId = '20000000-0000-4000-8000-000000000001';
+  const legacyExecutionId = '20000000-0000-4000-8000-000000000002';
+  const customPlanningId = '20000000-0000-4000-8000-000000000003';
+  run('docker', ['compose', '-p', project, 'stop', 'api']);
+  run('docker', ['compose', '-p', project, 'exec', '-T', 'postgres', 'psql', '-v', 'ON_ERROR_STOP=1', '-U', 'fylkren', '-d', 'fylkren', '-c', `
+    INSERT INTO sites (id, name, normalized_name, is_active, created_at, final_report_template, overview_design, version)
+    VALUES
+      ('${legacySiteId}', 'Legacy defaults', 'LEGACY DEFAULTS', TRUE, '2026-09-01T00:00:00Z', '# Summary\\n\\n# Execution\\n\\n# Conclusion', 'classic', 1),
+      ('${customSiteId}', 'Customized content', 'CUSTOMIZED CONTENT', TRUE, '2026-09-01T00:00:00Z', '# Customer report', 'classic', 1);
+    INSERT INTO workflow_definitions (id, site_id, owner_unit_id, name, kind, is_system, is_active)
+    VALUES
+      ('${legacyPlanningId}', '${legacySiteId}', NULL, 'Standard', 'planning', FALSE, TRUE),
+      ('${legacyExecutionId}', '${legacySiteId}', NULL, 'Standard', 'execution', FALSE, TRUE),
+      ('${customPlanningId}', '${customSiteId}', NULL, 'Standard', 'planning', FALSE, TRUE);
+    INSERT INTO workflow_steps (id, definition_id, template_id, name, sort_order, is_optional, allows_task_allocation, has_timeline)
+    VALUES
+      ('30000000-0000-4000-8000-000000000001', '${legacyPlanningId}', NULL, 'Analysis', 0, FALSE, FALSE, TRUE),
+      ('30000000-0000-4000-8000-000000000002', '${legacyPlanningId}', NULL, 'Task', 1, FALSE, FALSE, FALSE),
+      ('30000000-0000-4000-8000-000000000003', '${legacyPlanningId}', NULL, 'Intent', 2, FALSE, FALSE, FALSE),
+      ('30000000-0000-4000-8000-000000000004', '${legacyPlanningId}', NULL, 'Plan', 3, FALSE, TRUE, FALSE),
+      ('30000000-0000-4000-8000-000000000005', '${legacyExecutionId}', NULL, 'Preparation', 0, FALSE, FALSE, FALSE),
+      ('30000000-0000-4000-8000-000000000006', '${legacyExecutionId}', NULL, 'Execution', 1, FALSE, FALSE, FALSE),
+      ('30000000-0000-4000-8000-000000000007', '${legacyExecutionId}', NULL, 'Closure and follow-up', 2, FALSE, FALSE, FALSE),
+      ('30000000-0000-4000-8000-000000000008', '${customPlanningId}', NULL, 'Analysis', 0, FALSE, FALSE, TRUE),
+      ('30000000-0000-4000-8000-000000000009', '${customPlanningId}', NULL, 'Task', 1, FALSE, FALSE, FALSE),
+      ('30000000-0000-4000-8000-000000000010', '${customPlanningId}', NULL, 'Customer intent', 2, FALSE, FALSE, FALSE),
+      ('30000000-0000-4000-8000-000000000011', '${customPlanningId}', NULL, 'Plan', 3, FALSE, TRUE, FALSE);
+    DELETE FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261002133000_PreserveSiteOwnedWorkContent';
+  `]);
+  run('docker', ['compose', '-p', project, 'up', '-d', '--wait', 'api']);
+  run('docker', ['compose', '-p', project, 'exec', '-T', 'postgres', 'psql', '-v', 'ON_ERROR_STOP=1', '-U', 'fylkren', '-d', 'fylkren', '-c', `
+    DO \$\$
+    DECLARE legacy_report text := convert_from(decode('IyBTYW1tZW5kcmFnCgojIEdqZW5ub21mw7hyaW5nCgojIEtvbmtsdXNqb24=', 'base64'), 'UTF8');
+    BEGIN
+      IF (SELECT final_report_template FROM sites WHERE id = '${legacySiteId}') <> legacy_report THEN RAISE EXCEPTION 'Legacy report default was not restored'; END IF;
+      IF (SELECT final_report_template FROM sites WHERE id = '${customSiteId}') <> '# Customer report' THEN RAISE EXCEPTION 'Customized report template was changed'; END IF;
+      IF (SELECT name FROM workflow_steps WHERE definition_id = '${legacyPlanningId}' AND sort_order = 0) <> convert_from(decode('QW5hbHlzZQ==', 'base64'), 'UTF8') THEN RAISE EXCEPTION 'Legacy planning defaults were not restored'; END IF;
+      IF (SELECT name FROM workflow_steps WHERE definition_id = '${legacyExecutionId}' AND sort_order = 2) <> convert_from(decode('QXZzbHV0bmluZyBvZyBldHRlcmFyYmVpZA==', 'base64'), 'UTF8') THEN RAISE EXCEPTION 'Legacy execution defaults were not restored'; END IF;
+      IF (SELECT name FROM workflow_steps WHERE definition_id = '${customPlanningId}' AND sort_order = 0) <> 'Analysis' THEN RAISE EXCEPTION 'Customized planning workflow was changed'; END IF;
+    END \$\$;
+    DELETE FROM workflow_definitions WHERE site_id IN ('${legacySiteId}', '${customSiteId}');
+    DELETE FROM sites WHERE id IN ('${legacySiteId}', '${customSiteId}');
+  `]);
   run('docker', ['compose', '-p', project, 'exec', '-T', 'api', 'sh', '-c', 'test ! -e /var/run/docker.sock']);
   run('./deploy/compose/backup.sh', [backupRoot]);
   if (existsSync(oldestBackup)) throw new Error('Oldest completed backup was not pruned');

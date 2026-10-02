@@ -276,6 +276,18 @@ async function makeUser(label, userSiteId = siteId) {
 const siteManager = await makeUser('manager');
 const assignedManager = await platform.post(`/api/sites/${siteId}/site-managers`, { personId: siteManager.personId });
 assert.equal(assignedManager.status, 201, JSON.stringify(assignedManager.body));
+const defaultReportTemplate = await siteManager.account.request(`/api/templates/sites/${siteId}/final-report`);
+assert.equal(defaultReportTemplate.status, 200, JSON.stringify(defaultReportTemplate.body));
+assert.equal(defaultReportTemplate.body.content, '# Summary\n\n# Execution\n\n# Conclusion',
+  'A new Site must own a correctly formatted copy of the English report default');
+assert.equal(defaultReportTemplate.body.content.includes('\\n'), false,
+  'The final-report template contains literal newline escape sequences');
+const defaultWorkflows = await siteManager.account.request(`/api/workflows/sites/${siteId}`);
+assert.equal(defaultWorkflows.status, 200, JSON.stringify(defaultWorkflows.body));
+assert.deepEqual(defaultWorkflows.body.find(value => value.kind === 'planning')?.steps.map(value => value.name),
+  ['Analysis', 'Task', 'Intent', 'Plan']);
+assert.deepEqual(defaultWorkflows.body.find(value => value.kind === 'execution')?.steps.map(value => value.name),
+  ['Preparation', 'Execution', 'Closure and follow-up']);
 
 const leadership = await siteManager.account.post(`/api/sites/${siteId}/organization-units`, {
   name: 'Leadership', parentId: null, isTemporary: false, worksAtParentLevel: false, isSiteLeadership: true,
