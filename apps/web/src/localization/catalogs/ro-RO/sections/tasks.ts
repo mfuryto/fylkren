@@ -1,6 +1,15 @@
 import type { MessageKey } from "../../en-US";
 
 export const tasksRoRO = {
+  taskCommentAdded: "Comentariu adăugat",
+  taskCommentsTitle: "Comentarii",
+  taskCommentsIntro: "Împărtășește informații despre sarcină, chiar dacă nu ești responsabil de ea.",
+  taskCommentText: "Comentariul tău",
+  taskCommentPost: "Adaugă un comentariu",
+  taskCommentsEmpty: "Nu există încă niciun comentariu.",
+  taskCommentsLoadFailed: "Comentariile nu au putut fi încărcate.",
+  taskCommentSaveFailed: "Comentariul nu a putut fi adăugat.",
+
   tasksExecutionHistoryExternalFollowUp: "Urmărire externă:",
   tasksExecutionHistoryLoadingExecution: "Se încarcă execuția...",
   tasksExecutionHistoryNoDocumentation: "Fără documentaţie.",

@@ -1,6 +1,15 @@
 import type { MessageKey } from "../../en-US";
 
 export const tasksFrFR = {
+  taskCommentAdded: "Commentaire ajouté",
+  taskCommentsTitle: "Commentaires",
+  taskCommentsIntro: "Partagez vos connaissances sur la tâche, même si vous n’en êtes pas responsable.",
+  taskCommentText: "Votre commentaire",
+  taskCommentPost: "Ajouter un commentaire",
+  taskCommentsEmpty: "Aucun commentaire pour le moment.",
+  taskCommentsLoadFailed: "Impossible de charger les commentaires.",
+  taskCommentSaveFailed: "Impossible d’ajouter le commentaire.",
+
   tasksExecutionHistoryExternalFollowUp: "Suivi externe:",
   tasksExecutionHistoryLoadingExecution: "Chargement de l'exécution...",
   tasksExecutionHistoryNoDocumentation: "Pas de documentation.",

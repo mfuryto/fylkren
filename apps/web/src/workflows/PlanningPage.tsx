@@ -204,7 +204,7 @@ export function PlanningPage({
         sort={sort}
         onSortChange={value => { setSort(value); setQueuePage(1); }}
       />
-      <PlanningQueueList
+      <PlanningQueueList siteId={siteId}
         runs={runs}
         totalItems={totalRuns}
         page={queuePage}

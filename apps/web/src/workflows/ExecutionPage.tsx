@@ -158,7 +158,7 @@ export function ExecutionPage({ session, language, classificationMarkings, perma
         {sites.map(site => <option key={site.siteId} value={site.siteId}>{site.name}</option>)}
       </select>
     </div>}<ListSortControl id="execution-sort" value={sort} onChange={value => { setSort(value); setQueuePage(1); }}/></section>
-    <ExecutionQueueList
+    <ExecutionQueueList siteId={siteId}
       items={items}
       totalItems={totalItems}
       page={queuePage}

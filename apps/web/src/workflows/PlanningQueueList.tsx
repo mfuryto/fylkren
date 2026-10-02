@@ -1,3 +1,4 @@
+import { TaskCommentsButton } from "../tasks/TaskCommentsButton";
 import { translateActive } from "../localization";
 import type { ReactNode } from "react";
 import { PaginationNav } from "../components/PaginationNav";
@@ -7,6 +8,7 @@ import { PlanningTaskPreview } from "./PlanningTaskPreview";
 import { WorkReference } from "../components/WorkReference";
 
 type PlanningQueueListProps = {
+  siteId: string;
   runs: PlanningRun[];
   totalItems: number;
   page: number;
@@ -36,6 +38,7 @@ function planningStatus(run: PlanningRun) {
 }
 
 export function PlanningQueueList({
+  siteId,
   runs,
   totalItems,
   page,
@@ -83,9 +86,9 @@ export function PlanningQueueList({
           <button className="secondary-button" type="button" onClick={() => onReassign(run)}>{translateActive("workflowsPlanningDialogsReassignPlanning")}</button>
         </div>}
         {run.canManage && childUnits.length > 0 && <button className="secondary-button" type="button" onClick={() => onAllocateDownward(run, childUnits)}>{translateActive("workflowsPlanningQueueListClosePlanningAndRouteOnward")}</button>}
-        <button className="link-button" type="button" onClick={() => onTogglePreview(run.id)}>
+        <div className="task-detail-links"><button className="link-button" type="button" onClick={() => onTogglePreview(run.id)}>
           {previewRunId === run.id ? translateActive("workflowsPlanningQueueListHideTask") : translateActive("workflowsPlanningQueueListShowTask")}
-        </button>
+        </button><TaskCommentsButton siteId={siteId} itemId={run.item.id} title={run.item.title} timeZone={timeZone} /></div>
         {run.ancestors.length > 0 && <div className="task-detail-links" aria-label={translateActive("parentPlansLabel")}>
           {run.ancestors.map(ancestor => <button className="link-button" type="button" key={ancestor.id} onClick={() => onShowAncestor(ancestor.id)}>
             {ancestor.distance === 1 ? `Show the plan from the level above · ${ancestor.title}` : `Show the plan ${ancestor.distance} levels above · ${ancestor.title}`}

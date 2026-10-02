@@ -1,6 +1,15 @@
 import type { MessageKey } from "../../en-US";
 
 export const tasksPlPL = {
+  taskCommentAdded: "Dodano komentarz",
+  taskCommentsTitle: "Komentarze",
+  taskCommentsIntro: "Podziel się wiedzą o zadaniu, nawet jeśli nie jesteś za nie odpowiedzialny.",
+  taskCommentText: "Twój komentarz",
+  taskCommentPost: "Dodaj komentarz",
+  taskCommentsEmpty: "Nie ma jeszcze komentarzy.",
+  taskCommentsLoadFailed: "Nie udało się wczytać komentarzy.",
+  taskCommentSaveFailed: "Nie udało się dodać komentarza.",
+
   tasksExecutionHistoryExternalFollowUp: "Zewnętrzne monitorowanie:",
   tasksExecutionHistoryLoadingExecution: "Wczytywanie egzekucji...",
   tasksExecutionHistoryNoDocumentation: "Brak dokumentacji.",

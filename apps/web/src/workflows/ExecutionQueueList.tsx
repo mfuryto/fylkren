@@ -1,3 +1,4 @@
+import { TaskCommentsButton } from "../tasks/TaskCommentsButton";
 import { translateActive } from "../localization";
 import type { ReactNode } from "react";
 import { PaginationNav } from "../components/PaginationNav";
@@ -8,6 +9,7 @@ import { executionStatus } from "./executionQueue";
 import { WorkReference } from "../components/WorkReference";
 
 type ExecutionQueueListProps = {
+  siteId: string;
   items: ExecutionItem[];
   totalItems: number;
   page: number;
@@ -30,6 +32,7 @@ type ExecutionQueueListProps = {
 };
 
 export function ExecutionQueueList({
+  siteId,
   items,
   totalItems,
   page,
@@ -65,7 +68,7 @@ export function ExecutionQueueList({
           <div className="task-title-cell"><h2><button className="task-heading-toggle" type="button" title={item.title} aria-expanded={open} aria-label={`${open ? translateActive("workflowsExecutionQueueListCloseExecution") : translateActive("workflowsExecutionQueueListOpenExecution")}: ${item.title}`} onClick={() => onToggle(item.id)}><i aria-hidden="true">{open ? "▾" : "▸"}</i><span>{item.title}</span></button></h2><span className="muted">{item.assignedUnitName ?? translateActive("topLevel")}</span></div>
           <div className="task-header-actions"><span className="task-status execution">{executionStatus(item)}</span>{open && <button className="task-icon-action permalink-action" type="button" title={translateActive("workflowsExecutionQueueListCopyLinkToExecution")} aria-label={translateActive("workflowsExecutionQueueListCopyLinkToExecution")} onClick={() => onCopyLink(item.id)}><i aria-hidden="true">🔗</i></button>}</div>
         </div>
-        <button className="link-button" type="button" onClick={() => onToggleDetails(item.id)}>{expanded ? translateActive("workflowsExecutionQueueListHideTask") : translateActive("workflowsExecutionQueueListReadTask")}</button>
+        <div className="task-detail-links"><button className="link-button" type="button" onClick={() => onToggleDetails(item.id)}>{expanded ? translateActive("workflowsExecutionQueueListHideTask") : translateActive("workflowsExecutionQueueListReadTask")}</button><TaskCommentsButton siteId={siteId} itemId={item.id} title={item.title} /></div>
         {expanded && <div className="planning-preview">
           {item.originReference && <p className="muted"><strong>{translateActive("originReferenceLabel")}:</strong> {item.originReference}</p>}
           {item.requestBasisSnapshot && <details className="returned-report treatment-history-section"><summary><span>{translateActive("tasksTaskCardPresentationTaskBasisFromSender")}</span><small>{translateActive("tasksTaskCardPresentationShowFrozenDescriptionAndApprovedPlan")}</small></summary><div className="returned-report-content"><RichTextContent value={item.requestBasisSnapshot}/></div></details>}

@@ -14,6 +14,7 @@ public static class WorkItemEndpoints
         WorkItemStatusEndpoints.Map(group);
         WorkItemCompletionEndpoints.Map(group);
         WorkItemDependencyEndpoints.Map(group);
+        WorkItemCommentEndpoints.Map(group);
         return endpoints;
     }
 }

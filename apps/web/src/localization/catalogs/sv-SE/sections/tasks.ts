@@ -1,6 +1,15 @@
 import type { MessageKey } from "../../en-US";
 
 export const tasksSvSE = {
+  taskCommentAdded: "Kommentar tillagd",
+  taskCommentsTitle: "Kommentarer",
+  taskCommentsIntro: "Dela kunskap om uppgiften, även om du inte ansvarar för den.",
+  taskCommentText: "Din kommentar",
+  taskCommentPost: "Lägg till kommentar",
+  taskCommentsEmpty: "Inga kommentarer ännu.",
+  taskCommentsLoadFailed: "Kommentarerna kunde inte läsas in.",
+  taskCommentSaveFailed: "Kommentaren kunde inte läggas till.",
+
   tasksExecutionHistoryExternalFollowUp: "Extern uppföljning:",
   tasksExecutionHistoryLoadingExecution: "Lastning av avrättning...",
   tasksExecutionHistoryNoDocumentation: "Ingen dokumentation.",

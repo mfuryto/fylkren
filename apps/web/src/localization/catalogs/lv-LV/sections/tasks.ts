@@ -1,6 +1,15 @@
 import type { MessageKey } from "../../en-US";
 
 export const tasksLvLV = {
+  taskCommentAdded: "Komentārs pievienots",
+  taskCommentsTitle: "Komentāri",
+  taskCommentsIntro: "Dalieties ar zināšanām par uzdevumu, pat ja neesat par to atbildīgs.",
+  taskCommentText: "Jūsu komentārs",
+  taskCommentPost: "Pievienot komentāru",
+  taskCommentsEmpty: "Vēl nav komentāru.",
+  taskCommentsLoadFailed: "Komentārus neizdevās ielādēt.",
+  taskCommentSaveFailed: "Komentāru neizdevās pievienot.",
+
   tasksExecutionHistoryExternalFollowUp: "Ārēja pārraudzība",
   tasksExecutionHistoryLoadingExecution: "Ielādē izpildi...",
   tasksExecutionHistoryNoDocumentation: "Dokumentācija nav nepieciešama.",

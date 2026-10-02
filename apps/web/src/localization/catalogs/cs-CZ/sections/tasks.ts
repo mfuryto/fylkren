@@ -1,6 +1,15 @@
 import type { MessageKey } from "../../en-US";
 
 export const tasksCsCZ = {
+  taskCommentAdded: "Komentář přidán",
+  taskCommentsTitle: "Komentáře",
+  taskCommentsIntro: "Sdílejte znalosti o úkolu, i když za něj neodpovídáte.",
+  taskCommentText: "Váš komentář",
+  taskCommentPost: "Přidat komentář",
+  taskCommentsEmpty: "Zatím žádné komentáře.",
+  taskCommentsLoadFailed: "Komentáře se nepodařilo načíst.",
+  taskCommentSaveFailed: "Komentář se nepodařilo přidat.",
+
   tasksExecutionHistoryExternalFollowUp: "Vnější sledování:",
   tasksExecutionHistoryLoadingExecution: "Nahrávám popravu...",
   tasksExecutionHistoryNoDocumentation: "Žádná dokumentace.",

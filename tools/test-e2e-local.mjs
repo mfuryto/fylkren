@@ -1,3 +1,4 @@
+import { testTaskComments } from './e2e/task-comments.mjs';
 import assert from 'node:assert/strict';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -254,14 +255,14 @@ async function authenticationPost(account, path, body) {
   return result;
 }
 
-async function makeUser(label, userSiteId = siteId) {
+async function makeUser(label, userSiteId = siteId, organizationUnitId = null) {
   const username = `${label}-${suffix}`;
   const password = `V8!${randomBytes(22).toString('base64url')}#x`;
   const created = await platform.post(`/api/sites/${userSiteId}/access/local-users`, {
     displayName: `Synthetic ${label}`,
     email: `${username}@example.invalid`,
     username,
-    organizationUnitId: null,
+    organizationUnitId,
   });
   assert.equal(created.status, 201, `${label} create: ${JSON.stringify(created.body)}`);
   const account = client();
@@ -856,6 +857,13 @@ const decisionsRisksVersions = await testDecisionsRisksVersions({
   sectionTaskId: sectionTask.id, approvedReportTaskId: transitionChains.approvedReportTaskId, suffix,
 });
 
+const commentReader = await makeUser('comment-reader', siteId, leadership.body.id);
+const taskComments = await testTaskComments({
+  leader: leader.account, reader: commentReader.account, sibling: sectionTwoLeader,
+  unrelated: newParentLeader, platform, siteId, otherSiteId: newParentId,
+  taskId: task.body.id, readerPersonId: commentReader.personId, base,
+});
+
 const webhooks = await testWebhookFailureIsolation({
   platform, leader: leader.account, unrelated: newParentLeader,
   siteId, otherSiteId: newParentId, taskId: task.body.id, suffix,
@@ -871,7 +879,7 @@ const federation = await testFederationCandidates({
   platform, siteManager: siteManager.account, rootSiteId: siteId, childSiteId,
 });
 const identitySessionLifecycle = await testIdentitySessionLifecycle({
-  base, platform, siteManager: siteManager.account, siteId, makeUser, client,
+  base, platform, siteManager: siteManager.account, siteId, makeUser, client, authenticationPost,
 });
 
 const removedLicense = await platform.request('/api/platform/license', { method: 'DELETE' });
@@ -899,4 +907,4 @@ assert.equal(taskAfterRemoval.status, 200, 'Customer-owned work must remain read
 await new Promise((resolve) => setTimeout(resolve, 61_000));
 const authenticationBoundary = await testAuthenticationBoundary({ base });
 
-console.log(JSON.stringify({ editionsAndTransitions: 'passed', bootstrap: 'passed', ...authSessionSecurity, ...identitySessionLifecycle, ...authenticationBoundary, roleSetup: 'passed', lookupSorting: 'passed', operationalIsolation: 'passed', localPlanningExecutionReport: 'passed', threeLevelDistribution: 'passed', parentChildReporting: 'passed', crossSiteIsolation: 'passed', reportArchives: 'passed', activeSiteMoveRouting: 'passed', detachedSiteRouting: 'passed', placementValidation: 'passed', senderSnapshots: 'passed', threeSiteReporting: 'passed', recursiveSiteWorkload: 'passed', crossSiteRequestResponse: 'passed', crossSiteRequestCancellation: 'passed', combinedBranches: 'passed', transitionChains: 'passed', ...authorizationBoundaries, administrationReportApis: 'passed', dependencies: 'passed', decisionsRisksVersions: 'passed', webhookFailureIsolation: 'passed', portability: 'passed', federationCandidates: 'passed', [process.env.FYLKREN_E2E_SMTP_HOST ? 'requestNotificationsDelivered' : 'requestNotificationsQueued']: 'passed', siteId, childSiteId, grandchildSiteId, newParentId, answeredRequestId: requests.answeredTrackingId, directMixedTaskId: combinedBranches.directSourceId, plannedMixedTaskId: combinedBranches.plannedSourceId, ...transitionChains, ...administrationReportApis, ...dependencies, ...decisionsRisksVersions, ...webhooks, ...portability, taskId: task.body.id, hierarchyTaskId: mainTask.body.id, parentTaskId: parentTask.body.id }));
+console.log(JSON.stringify({ editionsAndTransitions: 'passed', bootstrap: 'passed', ...authSessionSecurity, ...identitySessionLifecycle, ...authenticationBoundary, roleSetup: 'passed', lookupSorting: 'passed', operationalIsolation: 'passed', localPlanningExecutionReport: 'passed', threeLevelDistribution: 'passed', parentChildReporting: 'passed', crossSiteIsolation: 'passed', reportArchives: 'passed', activeSiteMoveRouting: 'passed', detachedSiteRouting: 'passed', placementValidation: 'passed', senderSnapshots: 'passed', threeSiteReporting: 'passed', recursiveSiteWorkload: 'passed', crossSiteRequestResponse: 'passed', crossSiteRequestCancellation: 'passed', combinedBranches: 'passed', transitionChains: 'passed', ...authorizationBoundaries, administrationReportApis: 'passed', dependencies: 'passed', taskComments: 'passed', taskCommentsResult: taskComments, decisionsRisksVersions: 'passed', webhookFailureIsolation: 'passed', portability: 'passed', federationCandidates: 'passed', [process.env.FYLKREN_E2E_SMTP_HOST ? 'requestNotificationsDelivered' : 'requestNotificationsQueued']: 'passed', siteId, childSiteId, grandchildSiteId, newParentId, answeredRequestId: requests.answeredTrackingId, directMixedTaskId: combinedBranches.directSourceId, plannedMixedTaskId: combinedBranches.plannedSourceId, ...transitionChains, ...administrationReportApis, ...dependencies, ...decisionsRisksVersions, ...webhooks, ...portability, taskId: task.body.id, hierarchyTaskId: mainTask.body.id, parentTaskId: parentTask.body.id }));

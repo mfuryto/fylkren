@@ -1,6 +1,15 @@
 import type { MessageKey } from "../../en-US";
 
 export const tasksUkUA = {
+  taskCommentAdded: "Коментар додано",
+  taskCommentsTitle: "Коментарі",
+  taskCommentsIntro: "Поділіться знаннями про завдання, навіть якщо ви не відповідаєте за нього.",
+  taskCommentText: "Ваш коментар",
+  taskCommentPost: "Додати коментар",
+  taskCommentsEmpty: "Коментарів ще немає.",
+  taskCommentsLoadFailed: "Не вдалося завантажити коментарі.",
+  taskCommentSaveFailed: "Не вдалося додати коментар.",
+
   tasksExecutionHistoryExternalFollowUp: "Зовнішній контроль:",
   tasksExecutionHistoryLoadingExecution: "Виконання завантаження...",
   tasksExecutionHistoryNoDocumentation: "Немає документації.",

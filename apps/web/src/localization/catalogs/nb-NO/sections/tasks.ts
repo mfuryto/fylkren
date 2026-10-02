@@ -1,4 +1,13 @@
 export const tasksNbNO = {
+  taskCommentAdded: "Kommentar lagt til",
+  taskCommentsTitle: "Kommentarer",
+  taskCommentsIntro: "Del nyttig kunnskap om oppgaven, selv om du ikke er ansvarlig for den.",
+  taskCommentText: "Din kommentar",
+  taskCommentPost: "Legg til kommentar",
+  taskCommentsEmpty: "Ingen kommentarer ennå.",
+  taskCommentsLoadFailed: "Kommentarene kunne ikke lastes.",
+  taskCommentSaveFailed: "Kommentaren kunne ikke legges til.",
+
   tasksExecutionHistoryExternalFollowUp: "Ekstern oppfølging:",
   tasksExecutionHistoryLoadingExecution: "Laster utførelsen …",
   tasksExecutionHistoryNoDocumentation: "Ingen dokumentasjon.",

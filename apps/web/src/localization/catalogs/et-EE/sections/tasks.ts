@@ -1,6 +1,15 @@
 import type { MessageKey } from "../../en-US";
 
 export const tasksEtEE = {
+  taskCommentAdded: "Kommentaar lisatud",
+  taskCommentsTitle: "Kommentaarid",
+  taskCommentsIntro: "Jaga teadmisi ülesande kohta ka siis, kui sa ei vastuta selle eest.",
+  taskCommentText: "Sinu kommentaar",
+  taskCommentPost: "Lisa kommentaar",
+  taskCommentsEmpty: "Kommentaare veel pole.",
+  taskCommentsLoadFailed: "Kommentaare ei saanud laadida.",
+  taskCommentSaveFailed: "Kommentaari ei saanud lisada.",
+
   tasksExecutionHistoryExternalFollowUp: "Välised järelmeetmed:",
   tasksExecutionHistoryLoadingExecution: "Täitmise laadimine...",
   tasksExecutionHistoryNoDocumentation: "Dokumente pole.",

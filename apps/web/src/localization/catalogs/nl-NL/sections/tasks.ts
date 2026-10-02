@@ -1,6 +1,15 @@
 import type { MessageKey } from "../../en-US";
 
 export const tasksNlNL = {
+  taskCommentAdded: "Reactie toegevoegd",
+  taskCommentsTitle: "Reacties",
+  taskCommentsIntro: "Deel kennis over de taak, ook als je er niet verantwoordelijk voor bent.",
+  taskCommentText: "Je reactie",
+  taskCommentPost: "Reactie toevoegen",
+  taskCommentsEmpty: "Nog geen reacties.",
+  taskCommentsLoadFailed: "Reacties konden niet worden geladen.",
+  taskCommentSaveFailed: "De reactie kon niet worden toegevoegd.",
+
   tasksExecutionHistoryExternalFollowUp: "Externe follow-up:",
   tasksExecutionHistoryLoadingExecution: "Uitvoer wordt geladen...",
   tasksExecutionHistoryNoDocumentation: "Geen documentatie.",

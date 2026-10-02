@@ -40,3 +40,5 @@ For each run, record:
 The test output and source assertions are evidence references, but neither replaces the observed-results table. Keep secrets, passwords, tokens, personal data and operational content out of records. Use synthetic identifiers where they materially help trace a chain. If raw logs were not retained, say so; do not imply they exist.
 
 The [localization context follow-up](2026-10-02-localization-context-follow-up.md) corrects operational meanings that structural catalog checks did not catch and records the Norwegian workflow context as a translation input.
+
+The [task-comments run](2026-10-02-task-comments.md) records unassigned-reader contributions, task access boundaries, antiforgery, persistence, pagination, export and safe text rendering.

@@ -1,6 +1,15 @@
 import type { MessageKey } from "../../en-US";
 
 export const tasksLtLT = {
+  taskCommentAdded: "Komentaras pridėtas",
+  taskCommentsTitle: "Komentarai",
+  taskCommentsIntro: "Pasidalykite žiniomis apie užduotį, net jei nesate už ją atsakingi.",
+  taskCommentText: "Jūsų komentaras",
+  taskCommentPost: "Pridėti komentarą",
+  taskCommentsEmpty: "Komentarų dar nėra.",
+  taskCommentsLoadFailed: "Nepavyko įkelti komentarų.",
+  taskCommentSaveFailed: "Nepavyko pridėti komentaro.",
+
   tasksExecutionHistoryExternalFollowUp: "Išor• tolesni veiksmai:",
   tasksExecutionHistoryLoadingExecution: "Įkeliama...",
   tasksExecutionHistoryNoDocumentation: "Nr dokumentų.",

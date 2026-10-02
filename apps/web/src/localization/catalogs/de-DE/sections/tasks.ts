@@ -1,6 +1,15 @@
 import type { MessageKey } from "../../en-US";
 
 export const tasksDeDE = {
+  taskCommentAdded: "Kommentar hinzugefügt",
+  taskCommentsTitle: "Kommentare",
+  taskCommentsIntro: "Teilen Sie Wissen zur Aufgabe, auch wenn Sie nicht dafür verantwortlich sind.",
+  taskCommentText: "Ihr Kommentar",
+  taskCommentPost: "Kommentar hinzufügen",
+  taskCommentsEmpty: "Noch keine Kommentare.",
+  taskCommentsLoadFailed: "Kommentare konnten nicht geladen werden.",
+  taskCommentSaveFailed: "Der Kommentar konnte nicht hinzugefügt werden.",
+
   tasksExecutionHistoryExternalFollowUp: "Externe Nachverfolgung:",
   tasksExecutionHistoryLoadingExecution: "Ausführung des Ladens...",
   tasksExecutionHistoryNoDocumentation: "Keine Dokumentation.",

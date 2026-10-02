@@ -280,3 +280,11 @@ Contextual Help buttons on operational and administration pages explain the loca
 For an unavailable service, Platform Manager checks Operations and technical logs; operators then use [Host status integration](../operations/HOST_STATUS.md), [Installation and upgrades](../operations/INSTALLATION_AND_UPGRADES.md) and [Server setup](../operations/SERVER_SETUP.md). Never delete volumes or edit database migration history as general troubleshooting.
 
 Identity/provider details are in [Access and identity](ACCESS_AND_IDENTITY.md). Machine integrations are documented under [API conventions](../api/API.md).
+
+## Task comments
+
+Open **Comments** beside Dependencies, Decisions, Risk and Versions and approvals on an expanded task card. The same discussion is available from the task links in Planning and Execution. Comments belong to the task rather than an individual workflow run.
+
+Anyone with operational read access to the task can contribute without being assigned to it. Use comments to share existing solutions, relevant experience or information that prevents duplicate work. Comments retain the contributor's name and timestamp and show the newest entries first, with pagination for longer discussions. They can also be added after task completion. Posting a comment does not change responsibility, status, decisions or approval results.
+
+Comments are stored as plain text, recorded in the Site audit and included in Site portability exports and database backups. Posted comments are retained; this initial implementation does not offer editing or deletion. Users without access to the task cannot read or post comments, including Platform Managers without operational access.

@@ -90,3 +90,11 @@
   .process-queue .process-card.minimized .process-card-toggle,
   .process-card .task-icon-action:not(.permalink-action) { min-height: 40px; }
 }
+
+@media screen {
+  .task-comment-list { display: grid; gap: 8px; margin-block: 10px; }
+  .task-comment { padding-block: 6px; border-bottom: 1px solid var(--border); }
+  .task-comment header { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+  .task-comment time { font-size: .8rem; color: var(--muted); }
+  .task-comment p { margin-block: 4px; }
+}

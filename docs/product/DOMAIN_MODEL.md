@@ -82,3 +82,7 @@ Platform
 Platform and site administration ── Audit event
 Domain notification event ── Delivery queue ── Delivery attempt
 ```
+
+### Work-item comments
+
+A comment belongs to one Site and work item and stores immutable plain text (1–10,000 trimmed characters), the author's person ID, an author-name snapshot and a UTC creation timestamp. Operational readers may contribute without claiming or managing the task. The existing task read boundary applies to both listing and posting. Comments remain available across workflow runs and after task closure; they do not alter formal task state or approved content. Lists return 20 entries per page, newest first, with an ID tie-breaker. Posting requires an authenticated session and antiforgery token and records `work-item.comment-added` in the Site audit. Site portability includes comments and their authors.

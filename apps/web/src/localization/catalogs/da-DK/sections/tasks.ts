@@ -1,6 +1,15 @@
 import type { MessageKey } from "../../en-US";
 
 export const tasksDaDK = {
+  taskCommentAdded: "Kommentar tilføjet",
+  taskCommentsTitle: "Kommentarer",
+  taskCommentsIntro: "Del viden om opgaven, selv om du ikke er ansvarlig for den.",
+  taskCommentText: "Din kommentar",
+  taskCommentPost: "Tilføj kommentar",
+  taskCommentsEmpty: "Ingen kommentarer endnu.",
+  taskCommentsLoadFailed: "Kommentarerne kunne ikke indlæses.",
+  taskCommentSaveFailed: "Kommentaren kunne ikke tilføjes.",
+
   tasksExecutionHistoryExternalFollowUp: "Opfølgning udadtil:",
   tasksExecutionHistoryLoadingExecution: "Indlæser udførelse...",
   tasksExecutionHistoryNoDocumentation: "Ingen dokumentation.",

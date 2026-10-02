@@ -1,4 +1,13 @@
 export const tasksEn = {
+  taskCommentAdded: "Comment added",
+  taskCommentsTitle: "Comments",
+  taskCommentsIntro: "Share useful knowledge about the task, even if you are not responsible for it.",
+  taskCommentText: "Your comment",
+  taskCommentPost: "Post comment",
+  taskCommentsEmpty: "No comments yet.",
+  taskCommentsLoadFailed: "Comments could not be loaded.",
+  taskCommentSaveFailed: "The comment could not be posted.",
+
   tasksExecutionHistoryExternalFollowUp: "External follow-up:",
   tasksExecutionHistoryLoadingExecution: "Loading execution…",
   tasksExecutionHistoryNoDocumentation: "No documentation.",

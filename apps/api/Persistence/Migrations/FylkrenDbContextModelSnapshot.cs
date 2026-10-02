@@ -4947,6 +4947,25 @@ namespace Fylkren.Api.Persistence.Migrations
                 {
                     b.Navigation("Allocations");
                 });
+            modelBuilder.Entity("Fylkren.Api.WorkManagement.WorkItemComment", b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid").HasColumnName("id");
+                    b.Property<Guid>("SiteId").HasColumnType("uuid").HasColumnName("site_id");
+                    b.Property<Guid>("WorkItemId").HasColumnType("uuid").HasColumnName("work_item_id");
+                    b.Property<Guid>("AuthorPersonId").HasColumnType("uuid").HasColumnName("author_person_id");
+                    b.Property<string>("AuthorName").IsRequired().HasMaxLength(200).HasColumnType("character varying(200)").HasColumnName("author_name");
+                    b.Property<string>("Text").IsRequired().HasMaxLength(10000).HasColumnType("character varying(10000)").HasColumnName("text");
+                    b.Property<DateTimeOffset>("CreatedAt").HasColumnType("timestamp with time zone").HasColumnName("created_at");
+                    b.HasKey("Id");
+                    b.HasIndex("SiteId");
+                    b.HasIndex("AuthorPersonId");
+                    b.HasIndex("WorkItemId", "CreatedAt", "Id");
+                    b.ToTable("work_item_comments");
+                    b.HasOne("Fylkren.Api.Organization.Site", null).WithMany().HasForeignKey("SiteId").OnDelete(DeleteBehavior.Restrict).IsRequired();
+                    b.HasOne("Fylkren.Api.Identity.Person", null).WithMany().HasForeignKey("AuthorPersonId").OnDelete(DeleteBehavior.Restrict).IsRequired();
+                    b.HasOne("Fylkren.Api.WorkManagement.WorkItem", null).WithMany().HasForeignKey("WorkItemId").OnDelete(DeleteBehavior.Restrict).IsRequired();
+                });
+
 #pragma warning restore 612, 618
         }
     }

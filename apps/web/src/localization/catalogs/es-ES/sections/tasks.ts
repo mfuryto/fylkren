@@ -1,6 +1,15 @@
 import type { MessageKey } from "../../en-US";
 
 export const tasksEsES = {
+  taskCommentAdded: "Comentario añadido",
+  taskCommentsTitle: "Comentarios",
+  taskCommentsIntro: "Comparte información sobre la tarea, aunque no seas responsable de ella.",
+  taskCommentText: "Tu comentario",
+  taskCommentPost: "Añadir comentario",
+  taskCommentsEmpty: "Todavía no hay comentarios.",
+  taskCommentsLoadFailed: "No se pudieron cargar los comentarios.",
+  taskCommentSaveFailed: "No se pudo añadir el comentario.",
+
   tasksExecutionHistoryExternalFollowUp: "Seguimiento externo:",
   tasksExecutionHistoryLoadingExecution: "Cargando ejecución...",
   tasksExecutionHistoryNoDocumentation: "No hay documentación.",

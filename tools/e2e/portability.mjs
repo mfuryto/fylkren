@@ -29,6 +29,10 @@ export async function testPortability({ platform, siteManager, leader, siteId, o
     const lines = entries.get(`data/${name}.jsonl`).toString('utf8').split('\n').filter(Boolean).map(JSON.parse);
     assert.ok(lines.some(value => value.id === id), `Export lacks ${name} ID ${id}`);
   }
+  const comments = entries.get('data/work-item-comments.jsonl').toString('utf8').split('\n').filter(Boolean).map(JSON.parse);
+  assert.ok(comments.some(value => value.work_item_id === taskId), 'Export lacks task comments');
+  const people = new Set(entries.get('data/people.jsonl').toString('utf8').split('\n').filter(Boolean).map(line => JSON.parse(line).id));
+  for (const comment of comments) assert.ok(people.has(comment.author_person_id), 'Comment author missing from export');
   assert.ok(![...entries.keys()].some(value => /password|reset-grant|session|secret/i.test(value)),
     'Authentication secrets included as package entries');
 

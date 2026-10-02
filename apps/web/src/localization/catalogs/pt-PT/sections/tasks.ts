@@ -1,6 +1,15 @@
 import type { MessageKey } from "../../en-US";
 
 export const tasksPtPT = {
+  taskCommentAdded: "Comentário adicionado",
+  taskCommentsTitle: "Comentários",
+  taskCommentsIntro: "Partilhe informações sobre a tarefa, mesmo que não seja responsável por ela.",
+  taskCommentText: "O seu comentário",
+  taskCommentPost: "Adicionar comentário",
+  taskCommentsEmpty: "Ainda não há comentários.",
+  taskCommentsLoadFailed: "Não foi possível carregar os comentários.",
+  taskCommentSaveFailed: "Não foi possível adicionar o comentário.",
+
   tasksExecutionHistoryExternalFollowUp: "Acompanhamento externo:",
   tasksExecutionHistoryLoadingExecution: "Carregando execução...",
   tasksExecutionHistoryNoDocumentation: "Sem documentação.",

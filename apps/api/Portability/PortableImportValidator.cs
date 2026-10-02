@@ -147,6 +147,8 @@ internal static class PortableImportValidator
         Reference(values, errors, "work-items", "created_by_person_id", "people");
         Reference(values, errors, "work-item-dependencies", "predecessor_work_item_id", "work-items");
         Reference(values, errors, "work-item-dependencies", "dependent_work_item_id", "work-items");
+        Reference(values, errors, "work-item-comments", "work_item_id", "work-items");
+        Reference(values, errors, "work-item-comments", "author_person_id", "people");
         Reference(values, errors, "work-item-history", "work_item_id", "work-items");
         Reference(values, errors, "workflow-steps", "definition_id", "workflow-definitions");
         Reference(values, errors, "workflow-steps", "template_id", "workflow-step-templates");

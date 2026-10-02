@@ -24,11 +24,11 @@ async function postAnonymous(base, path, body) {
 }
 
 export async function testIdentitySessionLifecycle({
-  base, platform, siteManager, siteId, makeUser, client,
+  base, platform, siteManager, siteId, makeUser, client, authenticationPost,
 }) {
   const actor = await makeUser('security-lifecycle');
   const parallelSession = client();
-  const parallelLogin = await parallelSession.post('/api/session', {
+  const parallelLogin = await authenticationPost(parallelSession, '/api/session', {
     username: actor.username,
     password: actor.password,
   });
@@ -62,7 +62,7 @@ export async function testIdentitySessionLifecycle({
     'Password reset must immediately invalidate an active session');
 
   const activeAfterReset = client();
-  const resetLogin = await activeAfterReset.post('/api/session', {
+  const resetLogin = await authenticationPost(activeAfterReset, '/api/session', {
     username: actor.username,
     password: resetPassword,
   });

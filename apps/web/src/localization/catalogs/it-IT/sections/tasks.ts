@@ -1,6 +1,15 @@
 import type { MessageKey } from "../../en-US";
 
 export const tasksItIT = {
+  taskCommentAdded: "Commento aggiunto",
+  taskCommentsTitle: "Commenti",
+  taskCommentsIntro: "Condividi informazioni sull’attività, anche se non ne sei responsabile.",
+  taskCommentText: "Il tuo commento",
+  taskCommentPost: "Aggiungi commento",
+  taskCommentsEmpty: "Non ci sono ancora commenti.",
+  taskCommentsLoadFailed: "Impossibile caricare i commenti.",
+  taskCommentSaveFailed: "Impossibile aggiungere il commento.",
+
   tasksExecutionHistoryExternalFollowUp: "Seguito esterno:",
   tasksExecutionHistoryLoadingExecution: "Esecuzione di carico...",
   tasksExecutionHistoryNoDocumentation: "Nessuna documentazione.",

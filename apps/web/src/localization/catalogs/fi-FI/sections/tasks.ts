@@ -1,6 +1,15 @@
 import type { MessageKey } from "../../en-US";
 
 export const tasksFiFI = {
+  taskCommentAdded: "Kommentti lisätty",
+  taskCommentsTitle: "Kommentit",
+  taskCommentsIntro: "Jaa tietoa tehtävästä, vaikka et olisi siitä vastuussa.",
+  taskCommentText: "Kommenttisi",
+  taskCommentPost: "Lisää kommentti",
+  taskCommentsEmpty: "Ei vielä kommentteja.",
+  taskCommentsLoadFailed: "Kommentteja ei voitu ladata.",
+  taskCommentSaveFailed: "Kommenttia ei voitu lisätä.",
+
   tasksExecutionHistoryExternalFollowUp: "Ulkoiset seurantatoimet:",
   tasksExecutionHistoryLoadingExecution: "Ladataan suoritusta...",
   tasksExecutionHistoryNoDocumentation: "Ei asiakirjoja.",
