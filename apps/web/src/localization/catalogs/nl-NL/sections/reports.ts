@@ -2,7 +2,7 @@ import type { MessageKey } from "../../en-US";
 
 export const reportsNlNL = {
   reportsTitle: "Verslagen",
-  reportsIntro: "Goedkeuring van eindverslagen op het geselecteerde werkniveau.",
+  reportsIntro: "Goedgekeurde eindrapporten voor het geselecteerde werkniveau en onderliggende niveaus.",
   reportContextLoadFailed: "De rapportagecontext kon niet geladen worden.",
   reportsLoadFailed: "De rapporten konden niet geladen worden.",
   reportUnavailable: "Het rapport bestaat niet of u hebt geen toegang tot het geselecteerde niveau.",

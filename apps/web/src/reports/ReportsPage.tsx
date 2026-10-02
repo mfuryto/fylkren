@@ -87,7 +87,7 @@ export function ReportsPage({ language, timeZone, classificationMarkings, permal
   }, [selectedSiteId, selectedUnitId, year, appliedSearch, sort, page, permalink.reportId]);
 
   return <div className="page reports-page">
-    <header className="page-header"><div><h1>{t("reportsTitle")}</h1><p className="muted">{t("reportsIntro")}</p></div><PageHelpButton title="reportsTitle" paragraphs={["reportsIntro", "reportApiHelpNote"]}/></header>
+    <header className="page-header"><div><h1>{t("reportsTitle")}</h1><p className="muted">{t("reportsIntro")}</p></div><PageHelpButton title="reportsTitle" paragraphs={["reportsIntro"]}/></header>
     {error && <p className="status-message error-message">{error}</p>}
     {linkMessage && <p className="status-message" role="status">{linkMessage}</p>}
     {sites.length === 0 && !loading ? <section className="panel empty-state"><div>

@@ -16,9 +16,9 @@ export const notificationsFrFR = {
   notifyDecisionRequired: "Mesures à prendre",
   notifyDecisionRequiredHelp: "Aviser le gestionnaire d'un niveau au-dessus lorsqu'une décision est nécessaire.",
   notifyChildCompleted: "Travail des enfants ou rapport final terminé",
-  notifyChildCompletedHelp: "Prévenez le niveau subalterne de son travail.",
+  notifyChildCompletedHelp: "Notifier lorsque le niveau subordonné renvoie son travail.",
   notifyPlanningCompleted: "Planification achevée",
   notifyPlanningCompletedHelp: "Avisez-le lorsque la planification est soumise à l'approbation.",
   notifyExecutionCompleted: "Exécution achevée",
-  notifyExecutionCompletedHelp: "Informez le demandeur de la date à laquelle l'exécution est soumise à l'examen.",
+  notifyExecutionCompletedHelp: "Notifier lorsque l’exécution est soumise à vérification.",
 } satisfies Partial<Record<MessageKey, string>>;

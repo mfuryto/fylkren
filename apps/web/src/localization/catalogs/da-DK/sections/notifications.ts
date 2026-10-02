@@ -7,7 +7,7 @@ export const notificationsDaDK = {
   notificationSettingsSaved: "Indstillingerne for underretningen blev gemt.",
   notifications: "Meddelelser",
   notificationsIntro: "Vælg hvilke e-mail-meddelelser der bruges af webstedet.",
-  notificationScopeHelp: "Anmeldelser følger adgangs- og arbejdsniveau. Webstedets navn tilføjes SMTP afsenderens navn.",
+  notificationScopeHelp: "Varslinger følger adgang og arbejdsniveau. Site-navnet føjes til SMTP-afsenderens navn.",
   saveNotificationSettings: "Gem notifikationsindstillinger",
   notifyNewWork: "Nyt arbejde",
   notifyNewWorkHelp: "Underret, når niveauet modtager nyt arbejde.",
@@ -20,5 +20,5 @@ export const notificationsDaDK = {
   notifyPlanningCompleted: "Planlægning afsluttet",
   notifyPlanningCompletedHelp: "Underret, når planlægningen forelægges til godkendelse.",
   notifyExecutionCompleted: "Fuldført udførelse",
-  notifyExecutionCompletedHelp: "Underret når henrettelsen er indsendt til revision.",
+  notifyExecutionCompletedHelp: "Underret, når udførelsen er indsendt til kontrol.",
 } satisfies Partial<Record<MessageKey, string>>;

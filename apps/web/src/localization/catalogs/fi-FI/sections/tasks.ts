@@ -20,7 +20,7 @@ export const tasksFiFI = {
   tasksTaskActionPanelsRouteOnward: "Reitti eteenpäin",
   tasksTaskActionPanelsSendRequest: "Lähetä pyyntö",
   tasksTaskActionPanelsWriteFinalReport: "Kirjoita loppuraportti",
-  tasksTaskApiExecutionHistoryCouldNotBeLoaded: "Teloitushistoriaa ei voitu ladata.",
+  tasksTaskApiExecutionHistoryCouldNotBeLoaded: "Toteutushistoriaa ei voitu ladata.",
   tasksTaskApiSendersCouldNotBeLoaded: "-Ei voi olla ladattu.",
   tasksTaskApiSourceTypesCouldNotBeLoaded: "Lähdetyyppejä ei voitu ladata.",
   tasksTaskApiTaskDetailsCouldNotBeLoaded: "Tehtävän yksityiskohtia ei voitu ladata.",

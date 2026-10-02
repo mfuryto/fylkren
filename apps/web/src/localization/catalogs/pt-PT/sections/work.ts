@@ -42,7 +42,7 @@ export const workPtPT = {
   decisionStatusWithdrawn: "Retirado",
   taskStatusRegistered: "Registado",
   taskStatusUnderReview: "Em revisão",
-  taskStatusOnHold: "Em espera.",
+  taskStatusOnHold: "Em espera",
   taskStatusRejected: "Rejeitado",
   taskStatusPlanning: "Planeamento",
   taskStatusPlanningApproval: "Plano que aguarda aprovação",

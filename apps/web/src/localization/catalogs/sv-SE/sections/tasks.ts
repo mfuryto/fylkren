@@ -37,7 +37,7 @@ export const tasksSvSE = {
   tasksTaskCardPresentationCloseTask: "Nära uppgift",
   tasksTaskCardPresentationDecisions: "Beslut",
   tasksTaskCardPresentationDependencies: "Beroende",
-  tasksTaskCardPresentationDueDate: "Datum för Due:",
+  tasksTaskCardPresentationDueDate: "Förfallodatum:",
   tasksTaskCardPresentationFinalReportFrom: "Slutrapport från",
   tasksTaskCardPresentationInternalRequestInTheSameSite: "Intern begäran på samma webbplats. Uppgiftsbasen och tidigare behandling följer webbplatsens vanliga åtkomstregler.",
   tasksTaskCardPresentationOpenTask: "Öppen uppgift",

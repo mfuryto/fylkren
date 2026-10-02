@@ -2,7 +2,7 @@ import type { MessageKey } from "../../en-US";
 
 export const reportsPtPT = {
   reportsTitle: "Relatórios",
-  reportsIntro: "Aprovaram os relatórios finais ao nível de trabalho seleccionado.",
+  reportsIntro: "Relatórios finais aprovados para o nível de trabalho selecionado e níveis subordinados.",
   reportContextLoadFailed: "O contexto do relatório não pôde ser carregado.",
   reportsLoadFailed: "Os relatórios não puderam ser carregados.",
   reportUnavailable: "O relatório não existe, ou você não tem acesso ao nível selecionado.",

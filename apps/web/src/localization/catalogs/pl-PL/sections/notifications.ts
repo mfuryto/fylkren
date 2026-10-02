@@ -18,7 +18,7 @@ export const notificationsPlPL = {
   notifyChildCompleted: "Praca nad dzieckiem lub sprawozdanie końcowe zakończone",
   notifyChildCompletedHelp: "Informuj, kiedy poziom podrzędny zwróci swoją pracę.",
   notifyPlanningCompleted: "Zakończono planowanie",
-  notifyPlanningCompletedHelp: "Należy poinformować o planowaniu, który jest przedkładany do zatwierdzenia.",
+  notifyPlanningCompletedHelp: "Powiadom, gdy plan zostanie przekazany do zatwierdzenia.",
   notifyExecutionCompleted: "Wykonanie zakończone",
-  notifyExecutionCompletedHelp: "Powiadomcie o złożeniu wniosku o przeprowadzenie kontroli.",
+  notifyExecutionCompletedHelp: "Powiadom, gdy wykonanie zostanie przekazane do kontroli.",
 } satisfies Partial<Record<MessageKey, string>>;

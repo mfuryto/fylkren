@@ -37,7 +37,7 @@ export const tasksPlPL = {
   tasksTaskCardPresentationCloseTask: "Zamknij zadanie",
   tasksTaskCardPresentationDecisions: "Decyzje",
   tasksTaskCardPresentationDependencies: "Zależności",
-  tasksTaskCardPresentationDueDate: "Termin płatności:",
+  tasksTaskCardPresentationDueDate: "Termin wykonania:",
   tasksTaskCardPresentationFinalReportFrom: "Sprawozdanie końcowe",
   tasksTaskCardPresentationInternalRequestInTheSameSite: "Wewnętrzne żądanie w tej samej witrynie. Podstawy zadania i wcześniejsze przetwarzanie zgodnie z zwykłymi zasadami dostępu do witryny.",
   tasksTaskCardPresentationOpenTask: "Otwórz zadanie",

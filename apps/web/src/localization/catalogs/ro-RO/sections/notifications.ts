@@ -14,7 +14,7 @@ export const notificationsRoRO = {
   notifyWorkChanges: "Modificări de muncă",
   notifyWorkChangesHelp: "Anunță managementul atunci când activitatea la nivel se schimbă.",
   notifyDecisionRequired: "Măsuri necesare",
-  notifyDecisionRequiredHelp: "Anunță administratorul cu un nivel mai mare decât cel necesar în cazul în care este necesară o decizie.",
+  notifyDecisionRequiredHelp: "Notifică managerul de la nivelul imediat superior atunci când este necesară o decizie.",
   notifyChildCompleted: "Lucrări pentru copii sau raport final finalizat",
   notifyChildCompletedHelp: "Anunta cand un nivel subordonat isi intoarce munca.",
   notifyPlanningCompleted: "Planificarea s-a încheiat",

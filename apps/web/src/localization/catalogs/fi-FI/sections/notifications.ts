@@ -14,11 +14,11 @@ export const notificationsFiFI = {
   notifyWorkChanges: "Työn muutokset",
   notifyWorkChangesHelp: "Ilmoita johdolle, kun työtaso muuttuu.",
   notifyDecisionRequired: "Tarvittavat toimet",
-  notifyDecisionRequiredHelp: "Ilmoita johtajalle yksi taso, kun päätös on tarpeen.",
+  notifyDecisionRequiredHelp: "Ilmoita yhtä tasoa ylemmälle johtajalle, kun päätöstä tarvitaan.",
   notifyChildCompleted: "Lapsityö tai loppuraportti valmistunut",
   notifyChildCompletedHelp: "Ilmoita, kun alisteinen taso palauttaa työnsä.",
   notifyPlanningCompleted: "Suunnittelu suoritettu",
   notifyPlanningCompletedHelp: "Ilmoita, kun suunnittelu on toimitettu hyväksyttäväksi.",
   notifyExecutionCompleted: "Toteutus suoritettu",
-  notifyExecutionCompletedHelp: "Ilmoita, kun teloitus toimitetaan uudelleen arvioitavaksi.",
+  notifyExecutionCompletedHelp: "Ilmoita, kun toteutus lähetetään tarkistettavaksi.",
 } satisfies Partial<Record<MessageKey, string>>;

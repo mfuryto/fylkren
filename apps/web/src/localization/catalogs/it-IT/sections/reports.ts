@@ -2,7 +2,7 @@ import type { MessageKey } from "../../en-US";
 
 export const reportsItIT = {
   reportsTitle: "Relazioni",
-  reportsIntro: "Approvato i rapporti finali a livello di lavoro selezionato.",
+  reportsIntro: "Rapporti finali approvati per il livello di lavoro selezionato e i livelli subordinati.",
   reportContextLoadFailed: "Il contesto del rapporto non potrebbe essere caricato.",
   reportsLoadFailed: "I rapporti non potevano essere caricati.",
   reportUnavailable: "Il rapporto non esiste, o non ha accesso a livello selezionato.",

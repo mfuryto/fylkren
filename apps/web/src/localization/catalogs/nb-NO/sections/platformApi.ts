@@ -100,7 +100,7 @@ export const platformApiNbNO = {
   reportApiHelpClassifiedText: "Dette krever en uttrykkelig tildeling.",
   reportApiHelpRemoveTitle: "Fjern når behovet opphører.",
   reportApiHelpRemoveText: "Fjerning påvirker ikke rapportene.",
-  reportApiHelpNote: "API-et eksponerer bare godkjente sluttrapporter og nødvendig metadata.",
+  reportApiHelpNote: "API-et eksponerer bare godkjente rapporter og nødvendige metadata.",
   webhookSitesLoadFailed: "Sitene kunne ikke lastes.",
   webhookCatalogLoadFailed: "Hendelseskatalogen kunne ikke lastes.",
   webhookSetupLoadFailed: "Webhook-oppsettet kunne ikke lastes.",

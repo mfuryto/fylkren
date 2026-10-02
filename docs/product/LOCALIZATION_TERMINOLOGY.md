@@ -34,3 +34,19 @@ The following names remain unchanged in every interface language, apart from nor
 - Customer-defined classification names are data and are never translated by the interface catalog.
 
 Security-sensitive actions must preserve their force. Delete, deactivate, revoke, reject, cancel and remove are not interchangeable. Labels use the target language's normal imperative UI form; explanatory text states the resulting effect explicitly.
+
+## Translate the workflow meaning
+
+Use the Norwegian catalog and the actual workflow behavior to resolve ambiguous source words. The English catalog remains the technical key and placeholder source; its individual words are not a sufficient translation specification.
+
+| Concept | Meaning to preserve | Misinterpretations to reject |
+| --- | --- | --- |
+| Execution | Carrying out an operational task | Capital punishment, a computer process, or an executor role |
+| Under review | Initial assessment of a received task | Already reviewed or completed |
+| In review | Completed work awaiting verification | Initial intake assessment or a showcase |
+| On hold | Work is paused or awaiting a dependency | Continue, stop command, or cancellation |
+| Due date | Deadline for completing the task | Payment due date, event date, or expiry date |
+| Withdrawn by sender | Sender has withdrawn their request | Deletion of the sender, an extract, or editing the request |
+| Recorded workload | Registered operational tasks over time | Audio recording, recruitment, staffing, or available capacity |
+
+Read the surrounding page, help text and state transitions before choosing the target-language wording. Status labels describe a state; action buttons describe an action. Keep this distinction even when English uses the same word for both. Review task assessment and completed-work verification separately.

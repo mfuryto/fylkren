@@ -67,7 +67,7 @@ export const siteAuditDaDK = {
   auditReplanningRequested: "Plan returneret til korrektion",
   auditPlanningOnHold: "Planlægning sat på standby",
   auditPlanRejected: "Plan afvist",
-  auditExecutionClaimed: "Henrettelse er angivet",
+  auditExecutionClaimed: "Udførelse er angivet",
   auditExecutionStarted: "Udførelse af workflow startet",
   auditExecutionReassigned: "Overførsel",
   auditExecutionReleased: "Udførelse frigivet",

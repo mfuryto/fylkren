@@ -2,7 +2,7 @@ import type { MessageKey } from "../../en-US";
 
 export const tasksDaDK = {
   tasksExecutionHistoryExternalFollowUp: "Opfølgning udadtil:",
-  tasksExecutionHistoryLoadingExecution: "Indlæser henrettelse...",
+  tasksExecutionHistoryLoadingExecution: "Indlæser udførelse...",
   tasksExecutionHistoryNoDocumentation: "Ingen dokumentation.",
   tasksExecutionHistoryNoDocumentedExecutionWorkflow: "Ingen dokumenteret udførelse workflow.",
   tasksExecutionHistoryReceivedResponse: "Modtagne svar",
@@ -20,7 +20,7 @@ export const tasksDaDK = {
   tasksTaskActionPanelsRouteOnward: "Fremad",
   tasksTaskActionPanelsSendRequest: "Send anmodning",
   tasksTaskActionPanelsWriteFinalReport: "Skriv endelig rapport",
-  tasksTaskApiExecutionHistoryCouldNotBeLoaded: "Henrettelseshistorikken kunne ikke indlæses.",
+  tasksTaskApiExecutionHistoryCouldNotBeLoaded: "Udførelseshistorikken kunne ikke indlæses.",
   tasksTaskApiSendersCouldNotBeLoaded: "Sendere kunne ikke læsses.",
   tasksTaskApiSourceTypesCouldNotBeLoaded: "Kildetyper kunne ikke indlæses.",
   tasksTaskApiTaskDetailsCouldNotBeLoaded: "Opgavens detaljer kunne ikke indlæses.",

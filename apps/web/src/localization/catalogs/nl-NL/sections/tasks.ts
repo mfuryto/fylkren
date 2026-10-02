@@ -37,7 +37,7 @@ export const tasksNlNL = {
   tasksTaskCardPresentationCloseTask: "Taak sluiten",
   tasksTaskCardPresentationDecisions: "Besluiten",
   tasksTaskCardPresentationDependencies: "Afhankelijkheden",
-  tasksTaskCardPresentationDueDate: "Verloopdatum:",
+  tasksTaskCardPresentationDueDate: "Uiterste datum:",
   tasksTaskCardPresentationFinalReportFrom: "Eindverslag van",
   tasksTaskCardPresentationInternalRequestInTheSameSite: "Interne aanvraag op dezelfde site. De taak basis en vorige verwerking volgen de gewone toegangsregels van de site.",
   tasksTaskCardPresentationOpenTask: "Open taak",

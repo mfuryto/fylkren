@@ -4,7 +4,7 @@ export const notificationsNbNO = {
   notificationSettingsSaveFailed: "Varslingsvalgene kunne ikke lagres.",
   notificationSettingsSaved: "Varslingsvalgene er lagret.",
   notifications: "Varslinger",
-  notificationsIntro: "Velg hvilke e-postvarsler som skal brukes i siten.",
+  notificationsIntro: "Styr hvilke hendelser som gir varslinger på valgt Site.",
   notificationScopeHelp: "Varsler følger tilgang og arbeidsnivå. Site-navnet legges til SMTP-avsendernavnet.",
   saveNotificationSettings: "Lagre varslingsvalg",
   notifyNewWork: "Nye oppdrag",
