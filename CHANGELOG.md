@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Added a dedicated due-date column after the task title in the Tasks list, with localized dates and a compact stacked layout on narrow screens.
+
 - Removed the redundant Report Archive heading, made report titles open the viewer, and included search-aware report counts in each year option and All years.
 
 - Applied heading-based opening and closing with inline copy-link actions to Planning and Execution cards as well.

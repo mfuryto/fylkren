@@ -61,6 +61,9 @@
   .process-card :is(.planning-result, .planning-preview, .delegation-tree, .delegation-child) { padding: 9px 10px; gap: 8px; }
   .process-card .returned-report > summary { padding: 7px 10px; }
   .process-queue.work-queue .process-card.minimized { grid-template-columns: minmax(0, 1fr); }
+  .process-queue.work-queue .process-card .task-reference-heading { grid-template-columns: minmax(132px, max-content) minmax(0, 1fr) 9rem max-content; align-items: center; }
+  .task-deadline-cell { display: grid; gap: 2px; font-size: .82rem; }
+  .task-deadline-cell small { color: var(--text-muted); font-size: .72rem; }
   .process-queue.heading-toggle-queue .process-card.minimized { grid-template-columns: minmax(0, 1fr); }
   .task-interactive-heading { cursor: pointer; }
   .task-interactive-heading:hover { background: color-mix(in srgb, var(--brand) 4%, transparent); }
@@ -72,6 +75,9 @@
 }
 @media screen and (max-width: 720px) {
   .page-header, .section-heading { flex-wrap: wrap; }
+  .process-queue.work-queue .process-card .task-reference-heading { grid-template-columns: minmax(80px, max-content) minmax(0, 1fr); gap: 4px 8px; }
+  .work-queue .task-deadline-cell { grid-column: 2; display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px; }
+  .work-queue .task-header-actions { grid-column: 2; justify-content: flex-start; flex-wrap: wrap; }
 }
 @media screen and (max-width: 520px) {
   .page { padding: 14px 12px; }
