@@ -1,4 +1,10 @@
 export const risksEn = {
+  riskMatrix: "Risk map",
+  riskBeforeMitigation: "Risk before mitigation",
+  riskNumber: "No.",
+  riskCoordinates: "P/I",
+  riskMapHelp: "Select an assessment, then click a cell or drag its numbered circle.",
+
   risksLoadFailed: "Risks could not be loaded.",
   riskUpdateFailed: "The risk could not be updated.",
   riskSaveFailed: "The risk could not be saved.",

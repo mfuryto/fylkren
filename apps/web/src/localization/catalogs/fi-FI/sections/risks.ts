@@ -1,6 +1,12 @@
 import type { MessageKey } from "../../en-US";
 
 export const risksFiFI = {
+  riskMatrix: "Riskikartta",
+  riskBeforeMitigation: "Riski ennen toimenpiteitä",
+  riskNumber: "Nro",
+  riskCoordinates: "T/V",
+  riskMapHelp: "Valitse arvio ja napsauta ruutua tai vedä numeroitua ympyrää.",
+
   risksLoadFailed: "Riskit eivät olleet ladattavissa.",
   riskUpdateFailed: "Riskiä ei voitu päivittää.",
   riskSaveFailed: "Riskiä ei voitu pelastaa.",

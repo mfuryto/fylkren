@@ -1,6 +1,12 @@
 import type { MessageKey } from "../../en-US";
 
 export const risksDeDE = {
+  riskMatrix: "Risikokarte",
+  riskBeforeMitigation: "Risiko vor Maßnahmen",
+  riskNumber: "Nr.",
+  riskCoordinates: "W/A",
+  riskMapHelp: "Wählen Sie eine Bewertung und klicken Sie auf ein Feld oder ziehen Sie den nummerierten Kreis.",
+
   risksLoadFailed: "Risiken konnten nicht geladen werden.",
   riskUpdateFailed: "Das Risiko konnte nicht aktualisiert werden.",
   riskSaveFailed: "Das Risiko konnte nicht gerettet werden.",

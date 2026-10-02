@@ -1,6 +1,12 @@
 import type { MessageKey } from "../../en-US";
 
 export const risksLtLT = {
+  riskMatrix: "Rizikos žemėlapis",
+  riskBeforeMitigation: "Rizika prieš priemones",
+  riskNumber: "Nr.",
+  riskCoordinates: "T/P",
+  riskMapHelp: "Pasirinkite vertinimą, tada spustelėkite langelį arba vilkite sunumeruotą apskritimą.",
+
   risksLoadFailed: "Pavojų nebuvo galima įkelti.",
   riskUpdateFailed: "Pavojaus nebuvo galima atnaujinti.",
   riskSaveFailed: "Pavojaus nepavyko išsaugoti.",

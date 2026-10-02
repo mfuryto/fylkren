@@ -1,6 +1,12 @@
 import type { MessageKey } from "../../en-US";
 
 export const risksUkUA = {
+  riskMatrix: "Карта ризиків",
+  riskBeforeMitigation: "Ризик до заходів",
+  riskNumber: "№",
+  riskCoordinates: "Й/В",
+  riskMapHelp: "Виберіть оцінку, потім натисніть клітинку або перетягніть пронумероване коло.",
+
   risksLoadFailed: "Не можна навантажувати ризики.",
   riskUpdateFailed: "Не вдалося оновити ризик.",
   riskSaveFailed: "Не вдалося врятувати ризик.",

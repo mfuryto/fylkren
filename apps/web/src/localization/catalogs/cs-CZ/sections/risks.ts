@@ -1,6 +1,12 @@
 import type { MessageKey } from "../../en-US";
 
 export const risksCsCZ = {
+  riskMatrix: "Mapa rizik",
+  riskBeforeMitigation: "Riziko před opatřeními",
+  riskNumber: "Č.",
+  riskCoordinates: "P/D",
+  riskMapHelp: "Vyberte hodnocení a klikněte na buňku nebo přetáhněte očíslovaný kruh.",
+
   risksLoadFailed: "Riskování se nedá podplatit.",
   riskUpdateFailed: "Riziko nebylo možné aktualizovat.",
   riskSaveFailed: "Riziko nebylo možné zachránit.",

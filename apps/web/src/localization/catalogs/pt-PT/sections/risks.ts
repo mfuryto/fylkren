@@ -1,6 +1,12 @@
 import type { MessageKey } from "../../en-US";
 
 export const risksPtPT = {
+  riskMatrix: "Mapa de riscos",
+  riskBeforeMitigation: "Risco antes das medidas",
+  riskNumber: "N.º",
+  riskCoordinates: "P/I",
+  riskMapHelp: "Selecione uma avaliação e clique numa célula ou arraste o círculo numerado.",
+
   risksLoadFailed: "Os riscos não puderam ser carregados.",
   riskUpdateFailed: "O risco não pôde ser actualizado.",
   riskSaveFailed: "O risco não pôde ser salvo.",

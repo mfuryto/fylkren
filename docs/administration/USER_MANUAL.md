@@ -288,3 +288,7 @@ Open **Comments** beside Dependencies, Decisions, Risk and Versions and approval
 Anyone with operational read access to the task can contribute without being assigned to it. Use comments to share existing solutions, relevant experience or information that prevents duplicate work. Comments retain the contributor's name and timestamp and show the newest entries first, with pagination for longer discussions. They can also be added after task completion. Posting a comment does not change responsibility, status, decisions or approval results.
 
 Comments are stored as plain text, recorded in the Site audit and included in Site portability exports and database backups. Posted comments are retained; this initial implementation does not offer editing or deletion. Users without access to the task cannot read or post comments, including Platform Managers without operational access.
+
+## Visual risk assessment
+
+Open **Risk** in the task detail links. The numbered register presents title, description, probability/impact before mitigation, actions, deadlines and residual probability/impact after mitigation. Its [interactive risk map](RISK_MANAGEMENT.md) connects the initial and residual circles for each risk. Select a risk to edit, click a map cell or drag the selected circle, then save the assessment. Enter mitigation actions before residual risk; actions can be edited and completed separately. The scale remains 1–5 with the established low, moderate, high and critical score boundaries.

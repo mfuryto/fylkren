@@ -1,6 +1,12 @@
 import type { MessageKey } from "../../en-US";
 
 export const risksNlNL = {
+  riskMatrix: "Risicokaart",
+  riskBeforeMitigation: "Risico vóór maatregelen",
+  riskNumber: "Nr.",
+  riskCoordinates: "K/I",
+  riskMapHelp: "Selecteer een beoordeling en klik op een vak of sleep de genummerde cirkel.",
+
   risksLoadFailed: "Risico's konden niet geladen worden.",
   riskUpdateFailed: "Het risico kon niet worden bijgewerkt.",
   riskSaveFailed: "Het risico kon niet worden gered.",

@@ -1,6 +1,12 @@
 import type { MessageKey } from "../../en-US";
 
 export const risksRoRO = {
+  riskMatrix: "Harta riscurilor",
+  riskBeforeMitigation: "Risc înainte de măsuri",
+  riskNumber: "Nr.",
+  riskCoordinates: "P/I",
+  riskMapHelp: "Selectează evaluarea, apoi apasă pe o celulă sau trage cercul numerotat.",
+
   risksLoadFailed: "Riscurile nu au putut fi încărcate.",
   riskUpdateFailed: "Riscul nu a putut fi actualizat.",
   riskSaveFailed: "Riscul nu a putut fi salvat.",

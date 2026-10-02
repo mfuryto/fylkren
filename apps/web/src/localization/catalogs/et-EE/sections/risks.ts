@@ -1,6 +1,12 @@
 import type { MessageKey } from "../../en-US";
 
 export const risksEtEE = {
+  riskMatrix: "Riskikaart",
+  riskBeforeMitigation: "Risk enne meetmeid",
+  riskNumber: "Nr",
+  riskCoordinates: "T/M",
+  riskMapHelp: "Vali hinnang, seejärel klõpsa ruudul või lohista nummerdatud ringi.",
+
   risksLoadFailed: "Riskid ei ole laetud.",
   riskUpdateFailed: "Riski ei olnud võimalik ajakohastada.",
   riskSaveFailed: "Riski ei suudetud päästa.",

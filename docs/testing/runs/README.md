@@ -42,3 +42,5 @@ The test output and source assertions are evidence references, but neither repla
 The [localization context follow-up](2026-10-02-localization-context-follow-up.md) corrects operational meanings that structural catalog checks did not catch and records the Norwegian workflow context as a translation input.
 
 The [task-comments run](2026-10-02-task-comments.md) records unassigned-reader contributions, task access boundaries, antiforgery, persistence, pagination, export and safe text rendering.
+
+The [visual risk-workspace run](2026-10-02-visual-risk-workspace.md) records the numbered register, mitigation-first editing, 5 × 5 initial/residual map, real browser clicks and dragging, and atomic risk/action creation.

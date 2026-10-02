@@ -1,6 +1,12 @@
 import type { MessageKey } from "../../en-US";
 
 export const risksLvLV = {
+  riskMatrix: "Risku karte",
+  riskBeforeMitigation: "Risks pirms pasākumiem",
+  riskNumber: "Nr.",
+  riskCoordinates: "V/I",
+  riskMapHelp: "Izvēlieties vērtējumu un noklikšķiniet uz šūnas vai velciet numurēto apli.",
+
   risksLoadFailed: "Riskus neizdevās ielādēt.",
   riskUpdateFailed: "Risku nav iespējams atjaunināt.",
   riskSaveFailed: "Risku nav iespējams glābt.",

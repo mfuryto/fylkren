@@ -1,6 +1,12 @@
 import type { MessageKey } from "../../en-US";
 
 export const risksDaDK = {
+  riskMatrix: "Risikokort",
+  riskBeforeMitigation: "Risiko før tiltag",
+  riskNumber: "Nr.",
+  riskCoordinates: "S/K",
+  riskMapHelp: "Vælg vurdering, klik i et felt eller træk den nummererede cirkel.",
+
   risksLoadFailed: "Risici kunne ikke læsses.",
   riskUpdateFailed: "Risikoen kunne ikke opdateres.",
   riskSaveFailed: "Risikoen kunne ikke reddes.",

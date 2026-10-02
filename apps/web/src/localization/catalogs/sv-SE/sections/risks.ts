@@ -1,6 +1,12 @@
 import type { MessageKey } from "../../en-US";
 
 export const risksSvSE = {
+  riskMatrix: "Riskkarta",
+  riskBeforeMitigation: "Risk före åtgärder",
+  riskNumber: "Nr.",
+  riskCoordinates: "S/K",
+  riskMapHelp: "Välj bedömning och klicka i en ruta eller dra den numrerade cirkeln.",
+
   risksLoadFailed: "Risker kunde inte laddas.",
   riskUpdateFailed: "Risken kunde inte uppdateras.",
   riskSaveFailed: "Risken kunde inte sparas.",

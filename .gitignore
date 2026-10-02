@@ -45,3 +45,6 @@ Thumbs.db
 TestResults/
 playwright-report/
 test-results/
+
+# Risk workspace browser evidence
+output/risk-workspace*/

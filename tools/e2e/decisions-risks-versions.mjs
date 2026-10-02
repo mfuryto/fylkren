@@ -46,6 +46,20 @@ export async function testDecisionsRisksVersions({ leader, sibling, unrelated, s
     probability: 4, impact: 5, ownerPersonId: personId, status: 'identified',
     dueDate: '2026-12-31', residualProbability: null, residualImpact: null,
   };
+  const combined = await leader.post(riskPath, { ...riskBody, title: `Combined risk ${suffix}`, initialMitigation: 'Prevent duplicate work', residualProbability: 2, residualImpact: 2 });
+  assert.equal(combined.status, 201, `Combined risk and mitigation: ${JSON.stringify(combined.body)}`);
+  const combinedList = await leader.request(riskPath);
+  const combinedRisk = combinedList.body.find(value => value.id === combined.body.id);
+  assert.equal(combinedRisk.mitigations.length, 1);
+  assert.equal(combinedRisk.mitigations[0].action, 'Prevent duplicate work');
+  assert.equal(combinedRisk.mitigations[0].dueDate, riskBody.dueDate);
+  assert.equal(combinedRisk.mitigations[0].ownerPersonId, personId);
+  assert.equal(combinedRisk.current.residualScore, 4);
+  for (const initialMitigation of ['x', 'x'.repeat(4001)]) {
+    const invalid = await leader.post(riskPath, { ...riskBody, initialMitigation });
+    assert.equal(invalid.status, 400);
+  }
+  assert.equal((await leader.request(riskPath)).body.length, combinedList.body.length, 'Invalid mitigation partially created a risk');
   const riskCreated = await leader.post(riskPath, riskBody);
   assert.equal(riskCreated.status, 201, `Risk create: ${JSON.stringify(riskCreated.body)}`);
   const riskId = riskCreated.body.id;

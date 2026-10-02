@@ -1,0 +1,58 @@
+.modal-card:has(.risk-workspace) { width: min(1240px, calc(100vw - 32px)); max-width: 1240px; }
+.risk-workspace-heading, .risk-map-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.risk-workspace-heading { margin-bottom: 10px; }
+.risk-workspace-heading > strong { overflow-wrap: anywhere; }
+.risk-register-scroll { overflow-x: auto; margin-block: 8px 14px; }
+.risk-register { width: 100%; border-collapse: collapse; font-size: .85rem; min-width: 850px; }
+.risk-register :is(th, td) { text-align: left; vertical-align: top; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.risk-register th { background: var(--surface-subtle); }
+.risk-register th small { display: block; font-weight: normal; }
+.risk-register tr.selected { background: color-mix(in srgb, var(--accent) 9%, var(--surface)); }
+.risk-register td:nth-child(3) { min-width: 140px; max-width: 260px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.risk-register td:nth-child(5) { min-width: 160px; max-width: 300px; }
+.risk-register .risk-value { font-weight: 700; white-space: nowrap; }
+.risk-row-number { width: 28px; height: 28px; padding: 0; border-radius: 50%; font-weight: 700; }
+.risk-register-action { display: block; margin-bottom: 6px; overflow-wrap: anywhere; white-space: pre-wrap; }
+.risk-register-action > span { display: block; }
+.risk-register-action-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.risk-register-action-meta button { padding: 0; }
+.risk-register-action small { color: var(--muted); }
+.risk-register-deadline { margin-bottom: 6px; white-space: nowrap; }
+.risk-workspace-body { display: grid; gap: 16px; }
+.risk-workspace-body.editing { grid-template-columns: minmax(0, 1fr) minmax(280px, 1fr); align-items: start; }
+.risk-map-section { min-width: 0; }
+.risk-map-section h3, .risk-editor h3 { margin-block: 0 8px; }
+.risk-matrix { width: 100%; max-width: 500px; display: block; margin-inline: auto; overflow: visible; touch-action: none; }
+.risk-cell { stroke: #555; stroke-width: 1; }
+.risk-cell[role="button"] { cursor: crosshair; }
+.risk-cell:focus-visible { stroke: #101820; stroke-width: 4; }
+.risk-cell-low { fill: #4cb944; background: #4cb944; }
+.risk-cell-moderate { fill: #ffe137; background: #ffe137; }
+.risk-cell-high { fill: #f78335; background: #f78335; }
+.risk-cell-critical { fill: #ec4c2f; background: #ec4c2f; }
+.risk-matrix text { fill: var(--text); font-size: 15px; pointer-events: none; }
+.risk-axis { font-weight: 700; }
+.risk-connection { stroke: #142535; stroke-width: 2; opacity: .6; pointer-events: none; }
+.risk-connection.selected { stroke-width: 3; opacity: 1; }
+.risk-map-marker { cursor: pointer; }
+.risk-map-marker circle { fill: #142535; stroke: #fff; stroke-width: 2; }
+.risk-map-marker text { fill: #fff; font-size: 13px; font-weight: 700; }
+.risk-map-marker.after circle { fill: #fff; stroke: #142535; stroke-width: 2.5; }
+.risk-map-marker.after text { fill: #142535; }
+.risk-map-marker.selected circle, .risk-map-marker:focus-visible circle { stroke: #1565c0; stroke-width: 4; }
+.risk-map-legend, .risk-map-levels { display: flex; flex-wrap: wrap; gap: 8px 12px; font-size: .8rem; }
+.risk-map-levels { justify-content: center; }
+.risk-map-legend span, .risk-map-levels span { display: inline-flex; align-items: center; gap: 5px; }
+.risk-map-levels i { width: 13px; height: 13px; border: 1px solid #555; }
+.risk-marker-before, .risk-marker-after { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #142535; background: #142535; }
+.risk-marker-after { background: #fff; }
+.risk-editor { gap: 8px; }
+.risk-assessment-fields { margin: 0; padding: 8px; border: 1px solid var(--border); border-radius: 4px; min-width: 0; }
+.risk-assessment-fields.selected { border-color: #1565c0; }
+.risk-assessment-fields legend { font-size: .9rem; font-weight: 700; padding-inline: 4px; }
+.risk-editor-actions { margin: 0 0 6px; padding-left: 18px; }
+.risk-editor-actions small { display: block; color: var(--muted); }
+@media (max-width: 800px) { .risk-workspace-body.editing { grid-template-columns: minmax(0, 1fr); } }
+@media print { .risk-register-scroll { overflow: visible; } .risk-register { min-width: 0; } .risk-cell { print-color-adjust: exact; } }
+
+.risk-assessment-fields .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
