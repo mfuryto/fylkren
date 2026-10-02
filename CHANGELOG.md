@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Made Overview task statistics content-sized inline counters instead of full-width cards, with wrapping labels and compact spacing.
+
 - Applied compact screen spacing throughout shared panels, forms, buttons, lists and dialogs. Touch controls retain larger targets and printed report layout remains unchanged.
 
 - Reduced Overview header, summary cards, subordinate cards and statistics spacing across all overview designs, with compact controls and responsive mobile headings.

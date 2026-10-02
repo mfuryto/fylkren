@@ -23,8 +23,14 @@
 .overview-page .overview-unit-total { min-width: 30px; height: 30px; padding: 0 6px; font-size: .95rem; }
 .overview-page .overview-unit-load-label { margin-bottom: 3px; }
 .overview-page .overview-statistics { margin-top: 16px; }
-.overview-page .overview-statistics-grid { margin: 10px 0 0; }
-.overview-page .overview-stat-card { padding: 10px 12px; }
+.overview-page .overview-statistics-grid { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; }
+.overview-page .overview-stat-card { flex: 0 1 auto; flex-direction: row; align-items: baseline; gap: 10px; min-width: 0; max-width: 100%; padding: 6px 9px; }
+.overview-page .overview-stat-card span { font-size: .8rem; overflow-wrap: anywhere; }
+.overview-page .overview-stat-card strong { flex-shrink: 0; margin: 0; padding: 0; font-size: 1rem; }
+@media (min-width: 1100px) {
+  .overview-page .overview-statistics-grid { flex-wrap: nowrap; }
+  .overview-page .overview-stat-card { flex: 1 1 0; }
+}
 @media (max-width: 520px) {
   .overview-page .overview-header { min-height: auto; padding: 12px; }
   .overview-page .section-heading { flex-wrap: wrap; }
