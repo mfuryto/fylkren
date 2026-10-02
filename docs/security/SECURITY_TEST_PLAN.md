@@ -13,13 +13,15 @@ This plan turns the security release gate in the [roadmap](../project/ROADMAP.md
 7. Verify operational history, audit isolation, notification failures, secret sanitization, backup, and restore.
 8. Run dependency, repository, container-image, and configuration scans; remediate and retest every finding; issue the final security report.
 
-The federation portion is handed to the independent reviewer through the [federation security review brief](FEDERATION_SECURITY_REVIEW_BRIEF.md). It freezes the target, enumerates the externally reachable and management surfaces, defines the minimum adversarial coverage and separates maintained regression evidence from reviewer-owned tests.
+Execute this plan through repeatable tests and requirement-level evidence in the ASVS matrix. An external review is optional when explicitly requested; the [federation security review brief](FEDERATION_SECURITY_REVIEW_BRIEF.md) is available as a handoff template and is not a prerequisite for this testing work.
 
 ## Site reference authorization
 
 Only Platform Manager may update fallback Site codes through `PUT /api/references/sites/{siteId}`. Verify that a Site Manager with an active assignment receives HTTP 403, including for their own Site; Platform Manager must be able to update a valid code with CSRF protection, while duplicate and invalid codes remain rejected. Existing task references must remain unchanged. This boundary requires dynamic authorization evidence; a successful build is not that evidence.
 
 ## Evidence rules
+
+The [ASVS matrix](ASVS_5.0.0_L2_MATRIX.md) is the single security-testing work list. Reconcile already executed security assertions into its existing rows before adding new cases, then proceed in chapter/requirement order. Link both the maintained test and its execution record, state the tested scope and record missing cases on the same row. `pnpm check:security-evidence` checks this traceability and also runs within `pnpm check:docs`; it does not execute controls.
 
 - Link every result to a commit, displayed version, date, environment, and stable ASVS/WSTG identifier.
 - Use synthetic data. Never store credentials, cookies, API keys, MFA material, or personal data in the repository.

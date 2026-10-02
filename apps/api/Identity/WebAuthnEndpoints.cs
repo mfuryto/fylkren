@@ -107,7 +107,7 @@ public static class WebAuthnEndpoints
         return Results.Ok(new
         {
             options = credentialOptions,
-            token = flow.Protect(grant.Id, personId, credentialOptions.ToJson(), name, expiresAt)
+            token = flow.Protect(grant.Id, personId, login.SecurityVersion, credentialOptions.ToJson(), name, expiresAt)
         });
     }
 
@@ -132,7 +132,7 @@ public static class WebAuthnEndpoints
             request.Credential is null)
             return Results.BadRequest();
 
-        (Guid grantId, Guid person, string json, string? name) state;
+        (Guid grantId, Guid person, long securityVersion, string json, string? name) state;
         try
         {
             state = flow.Read(request.Token);
@@ -144,8 +144,13 @@ public static class WebAuthnEndpoints
 
         if (state.person != personId)
             return Results.Forbid();
-        if (await EligibleLocalIdentity(personId, db, ct) is null)
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+        var login = await EligibleLocalIdentity(personId, db, ct);
+        if (login is null)
             return Results.Unauthorized();
+        await LockIdentity(login, db, ct);
+        if (login.SecurityVersion != state.securityVersion || await EligibleLocalIdentity(personId, db, ct) is null)
+            return Results.BadRequest();
 
         var credentialOptions = CredentialCreateOptions.FromJson(state.json);
         var result = await fido2.MakeNewCredentialAsync(new MakeNewCredentialParams
@@ -159,7 +164,6 @@ public static class WebAuthnEndpoints
         }, ct);
 
         var now = DateTimeOffset.UtcNow;
-        await using var transaction = await db.Database.BeginTransactionAsync(ct);
         if (!await ConsumeFlowGrant(state.grantId, "register", now, db, ct))
             return Results.BadRequest();
         db.WebAuthnCredentials.Add(new WebAuthnCredential(
@@ -171,9 +175,6 @@ public static class WebAuthnEndpoints
             result.SignCount,
             state.name ?? "Passkey",
             now));
-        var login = await EligibleLocalIdentity(personId, db, ct);
-        if (login is null)
-            return Results.Unauthorized();
         login.AdvanceSecurityVersion();
         db.AuditEvents.Add(new AuditEvent(
             Guid.NewGuid(), null, personId,
@@ -235,7 +236,7 @@ public static class WebAuthnEndpoints
         return Results.Ok(new
         {
             options = assertionOptions,
-            token = flow.Protect(grant.Id, login.PersonId, assertionOptions.ToJson(), null, expiresAt)
+            token = flow.Protect(grant.Id, login.PersonId, login.SecurityVersion, assertionOptions.ToJson(), null, expiresAt)
         });
     }
 
@@ -255,7 +256,7 @@ public static class WebAuthnEndpoints
             request.Credential is null)
             return Results.Problem(statusCode: 401);
 
-        (Guid grantId, Guid person, string json, string? name) state;
+        (Guid grantId, Guid person, long securityVersion, string json, string? name) state;
         try
         {
             state = flow.Read(request.Token);
@@ -269,8 +270,9 @@ public static class WebAuthnEndpoints
         if (login is null)
             return Results.Problem(statusCode: 401);
         await using var transaction = await db.Database.BeginTransactionAsync(ct);
-        var identityLockKey = BitConverter.ToInt64(login.Id.ToByteArray(), 0);
-        await db.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock({identityLockKey})", ct);
+        await LockIdentity(login, db, ct);
+        if (login.SecurityVersion != state.securityVersion || await EligibleLocalIdentity(state.person, db, ct) is null)
+            return Results.Problem(statusCode: 401);
         var credential = await db.WebAuthnCredentials.FirstOrDefaultAsync(value =>
             value.PersonId == state.person &&
             value.IsActive &&
@@ -329,8 +331,12 @@ public static class WebAuthnEndpoints
         await antiforgery.ValidateRequestAsync(context);
         if (!PersonId(user, out var personId))
             return Results.Unauthorized();
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
         var login = await EligibleLocalIdentity(personId, db, ct);
         if (login is null)
+            return Results.Unauthorized();
+        await LockIdentity(login, db, ct);
+        if (await EligibleLocalIdentity(personId, db, ct) is null)
             return Results.Unauthorized();
         if (!IdentityEndpoints.VerifyCurrentPassword(login, request.CurrentPassword, passwordHasher))
             return Results.Problem(statusCode: 400, title: "The current password is incorrect.");
@@ -346,10 +352,18 @@ public static class WebAuthnEndpoints
             Guid.NewGuid(), null, personId,
             "webauthn.removed", "person", personId, DateTimeOffset.UtcNow));
         await db.SaveChangesAsync(ct);
+        await transaction.CommitAsync(ct);
         await context.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
             IdentityEndpoints.CreatePrincipal(login));
         return Results.NoContent();
+    }
+
+    private static async Task LockIdentity(LoginIdentity login, FylkrenDbContext db, CancellationToken ct)
+    {
+        var key = BitConverter.ToInt64(login.Id.ToByteArray(), 0);
+        await db.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock({key})", ct);
+        await db.Entry(login).ReloadAsync(ct);
     }
 
     private static async Task<LoginIdentity?> EligibleLocalIdentity(

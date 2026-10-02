@@ -1,5 +1,7 @@
 # Independent federation security review brief
 
+This is an optional handoff template if an external review is explicitly requested. It is not a mandatory testing dependency. The [ASVS matrix](ASVS_5.0.0_L2_MATRIX.md) remains the single security-testing work list.
+
 ## Purpose and decision authority
 
 This brief is the handoff contract for an independent security review of Fylkren's instance-federation implementation. It does not constitute a review result, authorize production federation or replace the main [security test plan](SECURITY_TEST_PLAN.md). The reviewer must select and operate their own attack tooling, retain evidence outside the repository when it may contain sensitive data, and report findings without relying on implementation-team assertions as proof.

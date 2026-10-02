@@ -70,12 +70,24 @@ Trivy 0.75.0 used the vulnerability database updated 2026-10-02 12:48 UTC. Repos
 
 The API image reported zero Critical/High findings and 14 package findings: nine Medium and five Low, with no vendor FixedVersion available in this scan. The Medium CVEs are `CVE-2026-18374`, `CVE-2026-89092`, `CVE-2026-86145`, `CVE-2026-89161`, `CVE-2026-18477`, `CVE-2026-18508` and `CVE-2026-85091`; repeated libc package occurrences account for the difference between CVEs and package findings. Low findings are `CVE-2025-5222`, `CVE-2026-40228` and `CVE-2024-56433`. No API image secrets were found. These residual findings remain open; this run does not accept their risk on behalf of the security owner.
 
-## Release gates still requiring separate evidence
+## Remaining scope
 
-- Complete the remaining in-scope ASVS matrix entries; this run does not promote untested requirements.
-- Commission independent security review and remediate or formally accept its findings and the residual dependency risks.
-- Rehearse restore under production backup/key custody and verify the deployment's TLS, canonical Host/port, proxy and customer identity-provider assumptions.
-- Verify real hardware/platform authenticators and representative customer IdPs; virtual browser authentication is laboratory evidence.
-- Re-run historical mixed-version interoperability with an available archived release artifact. The current default federation command exercises its Production boundary; it does not run the legacy mixed-version function.
+The [ASVS matrix](../../security/ASVS_5.0.0_L2_MATRIX.md) holds the remaining security work and partial evidence; this report does not maintain another security checklist. Its deployment-sensitive rows still require production-equivalent restore/key custody, TLS, canonical Host/port, proxy, customer IdPs and real authenticator evidence. Residual findings remain in the finding register. Historical mixed-version interoperability additionally requires an archived release artifact: the current default federation command exercises the Production boundary and does not execute that legacy compatibility function. External review is optional when requested.
 
-Owners: repository maintainer for remediation and repeatable tests; deployment/security authority for production evidence, independent review and risk acceptance. The [security verification record](../../security/SECURITY_VERIFICATION.md) remains the release decision authority.
+Owners: repository maintainer for remediation and repeatable tests; deployment/security authority for production evidence and risk acceptance. The [security verification record](../../security/SECURITY_VERIFICATION.md) remains the release decision authority.
+
+## ASVS reconciliation and WebAuthn lifecycle continuation
+
+The continuation starts from `382b4691c07c6ed5c67daf704c8c74820db15c04` at the same displayed version. Its source hashes and sanitized results are appended under `continuations` in the existing evidence JSON; the original run's hashes and results remain unchanged.
+
+The [ASVS matrix](../../security/ASVS_5.0.0_L2_MATRIX.md) is now the single security-testing work list. Existing executed tests and run records are linked to 107 requirements, including previously separate browser, LDAP/AD/SSO, authorization, API, learning/report privacy, workload, backup/restore, public-surface/TLS and logging checks. Partial suite coverage remains partial. Nineteen former Passed entries lacked sufficient requirement-specific execution evidence and were downgraded. The resulting 253-row matrix has 20 Passed, 120 In progress, 59 Not assessed and 54 Not applicable requirements. These counts are a traceability audit, not evidence that new controls passed.
+
+`pnpm check:security-evidence` checks matrix completeness, unique requirement IDs, allowed statuses and concrete test/execution-record links for every Passed entry. It also runs as part of `pnpm check:docs`. It does not execute or certify the controls. Matrix regeneration preserves the maintained workflow and evidence preamble.
+
+SV-058 was reproduced before remediation: a registration proof issued before explicit sign-out enrolled a new passkey after a new password sign-in (`204` instead of rejection). Completion still required an authenticated session; this is a stale reauthentication-proof boundary, not demonstrated anonymous takeover. Protected registration/login state now binds the identity security version under `Fylkren.WebAuthnFlow.v2`. Completion locks and reloads identity state and rejects mismatched versions before grant consumption. Registration, login and removal share identity serialization.
+
+The fresh virtual CTAP2 retest passed stale registration/login rejection after sign-out, simultaneous registration and login with exactly one success, registration/assertion replay, validly signed wrong-origin/RP rejection, counter regression, wrong-password removal rejection and pending-login rejection after credential deletion. Failed login attempts left no session. The laboratory uses an inert browser document and independent cookie jars for parallel enrollment so an older cookie renewed by a losing request cannot overwrite the successful request's cookie.
+
+The v2 protection purpose invalidates unfinished v1 ceremonies at upgrade; users restart that registration/sign-in. Existing registered credentials remain usable and no database migration is needed. Hardware/platform compatibility, expiry and the remaining factor lifecycle cases stay open on their ASVS rows. The complete edition/API regression is rerun after this change, including disposable coordinated backup/restore. Laboratories run sequentially because both temporarily manage an absent repository `.env`; an initial overlapping backup run rejected a missing laboratory `.env` and is not passing evidence.
+
+External testing is optional when explicitly requested. Work continues in ASVS chapter/requirement order, adding missing positive, negative and boundary cases to the existing suites and recording results on those rows. No new vulnerability scan, production update or residual-risk acceptance is claimed by this continuation.

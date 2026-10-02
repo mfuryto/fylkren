@@ -7,7 +7,7 @@ This roadmap contains approved future work and release gates. Current behavior b
 1. Complete repository and documentation consolidation.
 2. Complete the [one-product Community/Enterprise entitlement foundation](../architecture/EDITION_ENTITLEMENTS.md), including the private production issuer and offline key-management procedure. API and web remain separate containers/images, but never have edition-specific builds.
 3. Run the clean end-to-end acceptance suite from reset synthetic fixtures in both edition states.
-4. Complete the documented security verification and independent review against the same edition architecture.
+4. Complete the documented ASVS security verification against the same edition architecture.
 5. Internationalize the product and make repository content consistently English.
 
 Each gate must be complete and evidenced before the next gate changes public contracts or distribution.
@@ -65,7 +65,7 @@ The baseline is:
 - OWASP Web Security Testing Guide for dynamic testing;
 - OWASP API Security Top 10 for all machine and browser APIs.
 
-Use the [security test plan](../security/SECURITY_TEST_PLAN.md), [threat model](../security/SECURITY_THREAT_MODEL.md), [verification record](../security/SECURITY_VERIFICATION.md), and [ASVS matrix](../security/ASVS_5.0.0_L2_MATRIX.md). Complete the coordinated database/Data Protection key restore exercise and an independent penetration test.
+Use the [security test plan](../security/SECURITY_TEST_PLAN.md), [threat model](../security/SECURITY_THREAT_MODEL.md), [verification record](../security/SECURITY_VERIFICATION.md), and [ASVS matrix](../security/ASVS_5.0.0_L2_MATRIX.md). Use the ASVS matrix as the single security-testing work list and complete the coordinated database/Data Protection key restore exercise. An external penetration test is optional when requested.
 
 ## Internationalization
 
@@ -97,7 +97,7 @@ The [edition architecture](../architecture/EDITION_ENTITLEMENTS.md) is part of t
 
 ## Enterprise instance federation before final 1.0 testing
 
-The [instance-federation implementation](../architecture/INSTANCE_FEDERATION.md) covers stable installation identity, protected signing keys, bilateral proof, automatic top-level catalogs, default-off audited GUI activation, ordinary request routing, signed delivery/returns, retry/idempotency, site moves, key rotation and controlled key-loss recovery. A two-database `Production` baseline proves disabled-state isolation, activation through the Platform Manager API, ordinary signed delivery without site-pair grants and absence of synthetic routes. Compatibility, browser, classified PDF, proxy/load, retention/load and matched database/key-ring restore evidence also exists. The [reviewer handoff](../security/FEDERATION_SECURITY_REVIEW_BRIEF.md) remains an independent release-governance gate; repeat all baselines against each release candidate and exercise restore with production backup custody before organizational activation.
+The [instance-federation implementation](../architecture/INSTANCE_FEDERATION.md) covers stable installation identity, protected signing keys, bilateral proof, automatic top-level catalogs, default-off audited GUI activation, ordinary request routing, signed delivery/returns, retry/idempotency, site moves, key rotation and controlled key-loss recovery. A two-database `Production` baseline proves disabled-state isolation, activation through the Platform Manager API, ordinary signed delivery without site-pair grants and absence of synthetic routes. Compatibility, browser, classified PDF, proxy/load, retention/load and matched database/key-ring restore evidence also exists. The [reviewer handoff](../security/FEDERATION_SECURITY_REVIEW_BRIEF.md) is an optional external-review template; repeat all baselines against each release candidate and exercise restore with production backup custody before organizational activation.
 
 ## Documentation obligations
 

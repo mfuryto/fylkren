@@ -268,5 +268,132 @@
       "configurationFailures": 0,
       "findings": []
     }
-  }
+  },
+  "continuations": [
+    {
+      "recordedAtUtc": "2026-10-02T18:55:39.824197+00:00",
+      "baseRevision": "382b4691c07c6ed5c67daf704c8c74820db15c04",
+      "version": "0.70.0-dev.1",
+      "sourceSha256": {
+        "apps/api/Identity/WebAuthnEndpoints.cs": "2afe99e0702e2a70c665ba36744599f6078c2a76682942c89f795cfcebb3d1cc",
+        "apps/api/Identity/WebAuthnFlowService.cs": "937b0d9a4705c0994b5d8c813588dd748faf1ca5df191fbd6c1e92da3566429e",
+        "tools/e2e/webauthn-security.mjs": "79b85a8017e304cf8b7f24fff87d7c4b667609fee2b74130290873003cb851b3",
+        "tools/run-release-browser.mjs": "81d7b5b9c568aeec88347308682c7c69dcd4d27574d5b7f4e739f298be79ef9b",
+        "tools/run-e2e-editions.mjs": "86d60a38c2f160f9bbf4b238379719de5d5d9e73d15085b3424dffae9adb8c8f",
+        "tools/e2e/auth-session-security.mjs": "72764c9f71df6c61ab6b2dfeeeb7e7873b8f23af21461fb9720a03ba49863f00",
+        "tools/e2e/identity-session-lifecycle.mjs": "61a39140512b74db4c7aa9cb410b79dd43632876c9285b1f73b18acdf75d91d4",
+        "tools/check-security-evidence.mjs": "b8183d7c10b55643e9bd4d413ce94b8af68f79611c2bcadf33d7b107777d0d1e",
+        "tools/generate-asvs-matrix.mjs": "8a50b0ba9e4814ac01a4f1d0456344df680a9627d608874b06a9e9c97aa6fe7e",
+        "docs/security/ASVS_5.0.0_L2_MATRIX.md": "7dd6c363952be503205daf57c17499195c2e85d8564a6a32657c5adece3d65d5",
+        "package.json": "39f2cd376e18e6ef507ecc3217cb3c0de10a53f3cd621367f64213361b522635"
+      },
+      "apiImages": {
+        "webAuthnLab": "sha256:6f58156774c2010586ca9c6d13f8636d2be7a02870fbaf09dbbf7538cf41174d",
+        "editionLab": "sha256:e3fb59276b130179d5ca9166e757f0bf670a7eff359d85a4ed218f24ed19e28f"
+      },
+      "sv058PreFix": {
+        "targetCommit": "382b4691c07c6ed5c67daf704c8c74820db15c04",
+        "staleRegistrationObservedStatus": 204,
+        "expectedStatus": 400
+      },
+      "webAuthnResult": {
+        "webAuthnSecurity": "passed",
+        "virtualCtap2Authenticator": true,
+        "passwordReauthentication": true,
+        "staleRegistrationAfterSignOutRejected": true,
+        "parallelRegistrationSingleUse": true,
+        "parallelLoginSingleUse": true,
+        "registrationReplayRejected": true,
+        "signIn": true,
+        "assertionReplayRejected": true,
+        "wrongOriginRejected": true,
+        "wrongRpIdRejected": true,
+        "regressedCounterRejected": true,
+        "staleLoginAfterSignOutRejected": true,
+        "deletionReauthentication": true,
+        "deletedCredentialPendingLoginRejected": true,
+        "failedFlowsLeaveNoSession": true
+      },
+      "editionResult": {
+        "editionsAndTransitions": "passed",
+        "bootstrap": "passed",
+        "sessionCookieAttributes": "passed",
+        "csrfSignOut": "passed",
+        "signedOutCookieReplay": "passed",
+        "passwordChangeSessionRevocation": "passed",
+        "concurrentPasswordReset": "passed",
+        "passwordResetSessionRevocation": "passed",
+        "deactivationSessionRevocation": "passed",
+        "reactivationCookieReplay": "passed",
+        "genericAuthenticationFailure": "passed",
+        "authenticationRateLimit": "passed",
+        "authorizationBoundaries": "passed",
+        "crossSiteGuidSubstitution": "passed",
+        "administrationReportApis": "passed",
+        "dependencies": "passed",
+        "learning": "passed",
+        "learningPrivacy": "passed",
+        "learningTreatment": "passed",
+        "learningConcurrency": "passed",
+        "learningHistoryPagination": "passed",
+        "taskComments": "passed",
+        "decisionsRisksVersions": "passed",
+        "webhookFailureIsolation": "passed",
+        "portability": "passed",
+        "workloadLoad": {
+          "workloadLoad": "passed",
+          "createdTasks": 1000,
+          "metrics": [
+            {
+              "concurrency": 1,
+              "authorizedRequests": 100,
+              "unauthorizedRequestsRejected": 100,
+              "p50Ms": 11,
+              "p95Ms": 85,
+              "p99Ms": 92,
+              "maxMs": 97
+            },
+            {
+              "concurrency": 10,
+              "authorizedRequests": 100,
+              "unauthorizedRequestsRejected": 100,
+              "p50Ms": 20,
+              "p95Ms": 134,
+              "p99Ms": 143,
+              "maxMs": 160
+            },
+            {
+              "concurrency": 25,
+              "authorizedRequests": 100,
+              "unauthorizedRequestsRejected": 100,
+              "p50Ms": 63,
+              "p95Ms": 224,
+              "p99Ms": 258,
+              "maxMs": 267
+            }
+          ]
+        }
+      },
+      "asvsTraceability": {
+        "total": 253,
+        "passed": 20,
+        "inProgress": 120,
+        "notAssessed": 59,
+        "notApplicable": 54,
+        "requirementsWithLinkedRunEvidence": 107,
+        "unsupportedPassedEntriesDowngraded": 19
+      },
+      "rawLogSha256": {
+        "fylkren-webauthn-lifecycle-before.log": "b9eb4def92a10da6b2d060995aa418c5827e33f00deea9c911abc5a407c9695a",
+        "fylkren-webauthn-lifecycle-after.log": "042760b7ff6fdb56ac6c2bb8621d8495733d7f13cf24f5dfeb71ed853155e34e",
+        "fylkren-security-lifecycle-editions.log": "d7d848edb021b9b0ed173d1944af0d631607f6d16e23669de0ed2af6245a720e"
+      },
+      "limits": [
+        "Virtual CTAP2 and loopback HTTP only",
+        "No new image vulnerability scan",
+        "No production deployment/test",
+        "Remaining scope is tracked in the ASVS matrix"
+      ]
+    }
+  ]
 }

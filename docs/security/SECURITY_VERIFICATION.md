@@ -1,6 +1,6 @@
 # Security verification record
 
-This is the maintained status record for Fylkren's security release gate. It does not replace an independent penetration test. The requirement baseline and evidence rules are defined in the [security test plan](SECURITY_TEST_PLAN.md), while individual ASVS requirements are tracked in the [ASVS matrix](ASVS_5.0.0_L2_MATRIX.md).
+This is the maintained status record for Fylkren's security release gate. The ASVS matrix is the single requirement-level testing work list; this record holds findings and release status. An external review is optional when explicitly requested. The requirement baseline and evidence rules are defined in the [security test plan](SECURITY_TEST_PLAN.md), while individual ASVS requirements are tracked in the [ASVS matrix](ASVS_5.0.0_L2_MATRIX.md).
 
 Requirements excluded by architecture are justified separately in the [ASVS applicability record](ASVS_APPLICABILITY.md), including the condition that would make each group applicable again.
 
@@ -18,7 +18,7 @@ No control is promoted from **Implemented** to **Verified** solely because code 
 
 ## Current release-gate summary
 
-The [2026-10-02 release regression](../testing/runs/2026-10-02-release-regression.md) records the latest fresh local edition, browser/PDF/learning privacy, identity, license, workload, federation and restore evidence. This adds measured evidence without declaring the remaining ASVS or independent/production gates complete.
+The [2026-10-02 release regression](../testing/runs/2026-10-02-release-regression.md) records the latest fresh local edition, browser/PDF/learning privacy, identity, license, workload, federation and restore evidence. This adds measured evidence without declaring the remaining ASVS or production gates complete.
 
 | Area | Current status | Required completion evidence |
 | --- | --- | --- |
@@ -26,12 +26,12 @@ The [2026-10-02 release regression](../testing/runs/2026-10-02-release-regressio
 | Sessions, cookies, and CSRF | Implemented | Lifecycle and parallel-session invalidation passed; complete absolute/sliding expiry, mutation-matrix and external-IdP revocation evidence |
 | Local passwords and recovery | Implemented | Concurrent reset and session revocation passed; complete blocklist, reset-expiry and remaining boundary evidence |
 | TOTP and recovery codes | Implemented | The 2026-10-02 lab passed setup replay, adjacent-window rejection, concurrent TOTP/recovery single-use and sign-out challenge invalidation; expiry/clock-skew and remaining lifecycle boundaries still need evidence |
-| WebAuthn and passkeys | Implemented | The 2026-10-02 virtual CTAP2 lab passed registration/sign-in, replay, origin/RP and counter regression; hardware/platform authenticators, expiry and remaining lifecycle evidence still need coverage |
+| WebAuthn and passkeys | Implemented | The 2026-10-02 virtual CTAP2 lab passed registration/sign-in, replay, origin/RP, counter regression, concurrent single-use, security-version revocation and removal boundaries; hardware/platform authenticators, expiry and remaining lifecycle evidence still need coverage |
 | OIDC, SAML, AD, and LDAP | Implemented | The maintained 2026-09-29 laboratories now pass the complete E2E-14 functional and negative identity scope, including exact issuer/entity binding, nonce/audience, unsigned/tampered/replayed assertions, lifecycle fail-safe cases, unlink/relink and one-time environment import; repeat unchanged against the exact release candidate and representative customer IdPs |
 | Enterprise license lifecycle | Implemented | Real-time expiry, immediate entitlement closure, retained state and renewal without restart passed on 2026-09-29; repeat against the exact release candidate and verify production issuer/key custody |
 | Platform/site/level authorization | Implemented | Full role/object matrix through UI and direct HTTP calls, including cross-site and sibling isolation |
 | Cross-site assignments and requests | Implemented | Clean E2E rerun proving snapshots, filtered response, return route, workload, and report receipts |
-| Independent-instance federation | Implemented in isolated test environment; reviewer handoff defined | Execute the [independent federation review brief](FEDERATION_SECURITY_REVIEW_BRIEF.md), close or accept findings, and complete the remaining threat-model production gates before enabling ordinary routing |
+| Independent-instance federation | Implemented in isolated test environment; reviewer handoff defined | Complete the applicable ASVS and federation threat-model controls, close or accept findings, and verify the supported deployment before enabling ordinary routing; the external review brief is optional |
 | Rich text, URLs, input, and output | Implemented | Injection payloads, protocol allowlist, field/body bounds, mail headers, print, and PDF |
 | Administration and report APIs | Implemented | Complete scope/grant/BOLA, ETag, idempotency, pagination, rate, and concurrency suite |
 | Audit, technical logs, and notifications | Implemented | Leakage, isolation, delivery failure, retry, retention, and tamper-boundary evidence |
@@ -101,16 +101,9 @@ The following controls were introduced during hardening and must remain covered 
 
 ## Open verification work
 
-The current blocking work is verification, not an assumption that the inventory above is production-certified:
+The [ASVS matrix](ASVS_5.0.0_L2_MATRIX.md) is the sole security-testing work list. Existing test implementations and execution records are linked in its evidence cells, with remaining scope on the same row. Proceed systematically through its chapters; complete positive, negative and boundary tests before marking a requirement Passed. Rerun affected controls after remediation and freeze the tested candidate in the run evidence. The E2E acceptance matrix remains the functional acceptance baseline, not a competing security checklist.
 
-1. Complete every `Not assessed` and `In progress` item in the ASVS matrix.
-2. Execute the maintained [E2E acceptance matrix](../testing/END_TO_END_TEST_MATRIX.md) from reset synthetic fixtures.
-3. Run all automated security scripts against the same release candidate and retain safe evidence.
-4. Exercise the remaining TOTP, WebAuthn, API authentication, ETag, and idempotency races.
-5. Repeat the now-complete maintained AD, LDAP, OIDC and SAML identity laboratories against the exact release candidate and representative customer IdPs. Test WebAuthn in the closed integration environment afterward.
-6. Repeat the passed coordinated database/key-ring restore against the formal release environment and retain protected evidence.
-7. Measure authorization-sensitive queries and representative workload at supported deployment sizes.
-8. Perform an independent penetration test using the [federation review brief](FEDERATION_SECURITY_REVIEW_BRIEF.md) where applicable, then remediate or formally accept every finding.
+Production-only controls, representative deployment sizing and the formal database/key-ring restore must be verified in their authorized environment. An external tester is not a prerequisite for this work; the existing federation review brief is an optional handoff if an external review is later requested.
 
 ## Finding register
 
@@ -145,6 +138,7 @@ Historical hardening changes before this maintained register remain traceable in
 | SV-054 | Dependency maintenance; Medium | PostgreSQL image included nghttp2-libs 1.69.0-r0 with CVE-2026-58055 and an available fix. | Upgrade Alpine packages during image construction; installed 1.70.0-r0. Rebuilt image scan reported zero vulnerabilities. Fresh database/backup/restore regression passed. | Closed in the commit containing this record; retested 2026-10-02 |
 | SV-056 | Container least privilege; scanner DS-0002 High | PostgreSQL's Dockerfile inherited the root image user. Its entrypoint normally dropped the server process to postgres, but initialization and default container exec still started with root privileges. | Set USER postgres, drop all capabilities and prohibit privilege escalation. The fresh database/restore fixture asserts non-root UID, zero effective capabilities and NoNewPrivs=1. A separate existing-volume upgrade from the former root entrypoint preserved data under UID 70. The configuration rescan has zero findings. | Closed in the commit containing this record; retested 2026-10-02 |
 | SV-057 | TM-15; Low | Invalid/replayed WebAuthn verification responses escaped as unhandled 500 errors. The observed registration replay did not create another credential or bypass authentication, but produced a server failure instead of a controlled rejection. | Handle only Fido2VerificationException on WebAuthn routes; return bounded generic 400 for registration and 401 for login, without logging assertion/attestation material. The fresh virtual CTAP2 run rejected registration/assertion replay, validly signed wrong-origin/wrong-RP responses and counter regression; every failed login left no session. | Closed in the commit containing this record; retested 2026-10-02 |
+| SV-058 | ASVS 7.4.1 / 7.5.1; TM-15; Medium | A passkey registration proof issued before sign-out still enrolled a credential after a new password sign-in. An earlier reauthentication proof therefore survived security-version revocation; completion still required an authenticated session. | WebAuthn protected state v2 carries security version. Completion locks and reloads identity state, rejects stale state before grant consumption and serializes registration/login/removal. The fresh CTAP2 lab rejected stale registration and login after sign-out, enforced single-use under concurrent requests and rejected pending login after credential removal. See the release run and ASVS rows for evidence. | Closed in the commit containing this record; retested 2026-10-02; maintainer |
 
 ### Open residual findings
 
