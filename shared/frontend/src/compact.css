@@ -34,6 +34,10 @@
   .site-tree-row { gap: 8px; padding: 9px 12px 9px calc(12px + var(--site-depth) * 24px); }
   .audit-row { gap: 8px 12px; padding: 8px 12px; }
   .report-list-row { padding-inline: 12px; }
+  .reports-page .report-list-row { grid-template-columns: minmax(132px, max-content) minmax(0, 1fr); cursor: pointer; }
+  .reports-page .report-list-panel > .admin-list { margin-top: 0; }
+  .report-heading-button { display: block; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; text-align: start; font: inherit; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+  .report-heading-button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
   :is(.personnel-list, .role-list) .section-heading { padding: 12px 12px 0; }
   :is(.audit-list-panel, .report-list-panel) .section-heading { padding: 12px 12px 8px; }
   .pagination { gap: 8px; padding: 10px 12px; }

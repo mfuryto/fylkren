@@ -18,6 +18,7 @@ export function ReportsPage({ language, timeZone, classificationMarkings, permal
   const [selectedSiteId, setSelectedSiteId] = useState("");
   const [selectedUnitId, setSelectedUnitId] = useState("");
   const [reports, setReports] = useState<ArchivedReport[]>([]);
+  const [yearCounts, setYearCounts] = useState<Array<{ year: number; count: number }>>([]);
   const [years, setYears] = useState<number[]>([]);
   const [year, setYear] = useState(new Date().getFullYear().toString());
   const [search, setSearch] = useState("");
@@ -66,10 +67,11 @@ export function ReportsPage({ language, timeZone, classificationMarkings, permal
     if (selectedUnitId) parameters.set("unitId", selectedUnitId);
     if (year) parameters.set("year", year);
     if (appliedSearch) parameters.set("search", appliedSearch);
-    apiGet<{ reports: ArchivedReport[]; years: number[]; total: number }>(`/api/work/sites/${selectedSiteId}/reports?${parameters}`, t("reportsLoadFailed"))
+    apiGet<{ reports: ArchivedReport[]; years: number[]; yearCounts: Array<{ year: number; count: number }>; total: number }>(`/api/work/sites/${selectedSiteId}/reports?${parameters}`, t("reportsLoadFailed"))
       .then(value => {
         setReports(value.reports);
         setYears(value.years);
+        setYearCounts(value.yearCounts ?? []);
         setTotal(value.total);
         setError("");
         if (permalink.reportId) {
@@ -92,7 +94,7 @@ export function ReportsPage({ language, timeZone, classificationMarkings, permal
     </div></section> : <>
       <ReportToolbar
         sites={sites} units={availableUnits} selectedSiteId={selectedSiteId} selectedUnitId={selectedUnitId}
-        hasTopLevelAccess={Boolean(selectedSite?.hasTopLevelAccess)} year={year} years={years} search={search}
+        hasTopLevelAccess={Boolean(selectedSite?.hasTopLevelAccess)} year={year} years={years} yearCounts={yearCounts} loading={loading} search={search}
         sort={sort}
         onSiteChange={value => { setSelectedSiteId(value); setSelectedUnitId(""); setPage(1); }}
         onUnitChange={value => { setSelectedUnitId(value); setPage(1); }}

@@ -12,6 +12,8 @@ type ReportToolbarProps = {
   hasTopLevelAccess: boolean;
   year: string;
   years: number[];
+  yearCounts: Array<{ year: number; count: number }>;
+  loading: boolean;
   search: string;
   onSiteChange: (siteId: string) => void;
   onUnitChange: (unitId: string) => void;
@@ -22,7 +24,7 @@ type ReportToolbarProps = {
   onSortChange: (sort: ListSort) => void;
 };
 
-export function ReportToolbar({ sites, units, selectedSiteId, selectedUnitId, hasTopLevelAccess, year, years, search, sort, onSiteChange, onUnitChange, onYearChange, onSearchChange, onSortChange, onSubmit }: ReportToolbarProps) {
+export function ReportToolbar({ sites, units, selectedSiteId, selectedUnitId, hasTopLevelAccess, year, years, yearCounts, loading, search, sort, onSiteChange, onUnitChange, onYearChange, onSearchChange, onSortChange, onSubmit }: ReportToolbarProps) {
   const t = useTranslation();
   return <form className="panel report-toolbar" onSubmit={onSubmit}>
     {sites.length > 1 && <div className="field">
@@ -41,8 +43,8 @@ export function ReportToolbar({ sites, units, selectedSiteId, selectedUnitId, ha
     <div className="field">
       <label htmlFor="report-year">{t("year")}</label>
       <select id="report-year" value={year} onChange={event => onYearChange(event.target.value)}>
-        <option value="">{t("allYears")}</option>
-        {availableReportYears(years, year).map(value => <option key={value} value={value}>{value}</option>)}
+        <option value="">{t("allYears")} ({loading ? "…" : yearCounts.reduce((sum, entry) => sum + entry.count, 0)})</option>
+        {availableReportYears(years, year).map(value => <option key={value} value={value}>{value} ({loading ? "…" : yearCounts.find(entry => entry.year === value)?.count ?? 0})</option>)}
       </select>
     </div>
     <div className="field report-search">

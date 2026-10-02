@@ -18,17 +18,20 @@ internal static class ReportQueryEndpoints
             if (year is < 1900 or > 9999) return Results.ValidationProblem(new Dictionary<string, string[]> { ["year"] = ["The year must be between 1900 and 9999."] });
             var pageNumber = Math.Max(page ?? 1, 1); const int pageSize = 20;
             var query = db.WorkItems.AsNoTracking().Where(x => x.SiteId == siteId && x.AssignedUnitId == unitId && x.Status == "completed" && x.FinalReport != null && x.FinalReportApprovedAt != null);
-            var years = await query.Select(x => x.FinalReportApprovedAt!.Value.Year).Distinct().OrderByDescending(x => x).ToListAsync(ct);
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var pattern = RequestQueryPolicy.LikePattern(search);
+                query = query.Where(x => EF.Functions.ILike(x.ReferenceCode, pattern, "\\") || EF.Functions.ILike(x.Title, pattern, "\\") || EF.Functions.ILike(x.FinalReport!, pattern, "\\") || x.CreatedByPerson != null && EF.Functions.ILike(x.CreatedByPerson.DisplayName, pattern, "\\") || x.SenderSiteName != null && EF.Functions.ILike(x.SenderSiteName, pattern, "\\") || x.FinalReportWrittenByPerson != null && EF.Functions.ILike(x.FinalReportWrittenByPerson.DisplayName, pattern, "\\"));
+            }
+            var yearCounts = await query.GroupBy(x => x.FinalReportApprovedAt!.Value.Year)
+                .Select(group => new { year = group.Key, count = group.Count() })
+                .OrderByDescending(value => value.year).ToListAsync(ct);
+            var years = yearCounts.Select(value => value.year).ToList();
             if (year is > 0)
             {
                 var from = new DateTimeOffset(year.Value, 1, 1, 0, 0, 0, TimeSpan.Zero);
                 var until = from.AddYears(1);
                 query = query.Where(x => x.FinalReportApprovedAt >= from && x.FinalReportApprovedAt < until);
-            }
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                var pattern = RequestQueryPolicy.LikePattern(search);
-                query = query.Where(x => EF.Functions.ILike(x.ReferenceCode, pattern, "\\") || EF.Functions.ILike(x.Title, pattern, "\\") || EF.Functions.ILike(x.FinalReport!, pattern, "\\") || x.CreatedByPerson != null && EF.Functions.ILike(x.CreatedByPerson.DisplayName, pattern, "\\") || x.SenderSiteName != null && EF.Functions.ILike(x.SenderSiteName, pattern, "\\") || x.FinalReportWrittenByPerson != null && EF.Functions.ILike(x.FinalReportWrittenByPerson.DisplayName, pattern, "\\"));
             }
             var total = await query.CountAsync(ct);
             var siteName = await db.Sites.Where(x => x.Id == siteId).Select(x => x.Name).SingleAsync(ct);
@@ -112,7 +115,7 @@ internal static class ReportQueryEndpoints
                 x.approvedBy,
                 x.FinalReportApprovedAt
             }).ToList();
-            return Results.Ok(new { reports, years, page = pageNumber, pageSize, total, totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)pageSize)) });
+            return Results.Ok(new { reports, years, yearCounts, page = pageNumber, pageSize, total, totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)pageSize)) });
         });
     }
 
