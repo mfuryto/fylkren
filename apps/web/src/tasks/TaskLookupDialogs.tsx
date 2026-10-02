@@ -36,7 +36,7 @@ export function TaskTypeManagerDialog({
         </div>
         {form.id && (
           <label className="checkbox-field">
-            <input type="checkbox" checked={form.isActive} onChange={(event) => setForm({ ...form, isActive: event.target.checked })} /> {translateActive("tasksTaskLookupDialogsActiveTaskType")}
+            <input type="checkbox" disabled={types.some(type => type.id === form.id && type.isSystemManaged)} checked={form.isActive} onChange={(event) => setForm({ ...form, isActive: event.target.checked })} /> {translateActive("tasksTaskLookupDialogsActiveTaskType")}
           </label>
         )}
         <button className="primary-button" disabled={busy}>{form.id ? translateActive("tasksTaskLookupDialogsSaveType") : translateActive("createType")}</button>
@@ -49,11 +49,8 @@ export function TaskTypeManagerDialog({
               <strong>{type.name}</strong>
               <small className="muted">{type.abbreviation} · {type.isActive ? translateActive("active") : translateActive("inactive")}{type.inUse ? translateActive("inUseSuffix") : ""}</small>
             </span>
-            {type.isSystemManaged ? (
-              <span className="muted">{translateActive("tasksTaskLookupDialogsSystemManaged")}</span>
-            ) : (
-              <button className="link-button" type="button" onClick={() => setForm({ id: type.id, name: type.name, abbreviation: type.abbreviation ?? "", isActive: type.isActive })}>{translateActive("edit")}</button>
-            )}
+            {type.isSystemManaged && <span className="muted">{translateActive("tasksTaskLookupDialogsSystemManaged")}</span>}
+            <button className="link-button" type="button" onClick={() => setForm({ id: type.id, name: type.name, abbreviation: type.abbreviation ?? "", isActive: type.isActive })}>{translateActive("edit")}</button>
           </div>
         ))}
       </section>

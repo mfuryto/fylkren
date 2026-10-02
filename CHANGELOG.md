@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Allowed Site Manager to rename and abbreviate the system request type while retaining its protected active state, routing identity and existing reference codes.
+
 - Restricted fallback Site code editing to Platform Manager's existing References page and removed the code section from Site Manager's References. Existing task references remain unchanged.
 
 - Compacted Platform Manager status counters, service and log rows, action buttons, administration sections, delivery summaries and the licence certificate while retaining its branding and entitlement details.

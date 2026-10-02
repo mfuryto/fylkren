@@ -62,8 +62,8 @@ internal static class WorkItemLookupEndpoints
             return Results.Problem(statusCode: 403);
         var type = await db.WorkItemTypes.SingleOrDefaultAsync(value => value.Id == typeId && value.SiteId == siteId, ct);
         if (type is null) return Results.NotFound();
-        if (type.IsSystemManaged)
-            return Results.Conflict(new { error = "System-managed task types cannot be changed or disabled." });
+        if (type.IsSystemManaged && !request.IsActive)
+            return Results.Conflict(new { error = "System-managed task types cannot be disabled." });
         var name = NormalizeName(request.Name);
         if (!ValidName(name) || await db.WorkItemTypes.AnyAsync(value =>
                 value.SiteId == siteId && value.Id != typeId && value.NormalizedName == name.ToUpperInvariant(), ct))
