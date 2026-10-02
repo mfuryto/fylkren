@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Aligned the Tasks due-date column across rows by giving reference and status columns consistent widths, including when a task is opened.
+
 - Made individual learning-point treatment clearer with clickable status controls for leaders, explicit opening instructions and an explanation for users with read-only treatment access.
 
 - Restarted numbering separately for each final-report learning list and moved learning categories into a compact green/red indicator column before the observation text.

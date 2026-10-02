@@ -48,6 +48,25 @@ for (const page of ['Overview', 'Tasks', 'Planning', 'Execution', 'Reports']) {
     assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), `${page} horizontal overflow`);
     if (page === 'Planning') assert.ok(await evaluate('document.querySelector(".timeline-ruler").getBoundingClientRect().bottom < innerHeight'), 'Timeline must be visible in screenshot');
     await screenshot(page.toLowerCase());
+    if (page === 'Tasks') {
+      async function checkDeadlineAlignment() {
+        const positions = await evaluate('Array.from(document.querySelectorAll(".work-queue .task-deadline-cell"), e => e.getBoundingClientRect().left)');
+        assert.ok(positions.length >= 5);
+        assert.ok(Math.max(...positions) - Math.min(...positions) < 1, 'Task deadlines must share a column regardless of status width');
+      }
+      await checkDeadlineAlignment();
+      await evaluate('document.querySelector(".work-queue .task-reference").textContent = "OPS-000101-123-456-789-123456789"');
+      await checkDeadlineAlignment();
+      await evaluate('document.querySelector(".work-queue .task-heading-toggle").click()');
+      await wait('document.querySelector(".work-queue .permalink-action") !== null');
+      await checkDeadlineAlignment();
+      await call('Emulation.setDeviceMetricsOverride', { width: 900, height: 1080, deviceScaleFactor: 1, mobile: false });
+      await checkDeadlineAlignment();
+      assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Task list must fit tablet width');
+      await call('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
+      await checkDeadlineAlignment();
+      assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Task list must fit mobile width');
+    }
     if (page === 'Reports') {
       await evaluate('document.querySelector(".report-heading-button").click()');
       await wait('document.querySelector("#printable-report") !== null');
