@@ -8,14 +8,14 @@ using Microsoft.EntityFrameworkCore;
 namespace Fylkren.Api.DomainEvents;
 
 // Command-owned intent. Never reconstruct activity by scanning security audit records.
-internal sealed record WorkActivityIntent(AuditEvent Audit, string Type, string? NotificationKind, Guid? WorkItemId, Guid? SourceMessageId, Guid? CorrelationId, Guid? OriginSiteId, string? MetadataJson);
+internal sealed record WorkActivityIntent(AuditEvent Audit, string Type, string? NotificationKind, Guid? WorkItemId, Guid? SourceMessageId, Guid? CorrelationId, Guid? OriginSiteId, string? MetadataJson, string? ResourceType, Guid? ResourceId);
 internal static class WorkActivity
 {
-    internal static void Add(FylkrenDbContext db, AuditEvent audit, string type, string? notificationKind = null, Guid? workItemId = null, Guid? sourceMessageId = null, Guid? correlationId = null, Guid? originSiteId = null, string? metadataJson = null)
+    internal static void Add(FylkrenDbContext db, AuditEvent audit, string type, string? notificationKind = null, Guid? workItemId = null, Guid? sourceMessageId = null, Guid? correlationId = null, Guid? originSiteId = null, string? metadataJson = null, string? resourceType = null, Guid? resourceId = null)
     {
         if (!ActivityEventCatalog.Types.Contains(type)) throw new ArgumentException("Unknown command activity.");
         db.AuditEvents.Add(audit);
-        db.PendingWorkActivities.Add(new(audit, type, notificationKind, workItemId, sourceMessageId, correlationId, originSiteId, metadataJson));
+        db.PendingWorkActivities.Add(new(audit, type, notificationKind, workItemId, sourceMessageId, correlationId, originSiteId, metadataJson, resourceType, resourceId));
     }
 
     internal static async Task Prepare(FylkrenDbContext db, CancellationToken ct)
@@ -40,8 +40,8 @@ internal static class WorkActivity
             // A source-site audit about a recipient-owned resource remains audit-only.
             if (audit.SiteId is Guid auditSite && auditSite != item.SiteId) continue;
             var old = db.ChangeTracker.Entries<DomainEvent>().FirstOrDefault(x => x.State == EntityState.Added &&
-                x.Entity.ActivityType == null && x.Entity.SiteId == item.SiteId && x.Entity.ResourceId == audit.EntityId);
-            var resource = old?.Entity.ResourceType ?? (audit.EntityType == "workflow-run" ? "plan" : audit.EntityType == "execution-run" ? "execution" : intent.Type.StartsWith("report.", StringComparison.Ordinal) ? "report" : "work_item");
+                x.Entity.ActivityType == null && x.Entity.SiteId == item.SiteId && x.Entity.ResourceId == (intent.ResourceId ?? audit.EntityId) && (intent.ResourceType == null || x.Entity.ResourceType == intent.ResourceType));
+            var resource = intent.ResourceType ?? old?.Entity.ResourceType ?? (audit.EntityType == "workflow-run" ? "plan" : audit.EntityType == "execution-run" ? "execution" : intent.Type.StartsWith("report.", StringComparison.Ordinal) ? "report" : "work_item");
             var crossSiteActor = old is not null ? old.Entity.ActorPersonId is null : audit.ActorPersonId is Guid person && !await db.SiteMemberships.AnyAsync(x => x.SiteId == item.SiteId && x.PersonId == person && x.IsActive, ct);
             var context = audit.ActorInstanceId is Guid peer && audit.ActorSiteId is Guid peerSite
                 ? new DomainEventContext("federated", "federated-site", peer, peerSite, db.ActivityOperationId, ActorInstanceId: peer, ActorSiteId: peerSite, CorrelationId: db.ActivityOperationId)
@@ -53,7 +53,7 @@ internal static class WorkActivity
             context = context with { OriginSiteId = intent.OriginSiteId ?? context.OriginSiteId };
             context = context with { SourceMessageId = intent.SourceMessageId ?? transport?.MessageId, CorrelationId = intent.CorrelationId ?? transport?.CorrelationId ?? db.ActivityOperationId, RequestId = db.ActivityRequestId };
             var activityType = intent.Type == "assignment.started" && await db.DomainEvents.AnyAsync(x => x.ContextWorkItemId == item.Id && x.ActivityType == "assignment.started", ct) ? "assignment.updated" : intent.Type;
-            var value = DomainEvent.Create(old?.Entity.Id ?? Guid.NewGuid(), activityType, item.SiteId, resource, audit.EntityId, item.Id, context,
+            var value = DomainEvent.Create(old?.Entity.Id ?? Guid.NewGuid(), activityType, item.SiteId, resource, intent.ResourceId ?? audit.EntityId, item.Id, context,
                 intent.MetadataJson ?? JsonSerializer.Serialize(new { status = item.Status }), audit.OccurredAt, DateTimeOffset.UtcNow, audit.Id.ToString("N"), old?.Entity.EventType, old?.Entity.PayloadJson ?? "{}");
             if (old is not null) old.State = EntityState.Detached;
             db.DomainEvents.Add(value);

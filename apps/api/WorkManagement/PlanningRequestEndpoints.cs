@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using Fylkren.Api.ActivityAudit;
+using Fylkren.Api.DomainEvents;
 using Fylkren.Api.Federation;
 using Fylkren.Api.Licensing;
 using Fylkren.Api.Organization;
@@ -62,6 +64,7 @@ internal static class PlanningRequestEndpoints
                     request.TargetSiteId, instruction);
             }
             db.WorkflowPlanRequests.Add(plannedRequest);
+            WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.request-planned", "workflow-run", run.Id, DateTimeOffset.UtcNow), "plan.updated", metadataJson: "{\"changedFields\":\"plannedRequests\"}");
             await db.SaveChangesAsync(ct);
             return Results.Created($"/api/workflows/planning/{runId}/requests/{plannedRequest.Id}", new { plannedRequest.Id });
         });
@@ -73,6 +76,7 @@ internal static class PlanningRequestEndpoints
             var request = await db.WorkflowPlanRequests.Include(x => x.Run).ThenInclude(x => x.WorkItem).SingleOrDefaultAsync(x => x.Id == requestId && x.RunId == runId && x.Run.ClaimedByPersonId == personId && x.Run.Status == "in_progress", ct);
             if (request is null || !await OrganizationAuthorization.CanPlanAtLevel(request.Run.WorkItem.SiteId, request.Run.WorkItem.AssignedUnitId, personId, db, ct)) return Results.Problem(statusCode: 403);
             db.WorkflowPlanRequests.Remove(request);
+            WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), request.Run.WorkItem.SiteId, personId, "workflow.planned-request-removed", "workflow-run", request.Run.Id, DateTimeOffset.UtcNow), "plan.updated", metadataJson: "{\"changedFields\":\"plannedRequests\"}");
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });

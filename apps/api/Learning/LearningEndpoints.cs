@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Fylkren.Api.ActivityAudit;
 using Fylkren.Api.Persistence;
+using Fylkren.Api.DomainEvents;
 using Fylkren.Api.WorkManagement;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.EntityFrameworkCore;
@@ -85,7 +86,7 @@ internal static class LearningEndpoints
         var author = await db.People.Where(value => value.Id == personId).Select(value => value.DisplayName).SingleAsync(ct);
         var entry = new LearningEntry(Guid.NewGuid(), lesson.SiteId, lesson.Id, personId, author, "comment", text, now);
         db.LearningEntries.Add(entry);
-        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), lesson.SiteId, personId, "learning.comment-added", "work-item", lesson.WorkItemId, now));
+        WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), lesson.SiteId, personId, "learning.comment-added", "work-item", lesson.WorkItemId, now), "learning.comment_added", resourceType: "learning", resourceId: lesson.Id, metadataJson: "{}");
         await db.SaveChangesAsync(ct);
         return Results.Created($"/api/work/learning/{lesson.Id}/entries", new { entry.Id });
     }
@@ -109,7 +110,7 @@ internal static class LearningEndpoints
         var author = await db.People.Where(value => value.Id == personId).Select(value => value.DisplayName).SingleAsync(ct);
         lesson.Review(request.Status!, request.Priority!, plan, note, request.DueOn, personId, author, now);
         db.LearningEntries.Add(new LearningEntry(Guid.NewGuid(), lesson.SiteId, lesson.Id, personId, author, "review", note, now, lesson.Status, lesson.Priority, plan, lesson.DueOn));
-        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), lesson.SiteId, personId, "learning.reviewed", "work-item", lesson.WorkItemId, now));
+        WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), lesson.SiteId, personId, "learning.reviewed", "work-item", lesson.WorkItemId, now), "learning.updated", resourceType: "learning", resourceId: lesson.Id, metadataJson: System.Text.Json.JsonSerializer.Serialize(new { revision = lesson.Version, status = lesson.Status }));
         await db.SaveChangesAsync(ct);
         return Results.NoContent();
     }

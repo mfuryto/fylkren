@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 2026-10-03 after the event/activity foundation and WorkItem lifecycle delivery.
+Updated 2026-10-03 after the event/activity foundation, WorkItem lifecycle and Work-owned domain activity delivery.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -8,11 +8,11 @@ This roadmap contains remaining work and release gates. Delivered behavior belon
 
 Repository/documentation consolidation, the common Community/Enterprise entitlement implementation, internationalization, human-readable work references and operational federation are implemented. Maintained end-to-end and identity laboratories have executed successfully within their documented scopes. These are no longer future implementation milestones; candidate-specific reruns and deployment qualification remain release work.
 
-The additive event/activity foundation and coherent WorkItem slice are delivered, including shared notification/webhook integration, authorized object/Site timelines and guarded closure, archive and restoration. Permanent deletion, anonymisation and retention-policy execution remain disabled. See the [architecture and requirement/test traceability](../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md) and [staged execution evidence](../testing/runs/2026-10-02-release-regression.md#activity-and-lifecycle-delivery--2026-10-03). Successful regression runs do not mean ASVS is complete.
+The additive event/activity foundation and coherent WorkItem slice are delivered, including shared notification/webhook integration, authorized object/Site timelines and guarded closure, archive and restoration. Work-owned decisions, risks, measures, comments, learning and remaining planning/follow-up edits now use this same activity path, with exact-level learning privacy. Permanent deletion, anonymisation and retention-policy execution remain disabled. See the [architecture and requirement/test traceability](../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md) and [staged execution evidence](../testing/runs/2026-10-02-release-regression.md#work-owned-domain-activity-coverage--2026-10-03). Successful regression runs do not mean ASVS is complete.
 
 ## Next delivery order
 
-1. Extend the common event/activity and lifecycle model to the remaining domains, following delivery stage 4 in the architecture document. Complete and test each coherent slice before moving on.
+1. Continue delivery stage 4 with Site/user archive and custodianship, consistent lifecycle export and policy/hold adapters. Work-owned domain activity coverage is delivered. Complete and test each coherent slice before moving on.
 2. Correct and qualify navigation-count performance with the maintained hierarchy/load fixture. This is a separate sizing concern, not a reason to change pending-count semantics or authorization.
 3. Retest security requirements affected by these changes in the existing ASVS matrix, then resume incomplete chapter-1 requirements 1.3.3, 1.3.6 and 1.4.2. Continue the remaining matrix in the established requirement-order workflow.
 4. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records.
@@ -23,7 +23,7 @@ No irreversible disposition is authorized by this order. Establish and verify it
 
 Use the [single architecture/requirements/test reference](../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md) for detailed scope and T01–T14 acceptance cases.
 
-- Extend shared activity recording to risks, measures, decisions and remaining draft, RFI, comment and learning changes. Preserve existing working behavior and external API/federation contracts.
+- Integrate remaining Site/shared-user lifecycle effects through the existing recorder and explicit authorization adapters. Work-owned decisions, risks/measures, planning drafts/RFI, comments and learning are already covered; preserve existing working behavior and external API/federation contracts.
 - Add Site/user custodianship and relationship-aware lifecycle adapters, including deactivated identities, shared historical references and independently owned cross-site/federated records.
 - Establish consistent snapshot portability and customer exit/export behavior, including attachments and dependent records. Existing validation-only import is not a completed restoration/import capability.
 - Before irreversible disposition, implement configurable policy and hold gates, export-before-deletion, cross-owner reference protection, replay-horizon preservation and resumable redaction/purge recovery, including backup resurrection protection.
@@ -31,7 +31,9 @@ Use the [single architecture/requirements/test reference](../architecture/EVENT_
 
 ## Navigation-count performance
 
-Multi-second `/api/work/navigation-counts` reads were observed under 10/25 concurrent readers against both the additive checkpoint and the WorkItem candidate. The fixtures differ, so this is not a controlled performance-equivalence result. The maintained workload harness records per-endpoint measurements; the [staged run](../testing/runs/2026-10-02-release-regression.md#activity-and-lifecycle-delivery--2026-10-03) contains the evidence.
+Multi-second `/api/work/navigation-counts` reads were observed under 10/25 concurrent readers against both the additive checkpoint and the WorkItem candidate. The fixtures differ, so this is not a controlled performance-equivalence result. The maintained workload harness records per-endpoint measurements; the [staged run](../testing/runs/2026-10-02-release-regression.md#work-owned-domain-activity-coverage--2026-10-03) contains the evidence.
+
+The latest unchanged-query continuation measured p95 91/136/301 ms at concurrency 1/10/25, so the historical slowdown was not reproduced in that execution. Explain this variation with repeatable query plans and fixture/runtime conditions; do not infer a fix from one faster run.
 
 Reproduce query plans, correct the bottleneck and qualify the result against the full hierarchy fixture before production sizing approval. Preserve role/level predicates, Site isolation and counts of elements waiting for treatment. Do not hide the problem by simplifying fixtures or broadening visibility.
 

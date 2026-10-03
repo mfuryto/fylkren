@@ -926,7 +926,8 @@ const learning = await testLearning({ leader: leader.account, reader: commentRea
   base, executeDefault, updateStatus,
 });
 
-const activityLifecycle = await testActivityLifecycle({ leader: leader.account, sibling: sectionTwoLeader, unrelated: newParentLeader, platform, siteManager: siteManager.account, siteId, otherSiteId: newParentId, taskId: task.body.id, base, suffix });
+const archiveManager = await appointLeader('archive-manager', leadership.body.id);
+const activityLifecycle = await testActivityLifecycle({ leader: leader.account, manager: archiveManager, sibling: sectionTwoLeader, unrelated: newParentLeader, platform, siteManager: siteManager.account, siteId, otherSiteId: newParentId, taskId: task.body.id, base, suffix });
 
 const webhooks = await testWebhookFailureIsolation({
   platform, leader: leader.account, unrelated: newParentLeader,

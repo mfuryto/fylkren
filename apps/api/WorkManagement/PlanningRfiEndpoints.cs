@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Fylkren.Api.ActivityAudit;
 using Fylkren.Api.Organization;
 using Fylkren.Api.Persistence;
+using Fylkren.Api.DomainEvents;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.EntityFrameworkCore;
 using static Fylkren.Api.WorkManagement.WorkflowEndpoints;
@@ -33,7 +34,7 @@ internal static class PlanningRfiEndpoints
             var now = DateTimeOffset.UtcNow;
             var entry = new PlanningRfiEntry(Guid.NewGuid(), runId, "", "", null, false, "", now);
             db.PlanningRfiEntries.Add(entry);
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "planning.rfi-created", "planning-rfi", entry.Id, now));
+            WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "planning.rfi-created", "planning-rfi", entry.Id, now), "plan.updated", workItemId: run.WorkItemId, resourceType: "plan", resourceId: run.Id, metadataJson: "{\"changedFields\":\"rfi\"}");
             await db.SaveChangesAsync(ct);
             return Results.Created($"/api/workflows/planning/{runId}/rfi/{entry.Id}", new { entry.Id, entry.Who, entry.What, entry.DueOn, entry.Answered, entry.Answer, entry.CreatedAt, entry.UpdatedAt });
         });
@@ -51,7 +52,7 @@ internal static class PlanningRfiEndpoints
                 return Results.ValidationProblem(new Dictionary<string, string[]> { ["rfi"] = ["Check the length of Who, What, and Response."] });
             var now = DateTimeOffset.UtcNow;
             entry.Update(who, what, request.DueOn, request.Answered, answer, now);
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "planning.rfi-updated", "planning-rfi", entry.Id, now));
+            WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "planning.rfi-updated", "planning-rfi", entry.Id, now), "plan.updated", workItemId: run.WorkItemId, resourceType: "plan", resourceId: run.Id, metadataJson: "{\"changedFields\":\"rfi\"}");
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });
@@ -65,7 +66,7 @@ internal static class PlanningRfiEndpoints
             var entry = await db.PlanningRfiEntries.SingleOrDefaultAsync(x => x.Id == entryId && x.RunId == runId, ct);
             if (entry is null) return Results.NotFound();
             db.PlanningRfiEntries.Remove(entry);
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "planning.rfi-removed", "planning-rfi", entry.Id, DateTimeOffset.UtcNow));
+            WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "planning.rfi-removed", "planning-rfi", entry.Id, DateTimeOffset.UtcNow), "plan.updated", workItemId: run.WorkItemId, resourceType: "plan", resourceId: run.Id, metadataJson: "{\"changedFields\":\"rfi\"}");
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });

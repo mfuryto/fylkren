@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Fylkren.Api.ActivityAudit;
 using Fylkren.Api.Organization;
 using Fylkren.Api.Persistence;
+using Fylkren.Api.DomainEvents;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.EntityFrameworkCore;
 using static Fylkren.Api.WorkManagement.ExecutionEndpoints;
@@ -23,7 +24,7 @@ internal static class ExecutionFollowUpEndpoints
             var now = DateTimeOffset.UtcNow;
             var value = new ExecutionExternalRequest(Guid.NewGuid(), runId, request.StepId, recipient, requestText, now);
             db.ExecutionExternalRequests.Add(value);
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "execution.external-follow-up-recorded", "execution-external-request", value.Id, now));
+            WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "execution.external-follow-up-recorded", "execution-external-request", value.Id, now), "execution.updated", workItemId: run.WorkItemId, resourceType: "execution", resourceId: run.Id, metadataJson: "{\"changedFields\":\"externalFollowUp\"}");
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });
@@ -38,7 +39,7 @@ internal static class ExecutionFollowUpEndpoints
             if (value is null || !await WorkLevelAuthorization.BelongsToLevel(value.Run.WorkItem.SiteId, value.Run.WorkItem.AssignedUnitId, personId, db, ct)) return Results.Problem(statusCode: 403);
             var now = DateTimeOffset.UtcNow;
             value.RecordResponse(responseText, now);
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), value.Run.WorkItem.SiteId, personId, "execution.external-response-recorded", "execution-external-request", value.Id, now));
+            WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), value.Run.WorkItem.SiteId, personId, "execution.external-response-recorded", "execution-external-request", value.Id, now), "execution.updated", workItemId: value.Run.WorkItemId, resourceType: "execution", resourceId: value.Run.Id, metadataJson: "{\"changedFields\":\"externalFollowUp\"}");
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });

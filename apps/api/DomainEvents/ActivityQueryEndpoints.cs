@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Fylkren.Api.Persistence;
+using Fylkren.Api.Learning;
 using Fylkren.Api.WorkManagement;
 using Microsoft.EntityFrameworkCore;
 using static Fylkren.Api.WorkManagement.WorkItemPolicy;
@@ -25,6 +26,9 @@ internal static class ActivityQueryEndpoints
         var ids = visible.Where(x => x.SiteId == siteId).Select(x => x.Id);
         if (workItemId is Guid root && !await ids.AnyAsync(x => x == root, ct)) return Results.Problem(statusCode: 403);
         var query = db.DomainEvents.AsNoTracking().Where(x => x.SiteId == siteId && x.ContextWorkItemId != null && ids.Contains(x.ContextWorkItemId.Value));
+        // Work visibility alone never grants access to another level's private learning.
+        var learningUnits = (await LearningPolicy.Levels(person, db, ct)).Where(x => x.SiteId == siteId).Select(x => x.UnitId).ToArray();
+        query = query.Where(x => x.ResourceType != "learning" || db.LearningLessons.Any(lesson => lesson.Id == x.ResourceId && lesson.SiteId == siteId && lesson.WorkItemId == x.ContextWorkItemId && learningUnits.Contains(lesson.UnitId)));
         if (workItemId is Guid id) query = query.Where(x => x.ContextWorkItemId == id);
         if (eventType is not null) query = query.Where(x => x.ActivityType == eventType);
         if (resourceType is not null) query = query.Where(x => x.ResourceType == resourceType);

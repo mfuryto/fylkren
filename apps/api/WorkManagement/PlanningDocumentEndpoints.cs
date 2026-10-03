@@ -21,6 +21,7 @@ internal static class PlanningDocumentEndpoints
             var count = await db.WorkflowSteps.CountAsync(x => x.DefinitionId == run.DefinitionId, ct);
             if (request.Step < 0 || request.Step >= count) return Results.ValidationProblem(new Dictionary<string, string[]> { ["step"] = ["Invalid step."] });
             run.Advance(request.Step);
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.step-changed", "workflow-run", run.Id, DateTimeOffset.UtcNow), "plan.updated", metadataJson: "{\"changedFields\":\"step\"}");
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });

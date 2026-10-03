@@ -103,5 +103,30 @@ export async function testLearning({ leader, reader, sibling, unrelated, platfor
   assert.equal(audit.status, 200);
   assert.ok(audit.body.events.some(value => value.workReference === first.workReference));
   assert.ok(!JSON.stringify(audit.body).includes(first.text), 'Internal point text leaked into administrative audit');
+  // An operational timeline must not become a bypass around exact-level learning access.
+  const ownActivity = await leader.request(`/api/activity/sites/${siteId}?workItemId=${taskId}&eventType=learning.created&limit=50`);
+  assert.equal(ownActivity.status, 200, JSON.stringify(ownActivity.body));
+  assert.equal(ownActivity.body.items.length, 2, 'Repeated report save duplicated learning activity');
+  assert.ok(ownActivity.body.items.every(value => draftIds.includes(value.resourceId) && value.resourceType === 'learning'));
+  const visibleActivity = await leader.request(`/api/activity/sites/${siteId}?resourceType=learning&limit=50`);
+  assert.equal(visibleActivity.status, 200);
+  assert.ok(!JSON.stringify(visibleActivity.body).includes(privatePoint.id), 'Subordinate learning identity leaked into Site activity');
+  assert.ok(!JSON.stringify(visibleActivity.body).includes(privatePoint.text), 'Private learning content leaked into activity');
+  const hiddenActivity = await leader.request(`/api/activity/sites/${siteId}?workItemId=${sectionTask.body.id}&resourceType=learning&limit=1`);
+  assert.ok([200, 403].includes(hiddenActivity.status));
+  if (hiddenActivity.status === 200) {
+    assert.deepEqual(hiddenActivity.body.items, []);
+    assert.equal(hiddenActivity.body.hasMore, false, 'Hidden learning affected pagination');
+    assert.equal(hiddenActivity.body.next, null);
+  }
+  const privateActivity = await sectionLeader.request(`/api/activity/sites/${siteId}?workItemId=${sectionTask.body.id}&eventType=learning.created`);
+  assert.equal(privateActivity.status, 200);
+  assert.equal(privateActivity.body.items.length, 1);
+  assert.equal(privateActivity.body.items[0].resourceId, privatePoint.id);
+  const commentsActivity = await leader.request(`/api/activity/sites/${siteId}?workItemId=${taskId}&eventType=learning.comment_added&limit=50`);
+  assert.equal(commentsActivity.status, 200);
+  assert.equal(commentsActivity.body.items.length, 21);
+  assert.ok(commentsActivity.body.items.every(value => value.resourceId === first.id));
+  assert.equal((await reader.request(`/api/activity/sites/${siteId}?workItemId=${taskId}&eventType=learning.comment_added`)).status, 403, 'Learning access alone granted full work activity access');
   return { learning: 'passed', learningPrivacy: 'passed', learningTreatment: 'passed', learningConcurrency: 'passed', learningHistoryPagination: 'passed' };
 }

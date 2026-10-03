@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Fylkren.Api.ActivityAudit;
 using Fylkren.Api.Persistence;
+using Fylkren.Api.DomainEvents;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.EntityFrameworkCore;
 using static Fylkren.Api.WorkManagement.WorkItemPolicy;
@@ -47,7 +48,7 @@ internal static class WorkItemCommentEndpoints
         var now = DateTimeOffset.UtcNow;
         var comment = new WorkItemComment(Guid.NewGuid(), siteId, itemId, personId, authorName, text, now);
         db.WorkItemComments.Add(comment);
-        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.comment-added", "work-item", itemId, now));
+        WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, personId, "work-item.comment-added", "work-item", itemId, now), "comment.created", resourceType: "comment", resourceId: comment.Id);
         await db.SaveChangesAsync(ct);
         return Results.Created($"/api/work/sites/{siteId}/items/{itemId}/comments", new { comment.Id });
     }

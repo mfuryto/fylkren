@@ -58,7 +58,7 @@ public static class DecisionEndpoints
         db.DecisionRevisions.Add(revision);
         if (request.Status == "recorded")
             await FormalApprovalService.Approve(db, siteId, "decision", decision.Id, itemId, request.Title!, new { revision = 1, title = request.Title, decision = request.Decision, request.Rationale, request.Status, decidedAt = request.DecidedAt ?? now, decisionMakers = makers.Select(x => new { personId = x.Id, displayName = x.Name }), references }, personId, now, ct);
-        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "decision.created", "decision", decision.Id, now));
+        WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, personId, "decision.created", "decision", decision.Id, now), "decision.created", workItemId: itemId, resourceType: "decision", metadataJson: System.Text.Json.JsonSerializer.Serialize(new { revision = 1, status = request.Status }));
         DomainEventRecorder.Record(db, "decision.recorded", siteId, personId, "decision", decision.Id, new { decisionId = decision.Id, taskId = itemId, revision = 1, status = request.Status }, now);
         await db.SaveChangesAsync(ct);
         return Results.Created($"/api/decisions/{decision.Id}", new { decision.Id, revision = 1 });
@@ -87,9 +87,9 @@ public static class DecisionEndpoints
         db.DecisionRevisions.Add(revision);
         if (request.Status == "recorded")
             await FormalApprovalService.Approve(db, decision.SiteId, "decision", decision.Id, itemId, request.Title!, new { revision = revision.RevisionNumber, title = request.Title, decision = request.Decision, request.Rationale, request.Status, decidedAt = request.DecidedAt ?? now, decisionMakers = makers.Select(x => new { personId = x.Id, displayName = x.Name }), references }, personId, now, ct);
-        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), decision.SiteId, personId, "decision.revised", "decision", decision.Id, now));
+        WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), decision.SiteId, personId, "decision.revised", "decision", decision.Id, now), "decision.updated", workItemId: itemId, resourceType: "decision", metadataJson: System.Text.Json.JsonSerializer.Serialize(new { revision = revision.RevisionNumber, status = request.Status, previousStatus = latest.Status }));
         try { await db.SaveChangesAsync(ct); }
-        catch (DbUpdateException) { return Results.Conflict(new { error = "The decision was changed concurrently. Load the latest version and try again." }); }
+        catch (DbUpdateException exception) when (exception.InnerException is Npgsql.PostgresException { SqlState: "23505" }) { return Results.Conflict(new { error = "The decision was changed concurrently. Load the latest version and try again." }); }
         return Results.Ok(new { decision.Id, revision = revision.RevisionNumber });
     }
 

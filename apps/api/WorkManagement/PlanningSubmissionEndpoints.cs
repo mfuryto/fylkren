@@ -20,6 +20,7 @@ internal static class PlanningSubmissionEndpoints
             if (run is null || !await OrganizationAuthorization.CanPlanAtLevel(run.WorkItem.SiteId, run.WorkItem.AssignedUnitId, personId, db, ct)) return Results.Problem(statusCode: 403);
             if (!await ValidAllocations(run, request.Allocations, db, ct, allowEmptyInstruction: true)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["allocations"] = ["Check the recipients and task text in the subtasks."] });
             ReconcileAllocations(run, request.Allocations!, db);
+            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "workflow.allocations-updated", "workflow-run", run.Id, DateTimeOffset.UtcNow), "plan.updated", metadataJson: "{\"changedFields\":\"allocations\"}");
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });

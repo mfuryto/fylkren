@@ -8,6 +8,7 @@ import { writeReportPdf } from './report-pdf.mjs';
 import { configureTaskSmtp, verifyTaskMail } from './smtp-browser.mjs';
 import { verifyMultiPageClassifiedPdf } from './verify-classified-report-pdf.mjs';
 import { verifyWorkloadPresentation } from './workload-browser.mjs';
+import { verifyLifecyclePresentation } from './lifecycle-browser.mjs';
 import { addPrivateLearning, verifyPrivateLearning, verifyPrivateLearningPdf } from './learning-report-privacy.mjs';
 
 const endpoint = process.env.FYLKREN_BROWSER_CDP_URL ?? 'http://127.0.0.1:19224';
@@ -128,9 +129,12 @@ async function request(path, method = 'GET', body) {
 async function requestExpectingHttpError(path, method, body, expectedStatus) {
   const firstNewError = browserErrors.length;
   const response = await request(path, method, body);
-  assert.equal(response.status, expectedStatus, JSON.stringify(response.body));
+  const allowed = Array.isArray(expectedStatus) ? expectedStatus : [expectedStatus];
+  assert.ok(allowed.includes(response.status), JSON.stringify(response.body));
+  if (response.status < 400) return response;
   await pause(250);
-  const expectedMessage = `Failed to load resource: the server responded with a status of ${expectedStatus} (Bad Request)`;
+  const statusText = response.status === 409 ? "Conflict" : "Bad Request";
+  const expectedMessage = `Failed to load resource: the server responded with a status of ${response.status} (${statusText})`;
   const errorIndex = browserErrors.findIndex((message, index) =>
     index >= firstNewError && message === expectedMessage);
   assert.notEqual(errorIndex, -1, `Expected browser HTTP error was not observed: ${JSON.stringify(browserErrors.slice(firstNewError))}`);
@@ -381,9 +385,25 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
   await clickButton('Approve final report');
   await waitFor(`[...document.querySelectorAll('button')]
     .some(button => button.textContent.trim() === 'Complete')`, 'approved final report');
+  await waitFor('document.body.innerText.includes("Lock/Archive · Active")', 'visible information state');
+  await clickButton('Lock/Archive · Active');
+  await waitFor('document.querySelector("[role=dialog] textarea") !== null', 'closing and archiving state');
+  assert.equal(await evaluate('document.querySelector("[role=dialog]").innerText.includes("Active")'), true);
+  assert.equal(await evaluate('document.querySelector("[role=dialog]").innerText.includes("approved final report")'), true);
+  assert.equal(await evaluate(`(() => {
+    const dialog = document.querySelector('[role=dialog]');
+    return [...dialog.querySelectorAll('select, textarea')].every(control => {
+      const label = dialog.querySelector('label[for="' + control.id + '"]');
+      return label && control.getBoundingClientRect().top >= label.getBoundingClientRect().bottom;
+    });
+  })()`), true, 'Lifecycle controls share a row with their labels');
+  await assertNoOverflow('Lock/Archive dialog');
+  await clickButton('Cancel', 'document.querySelector("[role=dialog]")');
+  await waitFor('document.querySelector("[role=dialog]") === null', 'cancel lifecycle without transition');
   await clickButton('Activity');
   await waitFor('document.querySelector("[role=dialog]")?.innerText.includes("Final report approved")', 'object activity timeline');
   assert.equal(await evaluate('document.querySelector("[role=dialog]").innerText.includes("History before this feature may be incomplete.")'), true);
+  assert.equal(await evaluate('document.querySelector("[role=dialog] option[value=risk]").textContent'), 'Risk');
   await waitFor('document.querySelector("[role=dialog]")?.contains(document.activeElement)', 'activity dialog keyboard focus');
   await call('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
   await call('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
@@ -450,6 +470,7 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
     document.body.innerText.includes("Execution submitted for review") &&
     document.body.innerText.includes("Final report approved")`, 'site audit chain');
 
+  await verifyLifecyclePresentation({ request, requestExpectingHttpError, navigate, waitFor, clickButton, setInput, setSelect, pause, siteId: site.id });
   const leaderLogout = await request('/api/session', 'DELETE');
   assert.equal(leaderLogout.status, 204, JSON.stringify(leaderLogout.body));
   await navigate('/');
@@ -555,7 +576,7 @@ try {
     ...(taskFlow
       ? { topLevelTaskBrowserFlow: 'passed', taskRegistration: true,
         leaderAssessment: true, directExecution: true, finalReport: true,
-        reportArchive: true, overviewCounts: true, siteAudit: true, objectActivityTimeline: true, siteActivityTimeline: true, activityKeyboard: true,
+        reportArchive: true, overviewCounts: true, siteAudit: true, objectActivityTimeline: true, siteActivityTimeline: true, activityKeyboard: true, lifecycleDialogLayout: true, lifecycleVisibleState: true, lifecycleArchiveRestore: true,
         notificationQueue: true, classifiedReport: true, workloadPresentation: true,
         separateReportApprover: true, storedContentInjection: true, pdfOutput: Boolean(reportPdfPath),
         multiPageClassifiedReport: Boolean(reportPdfPath), ...taskEvidence }

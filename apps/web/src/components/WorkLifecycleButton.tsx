@@ -12,31 +12,42 @@ const descriptions: Record<Stage, MessageKey> = {
   archived: "lifecycleArchivedDescription",
 };
 
+const labels: Record<Stage, MessageKey> = {
+  active: "lifecycleStateActive", closed: "lifecycleStateClosed", archived: "lifecycleStateArchived",
+};
+
 export function WorkLifecycleButton({ siteId, itemId }: { siteId: string; itemId: string }) {
   const t = useTranslation();
   const [open, setOpen] = useState(false);
-  return <><button className="task-icon-action" type="button" aria-haspopup="dialog" onClick={() => setOpen(true)}><i aria-hidden="true">▣</i><span>{t("lifecycleTitle")}</span></button>{open && <LifecycleDialog siteId={siteId} itemId={itemId} onClose={() => setOpen(false)} />}</>;
+  const [state, setState] = useState<State>();
+  const [error, setError] = useState("");
+  const path = `/api/information/sites/${siteId}/work-items/${itemId}`;
+  useEffect(() => {
+    const controller = new AbortController();
+    setState(undefined); setError("");
+    const refresh = () => {
+      apiGet<State>(path, t("activityLoadFailed"), { signal: controller.signal }).then(value => {
+        if (!controller.signal.aborted) { setState(value); setError(""); }
+      }).catch(e => {
+        if (!controller.signal.aborted) setError(e.message);
+      });
+    };
+    refresh();
+    window.addEventListener("fylkren:work-changed", refresh);
+    return () => { controller.abort(); window.removeEventListener("fylkren:work-changed", refresh); };
+  }, [path, t]);
+  return <><button className="task-icon-action" type="button" aria-haspopup="dialog" onClick={() => setOpen(true)}><i aria-hidden="true">▣</i><span>{t("lifecycleTitle")}{state && <> · {t(labels[state.stage])}</>}</span></button>{open && <LifecycleDialog path={path} state={state} loadError={error} onChange={setState} onClose={() => setOpen(false)} />}</>;
 }
 
-function LifecycleDialog({ siteId, itemId, onClose }: { siteId: string; itemId: string; onClose: () => void }) {
+function LifecycleDialog({ path, state, loadError, onChange, onClose }: { path: string; state?: State; loadError: string; onChange: (state: State) => void; onClose: () => void }) {
   const t = useTranslation();
   const reasonHelpId = useId();
   const actionId = useId();
   const reasonId = useId();
-  const [state, setState] = useState<State>();
   const [selected, setSelected] = useState<Stage>();
   const [reason, setReason] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const path = `/api/information/sites/${siteId}/work-items/${itemId}`;
-  useEffect(() => {
-    const controller = new AbortController();
-    apiGet<State>(path, t("activityLoadFailed"), { signal: controller.signal }).then(setState).catch(e => {
-      if (!controller.signal.aborted) setError(e.message);
-    });
-    return () => controller.abort();
-  }, [path, t]);
-
   const actions: [Stage, MessageKey][] = state?.stage === "active"
     ? [["closed", "lifecycleClosed"]]
     : state?.stage === "closed"
@@ -48,16 +59,17 @@ function LifecycleDialog({ siteId, itemId, onClose }: { siteId: string; itemId: 
     if (!state || saving) return;
     setSaving(true); setError("");
     try {
-      const result = await apiMutate<{ stage: Stage; version: number }>(`${path}/transitions`, "POST", { stage: action[0], expectedVersion: state.version, reason }, t("activityLoadFailed"));
-      setState({ ...state, ...result }); setSelected(undefined); setReason("");
+      const result = await apiMutate<{ stage: Stage; version: number }>(`${path}/transitions`, "POST", { stage: action[0], expectedVersion: state.version, reason: reason.replace(/[\r\n\t]+/g, " ").trim() }, t("activityLoadFailed"));
+      onChange({ ...state, ...result }); setSelected(undefined); setReason("");
     } catch (e) { setError(e instanceof Error ? e.message : t("activityLoadFailed")); }
     finally { setSaving(false); }
   }
 
   return <Modal title={t("lifecycleTitle")} onClose={onClose} dismissible={!saving}>
-    {error && <p role="alert">{error}</p>}
-    {!state ? <p role="status">{t("loading")}</p> : <>
-      <p role="status">{t(descriptions[state.stage])}</p>
+    {(error || loadError) && <p role="alert">{error || loadError}</p>}
+    {!state ? !loadError && <p role="status">{t("loading")}</p> : <>
+      <p role="status"><strong>{t(labels[state.stage])}</strong></p>
+      <p className="muted">{t(descriptions[state.stage])}</p>
       {state.held && <p role="note">{t("lifecycleHeldNotice")}</p>}
       <div className="field">
         <label htmlFor={actionId}>{t("lifecycleAction")}</label>

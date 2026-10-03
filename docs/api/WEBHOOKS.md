@@ -2,7 +2,7 @@
 
 Creating subscriptions and delivering webhooks require the Enterprise `webhooks` entitlement. Without it, existing subscriptions, queued events and delivery history remain stored and readable to Platform Manager, but new deliveries pause. See [edition entitlements](../architecture/EDITION_ENTITLEMENTS.md).
 
-Fylkren records important domain actions as durable domain events. Domain events are separate from the technical audit log: the audit log explains administrative activity, while domain events form the stable integration contract.
+Fylkren records important domain actions as durable domain events. Domain events are separate from the security audit log. The common activity catalogue is broader than the versioned webhook contract: only the existing externally supported event allowlist is delivered. New internal risk, mitigation, comment and learning activity does not add webhook categories or expose private content. Decision creation retains the same `decision.recorded` v1 event ID and payload while supplying the canonical activity fact; decision revision does not introduce a second webhook mechanism.
 
 ## Envelope version 1
 

@@ -4,6 +4,10 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Show Active/Locked/Archived beside Lock/Archive, shorten the dialog, and localize locked-content and lifecycle conflicts instead of reporting them as concurrent edits.
+
+- Extended the shared activity history to decisions, risks, mitigation actions, comments, exact-level private learning and remaining planning/follow-up edits while preserving existing notifications, webhook contracts and independent audit.
+
 - Placed closing/archiving controls and reason labels on separate rows using the shared accessible field layout.
 
 - Clarified closing and archiving with the current information state, explicit action selection, action-specific reasons and explanations of locking, restoration and retained history.

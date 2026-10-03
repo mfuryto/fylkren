@@ -177,3 +177,39 @@ Candidate API and web IDs, 86 source/test hashes and safe outcome data are in th
 The full fixture plus 1,000 tasks returned every authorized read successfully and rejected all 300 administrative-only workload reads. Its navigation-count p95 at concurrency 1/10/25 was 4,135/7,437/11,522 ms; other endpoint p95 values were at most 239 ms. A reset initial-role fixture against the additive checkpoint also reproduced navigation-count p95 of 105/5,555/9,606 ms. The fixtures have different hierarchy complexity, so these are diagnostic observations, not a controlled performance-equivalence claim. Navigation implementation is unchanged and this sizing issue is explicitly retained in the roadmap. The existing workload harness now records endpoint-level measurements; `--workload-only` repeats its reset initial-role fixture without introducing another test list.
 
 Next architecture delivery is broader risk/measure/decision and other command activity, Site/user custodianship, consistent exit export and policy/hold adapters. Irreversible disposition remains disabled. Navigation-count query sizing is a separate outstanding release concern; security continuation still follows the one ASVS matrix.
+
+## Work-owned domain activity coverage — 2026-10-03
+
+This stage-4 continuation completes the Work-owned command coverage listed in the [same architecture requirements/implementation/test reference](../../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md#work-owned-domain-activity-coverage--2026-10-03). Decisions, risks/measures, comments, private learning, planning drafts/RFI and execution follow-up use the existing recorder, projections and independent audit. Decision creation retains the existing v1 fact identity/payload/actor; learning companion facts cannot consume report events. New internal facts do not activate additional notifications, webhook deliveries or federation messages. No schema migration, new store, backfill or retention duration is introduced.
+
+The Lock/Archive action now shows Active/Locked/Archived before opening. The dialog separates state, action and reason, uses short English/Norwegian explanations and accepts multiline reasons by normalizing line breaks before the existing API validation. Closed/archive violations have a distinct `information_locked` problem code with localized guidance, including decision revisions that formerly masked database guards as concurrency conflicts. Other conflicts retain their existing behavior; unfinished relationships, stale versions and unavailable transitions have localized explanations.
+
+The first browser execution found that an authorized owning-level manager who was not the root task author could perform lifecycle transitions but could not read their state. The read gate now uses the same current management authority, retaining membership and negative administrative-only, sibling and foreign boundaries. Failed test-fixture expectations also assumed that learning access granted full root history and that a completion event would always remain in the first 25 rows after adding more activity. Corrected assertions preserve the denied root access and query completion by event type. The added archive browser fixture also initially assumed version zero for newly created lifecycle records; it now reads and submits the actual optimistic-concurrency version. These failed attempts are excluded from final successful results.
+
+Reproduction uses the existing commands, with the immutable candidate API/web images from the [same evidence manifest](2026-10-02-release-regression-evidence.json):
+
+```sh
+node tools/run-foundation-tests.mjs
+pnpm --filter @fylkren/web test
+pnpm typecheck
+node tools/run-e2e-editions.mjs --no-build
+node tools/run-release-browser.mjs --community-only --no-build
+pnpm check:docs
+pnpm check:structure
+pnpm check:version
+```
+
+Set `FYLKREN_E2E_API_IMAGE` and `FYLKREN_E2E_WEB_IMAGE` to the recorded candidates for the two image-backed runners. Edition/browser laboratories run sequentially and restore the repository environment fixture. All tests use disposable databases and synthetic people/work; production is unchanged.
+
+| Scope | Executed result |
+| --- | --- |
+| Existing foundation/WorkItem and added domain database assertions | Passed real PostgreSQL transaction rollback, immutable event/audit/projection handling, v1 decision identity/payload/actor preservation, report/learning separation, skipped private delivery and risk revision rollback. |
+| Frontend | 153 tests in 40 files passed, including localized locked-content errors and preserved unrelated conflicts; type checks and candidate production image builds passed. |
+| Community/Enterprise API | Full edition regression, exact-level learning/activity authorization and hidden pagination, resource/type facts and counts, stale revision negatives, manager lifecycle reads, closed comment/decision/status errors, archive/restore and matched database/key backup restore passed. |
+| Chromium Community | Actual label/control bounding rectangles, short dialog, state beside the action, archive/restore/reopen with a multiline reason, rejected locked comment, existing keyboard/desktop/mobile activity, classified PDF/private learning and actual SMTP checks passed. |
+| External contracts and audit | Existing v1 decision identity/payload preserved in PostgreSQL and edition/webhook regression; audit remains independent. Signed-federation protocol code is unchanged; this continuation does not claim a new signed federation run. |
+| Repository | Documentation, single-ASVS evidence links, source structure/language, version and whitespace gates passed. No pending EF model changes. |
+
+The safe manifest records candidate IDs, source/test hashes, log hashes and measured API workload results. The final full fixture plus 1,000 tasks passed all 300 authorized reads and rejected all 300 administrative-only reads. Navigation-count p95 was 91/136/301 ms at concurrency 1/10/25 in this execution, substantially below earlier executions. Navigation source is unchanged; this variation is not evidence of a bottleneck fix. The previously recorded slow navigation-count query remains a separate roadmap item; successful correctness/authorization tests do not resolve it. ASVS counts stay 35 Passed, 112 In progress, 53 Not assessed and 53 Not applicable; this activity continuation does not complete the security assessment.
+
+Next architecture delivery remains whole-Site/shared-user archive and custodianship, consistent exit export and policy/hold administration, followed by guarded disposition/recovery and compatibility-cursor reconciliation. Irreversible deletion, anonymisation and retention-policy execution stay disabled. Complete each coherent delivery with the same traceability before proceeding.

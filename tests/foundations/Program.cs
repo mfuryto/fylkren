@@ -99,3 +99,5 @@ await migrator.MigrateAsync(foundation);
 Require((await db.DomainEvents.AsNoTracking().SingleAsync(x => x.Id == legacy.Id)).PayloadJson.Contains("synthetic"), "Reversible schema migration lost original events.");
 Console.WriteLine("Foundation tests passed: actor/schema/metadata boundaries, lifecycle/hold/version guards, projection lease/retry, populated migration without dispatch, rollback, immutable facts, concurrency, SQL constraints and reversible pre-cutover upgrade.");
 await WorkSliceTests.Run(db);
+
+await DomainCoverageTests.Run(db);

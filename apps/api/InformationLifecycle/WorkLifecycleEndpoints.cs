@@ -19,8 +19,9 @@ internal static class WorkLifecycleEndpoints
     }
     private static async Task<IResult> Read(Guid siteId, Guid itemId, ClaimsPrincipal user, FylkrenDbContext db, CancellationToken ct)
     {
-        if (!PersonId(user, out var person) || !await IsMember(siteId, person, db, ct) || !await CanReadWorkTree(siteId, itemId, person, db, ct)) return Results.Problem(statusCode: 403);
-        if (!await db.WorkItems.AnyAsync(x => x.Id == itemId && x.SiteId == siteId, ct)) return Results.NotFound();
+        if (!PersonId(user, out var person) || !await IsMember(siteId, person, db, ct)) return Results.Problem(statusCode: 403);
+        var item = await db.WorkItems.AsNoTracking().SingleOrDefaultAsync(x => x.Id == itemId && x.SiteId == siteId, ct);
+        if (item is null || !await CanManageItem(item, person, db, ct) && !await CanReadWorkTree(siteId, itemId, person, db, ct)) return Results.Problem(statusCode: 403);
         var record = await db.InformationLifecycles.AsNoTracking().SingleOrDefaultAsync(x => x.OwnerSiteId == siteId && x.ResourceType == "work_item" && x.ResourceId == itemId, ct);
         return Results.Ok(new { stage = record?.Stage ?? "active", version = record?.Version ?? 0, held = record?.IsHeld ?? false, irreversibleEnabled = false });
     }

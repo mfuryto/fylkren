@@ -1,5 +1,6 @@
 using Fylkren.Api.ActivityAudit;
 using Fylkren.Api.Persistence;
+using Fylkren.Api.DomainEvents;
 using Fylkren.Api.WorkManagement;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,7 +30,7 @@ internal static class LearningCreation
         foreach (var draft in fresh)
         {
             db.LearningLessons.Add(new LearningLesson(draft.Id, item.SiteId, item.Id, unitId.Value, ++number, draft.Kind!, draft.Text!.Trim(), personId, author, now));
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), item.SiteId, personId, "learning.created", "work-item", item.Id, now));
+            WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), item.SiteId, personId, "learning.created", "work-item", item.Id, now), "learning.created", resourceType: "learning", resourceId: draft.Id, metadataJson: "{}");
         }
         return null;
     }

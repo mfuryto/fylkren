@@ -99,6 +99,27 @@ export async function testDecisionsRisksVersions({ leader, sibling, unrelated, s
   assert.equal((await leader.request(`/api/risks/sites/${otherSiteId}/task/${taskId}`)).status, 404,
     'Risk crossed site boundary');
 
+  // Common activity remains correlated with the original immutable revisions.
+  const historyFor = async resourceType => {
+    const result = await leader.request(`/api/activity/sites/${siteId}?workItemId=${taskId}&resourceType=${resourceType}&limit=50`);
+    assert.equal(result.status, 200, JSON.stringify(result.body));
+    assert.ok(result.body.items.every(value => !('payloadJson' in value) && !('activityMetadataJson' in value)));
+    return result.body.items;
+  };
+  const decisionActivity = (await historyFor('decision')).filter(value => value.resourceId === decisionId);
+  assert.equal(decisionActivity.filter(value => value.type === 'decision.created').length, 1);
+  assert.equal(decisionActivity.filter(value => value.type === 'decision.updated').length, 1, 'Stale revision created activity');
+  assert.equal((await leader.put(`/api/risks/${riskId}`, {
+    ...riskBody, expectedVersion: 2, status: 'closed', residualProbability: 2, residualImpact: 3,
+  })).status, 200);
+  const riskActivity = (await historyFor('risk')).filter(value => value.resourceId === riskId);
+  for (const type of ['risk.created', 'risk.updated', 'risk.closed']) assert.equal(riskActivity.filter(value => value.type === type).length, 1, type);
+  const measureActivity = (await historyFor('measure')).filter(value => value.resourceId === action.body.id);
+  for (const type of ['measure.created', 'measure.completed']) assert.equal(measureActivity.filter(value => value.type === type).length, 1, type);
+  const safeHistory = JSON.stringify([...decisionActivity, ...riskActivity, ...measureActivity]);
+  for (const privateText of [decisionBody.rationale, riskBody.description, 'Install synthetic containment']) assert.ok(!safeHistory.includes(privateText), 'Domain content leaked into activity');
+  assert.equal((await sibling.request(`/api/activity/sites/${siteId}?workItemId=${taskId}&resourceType=risk`)).status, 403);
+
   const versionsPath = `/api/approvals/sites/${siteId}/items/${taskId}/versions`;
   const versions = await leader.request(versionsPath);
   assert.equal(versions.status, 200);

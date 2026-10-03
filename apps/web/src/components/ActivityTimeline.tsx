@@ -12,6 +12,10 @@ const labels: Record<string, MessageKey> = {
   "assignment.claimed": "responsibilityClaimed", "assignment.released": "auditWorkflowReleased", "assignment.reopened": "lifecycleReopen",
   "plan.published": "auditPlanApproved", "plan.updated": "auditPlanningStepDocumented", "plan.submitted": "taskStatusPlanningApproval",
   "execution.started": "auditExecutionStarted", "execution.updated": "auditExecutionStepDocumented", "execution.submitted": "auditExecutionSubmitted",
+  "decision.created": "auditDecisionCreated", "decision.updated": "auditDecisionRevised",
+  "risk.created": "activityRiskCreated", "risk.updated": "activityRiskUpdated", "risk.closed": "activityRiskClosed",
+  "measure.created": "activityMeasureCreated", "measure.updated": "activityMeasureUpdated", "measure.completed": "activityMeasureCompleted",
+  "comment.created": "taskCommentAdded", "learning.created": "auditLearningAdded", "learning.updated": "auditLearningReviewed", "learning.comment_added": "auditLearningCommentAdded",
   "report.updated": "auditFinalReportUpdated", "report.approved": "auditFinalReportApproved",
   "information.closed": "lifecycleClosed", "information.archived": "lifecycleArchived", "information.restored": "lifecycleRestore",
 };
@@ -46,7 +50,7 @@ export function ActivityTimeline({ siteId, itemId, timeZone }: Props) {
   function reset(change: () => void) { setCursor(null); setHistory([]); change(); }
   return <section><p className="muted">{t("activityLegacyNotice")}</p><div className="report-toolbar">
     <label htmlFor={`${field}-type`}>{t("auditEvent")}<select id={`${field}-type`} value={type} onChange={e => reset(() => setType(e.target.value))}><option value="">{t("allEvents")}</option>{Object.entries(labels).map(([key, label]) => <option key={key} value={key}>{t(label)}</option>)}</select></label>
-    <label htmlFor={`${field}-resource`}>{t("auditArea")}<select id={`${field}-resource`} value={resource} onChange={e => reset(() => setResource(e.target.value))}><option value="">{t("all")}</option>{([['work_item', 'entityWork'], ['task', 'entityWork'], ['plan', 'entityWorkflowRun'], ['execution', 'entityExecutionRun'], ['report', 'reportsTitle']] as const).map(([value, label]) => <option key={value} value={value}>{t(label)}</option>)}</select></label>
+    <label htmlFor={`${field}-resource`}>{t("auditArea")}<select id={`${field}-resource`} value={resource} onChange={e => reset(() => setResource(e.target.value))}><option value="">{t("all")}</option>{([['work_item', 'entityWork'], ['task', 'entityWork'], ['plan', 'entityWorkflowRun'], ['execution', 'entityExecutionRun'], ['report', 'reportsTitle'], ['decision', 'approvalDecision'], ['risk', 'tasksTaskCardPresentationRisk'], ['measure', 'mitigations'], ['comment', 'taskCommentsTitle'], ['learning', 'navLearning']] as const).map(([value, label]) => <option key={value} value={value}>{t(label)}</option>)}</select></label>
     <label htmlFor={`${field}-from`}>{t("fromDate")} (UTC)<input id={`${field}-from`} type="date" value={from} onChange={e => reset(() => setFrom(e.target.value))} /></label>
     <label htmlFor={`${field}-until`}>{t("toDate")} (UTC)<input id={`${field}-until`} type="date" min={from} value={until} onChange={e => reset(() => setUntil(e.target.value))} /></label>
   </div>{error && <p role="alert">{error}</p>}{loading ? <p role="status">{t("loading")}</p> : <><ol className="task-comment-list">{data.items.map(row => <ActivityEntry key={row.id} row={row} timeZone={timeZone} siteId={siteId} />)}</ol>{!data.items.length && <p>{t("noAuditMatches")}</p>}

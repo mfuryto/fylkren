@@ -9,8 +9,9 @@ public static class ActivityEventCatalog
         "assignment.completed", "assignment.cancelled", "assignment.reassigned", "assignment.reopened", "assignment.claimed", "assignment.released",
         "plan.published", "plan.updated", "plan.submitted", "execution.started", "execution.updated", "execution.submitted",
         "decision.created", "decision.updated", "risk.created", "risk.updated", "risk.closed", "measure.created", "measure.updated", "measure.completed",
+        "comment.created", "learning.created", "learning.updated", "learning.comment_added",
         "report.updated", "report.submitted", "report.approved", "information.closed", "information.archived", "information.restored"];
-    public static readonly string[] Resources = ["work_item", "task", "assignment", "plan", "execution", "decision", "risk", "measure", "report", "site", "person"];
+    public static readonly string[] Resources = ["work_item", "task", "assignment", "plan", "execution", "decision", "risk", "measure", "report", "site", "person", "comment", "learning"];
     private static readonly HashSet<string> MetadataFields = ["status", "previousStatus", "changedFields", "revision", "phase", "resourceVersionId", "reasonCode", "workKind"];
     public static string ValidateMetadata(string eventType, string json)
     {
