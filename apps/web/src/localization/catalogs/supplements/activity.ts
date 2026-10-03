@@ -2,41 +2,65 @@ export const activityEn = {
   "activityTitle": "Activity",
   "activityLegacyNotice": "History before this feature may be incomplete.",
   "activityLoadFailed": "Activity could not be loaded.",
-  "lifecycleTitle": "Information lifecycle",
-  "lifecycleClosed": "Close information",
+  "lifecycleTitle": "Closing and archiving",
+  "lifecycleClosed": "Lock content",
   "lifecycleArchived": "Archive",
   "lifecycleRestore": "Restore to closed",
-  "lifecycleReopen": "Reopen information",
+  "lifecycleReopen": "Reopen for editing",
   "lifecycleReason": "Reason",
+  "lifecycleAction": "Action",
+  "lifecycleActiveDescription": "Active: Content can be edited. Closing locks finished work; unfinished related work or pending delivery must be resolved first. Use this after completion, rejection or cancellation, when follow-up is finished. Completed work needs an approved final report. This does not replace the normal task status actions.",
+  "lifecycleClosedDescription": "Closed: Content is locked and retained. Archive it, or reopen it for further editing. The task status is unchanged.",
+  "lifecycleArchivedDescription": "Archived: Content and history are retained and locked. Restore to closed, then reopen to resume editing. Nothing is deleted.",
+  "lifecycleReasonHelp": "Explain why you are changing this state. For example: Final report approved and all follow-up completed. A reason is required for each change.",
+  "lifecycleHeldNotice": "A hold prevents changes to this state.",
   "activityUnknown": "Activity recorded"
 } as const;
 export type ActivityMessageKey = keyof typeof activityEn;
 export const activityTranslations: Record<string, Record<ActivityMessageKey, string>> = {
   "en-US": {
+    "lifecycleAction": "Action",
+    "lifecycleActiveDescription": "Active: Content can be edited. Closing locks finished work; unfinished related work or pending delivery must be resolved first. Use this after completion, rejection or cancellation, when follow-up is finished. Completed work needs an approved final report. This does not replace the normal task status actions.",
+    "lifecycleClosedDescription": "Closed: Content is locked and retained. Archive it, or reopen it for further editing. The task status is unchanged.",
+    "lifecycleArchivedDescription": "Archived: Content and history are retained and locked. Restore to closed, then reopen to resume editing. Nothing is deleted.",
+    "lifecycleReasonHelp": "Explain why you are changing this state. For example: Final report approved and all follow-up completed. A reason is required for each change.",
+    "lifecycleHeldNotice": "A hold prevents changes to this state.",
     "activityTitle": "Activity",
     "activityLegacyNotice": "History before this feature may be incomplete.",
     "activityLoadFailed": "Activity could not be loaded.",
-    "lifecycleTitle": "Information lifecycle",
-    "lifecycleClosed": "Close information",
+    "lifecycleTitle": "Closing and archiving",
+    "lifecycleClosed": "Lock content",
     "lifecycleArchived": "Archive",
     "lifecycleRestore": "Restore to closed",
-    "lifecycleReopen": "Reopen information",
+    "lifecycleReopen": "Reopen for editing",
     "lifecycleReason": "Reason",
     "activityUnknown": "Activity recorded"
   },
   "nb-NO": {
+    "lifecycleAction": "Handling",
+    "lifecycleActiveDescription": "Aktiv: Innholdet kan redigeres. Lukking låser ferdig behandlet arbeid. Uferdig tilknyttet arbeid eller ventende levering må håndteres først. Bruk dette etter fullføring, avvisning eller kansellering, når oppfølgingen er ferdig. Fullførte oppdrag krever godkjent sluttrapport. Dette erstatter ikke de vanlige valgene for oppdragsstatus.",
+    "lifecycleClosedDescription": "Lukket: Innholdet er låst og bevart. Du kan arkivere eller gjenåpne for videre redigering. Oppdragsstatusen endres ikke.",
+    "lifecycleArchivedDescription": "Arkivert: Innhold og historikk er bevart og låst. Tilbakefør til lukket, og gjenåpne deretter for å redigere. Ingenting slettes.",
+    "lifecycleReasonHelp": "Forklar hvorfor du endrer tilstanden. Eksempel: Sluttrapport godkjent og all oppfølging ferdig. Hver endring krever en begrunnelse.",
+    "lifecycleHeldNotice": "En bevaringssperre hindrer endring av tilstanden.",
     "activityTitle": "Aktivitet",
     "activityLegacyNotice": "Historikken før denne funksjonen kan være ufullstendig.",
     "activityLoadFailed": "Aktiviteten kunne ikke lastes.",
-    "lifecycleTitle": "Informasjonslivssyklus",
-    "lifecycleClosed": "Lukk informasjon",
+    "lifecycleTitle": "Lukking og arkivering",
+    "lifecycleClosed": "Lås innhold",
     "lifecycleArchived": "Arkiver",
     "lifecycleRestore": "Tilbakefør til lukket",
-    "lifecycleReopen": "Gjenåpne informasjon",
+    "lifecycleReopen": "Gjenåpne for redigering",
     "lifecycleReason": "Begrunnelse",
     "activityUnknown": "Aktivitet registrert"
   },
   "sv-SE": {
+    "lifecycleAction": "Åtgärd",
+    "lifecycleActiveDescription": "Aktiv: Innehållet kan redigeras. Stängning låser färdigbehandlat arbete. Oavslutat relaterat arbete eller väntande leverans måste hanteras först. Använd detta efter slutförande, avslag eller avbrytande, när uppföljningen är klar. Slutförda uppdrag kräver en godkänd slutrapport. Detta ersätter inte vanliga statusåtgärder.",
+    "lifecycleClosedDescription": "Stängd: Innehållet är låst och bevarat. Arkivera eller öppna igen för fortsatt redigering. Uppdragsstatusen ändras inte.",
+    "lifecycleArchivedDescription": "Arkiverad: Innehåll och historik är bevarade och låsta. Återställ till stängd och öppna sedan igen för att redigera. Ingenting raderas.",
+    "lifecycleReasonHelp": "Förklara varför du ändrar tillståndet. Exempel: Slutrapport godkänd och all uppföljning klar. Varje ändring kräver en motivering.",
+    "lifecycleHeldNotice": "En bevarandespärr hindrar ändring av tillståndet.",
     "activityTitle": "Aktivitet",
     "activityLegacyNotice": "Historiken före denna funktion kan vara ofullständig.",
     "activityLoadFailed": "Aktiviteten kunde inte laddas.",
@@ -49,6 +73,12 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
     "activityUnknown": "Aktivitet registrerad"
   },
   "da-DK": {
+    "lifecycleAction": "Handling",
+    "lifecycleActiveDescription": "Aktiv: Indholdet kan redigeres. Lukning låser færdigbehandlet arbejde. Uafsluttet relateret arbejde eller ventende levering skal håndteres først. Brug dette efter afslutning, afvisning eller annullering, når opfølgningen er færdig. Afsluttede opgaver kræver en godkendt slutrapport. Dette erstatter ikke de almindelige statusvalg.",
+    "lifecycleClosedDescription": "Lukket: Indholdet er låst og bevaret. Arkivér eller genåbn for videre redigering. Opgavens status ændres ikke.",
+    "lifecycleArchivedDescription": "Arkiveret: Indhold og historik er bevaret og låst. Gendan til lukket, og genåbn derefter for at redigere. Intet slettes.",
+    "lifecycleReasonHelp": "Forklar, hvorfor du ændrer tilstanden. Eksempel: Slutrapport godkendt og al opfølgning afsluttet. Hver ændring kræver en begrundelse.",
+    "lifecycleHeldNotice": "En bevaringsspærring forhindrer ændring af tilstanden.",
     "activityTitle": "Aktivitet",
     "activityLegacyNotice": "Historikken før denne funktion kan være ufuldstændig.",
     "activityLoadFailed": "Aktiviteten kunne ikke indlæses.",
@@ -61,6 +91,12 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
     "activityUnknown": "Aktivitet registreret"
   },
   "fi-FI": {
+    "lifecycleAction": "Toiminto",
+    "lifecycleActiveDescription": "Aktiivinen: Sisältöä voi muokata. Sulkeminen lukitsee valmiin työn. Keskeneräinen liittyvä työ tai odottava toimitus on käsiteltävä ensin. Käytä tätä valmistumisen, hylkäyksen tai peruutuksen jälkeen, kun seuranta on valmis. Valmis työ vaatii hyväksytyn loppuraportin. Tämä ei korvaa tavallisia tilatoimintoja.",
+    "lifecycleClosedDescription": "Suljettu: Sisältö on lukittu ja säilytetty. Arkistoi tai avaa uudelleen muokkausta varten. Tehtävän tila ei muutu.",
+    "lifecycleArchivedDescription": "Arkistoitu: Sisältö ja historia säilyvät lukittuina. Palauta suljetuksi ja avaa sitten uudelleen muokkausta varten. Mitään ei poisteta.",
+    "lifecycleReasonHelp": "Kerro, miksi muutat tilaa. Esimerkki: Loppuraportti hyväksytty ja seuranta valmis. Jokainen muutos vaatii perustelun.",
+    "lifecycleHeldNotice": "Säilytysesto estää tilan muuttamisen.",
     "activityTitle": "Toiminta",
     "activityLegacyNotice": "Tätä toimintoa edeltävä historia voi olla puutteellinen.",
     "activityLoadFailed": "Toimintaa ei voitu ladata.",
@@ -73,6 +109,12 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
     "activityUnknown": "Toiminta kirjattu"
   },
   "de-DE": {
+    "lifecycleAction": "Aktion",
+    "lifecycleActiveDescription": "Aktiv: Der Inhalt kann bearbeitet werden. Das Schließen sperrt abgeschlossene Arbeit. Offene zugehörige Arbeit oder ausstehende Zustellung muss zuerst erledigt werden. Nach Abschluss, Ablehnung oder Abbruch verwenden, wenn die Nachverfolgung beendet ist. Abgeschlossene Aufträge benötigen einen genehmigten Abschlussbericht. Dies ersetzt keine normalen Statusaktionen.",
+    "lifecycleClosedDescription": "Geschlossen: Der Inhalt ist gesperrt und bleibt erhalten. Archivieren oder zur Bearbeitung erneut öffnen. Der Auftragsstatus bleibt unverändert.",
+    "lifecycleArchivedDescription": "Archiviert: Inhalt und Verlauf bleiben gesperrt erhalten. Als geschlossen wiederherstellen und anschließend erneut öffnen. Nichts wird gelöscht.",
+    "lifecycleReasonHelp": "Begründen Sie die Zustandsänderung. Beispiel: Abschlussbericht genehmigt und Nachverfolgung abgeschlossen. Jede Änderung benötigt eine Begründung.",
+    "lifecycleHeldNotice": "Eine Aufbewahrungssperre verhindert die Zustandsänderung.",
     "activityTitle": "Aktivität",
     "activityLegacyNotice": "Der Verlauf vor dieser Funktion kann unvollständig sein.",
     "activityLoadFailed": "Aktivität konnte nicht geladen werden.",
@@ -85,6 +127,12 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
     "activityUnknown": "Aktivität erfasst"
   },
   "fr-FR": {
+    "lifecycleAction": "Action",
+    "lifecycleActiveDescription": "Actif : le contenu est modifiable. La clôture verrouille le travail terminé. Le travail associé inachevé ou les livraisons en attente doivent être traités au préalable. À utiliser après achèvement, rejet ou annulation, une fois le suivi terminé. Une mission achevée nécessite un rapport final approuvé. Cela ne remplace pas les actions de statut habituelles.",
+    "lifecycleClosedDescription": "Clos : le contenu est verrouillé et conservé. Archivez ou rouvrez pour modifier. Le statut de la mission ne change pas.",
+    "lifecycleArchivedDescription": "Archivé : le contenu et l’historique sont conservés et verrouillés. Rétablissez à l’état clos, puis rouvrez pour modifier. Rien n’est supprimé.",
+    "lifecycleReasonHelp": "Expliquez ce changement d’état. Exemple : rapport final approuvé et suivi terminé. Chaque changement nécessite un motif.",
+    "lifecycleHeldNotice": "Un gel de conservation empêche le changement d’état.",
     "activityTitle": "Activité",
     "activityLegacyNotice": "L’historique antérieur à cette fonction peut être incomplet.",
     "activityLoadFailed": "Impossible de charger l’activité.",
@@ -97,6 +145,12 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
     "activityUnknown": "Activité enregistrée"
   },
   "pl-PL": {
+    "lifecycleAction": "Działanie",
+    "lifecycleActiveDescription": "Aktywne: Treść można edytować. Zamknięcie blokuje zakończoną pracę. Najpierw należy zakończyć powiązane prace i oczekujące dostarczenia. Użyj po zakończeniu, odrzuceniu lub anulowaniu, gdy działania następcze są zakończone. Zakończona praca wymaga zatwierdzonego raportu końcowego. Nie zastępuje to zwykłych zmian statusu.",
+    "lifecycleClosedDescription": "Zamknięte: Treść jest zablokowana i zachowana. Zarchiwizuj lub otwórz ponownie do edycji. Status zadania nie zmienia się.",
+    "lifecycleArchivedDescription": "Zarchiwizowane: Treść i historia są zachowane i zablokowane. Przywróć stan zamknięty, a następnie otwórz ponownie do edycji. Nic nie jest usuwane.",
+    "lifecycleReasonHelp": "Wyjaśnij zmianę stanu. Przykład: Raport końcowy zatwierdzony i działania następcze zakończone. Każda zmiana wymaga uzasadnienia.",
+    "lifecycleHeldNotice": "Blokada przechowywania uniemożliwia zmianę stanu.",
     "activityTitle": "Aktywność",
     "activityLegacyNotice": "Historia sprzed tej funkcji może być niepełna.",
     "activityLoadFailed": "Nie udało się wczytać aktywności.",
@@ -109,6 +163,12 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
     "activityUnknown": "Aktywność zarejestrowana"
   },
   "es-ES": {
+    "lifecycleAction": "Acción",
+    "lifecycleActiveDescription": "Activo: El contenido se puede editar. El cierre bloquea el trabajo terminado. Primero deben resolverse el trabajo relacionado pendiente y las entregas pendientes. Úsalo tras finalizar, rechazar o cancelar, cuando el seguimiento haya terminado. El trabajo finalizado requiere un informe final aprobado. No sustituye las acciones habituales de estado.",
+    "lifecycleClosedDescription": "Cerrado: El contenido está bloqueado y se conserva. Archiva o reabre para editar. El estado del encargo no cambia.",
+    "lifecycleArchivedDescription": "Archivado: El contenido y el historial se conservan bloqueados. Restaura al estado cerrado y después reabre para editar. No se elimina nada.",
+    "lifecycleReasonHelp": "Explica el cambio de estado. Ejemplo: Informe final aprobado y seguimiento completado. Cada cambio requiere un motivo.",
+    "lifecycleHeldNotice": "Una retención impide cambiar el estado.",
     "activityTitle": "Actividad",
     "activityLegacyNotice": "El historial anterior a esta función puede estar incompleto.",
     "activityLoadFailed": "No se pudo cargar la actividad.",
@@ -121,6 +181,12 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
     "activityUnknown": "Actividad registrada"
   },
   "it-IT": {
+    "lifecycleAction": "Azione",
+    "lifecycleActiveDescription": "Attivo: Il contenuto può essere modificato. La chiusura blocca il lavoro completato. Prima occorre completare il lavoro correlato e le consegne in sospeso. Da usare dopo completamento, rifiuto o annullamento, quando le attività successive sono concluse. Il lavoro completato richiede un rapporto finale approvato. Non sostituisce le normali azioni di stato.",
+    "lifecycleClosedDescription": "Chiuso: Il contenuto è bloccato e conservato. Archivia o riapri per modificarlo. Lo stato dell’incarico non cambia.",
+    "lifecycleArchivedDescription": "Archiviato: Il contenuto e la cronologia sono conservati e bloccati. Ripristina allo stato chiuso, poi riapri per modificare. Nulla viene eliminato.",
+    "lifecycleReasonHelp": "Spiega il cambio di stato. Esempio: Rapporto finale approvato e attività successive completate. Ogni modifica richiede un motivo.",
+    "lifecycleHeldNotice": "Un vincolo di conservazione impedisce il cambio di stato.",
     "activityTitle": "Attività",
     "activityLegacyNotice": "La cronologia precedente a questa funzione può essere incompleta.",
     "activityLoadFailed": "Impossibile caricare l’attività.",
@@ -133,6 +199,12 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
     "activityUnknown": "Attività registrata"
   },
   "uk-UA": {
+    "lifecycleAction": "Дія",
+    "lifecycleActiveDescription": "Активний: Вміст можна редагувати. Закриття блокує завершену роботу. Спочатку потрібно завершити пов’язану роботу та очікувані доставки. Використовуйте після завершення, відхилення або скасування, коли подальші дії завершені. Завершена робота потребує затвердженого підсумкового звіту. Це не замінює звичайні дії зі статусом.",
+    "lifecycleClosedDescription": "Закритий: Вміст заблоковано та збережено. Архівуйте або відкрийте повторно для редагування. Статус завдання не змінюється.",
+    "lifecycleArchivedDescription": "Архівований: Вміст та історію збережено й заблоковано. Відновіть закритий стан, а потім відкрийте повторно для редагування. Нічого не видаляється.",
+    "lifecycleReasonHelp": "Поясніть зміну стану. Приклад: Підсумковий звіт затверджено, усі подальші дії завершено. Кожна зміна потребує обґрунтування.",
+    "lifecycleHeldNotice": "Заборона на знищення даних перешкоджає зміні стану.",
     "activityTitle": "Активність",
     "activityLegacyNotice": "Історія до появи цієї функції може бути неповною.",
     "activityLoadFailed": "Не вдалося завантажити активність.",
@@ -145,6 +217,12 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
     "activityUnknown": "Активність зареєстровано"
   },
   "nl-NL": {
+    "lifecycleAction": "Actie",
+    "lifecycleActiveDescription": "Actief: De inhoud kan worden bewerkt. Sluiten vergrendelt afgerond werk. Rond eerst gerelateerd werk en wachtende leveringen af. Gebruik dit na afronding, afwijzing of annulering, wanneer de opvolging klaar is. Afgerond werk vereist een goedgekeurd eindrapport. Dit vervangt de normale statusacties niet.",
+    "lifecycleClosedDescription": "Gesloten: De inhoud is vergrendeld en bewaard. Archiveer of heropen om verder te bewerken. De opdrachtstatus verandert niet.",
+    "lifecycleArchivedDescription": "Gearchiveerd: Inhoud en geschiedenis blijven vergrendeld bewaard. Herstel naar gesloten en heropen vervolgens om te bewerken. Er wordt niets verwijderd.",
+    "lifecycleReasonHelp": "Leg de toestandswijziging uit. Voorbeeld: Eindrapport goedgekeurd en opvolging afgerond. Elke wijziging vereist een reden.",
+    "lifecycleHeldNotice": "Een bewaarbeperking verhindert de toestandswijziging.",
     "activityTitle": "Activiteit",
     "activityLegacyNotice": "De geschiedenis van vóór deze functie kan onvolledig zijn.",
     "activityLoadFailed": "Activiteit kon niet worden geladen.",
@@ -157,6 +235,12 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
     "activityUnknown": "Activiteit vastgelegd"
   },
   "pt-PT": {
+    "lifecycleAction": "Ação",
+    "lifecycleActiveDescription": "Ativo: O conteúdo pode ser editado. O fecho bloqueia o trabalho concluído. Primeiro, conclua o trabalho relacionado e as entregas pendentes. Utilize após conclusão, rejeição ou cancelamento, quando o acompanhamento estiver concluído. O trabalho concluído exige um relatório final aprovado. Não substitui as ações habituais de estado.",
+    "lifecycleClosedDescription": "Fechado: O conteúdo está bloqueado e conservado. Arquive ou reabra para editar. O estado da tarefa não muda.",
+    "lifecycleArchivedDescription": "Arquivado: O conteúdo e o histórico são conservados e bloqueados. Restaure ao estado fechado e depois reabra para editar. Nada é eliminado.",
+    "lifecycleReasonHelp": "Explique a mudança de estado. Exemplo: Relatório final aprovado e acompanhamento concluído. Cada mudança exige um motivo.",
+    "lifecycleHeldNotice": "Um bloqueio de conservação impede a mudança de estado.",
     "activityTitle": "Atividade",
     "activityLegacyNotice": "O histórico anterior a esta função pode estar incompleto.",
     "activityLoadFailed": "Não foi possível carregar a atividade.",
@@ -169,6 +253,12 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
     "activityUnknown": "Atividade registada"
   },
   "cs-CZ": {
+    "lifecycleAction": "Akce",
+    "lifecycleActiveDescription": "Aktivní: Obsah lze upravovat. Uzavření uzamkne dokončenou práci. Nejprve je nutné dokončit související práci a čekající doručení. Použijte po dokončení, zamítnutí nebo zrušení, až jsou následné kroky dokončeny. Dokončená práce vyžaduje schválenou závěrečnou zprávu. Nenahrazuje běžné změny stavu.",
+    "lifecycleClosedDescription": "Uzavřeno: Obsah je uzamčen a zachován. Archivujte nebo znovu otevřete pro úpravy. Stav úkolu se nemění.",
+    "lifecycleArchivedDescription": "Archivováno: Obsah i historie jsou zachovány a uzamčeny. Obnovte uzavřený stav a poté znovu otevřete pro úpravy. Nic se nemaže.",
+    "lifecycleReasonHelp": "Vysvětlete změnu stavu. Příklad: Závěrečná zpráva schválena a následné kroky dokončeny. Každá změna vyžaduje odůvodnění.",
+    "lifecycleHeldNotice": "Blokace uchování brání změně stavu.",
     "activityTitle": "Aktivita",
     "activityLegacyNotice": "Historie před zavedením této funkce může být neúplná.",
     "activityLoadFailed": "Aktivitu se nepodařilo načíst.",
@@ -181,6 +271,12 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
     "activityUnknown": "Aktivita zaznamenána"
   },
   "ro-RO": {
+    "lifecycleAction": "Acțiune",
+    "lifecycleActiveDescription": "Activ: Conținutul poate fi editat. Închiderea blochează lucrările finalizate. Finalizați mai întâi lucrările asociate și livrările în așteptare. Utilizați după finalizare, respingere sau anulare, când urmărirea este încheiată. Lucrările finalizate necesită un raport final aprobat. Nu înlocuiește acțiunile obișnuite de stare.",
+    "lifecycleClosedDescription": "Închis: Conținutul este blocat și păstrat. Arhivați sau redeschideți pentru editare. Starea sarcinii nu se schimbă.",
+    "lifecycleArchivedDescription": "Arhivat: Conținutul și istoricul sunt păstrate și blocate. Restabiliți starea închisă, apoi redeschideți pentru editare. Nimic nu se șterge.",
+    "lifecycleReasonHelp": "Explicați schimbarea stării. Exemplu: Raport final aprobat și urmărire finalizată. Fiecare schimbare necesită un motiv.",
+    "lifecycleHeldNotice": "O restricție de păstrare împiedică schimbarea stării.",
     "activityTitle": "Activitate",
     "activityLegacyNotice": "Istoricul anterior acestei funcții poate fi incomplet.",
     "activityLoadFailed": "Activitatea nu a putut fi încărcată.",
@@ -193,6 +289,12 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
     "activityUnknown": "Activitate înregistrată"
   },
   "et-EE": {
+    "lifecycleAction": "Toiming",
+    "lifecycleActiveDescription": "Aktiivne: Sisu saab muuta. Sulgemine lukustab lõpetatud töö. Esmalt tuleb lõpetada seotud töö ja ootel edastused. Kasuta pärast lõpetamist, tagasilükkamist või tühistamist, kui järeltegevused on tehtud. Lõpetatud töö vajab kinnitatud lõpparuannet. See ei asenda tavapäraseid olekutoiminguid.",
+    "lifecycleClosedDescription": "Suletud: Sisu on lukustatud ja säilitatud. Arhiveeri või ava uuesti muutmiseks. Ülesande olek ei muutu.",
+    "lifecycleArchivedDescription": "Arhiveeritud: Sisu ja ajalugu säilitatakse lukustatult. Taasta suletud olek ja seejärel ava uuesti muutmiseks. Midagi ei kustutata.",
+    "lifecycleReasonHelp": "Selgita oleku muutmist. Näide: Lõpparuanne kinnitatud ja järeltegevused lõpetatud. Iga muudatus vajab põhjendust.",
+    "lifecycleHeldNotice": "Säilitamispiirang takistab oleku muutmist.",
     "activityTitle": "Tegevus",
     "activityLegacyNotice": "Sellele funktsioonile eelnev ajalugu võib olla puudulik.",
     "activityLoadFailed": "Tegevust ei saanud laadida.",
@@ -205,6 +307,12 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
     "activityUnknown": "Tegevus registreeritud"
   },
   "lv-LV": {
+    "lifecycleAction": "Darbība",
+    "lifecycleActiveDescription": "Aktīvs: Saturu var rediģēt. Aizvēršana bloķē pabeigtu darbu. Vispirms jāpabeidz saistītie darbi un gaidošās piegādes. Izmantojiet pēc pabeigšanas, noraidīšanas vai atcelšanas, kad turpmākās darbības ir pabeigtas. Pabeigtam darbam nepieciešams apstiprināts gala ziņojums. Tas neaizstāj parastās statusa darbības.",
+    "lifecycleClosedDescription": "Aizvērts: Saturs ir bloķēts un saglabāts. Arhivējiet vai atveriet atkārtoti rediģēšanai. Uzdevuma statuss nemainās.",
+    "lifecycleArchivedDescription": "Arhivēts: Saturs un vēsture ir saglabāti un bloķēti. Atjaunojiet aizvērtu stāvokli, tad atveriet atkārtoti rediģēšanai. Nekas netiek dzēsts.",
+    "lifecycleReasonHelp": "Paskaidrojiet stāvokļa maiņu. Piemērs: Gala ziņojums apstiprināts un turpmākās darbības pabeigtas. Katrai maiņai nepieciešams pamatojums.",
+    "lifecycleHeldNotice": "Saglabāšanas ierobežojums neļauj mainīt stāvokli.",
     "activityTitle": "Aktivitāte",
     "activityLegacyNotice": "Vēsture pirms šīs funkcijas var būt nepilnīga.",
     "activityLoadFailed": "Aktivitāti neizdevās ielādēt.",
@@ -217,6 +325,12 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
     "activityUnknown": "Aktivitāte reģistrēta"
   },
   "lt-LT": {
+    "lifecycleAction": "Veiksmas",
+    "lifecycleActiveDescription": "Aktyvus: Turinį galima redaguoti. Uždarymas užrakina baigtą darbą. Pirmiausia reikia užbaigti susijusius darbus ir laukiančius pristatymus. Naudokite po užbaigimo, atmetimo ar atšaukimo, kai tolesni veiksmai baigti. Užbaigtam darbui reikia patvirtintos galutinės ataskaitos. Tai nepakeičia įprastų būsenos veiksmų.",
+    "lifecycleClosedDescription": "Uždarytas: Turinys užrakintas ir išsaugotas. Archyvuokite arba atverkite iš naujo redagavimui. Užduoties būsena nesikeičia.",
+    "lifecycleArchivedDescription": "Archyvuotas: Turinys ir istorija išsaugoti ir užrakinti. Atkurkite uždarytą būseną, tada atverkite iš naujo redagavimui. Niekas neištrinama.",
+    "lifecycleReasonHelp": "Paaiškinkite būsenos keitimą. Pavyzdys: Galutinė ataskaita patvirtinta ir tolesni veiksmai užbaigti. Kiekvienam keitimui reikia pagrindimo.",
+    "lifecycleHeldNotice": "Saugojimo apribojimas neleidžia keisti būsenos.",
     "activityTitle": "Veikla",
     "activityLegacyNotice": "Iki šios funkcijos atsiradimo istorija gali būti neišsami.",
     "activityLoadFailed": "Nepavyko įkelti veiklos.",
@@ -229,14 +343,20 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
     "activityUnknown": "Veikla užregistruota"
   },
   "en-GB": {
+    "lifecycleAction": "Action",
+    "lifecycleActiveDescription": "Active: Content can be edited. Closing locks finished work; unfinished related work or pending delivery must be resolved first. Use this after completion, rejection or cancellation, when follow-up is finished. Completed work needs an approved final report. This does not replace the normal task status actions.",
+    "lifecycleClosedDescription": "Closed: Content is locked and retained. Archive it, or reopen it for further editing. The task status is unchanged.",
+    "lifecycleArchivedDescription": "Archived: Content and history are retained and locked. Restore to closed, then reopen to resume editing. Nothing is deleted.",
+    "lifecycleReasonHelp": "Explain why you are changing this state. For example: Final report approved and all follow-up completed. A reason is required for each change.",
+    "lifecycleHeldNotice": "A hold prevents changes to this state.",
     "activityTitle": "Activity",
     "activityLegacyNotice": "History before this feature may be incomplete.",
     "activityLoadFailed": "Activity could not be loaded.",
-    "lifecycleTitle": "Information lifecycle",
-    "lifecycleClosed": "Close information",
+    "lifecycleTitle": "Closing and archiving",
+    "lifecycleClosed": "Lock content",
     "lifecycleArchived": "Archive",
     "lifecycleRestore": "Restore to closed",
-    "lifecycleReopen": "Reopen information",
+    "lifecycleReopen": "Reopen for editing",
     "lifecycleReason": "Reason",
     "activityUnknown": "Activity recorded"
   }

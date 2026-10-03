@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Clarified closing and archiving with the current information state, explicit action selection, action-specific reasons and explanations of locking, restoration and retained history.
+
 - Added authorized WorkItem and Site activity timelines over the existing event store, with correlated independent audit, notification/webhook projection and signed federation delivery.
 
 - Added explicit WorkItem information closure, archive and restoration with relationship checks and database guards. Irreversible deletion, anonymisation and retention-policy execution remain disabled.
