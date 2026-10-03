@@ -2233,5 +2233,140 @@
     "retentionPolicyExecutionEnabled": false,
     "productionTouched": false,
     "asvsStatusesChanged": false
+  },
+  "preservationSnapshotContinuation": {
+    "recordedAtUtc": "2026-10-03T21:16:06.102278+00:00",
+    "baseRevision": "f62be87",
+    "apiImage": "sha256:47f0dfedacc0ee98b1dd9a7bc0dfbfa56c940c2b8f48183179ae702847b524ae",
+    "webImage": "sha256:66ef2bb6b600cf9539a8c1067ef24043d6cf1b1b6888ee05e143349fee2689be",
+    "sourceSha256": {
+      "apps/api/Portability/PortableExportPackage.cs": "feae39fd8d5c80557b566260f8418a27bee33c21c578d36fc98d2184e3a0792a",
+      "apps/api/Portability/PortableImportValidator.cs": "6ebea580413cc1d65499f99a989492b8b194ea9537c31103be192a267494e20e",
+      "apps/api/Portability/ExportReceipt.cs": "14f6e6234688f8280035bc050bc67570d2357706c2f22b2c8f7fa4af943296d2",
+      "apps/api/Portability/PortabilityReceiptEndpoints.cs": "72da759d41db160be10856cdc02235bc5f1f2be041736e36cc30d6c758f0d89c",
+      "apps/api/InformationLifecycle/PreservationEndpoints.cs": "8a3a472ce356918e5a6631d38019f24a0c3814be1e177bc8776fb2e06956b347",
+      "apps/api/Platform/ApiMaintenanceWorker.cs": "b735f1a181a97aa81e52cda8fd1cc10524aada627512928b41b42ca19d9d3ddf",
+      "apps/api/Persistence/Migrations/20261003202712_AddPreservationAndSnapshotReceipts.cs": "a220f835f3ef8e5eb9da46dd1eecba5f2d98d0e527b67b173372283a7b61e04b",
+      "apps/web/src/components/PreservationControls.tsx": "009ba4eed77b9f27889c3a95a2fbd7e5108bb40f931e67f391cd643f65fbf5dd",
+      "apps/web/src/components/ExportHandoff.tsx": "77e5b0ae438665a15c69051d3051cfed97272590ec74bd14090e8fac51d79c73",
+      "tests/foundations/PreservationTests.cs": "ac23d506ddbe13b2b148040c60193778054f7fc6770a7b34e3987c13ace6357c",
+      "tests/foundations/PortableValidationTests.cs": "c623da2ca43596c297d1fec26175bcfd7e053888c9c83f1abd6312a17a4f7efe",
+      "tests/foundations/LegacyHoldUpgradeTests.cs": "192c61c1e1974bfe779d6430832a9e96b6703807aefeeeeea683a0c493cd3c1a",
+      "tools/e2e/preservation.mjs": "44fbf6d32001bf361d699e916274588b5ebb165ed7bd79ded995e81411f42447",
+      "tools/e2e/governance-browser.mjs": "ed131bf647e276310a77fa140e0a9e487d6ac83ed7a46c3908637d3dce1826a7",
+      "tools/e2e/activity-lifecycle.mjs": "774de21befb281598302c8d3df60c4366ef240fab8e52a6fef6f5d20986e8372"
+    },
+    "foundations": "passed including concurrent snapshot/hold housekeeping, file/byte failures, unknown-provenance legacy upgrade and manipulated owner/policy validation",
+    "apiSummary": {
+      "editionsAndTransitions": "passed",
+      "activityTimeline": "passed",
+      "informationArchive": "passed",
+      "preservationHolds": "passed",
+      "immutablePolicyVersions": "passed",
+      "verifiedExportCustody": "passed",
+      "portability": "passed",
+      "portableDatasetCount": 61,
+      "rejectedManifestCases": 20
+    },
+    "browser": {
+      "topLevelTaskBrowserFlow": "passed",
+      "taskRegistration": true,
+      "leaderAssessment": true,
+      "directExecution": true,
+      "finalReport": true,
+      "reportArchive": true,
+      "overviewCounts": true,
+      "siteAudit": true,
+      "objectActivityTimeline": true,
+      "siteActivityTimeline": true,
+      "activityKeyboard": true,
+      "lifecycleDialogLayout": true,
+      "lifecycleVisibleState": true,
+      "lifecycleArchiveRestore": true,
+      "notificationQueue": true,
+      "classifiedReport": true,
+      "workloadPresentation": true,
+      "separateReportApprover": true,
+      "storedContentInjection": true,
+      "pdfOutput": true,
+      "multiPageClassifiedReport": true,
+      "siteArchiveGovernance": true,
+      "archiveCustodianSearch": true,
+      "archiveOnlyBrowserSession": true,
+      "readOnlyArchiveTimeline": true,
+      "keyboardModalNavigation": true,
+      "accessibleDialogTree": true,
+      "visibleKeyboardFocus": true,
+      "smtpHandoff": true,
+      "smtpRetry": true,
+      "mailboxReceipt": true,
+      "smtpHeaderInjectionRejected": true,
+      "templateExpressionsLiteral": true,
+      "templateValuesNotRecursivelyExpanded": true,
+      "templateRejectedUpdatesUnchanged": true,
+      "smtpDotContentPreserved": true,
+      "chromium": "Chrome/152.0.7977.82",
+      "firstRunSetup": true,
+      "authenticatedShell": true,
+      "communityEdition": true,
+      "siteCreation": true,
+      "desktopOverflow": false,
+      "mobileOverflow": false,
+      "browserErrors": 0
+    },
+    "federationRetention": {
+      "federationRetention": "passed",
+      "retentionDays": 2555,
+      "expiredRowsRemoved": {
+        "outbound": 5000,
+        "receipts": 5000,
+        "audit": 0
+      },
+      "recentRowsRetained": {
+        "outbound": 50002,
+        "receipts": 50002,
+        "audit": 50000
+      },
+      "activeAndUnresolvedRowsRetained": true,
+      "securityAuditRetained": true,
+      "nonFederationAuditRetained": true,
+      "plans": {
+        "deliveryCounts": {
+          "executionMs": 5.182,
+          "indexes": [
+            "IX_federation_outbound_messages_peer_instance_id_status"
+          ]
+        },
+        "newestDeliveries": {
+          "executionMs": 0.089,
+          "indexes": [
+            "IX_federation_outbound_messages_peer_instance_id_created_at"
+          ]
+        },
+        "receiptLookup": {
+          "executionMs": 0.057,
+          "indexes": [
+            "PK_federation_inbound_receipts"
+          ]
+        },
+        "newestAudit": {
+          "executionMs": 18.014,
+          "indexes": [
+            "IX_audit_events_occurred_at_id"
+          ]
+        }
+      }
+    },
+    "frontendTests": 157,
+    "exactExclusiveUntilAssertion": "passed in this dependent API run",
+    "apiParserExtensionNote": "Additional lifecycle owner/policy JSONL cases added after this API module was loaded; equivalent real-package foundation validator cases passed. Execute the added HTTP cases in the next complete API run.",
+    "excludedFailedAttempts": [
+      "Synthetic schema helper initially rejected by EF1002; replaced with validated generated identifier and migration test passed.",
+      "Browser fixture clicked disabled preservation control before its initial read completed; explicit enabled-state wait added and complete browser chain rerun successfully."
+    ],
+    "irreversibleDispositionEnabled": false,
+    "retentionExecutionEnabled": false,
+    "asvsStatusesChanged": false,
+    "productionTouched": false
   }
 }

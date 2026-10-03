@@ -56,6 +56,12 @@ public sealed class AuditEvent
         };
     }
 
+    public string? ChangeReason { get; private set; }
+    public AuditEvent WithReason(string reason)
+    {
+        if (string.IsNullOrWhiteSpace(reason) || reason.Length > 1000 || reason.Any(char.IsControl)) throw new ArgumentException("A bounded audit reason is required.");
+        ChangeReason = reason.Trim(); return this;
+    }
     public Guid? DomainEventId { get; private set; }
     public Guid? CorrelationId { get; private set; }
     public void Correlate(Guid eventId, Guid operationId) { DomainEventId = eventId; CorrelationId = operationId; }

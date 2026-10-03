@@ -21,6 +21,7 @@ internal static class AuditModelConfiguration
             "(actor_person_id IS NULL AND actor_instance_id IS NULL AND actor_site_id IS NULL AND actor_site_name IS NULL AND NULLIF(BTRIM(actor_system), '') IS NOT NULL)"));
         auditEvent.Property(value => value.DomainEventId).HasColumnName("domain_event_id");
         auditEvent.Property(value => value.CorrelationId).HasColumnName("correlation_id");
+        auditEvent.Property(value => value.ChangeReason).HasColumnName("change_reason").HasMaxLength(1000);
         auditEvent.HasKey(value => value.Id);
         auditEvent.Property(value => value.Id).HasColumnName("id");
         auditEvent.Property(value => value.SiteId).HasColumnName("site_id");

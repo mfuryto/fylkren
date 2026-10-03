@@ -1,6 +1,8 @@
 import { useEffect, useId, useState } from "react";
 import { apiGet, apiMutate } from "../api/client";
 import { useTranslation } from "../localization/LocalizationProvider";
+import { PreservationControls } from "./PreservationControls";
+import { ExportHandoff } from "./ExportHandoff";
 import { ArchiveCustodians } from "./ArchiveCustodians";
 import { Modal } from "./Modal";
 import type { MessageKey } from "../localization";
@@ -29,10 +31,10 @@ export function WorkLifecycleButton({ siteId, itemId }: { siteId: string; itemId
 }
 
 export function GovernanceLifecycleButton({ kind, id }: { kind: "site" | "person"; id: string }) {
-  return <LifecycleAction path={`/api/information/governance/${kind}/${id}`} governance siteId={kind === "site" ? id : undefined} />;
+  return <LifecycleAction path={`/api/information/governance/${kind}/${id}`} governance={{ kind, id }} siteId={kind === "site" ? id : undefined} />;
 }
 
-function LifecycleAction({ path, governance, siteId }: { path: string; governance?: boolean; siteId?: string }) {
+function LifecycleAction({ path, governance, siteId }: { path: string; governance?: { kind: "site" | "person"; id: string }; siteId?: string }) {
   const t = useTranslation();
   const [open, setOpen] = useState(false);
   const [state, setState] = useState<State>();
@@ -54,7 +56,7 @@ function LifecycleAction({ path, governance, siteId }: { path: string; governanc
   return <><button className="task-icon-action" type="button" aria-haspopup="dialog" onClick={() => setOpen(true)}><i aria-hidden="true">▣</i><span>{t("lifecycleTitle")}{state && <> · {t(labels[state.effectiveStage ?? state.stage])}</>}</span></button>{open && <LifecycleDialog path={path} governance={governance} siteId={siteId} state={state} loadError={error} onChange={setState} onClose={() => setOpen(false)} />}</>;
 }
 
-function LifecycleDialog({ path, governance, siteId, state, loadError, onChange, onClose }: { path: string; governance?: boolean; siteId?: string; state?: State; loadError: string; onChange: (state: State) => void; onClose: () => void }) {
+function LifecycleDialog({ path, governance, siteId, state, loadError, onChange, onClose }: { path: string; governance?: { kind: "site" | "person"; id: string }; siteId?: string; state?: State; loadError: string; onChange: (state: State) => void; onClose: () => void }) {
   const t = useTranslation();
   const reasonHelpId = useId();
   const actionId = useId();
@@ -88,6 +90,8 @@ function LifecycleDialog({ path, governance, siteId, state, loadError, onChange,
       {state.held && <p role="note">{t("lifecycleHeldNotice")}</p>}
       {governance && state.impact && !state.impact.eligible && <div><strong>{t("lifecycleBlocked")}</strong><ul>{Object.entries(state.impact.blockers).map(([code, count]) => <li key={code}>{t(blockers[code] ?? "activityUnknown")} ({count})</li>)}</ul></div>}
       {siteId && <ArchiveCustodians siteId={siteId} onChanged={() => { void apiGet<State>(path, t("activityLoadFailed")).then(onChange); }} />}
+      {governance && <PreservationControls kind={governance.kind} id={governance.id} onChanged={() => { void apiGet<State>(path, t("activityLoadFailed")).then(onChange); }} />}
+      {siteId && <ExportHandoff siteId={siteId} />}
       <div className="field">
         <label htmlFor={actionId}>{t("lifecycleAction")}</label>
         <select id={actionId} value={action[0]} disabled={saving || state.held || state.inheritedLock} onChange={e => { setSelected(e.target.value as Stage); setReason(""); }}>

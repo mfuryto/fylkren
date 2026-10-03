@@ -38,7 +38,10 @@ internal static class PortableImportValidator
                 manifest = await JsonSerializer.DeserializeAsync<PortableExportManifest>(manifestStream, new JsonSerializerOptions(JsonSerializerDefaults.Web), cancellationToken);
             if (manifest is null || !HasValidShape(manifest)) return Invalid(errors, "The manifest structure or field limits are invalid.");
             if (manifest.Format != PortableExportPackage.Format) errors.Add("The package is not a Fylkren portability format.");
-            if (manifest.FormatVersion != PortableExportPackage.FormatVersion) errors.Add($"Format version {manifest.FormatVersion} is not supported by this installation.");
+            if (manifest.FormatVersion is not ("1.0" or "1.1")) errors.Add($"Format version {manifest.FormatVersion} is not supported by this installation.");
+            if (manifest.FormatVersion == "1.0") warnings.Add("Legacy format 1.0 lacks snapshot/lifecycle/export custody evidence and does not establish restoration readiness.");
+            if (manifest.FormatVersion == "1.1" && (manifest.Snapshot is null || manifest.Snapshot.InstanceId == Guid.Empty || manifest.Snapshot.CapturedAt != manifest.ExportedAt || manifest.Snapshot.Boundary is not { Length: 64 } || !manifest.Snapshot.Boundary.All(Uri.IsHexDigit))) errors.Add("Format 1.1 requires a valid consistent snapshot descriptor.");
+            if (manifest.Datasets.Select(d => d.Name).Distinct(StringComparer.Ordinal).Count() != manifest.Datasets.Count) errors.Add("Dataset names must be unique.");
             if (manifest.Scope != "site") errors.Add("Only site-scoped packages are supported.");
             if (manifest.Site.Id != expectedSiteId) errors.Add("The package belongs to another site. Import across site boundaries is blocked.");
             if (!string.Equals(manifest.IntegrityAlgorithm, "SHA-256", StringComparison.OrdinalIgnoreCase)) errors.Add("The package uses an unknown integrity algorithm.");
@@ -62,12 +65,13 @@ internal static class PortableImportValidator
                 if (result.Count != dataset.RecordCount) errors.Add($"The record count does not match for {dataset.Path}.");
                 errors.AddRange(result.Errors.Select(value => $"{dataset.Path}: {value}"));
             }
-            ValidateDatasetStructure(inspections, expectedSiteId, errors);
+            ValidateDatasetStructure(inspections, expectedSiteId, manifest.FormatVersion, errors);
 
             foreach (var attachment in manifest.Attachments)
             {
                 if (!declaredPaths.Add(attachment.Path)) { errors.Add($"Duplicate file in the manifest: {attachment.Path}"); continue; }
                 if (!attachment.Path.StartsWith("attachments/", StringComparison.Ordinal)) { errors.Add($"Invalid attachment path: {attachment.Path}"); continue; }
+                if (attachment.OwnerType != "person" || !inspections.TryGetValue("people", out var people) || !people.Ids.Contains(attachment.OwnerId)) errors.Add($"Attachment owner is missing or unsupported: {attachment.Path}.");
                 var entry = archive.GetEntry(attachment.Path);
                 if (entry is null) { errors.Add($"Missing attachment: {attachment.Path}"); continue; }
                 await using var input = entry.Open();
@@ -111,6 +115,8 @@ internal static class PortableImportValidator
         var errors = new List<string>();
         var count = 0;
         var ids = new HashSet<Guid>();
+        var policyKeys = new HashSet<string>();
+        var policyBindings = new HashSet<string>();
         var references = new Dictionary<string, List<Guid>>(StringComparer.Ordinal);
         await using var input = entry.Open();
         using var buffer = new MemoryStream();
@@ -134,6 +140,17 @@ internal static class PortableImportValidator
             if (datasetName == "domain-events" && document.RootElement.TryGetProperty("request_id", out var requestId) && requestId.ValueKind != JsonValueKind.Null &&
                 (requestId.ValueKind != JsonValueKind.String || requestId.GetString() is { Length: > 200 } || requestId.GetString()!.Any(char.IsControl)))
                 errors.Add($"Record {count} has an invalid request identifier.");
+            if (document.RootElement.TryGetProperty("owner_site_id", out var owner) && owner.ValueKind != JsonValueKind.Null && (owner.ValueKind != JsonValueKind.String || !owner.TryGetGuid(out var ownerId) || ownerId != expectedSiteId))
+                errors.Add($"Record {count} has a foreign lifecycle owner.");
+            if (document.RootElement.TryGetProperty("policy_id", out var policyId) && policyId.ValueKind != JsonValueKind.Null)
+            {
+                var versionField = datasetName == "retention-policy-versions" ? "version" : "policy_version";
+                if (policyId.ValueKind != JsonValueKind.String || !Guid.TryParse(policyId.GetString(), out var key) || !document.RootElement.TryGetProperty(versionField, out var policyVersion) || policyVersion.ValueKind != JsonValueKind.Number || !policyVersion.TryGetInt32(out var version) || version < 1)
+                    errors.Add($"Record {count} has an invalid versioned policy reference.");
+                else if (datasetName == "retention-policy-versions") { if (!policyKeys.Add($"{key:N}:{version}")) errors.Add("Duplicate policy version."); }
+                else policyBindings.Add($"{key:N}:{version}");
+            }
+            if (datasetName == "information-lifecycle" && document.RootElement.TryGetProperty("policy_version", out var boundVersion) && boundVersion.ValueKind != JsonValueKind.Null && (!document.RootElement.TryGetProperty("policy_id", out var boundId) || boundId.ValueKind == JsonValueKind.Null)) errors.Add("A policy version requires its policy ID.");
             foreach (var property in document.RootElement.EnumerateObject().Where(value => !(datasetName == "domain-events" && value.Name == "request_id") && value.Name.EndsWith("_id", StringComparison.Ordinal) && value.Value.ValueKind == JsonValueKind.String))
             {
                 if (!Guid.TryParse(property.Value.GetString(), out var reference)) { errors.Add($"Record {count} has an invalid reference in {property.Name}."); continue; }
@@ -141,13 +158,26 @@ internal static class PortableImportValidator
                 values.Add(reference);
             }
         }
-        return new DatasetInspection(PortableExportPackage.Hash(bytes), count, ids, references, errors);
+        return new DatasetInspection(PortableExportPackage.Hash(bytes), count, ids, references, errors, policyKeys, policyBindings);
     }
 
-    private static void ValidateDatasetStructure(Dictionary<string, DatasetInspection> values, Guid expectedSiteId, List<string> errors)
+    private static void ValidateDatasetStructure(Dictionary<string, DatasetInspection> values, Guid expectedSiteId, string formatVersion, List<string> errors)
     {
         string[] required = ["site", "organization-units", "site-memberships", "people", "work-items", "work-item-history", "workflow-definitions", "workflow-steps", "workflow-runs", "execution-runs", "decisions", "decision-revisions", "risks", "risk-revisions", "audit-events"];
         foreach (var name in required.Where(name => !values.ContainsKey(name))) errors.Add($"Required dataset is missing: {name}.");
+        if (formatVersion == "1.1")
+        {
+            string[] lifecycleSets = ["information-lifecycle", "lifecycle-holds", "retention-policy-versions", "archive-grants", "export-receipts", "event-projections", "domain-events", "federation-work-links", "federation-inbound-receipts", "federation-outbound-evidence", "person-lifecycle-references"];
+            foreach (var name in lifecycleSets.Where(name => !values.ContainsKey(name))) errors.Add($"Required lifecycle dataset is missing: {name}.");
+            if (values.TryGetValue("information-lifecycle", out var lifecycle) && values.TryGetValue("retention-policy-versions", out var policies) && !lifecycle.PolicyBindings.IsSubsetOf(policies.PolicyKeys)) errors.Add("A bound immutable policy version is missing.");
+            Reference(values, errors, "lifecycle-holds", "lifecycle_id", "information-lifecycle");
+            Reference(values, errors, "event-projections", "domain_event_id", "domain-events");
+            Reference(values, errors, "federation-work-links", "local_work_item_id", "work-items");
+            Reference(values, errors, "federation-inbound-receipts", "local_work_item_id", "work-items");
+        }
+        foreach (var dataset in values)
+            foreach (var personReference in dataset.Value.References.Keys.Where(k => k.EndsWith("person_id", StringComparison.Ordinal)))
+                Reference(values, errors, dataset.Key, personReference, "people");
         if (values.TryGetValue("site", out var site) && (site.Count != 1 || !site.Ids.Contains(expectedSiteId))) errors.Add("The site dataset must contain exactly the site covered by the package.");
 
         Reference(values, errors, "organization-unit-memberships", "organization_unit_id", "organization-units");
@@ -228,5 +258,5 @@ internal static class PortableImportValidator
         return new PortablePackageValidationResult(false, "", "", Guid.Empty, Guid.Empty, "", 0, 0, 0, errors, []);
     }
 
-    private sealed record DatasetInspection(string Hash, int Count, HashSet<Guid> Ids, Dictionary<string, List<Guid>> References, IReadOnlyList<string> Errors);
+    private sealed record DatasetInspection(string Hash, int Count, HashSet<Guid> Ids, Dictionary<string, List<Guid>> References, IReadOnlyList<string> Errors, HashSet<string> PolicyKeys, HashSet<string> PolicyBindings);
 }

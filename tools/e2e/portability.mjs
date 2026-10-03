@@ -28,6 +28,8 @@ export async function testPortableParserBoundaries({ platform, siteManager, site
   const typed = await validate(value => { value.$type = 'Synthetic.UntrustedType, Synthetic'; value.site.$type = 'Synthetic.OtherType'; });
   assert.equal(typed.valid, true, 'Unknown type metadata must not select a runtime type');
   const invalid = [
+    ['snapshot missing', value => { value.snapshot = null; }],
+    ['duplicate dataset name', value => { value.datasets[1].name = value.datasets[0].name; }],
     ['site null', value => { value.site = null; }],
     ['datasets null', value => { value.datasets = null; }],
     ['attachments null', value => { value.attachments = null; }],
@@ -67,7 +69,7 @@ export async function testPortability({ platform, siteManager, leader, siteId, o
   const manifest = JSON.parse(entries.get('manifest.json').toString('utf8'));
   const parserBoundaries = await testPortableParserBoundaries({ platform, siteManager, siteId, entries, manifest });
   assert.equal(manifest.format, 'fylkren-portable-export');
-  assert.equal(manifest.formatVersion, '1.0');
+  assert.equal(manifest.formatVersion, '1.1');
   assert.equal(manifest.site.id, siteId);
   assert.equal(manifest.integrityAlgorithm, 'SHA-256');
   for (const dataset of manifest.datasets) {
@@ -115,6 +117,8 @@ export async function testPortability({ platform, siteManager, leader, siteId, o
     copy.set('manifest.json', Buffer.from(JSON.stringify(metadata)));
     return writeZip(copy);
   }
+  const legacy = await validate(editedPackage((_files, metadata) => { metadata.formatVersion = '1.0'; delete metadata.snapshot; }));
+  assert.equal(legacy.valid, true); assert.ok(legacy.warnings.some(w => /Legacy format/.test(w)));
   const incompatible = await validate(editedPackage((_files, metadata) => { metadata.formatVersion = '99.0'; }));
   assert.equal(incompatible.valid, false, 'Unsupported version accepted');
   const missing = await validate(editedPackage((files) => { files.delete('data/work-items.jsonl'); }));
@@ -146,6 +150,26 @@ export async function testPortability({ platform, siteManager, leader, siteId, o
   assert.equal(crossing.valid, false, 'Cross-site row accepted');
   const missingReference = await validate(changedWorkItem(records => { records[0].created_by_person_id = '00000000-0000-4000-8000-000000000001'; }));
   assert.equal(missingReference.valid, false, 'Missing person relationship accepted');
+  function changedLifecycle(edit) {
+    return editedPackage((files, metadata) => {
+      const path = 'data/information-lifecycle.jsonl';
+      const records = files.get(path).toString('utf8').split('\n').filter(Boolean).map(JSON.parse);
+      assert.ok(records.length > 0);
+      edit(records[0]);
+      const data = Buffer.from(`${records.map(JSON.stringify).join('\n')}\n`);
+      files.set(path, data);
+      const descriptor = metadata.datasets.find(d => d.path === path);
+      descriptor.bytes = data.length; descriptor.sha256 = digest(data);
+    });
+  }
+  for (const [label, edit] of [
+    ['foreign lifecycle owner', row => { row.owner_site_id = otherSiteId; }],
+    ['numeric lifecycle owner', row => { row.owner_site_id = 42; }],
+    ['missing immutable policy', row => { row.policy_id = '00000000-0000-4000-8000-000000000001'; row.policy_version = 1; }],
+    ['string policy version', row => { row.policy_id = '00000000-0000-4000-8000-000000000001'; row.policy_version = '1'; }],
+    ['unpaired policy version', row => { row.policy_id = null; row.policy_version = 1; }],
+  ]) assert.equal((await validate(changedLifecycle(edit))).valid, false, label);
+  assert.equal((await validate(editedPackage((_files, metadata) => { metadata.datasets = metadata.datasets.filter(d => d.name !== 'lifecycle-holds'); }))).valid, false, 'Missing 1.1 foundation dataset accepted');
   const noApply = await platform.request(`/api/portability/sites/${siteId}/imports/apply`, { method: 'POST' });
   assert.equal(noApply.status, 404, 'Import-apply endpoint unexpectedly exists');
   return { portableExportId: manifest.exportId, portableDatasetCount: manifest.datasets.length, ...parserBoundaries };

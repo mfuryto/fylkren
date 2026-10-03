@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Data;
 using Fylkren.Api.ActivityAudit;
 using Fylkren.Api.Organization;
 using Fylkren.Api.Persistence;
@@ -8,12 +9,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fylkren.Api.Portability;
 
-public static class PortabilityEndpoints
+public static partial class PortabilityEndpoints
 {
     public static IEndpointRouteBuilder MapPortabilityEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("/api/portability").RequireAuthorization();
         group.MapPost("/sites/{siteId:guid}/export", Export);
+        group.MapGet("/sites/{siteId:guid}/exports", Receipts);
+        group.MapGet("/sites/{siteId:guid}/exit", ExitStatus);
+        group.MapPost("/sites/{siteId:guid}/exports/{exportId:guid}/acknowledge", Acknowledge);
         group.MapPost("/sites/{siteId:guid}/imports/validate", ValidateImport)
             .DisableAntiforgery()
             .WithMetadata(new RequestFormLimitsAttribute { MultipartBodyLengthLimit = PortableExportPackage.MaximumPackageBytes });
@@ -29,17 +33,27 @@ public static class PortabilityEndpoints
         CancellationToken cancellationToken)
     {
         if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest(new { error = "Antiforgery token validation failed." });
-        if (!PersonId(user, out var actorPersonId) || !(await CanAdminister(siteId, actorPersonId, user, db, cancellationToken) || await Fylkren.Api.InformationLifecycle.ArchiveAccess.CanExport(siteId, actorPersonId, db, cancellationToken)))
+        if (!PersonId(user, out var actorPersonId)) return Results.Problem(statusCode: 403);
+        await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
+        if (!(await CanAdminister(siteId, actorPersonId, user, db, cancellationToken) || await Fylkren.Api.InformationLifecycle.ArchiveAccess.CanExport(siteId, actorPersonId, db, cancellationToken)))
             return Results.Problem(statusCode: StatusCodes.Status403Forbidden);
         if (!await db.Sites.AnyAsync(value => value.Id == siteId, cancellationToken)) return Results.NotFound();
         try
         {
             var content = await PortableExportPackage.Create(siteId, actorPersonId, db, cancellationToken);
+            var receipt = db.ExportReceipts.Local.Single(r => r.SiteId == siteId);
+            context.Response.Headers["X-Fylkren-Export-Id"] = receipt.Id.ToString();
+            context.Response.Headers["X-Fylkren-Package-Sha256"] = receipt.PackageSha256;
+            await transaction.CommitAsync(cancellationToken);
             return Results.File(content, "application/zip", $"fylkren-site-{siteId:N}-export.zip");
+        }
+        catch (PortableExportIntegrityException)
+        {
+            return Results.Conflict(new { code = "portable_export_incomplete", error = "Export relationships could not be validated. No export receipt was created." });
         }
         catch (PortablePackageTooLargeException)
         {
-            return Results.Problem(statusCode: StatusCodes.Status413PayloadTooLarge, title: "The export package exceeds the 512 MiB limit.");
+            return Results.Problem(statusCode: StatusCodes.Status413PayloadTooLarge, title: "The export exceeds the package size or file count limit.");
         }
     }
 

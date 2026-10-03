@@ -55,7 +55,7 @@ internal static class GovernanceLifecycleEndpoints
         try { record.Transition(request.Stage, record.Version, request.Reason, DateTimeOffset.UtcNow); }
         catch (InvalidOperationException) { return Results.Conflict(new { code = "lifecycle_transition_conflict" }); }
         var type = request.Stage == "archived" ? "information.archived" : request.Stage == "closed" && previous == "active" ? "information.closed" : "information.restored";
-        var audit = new AuditEvent(Guid.NewGuid(), kind == "site" ? id : null, actor, type, kind, id, DateTimeOffset.UtcNow);
+        var audit = new AuditEvent(Guid.NewGuid(), kind == "site" ? id : null, actor, type, kind, id, DateTimeOffset.UtcNow).WithReason(request.Reason);
         if (kind == "site") await DomainEventRecorder.RecordGovernance(db, audit, type, id, kind, id, new { status = record.Stage, previousStatus = previous }, ct);
         else db.AuditEvents.Add(audit); // Global identities have no invented originating tenant.
         await db.SaveChangesAsync(ct); await tx.CommitAsync(ct);
@@ -71,7 +71,7 @@ internal static class GovernanceLifecycleEndpoints
         if (!await db.People.AnyAsync(p => p.Id == request.PersonId && p.IsActive && !p.IsDeleted, ct) || !await db.LoginIdentities.AnyAsync(i => i.PersonId == request.PersonId && i.IsActive, ct)) return Results.BadRequest();
         if (await db.ArchiveGrants.AnyAsync(g => g.SiteId == siteId && g.PersonId == request.PersonId && g.IsActive, ct)) return Results.Conflict();
         var grant = new ArchiveGrant(Guid.NewGuid(), siteId, request.PersonId, request.CanExport, DateTimeOffset.UtcNow); db.ArchiveGrants.Add(grant);
-        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, actor, "archive-access.granted", "archive-grant", grant.Id, DateTimeOffset.UtcNow));
+        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, actor, "archive-access.granted", "archive-grant", grant.Id, DateTimeOffset.UtcNow).WithReason(request.Reason));
         await db.SaveChangesAsync(ct); await tx.CommitAsync(ct); return Results.Ok(grant);
     }
     private sealed record RevokeRequest(long ExpectedVersion, string Reason);
@@ -84,7 +84,7 @@ internal static class GovernanceLifecycleEndpoints
         var grant = await db.ArchiveGrants.SingleOrDefaultAsync(g => g.Id == grantId && g.SiteId == siteId, ct); if (grant is null) return Results.NotFound();
         if (root.Stage != "active" && grant.CanExport && !await db.ArchiveGrants.AnyAsync(g => g.SiteId == siteId && g.Id != grantId && g.IsActive && g.CanExport && db.People.Any(p => p.Id == g.PersonId && p.IsActive && !p.IsDeleted) && db.LoginIdentities.Any(i => i.PersonId == g.PersonId && i.IsActive), ct)) return Results.Conflict(new { code = "archive_last_custodian" });
         try { grant.Revoke(request.ExpectedVersion, DateTimeOffset.UtcNow); } catch (InvalidOperationException) { return Results.Conflict(new { code = "lifecycle_version_conflict" }); }
-        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, actor, "archive-access.revoked", "archive-grant", grant.Id, DateTimeOffset.UtcNow));
+        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, actor, "archive-access.revoked", "archive-grant", grant.Id, DateTimeOffset.UtcNow).WithReason(request.Reason));
         await db.SaveChangesAsync(ct); await tx.CommitAsync(ct); return Results.NoContent();
     }
     internal static bool Reason(string? value) => !string.IsNullOrWhiteSpace(value) && value.Length <= 1000 && !value.Any(char.IsControl);

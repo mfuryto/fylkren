@@ -45,7 +45,7 @@ internal static class WorkLifecycleEndpoints
         try { record.Transition(request.Stage, record.Version, request.Reason, DateTimeOffset.UtcNow); }
         catch (InvalidOperationException) { return Results.Conflict(new { code = "lifecycle_transition_conflict" }); }
         var type = request.Stage == "archived" ? "information.archived" : request.Stage == "closed" && previousStage == "active" ? "information.closed" : "information.restored";
-        WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, person, type, "work-item", itemId, DateTimeOffset.UtcNow), type, metadataJson: System.Text.Json.JsonSerializer.Serialize(new { status = record.Stage, previousStatus = previousStage }));
+        WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, person, type, "work-item", itemId, DateTimeOffset.UtcNow).WithReason(request.Reason), type, metadataJson: System.Text.Json.JsonSerializer.Serialize(new { status = record.Stage, previousStatus = previousStage }));
         await db.SaveChangesAsync(ct); await tx.CommitAsync(ct);
         return Results.Ok(new { record.Stage, record.Version });
     }

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { testPreservation, testExportAcknowledgement } from './preservation.mjs';
 
 export async function testGovernanceLifecycle({ platform, unauthorized, makeUser, suffix }) {
   const created = await platform.post('/api/sites/', { name: `Synthetic governance ${suffix}`, overviewDesign: 'classic' });
@@ -25,6 +26,8 @@ export async function testGovernanceLifecycle({ platform, unauthorized, makeUser
   assert.equal(closedPerson.status, 200, JSON.stringify(closedPerson.body));
   assert.equal((await unauthorized.request(personPath)).status, 403);
   assert.equal((await platform.post(`${personPath}/transitions`, { stage: 'archived', expectedVersion: closedPerson.body.version, reason: 'Preserve global historical identity' })).status, 200);
+  const preservation = await testPreservation({ platform, unauthorized, siteId });
+  state = (await platform.request(path)).body;
   assert.equal((await transition('closed')).status, 200);
   assert.equal((await transition('archived')).status, 200);
   const archive = `/api/information/archives/${siteId}`;
@@ -42,9 +45,10 @@ export async function testGovernanceLifecycle({ platform, unauthorized, makeUser
   assert.equal((await transition('deleted')).status, 400);
   const exportResult = await custodian.account.request(`/api/portability/sites/${siteId}/export`, { method: 'POST', binary: true });
   assert.equal(exportResult.status, 200, 'Explicit archive export denied');
+  const handoff = await testExportAcknowledgement({ account: custodian.account, unauthorized, siteId, bytes: exportResult.body });
   assert.equal((await transition('closed')).status, 200); assert.equal((await transition('active')).status, 200);
   assert.equal((await custodian.account.request(`${archive}/activity`)).status, 401, 'Archive-only session remained eligible after reopening');
   const restored = await platform.put(`/api/sites/${siteId}`, { name: created.body.name, isActive: true, overviewDesign: 'classic', parentOrganizationUnitId: null });
   assert.equal(restored.status, 200, JSON.stringify(restored.body));
-  return { siteArchiveCustody: 'passed', archiveAccessBoundaries: 'passed', siteArchiveRestore: 'passed', irreversibleDispositionDisabled: 'passed' };
+  return { ...preservation, ...handoff, siteArchiveCustody: 'passed', archiveAccessBoundaries: 'passed', siteArchiveRestore: 'passed', irreversibleDispositionDisabled: 'passed' };
 }

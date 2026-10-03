@@ -103,3 +103,7 @@ await WorkSliceTests.Run(db);
 await DomainCoverageTests.Run(db);
 
 await GovernanceTests.Run(db);
+
+await PreservationTests.Run(db);
+
+await LegacyHoldUpgradeTests.Run(db);

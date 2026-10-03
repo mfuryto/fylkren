@@ -335,3 +335,9 @@ Open **Risk** in the task detail links. The numbered register presents title, de
 ## Internal experience-based learning
 
 When writing a final report, add numbered learning points under **What worked well?** and **What could be improved?**. They are saved separately from report content and stay internal to the reporting work level. On **Learning**, leaders prioritize points, record an action plan and deadline, comment and close them with an outcome or rationale. Pending points contribute to the menu counter; closed points remain in searchable history. See [the learning guide](LEARNING.md) for access boundaries, workflow and examples.
+
+## Preservation and export custody
+
+Platform Managers open **Lock/Archive → Preservation** for a Site or global user. Add a preservation hold with a reason when information must be kept pending review; release that specific hold with a new reason when the obligation ends. Other active holds remain in force. Hold history is retained. An optional named preservation rule records a review interval without scheduling deletion, anonymisation or an automatic expiry. Choose the immutable rule version that applies to the information.
+
+Export remains a deliberate action. Under **Confirm export custody**, choose the saved ZIP and explain who received it. The browser compares the file against the recorded checksum before confirmation; file contents are not uploaded for this check. Explicit export custodians have the same confirmation control in **Archives**. Confirmation records a handoff, not approval to delete the source or proof that another installation can restore it.

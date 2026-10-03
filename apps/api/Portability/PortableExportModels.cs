@@ -11,7 +11,10 @@ internal sealed record PortableExportManifest(
     string IntegrityAlgorithm,
     IReadOnlyList<PortableDatasetDescriptor> Datasets,
     IReadOnlyList<PortableAttachmentDescriptor> Attachments,
-    IReadOnlyList<string> Exclusions);
+    IReadOnlyList<string> Exclusions,
+    PortableSnapshotDescriptor? Snapshot = null);
+
+internal sealed record PortableSnapshotDescriptor(Guid InstanceId, DateTimeOffset CapturedAt, string Boundary);
 
 internal sealed record PortableSiteDescriptor(Guid Id, string Name);
 

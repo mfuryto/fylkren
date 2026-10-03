@@ -12,7 +12,7 @@ The additive event/activity foundation and coherent WorkItem slice are delivered
 
 ## Next delivery order
 
-1. Continue delivery stage 4 with consistent lifecycle export and policy/hold adapters, then compatibility projection reconciliation. Work-owned activity and Site/user archive/custodianship are delivered and verified. Complete and test each coherent slice before moving on.
+1. Continue delivery stage 4 with compatibility projection reconciliation. Work-owned activity, Site/user archive/custodianship, consistent lifecycle export and preservation adapters are delivered and verified. Complete and test each coherent slice before moving on.
 2. Correct and qualify navigation-count performance with the maintained hierarchy/load fixture. This is a separate sizing concern, not a reason to change pending-count semantics or authorization.
 3. Retest security requirements affected by these changes in the existing ASVS matrix, then resume incomplete chapter-1 requirements 1.3.3, 1.3.6 and 1.4.2. Continue the remaining matrix in the established requirement-order workflow.
 4. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records.
@@ -24,7 +24,7 @@ No irreversible disposition is authorized by this order. Establish and verify it
 Use the [single architecture/requirements/test reference](../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md) for detailed scope and T01–T14 acceptance cases.
 
 - Integrate remaining Site/shared-user lifecycle effects through the existing recorder and explicit authorization adapters. Work-owned decisions, risks/measures, planning drafts/RFI, comments and learning are already covered; preserve existing working behavior and external API/federation contracts.
-- Establish consistent snapshot portability and customer exit/export behavior, including attachments and dependent records. Existing validation-only import is not a completed restoration/import capability.
+- Snapshot portability, lifecycle/federation evidence and explicit export custody are delivered within the documented package limits. Chunked large exports and restoration/import apply remain future capabilities.
 - Before irreversible disposition, implement configurable policy and hold gates, export-before-deletion, cross-owner reference protection, replay-horizon preservation and resumable redaction/purge recovery, including backup resurrection protection.
 - Reconcile uncovered legacy notification/activity paths before retiring their compatibility cursors/markers. Never introduce a second activity store, replacement security audit, broker or event sourcing.
 

@@ -55,6 +55,11 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("actor_was_platform_manager");
 
+                    b.Property<string>("ChangeReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("change_reason");
+
                     b.Property<Guid?>("CorrelationId")
                         .HasColumnType("uuid")
                         .HasColumnName("correlation_id");
@@ -1832,7 +1837,7 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<Guid>("CreatedByPersonId")
+                    b.Property<Guid?>("CreatedByPersonId")
                         .HasColumnType("uuid")
                         .HasColumnName("created_by_person_id");
 
@@ -1859,6 +1864,14 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("released_by_person_id");
 
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasDefaultValue("local")
+                        .HasColumnName("source");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedByPersonId");
@@ -1867,7 +1880,10 @@ namespace Fylkren.Api.Persistence.Migrations
 
                     b.HasIndex("LifecycleId", "ReleasedAt");
 
-                    b.ToTable("lifecycle_holds", (string)null);
+                    b.ToTable("lifecycle_holds", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_lifecycle_hold_source", "(source = 'local' AND created_by_person_id IS NOT NULL) OR (source = 'legacy' AND created_by_person_id IS NULL)");
+                        });
                 });
 
             modelBuilder.Entity("Fylkren.Api.InformationLifecycle.RetentionPolicyVersion", b =>
@@ -3156,6 +3172,74 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("smtp_settings", (string)null);
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Portability.ExportReceipt", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("AcknowledgedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("acknowledged_at");
+
+                    b.Property<Guid?>("AcknowledgedByPersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("acknowledged_by_person_id");
+
+                    b.Property<string>("AcknowledgementReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("acknowledgement_reason");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CreatedByPersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_person_id");
+
+                    b.Property<long>("PackageBytes")
+                        .HasColumnType("bigint")
+                        .HasColumnName("package_bytes");
+
+                    b.Property<string>("PackageSha256")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("package_sha256");
+
+                    b.Property<long>("RootLifecycleVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("root_lifecycle_version");
+
+                    b.Property<Guid>("SiteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("site_id");
+
+                    b.Property<string>("SnapshotBoundary")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("snapshot_boundary");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AcknowledgedByPersonId");
+
+                    b.HasIndex("CreatedByPersonId");
+
+                    b.HasIndex("SiteId", "CreatedAt");
+
+                    b.ToTable("export_receipts", (string)null);
                 });
 
             modelBuilder.Entity("Fylkren.Api.Risks.Risk", b =>
@@ -4869,8 +4953,7 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.HasOne("Fylkren.Api.Identity.Person", null)
                         .WithMany()
                         .HasForeignKey("CreatedByPersonId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Fylkren.Api.InformationLifecycle.InformationLifecycleRecord", null)
                         .WithMany()
@@ -5116,6 +5199,26 @@ namespace Fylkren.Api.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("MachineIdentity");
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Portability.ExportReceipt", b =>
+                {
+                    b.HasOne("Fylkren.Api.Identity.Person", null)
+                        .WithMany()
+                        .HasForeignKey("AcknowledgedByPersonId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Fylkren.Api.Identity.Person", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedByPersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Fylkren.Api.Organization.Site", null)
+                        .WithMany()
+                        .HasForeignKey("SiteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Fylkren.Api.Risks.RiskMitigation", b =>

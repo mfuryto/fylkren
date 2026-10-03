@@ -1,4 +1,5 @@
 using System.IO.Compression;
+using System.Data;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -6,13 +7,14 @@ using Fylkren.Api.ActivityAudit;
 using Fylkren.Api.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Fylkren.Api.Portability;
 
 internal static class PortableExportPackage
 {
     internal const string Format = "fylkren-portable-export";
-    internal const string FormatVersion = "1.0";
+    internal const string FormatVersion = "1.1";
     internal const long MaximumPackageBytes = 512L * 1024 * 1024;
     internal const int MaximumEntries = 250;
 
@@ -29,8 +31,17 @@ internal static class PortableExportPackage
         Guid siteId,
         Guid actorPersonId,
         FylkrenDbContext db,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        long maximumBytes = MaximumPackageBytes)
     {
+        if (maximumBytes is < 1 or > MaximumPackageBytes) throw new ArgumentOutOfRangeException(nameof(maximumBytes));
+        await using var transaction = db.Database.CurrentTransaction is null
+            ? await db.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken) : null;
+        if (db.Database.CurrentTransaction!.GetDbTransaction().IsolationLevel is not (IsolationLevel.RepeatableRead or IsolationLevel.Serializable))
+            throw new InvalidOperationException("Portable export requires a consistent snapshot transaction.");
+        var snapshot = await db.Database.SqlQuery<SnapshotBoundary>($"SELECT transaction_timestamp() AS \"At\", pg_current_snapshot()::text AS \"Boundary\"").SingleAsync(cancellationToken);
+        var boundary = Hash(Encoding.UTF8.GetBytes(snapshot.Boundary));
+        var instanceId = await db.InstanceIdentities.AsNoTracking().Where(i => i.Key == 1).Select(i => i.InstanceId).SingleAsync(cancellationToken);
         var site = await db.Sites.AsNoTracking().SingleAsync(value => value.Id == siteId, cancellationToken);
         var units = await db.OrganizationUnits.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken);
         var unitIds = units.Select(value => value.Id).ToHashSet();
@@ -68,94 +79,64 @@ internal static class PortableExportPackage
         var lessons = await db.LearningLessons.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken);
         var learningEntries = await db.LearningEntries.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken);
         var comments = await db.WorkItemComments.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken);
-        var personIds = memberships.Select(value => value.PersonId)
-            .Concat(unitMemberships.Select(value => value.PersonId))
-            .Concat(roleAssignments.Select(value => value.PersonId))
-            .Concat(audit.Where(value => value.ActorPersonId.HasValue).Select(value => value.ActorPersonId!.Value))
-            .Concat(workItems.Where(value => value.CreatedByPersonId.HasValue).Select(value => value.CreatedByPersonId!.Value))
-            .Concat(workItems.Where(value => value.FinalReportWrittenByPersonId != null).Select(value => value.FinalReportWrittenByPersonId!.Value))
-            .Concat(workItems.Where(value => value.FinalReportApprovedByPersonId != null).Select(value => value.FinalReportApprovedByPersonId!.Value))
-            .Concat(comments.Select(value => value.AuthorPersonId))
-            .Concat(lessons.Select(value => value.AuthorPersonId))
-            .Concat(lessons.Where(value => value.OwnerPersonId != null).Select(value => value.OwnerPersonId!.Value))
-            .Concat(learningEntries.Select(value => value.AuthorPersonId))
-            .Concat(decisions.Select(value => value.CreatedByPersonId))
-            .Concat(webhookSubscriptions.Select(value => value.CreatedByPersonId))
-            .Concat(approvedVersions.Select(value => value.CreatedByPersonId))
-            .Concat(approvalSignoffs.Select(value => value.ApproverPersonId))
-            .ToHashSet();
-        var people = await db.People.AsNoTracking().Where(value => personIds.Contains(value.Id)).ToListAsync(cancellationToken);
-
+        var personIds = webhookSubscriptions.Select(s => s.CreatedByPersonId).ToHashSet(); personIds.Add(actorPersonId);
         var datasets = new List<(string Name, byte[] Content)>();
-        AddEntities(datasets, db, "site", [site]);
-        AddEntities(datasets, db, "organization-units", units);
-        AddEntities(datasets, db, "site-memberships", memberships);
-        AddEntities(datasets, db, "organization-unit-memberships", unitMemberships);
-        AddEntities(datasets, db, "site-manager-assignments", await db.SiteManagerAssignments.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "organization-roles", roles);
-        AddEntities(datasets, db, "role-assignments", roleAssignments);
-        AddRows(datasets, "people", people.Select(value => new
+        void Entities<T>(string name, IEnumerable<T> rows) where T : class
         {
-            value.Id,
-            value.DisplayName,
-            value.Email,
-            value.IsActive,
-            value.IsDeleted,
-            value.DeletedAt,
-            value.ProfileImageContentType,
-            value.CreatedAt
-        }));
-        AddRows(datasets, "identity-references", await db.LoginIdentities.AsNoTracking().Where(value => personIds.Contains(value.PersonId)).Select(value => new
-        {
-            value.Id,
-            value.PersonId,
-            value.Username,
-            value.IsActive,
-            value.CreatedAt,
-            value.LastSignedInAt,
-            authenticationSecretsIncluded = false
-        }).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "external-identity-links", await db.ExternalIdentityLinks.AsNoTracking().Where(value => personIds.Contains(value.PersonId)).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "work-item-types", await db.WorkItemTypes.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "work-item-lookups", await db.WorkItemLookups.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "work-items", workItems);
-        AddEntities(datasets, db, "work-item-comments", comments);
-        AddEntities(datasets, db, "learning-lessons", lessons);
-        AddEntities(datasets, db, "learning-entries", learningEntries);
-        AddEntities(datasets, db, "work-item-dependencies", await db.WorkItemDependencies.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "work-item-history", await db.WorkItemStateHistory.AsNoTracking().Where(value => value.SiteId == siteId).OrderBy(value => value.OccurredAt).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "workflow-definitions", definitions);
-        AddEntities(datasets, db, "workflow-steps", steps);
-        AddEntities(datasets, db, "workflow-step-templates", await db.WorkflowStepTemplates.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "workflow-runs", runs);
-        AddEntities(datasets, db, "planning-rfi-entries", await db.PlanningRfiEntries.AsNoTracking().Where(value => runIds.Contains(value.RunId)).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "workflow-plan-allocations", await db.WorkflowPlanAllocations.AsNoTracking().Where(value => runIds.Contains(value.RunId)).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "workflow-plan-requests", await db.WorkflowPlanRequests.AsNoTracking().Where(value => runIds.Contains(value.RunId)).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "workflow-step-documents", await db.WorkflowStepDocuments.AsNoTracking().Where(value => runIds.Contains(value.RunId)).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "workflow-step-links", await db.WorkflowStepLinks.AsNoTracking().Where(value => runIds.Contains(value.RunId)).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "workflow-timeline-events", await db.WorkflowTimelineEvents.AsNoTracking().Where(value => runIds.Contains(value.RunId)).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "execution-runs", executionRuns);
-        AddEntities(datasets, db, "execution-step-documents", await db.ExecutionStepDocuments.AsNoTracking().Where(value => executionRunIds.Contains(value.RunId)).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "execution-follow-up", await db.ExecutionExternalRequests.AsNoTracking().Where(value => executionRunIds.Contains(value.RunId)).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "execution-timeline-events", await db.ExecutionTimelineEvents.AsNoTracking().Where(value => executionRunIds.Contains(value.RunId)).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "decisions", decisions);
-        AddEntities(datasets, db, "decision-revisions", decisionRevisions);
-        AddEntities(datasets, db, "decision-makers", await db.DecisionMakers.AsNoTracking().Where(value => decisionRevisionIds.Contains(value.RevisionId)).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "decision-references", await db.DecisionReferences.AsNoTracking().Where(value => decisionRevisionIds.Contains(value.RevisionId)).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "risks", risks);
-        AddEntities(datasets, db, "risk-revisions", await db.RiskRevisions.AsNoTracking().Where(value => riskIds.Contains(value.RiskId)).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "risk-mitigations", mitigations);
-        AddEntities(datasets, db, "risk-mitigation-revisions", await db.RiskMitigationRevisions.AsNoTracking().Where(value => mitigationIds.Contains(value.MitigationId)).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "domain-object-versions", approvedVersions);
-        AddEntities(datasets, db, "formal-approval-signoffs", approvalSignoffs);
-        var now = DateTimeOffset.UtcNow;
+            var values = rows.ToArray();
+            var properties = db.Model.FindEntityType(typeof(T))!.GetProperties().Where(p => (p.Name.EndsWith("PersonId", StringComparison.Ordinal) || p.Name == "UpdatedBy") && p.PropertyInfo is not null);
+            foreach (var row in values) foreach (var property in properties)
+                if (property.PropertyInfo!.GetValue(row) is Guid personId) personIds.Add(personId);
+            AddEntities(datasets, db, name, values, maximumBytes);
+        }
+
+        Entities("site", [site]);
+        Entities("site-reference-settings", await db.SiteReferenceSettings.AsNoTracking().Where(s => s.SiteId == siteId).ToListAsync(cancellationToken));
+        Entities("organization-units", units);
+        Entities("site-memberships", memberships);
+        Entities("organization-unit-memberships", unitMemberships);
+        Entities("site-manager-assignments", await db.SiteManagerAssignments.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken));
+        Entities("organization-roles", roles);
+        Entities("role-assignments", roleAssignments);
+        Entities("work-item-types", await db.WorkItemTypes.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken));
+        Entities("work-item-lookups", await db.WorkItemLookups.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken));
+        Entities("work-items", workItems);
+        Entities("work-item-comments", comments);
+        Entities("learning-lessons", lessons);
+        Entities("learning-entries", learningEntries);
+        Entities("work-item-dependencies", await db.WorkItemDependencies.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken));
+        Entities("work-item-history", await db.WorkItemStateHistory.AsNoTracking().Where(value => value.SiteId == siteId).OrderBy(value => value.OccurredAt).ToListAsync(cancellationToken));
+        Entities("workflow-definitions", definitions);
+        Entities("workflow-steps", steps);
+        Entities("workflow-step-templates", await db.WorkflowStepTemplates.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken));
+        Entities("workflow-runs", runs);
+        Entities("planning-rfi-entries", await db.PlanningRfiEntries.AsNoTracking().Where(value => runIds.Contains(value.RunId)).ToListAsync(cancellationToken));
+        Entities("workflow-plan-allocations", await db.WorkflowPlanAllocations.AsNoTracking().Where(value => runIds.Contains(value.RunId)).ToListAsync(cancellationToken));
+        Entities("workflow-plan-requests", await db.WorkflowPlanRequests.AsNoTracking().Where(value => runIds.Contains(value.RunId)).ToListAsync(cancellationToken));
+        Entities("workflow-step-documents", await db.WorkflowStepDocuments.AsNoTracking().Where(value => runIds.Contains(value.RunId)).ToListAsync(cancellationToken));
+        Entities("workflow-step-links", await db.WorkflowStepLinks.AsNoTracking().Where(value => runIds.Contains(value.RunId)).ToListAsync(cancellationToken));
+        Entities("workflow-timeline-events", await db.WorkflowTimelineEvents.AsNoTracking().Where(value => runIds.Contains(value.RunId)).ToListAsync(cancellationToken));
+        Entities("execution-runs", executionRuns);
+        Entities("execution-step-documents", await db.ExecutionStepDocuments.AsNoTracking().Where(value => executionRunIds.Contains(value.RunId)).ToListAsync(cancellationToken));
+        Entities("execution-follow-up", await db.ExecutionExternalRequests.AsNoTracking().Where(value => executionRunIds.Contains(value.RunId)).ToListAsync(cancellationToken));
+        Entities("execution-timeline-events", await db.ExecutionTimelineEvents.AsNoTracking().Where(value => executionRunIds.Contains(value.RunId)).ToListAsync(cancellationToken));
+        Entities("decisions", decisions);
+        Entities("decision-revisions", decisionRevisions);
+        Entities("decision-makers", await db.DecisionMakers.AsNoTracking().Where(value => decisionRevisionIds.Contains(value.RevisionId)).ToListAsync(cancellationToken));
+        Entities("decision-references", await db.DecisionReferences.AsNoTracking().Where(value => decisionRevisionIds.Contains(value.RevisionId)).ToListAsync(cancellationToken));
+        Entities("risks", risks);
+        Entities("risk-revisions", await db.RiskRevisions.AsNoTracking().Where(value => riskIds.Contains(value.RiskId)).ToListAsync(cancellationToken));
+        Entities("risk-mitigations", mitigations);
+        Entities("risk-mitigation-revisions", await db.RiskMitigationRevisions.AsNoTracking().Where(value => mitigationIds.Contains(value.MitigationId)).ToListAsync(cancellationToken));
+        Entities("domain-object-versions", approvedVersions);
+        Entities("formal-approval-signoffs", approvalSignoffs);
+        var now = snapshot.At;
         var exportId = Guid.NewGuid();
         var exportAudit = new AuditEvent(Guid.NewGuid(), siteId, actorPersonId, "portability.export-created", "portable-export", exportId, now);
-        db.AuditEvents.Add(exportAudit);
+        exportAudit.SnapshotActorRole(await db.LoginIdentities.AsNoTracking().AnyAsync(i => i.PersonId == actorPersonId && i.IsPlatformManager, cancellationToken));
         audit.Add(exportAudit);
-        await db.SaveChangesAsync(cancellationToken);
-        AddEntities(datasets, db, "audit-events", audit);
-        AddEntities(datasets, db, "domain-events", await db.DomainEvents.AsNoTracking().Where(value => value.SiteId == siteId).OrderBy(value => value.OccurredAt).ToListAsync(cancellationToken));
+        Entities("audit-events", audit);
+        Entities("domain-events", await db.DomainEvents.AsNoTracking().Where(value => value.SiteId == siteId).OrderBy(value => value.OccurredAt).ToListAsync(cancellationToken));
         AddRows(datasets, "webhook-subscriptions", webhookSubscriptions.Select(value => new
         {
             value.Id,
@@ -169,11 +150,29 @@ internal static class PortableExportPackage
             value.IsActive,
             signingSecretIncluded = false
         }));
-        AddEntities(datasets, db, "webhook-deliveries", webhookDeliveries);
-        AddEntities(datasets, db, "webhook-delivery-attempts", await db.WebhookDeliveryAttempts.AsNoTracking().Where(value => webhookDeliveryIds.Contains(value.DeliveryId)).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "site-notification-settings", await db.SiteNotificationSettings.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "personal-notification-settings", await db.PersonalNotificationSettings.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken));
-        AddEntities(datasets, db, "notification-outbox", await db.NotificationOutboxMessages.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken));
+        Entities("webhook-deliveries", webhookDeliveries);
+        Entities("webhook-delivery-attempts", await db.WebhookDeliveryAttempts.AsNoTracking().Where(value => webhookDeliveryIds.Contains(value.DeliveryId)).ToListAsync(cancellationToken));
+        Entities("site-notification-settings", await db.SiteNotificationSettings.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken));
+        Entities("personal-notification-settings", await db.PersonalNotificationSettings.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken));
+        Entities("notification-outbox", await db.NotificationOutboxMessages.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken));
+
+        var lifecycles = await db.InformationLifecycles.AsNoTracking().Where(l => l.OwnerSiteId == siteId).ToListAsync(cancellationToken);
+        var lifecycleIds = lifecycles.Select(l => l.Id).ToArray();
+        Entities("information-lifecycle", lifecycles);
+        Entities("lifecycle-holds", await db.LifecycleHolds.AsNoTracking().Where(h => lifecycleIds.Contains(h.LifecycleId)).ToListAsync(cancellationToken));
+        var policyIds = lifecycles.Where(l => l.PolicyId != null).Select(l => l.PolicyId!.Value).ToArray();
+        AddRows(datasets, "retention-policy-versions", (await db.RetentionPolicyVersions.AsNoTracking().Where(p => policyIds.Contains(p.PolicyId)).ToListAsync(cancellationToken)).Where(p => lifecycles.Any(l => l.PolicyId == p.PolicyId && l.PolicyVersion == p.Version)).Select(p => new { p.PolicyId, p.Version, p.Name, p.Category, p.ReviewAfterDays, p.CreatedAt }));
+        Entities("archive-grants", await db.ArchiveGrants.AsNoTracking().Where(g => g.SiteId == siteId).ToListAsync(cancellationToken));
+        Entities("export-receipts", await db.ExportReceipts.AsNoTracking().Where(r => r.SiteId == siteId).ToListAsync(cancellationToken));
+        Entities("event-projections", await db.EventProjections.AsNoTracking().Where(p => db.DomainEvents.Any(e => e.Id == p.DomainEventId && e.SiteId == siteId)).ToListAsync(cancellationToken));
+        Entities("federation-work-links", await db.FederationWorkLinks.AsNoTracking().Where(l => workItemIds.Contains(l.LocalWorkItemId)).ToListAsync(cancellationToken));
+        Entities("federation-inbound-receipts", await db.FederationInboundReceipts.AsNoTracking().Where(r => r.DestinationSiteId == siteId && workItemIds.Contains(r.LocalWorkItemId)).ToListAsync(cancellationToken));
+        AddRows(datasets, "federation-outbound-evidence", await db.FederationOutboundMessages.AsNoTracking().Where(m => m.SourceSiteId == siteId).Select(m => new { m.MessageId, m.PeerInstanceId, m.SourceSiteId, m.DestinationSiteId, m.OriginInstanceId, m.OriginSiteId, m.OriginResourceId, m.MessageType, m.SchemaVersion, m.CorrelationId, m.CausationId, m.Status, m.CreatedAt, m.DeliveredAt }).ToListAsync(cancellationToken));
+        var people = await db.People.AsNoTracking().Where(p => personIds.Contains(p.Id)).ToListAsync(cancellationToken);
+        AddRows(datasets, "people", people.Select(p => (object)new { p.Id, p.DisplayName, p.Email, p.IsActive, p.IsDeleted, p.DeletedAt, p.ProfileImageContentType, p.CreatedAt }).Concat(personIds.Except(people.Select(p => p.Id)).Select(id => (object)new { id, historicalReferenceOnly = true, isActive = false, isDeleted = true })));
+        AddRows(datasets, "identity-references", people.Select(p => new { personId = p.Id, authenticationSecretsIncluded = false }));
+        AddRows(datasets, "external-identity-links", Array.Empty<object>());
+        AddRows(datasets, "person-lifecycle-references", await db.InformationLifecycles.AsNoTracking().Where(l => l.OwnerSiteId == null && l.ResourceType == "person" && personIds.Contains(l.ResourceId)).Select(l => new { personId = l.ResourceId, l.Stage, l.Version, l.ClosedAt, l.ArchivedAt }).ToListAsync(cancellationToken));
 
         var attachments = new List<(PortableAttachmentDescriptor Descriptor, byte[] Content)>();
         foreach (var person in people.Where(value => value.ProfileImage is { Length: > 0 }))
@@ -182,7 +181,8 @@ internal static class PortableExportPackage
             var path = $"attachments/profile-images/{person.Id:N}.{extension}";
             attachments.Add((new PortableAttachmentDescriptor(path, person.ProfileImageContentType ?? "application/octet-stream", person.ProfileImage!.LongLength, Hash(person.ProfileImage), "person", person.Id), person.ProfileImage));
         }
-        if (datasets.Sum(value => value.Content.LongLength) + attachments.Sum(value => value.Content.LongLength) > MaximumPackageBytes)
+        if (datasets.Count + attachments.Count + 2 > MaximumEntries) throw new PortablePackageTooLargeException();
+        if (datasets.Sum(value => value.Content.LongLength) + attachments.Sum(value => value.Content.LongLength) > maximumBytes)
             throw new PortablePackageTooLargeException();
 
         using var package = new MemoryStream();
@@ -207,30 +207,44 @@ internal static class PortableExportPackage
                 "SHA-256",
                 descriptors,
                 attachments.Select(value => value.Descriptor).ToArray(),
-                ["Password hashes, MFA/TOTP secrets, recovery codes, passkeys, active sessions, reset grants, identity-provider configuration and secrets, webhook signing secrets and SMTP credentials are never exported."]);
+                ["Password hashes, MFA/TOTP secrets, recovery codes, passkeys, active sessions, reset grants, identity-provider configuration and secrets, webhook signing secrets and SMTP credentials are never exported.", "Installation-wide identity bindings, foreign private records and outbound federation payloads are excluded; external document links are not downloaded."],
+                new PortableSnapshotDescriptor(instanceId, snapshot.At, boundary));
             WriteEntry(archive, "manifest.json", JsonSerializer.SerializeToUtf8Bytes(manifest, JsonOptions));
             WriteEntry(archive, "README.txt", Encoding.UTF8.GetBytes(Readme));
         }
-        return package.ToArray();
+        var content = package.ToArray();
+        if (content.LongLength > maximumBytes) throw new PortablePackageTooLargeException();
+        using (var validationStream = new MemoryStream(content, false))
+        {
+            var validation = await PortableImportValidator.Validate(validationStream, siteId, cancellationToken);
+            if (!validation.Valid) throw new PortableExportIntegrityException();
+        }
+        db.AuditEvents.Add(exportAudit);
+        db.ExportReceipts.Add(new ExportReceipt(exportId, siteId, actorPersonId, snapshot.At, boundary, Hash(content), content.LongLength, lifecycles.FirstOrDefault(l => l.ResourceType == "site" && l.ResourceId == siteId)?.Version ?? 0));
+        await db.SaveChangesAsync(cancellationToken);
+        if (transaction is not null) await transaction.CommitAsync(cancellationToken);
+        return content;
     }
 
-    private static void AddEntities<TEntity>(List<(string Name, byte[] Content)> target, FylkrenDbContext db, string name, IEnumerable<TEntity> values) where TEntity : class
+    private static void AddEntities<TEntity>(List<(string Name, byte[] Content)> target, FylkrenDbContext db, string name, IEnumerable<TEntity> values, long maximumBytes) where TEntity : class
     {
         var type = db.Model.FindEntityType(typeof(TEntity)) ?? throw new InvalidOperationException($"Export metadata is missing for {typeof(TEntity).Name}.");
         var properties = type.GetProperties().Where(value => !value.IsShadowProperty() && value.PropertyInfo is not null && value.ClrType != typeof(byte[])).ToArray();
         var rows = values.Select(value => properties.ToDictionary(
             property => JsonNamingPolicy.SnakeCaseLower.ConvertName(property.Name),
             property => property.PropertyInfo!.GetValue(value)));
-        AddRows(target, name, rows);
+        AddRows(target, name, rows, maximumBytes);
     }
 
-    private static void AddRows<T>(List<(string Name, byte[] Content)> target, string name, IEnumerable<T> rows)
+    private static void AddRows<T>(List<(string Name, byte[] Content)> target, string name, IEnumerable<T> rows, long maximumBytes = MaximumPackageBytes)
     {
         using var stream = new MemoryStream();
+        var remaining = maximumBytes - target.Sum(d => d.Content.LongLength);
         foreach (var row in rows)
         {
-            JsonSerializer.Serialize(stream, row, RowJsonOptions);
-            stream.WriteByte((byte)'\n');
+            var bytes = JsonSerializer.SerializeToUtf8Bytes(row, RowJsonOptions);
+            if (stream.Length + bytes.LongLength + 1 > remaining) throw new PortablePackageTooLargeException();
+            stream.Write(bytes); stream.WriteByte((byte)'\n');
         }
         target.Add((name, stream.ToArray()));
     }
@@ -244,6 +258,8 @@ internal static class PortableExportPackage
 
     internal static string Hash(byte[] content) => Convert.ToHexStringLower(SHA256.HashData(content));
     private static int CountLines(byte[] content) => content.Count(value => value == (byte)'\n');
+
+    private sealed record SnapshotBoundary(DateTimeOffset At, string Boundary);
 
     private const string Readme = """
         Fylkren portable export package
@@ -263,3 +279,5 @@ internal static class PortableExportPackage
 internal sealed class PortablePackageTooLargeException : Exception
 {
 }
+
+internal sealed class PortableExportIntegrityException : Exception { }

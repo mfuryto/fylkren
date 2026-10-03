@@ -32,6 +32,18 @@ export async function verifyGovernanceArchive({ request, navigate, waitFor, setI
   await waitFor(`${row}?.innerText.includes("Lock/Archive · Active")`, 'inactive Site lifecycle action');
   await clickButton('Lock/Archive · Active', row);
   await waitFor('document.querySelector("[role=dialog] select") !== null', 'Site closure dialog');
+  const preservation = 'document.querySelector("[role=dialog] .preservation-controls")';
+  await evaluate(`${preservation}.open = true`);
+  await setInput('[role=dialog] .preservation-controls > div > .field textarea', 'Preserve evidence until review');
+  await waitFor(`${preservation}?.querySelector('button')?.disabled === false`, 'loaded preservation controls with a reason');
+  await clickButton('Add · Preservation hold', preservation);
+  await waitFor('document.querySelector("[role=dialog]")?.innerText.includes("A preservation hold blocks this change") || document.querySelector("[role=dialog] > .field textarea")?.disabled', 'held lifecycle action');
+  assert.equal(await evaluate('document.querySelector("[role=dialog] > .field textarea").disabled'), true);
+  await setInput('[role=dialog] .preservation-controls > div > .field textarea', 'Review completed, release this hold');
+  await waitFor(`[...${preservation}.querySelectorAll('button')].some(b => b.textContent.trim() === 'Release hold' && !b.disabled)`, 'hold release reason');
+  await clickButton('Release hold', preservation);
+  await waitFor('document.querySelector("[role=dialog] > .field textarea")?.disabled === false', 'hold release restores eligible lifecycle action');
+  await assertNoOverflow('Preservation controls');
   await setInput('[role=dialog] > .field textarea', 'All local obligations resolved');
   await clickButton('Lock content', 'document.querySelector("[role=dialog]")');
   await waitFor('document.querySelector("[role=dialog] [role=status]")?.innerText === "Locked"', 'Site closed');
