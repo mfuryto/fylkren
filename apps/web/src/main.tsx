@@ -212,7 +212,7 @@ function App() {
   const { effectiveItem, administrationNavigation, navigationItems } =
     buildNavigation(session, activeItem);
   const navigationLabels: Record<AppPage, Parameters<typeof translate>[1]> = {
-    Overview: "navOverview", Tasks: "navTasks", Workload: "navWorkload", Learning: "navLearning",
+    Archives: "navArchives", Overview: "navOverview", Tasks: "navTasks", Workload: "navWorkload", Learning: "navLearning",
     Planning: "navPlanning", Execution: "navExecution", Reports: "navReports",
     Platform: "navPlatform", Sites: "navSites", Identity: "navIdentity", References: "navReferences",
     Classifications: "navClassification", API: "navApi", Federation: "navFederation",

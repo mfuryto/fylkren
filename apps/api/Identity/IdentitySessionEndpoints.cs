@@ -34,7 +34,8 @@ public static partial class IdentityEndpoints
              site.OrganizationUnits.Any(unit => unit.IsActive && unit.IsSiteLeadership && unit.Roles.Any(role => role.IsActive && (role.IsLeader || role.HasLeaderAccess) && role.Assignments.Any(value => value.PersonId == identity.PersonId && value.IsActive && value.ValidFrom <= now && (value.ValidTo == null || value.ValidTo > now)))) ||
              site.OrganizationUnits.Any(unit => unit.IsActive && unit.WorksAtParentLevel && unit.Parent != null && (unit.Parent.IsSiteLeadership || unit.Parent.IsSiteRoot) && unit.Roles.Any(role => role.IsLeader && role.IsActive && role.Assignments.Any(value => value.PersonId == identity.PersonId && value.CanLeadParentLevel && value.IsActive && value.ValidFrom <= now && (value.ValidTo == null || value.ValidTo > now))))), cancellationToken);
         var isDirectoryManaged = await IsDirectoryManaged(identity.PersonId, database, cancellationToken);
-        return Results.Ok(new { authenticated = true, username = identity.Username, email = identity.Person.Email, personId = identity.PersonId.ToString(), displayName = identity.Person.DisplayName, isPlatformManager = identity.IsPlatformManager, managesSites, administersSite, hasOperationalRole, canExecute, mustChangePassword = identity.MustChangePassword, hasProfileImage = identity.Person.ProfileImage is not null, isDirectoryManaged, twoFactorEnabled = options.Authentication.MfaEnabled && identity.TotpEnabled, canPlan, canApproveWork, isTopLevelLeader });
+        var hasArchiveAccess = await Fylkren.Api.InformationLifecycle.ArchiveAccess.Current(database, identity.PersonId).AnyAsync(cancellationToken);
+        return Results.Ok(new { authenticated = true, username = identity.Username, email = identity.Person.Email, personId = identity.PersonId.ToString(), displayName = identity.Person.DisplayName, isPlatformManager = identity.IsPlatformManager, hasArchiveAccess, managesSites, administersSite, hasOperationalRole, canExecute, mustChangePassword = identity.MustChangePassword, hasProfileImage = identity.Person.ProfileImage is not null, isDirectoryManaged, twoFactorEnabled = options.Authentication.MfaEnabled && identity.TotpEnabled, canPlan, canApproveWork, isTopLevelLeader });
     }
 
     private static async Task<IResult> SignIn(
@@ -99,7 +100,8 @@ public static partial class IdentityEndpoints
 
     internal static async Task<bool> HasActiveAccess(Guid personId, FylkrenDbContext database, CancellationToken cancellationToken) =>
         await database.SiteMemberships.AnyAsync(value => value.PersonId == personId && value.IsActive && value.Site.IsActive, cancellationToken) ||
-        await database.SiteManagerAssignments.AnyAsync(value => value.PersonId == personId && value.IsActive && value.Site.IsActive, cancellationToken);
+        await database.SiteManagerAssignments.AnyAsync(value => value.PersonId == personId && value.IsActive && value.Site.IsActive, cancellationToken) ||
+        await Fylkren.Api.InformationLifecycle.ArchiveAccess.Current(database, personId).AnyAsync(cancellationToken);
 
     private static async Task<IResult> CompleteTwoFactorSignIn(TwoFactorSignInRequest request, FylkrenDbContext database, Fylkren.Api.Platform.FylkrenOptions options, TotpService totp, HttpContext context, CancellationToken cancellationToken)
     {

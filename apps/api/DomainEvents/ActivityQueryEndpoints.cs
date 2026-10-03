@@ -30,10 +30,15 @@ internal static class ActivityQueryEndpoints
         var learningUnits = (await LearningPolicy.Levels(person, db, ct)).Where(x => x.SiteId == siteId).Select(x => x.UnitId).ToArray();
         query = query.Where(x => x.ResourceType != "learning" || db.LearningLessons.Any(lesson => lesson.Id == x.ResourceId && lesson.SiteId == siteId && lesson.WorkItemId == x.ContextWorkItemId && learningUnits.Contains(lesson.UnitId)));
         if (workItemId is Guid id) query = query.Where(x => x.ContextWorkItemId == id);
+        return await Page(query, eventType, resourceType, from, until, before, beforeId, limit, db, ct);
+    }
+    internal static async Task<IResult> Page(IQueryable<DomainEvent> query, string? eventType, string? resourceType,
+        DateTimeOffset? from, DateTimeOffset? until, DateTimeOffset? before, Guid? beforeId, int? limit, FylkrenDbContext db, CancellationToken ct)
+    {
         if (eventType is not null) query = query.Where(x => x.ActivityType == eventType);
         if (resourceType is not null) query = query.Where(x => x.ResourceType == resourceType);
         if (from is not null) query = query.Where(x => x.OccurredAt >= from);
-        if (until is not null) query = query.Where(x => x.OccurredAt <= until);
+        if (until is not null) query = query.Where(x => x.OccurredAt < until);
         if (before is not null) query = query.Where(x => x.OccurredAt < before || x.OccurredAt == before && x.Id.CompareTo(beforeId!.Value) < 0);
         var size = limit ?? 25;
         var rows = await query.OrderByDescending(x => x.OccurredAt).ThenByDescending(x => x.Id).Take(size + 1)

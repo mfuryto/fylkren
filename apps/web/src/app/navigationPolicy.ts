@@ -32,24 +32,26 @@ export function buildNavigation(session: Session, activeItem: AppPage) {
       : [];
   const effectiveItem = session.mustChangePassword
     ? "Profile"
-    : session.isPlatformManager &&
-        activeItem !== "Profile" &&
-        !platformNavigation.includes(activeItem)
-      ? "Platform"
+    : session.isPlatformManager
+      ? activeItem === "Profile" || platformNavigation.includes(activeItem) || activeItem === "Archives" && session.hasArchiveAccess
+        ? activeItem
+        : "Platform"
       : session.canExecute &&
           !session.hasOperationalRole &&
           activeItem !== "Profile" &&
           activeItem !== "Execution" &&
           activeItem !== "Learning" &&
+          !(activeItem === "Archives" && session.hasArchiveAccess) &&
           !siteManagerNavigation.includes(activeItem)
         ? "Execution"
         : session.managesSites &&
             !session.hasOperationalRole &&
             !session.canExecute &&
             activeItem !== "Profile" &&
+            !(activeItem === "Archives" && session.hasArchiveAccess) &&
             !siteManagerNavigation.includes(activeItem)
           ? "Organization"
-          : activeItem;
+          : session.hasArchiveAccess && !session.hasOperationalRole && !session.canExecute && !session.managesSites && activeItem === "Overview" ? "Archives" : activeItem;
   const primaryNavigation = session.isPlatformManager
     ? []
     : [
@@ -59,9 +61,10 @@ export function buildNavigation(session: Session, activeItem: AppPage) {
         ...(session.hasOperationalRole ? ["Reports"] as AppPage[] : []),
         ...(session.isTopLevelLeader ? ["Workload"] as AppPage[] : []),
         ...(session.hasOperationalRole || session.canExecute ? ["Learning"] as AppPage[] : []),
+        ...(session.hasArchiveAccess ? ["Archives"] as AppPage[] : []),
       ];
   const administrationNavigation = session.isPlatformManager
-    ? platformNavigation
+    ? [...platformNavigation, ...(session.hasArchiveAccess ? ["Archives"] as AppPage[] : [])]
     : session.managesSites
       ? siteManagerNavigation
       : operationalAdministrationNavigation;

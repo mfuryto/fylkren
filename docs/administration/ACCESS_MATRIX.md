@@ -10,6 +10,7 @@ This is the authoritative baseline for UI, API and authorization tests. Every de
 | Delegated/acting leader | No site administration | Same operational authority as the dedicated leader for the granted level and period |
 | Planner | No administration | Read tasks and read/write planning at assigned level; approval requires separate leader authority |
 | Role member | No administration | Read level tasks and work on assignments addressed to the person's role or team |
+| Explicit archive custodian | No administration | Read the entire assigned locked/archived Site through dedicated archive routes; export requires a separate grant flag. No operational membership/actions are implied. |
 | Unit member without work role | No administration | Read/write Execution at the person's organizational level; no planning or leader decisions |
 
 Rights are additive, but administrative status never widens the scope of an operational role. A person who is both Site Manager and planner receives the two independent capabilities, not site-wide operational leadership.
@@ -43,6 +44,8 @@ Site Manager manages people, memberships, placements and roles inside assigned s
 | --- | --- | --- | --- |
 | `/api/platform/*`, platform audit and API clients | Browser session | Platform Manager role | Platform Manager plus antiforgery token |
 | Site access/workflow/template/notification/audit administration | Browser session | Active Site Manager assignment | Site Manager in the same active site |
+| `/api/information/governance` | Browser session | Platform Manager; explicit owner/root/version and bounded reason | Reversible lifecycle and custody administration plus antiforgery |
+| `/api/information/archives` | Browser session | Active person/login with a current explicit grant to a locked/archived Site | Read-only; portable export additionally requires `CanExport` |
 | `/api/work`, workflow and execution operations | Browser session | Active person, site and exact visible/led level | Responsibility owner or leader at that level, depending on action |
 | `/api/platform/federation` | Browser session | Platform Manager role plus Enterprise entitlement for mutations | Platform Manager plus antiforgery; peer trust does not grant local site administration |
 | `/api/federation/v1` | Signed peer protocol | Active pinned peer, addressed instance/site, routing state, entitlement, nonce and protocol signature | Only the bounded catalog/work message accepted by the exact route |
@@ -58,5 +61,5 @@ Site Manager manages people, memberships, placements and roles inside assigned s
 - Read endpoints filter at the query; clients do not receive hidden content.
 - Access to one task branch may expose necessary ancestor context but not sibling branches.
 - A responsibility lock is not durable authority; every mutation revalidates current role or placement.
-- Inactive person, site or membership grants no operational access even when historical links remain.
+- Inactive person, site or membership grants no operational access even when historical links remain. An active archive custodian has a separate read-only archive entitlement while the Site is locked/archived; revocation and reopening immediately invalidate it.
 - Positive and negative integration tests must cover each matrix boundary before production use.

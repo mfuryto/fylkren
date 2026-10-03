@@ -1,3 +1,4 @@
+import { GovernanceLifecycleButton } from "../components/WorkLifecycleButton";
 import { useEffect, useRef, useState } from "react";
 import type React from "react";
 import { apiFormMutate, apiMutate, apiRequest, getAntiforgeryToken } from "../api/client";
@@ -336,6 +337,7 @@ export function SitesPage({ configuration }: { configuration: PublicConfiguratio
                       {site.isActive ? t("active") : t("deleted")}
                     </span>
                     <div className="row-actions">
+                      <GovernanceLifecycleButton kind="site" id={site.id} />
                       <button className="secondary-button" type="button" disabled={busy} onClick={() => void exportSite(site)}>
                         {t("export")}
                       </button>

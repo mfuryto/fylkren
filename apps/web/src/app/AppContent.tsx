@@ -1,3 +1,4 @@
+import { ArchivePage } from "../components/ArchivePage";
 import { lazy } from "react";
 import { apiGet } from "../api/client";
 import type { Branding, PublicConfiguration } from "./models";
@@ -78,6 +79,7 @@ export function AppContent({
     ? configuration.classificationMarkings
     : [];
 
+  if (effectiveItem === "Archives" && session.hasArchiveAccess) return <ArchivePage timeZone={timeZone} />;
   if (effectiveItem === "Profile")
     return <ProfilePage session={session} configuration={configuration} onSessionChanged={onSessionChanged} onSignOut={onSignOut} />;
   if (effectiveItem === "Platform" && session.isPlatformManager) return <PlatformPage />;

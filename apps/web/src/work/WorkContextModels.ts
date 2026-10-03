@@ -1,5 +1,6 @@
 export type Session = {
   authenticated: boolean;
+  hasArchiveAccess?: boolean;
   personId?: string;
   username?: string;
   email?: string;

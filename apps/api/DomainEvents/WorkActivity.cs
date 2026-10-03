@@ -56,17 +56,8 @@ internal static class WorkActivity
             var value = DomainEvent.Create(old?.Entity.Id ?? Guid.NewGuid(), activityType, item.SiteId, resource, intent.ResourceId ?? audit.EntityId, item.Id, context,
                 intent.MetadataJson ?? JsonSerializer.Serialize(new { status = item.Status }), audit.OccurredAt, DateTimeOffset.UtcNow, audit.Id.ToString("N"), old?.Entity.EventType, old?.Entity.PayloadJson ?? "{}");
             if (old is not null) old.State = EntityState.Detached;
-            db.DomainEvents.Add(value);
-            audit.Correlate(value.Id, db.ActivityOperationId);
-            db.EventProjections.Add(new EventProjection("notifications", value.Id, DateTimeOffset.UtcNow));
-            var webhookProjection = new EventProjection("webhooks", value.Id, DateTimeOffset.UtcNow);
             var subscriptions = old is null ? [] : await db.WebhookSubscriptions.AsNoTracking().Where(x => x.SiteId == item.SiteId && x.IsActive && x.CreatedAt <= value.OccurredAt).ToListAsync(ct);
-            if (!subscriptions.Any(x => x.SelectedEventTypes().Contains(value.EventType)))
-            {
-                var owner = Guid.NewGuid(); webhookProjection.Claim(owner, DateTimeOffset.UtcNow);
-                webhookProjection.Complete(owner, DateTimeOffset.UtcNow, true); value.MarkWebhooksProjected(DateTimeOffset.UtcNow);
-            }
-            db.EventProjections.Add(webhookProjection);
+            DomainEventRecorder.StoreActivity(db, value, audit, false, !subscriptions.Any(x => x.SelectedEventTypes().Contains(value.EventType)));
         }
         foreach (var entry in db.ChangeTracker.Entries<Fylkren.Api.WorkManagement.WorkItem>().Where(x => x.State == EntityState.Added).ToArray())
             db.InformationLifecycles.Add(new InformationLifecycleRecord(Guid.NewGuid(), entry.Entity.SiteId, "work_item", entry.Entity.Id, entry.Entity.Id, DateTimeOffset.UtcNow));

@@ -251,6 +251,14 @@ Workflow/template definitions are administration-only, but active eligible users
 
 A new Site receives editable English planning, execution and final-report defaults. These are copied into the Site when it is created; they are not live system translations. Site Manager may translate or otherwise revise them, and application updates preserve the Site's stored versions. Editing a workflow creates a new active version so work already using an earlier version retains its original structure.
 
+### Preserved Site archives
+
+Platform Manager can inspect **Lock/Archive** beside a Site or global user. For a Site, deactivate normal operation first and resolve the displayed unfinished work, learning, risks and pending delivery. Assign an active archive custodian by name before closure; at least one custodian must have explicit export permission. Custody covers the entire Site, including internal and restricted historical content, and must be assigned deliberately. It grants read/export rights to the preserved archive, without operational membership or work actions. Platform administration alone does not grant archive browsing.
+
+The custodian uses **Archives** to select the preserved Site, read its activity and work, and download the open portable package when export is permitted. An archive-only identity can sign in while its person/login remains active and current custody exists. Reopening the Site or revoking the grant removes that archive entitlement. The final export custodian cannot be revoked while the Site remains locked/archived.
+
+A global person can be locked only after active login/access and archive responsibilities are removed. Historical attribution is preserved; Site archival never locks a globally shared person on behalf of another owner. These actions do not delete or anonymise information.
+
 ## 13. Platform Manager administration
 
 Platform Manager pages include platform Overview/operations, Sites, global Users/Identity, external identity providers, Email and templates, Classifications, Appearance, machine API clients and platform Audit.

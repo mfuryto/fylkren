@@ -131,6 +131,8 @@ app.MapReportApiEndpoints();
 app.MapWebhookManagementEndpoints();
 app.MapActivityQueryEndpoints();
 Fylkren.Api.InformationLifecycle.WorkLifecycleEndpoints.MapWorkLifecycleEndpoints(app);
+Fylkren.Api.InformationLifecycle.GovernanceLifecycleEndpoints.MapGovernanceLifecycleEndpoints(app);
+Fylkren.Api.InformationLifecycle.ArchiveReaderEndpoints.MapArchiveReaderEndpoints(app);
 app.MapRiskEndpoints();
 app.MapPortabilityEndpoints();
 app.MapFormalApprovalEndpoints();

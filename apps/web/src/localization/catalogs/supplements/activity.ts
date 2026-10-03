@@ -1,9 +1,11 @@
+import { governanceEn, governanceTranslations } from "./governance";
 import { lifecycleUiEn, lifecycleUiTranslations } from "./lifecycleUi";
 import { domainActivityEn, domainActivityTranslations } from "./activityDomain";
 
 export const activityEn = {
   ...domainActivityEn,
   ...lifecycleUiEn,
+  ...governanceEn,
 
   "activityTitle": "Activity",
   "activityLegacyNotice": "History before this feature may be incomplete.",
@@ -27,6 +29,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   "en-US": {
     ...domainActivityTranslations["en-US"],
     ...lifecycleUiTranslations["en-US"],
+    ...governanceTranslations["en-US"],
 
     "lifecycleAction": "Action",
     "lifecycleActiveDescription": "Lock after completion, rejection or cancellation, when follow-up is finished. Completed work needs an approved final report.",
@@ -48,6 +51,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   "nb-NO": {
     ...domainActivityTranslations["nb-NO"],
     ...lifecycleUiTranslations["nb-NO"],
+    ...governanceTranslations["nb-NO"],
 
     "lifecycleAction": "Handling",
     "lifecycleActiveDescription": "Lås etter fullføring, avvisning eller kansellering, når oppfølgingen er ferdig. Fullførte oppdrag krever godkjent sluttrapport.",
@@ -69,6 +73,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   "sv-SE": {
     ...domainActivityTranslations["sv-SE"],
     ...lifecycleUiTranslations["sv-SE"],
+    ...governanceTranslations["sv-SE"],
 
     "lifecycleAction": "Åtgärd",
     "lifecycleActiveDescription": "Aktiv: Innehållet kan redigeras. Stängning låser färdigbehandlat arbete. Oavslutat relaterat arbete eller väntande leverans måste hanteras först. Använd detta efter slutförande, avslag eller avbrytande, när uppföljningen är klar. Slutförda uppdrag kräver en godkänd slutrapport. Detta ersätter inte vanliga statusåtgärder.",
@@ -90,6 +95,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   "da-DK": {
     ...domainActivityTranslations["da-DK"],
     ...lifecycleUiTranslations["da-DK"],
+    ...governanceTranslations["da-DK"],
 
     "lifecycleAction": "Handling",
     "lifecycleActiveDescription": "Aktiv: Indholdet kan redigeres. Lukning låser færdigbehandlet arbejde. Uafsluttet relateret arbejde eller ventende levering skal håndteres først. Brug dette efter afslutning, afvisning eller annullering, når opfølgningen er færdig. Afsluttede opgaver kræver en godkendt slutrapport. Dette erstatter ikke de almindelige statusvalg.",
@@ -111,6 +117,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   "fi-FI": {
     ...domainActivityTranslations["fi-FI"],
     ...lifecycleUiTranslations["fi-FI"],
+    ...governanceTranslations["fi-FI"],
 
     "lifecycleAction": "Toiminto",
     "lifecycleActiveDescription": "Aktiivinen: Sisältöä voi muokata. Sulkeminen lukitsee valmiin työn. Keskeneräinen liittyvä työ tai odottava toimitus on käsiteltävä ensin. Käytä tätä valmistumisen, hylkäyksen tai peruutuksen jälkeen, kun seuranta on valmis. Valmis työ vaatii hyväksytyn loppuraportin. Tämä ei korvaa tavallisia tilatoimintoja.",
@@ -132,6 +139,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   "de-DE": {
     ...domainActivityTranslations["de-DE"],
     ...lifecycleUiTranslations["de-DE"],
+    ...governanceTranslations["de-DE"],
 
     "lifecycleAction": "Aktion",
     "lifecycleActiveDescription": "Aktiv: Der Inhalt kann bearbeitet werden. Das Schließen sperrt abgeschlossene Arbeit. Offene zugehörige Arbeit oder ausstehende Zustellung muss zuerst erledigt werden. Nach Abschluss, Ablehnung oder Abbruch verwenden, wenn die Nachverfolgung beendet ist. Abgeschlossene Aufträge benötigen einen genehmigten Abschlussbericht. Dies ersetzt keine normalen Statusaktionen.",
@@ -153,6 +161,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   "fr-FR": {
     ...domainActivityTranslations["fr-FR"],
     ...lifecycleUiTranslations["fr-FR"],
+    ...governanceTranslations["fr-FR"],
 
     "lifecycleAction": "Action",
     "lifecycleActiveDescription": "Actif : le contenu est modifiable. La clôture verrouille le travail terminé. Le travail associé inachevé ou les livraisons en attente doivent être traités au préalable. À utiliser après achèvement, rejet ou annulation, une fois le suivi terminé. Une mission achevée nécessite un rapport final approuvé. Cela ne remplace pas les actions de statut habituelles.",
@@ -174,6 +183,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   "pl-PL": {
     ...domainActivityTranslations["pl-PL"],
     ...lifecycleUiTranslations["pl-PL"],
+    ...governanceTranslations["pl-PL"],
 
     "lifecycleAction": "Działanie",
     "lifecycleActiveDescription": "Aktywne: Treść można edytować. Zamknięcie blokuje zakończoną pracę. Najpierw należy zakończyć powiązane prace i oczekujące dostarczenia. Użyj po zakończeniu, odrzuceniu lub anulowaniu, gdy działania następcze są zakończone. Zakończona praca wymaga zatwierdzonego raportu końcowego. Nie zastępuje to zwykłych zmian statusu.",
@@ -195,6 +205,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   "es-ES": {
     ...domainActivityTranslations["es-ES"],
     ...lifecycleUiTranslations["es-ES"],
+    ...governanceTranslations["es-ES"],
 
     "lifecycleAction": "Acción",
     "lifecycleActiveDescription": "Activo: El contenido se puede editar. El cierre bloquea el trabajo terminado. Primero deben resolverse el trabajo relacionado pendiente y las entregas pendientes. Úsalo tras finalizar, rechazar o cancelar, cuando el seguimiento haya terminado. El trabajo finalizado requiere un informe final aprobado. No sustituye las acciones habituales de estado.",
@@ -216,6 +227,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   "it-IT": {
     ...domainActivityTranslations["it-IT"],
     ...lifecycleUiTranslations["it-IT"],
+    ...governanceTranslations["it-IT"],
 
     "lifecycleAction": "Azione",
     "lifecycleActiveDescription": "Attivo: Il contenuto può essere modificato. La chiusura blocca il lavoro completato. Prima occorre completare il lavoro correlato e le consegne in sospeso. Da usare dopo completamento, rifiuto o annullamento, quando le attività successive sono concluse. Il lavoro completato richiede un rapporto finale approvato. Non sostituisce le normali azioni di stato.",
@@ -237,6 +249,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   "uk-UA": {
     ...domainActivityTranslations["uk-UA"],
     ...lifecycleUiTranslations["uk-UA"],
+    ...governanceTranslations["uk-UA"],
 
     "lifecycleAction": "Дія",
     "lifecycleActiveDescription": "Активний: Вміст можна редагувати. Закриття блокує завершену роботу. Спочатку потрібно завершити пов’язану роботу та очікувані доставки. Використовуйте після завершення, відхилення або скасування, коли подальші дії завершені. Завершена робота потребує затвердженого підсумкового звіту. Це не замінює звичайні дії зі статусом.",
@@ -258,6 +271,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   "nl-NL": {
     ...domainActivityTranslations["nl-NL"],
     ...lifecycleUiTranslations["nl-NL"],
+    ...governanceTranslations["nl-NL"],
 
     "lifecycleAction": "Actie",
     "lifecycleActiveDescription": "Actief: De inhoud kan worden bewerkt. Sluiten vergrendelt afgerond werk. Rond eerst gerelateerd werk en wachtende leveringen af. Gebruik dit na afronding, afwijzing of annulering, wanneer de opvolging klaar is. Afgerond werk vereist een goedgekeurd eindrapport. Dit vervangt de normale statusacties niet.",
@@ -279,6 +293,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   "pt-PT": {
     ...domainActivityTranslations["pt-PT"],
     ...lifecycleUiTranslations["pt-PT"],
+    ...governanceTranslations["pt-PT"],
 
     "lifecycleAction": "Ação",
     "lifecycleActiveDescription": "Ativo: O conteúdo pode ser editado. O fecho bloqueia o trabalho concluído. Primeiro, conclua o trabalho relacionado e as entregas pendentes. Utilize após conclusão, rejeição ou cancelamento, quando o acompanhamento estiver concluído. O trabalho concluído exige um relatório final aprovado. Não substitui as ações habituais de estado.",
@@ -300,6 +315,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   "cs-CZ": {
     ...domainActivityTranslations["cs-CZ"],
     ...lifecycleUiTranslations["cs-CZ"],
+    ...governanceTranslations["cs-CZ"],
 
     "lifecycleAction": "Akce",
     "lifecycleActiveDescription": "Aktivní: Obsah lze upravovat. Uzavření uzamkne dokončenou práci. Nejprve je nutné dokončit související práci a čekající doručení. Použijte po dokončení, zamítnutí nebo zrušení, až jsou následné kroky dokončeny. Dokončená práce vyžaduje schválenou závěrečnou zprávu. Nenahrazuje běžné změny stavu.",
@@ -321,6 +337,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   "ro-RO": {
     ...domainActivityTranslations["ro-RO"],
     ...lifecycleUiTranslations["ro-RO"],
+    ...governanceTranslations["ro-RO"],
 
     "lifecycleAction": "Acțiune",
     "lifecycleActiveDescription": "Activ: Conținutul poate fi editat. Închiderea blochează lucrările finalizate. Finalizați mai întâi lucrările asociate și livrările în așteptare. Utilizați după finalizare, respingere sau anulare, când urmărirea este încheiată. Lucrările finalizate necesită un raport final aprobat. Nu înlocuiește acțiunile obișnuite de stare.",
@@ -342,6 +359,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   "et-EE": {
     ...domainActivityTranslations["et-EE"],
     ...lifecycleUiTranslations["et-EE"],
+    ...governanceTranslations["et-EE"],
 
     "lifecycleAction": "Toiming",
     "lifecycleActiveDescription": "Aktiivne: Sisu saab muuta. Sulgemine lukustab lõpetatud töö. Esmalt tuleb lõpetada seotud töö ja ootel edastused. Kasuta pärast lõpetamist, tagasilükkamist või tühistamist, kui järeltegevused on tehtud. Lõpetatud töö vajab kinnitatud lõpparuannet. See ei asenda tavapäraseid olekutoiminguid.",
@@ -363,6 +381,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   "lv-LV": {
     ...domainActivityTranslations["lv-LV"],
     ...lifecycleUiTranslations["lv-LV"],
+    ...governanceTranslations["lv-LV"],
 
     "lifecycleAction": "Darbība",
     "lifecycleActiveDescription": "Aktīvs: Saturu var rediģēt. Aizvēršana bloķē pabeigtu darbu. Vispirms jāpabeidz saistītie darbi un gaidošās piegādes. Izmantojiet pēc pabeigšanas, noraidīšanas vai atcelšanas, kad turpmākās darbības ir pabeigtas. Pabeigtam darbam nepieciešams apstiprināts gala ziņojums. Tas neaizstāj parastās statusa darbības.",
@@ -384,6 +403,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   "lt-LT": {
     ...domainActivityTranslations["lt-LT"],
     ...lifecycleUiTranslations["lt-LT"],
+    ...governanceTranslations["lt-LT"],
 
     "lifecycleAction": "Veiksmas",
     "lifecycleActiveDescription": "Aktyvus: Turinį galima redaguoti. Uždarymas užrakina baigtą darbą. Pirmiausia reikia užbaigti susijusius darbus ir laukiančius pristatymus. Naudokite po užbaigimo, atmetimo ar atšaukimo, kai tolesni veiksmai baigti. Užbaigtam darbui reikia patvirtintos galutinės ataskaitos. Tai nepakeičia įprastų būsenos veiksmų.",
@@ -405,6 +425,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   "en-GB": {
     ...domainActivityTranslations["en-GB"],
     ...lifecycleUiTranslations["en-GB"],
+    ...governanceTranslations["en-GB"],
 
     "lifecycleAction": "Action",
     "lifecycleActiveDescription": "Lock after completion, rejection or cancellation, when follow-up is finished. Completed work needs an approved final report.",

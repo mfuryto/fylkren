@@ -23,7 +23,8 @@ internal static class WorkLifecycleEndpoints
         var item = await db.WorkItems.AsNoTracking().SingleOrDefaultAsync(x => x.Id == itemId && x.SiteId == siteId, ct);
         if (item is null || !await CanManageItem(item, person, db, ct) && !await CanReadWorkTree(siteId, itemId, person, db, ct)) return Results.Problem(statusCode: 403);
         var record = await db.InformationLifecycles.AsNoTracking().SingleOrDefaultAsync(x => x.OwnerSiteId == siteId && x.ResourceType == "work_item" && x.ResourceId == itemId, ct);
-        return Results.Ok(new { stage = record?.Stage ?? "active", version = record?.Version ?? 0, held = record?.IsHeld ?? false, irreversibleEnabled = false });
+        var inherited = await db.InformationLifecycles.FromSqlInterpolated($"WITH RECURSIVE chain AS (SELECT id, parent_work_item_id FROM work_items WHERE id = {itemId} AND site_id = {siteId} UNION SELECT w.id, w.parent_work_item_id FROM work_items w JOIN chain c ON w.id = c.parent_work_item_id WHERE w.site_id = {siteId}) SELECT l.* FROM information_lifecycle l WHERE l.owner_site_id = {siteId} AND l.stage <> 'active' AND (l.resource_type = 'site' AND l.resource_id = {siteId} OR l.resource_type = 'work_item' AND l.resource_id <> {itemId} AND l.resource_id IN (SELECT id FROM chain)) ORDER BY CASE l.stage WHEN 'archived' THEN 0 ELSE 1 END LIMIT 1").AsNoTracking().SingleOrDefaultAsync(ct);
+        return Results.Ok(new { stage = record?.Stage ?? "active", effectiveStage = inherited?.Stage ?? record?.Stage ?? "active", inheritedLock = inherited != null, version = record?.Version ?? 0, held = record?.IsHeld ?? false, irreversibleEnabled = false });
     }
     private sealed record TransitionRequest(string Stage, long ExpectedVersion, string Reason);
     private static async Task<IResult> Transition(Guid siteId, Guid itemId, TransitionRequest request, ClaimsPrincipal user,

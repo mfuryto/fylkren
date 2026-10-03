@@ -52,7 +52,7 @@ public static class OrganizationEndpoints
             database.Sites.Add(site);
             database.OrganizationUnits.Add(siteRoot);
             DefaultSiteWorkConfiguration.Add(database, site, now);
-            database.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), site.Id, actorPersonId, "site.created", "site", site.Id, now));
+            await Fylkren.Api.DomainEvents.DomainEventRecorder.RecordGovernance(database, new AuditEvent(Guid.NewGuid(), site.Id, actorPersonId, "site.created", "site", site.Id, now), "site.created", site.Id, "site", site.Id, new { status = "active" }, cancellationToken);
             await database.SaveChangesAsync(cancellationToken);
             await capacity.CommitAsync(cancellationToken);
             return Results.Created($"/api/sites/{site.Id}", new SiteSummary(site.Id, site.ParentOrganizationUnitId, site.Name, site.IsActive, site.OverviewDesign, []));
@@ -92,7 +92,7 @@ public static class OrganizationEndpoints
             else if (nameChanged)
                 await FederationSitePublicationPolicy.RefreshAsync(siteId, database, DateTimeOffset.UtcNow, cancellationToken);
             site.UpdateOverviewDesign(request.OverviewDesign);
-            database.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, actorPersonId, "site.updated", "site", siteId, DateTimeOffset.UtcNow));
+            await Fylkren.Api.DomainEvents.DomainEventRecorder.RecordGovernance(database, new AuditEvent(Guid.NewGuid(), siteId, actorPersonId, "site.updated", "site", siteId, DateTimeOffset.UtcNow), "site.updated", siteId, "site", siteId, new { status = site.IsActive ? "active" : "inactive" }, cancellationToken);
             await database.SaveChangesAsync(cancellationToken);
             if (capacity is not null) await capacity.CommitAsync(cancellationToken);
             return Results.Ok(new SiteSummary(site.Id, site.ParentOrganizationUnitId, site.Name, site.IsActive, site.OverviewDesign, []));
@@ -108,7 +108,7 @@ public static class OrganizationEndpoints
                 return Results.Conflict(new { error = "The site has active subordinate sites. Move or disable them first." });
             var now = DateTimeOffset.UtcNow;
             await SiteDeactivationService.DeactivateAsync(site, database, now, cancellationToken);
-            database.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, actorPersonId, "site.deactivated", "site", siteId, now));
+            await Fylkren.Api.DomainEvents.DomainEventRecorder.RecordGovernance(database, new AuditEvent(Guid.NewGuid(), siteId, actorPersonId, "site.deactivated", "site", siteId, now), "site.deactivated", siteId, "site", siteId, new { status = "inactive" }, cancellationToken);
             await database.SaveChangesAsync(cancellationToken); return Results.NoContent();
         }).RequireAuthorization(policy => policy.RequireRole("PlatformManager"));
 

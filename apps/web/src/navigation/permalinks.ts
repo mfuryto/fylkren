@@ -2,7 +2,7 @@ export const appPages = [
   "Overview", "Tasks", "Workload", "Learning", "Planning", "Execution", "Reports", "Profile",
   "Platform", "Sites", "Identity", "References", "Classifications", "API", "Federation", "License",
   "Email", "Appearance", "Organization", "Personnel", "Sources", "Workflows", "Templates",
-  "Notifications", "Audit",
+  "Notifications", "Audit", "Archives",
 ] as const;
 
 export type AppPage = (typeof appPages)[number];
@@ -13,7 +13,7 @@ const pagePaths: Record<AppPage, string> = {
   Sites: "sites", Identity: "identity", References: "references", Classifications: "classifications", API: "api",
   Federation: "federation", License: "license", Email: "email", Appearance: "appearance",
   Organization: "organization", Personnel: "personnel", Sources: "sources", Workflows: "workflows",
-  Templates: "templates", Notifications: "notifications", Audit: "audit",
+  Archives: "archives", Templates: "templates", Notifications: "notifications", Audit: "audit",
 };
 
 const pagesByPath: Record<string, AppPage> = {

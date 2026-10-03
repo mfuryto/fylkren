@@ -1680,6 +1680,53 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.ToTable("webauthn_flow_grants", (string)null);
                 });
 
+            modelBuilder.Entity("Fylkren.Api.InformationLifecycle.ArchiveGrant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("CanExport")
+                        .HasColumnType("boolean")
+                        .HasColumnName("can_export");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("person_id");
+
+                    b.Property<DateTimeOffset?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("revoked_at");
+
+                    b.Property<Guid>("SiteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("site_id");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PersonId");
+
+                    b.HasIndex("SiteId", "PersonId")
+                        .IsUnique()
+                        .HasFilter("is_active");
+
+                    b.ToTable("archive_grants", (string)null);
+                });
+
             modelBuilder.Entity("Fylkren.Api.InformationLifecycle.InformationLifecycleRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1758,6 +1805,8 @@ namespace Fylkren.Api.Persistence.Migrations
 
                     b.HasIndex("ContextWorkItemId");
 
+                    b.HasIndex("PolicyId", "PolicyVersion");
+
                     b.HasIndex("ResourceType", "ResourceId")
                         .IsUnique()
                         .HasFilter("owner_site_id IS NULL");
@@ -1770,6 +1819,96 @@ namespace Fylkren.Api.Persistence.Migrations
                         {
                             t.HasCheckConstraint("CK_information_lifecycle_reversible", "stage IN ('active', 'closed', 'archived') AND version > 0 AND (owner_site_id IS NOT NULL OR context_work_item_id IS NULL)");
                         });
+                });
+
+            modelBuilder.Entity("Fylkren.Api.InformationLifecycle.LifecycleHold", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CreatedByPersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_person_id");
+
+                    b.Property<Guid>("LifecycleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lifecycle_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("reason");
+
+                    b.Property<string>("ReleaseReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("release_reason");
+
+                    b.Property<DateTimeOffset?>("ReleasedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("released_at");
+
+                    b.Property<Guid?>("ReleasedByPersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("released_by_person_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByPersonId");
+
+                    b.HasIndex("ReleasedByPersonId");
+
+                    b.HasIndex("LifecycleId", "ReleasedAt");
+
+                    b.ToTable("lifecycle_holds", (string)null);
+                });
+
+            modelBuilder.Entity("Fylkren.Api.InformationLifecycle.RetentionPolicyVersion", b =>
+                {
+                    b.Property<Guid>("PolicyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_id");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("category");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CreatedByPersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_person_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<int?>("ReviewAfterDays")
+                        .HasColumnType("integer")
+                        .HasColumnName("review_after_days");
+
+                    b.HasKey("PolicyId", "Version");
+
+                    b.HasIndex("CreatedByPersonId");
+
+                    b.ToTable("retention_policy_versions", (string)null);
                 });
 
             modelBuilder.Entity("Fylkren.Api.Learning.LearningEntry", b =>
@@ -4692,6 +4831,21 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.Navigation("Person");
                 });
 
+            modelBuilder.Entity("Fylkren.Api.InformationLifecycle.ArchiveGrant", b =>
+                {
+                    b.HasOne("Fylkren.Api.Identity.Person", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Fylkren.Api.Organization.Site", null)
+                        .WithMany()
+                        .HasForeignKey("SiteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Fylkren.Api.InformationLifecycle.InformationLifecycleRecord", b =>
                 {
                     b.HasOne("Fylkren.Api.WorkManagement.WorkItem", null)
@@ -4703,6 +4857,40 @@ namespace Fylkren.Api.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("OwnerSiteId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Fylkren.Api.InformationLifecycle.RetentionPolicyVersion", null)
+                        .WithMany()
+                        .HasForeignKey("PolicyId", "PolicyVersion")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Fylkren.Api.InformationLifecycle.LifecycleHold", b =>
+                {
+                    b.HasOne("Fylkren.Api.Identity.Person", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedByPersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Fylkren.Api.InformationLifecycle.InformationLifecycleRecord", null)
+                        .WithMany()
+                        .HasForeignKey("LifecycleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Fylkren.Api.Identity.Person", null)
+                        .WithMany()
+                        .HasForeignKey("ReleasedByPersonId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Fylkren.Api.InformationLifecycle.RetentionPolicyVersion", b =>
+                {
+                    b.HasOne("Fylkren.Api.Identity.Person", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedByPersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Fylkren.Api.Learning.LearningEntry", b =>

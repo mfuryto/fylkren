@@ -29,7 +29,7 @@ public static class PortabilityEndpoints
         CancellationToken cancellationToken)
     {
         if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest(new { error = "Antiforgery token validation failed." });
-        if (!PersonId(user, out var actorPersonId) || !await CanAdminister(siteId, actorPersonId, user, db, cancellationToken))
+        if (!PersonId(user, out var actorPersonId) || !(await CanAdminister(siteId, actorPersonId, user, db, cancellationToken) || await Fylkren.Api.InformationLifecycle.ArchiveAccess.CanExport(siteId, actorPersonId, db, cancellationToken)))
             return Results.Problem(statusCode: StatusCodes.Status403Forbidden);
         if (!await db.Sites.AnyAsync(value => value.Id == siteId, cancellationToken)) return Results.NotFound();
         try

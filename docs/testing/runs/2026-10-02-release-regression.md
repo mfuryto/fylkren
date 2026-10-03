@@ -213,3 +213,22 @@ Set `FYLKREN_E2E_API_IMAGE` and `FYLKREN_E2E_WEB_IMAGE` to the recorded candidat
 The safe manifest records candidate IDs, source/test hashes, log hashes and measured API workload results. The final full fixture plus 1,000 tasks passed all 300 authorized reads and rejected all 300 administrative-only reads. Navigation-count p95 was 91/136/301 ms at concurrency 1/10/25 in this execution, substantially below earlier executions. Navigation source is unchanged; this variation is not evidence of a bottleneck fix. The previously recorded slow navigation-count query remains a separate roadmap item; successful correctness/authorization tests do not resolve it. ASVS counts stay 35 Passed, 112 In progress, 53 Not assessed and 53 Not applicable; this activity continuation does not complete the security assessment.
 
 Next architecture delivery remains whole-Site/shared-user archive and custodianship, consistent exit export and policy/hold administration, followed by guarded disposition/recovery and compatibility-cursor reconciliation. Irreversible deletion, anonymisation and retention-policy execution stay disabled. Complete each coherent delivery with the same traceability before proceeding.
+
+## Governance lifecycle and archive custody — 2026-10-03
+
+The next stage-4 gate passed: Site/global Person lifecycle roots, explicit full-Site archive custody, independent owner guards and shared activity recording. Current grants permit archive-only authentication and read-only timeline/work browsing; ordinary administrative/membership access remains unchanged. Reopening or revocation invalidates archive eligibility. Global historical profile transitions retain attribution in independent global audit; no tenant origin is invented. No deletion/anonymisation or preservation executor is enabled.
+
+| Scope | Executed result |
+| --- | --- |
+| PostgreSQL foundations | Existing foundation, WorkItem and domain cases plus Site/person guards, independent owners, explicit grant/session eligibility and revocation, shared recorder, immutable policy metadata/hold model and restoration passed. |
+| Community/Enterprise API | Complete regression and matched backup/key recovery passed; new Site and global Person archives, explicit archive export, negative administrative/foreign access, blocked edits/last-custodian removal, disabled deletion and reopen invalidation passed. |
+| Frontend and Chromium | 157 tests passed. Type check/model consistency passed. Complete Community keyboard/mobile/task/report/PDF/SMTP flow passed, including actual Site closure/archive, named custodian selection and fresh archive-only browser sign-in/read-only history. Browser errors: zero. |
+| Repository | Documentation, structure/language, whitespace and repository/history safety checks passed; Trivy secret scan found no repository secrets. |
+
+Excluded attempts exposed a genuine combined Platform/Site Manager navigation-priority defect, now fixed and regression-tested. Additional login cases originally exceeded the existing authentication partition; test order/window isolation corrected without weakening limits. The SMTP retry assertion now runs before the new authentication waiting window. The earliest downgrade guard also prevents partial removal of governance tables after cutover. These failed attempts are not counted as passing evidence.
+
+The new exact exclusive-`until` assertion was added after the API process loaded the original module; execute it with the next dependent API run before claiming that added assertion. Browser dates and the shared query use the documented inclusive-from/exclusive-until convention.
+
+Immutable candidate IDs, source/test hashes and safe results are in the [same evidence manifest](2026-10-02-release-regression-evidence.json). API and browser labs ran sequentially and restored environment fixtures. Production was unchanged. Navigation-count p95 was 3,200/5,869/9,163 ms at concurrency 1/10/25, reproducing the separately tracked sizing concern; correctness/authorization checks passed and no performance fix is claimed. ASVS status counts remain unchanged.
+
+The next dependent stage adds consistent lifecycle portability, durable preservation administration and export receipts, then reconciles compatibility projection before retiring it. Destructive disposition/recovery remains disabled and deferred.

@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Added reversible Site/global-user locking and archival, explicit full-Site archive custody and a read-only Archives workspace; corrected navigation when Platform Manager also manages a Site.
+
 - Show Active/Locked/Archived beside Lock/Archive, shorten the dialog, and localize locked-content and lifecycle conflicts instead of reporting them as concurrent edits.
 
 - Extended the shared activity history to decisions, risks, mitigation actions, comments, exact-level private learning and remaining planning/follow-up edits while preserving existing notifications, webhook contracts and independent audit.

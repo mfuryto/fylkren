@@ -101,3 +101,5 @@ Console.WriteLine("Foundation tests passed: actor/schema/metadata boundaries, li
 await WorkSliceTests.Run(db);
 
 await DomainCoverageTests.Run(db);
+
+await GovernanceTests.Run(db);

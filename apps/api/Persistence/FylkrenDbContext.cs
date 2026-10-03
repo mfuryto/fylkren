@@ -52,6 +52,9 @@ public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options,
     public DbSet<DecisionReference> DecisionReferences => Set<DecisionReference>();
     public DbSet<EventProjection> EventProjections => Set<EventProjection>();
     public DbSet<Fylkren.Api.InformationLifecycle.InformationLifecycleRecord> InformationLifecycles => Set<Fylkren.Api.InformationLifecycle.InformationLifecycleRecord>();
+    public DbSet<Fylkren.Api.InformationLifecycle.ArchiveGrant> ArchiveGrants => Set<Fylkren.Api.InformationLifecycle.ArchiveGrant>();
+    public DbSet<Fylkren.Api.InformationLifecycle.LifecycleHold> LifecycleHolds => Set<Fylkren.Api.InformationLifecycle.LifecycleHold>();
+    public DbSet<Fylkren.Api.InformationLifecycle.RetentionPolicyVersion> RetentionPolicyVersions => Set<Fylkren.Api.InformationLifecycle.RetentionPolicyVersion>();
     public DbSet<DomainEvent> DomainEvents => Set<DomainEvent>();
     public DbSet<WebhookSubscription> WebhookSubscriptions => Set<WebhookSubscription>();
     public DbSet<WebhookDelivery> WebhookDeliveries => Set<WebhookDelivery>();
@@ -167,6 +170,7 @@ public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options,
         modelBuilder.ConfigureDecisions();
         modelBuilder.ConfigureDomainEvents();
         modelBuilder.ConfigureActivityFoundation();
+        modelBuilder.ConfigureLifecycleGovernance();
         modelBuilder.ConfigureRisks();
         modelBuilder.ConfigureFormalApprovals();
         modelBuilder.ConfigurePlatform();

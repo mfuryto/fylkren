@@ -1,0 +1,50 @@
+import assert from 'node:assert/strict';
+
+export async function testGovernanceLifecycle({ platform, unauthorized, makeUser, suffix }) {
+  const created = await platform.post('/api/sites/', { name: `Synthetic governance ${suffix}`, overviewDesign: 'classic' });
+  assert.equal(created.status, 201, JSON.stringify(created.body));
+  const siteId = created.body.id, path = `/api/information/governance/site/${siteId}`;
+  const custodian = await makeUser('archive-custodian', siteId);
+  const oldAuthor = await makeUser('archive-old-author', siteId);
+  assert.equal((await unauthorized.request(path)).status, 403);
+  let state = (await platform.request(path)).body;
+  const transition = async stage => {
+    const result = await platform.post(`${path}/transitions`, { stage, expectedVersion: state.version, reason: 'Synthetic lifecycle rationale' });
+    if (result.status === 200) state = result.body;
+    return result;
+  };
+  assert.equal((await transition('closed')).status, 409, 'Active Site closed');
+  const grant = await platform.post(`/api/information/governance/sites/${siteId}/custodians`, { personId: custodian.personId, canExport: true, reason: 'Explicit full-Site archive responsibility' });
+  assert.equal(grant.status, 200, JSON.stringify(grant.body));
+  state = (await platform.request(path)).body;
+  assert.equal((await platform.request(`/api/sites/${siteId}`, { method: 'DELETE' })).status, 204);
+  assert.equal((await platform.post('/api/platform/identity/users/delete', { personIds: [oldAuthor.personId] })).status, 200);
+  const personPath = `/api/information/governance/person/${oldAuthor.personId}`;
+  const oldState = await platform.request(personPath); assert.equal(oldState.status, 200);
+  const closedPerson = await platform.post(`${personPath}/transitions`, { stage: 'closed', expectedVersion: oldState.body.version, reason: 'Retain historical attribution after authentication cleanup' });
+  assert.equal(closedPerson.status, 200, JSON.stringify(closedPerson.body));
+  assert.equal((await unauthorized.request(personPath)).status, 403);
+  assert.equal((await platform.post(`${personPath}/transitions`, { stage: 'archived', expectedVersion: closedPerson.body.version, reason: 'Preserve global historical identity' })).status, 200);
+  assert.equal((await transition('closed')).status, 200);
+  assert.equal((await transition('archived')).status, 200);
+  const archive = `/api/information/archives/${siteId}`;
+  assert.equal((await platform.request(`${archive}/activity`)).status, 403, 'Platform administration granted automatic operational archive access');
+  assert.equal((await unauthorized.request(`${archive}/activity`)).status, 403);
+  const history = await custodian.account.request(`${archive}/activity`);
+  assert.equal(history.status, 200, JSON.stringify(history.body));
+  for (const type of ['site.created', 'site.deactivated', 'information.closed', 'information.archived']) assert.ok(history.body.items.some(e => e.type === type), type);
+  assert.equal((await custodian.account.request(`/api/work/sites/${siteId}/items?filter=all`)).status, 403, 'Custodian gained operational membership');
+  assert.equal((await custodian.account.request('/api/session')).body.authenticated, true);
+  assert.equal((await custodian.account.request(`${archive}/work-items`)).status, 200);
+  const blocked = await platform.put(`/api/sites/${siteId}`, { name: 'Forbidden archive rename', isActive: false, overviewDesign: 'classic', parentOrganizationUnitId: null });
+  assert.equal(blocked.status, 409); assert.equal(blocked.body.code, 'information_locked');
+  assert.equal((await platform.post(`/api/information/governance/sites/${siteId}/custodians/${grant.body.id}/revoke`, { expectedVersion: grant.body.version, reason: 'Unsafe loss of custody' })).status, 409);
+  assert.equal((await transition('deleted')).status, 400);
+  const exportResult = await custodian.account.request(`/api/portability/sites/${siteId}/export`, { method: 'POST', binary: true });
+  assert.equal(exportResult.status, 200, 'Explicit archive export denied');
+  assert.equal((await transition('closed')).status, 200); assert.equal((await transition('active')).status, 200);
+  assert.equal((await custodian.account.request(`${archive}/activity`)).status, 401, 'Archive-only session remained eligible after reopening');
+  const restored = await platform.put(`/api/sites/${siteId}`, { name: created.body.name, isActive: true, overviewDesign: 'classic', parentOrganizationUnitId: null });
+  assert.equal(restored.status, 200, JSON.stringify(restored.body));
+  return { siteArchiveCustody: 'passed', archiveAccessBoundaries: 'passed', siteArchiveRestore: 'passed', irreversibleDispositionDisabled: 'passed' };
+}

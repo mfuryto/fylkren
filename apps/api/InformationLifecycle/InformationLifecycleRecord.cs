@@ -35,6 +35,12 @@ public sealed class InformationLifecycleRecord
         if (next == "closed") ClosedAt = now;
         if (next == "archived") ArchivedAt = now;
     }
+    public void BindPolicy(Guid policyId, int policyVersion, long expectedVersion, string reason, DateTimeOffset now)
+    {
+        if (expectedVersion != Version || policyId == Guid.Empty || policyVersion < 1 || string.IsNullOrWhiteSpace(reason) || reason.Length > 1000 || reason.Any(char.IsControl))
+            throw new InvalidOperationException("A current version, policy and bounded reason are required.");
+        PolicyId = policyId; PolicyVersion = policyVersion; EligibleAt = null; Reason = reason.Trim(); ChangedAt = now; Version++;
+    }
     public void SetHold(bool held, long expectedVersion, string reason, DateTimeOffset now)
     {
         if (expectedVersion != Version || string.IsNullOrWhiteSpace(reason) || reason.Length > 1000 || reason.Any(char.IsControl))

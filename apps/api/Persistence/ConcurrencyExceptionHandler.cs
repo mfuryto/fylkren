@@ -11,9 +11,9 @@ internal sealed class ConcurrencyExceptionHandler : IExceptionHandler
         CancellationToken cancellationToken)
     {
         if (exception is not DbUpdateConcurrencyException &&
-            exception is not DbUpdateException { InnerException: Npgsql.PostgresException { ConstraintName: "work_lifecycle_guard" or "activity_writer_gate" or "domain_activity_immutable" or "activity_context_owner" } }) return false;
+            exception is not DbUpdateException { InnerException: Npgsql.PostgresException { ConstraintName: "work_lifecycle_guard" or "site_lifecycle_guard" or "person_lifecycle_guard" or "activity_writer_gate" or "domain_activity_immutable" or "activity_context_owner" } }) return false;
 
-        var locked = exception is DbUpdateException { InnerException: Npgsql.PostgresException { ConstraintName: "work_lifecycle_guard" } };
+        var locked = exception is DbUpdateException { InnerException: Npgsql.PostgresException { ConstraintName: "work_lifecycle_guard" or "site_lifecycle_guard" or "person_lifecycle_guard" } };
 
         httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
         await Results.Problem(

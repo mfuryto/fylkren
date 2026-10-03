@@ -12,6 +12,11 @@ export async function testActivityLifecycle({ leader, manager, sibling, unrelate
   for (const query of ['limit=0', 'limit=51', 'eventType=security.secret', 'resourceType=password', 'before=2026-10-02T00:00:00Z', 'from=2026-10-03T00:00:00Z&until=2026-10-02T00:00:00Z'])
     assert.equal((await leader.request(`${activity}?${query}`)).status, 400, query);
   const filtered = await leader.request(`${object}&eventType=task.created`); assert.equal(filtered.status, 200); assert.equal(filtered.body.items.length, 1); assert.ok(filtered.body.items.every(x => x.type === 'task.created'));
+  const boundary = filtered.body.items[0].occurredAt;
+  const exclusive = await leader.request(`${object}&eventType=task.created&until=${encodeURIComponent(boundary)}`);
+  assert.equal(exclusive.status, 200); assert.equal(exclusive.body.items.length, 0, 'Timeline until boundary must be exclusive');
+  const inclusive = await leader.request(`${object}&eventType=task.created&from=${encodeURIComponent(boundary)}`);
+  assert.equal(inclusive.status, 200); assert.equal(inclusive.body.items.length, 1, 'Timeline from boundary must be inclusive');
   const first = await leader.request(`${activity}?limit=2`); assert.equal(first.status, 200); assert.equal(first.body.items.length, 2); assert.equal(first.body.hasMore, true);
   const next = await leader.request(`${activity}?limit=2&before=${encodeURIComponent(first.body.next.before)}&beforeId=${first.body.next.beforeId}`); assert.equal(next.status, 200);
   assert.ok(next.body.items.every(x => !first.body.items.some(y => x.id === y.id)));

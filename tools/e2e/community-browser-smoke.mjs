@@ -1,3 +1,4 @@
+import { verifyGovernanceArchive } from './governance-browser.mjs';
 import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
 import { assertClassificationOrder } from './classification-browser.mjs';
@@ -483,8 +484,9 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
   assert.equal(platformSession.status, 200, JSON.stringify(platformSession.body));
   assert.equal(platformSession.body.isPlatformManager, true, JSON.stringify(platformSession.body));
 
-  return { ...keyboardEvidence,
-    ...(await verifyTaskMail({ request, pause, title, enabled: smtpDelivery })) };
+  const mailEvidence = await verifyTaskMail({ request, pause, title, enabled: smtpDelivery });
+  const archiveEvidence = await verifyGovernanceArchive({ request, navigate, waitFor, setInput, clickButton, evaluate, assertNoOverflow, platformCredentials, pause });
+  return { ...archiveEvidence, ...keyboardEvidence, ...mailEvidence };
 }
 
 try {
