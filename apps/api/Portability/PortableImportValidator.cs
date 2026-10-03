@@ -137,8 +137,10 @@ internal static class PortableImportValidator
             }
             if (document.RootElement.TryGetProperty("site_id", out var siteValue) && siteValue.ValueKind == JsonValueKind.String && Guid.TryParse(siteValue.GetString(), out var siteId) && siteId != expectedSiteId)
                 errors.Add($"Record {count} points to site {siteId} outside the import boundary.");
-            if (datasetName == "domain-events" && document.RootElement.TryGetProperty("request_id", out var requestId) && requestId.ValueKind != JsonValueKind.Null &&
-                (requestId.ValueKind != JsonValueKind.String || requestId.GetString() is { Length: > 200 } || requestId.GetString()!.Any(char.IsControl)))
+            var opaqueRequestProperty = datasetName == "domain-events" ? "request_id" : datasetName == "machine-audit-events" ? "correlation_id" : null;
+            var requestLimit = datasetName == "machine-audit-events" ? 100 : 200;
+            if (opaqueRequestProperty is not null && document.RootElement.TryGetProperty(opaqueRequestProperty, out var requestId) && requestId.ValueKind != JsonValueKind.Null &&
+                (requestId.ValueKind != JsonValueKind.String || requestId.GetString()!.Length > requestLimit || requestId.GetString()!.Any(char.IsControl)))
                 errors.Add($"Record {count} has an invalid request identifier.");
             if (document.RootElement.TryGetProperty("owner_site_id", out var owner) && owner.ValueKind != JsonValueKind.Null && (owner.ValueKind != JsonValueKind.String || !owner.TryGetGuid(out var ownerId) || ownerId != expectedSiteId))
                 errors.Add($"Record {count} has a foreign lifecycle owner.");
@@ -151,7 +153,7 @@ internal static class PortableImportValidator
                 else policyBindings.Add($"{key:N}:{version}");
             }
             if (datasetName == "information-lifecycle" && document.RootElement.TryGetProperty("policy_version", out var boundVersion) && boundVersion.ValueKind != JsonValueKind.Null && (!document.RootElement.TryGetProperty("policy_id", out var boundId) || boundId.ValueKind == JsonValueKind.Null)) errors.Add("A policy version requires its policy ID.");
-            foreach (var property in document.RootElement.EnumerateObject().Where(value => !(datasetName == "domain-events" && value.Name == "request_id") && value.Name.EndsWith("_id", StringComparison.Ordinal) && value.Value.ValueKind == JsonValueKind.String))
+            foreach (var property in document.RootElement.EnumerateObject().Where(value => value.Name != opaqueRequestProperty && value.Name.EndsWith("_id", StringComparison.Ordinal) && value.Value.ValueKind == JsonValueKind.String))
             {
                 if (!Guid.TryParse(property.Value.GetString(), out var reference)) { errors.Add($"Record {count} has an invalid reference in {property.Name}."); continue; }
                 if (!references.TryGetValue(property.Name, out var values)) references[property.Name] = values = [];

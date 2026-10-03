@@ -135,7 +135,7 @@ internal sealed class DirectoryLifecycleSynchronizer(
     private static async Task SynchronizeProfile(FylkrenDbContext database, ExternalIdentityLink link,
         DirectoryUser user, CancellationToken cancellationToken)
     {
-        if (link.Person.IsDeleted) return;
+        if (link.Person.IsDeleted || await database.InformationLifecycles.AnyAsync(l => l.ResourceType == "person" && l.ResourceId == link.PersonId && l.Stage != "active", cancellationToken)) return;
         var displayName = string.IsNullOrWhiteSpace(user.DisplayName)
             ? user.Username.Trim()
             : user.DisplayName.Trim();

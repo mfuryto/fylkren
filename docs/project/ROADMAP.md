@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 2026-10-03 after the event/activity foundation, WorkItem lifecycle and Work-owned domain activity delivery.
+Updated 2026-10-03 after the reversible event/activity and information-lifecycle foundation delivery.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -8,14 +8,13 @@ This roadmap contains remaining work and release gates. Delivered behavior belon
 
 Repository/documentation consolidation, the common Community/Enterprise entitlement implementation, internationalization, human-readable work references and operational federation are implemented. Maintained end-to-end and identity laboratories have executed successfully within their documented scopes. These are no longer future implementation milestones; candidate-specific reruns and deployment qualification remain release work.
 
-The additive event/activity foundation and coherent WorkItem slice are delivered, including shared notification/webhook integration, authorized object/Site timelines and guarded closure, archive and restoration. Work-owned decisions, risks, measures, comments, learning and remaining planning/follow-up edits now use this same activity path, with exact-level learning privacy. Permanent deletion, anonymisation and retention-policy execution remain disabled. See the [architecture and requirement/test traceability](../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md) and [staged execution evidence](../testing/runs/2026-10-02-release-regression.md#work-owned-domain-activity-coverage--2026-10-03). Successful regression runs do not mean ASVS is complete.
+The additive event/activity foundation and coherent WorkItem slice are delivered, including shared notification/webhook integration, authorized object/Site timelines and guarded closure, archive and restoration. Work-owned decisions, risks, measures, comments, learning and remaining planning/follow-up edits now use this same activity path, with exact-level learning privacy. Site/global-user archive custody, preservation controls, consistent exports and compatibility consumer reconciliation are also delivered and verified. Permanent deletion, anonymisation and retention-policy execution remain disabled. See the [architecture and requirement/test traceability](../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md) and [staged execution evidence](../testing/runs/2026-10-02-release-regression.md#work-owned-domain-activity-coverage--2026-10-03). Successful regression runs do not mean ASVS is complete.
 
 ## Next delivery order
 
-1. Continue delivery stage 4 with compatibility projection reconciliation. Work-owned activity, Site/user archive/custodianship, consistent lifecycle export and preservation adapters are delivered and verified. Complete and test each coherent slice before moving on.
-2. Correct and qualify navigation-count performance with the maintained hierarchy/load fixture. This is a separate sizing concern, not a reason to change pending-count semantics or authorization.
-3. Retest security requirements affected by these changes in the existing ASVS matrix, then resume incomplete chapter-1 requirements 1.3.3, 1.3.6 and 1.4.2. Continue the remaining matrix in the established requirement-order workflow.
-4. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records.
+1. Correct and qualify navigation-count performance with the maintained hierarchy/load fixture. This is a separate sizing concern, not a reason to change pending-count semantics or authorization.
+2. Retest security requirements affected by these changes in the existing ASVS matrix, then resume incomplete chapter-1 requirements 1.3.3, 1.3.6 and 1.4.2. Continue the remaining matrix in the established requirement-order workflow.
+3. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records.
 
 No irreversible disposition is authorized by this order. Establish and verify its prerequisites before proposing activation; do not choose arbitrary retention periods.
 
@@ -23,16 +22,16 @@ No irreversible disposition is authorized by this order. Establish and verify it
 
 Use the [single architecture/requirements/test reference](../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md) for detailed scope and T01–T14 acceptance cases.
 
-- Integrate remaining Site/shared-user lifecycle effects through the existing recorder and explicit authorization adapters. Work-owned decisions, risks/measures, planning drafts/RFI, comments and learning are already covered; preserve existing working behavior and external API/federation contracts.
+- The authorized reversible foundation is implemented: Work-owned domain activity, Site/global-user archives/custody, consistent exports, preservation administration and common consumer cutover. Final candidate foundation, API/recovery, Chromium and affected identity/federation chains passed in the [existing release record](../testing/runs/2026-10-02-release-regression.md#consumer-reconciliation-and-final-reversible-foundation--2026-10-03); do not infer full product/security qualification from foundation delivery.
 - Snapshot portability, lifecycle/federation evidence and explicit export custody are delivered within the documented package limits. Chunked large exports and restoration/import apply remain future capabilities.
-- Before irreversible disposition, implement configurable policy and hold gates, export-before-deletion, cross-owner reference protection, replay-horizon preservation and resumable redaction/purge recovery, including backup resurrection protection.
-- Reconcile uncovered legacy notification/activity paths before retiring their compatibility cursors/markers. Never introduce a second activity store, replacement security audit, broker or event sourcing.
+- Configurable immutable policy metadata, independent holds, snapshot exports, verified custody and cross-owner archive protection are delivered. Before irreversible disposition, extend these into purge-plan binding, disposition authorization, replay-horizon preservation and resumable redaction/purge recovery, including backup resurrection protection.
+- Legacy notification obligations are reconciled once at startup; SMTP no longer scans audit, and webhook workers consume the common projection ledger. Retained old cursor/marker fields are compatibility evidence. Never introduce a second activity store, replacement security audit, broker or event sourcing.
 
 ## Navigation-count performance
 
 Multi-second `/api/work/navigation-counts` reads were observed under 10/25 concurrent readers against both the additive checkpoint and the WorkItem candidate. The fixtures differ, so this is not a controlled performance-equivalence result. The maintained workload harness records per-endpoint measurements; the [staged run](../testing/runs/2026-10-02-release-regression.md#work-owned-domain-activity-coverage--2026-10-03) contains the evidence.
 
-The latest unchanged-query continuation measured p95 91/136/301 ms at concurrency 1/10/25, so the historical slowdown was not reproduced in that execution. Explain this variation with repeatable query plans and fixture/runtime conditions; do not infer a fix from one faster run.
+The governance continuation reproduced navigation-count p95 of 3,200/5,869/9,163 ms at concurrency 1/10/25. Subsequent unchanged-query preservation and final consumer runs measured 91/136/301 ms and 96/138/253 ms respectively. Explain this variation with repeatable query plans and fixture/runtime conditions; do not infer a fix from faster runs.
 
 Reproduce query plans, correct the bottleneck and qualify the result against the full hierarchy fixture before production sizing approval. Preserve role/level predicates, Site isolation and counts of elements waiting for treatment. Do not hide the problem by simplifying fixtures or broadening visibility.
 

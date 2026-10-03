@@ -77,9 +77,9 @@ public static partial class PlatformUserEndpoints
 
         var now = DateTimeOffset.UtcNow;
         var planningRuns = await database.WorkflowRuns.Where(value => value.ClaimedByPersonId != null && ids.Contains(value.ClaimedByPersonId.Value)).ToListAsync(cancellationToken);
-        foreach (var run in planningRuns) run.Release();
+        foreach (var run in planningRuns) Fylkren.Api.DomainEvents.AccessActivity.Release(database, run, now, "user-deactivation");
         var executionRuns = await database.ExecutionRuns.Where(value => value.ClaimedByPersonId != null && ids.Contains(value.ClaimedByPersonId.Value) && value.Status != "submitted" && value.Status != "cancelled").ToListAsync(cancellationToken);
-        foreach (var run in executionRuns) run.Release(now);
+        foreach (var run in executionRuns) Fylkren.Api.DomainEvents.AccessActivity.Release(database, run, now, "user-deactivation");
 
         await IdentityDeletionService.RemoveAuthenticationAsync(
             ids, database, now, cancellationToken);

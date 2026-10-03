@@ -136,6 +136,7 @@ internal static class PortableExportPackage
         exportAudit.SnapshotActorRole(await db.LoginIdentities.AsNoTracking().AnyAsync(i => i.PersonId == actorPersonId && i.IsPlatformManager, cancellationToken));
         audit.Add(exportAudit);
         Entities("audit-events", audit);
+        Entities("machine-audit-events", await db.ApiMachineAuditEvents.AsNoTracking().Where(a => a.SiteId == siteId).ToListAsync(cancellationToken));
         Entities("domain-events", await db.DomainEvents.AsNoTracking().Where(value => value.SiteId == siteId).OrderBy(value => value.OccurredAt).ToListAsync(cancellationToken));
         AddRows(datasets, "webhook-subscriptions", webhookSubscriptions.Select(value => new
         {

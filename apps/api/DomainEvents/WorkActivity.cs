@@ -37,6 +37,7 @@ internal static class WorkActivity
             if (rootId is null) throw new InvalidOperationException("Command activity requires a work context.");
             var item = db.ChangeTracker.Entries<Fylkren.Api.WorkManagement.WorkItem>().Select(x => x.Entity).FirstOrDefault(x => x.Id == rootId)
                 ?? await db.WorkItems.SingleAsync(x => x.Id == rootId, ct);
+            if (audit.ActorSystem is not null && audit.SiteId is null) audit.BindSystemOwner(item.SiteId);
             // A source-site audit about a recipient-owned resource remains audit-only.
             if (audit.SiteId is Guid auditSite && auditSite != item.SiteId) continue;
             var old = db.ChangeTracker.Entries<DomainEvent>().FirstOrDefault(x => x.State == EntityState.Added &&

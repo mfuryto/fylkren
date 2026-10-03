@@ -85,8 +85,8 @@ internal static class AdministrationUserCommandEndpoints
         var now = DateTimeOffset.UtcNow;
         foreach (var role in await db.RoleAssignments.Where(value => value.PersonId == personId && value.IsActive).ToListAsync(ct)) role.Deactivate();
         db.OrganizationUnitMemberships.RemoveRange(await db.OrganizationUnitMemberships.Where(value => value.PersonId == personId).ToListAsync(ct));
-        foreach (var run in await db.WorkflowRuns.Where(value => value.ClaimedByPersonId == personId).ToListAsync(ct)) run.Release();
-        foreach (var run in await db.ExecutionRuns.Where(value => value.ClaimedByPersonId == personId && value.Status != "submitted" && value.Status != "cancelled").ToListAsync(ct)) run.Release(now);
+        foreach (var run in await db.WorkflowRuns.Where(value => value.ClaimedByPersonId == personId).ToListAsync(ct)) Fylkren.Api.DomainEvents.AccessActivity.Release(db, run, now, "machine-user-access-change");
+        foreach (var run in await db.ExecutionRuns.Where(value => value.ClaimedByPersonId == personId && value.Status != "submitted" && value.Status != "cancelled").ToListAsync(ct)) Fylkren.Api.DomainEvents.AccessActivity.Release(db, run, now, "machine-user-access-change");
         await IdentityDeletionService.RemoveAuthenticationAsync(
             [personId], db, now, ct);
         person.Delete(now);
@@ -101,8 +101,8 @@ internal static class AdministrationUserCommandEndpoints
         db.OrganizationUnitMemberships.RemoveRange(await db.OrganizationUnitMemberships.Where(value => value.PersonId == personId && (value.SiteId == sourceSiteId || value.SiteId == targetSiteId)).ToListAsync(ct));
         foreach (var role in await db.RoleAssignments.Where(value => value.PersonId == personId && value.IsActive && (value.Role.OrganizationUnit.SiteId == sourceSiteId || value.Role.OrganizationUnit.SiteId == targetSiteId)).ToListAsync(ct)) role.Deactivate();
         foreach (var manager in await db.SiteManagerAssignments.Where(value => value.PersonId == personId && value.SiteId == sourceSiteId && value.IsActive).ToListAsync(ct)) manager.Deactivate();
-        foreach (var run in await db.WorkflowRuns.Where(value => value.WorkItem.SiteId == sourceSiteId && value.ClaimedByPersonId == personId && value.Status == "in_progress").ToListAsync(ct)) run.Release();
-        foreach (var run in await db.ExecutionRuns.Where(value => value.WorkItem.SiteId == sourceSiteId && value.ClaimedByPersonId == personId && value.Status != "submitted" && value.Status != "cancelled").ToListAsync(ct)) run.Release(now);
+        foreach (var run in await db.WorkflowRuns.Where(value => value.WorkItem.SiteId == sourceSiteId && value.ClaimedByPersonId == personId && value.Status == "in_progress").ToListAsync(ct)) Fylkren.Api.DomainEvents.AccessActivity.Release(db, run, now, "machine-user-access-change");
+        foreach (var run in await db.ExecutionRuns.Where(value => value.WorkItem.SiteId == sourceSiteId && value.ClaimedByPersonId == personId && value.Status != "submitted" && value.Status != "cancelled").ToListAsync(ct)) Fylkren.Api.DomainEvents.AccessActivity.Release(db, run, now, "machine-user-access-change");
     }
 
     private static Task<bool> IsPlatformManager(FylkrenDbContext db, Guid personId, CancellationToken ct) =>

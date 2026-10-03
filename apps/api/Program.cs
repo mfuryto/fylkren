@@ -87,6 +87,7 @@ await using (var scope = app.Services.CreateAsyncScope())
     var database = scope.ServiceProvider.GetRequiredService<FylkrenDbContext>();
     await database.Database.MigrateAsync();
     await DatabaseDefaults.EnsureCreatedAsync(database, fylkrenOptions);
+    await Fylkren.Api.Notifications.LegacyNotificationReconciliation.Run(database, fylkrenOptions.PublicUrl, default);
     await scope.ServiceProvider.GetRequiredService<IdentityProviderConfigurationService>()
         .InitializeAsync(database);
 }

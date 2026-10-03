@@ -114,6 +114,7 @@ internal static class NotificationEventProjector
                 MailHeaderPolicy.Normalize(Render(template.Subject, fields), 200),
                 Render(template.Body, fields), MailHeaderPolicy.Normalize(notificationSite.Name, 200),
                 audit.OccurredAt);
+            if (audit.DomainEventId is null && await db.NotificationOutboxMessages.AnyAsync(m => m.AuditEventId == audit.Id && m.RecipientPersonId == recipient.PersonId, ct)) continue;
             if (audit.DomainEventId is Guid eventId) message.LinkEvent(eventId, kind);
             db.NotificationOutboxMessages.Add(message);
         }

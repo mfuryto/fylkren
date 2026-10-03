@@ -69,11 +69,11 @@ public static partial class PlatformUserEndpoints
         var planningRuns = await database.WorkflowRuns
             .Where(value => value.WorkItem.SiteId == request.SourceSiteId && value.ClaimedByPersonId == personId && value.Status == "in_progress")
             .ToListAsync(cancellationToken);
-        foreach (var run in planningRuns) run.Release();
+        foreach (var run in planningRuns) Fylkren.Api.DomainEvents.AccessActivity.Release(database, run, now, "user-move");
         var executionRuns = await database.ExecutionRuns
             .Where(value => value.WorkItem.SiteId == request.SourceSiteId && value.ClaimedByPersonId == personId && value.Status != "submitted" && value.Status != "cancelled")
             .ToListAsync(cancellationToken);
-        foreach (var run in executionRuns) run.Release(now);
+        foreach (var run in executionRuns) Fylkren.Api.DomainEvents.AccessActivity.Release(database, run, now, "user-move");
 
         var login = await database.LoginIdentities.SingleOrDefaultAsync(value => value.PersonId == personId, cancellationToken);
         if (login is not null && !login.IsActive) login.Update(login.Username, true);

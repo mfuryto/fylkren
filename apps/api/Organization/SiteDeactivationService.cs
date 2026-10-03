@@ -51,7 +51,10 @@ internal static class SiteDeactivationService
                          value.ClaimedByPersonId != null &&
                          value.Status == "in_progress")
                      .ToListAsync(cancellationToken))
+        {
             run.Release();
+            Fylkren.Api.DomainEvents.WorkActivity.Add(database, Fylkren.Api.ActivityAudit.AuditEvent.FromSystem(Guid.NewGuid(), "site-deactivation", "workflow.released-on-site-deactivation", "workflow-run", run.Id, now, site.Id), "assignment.released");
+        }
 
         foreach (var run in await database.ExecutionRuns
                      .Where(value => value.WorkItem.SiteId == site.Id &&
@@ -59,6 +62,9 @@ internal static class SiteDeactivationService
                          value.Status != "submitted" &&
                          value.Status != "cancelled")
                      .ToListAsync(cancellationToken))
+        {
             run.Release(now);
+            Fylkren.Api.DomainEvents.WorkActivity.Add(database, Fylkren.Api.ActivityAudit.AuditEvent.FromSystem(Guid.NewGuid(), "site-deactivation", "execution.released-on-site-deactivation", "execution-run", run.Id, now, site.Id), "assignment.released");
+        }
     }
 }

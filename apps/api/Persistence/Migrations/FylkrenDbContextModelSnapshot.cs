@@ -2262,6 +2262,10 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_occurred_at");
 
+                    b.Property<DateTimeOffset?>("ReconciledAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reconciled_at");
+
                     b.HasKey("Id");
 
                     b.ToTable("notification_projection_cursors", (string)null);
@@ -2780,6 +2784,10 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("correlation_id");
+
+                    b.Property<Guid?>("DomainEventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("domain_event_id");
 
                     b.Property<Guid>("EntityId")
                         .HasColumnType("uuid")

@@ -45,17 +45,22 @@ public sealed class AuditEvent
     }
 
     public static AuditEvent FromSystem(Guid id, string actorSystem, string eventType,
-        string entityType, Guid entityId, DateTimeOffset occurredAt)
+        string entityType, Guid entityId, DateTimeOffset occurredAt, Guid? siteId = null)
     {
-        if (string.IsNullOrWhiteSpace(actorSystem) || actorSystem.Length > 100)
+        if (siteId == Guid.Empty || string.IsNullOrWhiteSpace(actorSystem) || actorSystem.Length > 100)
             throw new ArgumentException("A system audit actor is required.", nameof(actorSystem));
         return new AuditEvent
         {
-            Id = id, ActorSystem = actorSystem.Trim(), EventType = eventType,
+            Id = id, SiteId = siteId, ActorSystem = actorSystem.Trim(), EventType = eventType,
             EntityType = entityType, EntityId = entityId, OccurredAt = occurredAt
         };
     }
 
+    internal void BindSystemOwner(Guid siteId)
+    {
+        if (ActorSystem is null || siteId == Guid.Empty || SiteId is Guid current && current != siteId) throw new InvalidOperationException("System effect requires its authoritative owner.");
+        SiteId = siteId;
+    }
     public string? ChangeReason { get; private set; }
     public AuditEvent WithReason(string reason)
     {

@@ -12,10 +12,8 @@ namespace Fylkren.Api.Notifications;
 
 public sealed class NotificationDeliveryWorker(
     IServiceScopeFactory scopes,
-    FylkrenOptions options,
     ILogger<NotificationDeliveryWorker> logger) : BackgroundService
 {
-    private static readonly Guid CursorId = Guid.Parse("00000000-0000-0000-0000-000000000003");
     private static readonly Guid SmtpId = Guid.Parse("00000000-0000-0000-0000-000000000002");
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -23,7 +21,6 @@ public sealed class NotificationDeliveryWorker(
         {
             try
             {
-                await Project(stoppingToken);
                 await Deliver(stoppingToken);
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
@@ -32,41 +29,6 @@ public sealed class NotificationDeliveryWorker(
             }
 
             await Task.Delay(TimeSpan.FromSeconds(15), stoppingToken);
-        }
-    }
-
-    private async Task Project(CancellationToken ct)
-    {
-        await using var scope = scopes.CreateAsyncScope();
-        var db = scope.ServiceProvider.GetRequiredService<FylkrenDbContext>();
-        var cursor = await db.NotificationProjectionCursors.SingleAsync(x => x.Id == CursorId, ct);
-        var events = await db.AuditEvents
-            .AsNoTracking()
-            .Where(x => x.DomainEventId == null && (x.OccurredAt > cursor.LastOccurredAt ||
-                        x.OccurredAt == cursor.LastOccurredAt && x.Id.CompareTo(cursor.LastAuditEventId) > 0))
-            .OrderBy(x => x.OccurredAt)
-            .ThenBy(x => x.Id)
-            .Take(100)
-            .ToListAsync(ct);
-
-        foreach (var audit in events)
-        {
-            var kind = NotificationEventProjector.Kind(audit.EventType);
-            if (kind != null && audit.SiteId is Guid eventSiteId)
-            {
-                var notificationSiteId = await NotificationEventProjector.NotificationSite(db, audit, eventSiteId, kind, ct);
-                if (await NotificationEventProjector.Enabled(db, notificationSiteId, kind, ct))
-                {
-                    await NotificationEventProjector.Enqueue(db, audit, notificationSiteId, kind, options.PublicUrl, ct);
-                }
-            }
-
-            cursor.Advance(audit.OccurredAt, audit.Id);
-        }
-
-        if (events.Count > 0)
-        {
-            await db.SaveChangesAsync(ct);
         }
     }
 

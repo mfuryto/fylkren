@@ -56,8 +56,8 @@ internal static class FederationAnswerAcceptanceTestEndpoints
                     sourceMessageId = link.OfficialAnswerMessageId,
                     remoteApprovedAt = link.OfficialAnswerApprovedAt, acceptedAt = now }
             }, actor, now, ct);
-        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, actor,
-            "work-item.federated-answer-accepted", "work-item", work.Id, now));
+        WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), siteId, actor,
+            "work-item.federated-answer-accepted", "work-item", work.Id, now), "report.approved");
         DomainEventRecorder.Record(db, "task.completed", siteId, actor,
             "task", work.Id, new { taskId = work.Id, status = "completed" }, now);
         await db.SaveChangesAsync(ct);

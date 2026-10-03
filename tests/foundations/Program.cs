@@ -107,3 +107,5 @@ await GovernanceTests.Run(db);
 await PreservationTests.Run(db);
 
 await LegacyHoldUpgradeTests.Run(db);
+
+await ConsumerReconciliationTests.Run(db);

@@ -140,7 +140,7 @@ public static class AdministrationApiEndpoints
         DefaultSiteWorkConfiguration.Add(db, site, now);
         db.ApiIdempotencyRecords.Add(new ApiIdempotencyRecord(
             Guid.NewGuid(), machineId, key, requestHash, site.Id, now));
-        AddMachineAudit(db, machineId, site.Id, "site.created", site.Id, context, now);
+        await AddMachineAudit(db, machineId, site.Id, "site.created", site.Id, context, now, ct);
 
         try
         {
@@ -189,7 +189,7 @@ public static class AdministrationApiEndpoints
         if (nameChanged && site.ParentOrganizationUnitId is null && site.IsActive)
             await Fylkren.Api.Federation.FederationSitePublicationPolicy.RefreshAsync(siteId, db, DateTimeOffset.UtcNow, ct);
         site.UpdateOverviewDesign(design);
-        AddMachineAudit(db, machineId, site.Id, "site.updated", site.Id, context, DateTimeOffset.UtcNow);
+        await AddMachineAudit(db, machineId, site.Id, "site.updated", site.Id, context, DateTimeOffset.UtcNow, ct);
         return await SaveVersioned(site, context, db, ct);
     }
 
@@ -224,7 +224,7 @@ public static class AdministrationApiEndpoints
         site.Update(site.Name, request.ParentOrganizationUnitId, site.IsActive);
         if (request.ParentOrganizationUnitId is not null)
             await Fylkren.Api.Federation.FederationSitePublicationPolicy.SuspendAsync(siteId, db, DateTimeOffset.UtcNow, ct);
-        AddMachineAudit(db, machineId, site.Id, "site.moved", site.Id, context, DateTimeOffset.UtcNow);
+        await AddMachineAudit(db, machineId, site.Id, "site.moved", site.Id, context, DateTimeOffset.UtcNow, ct);
         return await SaveVersioned(site, context, db, ct);
     }
 
@@ -243,7 +243,7 @@ public static class AdministrationApiEndpoints
 
         var now = DateTimeOffset.UtcNow;
         await SiteDeactivationService.DeactivateAsync(site, db, now, ct);
-        AddMachineAudit(db, machineId, site.Id, "site.deactivated", site.Id, context, now);
+        await AddMachineAudit(db, machineId, site.Id, "site.deactivated", site.Id, context, now, ct);
         return await SaveVersioned(site, context, db, ct, true);
     }
 
@@ -319,12 +319,14 @@ public static class AdministrationApiEndpoints
             : new(machineId, site, null);
     }
 
-    private static void AddMachineAudit(
+    private static async Task AddMachineAudit(
         FylkrenDbContext db, Guid machineId, Guid? siteId, string eventType,
-        Guid entityId, HttpContext context, DateTimeOffset now) =>
-        db.ApiMachineAuditEvents.Add(new ApiMachineAuditEvent(
-            Guid.NewGuid(), machineId, siteId, eventType, "site", entityId,
-            context.TraceIdentifier, now));
+        Guid entityId, HttpContext context, DateTimeOffset now, CancellationToken ct)
+    {
+        var audit = new ApiMachineAuditEvent(Guid.NewGuid(), machineId, siteId, eventType, "site", entityId, context.TraceIdentifier, now);
+        db.ApiMachineAuditEvents.Add(audit);
+        await Fylkren.Api.DomainEvents.DomainEventRecorder.RecordMachineGovernance(db, audit, ct);
+    }
 
     private static bool ExpectedVersion(HttpContext context, long current, out IResult? error)
     {

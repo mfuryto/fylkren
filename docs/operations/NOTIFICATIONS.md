@@ -4,7 +4,9 @@
 
 Platform Manager configures shared SMTP transport and global templates on Email. Site Manager enables categories per site on Notifications. The domain event, organizational level and recipient rules come from the task/access model; notification settings can never expand information access.
 
-Historical events are not resent when notification support or a migration is installed.
+Historical events are not resent when notification support or a migration is installed. The final common-event upgrade drains only the old cursor's known unconsumed obligations in resumable startup batches, retaining existing rendered deliveries and their legacy deduplication key. It does not invent missing historical facts or replay rows already behind the old cursor.
+
+New business commands create a common event, independent audit and frozen eligible notification snapshot together. The SMTP worker delivers the existing queue and no longer scans security audit records. Common projection state owns backlog reporting.
 
 ## SMTP and sender
 

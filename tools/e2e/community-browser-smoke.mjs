@@ -485,7 +485,7 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
   assert.equal(platformSession.body.isPlatformManager, true, JSON.stringify(platformSession.body));
 
   const mailEvidence = await verifyTaskMail({ request, pause, title, enabled: smtpDelivery });
-  const archiveEvidence = await verifyGovernanceArchive({ request, navigate, waitFor, setInput, clickButton, evaluate, assertNoOverflow, platformCredentials, pause });
+  const archiveEvidence = await verifyGovernanceArchive({ request, navigate, waitFor, setInput, clickButton, evaluate, assertNoOverflow, platformCredentials, pause, call });
   return { ...archiveEvidence, ...keyboardEvidence, ...mailEvidence };
 }
 

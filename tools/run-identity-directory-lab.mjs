@@ -27,6 +27,7 @@ const env = {
   FYLKREN_IDENTITY_LAB_IMPORTED_LDAP_SERVER: 'ldap',
 };
 const composeFiles = ['-f', 'compose.yaml', '-f', 'tools/e2e/identity-lab.compose.yaml'];
+if (process.argv.includes('--no-build')) composeFiles.push('-f', 'tools/e2e/reuse-images.compose.yaml');
 const pause = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
 
 function command(program, args, options = {}) {
@@ -157,7 +158,7 @@ try {
   createLdif();
   process.stdout.write('Building and starting the isolated OpenLDAP identity lab...\n');
   started = true;
-  compose(['up', '-d', '--build', '--wait'], { stdio: 'inherit' });
+  compose(['up', '-d', process.argv.includes('--no-build') ? '--no-build' : '--build', '--wait'], { stdio: 'inherit' });
   compose(['exec', '-T', 'postgres', 'psql', '-U', 'fylkren', '-d', 'fylkren', '-v', 'ON_ERROR_STOP=1', '-c',
     `UPDATE instance_identity SET instance_id = '${fixture.instanceId}' WHERE key = 1`], { stdio: 'inherit' });
 
@@ -407,6 +408,25 @@ newsuperior: ou=people,dc=example,dc=test`);
   const linkAudit = databaseScalar(`SELECT COUNT(*) FROM audit_events WHERE entity_id = '${linked.body.id}' AND event_type IN ('identity.ldap.linked', 'identity.ldap.unlinked')`);
   assert.ok(Number(linkAudit) >= 3, `Expected link/unlink audit events, got ${linkAudit}`);
 
+  // Preserve a genuinely closed shared profile while continuing link/security sync.
+  databaseScalar(`UPDATE people SET is_active=false WHERE id='${linkedPersonId}';
+    UPDATE login_identities SET is_active=false WHERE person_id='${linkedPersonId}';
+    UPDATE site_memberships SET is_active=false WHERE person_id='${linkedPersonId}';
+    UPDATE site_manager_assignments SET is_active=false WHERE person_id='${linkedPersonId}';
+    UPDATE role_assignments SET is_active=false WHERE person_id='${linkedPersonId}';`);
+  const profileBeforeArchive = databaseScalar(`SELECT display_name FROM people WHERE id='${linkedPersonId}'`);
+  const lifecyclePath = `/api/information/governance/person/${linkedPersonId}`;
+  const preservedProfile = await manager.request(lifecyclePath);
+  assert.equal((await manager.post(`${lifecyclePath}/transitions`, { stage: 'closed', expectedVersion: preservedProfile.body.version, reason: 'Preserve global historical attribution' })).status, 200);
+  ldapModify(`dn: uid=live-ldap,ou=people,dc=example,dc=test
+changetype: modify
+replace: displayName
+displayName: Changed directory profile after closure`);
+  const preservedSync = await manager.post('/api/platform/identity/directories/lifecycle/sync', {});
+  assert.equal(preservedSync.status, 200); assert.equal(preservedSync.body.active, 1);
+  assert.equal(databaseScalar(`SELECT display_name FROM people WHERE id='${linkedPersonId}'`), profileBeforeArchive, 'Directory sync rewrote closed historical attribution');
+  assert.equal((await relinkedUser.request('/api/session')).body.authenticated, false, 'Closed inactive profile retained authentication');
+
   compose(['stop', 'ldap'], { stdio: 'inherit' });
   const unavailable = await manager.post('/api/platform/identity/directories/lifecycle/sync', {});
   assert.equal(unavailable.status, 200, JSON.stringify(unavailable.body));
@@ -438,6 +458,7 @@ newsuperior: ou=people,dc=example,dc=test`);
     lifecycleAndActorAudit: 'passed',
     secretSafeLogging: 'passed',
     outageFailSafe: 'passed',
+    archivedProfilePreservedDuringDirectorySync: 'passed',
   }, null, 2)}\n`);
 } finally {
   if (started) {

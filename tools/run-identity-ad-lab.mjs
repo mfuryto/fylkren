@@ -18,6 +18,7 @@ const env = {
   FYLKREN_IDENTITY_AD_LAB_ADMIN_PASSWORD: adAdminPassword,
 };
 const composeFiles = ['-f', 'compose.yaml', '-f', 'tools/e2e/identity-ad-lab.compose.yaml'];
+if (process.argv.includes('--no-build')) composeFiles.push('-f', 'tools/e2e/reuse-images.compose.yaml');
 
 function command(program, args, options = {}) {
   const result = spawnSync(program, args, { env, encoding: 'utf8', ...options });
@@ -64,7 +65,7 @@ let started = false;
 try {
   process.stdout.write('Building and starting the isolated Samba Active Directory lab...\n');
   started = true;
-  compose(['up', '-d', '--build', '--wait'], { stdio: 'inherit' });
+  compose(['up', '-d', process.argv.includes('--no-build') ? '--no-build' : '--build', '--wait'], { stdio: 'inherit' });
   compose(['exec', '-T', 'ad', 'samba-tool', 'user', 'create', 'live-ad', adUserPassword,
     '--given-name=Live', '--surname=AD Person', '--mail-address=live-ad@example.invalid',
     '-s', '/samba/etc/smb.conf'], { stdio: 'inherit' });

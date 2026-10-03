@@ -80,12 +80,10 @@ public static class SmtpEndpoints
             .SingleAsync(settings => settings.Id == Id, cancellationToken);
         var cursor = await database.NotificationProjectionCursors.AsNoTracking()
             .SingleAsync(value => value.Id == ProjectionCursorId, cancellationToken);
-        var projectionBacklog = await database.AuditEvents.AsNoTracking().CountAsync(value =>
-            value.DomainEventId == null && (value.OccurredAt > cursor.LastOccurredAt ||
-            value.OccurredAt == cursor.LastOccurredAt && value.Id.CompareTo(cursor.LastAuditEventId) > 0),
-            cancellationToken);
-        projectionBacklog += await database.EventProjections.AsNoTracking().CountAsync(value =>
+        var projectionBacklog = await database.EventProjections.AsNoTracking().CountAsync(value =>
             value.Consumer == "notifications" && value.Status != "completed" && value.Status != "skipped", cancellationToken);
+        var projectedAt = await database.EventProjections.AsNoTracking().Where(p => p.Consumer == "notifications")
+            .MaxAsync(p => p.CompletedAt, cancellationToken) ?? cursor.LastOccurredAt;
         var query = database.NotificationOutboxMessages.AsNoTracking();
         if (!string.IsNullOrEmpty(normalizedStatus))
             query = query.Where(message => message.Status == normalizedStatus);
@@ -126,7 +124,7 @@ public static class SmtpEndpoints
         return Results.Ok(new
         {
             transportEnabled = smtp.Enabled,
-            lastProjectedAt = cursor.LastOccurredAt,
+            lastProjectedAt = projectedAt,
             projectionBacklog,
             pending,
             failed,

@@ -25,6 +25,7 @@ internal static class ApiModelConfiguration
         var apiAudit = modelBuilder.Entity<ApiMachineAuditEvent>();
         apiAudit.ToTable("api_machine_audit_events");
         apiAudit.HasKey(x => x.Id);
+        apiAudit.Property(x => x.DomainEventId).HasColumnName("domain_event_id");
         apiAudit.Property(x => x.Id).HasColumnName("id");
         apiAudit.Property(x => x.MachineIdentityId).HasColumnName("machine_identity_id");
         apiAudit.Property(x => x.SiteId).HasColumnName("site_id");

@@ -60,6 +60,7 @@ internal static class NotificationModelConfiguration
         var projectionCursor = modelBuilder.Entity<NotificationProjectionCursor>();
         projectionCursor.ToTable("notification_projection_cursors");
         projectionCursor.HasKey(x => x.Id);
+        projectionCursor.Property(x => x.ReconciledAt).HasColumnName("reconciled_at");
         projectionCursor.Property(x => x.Id).HasColumnName("id");
         projectionCursor.Property(x => x.LastOccurredAt).HasColumnName("last_occurred_at");
         projectionCursor.Property(x => x.LastAuditEventId).HasColumnName("last_audit_event_id");

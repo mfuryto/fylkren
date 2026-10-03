@@ -2368,5 +2368,449 @@
     "retentionExecutionEnabled": false,
     "asvsStatusesChanged": false,
     "productionTouched": false
+  },
+  "consumerReconciliationContinuation": {
+    "recordedAtUtc": "2026-10-03T21:51:26.904613+00:00",
+    "baseRevision": "cd336e8",
+    "apiImage": "sha256:08e11410db3ea6d52a2e033aa3dac5f72e45753c3589532d8d9f73caf76631cf",
+    "webImage": "sha256:66ef2bb6b600cf9539a8c1067ef24043d6cf1b1b6888ee05e143349fee2689be",
+    "sourceSha256": {
+      "apps/api/ActivityAudit/AuditEvent.cs": "2aae2ff978c97dfbde58752dac515fba9225cccbafb6edcd6dadb7a4b9f34de2",
+      "apps/api/DomainEvents/DomainEventRecorder.cs": "cfd480212eade0fe46443a6f6b92daa75e01066c09a9654271b083e36302585d",
+      "apps/api/DomainEvents/WebhookDeliveryWorker.cs": "b7bd0d0e2eae546efab1dfb96e40c775c9113ae0dd906b1a63525acee95c646b",
+      "apps/api/DomainEvents/WorkActivity.cs": "2c7eb5219cea532aaee1c5ea2bed87d9cf5ae76ab4f85218e2eecf20dd72e612",
+      "apps/api/Federation/FederationAnswerAcceptanceTestEndpoints.cs": "4a2ee6c2f9bfa49e9c466966273cce83066bcf56d90c7e79703c55006108e943",
+      "apps/api/Federation/FederationOutboundTestEndpoints.cs": "5c2957bcab4696b93a6413784d2aec1e0bada24fb7ee57c3726e2a479978eff0",
+      "apps/api/Identity/DirectoryLifecycleSynchronizer.cs": "0d03ee65c49127d0e7a1e1615d8570aab32abb01f5d17d4d471935d392b50a7d",
+      "apps/api/Notifications/NotificationDeliveryWorker.cs": "05ff8be46cdcbc4a4e650e9fb3841a41060b653ff95cfbb2e11738857c02ea2b",
+      "apps/api/Notifications/NotificationEventProjector.cs": "ef479931f737ebb9f7f315c08c5d299d3bf8058e04f4fd68066bf952e0f38ad1",
+      "apps/api/Notifications/NotificationOutboxMessage.cs": "8b3d3acc087f5b48242a67c5ec3b543d813f9c3ed51d4a9a600e8764a1c2a4b0",
+      "apps/api/Organization/SiteDeactivationService.cs": "9af1958784540f01c47df357596facd89d20842ece6e4c3489b3f1ef8f6e2efb",
+      "apps/api/Organization/SiteMemberEndpoints.cs": "068bbe1c821d9d2944b282b3262c7e99166b312b1778842e99616a4a160017bd",
+      "apps/api/Persistence/ApiModelConfiguration.cs": "7d3d17498a9a8661689e3631bea4da4d2b22b9a4dd83f50fc9fd75cd27d4cada",
+      "apps/api/Persistence/Migrations/FylkrenDbContextModelSnapshot.cs": "74bf0f2e5f712b0fdba6ea2a2372fb45e976306dc4a956fe88141eb5e9fa2f13",
+      "apps/api/Persistence/NotificationModelConfiguration.cs": "55424a7606f0cce84b55fa89d153505c6b269ed38d7d97f442f7988bf20e2a91",
+      "apps/api/Platform/AdministrationApiEndpoints.cs": "dc604050721549450a47b2ad37245620df3f9af9a766b5ab4967cd217d2b1bf5",
+      "apps/api/Platform/AdministrationUserCommandEndpoints.cs": "d6a9248448c4340cd097a7a03693275f34db7315f3eec984135c9a828a19cf98",
+      "apps/api/Platform/ApiMachineAuditEvent.cs": "4ac8d69bf6e58dba4b3d0c2dbdf3dbfb14c8e79dfdd8b493030bcd4d3623b86f",
+      "apps/api/Platform/PlatformUserAccountEndpoints.cs": "04cb77ddd70af93203f0dbe453e8c2210ee1ec20d101fec84b8e76c3bdb5ef21",
+      "apps/api/Platform/PlatformUserBulkEndpoints.cs": "12772fd12cc8d68c028339f84e607ed289e9bcc1cd0b2e55317dd9f20dcccda5",
+      "apps/api/Platform/SmtpEndpoints.cs": "a930d526f166f4bdf42a272e379495bd77507b6cc73360e6c9d0caa8ad5e4db8",
+      "apps/api/Portability/PortableExportPackage.cs": "c57cdd721648fa9af01de39813cb13f2e1631654e79b2f8883160950086d3b33",
+      "apps/api/Portability/PortableImportValidator.cs": "7414e8807aea21dbbd7f6524bf06e0c85be4502d3288585352ad1e072abfcbb7",
+      "apps/api/Program.cs": "dd19f8d980d57ffe0f7d4207cc105c2c29da98819867824330280c3f09a300a5",
+      "tests/foundations/LegacyHoldUpgradeTests.cs": "b4c8fdbbe578388ef5aa8f61d1b8e36cb49e97b6d4a48888dfabe50014515a0f",
+      "tests/foundations/Program.cs": "4ab95142b689df4e25702ab547d7856a7bc87035751b22ff15b733100663c3db",
+      "tools/e2e/community-browser-smoke.mjs": "934e395eed40ef95363b882f9dce962df061266aa73295253082c36f9bfa79f4",
+      "tools/e2e/governance-browser.mjs": "9814dfc43a2352cc424c9d30e2fce067372419991050c9f0925ce2ef31106058",
+      "tools/run-identity-ad-lab.mjs": "0f20719bcba5a274b28b7f47062ce6c3f8b0df2a2e530a84e2180b0996f8ba79",
+      "tools/run-identity-directory-lab.mjs": "9abb0ee59c979974691e527a727b3201755da56b7582994508e51d7956e1d916",
+      "tools/run-identity-sso-lab.mjs": "8fe87d5da506fe91f2134c1664b999126b2f5669d124f864a3801ad0dbf5ceb9",
+      "apps/api/DomainEvents/AccessActivity.cs": "58183d604b5043b1cdb3451bb97e8633f629d57894f85f22a8ecc1d867b530fe",
+      "apps/api/Notifications/LegacyNotificationReconciliation.cs": "55f095410c3bbabcafbb6ea891aa9fbe8fe161e95f3cb825d4108d3acffdfd25",
+      "apps/api/Persistence/Migrations/20261003211918_ReconcileActivityConsumers.Designer.cs": "7bf35212fcfe52d90ed564b3a785939eab927de0e240bc9baf53343a4fcfd016",
+      "apps/api/Persistence/Migrations/20261003211918_ReconcileActivityConsumers.cs": "8223daa1194cea5fc59f88ffd665995770a976fca9a5eda2c9a3fa882cc5fdbd",
+      "tests/foundations/ConsumerReconciliationTests.cs": "b67f5176ca94aa2f6e223c76cb8dd5155f8221ecb8733086f9e4f7bb00158f7d",
+      "tools/e2e/preservation.mjs": "44fbf6d32001bf361d699e916274588b5ebb165ed7bd79ded995e81411f42447",
+      "tools/e2e/portability.mjs": "f44ebc98c7b63684405509bb4f694ac639878595be39968df90f6c72a6d6fcb7",
+      "tools/e2e/activity-lifecycle.mjs": "774de21befb281598302c8d3df60c4366ef240fab8e52a6fef6f5d20986e8372",
+      "tools/run-federation-pair.mjs": "01a1f46454022888af9eb4c214ed207f27ec5f9e57c44720a3a5a9ac32007c20",
+      "tools/run-foundation-tests.mjs": "b3961ac91e78f7b560c7172857159af5c597c5cfb0a751a35e077ffa1ff4ce86"
+    },
+    "logSha256": {
+      "foundations": "468223b58fa095a7bb52b466604ea547ddc9790b3a3da04169363cc09f5d3321",
+      "api-regression": "7614d9aa0936df014978b0278491a4afbada6075061be98cfa05af5e30b238af",
+      "browser": "009d7f021620d4d78a6777d52a9afba5bf03ca781b9fe963e1d261d4ab388157",
+      "directory": "30a30685656e48e03e3604ff827002a9142ef5ef897d5446b756b9e4aa6ce7fa",
+      "ad": "b5fb0c6367d3b59a86dcc16b2f9ce99a3c5d799dbb92879685a58a103f590710",
+      "sso": "b026a10e5386f593162b02c83fb35d887de5346e0bf799ee7cd5340e6f3facfb",
+      "web-tests": "b0503fce824d6578d8514df20921592d4494f5fb88a0669ea9e4b33b72d61f90",
+      "typecheck": "5cfb036289d819b2a87e947d65f4532031dd37753f3cf2def0f77d398eea1737",
+      "model": "815c5cd494b61a9d8737ba7653cd05fb05926e7b40a924683fa4eef4ca87566c",
+      "safety": "d5e3168900ccf8ce0f3da197ce2a683f92fbc5e4eeb0bd20c3ffb521db1f3bcb",
+      "federation-operational": "4b5020cf5c34fe715d07419a44f3761ab660ba3332bf93eec2a0f3bb9620543d",
+      "federation-production": "f148c1cda5a28c3a350cbedae7b066853e7ff835a3176514add934a34b69d2f1",
+      "federation-retention": "7b80f58e4593e3e4060c7adaf4518d7168d7129a052eee9eb142ec13e5e7509c"
+    },
+    "foundations": "passed including populated legacy migration, durable interrupted/concurrent drain, frozen deduplication, completed no-op, old-writer guards, typed machine/request/audit correlation, machine export and owned access effects",
+    "apiResults": {
+      "editionsAndTransitions": "passed",
+      "activityTimeline": "passed",
+      "informationArchive": "passed",
+      "activityAccessBoundaries": "passed",
+      "preservationHolds": "passed",
+      "immutablePolicyVersions": "passed",
+      "retentionExecutionDisabled": "passed",
+      "verifiedExportCustody": "passed",
+      "siteArchiveCustody": "passed",
+      "archiveAccessBoundaries": "passed",
+      "siteArchiveRestore": "passed",
+      "irreversibleDispositionDisabled": "passed",
+      "bootstrap": "passed",
+      "sessionCookieAttributes": "passed",
+      "csrfSignOut": "passed",
+      "signedOutCookieReplay": "passed",
+      "passwordChangeSessionRevocation": "passed",
+      "concurrentPasswordReset": "passed",
+      "passwordResetSessionRevocation": "passed",
+      "deactivationSessionRevocation": "passed",
+      "reactivationCookieReplay": "passed",
+      "genericAuthenticationFailure": "passed",
+      "authenticationRateLimit": "passed",
+      "roleSetup": "passed",
+      "lookupSorting": "passed",
+      "operationalIsolation": "passed",
+      "localPlanningExecutionReport": "passed",
+      "threeLevelDistribution": "passed",
+      "parentChildReporting": "passed",
+      "crossSiteIsolation": "passed",
+      "reportArchives": "passed",
+      "activeSiteMoveRouting": "passed",
+      "detachedSiteRouting": "passed",
+      "placementValidation": "passed",
+      "senderSnapshots": "passed",
+      "threeSiteReporting": "passed",
+      "recursiveSiteWorkload": "passed",
+      "crossSiteRequestResponse": "passed",
+      "crossSiteRequestCancellation": "passed",
+      "combinedBranches": "passed",
+      "transitionChains": "passed",
+      "authorizationBoundaries": "passed",
+      "crossSiteGuidSubstitution": "passed",
+      "administrationReportApis": "passed",
+      "dependencies": "passed",
+      "learning": "passed",
+      "learningPrivacy": "passed",
+      "learningTreatment": "passed",
+      "learningConcurrency": "passed",
+      "learningHistoryPagination": "passed",
+      "taskComments": "passed",
+      "decisionsRisksVersions": "passed",
+      "webhookFailureIsolation": "passed",
+      "portability": "passed",
+      "federationCandidates": "passed",
+      "requestNotificationsQueued": "passed",
+      "portableDatasetCount": 62,
+      "portableParserBoundaries": "passed",
+      "literalMetadataCases": 3,
+      "rejectedManifestCases": 20,
+      "clientTypeMetadataIgnored": true,
+      "workloadLoad": {
+        "workloadLoad": "passed",
+        "createdTasks": 1000,
+        "metrics": [
+          {
+            "concurrency": 1,
+            "authorizedRequests": 100,
+            "unauthorizedRequestsRejected": 100,
+            "p50Ms": 11,
+            "p95Ms": 87,
+            "p99Ms": 96,
+            "maxMs": 100,
+            "byEndpoint": [
+              {
+                "endpoint": "/api/work/sites/{siteId}/items?filter=active",
+                "p95Ms": 37,
+                "maxMs": 43
+              },
+              {
+                "endpoint": "/api/work/navigation-counts",
+                "p95Ms": 96,
+                "maxMs": 100
+              },
+              {
+                "endpoint": "/api/work/learning?siteId={siteId}&view=all",
+                "p95Ms": 9,
+                "maxMs": 26
+              },
+              {
+                "endpoint": "/api/work/sites/{siteId}/reports",
+                "p95Ms": 12,
+                "maxMs": 16
+              },
+              {
+                "endpoint": "/api/work/sites/{siteId}/workload-history",
+                "p95Ms": 13,
+                "maxMs": 59
+              }
+            ]
+          },
+          {
+            "concurrency": 10,
+            "authorizedRequests": 100,
+            "unauthorizedRequestsRejected": 100,
+            "p50Ms": 15,
+            "p95Ms": 130,
+            "p99Ms": 138,
+            "maxMs": 138,
+            "byEndpoint": [
+              {
+                "endpoint": "/api/work/learning?siteId={siteId}&view=all",
+                "p95Ms": 15,
+                "maxMs": 22
+              },
+              {
+                "endpoint": "/api/work/sites/{siteId}/workload-history",
+                "p95Ms": 15,
+                "maxMs": 20
+              },
+              {
+                "endpoint": "/api/work/sites/{siteId}/reports",
+                "p95Ms": 17,
+                "maxMs": 17
+              },
+              {
+                "endpoint": "/api/work/sites/{siteId}/items?filter=active",
+                "p95Ms": 46,
+                "maxMs": 52
+              },
+              {
+                "endpoint": "/api/work/navigation-counts",
+                "p95Ms": 138,
+                "maxMs": 138
+              }
+            ]
+          },
+          {
+            "concurrency": 25,
+            "authorizedRequests": 100,
+            "unauthorizedRequestsRejected": 100,
+            "p50Ms": 59,
+            "p95Ms": 227,
+            "p99Ms": 253,
+            "maxMs": 266,
+            "byEndpoint": [
+              {
+                "endpoint": "/api/work/learning?siteId={siteId}&view=all",
+                "p95Ms": 84,
+                "maxMs": 93
+              },
+              {
+                "endpoint": "/api/work/sites/{siteId}/reports",
+                "p95Ms": 60,
+                "maxMs": 87
+              },
+              {
+                "endpoint": "/api/work/sites/{siteId}/workload-history",
+                "p95Ms": 67,
+                "maxMs": 77
+              },
+              {
+                "endpoint": "/api/work/sites/{siteId}/items?filter=active",
+                "p95Ms": 150,
+                "maxMs": 151
+              },
+              {
+                "endpoint": "/api/work/navigation-counts",
+                "p95Ms": 253,
+                "maxMs": 266
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "browserResults": {
+      "topLevelTaskBrowserFlow": "passed",
+      "taskRegistration": true,
+      "leaderAssessment": true,
+      "directExecution": true,
+      "finalReport": true,
+      "reportArchive": true,
+      "overviewCounts": true,
+      "siteAudit": true,
+      "objectActivityTimeline": true,
+      "siteActivityTimeline": true,
+      "activityKeyboard": true,
+      "lifecycleDialogLayout": true,
+      "lifecycleVisibleState": true,
+      "lifecycleArchiveRestore": true,
+      "notificationQueue": true,
+      "classifiedReport": true,
+      "workloadPresentation": true,
+      "separateReportApprover": true,
+      "storedContentInjection": true,
+      "pdfOutput": true,
+      "multiPageClassifiedReport": true,
+      "siteArchiveGovernance": true,
+      "archiveCustodianSearch": true,
+      "archiveOnlyBrowserSession": true,
+      "readOnlyArchiveTimeline": true,
+      "savedExportCustodyBrowser": true,
+      "keyboardModalNavigation": true,
+      "accessibleDialogTree": true,
+      "visibleKeyboardFocus": true,
+      "smtpHandoff": true,
+      "smtpRetry": true,
+      "mailboxReceipt": true,
+      "smtpHeaderInjectionRejected": true,
+      "templateExpressionsLiteral": true,
+      "templateValuesNotRecursivelyExpanded": true,
+      "templateRejectedUpdatesUnchanged": true,
+      "smtpDotContentPreserved": true,
+      "chromium": "Chrome/152.0.7977.82",
+      "firstRunSetup": true,
+      "authenticatedShell": true,
+      "communityEdition": true,
+      "siteCreation": true,
+      "desktopOverflow": false,
+      "mobileOverflow": false,
+      "browserErrors": 0
+    },
+    "identityResults": {
+      "directory": {
+        "liveOpenLdapTls": "passed",
+        "providerConfigurationAndSecretProtection": "passed",
+        "oneTimeEnvironmentImport": "passed",
+        "directoryLinkAndAuthentication": "passed",
+        "scheduledAndManualLifecycleSync": "passed",
+        "ldapFilterInjectionRejection": "passed",
+        "authoritativeSuspensionAndSessionRevocation": "passed",
+        "restorationAndProfileSync": "passed",
+        "ambiguousStableIdFailSafe": "passed",
+        "malformedDirectoryDataFailSafe": "passed",
+        "invalidLookupBindFailSafe": "passed",
+        "missingAccountConfirmationAndSessionRevocation": "passed",
+        "unlinkRelinkAndAccessPreservation": "passed",
+        "lifecycleAndActorAudit": "passed",
+        "secretSafeLogging": "passed",
+        "outageFailSafe": "passed",
+        "archivedProfilePreservedDuringDirectorySync": "passed"
+      },
+      "ad": {
+        "timestamp": "2026-10-03T21:33:31.694308+0000",
+        "type": "groupChange",
+        "groupChange": {
+          "version": {
+            "major": 1,
+            "minor": 1
+          },
+          "statusCode": 0,
+          "status": "Success",
+          "action": "PrimaryGroup",
+          "remoteAddress": null,
+          "userSid": "S-1-5-18",
+          "group": "CN=Domain Users,CN=Users,DC=example,DC=test",
+          "transactionId": "9b8ab0b7-c73d-46d6-98a1-3f55f4a261f9",
+          "sessionId": "57c35fdd-4894-4047-a759-6a9b4b252cd1",
+          "user": "CN=Live AD Person,CN=Users,DC=example,DC=test"
+        }
+      },
+      "sso": {
+        "liveOidcHttpsMetadata": "passed",
+        "oidcSecretProtection": "passed",
+        "oidcAuthorizationCodeSignIn": "passed",
+        "oidcIssuerMismatchRejection": "passed",
+        "oidcForgedStateAndReplayRejection": "passed",
+        "oidcNonceMismatchRejection": "passed",
+        "oidcAudienceMismatchRejection": "passed",
+        "exactIssuerAndSubjectLink": "passed",
+        "oidcUnlinkAndRelink": "passed",
+        "directSsoAndLocalLockoutGuards": "passed",
+        "serverSideSessionWithoutBrowserTokens": "passed",
+        "liveSamlSignedAssertion": "passed",
+        "samlTamperedUnsignedAndReplayRejection": "passed",
+        "exactSamlEntityAndPersistentNameIdLink": "passed",
+        "samlUnlinkAndRelink": "passed",
+        "samlServerSideSession": "passed",
+        "xmlMetadataDtdAndExternalEntityRejection": "passed",
+        "xmlMetadataSizeBoundary": "passed",
+        "samlAssertionDtdAndExternalEntityRejection": "passed",
+        "samlSingleBase64Decoding": "passed",
+        "samlRuntimeMetadataDtdAndExternalEntityRejection": "passed",
+        "samlMetadataFailureIsolation": "passed"
+      }
+    },
+    "federationResults": {
+      "operational": {
+        "operationalWorkActivity": "passed",
+        "signedReceiptAndRetry": "passed",
+        "activityFactDeduplication": "passed",
+        "progressAndOfficialAnswer": "passed",
+        "privateLearningBoundary": "passed",
+        "sideAndPlannedRequests": "passed",
+        "cancellation": "passed"
+      },
+      "production": {
+        "federationProductionBoundary": "passed",
+        "environment": "Production",
+        "administrativeFoundationAvailable": true,
+        "routingDisabledByDefault": true,
+        "activatedThroughPlatformApi": true,
+        "productionWorkDelivered": true,
+        "ordinaryReportReturned": true,
+        "privateLearningExcludedFromFederation": true,
+        "deactivationVerified": true,
+        "peerWorkRoutesGatedWhileDisabled": 4,
+        "syntheticRoutesAbsent": 5,
+        "remoteRecipientSelectionAbsentBeforeActivation": true,
+        "noFederationWorkCreatedBeforeActivation": true
+      },
+      "retention": {
+        "federationRetention": "passed",
+        "retentionDays": 2555,
+        "expiredRowsRemoved": {
+          "outbound": 5000,
+          "receipts": 5000,
+          "audit": 0
+        },
+        "recentRowsRetained": {
+          "outbound": 50002,
+          "receipts": 50002,
+          "audit": 50000
+        },
+        "activeAndUnresolvedRowsRetained": true,
+        "securityAuditRetained": true,
+        "nonFederationAuditRetained": true,
+        "plans": {
+          "deliveryCounts": {
+            "executionMs": 4.584,
+            "indexes": [
+              "IX_federation_outbound_messages_peer_instance_id_status"
+            ]
+          },
+          "newestDeliveries": {
+            "executionMs": 0.076,
+            "indexes": [
+              "IX_federation_outbound_messages_peer_instance_id_created_at"
+            ]
+          },
+          "receiptLookup": {
+            "executionMs": 0.063,
+            "indexes": [
+              "PK_federation_inbound_receipts"
+            ]
+          },
+          "newestAudit": {
+            "executionMs": 19.973,
+            "indexes": [
+              "IX_audit_events_occurred_at_id"
+            ]
+          }
+        }
+      }
+    },
+    "frontendTests": {
+      "tests": 157,
+      "files": 40
+    },
+    "parserExtensionExecution": "Additional owner/policy HTTP cases from the prior preservation checkpoint now executed and passed in the full dependent API run.",
+    "repositoryGates": {
+      "documentation": "passed",
+      "structureAndLanguage": "passed",
+      "version": "passed",
+      "whitespace": "passed",
+      "modelConsistency": "passed",
+      "repositoryAndReachableHistorySafety": "passed"
+    },
+    "excludedFailedAttempts": [
+      "SQL trigger accessed a field absent from the audit table; table-specific nested branches fixed and complete foundation chain passed.",
+      "Machine-audit export validator treated bounded opaque request correlation as UUID; exact dataset-aware exception fixed and complete foundation/API chains passed.",
+      "Initial SSO attempt failed with Chromium net::ERR_NETWORK_CHANGED during concurrent disposable Docker network changes; complete SSO lab rerun alone passed."
+    ],
+    "irreversibleDispositionEnabled": false,
+    "retentionExecutionEnabled": false,
+    "asvsStatusesChanged": false,
+    "productionTouched": false
   }
 }

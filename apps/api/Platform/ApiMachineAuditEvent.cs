@@ -7,6 +7,8 @@ public sealed class ApiMachineAuditEvent
     private ApiMachineAuditEvent() { }
     public ApiMachineAuditEvent(Guid id, Guid machineIdentityId, Guid? siteId, string eventType, string entityType, Guid entityId, string correlationId, DateTimeOffset occurredAt)
     { Id = id; MachineIdentityId = machineIdentityId; SiteId = siteId; EventType = eventType; EntityType = entityType; EntityId = entityId; CorrelationId = correlationId; OccurredAt = occurredAt; }
+    public Guid? DomainEventId { get; private set; }
+    public void Correlate(Guid eventId) => DomainEventId = eventId;
     public Guid Id { get; private set; }
     public Guid MachineIdentityId { get; private set; }
     public Guid? SiteId { get; private set; }

@@ -37,6 +37,7 @@ const env = {
   FYLKREN_IDENTITY_LAB_NEGATIVE_SECRET: negativeClientSecret,
 };
 const composeFiles = ['-f', 'compose.yaml', '-f', 'tools/e2e/identity-sso-lab.compose.yaml'];
+if (process.argv.includes('--no-build')) composeFiles.push('-f', 'tools/e2e/reuse-images.compose.yaml');
 
 function command(program, args, options = {}) {
   const result = spawnSync(program, args, { env, encoding: 'utf8', ...options });
@@ -377,7 +378,7 @@ try {
   createRealm();
   process.stdout.write('Building and starting the isolated OIDC/SAML identity lab...\n');
   started = true;
-  compose(['up', '-d', '--build', '--wait'], { stdio: 'inherit' });
+  compose(['up', '-d', process.argv.includes('--no-build') ? '--no-build' : '--build', '--wait'], { stdio: 'inherit' });
   await waitForKeycloak();
   await waitForNegativeProvider();
   compose(['exec', '-T', 'postgres', 'psql', '-U', 'fylkren', '-d', 'fylkren', '-v', 'ON_ERROR_STOP=1', '-c',

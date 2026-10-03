@@ -38,3 +38,7 @@ Calculate HMAC-SHA256 with the UTF-8 secret over `<timestamp>.<raw request body>
 ## Administration
 
 Platform Manager configures subscriptions per site under **API → Webhooks**. HTTPS is mandatory. The view provides subscription state and delivery status/history. Deactivation stops new deliveries but preserves history. No third-party-specific integration is part of this foundation.
+
+## Common projection cutover
+
+Webhook delivery now consumes the existing common event-projection ledger. Upgrade moves only unprojected eligible legacy v1 rows into that ledger, with the existing subscription/event unique key; already projected history is not scheduled again, and unsupported legacy names are skipped. The old `webhooks_projected_at` column is retained as historical compatibility evidence, not a live alternate projection mechanism. Event IDs, v1 types/payloads/actor/resource fields, signing headers, retry behavior and entitlement gates remain unchanged. Internal Site/access lifecycle facts have skipped external projections.

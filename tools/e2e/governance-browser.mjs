@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
+import { writeFileSync, rmSync } from 'node:fs';
 
-export async function verifyGovernanceArchive({ request, navigate, waitFor, setInput, clickButton, evaluate, assertNoOverflow, platformCredentials, pause }) {
+export async function verifyGovernanceArchive({ request, navigate, waitFor, setInput, clickButton, evaluate, assertNoOverflow, platformCredentials, pause, call }) {
   const suffix = randomBytes(5).toString('hex');
   const name = `Synthetic archive browser ${suffix}`, displayName = `Synthetic custodian ${suffix}`;
   const created = await request('/api/sites/', 'POST', { name, overviewDesign: 'classic' }); assert.equal(created.status, 201, JSON.stringify(created.body));
@@ -71,6 +72,28 @@ export async function verifyGovernanceArchive({ request, navigate, waitFor, setI
   assert.equal(await evaluate('[...document.querySelectorAll("nav a, nav button")].some(node => node.textContent.trim() === "Tasks")'), false);
   assert.equal((await request(`/api/information/archives/${siteId}/activity`)).status, 200);
   await assertNoOverflow('Read-only Site archive');
+  const packagePath = `output/pdf/archive-handoff-${suffix}.zip`;
+  const bytes = await evaluate(`(async () => {
+    const token = await (await fetch('/api/security/antiforgery')).json();
+    const response = await fetch('/api/portability/sites/${siteId}/export', { method: 'POST', headers: { 'X-Fylkren-CSRF': token.token } });
+    if (!response.ok) throw new Error('Archive export failed: ' + response.status);
+    return Array.from(new Uint8Array(await response.arrayBuffer()));
+  })()`);
+  writeFileSync(packagePath, Buffer.from(bytes));
+  try {
+    await evaluate(`[...document.querySelectorAll('details')].find(d => d.querySelector('summary')?.textContent === 'Confirm export custody').open = true`);
+    await waitFor('document.querySelector("input[type=file]") !== null', 'recorded export custody controls');
+    const document = await call('DOM.getDocument');
+    const fileNode = await call('DOM.querySelector', { nodeId: document.root.nodeId, selector: 'input[type=file]' });
+    await call('DOM.setFileInputFiles', { nodeId: fileNode.nodeId, files: [`/work/${packagePath}`] });
+    const handoff = `[...document.querySelectorAll('details')].find(d => d.querySelector('summary')?.textContent === 'Confirm export custody')`;
+    await setInput('details textarea', 'Synthetic customer verified the saved ZIP');
+    await waitFor(`${handoff}?.querySelector('button')?.disabled === false`, 'matching saved export and custody rationale');
+    await clickButton('Confirm export custody', handoff);
+    await waitFor('document.body.innerText.includes("Export custody confirmed.")', 'browser digest-matched custody acknowledgement');
+    assert.equal((await request(`/api/portability/sites/${siteId}/exit`)).body.handoffAcknowledged, true);
+  } finally { rmSync(packagePath, { force: true }); }
+
   await signIn(platformCredentials, 'Platform');
-  return { siteArchiveGovernance: true, archiveCustodianSearch: true, archiveOnlyBrowserSession: true, readOnlyArchiveTimeline: true };
+  return { siteArchiveGovernance: true, archiveCustodianSearch: true, archiveOnlyBrowserSession: true, readOnlyArchiveTimeline: true, savedExportCustodyBrowser: true };
 }

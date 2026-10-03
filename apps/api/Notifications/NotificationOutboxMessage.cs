@@ -35,5 +35,7 @@ public sealed class NotificationProjectionCursor
     public Guid Id { get; private set; }
     public DateTimeOffset LastOccurredAt { get; private set; }
     public Guid LastAuditEventId { get; private set; }
+    public DateTimeOffset? ReconciledAt { get; private set; }
+    public void CompleteReconciliation(DateTimeOffset at) => ReconciledAt = at;
     public void Advance(DateTimeOffset occurredAt, Guid auditEventId) { LastOccurredAt = occurredAt; LastAuditEventId = auditEventId; }
 }

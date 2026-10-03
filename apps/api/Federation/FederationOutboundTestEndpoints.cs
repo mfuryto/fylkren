@@ -150,7 +150,7 @@ internal static class FederationOutboundTestEndpoints
         var audit = new AuditEvent(Guid.NewGuid(), request.SourceSiteId, actor,
             "federation-test.assignment-queued", "work-item", work.Id, now);
         audit.SnapshotActorRole(true);
-        db.AuditEvents.Add(audit);
+        WorkActivity.Add(db, audit, "assignment.dispatch_queued");
         DomainEventRecorder.Record(db, "assignment.created", work.SiteId,
             actor, "task", work.Id, new { taskId = work.Id, status = work.Status }, now);
         await db.SaveChangesAsync(ct);
@@ -201,7 +201,7 @@ internal static class FederationOutboundTestEndpoints
         var audit = new AuditEvent(Guid.NewGuid(), work.SiteId, actor,
             "federation-test.official-answer-queued", "work-item", work.Id, now);
         audit.SnapshotActorRole(true);
-        db.AuditEvents.Add(audit);
+        WorkActivity.Add(db, audit, "report.submitted");
         DomainEventRecorder.Record(db, "task.completed", work.SiteId, actor,
             "task", work.Id, new { taskId = work.Id, status = "completed" }, now);
         await db.SaveChangesAsync(ct);

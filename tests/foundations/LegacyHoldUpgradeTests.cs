@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 internal static class LegacyHoldUpgradeTests
 {
-    private static async Task SchemaCommand(FylkrenDbContext db, string action, string schema, string suffix = "")
+    internal static async Task SchemaCommand(FylkrenDbContext db, string action, string schema, string suffix = "")
     {
         if (!schema.StartsWith("synthetic_hold_upgrade_", StringComparison.Ordinal) || schema.Any(c => !(char.IsAsciiLetterOrDigit(c) || c == '_'))) throw new Exception("Invalid synthetic schema.");
         await db.Database.OpenConnectionAsync();

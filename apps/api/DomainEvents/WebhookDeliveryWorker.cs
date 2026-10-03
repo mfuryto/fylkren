@@ -31,7 +31,7 @@ internal sealed class WebhookDeliveryWorker(IServiceScopeFactory scopes, IHttpCl
     {
         await using var scope = scopes.CreateAsyncScope(); var db = scope.ServiceProvider.GetRequiredService<FylkrenDbContext>();
         await using var transaction = await db.Database.BeginTransactionAsync(ct);
-        var events = await db.DomainEvents.FromSqlRaw("SELECT e.* FROM domain_events e WHERE (e.source = 'legacy' AND e.webhooks_projected_at IS NULL) OR EXISTS (SELECT 1 FROM event_projections p WHERE p.domain_event_id = e.id AND p.consumer = 'webhooks' AND p.status IN ('pending','processing') AND p.next_attempt_at <= now() AND (p.lease_expires_at IS NULL OR p.lease_expires_at <= now())) ORDER BY e.occurred_at, e.id LIMIT 200 FOR UPDATE OF e SKIP LOCKED").ToListAsync(ct);
+        var events = await db.DomainEvents.FromSqlRaw("SELECT e.* FROM domain_events e WHERE EXISTS (SELECT 1 FROM event_projections p WHERE p.domain_event_id = e.id AND p.consumer = 'webhooks' AND p.status IN ('pending','processing') AND p.next_attempt_at <= now() AND (p.lease_expires_at IS NULL OR p.lease_expires_at <= now())) ORDER BY e.occurred_at, e.id LIMIT 200 FOR UPDATE OF e SKIP LOCKED").ToListAsync(ct);
         foreach (var e in events)
         {
             var subscriptions = await db.WebhookSubscriptions.AsNoTracking().Where(x => x.SiteId == e.SiteId && x.IsActive && x.CreatedAt <= e.OccurredAt && !db.WebhookDeliveries.Any(d => d.SubscriptionId == x.Id && d.DomainEventId == e.Id)).ToListAsync(ct);
@@ -42,7 +42,6 @@ internal sealed class WebhookDeliveryWorker(IServiceScopeFactory scopes, IHttpCl
                 var owner = Guid.NewGuid(); projection.Claim(owner, DateTimeOffset.UtcNow);
                 projection.Complete(owner, DateTimeOffset.UtcNow, !DomainEventTypes.ExternallySupported.Contains(e.EventType));
             }
-            e.MarkWebhooksProjected(DateTimeOffset.UtcNow);
         }
         await db.SaveChangesAsync(ct);
         await transaction.CommitAsync(ct);
