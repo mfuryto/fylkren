@@ -21,6 +21,8 @@ export function WorkLifecycleButton({ siteId, itemId }: { siteId: string; itemId
 function LifecycleDialog({ siteId, itemId, onClose }: { siteId: string; itemId: string; onClose: () => void }) {
   const t = useTranslation();
   const reasonHelpId = useId();
+  const actionId = useId();
+  const reasonId = useId();
   const [state, setState] = useState<State>();
   const [selected, setSelected] = useState<Stage>();
   const [reason, setReason] = useState("");
@@ -57,15 +59,17 @@ function LifecycleDialog({ siteId, itemId, onClose }: { siteId: string; itemId: 
     {!state ? <p role="status">{t("loading")}</p> : <>
       <p role="status">{t(descriptions[state.stage])}</p>
       {state.held && <p role="note">{t("lifecycleHeldNotice")}</p>}
-      <label>{t("lifecycleAction")}
-        <select value={action[0]} disabled={saving || state.held} onChange={e => { setSelected(e.target.value as Stage); setReason(""); }}>
+      <div className="field">
+        <label htmlFor={actionId}>{t("lifecycleAction")}</label>
+        <select id={actionId} value={action[0]} disabled={saving || state.held} onChange={e => { setSelected(e.target.value as Stage); setReason(""); }}>
           {actions.map(([stage, key]) => <option key={stage} value={stage}>{t(key)}</option>)}
         </select>
-      </label>
-      <label>{t("lifecycleReason")}: {t(action[1])}
-        <textarea rows={3} required maxLength={1000} disabled={saving || state.held} aria-describedby={reasonHelpId} value={reason} onChange={e => setReason(e.target.value)} />
-      </label>
-      <p id={reasonHelpId} className="muted">{t("lifecycleReasonHelp")}</p>
+      </div>
+      <div className="field">
+        <label htmlFor={reasonId}>{t("lifecycleReason")}: {t(action[1])}</label>
+        <textarea id={reasonId} rows={3} required maxLength={1000} disabled={saving || state.held} aria-describedby={reasonHelpId} value={reason} onChange={e => setReason(e.target.value)} />
+        <p id={reasonHelpId} className="muted">{t("lifecycleReasonHelp")}</p>
+      </div>
       <div className="modal-actions">
         <button type="button" className="secondary-button" disabled={saving} onClick={onClose}>{t("cancel")}</button>
         <button type="button" disabled={saving || state.held || !reason.trim()} onClick={() => void transition()}>{t(action[1])}</button>
