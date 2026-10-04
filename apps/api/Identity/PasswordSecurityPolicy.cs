@@ -10,16 +10,12 @@ internal sealed class PasswordSecurityPolicy
     internal const int MaximumLength = 128;
     private const int FingerprintLength = 32;
     private readonly byte[] commonPasswordFingerprints;
+    private readonly byte[] breachedPasswordFingerprints;
 
     public PasswordSecurityPolicy()
     {
-        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Fylkren.Api.Security.common-passwords.sha256")
-            ?? throw new InvalidOperationException("The bundled common-password blocklist is missing.");
-        using var memory = new MemoryStream();
-        stream.CopyTo(memory);
-        commonPasswordFingerprints = memory.ToArray();
-        if (commonPasswordFingerprints.Length == 0 || commonPasswordFingerprints.Length % FingerprintLength != 0)
-            throw new InvalidOperationException("The bundled common-password blocklist is invalid.");
+        commonPasswordFingerprints = LoadFingerprints("common-passwords.sha256");
+        breachedPasswordFingerprints = LoadFingerprints("breached-passwords.sha256");
     }
 
     public string? Validate(string? password, params string?[] contextualValues)
@@ -28,8 +24,10 @@ internal sealed class PasswordSecurityPolicy
             return $"The password must be between {MinimumLength} and {MaximumLength} characters.";
 
         var normalizedPassword = Normalize(password);
-        if (ContainsFingerprint(SHA256.HashData(Encoding.UTF8.GetBytes(normalizedPassword))))
-            return "Choose a less common password.";
+        var fingerprint = SHA256.HashData(Encoding.UTF8.GetBytes(normalizedPassword));
+        if (ContainsFingerprint(commonPasswordFingerprints, fingerprint) ||
+            ContainsFingerprint(breachedPasswordFingerprints, fingerprint))
+            return "Choose a password that is not common or known from a data breach.";
 
         foreach (var token in ContextTokens(contextualValues.Prepend("Fylkren")))
         {
@@ -40,14 +38,26 @@ internal sealed class PasswordSecurityPolicy
         return null;
     }
 
-    private bool ContainsFingerprint(ReadOnlySpan<byte> fingerprint)
+    private static byte[] LoadFingerprints(string name)
+    {
+        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"Fylkren.Api.Security.{name}")
+            ?? throw new InvalidOperationException($"The bundled {name} blocklist is missing.");
+        using var memory = new MemoryStream();
+        stream.CopyTo(memory);
+        var fingerprints = memory.ToArray();
+        if (fingerprints.Length == 0 || fingerprints.Length % FingerprintLength != 0)
+            throw new InvalidOperationException($"The bundled {name} blocklist is invalid.");
+        return fingerprints;
+    }
+
+    private static bool ContainsFingerprint(byte[] fingerprints, ReadOnlySpan<byte> fingerprint)
     {
         var low = 0;
-        var high = commonPasswordFingerprints.Length / FingerprintLength - 1;
+        var high = fingerprints.Length / FingerprintLength - 1;
         while (low <= high)
         {
             var middle = low + ((high - low) / 2);
-            var candidate = commonPasswordFingerprints.AsSpan(middle * FingerprintLength, FingerprintLength);
+            var candidate = fingerprints.AsSpan(middle * FingerprintLength, FingerprintLength);
             var comparison = fingerprint.SequenceCompareTo(candidate);
             if (comparison == 0) return true;
             if (comparison < 0) high = middle - 1;

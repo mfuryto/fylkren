@@ -4,6 +4,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Reject policy-compatible passwords from a pinned, PII-free breached-password set in addition to the separate top-3,000 common-password list.
 - Expose standard current/new-password autocomplete semantics on every user-password field so browser password helpers, external managers and paste work consistently.
 - Apply the shared authentication attempt limit to TOTP setup and profile email reauthentication, matching the documented credential-guessing boundary.
 - Give profile images, branding logos and portable exports explicit server-controlled download names while discarding caller upload filenames.

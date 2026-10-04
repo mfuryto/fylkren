@@ -18,7 +18,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ## SecLists password data
 
-Fylkren includes generated SHA-256 fingerprints derived from `Pwdb_top-1000000.txt` in SecLists release `2026.1`.
+Fylkren includes generated SHA-256 fingerprints derived from `Pwdb_top-1000000.txt` and the PII-free `Leaked-Databases/fortinet-2021_passwords.txt` in SecLists release `2026.1`.
 
 MIT License
 

@@ -1135,3 +1135,22 @@ FYLKREN_E2E_API_IMAGE=sha256:922a2f9dfae305cb99f6fd1cd51f215d91875dff95a0a14644b
 ```
 
 The source/document lock reports `{"passwordContextDocumentation":"passed","contextualValueFamilies":4,"normalization":"NFKC-lowercase","minimumTokenLength":4,"localPasswordSettingFlows":3,"offlineCommonPasswordList":true}`. The current-image run rejects product, username, display-name and email-token candidates during bootstrap, change and reset, including a full-width/case-variant `Fylkren` candidate. Distinct controls succeed and the reset grant survives all four invalid candidates: `{"passwordContextRuntime":"passed","rejectedContextFamilies":["product","username","display-name","email"],"testedFlows":["bootstrap","change","reset"],"nfkcCaseNormalization":true,"validControlsAccepted":true,"resetGrantPreservedAfterContextRejections":true}`. The test respects the shared authentication limiter's numeric `Retry-After` response between deliberate invalid batches. No correction or finding was required. Production is untouched.
+
+## Breached-password set — 2026-10-04
+
+Completes ASVS 6.2.12 and closes the control gap between the existing common-password ranking and an explicitly breached set. The new offline resource uses SecLists' PII-free `fortinet-2021_passwords.txt` at pinned release commit `190c6f7bd58c847ceadfe57d9853592737f059e8`. SecLists identifies the source as passwords from the 2021 Fortinet breach. A checksum-locked generator filters the source to Fylkren's 14–128-character policy, normalizes it identically to runtime and emits 8,249 unique sorted SHA-256 fingerprints. The raw breach list is not committed or distributed.
+
+Scoped commands:
+
+```sh
+node tools/test-breached-password-boundary.mjs
+node tools/test-password-blocklist-boundary.mjs
+node tools/test-password-context-documentation.mjs
+node tools/test-password-composition-boundary.mjs
+dotnet build apps/api/Fylkren.Api.csproj --no-restore
+node tools/run-e2e-editions.mjs --asvs-breached-password-only
+```
+
+The source/resource lock reports `{"breachedPasswordBoundary":"passed","fingerprints":8249,"fingerprintBytes":32,"sortedUnique":true,"knownBreachedCases":3,"independentFromCommonSet":true,"pinnedPiiFreeSource":true}`. All three selected known cases are absent from the separate common-password resource. The previous common, context and composition controls remain green, and the API build completes with zero warnings/errors. The current-image run rejects `__GettingCloser#@@` during bootstrap, authenticated change and reset, accepts distinct controls and preserves the reset grant: `{"breachedPasswordRuntime":"passed","testedFlows":["bootstrap","change","reset"],"breachedCandidateAbsentFromCommonSet":true,"validControlsAccepted":true,"resetGrantPreservedAfterBreachedPassword":true}`.
+
+The candidate API image is `sha256:a988e8e706d10ea77b77957b56299a3253ee51192640f0641275d3de25cd1acb`; the gateway image is `sha256:125e3c8e99cd6bb7034333f32915afd0c7c1a35142aea8f182c093ab090cc8d0`. Production is untouched.
