@@ -611,3 +611,18 @@ It rejects six direct WorkItem status skips and confirms rejected transitions le
 Maintained transition and dependency suites cover plan claim/submit/approve/release, hold/reopen, blocked work, report return, reassignment and cancellation. Maintained identity, lifecycle and federation suites cover their sequence-specific grants, versions, replay barriers and terminal states. The focused test result is `{"businessFlowSequence":"passed","rejectedStatusSkips":6,"prematureReportActionsRejected":4,"executionOrderRejections":2,"duplicateApprovalRejected":true,"terminalReopenRejected":true}`.
 
 ASVS 2.3.1 is Passed. Safe hashes and the unchanged candidate image IDs are recorded under `businessFlowSequenceCompletion` in the existing evidence manifest. This result does not pass business-limit enforcement under 2.3.2, concurrency/atomicity requirements or complete release qualification. Production is untouched.
+
+## Business-limit enforcement — 2026-10-04
+
+Completes ASVS 2.3.2 by comparing every row in the authoritative [business-limit table](../../security/INPUT_VALIDATION.md#business-limits-and-scope) with production enforcement and executed tests. Per-command text, collection, byte and package limits already passed in the completed 2.2.1 inventory, including atomic rejection. Existing focused runs verify 20 failed password checks with saturating lockout, one-time identity operations and the eight-per-minute authentication-client partition. The current federation evidence verifies its 20-request partitions plus body, response and retry ceilings.
+
+Two focused commands filled the remaining dynamic gaps:
+
+```sh
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-body-complete-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-asvs-header-file-web:latest node tools/run-e2e-editions.mjs --asvs-business-limits-only --no-build
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-body-complete-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-asvs-header-file-web:latest node tools/run-e2e-editions.mjs --asvs-community-limit-only --no-build
+```
+
+Separate machine identities each receive the documented 30 writes and 120 reads in a fixed minute; the next request returns `429` with numeric `Retry-After`. A clean Community fixture accepts three active Sites, rejects a fourth with `community_site_limit` without changing the count, then accepts a replacement after one Site is deactivated. The production policies centralize the same values used by UI and machine Site creation.
+
+ASVS 2.3.2 is Passed. The documentation explicitly says Fylkren has no per-account quota for ordinary object creation and no installation-wide data-set quota. Those missing anti-automation/capacity controls remain under 2.4.1 and release sizing; they are not counted as implemented limits here. Safe hashes and unchanged candidate image IDs are recorded under `businessLimitEnforcementCompletion` in the existing evidence manifest. This result does not pass transaction/concurrency requirements or complete release qualification. Production is untouched.

@@ -298,6 +298,78 @@ export async function testBusinessFlowSequence({ leader, siteId, unitId, workIte
     duplicateApprovalRejected: true, terminalReopenRejected: true };
 }
 
+export async function testBusinessLogicLimits({ platform, base }) {
+  async function createMachine(label, scopes) {
+    const response = await platform.post('/api/platform/api-clients/', {
+      name: label, scopes, expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    });
+    assert.equal(response.status, 201, JSON.stringify(response.body));
+    return response.body.token;
+  }
+  async function machineRequest(token, path, options = {}) {
+    const response = await fetch(`${base}${path}`, {
+      ...options,
+      headers: { Authorization: `Bearer ${token}`,
+        ...(options.body === undefined ? {} : { 'Content-Type': 'application/json' }),
+        ...(options.headers ?? {}) },
+      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    });
+    return response;
+  }
+
+  const missingSite = randomUUID();
+  const writeToken = await createMachine('Synthetic write-limit client', ['sites:write']);
+  for (let request = 1; request <= 30; request++) {
+    const response = await machineRequest(writeToken, `/api/v1/administration/sites/${missingSite}`, {
+      method: 'PUT', body: { name: 'Synthetic missing Site', overviewDesign: 'classic' },
+    });
+    assert.notEqual(response.status, 429, `Documented write allowance rejected request ${request}`);
+  }
+  const limitedWrite = await machineRequest(writeToken, `/api/v1/administration/sites/${missingSite}`, {
+    method: 'PUT', body: { name: 'Synthetic missing Site', overviewDesign: 'classic' },
+  });
+  assert.equal(limitedWrite.status, 429, 'The 31st machine write was not rate limited');
+  assert.match(limitedWrite.headers.get('retry-after') ?? '', /^\d+$/);
+
+  const readToken = await createMachine('Synthetic read-limit client', ['sites:read']);
+  for (let request = 1; request <= 120; request++) {
+    const response = await machineRequest(readToken, `/api/v1/administration/sites/${missingSite}`);
+    assert.notEqual(response.status, 429, `Documented read allowance rejected request ${request}`);
+  }
+  const limitedRead = await machineRequest(readToken, `/api/v1/administration/sites/${missingSite}`);
+  assert.equal(limitedRead.status, 429, 'The 121st machine read was not rate limited');
+  assert.match(limitedRead.headers.get('retry-after') ?? '', /^\d+$/);
+
+  return { businessLogicLimits: 'passed', machineWritesAllowed: 30,
+    machineWriteLimitStatus: limitedWrite.status, machineReadsAllowed: 120,
+    machineReadLimitStatus: limitedRead.status, retryAfterPresent: true };
+}
+
+export async function testCommunitySiteLimit({ platform }) {
+  const created = [];
+  for (let index = 1; index <= 3; index++) {
+    const response = await platform.post('/api/sites/', {
+      name: `Synthetic Community Site ${index}`, overviewDesign: 'classic',
+    });
+    assert.equal(response.status, 201, `Community Site ${index}: ${JSON.stringify(response.body)}`);
+    created.push(response.body.id);
+  }
+  const fourth = await platform.post('/api/sites/', {
+    name: 'Synthetic refused fourth Community Site', overviewDesign: 'classic',
+  });
+  assert.equal(fourth.status, 409, 'A fourth active Community Site was accepted');
+  assert.equal(fourth.body.code, 'community_site_limit');
+  assert.equal((await platform.request('/api/sites/')).body.filter(value => value.isActive).length, 3,
+    'Rejected Site creation changed the active-Site count');
+  assert.equal((await platform.request(`/api/sites/${created[2]}`, { method: 'DELETE' })).status, 204);
+  const replacement = await platform.post('/api/sites/', {
+    name: 'Synthetic Community replacement Site', overviewDesign: 'classic',
+  });
+  assert.equal(replacement.status, 201, 'An inactive Site did not release one Community capacity slot');
+  return { communitySiteLimit: 'passed', activeSitesAllowed: 3,
+    fourthActiveSiteRejected: true, inactiveSiteReleasedCapacity: true };
+}
+
 export async function testDerivedArithmeticBoundaries({ platform, siteManager, leader, siteId, unitId, workItemTypeId }) {
   const path = `/api/site-audit/sites/${siteId}`;
   const original = await siteManager.request(path);

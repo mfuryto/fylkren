@@ -4341,5 +4341,34 @@
     },
     "matrix": "ASVS 2.3.1 Passed; continue at 2.3.2",
     "scope": "Expected same-user sequence across business-flow families; no business-limit, concurrency or release qualification"
+  },
+  "businessLimitEnforcementCompletion": {
+    "date": "2026-10-04",
+    "baseline": "55c8adf",
+    "sourceHashes": {
+      "docs/security/INPUT_VALIDATION.md": "98070ae685cb01f7a8afca8059a19dcadf2713827a9b58406b49bc4532458944",
+      "apps/api/ServiceRegistration.cs": "0ed7557caf58f5aa96dfd46802ed952f81c726b7c9ca1aee87494f737fec2ad2",
+      "apps/api/Licensing/SiteCapacityPolicy.cs": "8a9b0a3779751fb430a4fec0368430c9951260eebc1fa4f3538688dc1c48076b",
+      "tools/e2e/encoding-security.mjs": "1c1ae00af1f20919aa83987a8b3c5655190ef99f3e2d6761c42af7a5ffafe0fb",
+      "tools/e2e/auth-session-security.mjs": "72764c9f71df6c61ab6b2dfeeeb7e7873b8f23af21461fb9720a03ba49863f00",
+      "tools/e2e/portability.mjs": "eac8cc9ea9f32e81f104fec061fd57c0e431cb57fb4cb6d9c2964384575e9f56",
+      "tools/run-federation-pair.mjs": "a556694d142677e6d0ba3c9b44f2db5d1f2f096d5ef94e96984f0d83a6d22007"
+    },
+    "apiImage": "sha256:9bbfe923bfc4d302051eec8cfffa47f94e0a64da30fcbc1d66439828bcb076d2",
+    "webImage": "sha256:2806135f53e64aaa7c63bcf2ff2e75933bb963361a42243bff84e2b512ae38e7",
+    "results": {
+      "businessLogicLimits": "passed",
+      "machineWritesAllowed": 30,
+      "machineWriteLimitStatus": 429,
+      "machineReadsAllowed": 120,
+      "machineReadLimitStatus": 429,
+      "retryAfterPresent": true,
+      "communitySiteLimit": "passed",
+      "activeSitesAllowed": 3,
+      "fourthActiveSiteRejected": true,
+      "inactiveSiteReleasedCapacity": true
+    },
+    "matrix": "ASVS 2.3.2 Passed; continue at 2.3.3",
+    "scope": "All documented business limits; absent object-creation and installation-wide data quotas remain 2.4.1 scope"
   }
 }
