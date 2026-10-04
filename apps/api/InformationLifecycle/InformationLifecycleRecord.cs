@@ -24,6 +24,8 @@ public sealed class InformationLifecycleRecord
     public DateTimeOffset? EligibleAt { get; private set; }
     public Guid? ExportId { get; private set; }
     public bool IsHeld { get; private set; }
+    public bool AutomationPaused { get; private set; }
+    public void SetAutomationPaused(bool paused) { if (AutomationPaused != paused) { AutomationPaused = paused; Version++; } }
     public string Reason { get; private set; } = "";
     public void Transition(string next, long expectedVersion, string reason, DateTimeOffset now)
     {

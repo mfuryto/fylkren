@@ -112,7 +112,7 @@ public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options,
         try
         {
             Database.ExecuteSqlRaw("SELECT set_config('fylkren.activity_writer', '1', true)");
-            if (PendingWorkActivities.Count > 0) throw new InvalidOperationException("Work activity requires asynchronous transactional save.");
+            if (PendingWorkActivities.Count > 0 || ChangeTracker.Entries<WorkItem>().Any(e => e.State == EntityState.Modified && e.Property(w => w.Status).IsModified && e.Property(w => w.Status).OriginalValue != e.Entity.Status && Fylkren.Api.InformationLifecycle.WorkLifecyclePolicy.Terminal(e.Entity.Status))) throw new InvalidOperationException("Work activity requires asynchronous transactional save.");
             if (pendingReferences.Length > 0) AssignReferences(pendingReferences);
             ProtectActivityFacts();
             ProtectFormalApprovalHistory();
@@ -133,6 +133,9 @@ public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options,
         CancellationToken cancellationToken = default)
     {
         var pendingReferences = PendingReferences();
+        var terminalChanges = ChangeTracker.Entries<WorkItem>().Where(e => e.State == EntityState.Modified &&
+            e.Property(w => w.Status).IsModified && e.Property(w => w.Status).OriginalValue != e.Entity.Status &&
+            Fylkren.Api.InformationLifecycle.WorkLifecyclePolicy.Terminal(e.Entity.Status)).Select(e => e.Entity).ToArray();
         await using var transaction = Database.CurrentTransaction is null
             ? await Database.BeginTransactionAsync(cancellationToken)
             : null;
@@ -151,6 +154,13 @@ public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options,
                 await WorkActivity.ProjectNotifications(this, activityOptions?.PublicUrl ?? "http://localhost:8080", cancellationToken);
                 await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
             }
+            foreach (var item in terminalChanges)
+            {
+                var lifecycle = await InformationLifecycles.SingleOrDefaultAsync(l => l.ResourceType == "work_item" && l.ResourceId == item.Id, cancellationToken);
+                lifecycle?.SetAutomationPaused(false);
+                await Fylkren.Api.InformationLifecycle.WorkLifecycleAutomation.Advance(item, this, false, cancellationToken);
+            }
+            if (terminalChanges.Length > 0) await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
             if (transaction is not null) await transaction.CommitAsync(cancellationToken);
             return result;
         }

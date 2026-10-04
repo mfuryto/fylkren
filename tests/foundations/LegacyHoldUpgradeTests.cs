@@ -29,7 +29,10 @@ internal static class LegacyHoldUpgradeTests
             var at = DateTimeOffset.UtcNow.AddYears(-1);
             var site = new Site(Guid.NewGuid(), "Synthetic legacy hold upgrade", at); db.Sites.Add(site);
             var root = new InformationLifecycleRecord(Guid.NewGuid(), site.Id, "site", site.Id, null, at);
-            root.SetHold(true, root.Version, "Historical hold, original actor unavailable", at); db.InformationLifecycles.Add(root); await db.SaveChangesAsync();
+            root.SetHold(true, root.Version, "Historical hold, original actor unavailable", at); await db.SaveChangesAsync();
+            // Seed the historical schema with its historical columns; the current
+            // EF model also contains fields introduced by later migrations.
+            await db.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO information_lifecycle(id,owner_site_id,resource_type,resource_id,stage,version,is_held,reason,changed_at) VALUES({root.Id},{site.Id},'site',{site.Id},'active',{root.Version},true,{root.Reason},{at})");
             var before = DateTimeOffset.UtcNow.AddSeconds(-1);
             await db.Database.MigrateAsync();
             var hold = await db.LifecycleHolds.SingleAsync(h => h.LifecycleId == root.Id);

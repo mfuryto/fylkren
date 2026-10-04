@@ -389,9 +389,10 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
   await waitFor("document.querySelector('button[aria-label=\"Lock/Archive: Active\"] svg[data-stage=\"active\"]') !== null", 'visible information state');
   assert.equal(await evaluate(`[...document.querySelectorAll('button')].find(b => b.getAttribute('aria-label') === 'Lock/Archive: Active')?.textContent`), 'Lock/Archive', 'Information state should be carried by the icon and accessible name');
   await clickButton('Lock/Archive');
-  await waitFor('document.querySelector("[role=dialog] textarea") !== null', 'closing and archiving state');
+  await waitFor('document.querySelector("[role=dialog]")?.innerText.includes("Locks automatically")', 'automatic lifecycle explanation');
   assert.equal(await evaluate('document.querySelector("[role=dialog]").innerText.includes("Active")'), true);
-  assert.equal(await evaluate('document.querySelector("[role=dialog]").innerText.includes("approved final report")'), true);
+  assert.equal(await evaluate('document.querySelector("[role=dialog] textarea") === null'), true, 'Unfinished active work still shows a redundant manual locking form');
+  assert.equal(await evaluate('document.querySelector("[role=dialog]").innerText.includes("Learning continues independently")'), true);
   assert.equal(await evaluate(`(() => {
     const dialog = document.querySelector('[role=dialog]');
     return [...dialog.querySelectorAll('select, textarea')].every(control => {
@@ -472,7 +473,7 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
     document.body.innerText.includes("Execution submitted for review") &&
     document.body.innerText.includes("Final report approved")`, 'site audit chain');
 
-  await verifyLifecyclePresentation({ request, requestExpectingHttpError, navigate, waitFor, clickButton, setInput, setSelect, pause, siteId: site.id });
+  await verifyLifecyclePresentation({ request, requestExpectingHttpError, navigate, waitFor, clickButton, setInput, setSelect, pause, evaluate, siteId: site.id });
   const leaderLogout = await request('/api/session', 'DELETE');
   assert.equal(leaderLogout.status, 204, JSON.stringify(leaderLogout.body));
   await navigate('/');

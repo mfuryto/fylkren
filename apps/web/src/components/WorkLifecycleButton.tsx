@@ -9,7 +9,7 @@ import type { MessageKey } from "../localization";
 import { LifecycleStateIcon, type LifecycleStage } from "./LifecycleStateIcon";
 
 type Stage = LifecycleStage;
-type State = { stage: Stage; version: number; held: boolean; effectiveStage?: Stage; inheritedLock?: boolean; impact?: { eligible: boolean; blockers: Record<string, number> } };
+type State = { automatic?: boolean; automationPaused?: boolean; terminal?: boolean; stage: Stage; version: number; held: boolean; effectiveStage?: Stage; inheritedLock?: boolean; impact?: { eligible: boolean; blockers: Record<string, number> } };
 const descriptions: Record<Stage, MessageKey> = {
   active: "lifecycleActiveDescription",
   closed: "lifecycleClosedDescription",
@@ -24,7 +24,7 @@ const blockers: Record<string, MessageKey> = {
   active_site: "activeSite", active_child_sites: "navSites", unfinished_work: "navTasks", open_learning: "navLearning", open_plans: "navPlanning",
   open_execution: "navExecution", open_risks: "tasksTaskCardPresentationRisk", pending_notifications: "navNotifications", pending_webhooks: "webhooks",
   pending_projection: "activityTitle", pending_federation: "navFederation", missing_custodian: "archiveCustodian", archive_responsibility: "archiveCustodian",
-  active_person: "active", active_login: "username", active_memberships: "navSites", active_manager: "siteManagers", active_roles: "roles",
+  final_report: "approvalFinalReport", editing: "lifecycleReopen", preservation: "preservationTitle", inherited_preservation: "preservationTitle", retired_site: "inactive", failed_deliveries: "failed", active_person: "active", active_login: "username", active_memberships: "navSites", active_manager: "siteManagers", active_roles: "roles",
 };
 
 export function WorkLifecycleButton({ siteId, itemId, name }: { siteId: string; itemId: string; name?: string }) {
@@ -45,7 +45,7 @@ function LifecycleAction({ path, governance, siteId, name }: { path: string; gov
     setState(undefined); setError("");
     const refresh = () => {
       apiGet<State>(path, t("activityLoadFailed"), { signal: controller.signal }).then(value => {
-        if (!controller.signal.aborted) { setState(value); setError(""); }
+        if (!controller.signal.aborted) { setState(current => current && current.version > value.version ? current : value); setError(""); }
       }).catch(e => {
         if (!controller.signal.aborted) setError(e.message);
       });
@@ -54,6 +54,15 @@ function LifecycleAction({ path, governance, siteId, name }: { path: string; gov
     window.addEventListener("fylkren:work-changed", refresh);
     return () => { controller.abort(); window.removeEventListener("fylkren:work-changed", refresh); };
   }, [path, t]);
+  useEffect(() => {
+    if (!open && (!state?.automatic || !state.terminal || state.automationPaused || state.stage === "archived" || state.inheritedLock)) return;
+    const controller = new AbortController();
+    const refresh = () => { void apiGet<State>(path, t("activityLoadFailed"), { signal: controller.signal }).then(value => {
+      if (!controller.signal.aborted) { setState(current => current && current.version > value.version ? current : value); setError(""); }
+    }).catch(e => { if (!controller.signal.aborted) setError(e.message); }); };
+    refresh(); const timer = window.setInterval(refresh, open ? 3000 : 10000);
+    return () => { controller.abort(); window.clearInterval(timer); };
+  }, [open, path, t, state?.automatic, state?.terminal, state?.automationPaused, state?.stage, state?.inheritedLock]);
   const stage = state?.effectiveStage ?? state?.stage;
   const accessibleLabel = `${t("lifecycleTitle")}${stage ? `: ${t(labels[stage])}` : ""}`;
   return <><button className="task-icon-action" type="button" aria-label={accessibleLabel} title={accessibleLabel} aria-haspopup="dialog" onClick={() => setOpen(true)}><LifecycleStateIcon stage={stage} /><span>{t("lifecycleTitle")}</span></button>{open && <LifecycleDialog path={path} governance={governance} siteId={siteId} name={name} state={state} loadError={error} onChange={setState} onClose={() => setOpen(false)} />}</>;
@@ -68,15 +77,16 @@ function LifecycleDialog({ path, governance, siteId, name, state, loadError, onC
   const [reason, setReason] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const actions: [Stage, MessageKey][] = state?.stage === "active"
-    ? [["closed", "lifecycleClosed"]]
+  const automatic = !governance && state?.automatic;
+  const actions: [Stage, MessageKey][] = automatic && state?.stage !== "active" ? [["active", "lifecycleReopen"]] : state?.stage === "active"
+    ? automatic ? state.automationPaused && state.terminal ? [["closed", "lifecycleFinishEditing"]] : [] : [["closed", "lifecycleClosed"]]
     : state?.stage === "closed"
       ? [["archived", "lifecycleArchived"], ["active", "lifecycleReopen"]]
       : [["closed", "lifecycleRestore"]];
   const action = actions.find(([stage]) => stage === selected) ?? actions[0];
 
   async function transition() {
-    if (!state || saving) return;
+    if (!state || !action || saving) return;
     setSaving(true); setError("");
     try {
       const result = await apiMutate<{ stage: Stage; version: number }>(`${path}/transitions`, "POST", { stage: action[0], expectedVersion: state.version, reason: reason.replace(/[\r\n\t]+/g, " ").trim() }, t("activityLoadFailed"));
@@ -89,10 +99,10 @@ function LifecycleDialog({ path, governance, siteId, name, state, loadError, onC
     {(error || loadError) && <p role="alert">{error || loadError}</p>}
     {!state ? !loadError && <p role="status">{t("loading")}</p> : <>
       <p role="status" className="lifecycle-current-state"><LifecycleStateIcon stage={state.effectiveStage ?? state.stage} /><strong>{t(labels[state.effectiveStage ?? state.stage])}</strong></p>
-      <p className="muted">{t(state.inheritedLock ? "lifecycleInheritedLock" : governance && state.stage === "active" ? governance.kind === "site" ? "lifecycleSiteGuide" : "lifecyclePersonGuide" : governance && state.stage === "closed" ? "lifecycleGovernanceLocked" : descriptions[state.stage])}</p>
+      <p className="muted">{t(state.inheritedLock ? "lifecycleInheritedLock" : automatic ? state.automationPaused ? "lifecycleAutomaticEditing" : "lifecycleAutomaticHelp" : governance && state.stage === "active" ? governance.kind === "site" ? "lifecycleSiteGuide" : "lifecyclePersonGuide" : governance && state.stage === "closed" ? "lifecycleGovernanceLocked" : descriptions[state.stage])}</p>
       {state.held && <p role="note">{t("lifecycleHeldNotice")}</p>}
-      {governance && state.impact && !state.impact.eligible && <div><strong>{t("lifecycleBlocked")}</strong><ul>{Object.entries(state.impact.blockers).map(([code, count]) => <li key={code}>{t(blockers[code] ?? "activityUnknown")} ({count})</li>)}</ul></div>}
-      <div className="field">
+      {(governance || automatic && state.terminal) && state.impact && !state.impact.eligible && <div><strong>{t(governance || state.automationPaused ? "lifecycleBlocked" : state.stage === "closed" ? "lifecyclePendingArchive" : "lifecyclePendingLock")}</strong><ul>{Object.entries(state.impact.blockers).map(([code, count]) => <li key={code}>{t(blockers[code] ?? "activityUnknown")} ({count})</li>)}</ul></div>}
+      {action && <><div className="field">
         <label htmlFor={actionId}>{t("lifecycleAction")}</label>
         <select id={actionId} value={action[0]} disabled={saving || state.held || state.inheritedLock} onChange={e => { setSelected(e.target.value as Stage); setReason(""); }}>
           {actions.map(([stage, key]) => <option key={stage} value={stage}>{t(key)}</option>)}
@@ -103,9 +113,10 @@ function LifecycleDialog({ path, governance, siteId, name, state, loadError, onC
         <textarea id={reasonId} rows={3} required maxLength={1000} disabled={saving || state.held || state.inheritedLock} aria-describedby={reasonHelpId} value={reason} onChange={e => setReason(e.target.value)} />
         <p id={reasonHelpId} className="muted">{t("lifecycleReasonHelp")}</p>
       </div>
+      </>}
       <div className="modal-actions">
         <button type="button" className="secondary-button" disabled={saving} onClick={onClose}>{t("cancel")}</button>
-        <button type="button" disabled={saving || state.held || state.inheritedLock || !reason.trim() || governance && action[0] !== "active" && state.impact && !state.impact.eligible} onClick={() => void transition()}>{t(action[1])}</button>
+        {action && <button type="button" disabled={saving || state.held || state.inheritedLock || !reason.trim() || action[0] !== "active" && state.impact && !state.impact.eligible} onClick={() => void transition()}>{t(action[1])}</button>}
       </div>
       {governance && <section className="lifecycle-administration" aria-label={t("lifecycleAdministration")}>
         <h3>{t("lifecycleAdministration")}</h3>

@@ -48,14 +48,24 @@ internal static class WorkItemQueuePager
             includeSearchText ? database.WorkItems.Where(child => child.ParentWorkItemId == item.Id && child.SenderSiteName != null && (child.SiteId != item.SiteId || child.AssignedUnitId != item.AssignedUnitId) && child.Status == "completed" && child.FinalReportApprovedAt != null).Select(child => child.FinalReport).FirstOrDefault() : null))
             .ToListAsync(cancellationToken);
 
+        var archived = (await database.Database.SqlQuery<Guid>($$"""
+            WITH RECURSIVE tree AS (SELECT w.id FROM work_items w JOIN information_lifecycle l ON l.resource_type='work_item' AND l.resource_id=w.id AND l.owner_site_id=w.site_id AND l.stage='archived' WHERE w.site_id={{siteId}}
+              UNION SELECT w.id FROM work_items w JOIN tree t ON w.parent_work_item_id=t.id WHERE w.site_id={{siteId}})
+            SELECT id AS "Value" FROM tree
+            """).ToArrayAsync(cancellationToken)).ToHashSet();
         var byId = nodes.ToDictionary(node => node.Id);
         var children = nodes.Where(node => node.ParentId is not null).GroupBy(node => node.ParentId!.Value).ToDictionary(group => group.Key, group => group.ToList());
         var scoped = nodes.Where(node => unitId is Guid selectedUnitId
             ? node.AssignedUnitId == selectedUnitId && !(node.IsOutgoingRequest && node.ParentTitle is not null) && !(node.ParentId is Guid parentId && byId.TryGetValue(parentId, out var parent) && parent.AssignedUnitId == selectedUnitId)
             : node.ParentId is null && !(node.IsOutgoingRequest && node.ParentTitle is not null)).ToList();
 
+        var summaryScope = scoped;
+        if (filter == "archived")
+            scoped = nodes.Where(node => archived.Contains(node.Id) && (unitId == null || node.AssignedUnitId == unitId) &&
+                !(node.ParentId is Guid parentId && byId.TryGetValue(parentId, out var parent) && archived.Contains(parentId) && (unitId == null || parent.AssignedUnitId == unitId))).ToList();
+
         var normalizedSearch = search?.Trim() ?? string.Empty;
-        var filtered = Sort(scoped.Where(node => MatchesFilter(node, filter) && SubtreeMatches(node, normalizedSearch, children)), sort).ToList();
+        var filtered = Sort(scoped.Where(node => MatchesFilter(node, filter, archived) && SubtreeMatches(node, normalizedSearch, children)), sort).ToList();
         var page = Math.Max(requestedPage, 1);
         if (focusItemId is Guid focusedId)
         {
@@ -70,8 +80,8 @@ internal static class WorkItemQueuePager
         var roots = filtered.Skip((page - 1) * PageSize).Take(PageSize).Select(node => node.Id).ToList();
         var orderedItemIds = IncludeDescendantsInOrder(roots, children);
         var selectedIds = orderedItemIds.ToHashSet();
-        var active = scoped.Where(node => !TerminalStatuses.Contains(EffectiveStatus(node))).ToList();
-        var summary = new Summary(active.Count, scoped.Count(node => EffectiveStatus(node) == "in_progress"), scoped.Count(node => EffectiveStatus(node) == "in_review"), active.Count(node => node.DueAt is not null && node.DueAt < DateTimeOffset.UtcNow));
+        var active = summaryScope.Where(node => !TerminalStatuses.Contains(EffectiveStatus(node))).ToList();
+        var summary = new Summary(active.Count, summaryScope.Count(node => EffectiveStatus(node) == "in_progress"), summaryScope.Count(node => EffectiveStatus(node) == "in_review"), active.Count(node => node.DueAt is not null && node.DueAt < DateTimeOffset.UtcNow));
         return new Result(selectedIds, orderedItemIds, total, page, PageSize, totalPages, summary);
     }
 
@@ -85,8 +95,11 @@ internal static class WorkItemQueuePager
         _ => nodes.OrderByDescending(node => node.CreatedAt).ThenBy(node => node.Id),
     };
 
-    private static bool MatchesFilter(Node node, string filter)
+    private static bool MatchesFilter(Node node, string filter, HashSet<Guid> archived)
     {
+        if (filter == "all") return true;
+        if (filter == "archived") return archived.Contains(node.Id);
+        if (archived.Contains(node.Id)) return false;
         var status = EffectiveStatus(node);
         return filter switch
         {

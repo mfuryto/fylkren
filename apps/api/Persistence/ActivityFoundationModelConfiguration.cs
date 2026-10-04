@@ -42,6 +42,7 @@ internal static class ActivityFoundationModelConfiguration
         l.Property(x => x.ClosedAt).HasColumnName("closed_at"); l.Property(x => x.ArchivedAt).HasColumnName("archived_at");
         l.Property(x => x.PolicyId).HasColumnName("policy_id"); l.Property(x => x.PolicyVersion).HasColumnName("policy_version");
         l.Property(x => x.EligibleAt).HasColumnName("eligible_at"); l.Property(x => x.ExportId).HasColumnName("export_id");
+        l.Property(x => x.AutomationPaused).HasColumnName("automation_paused");
         l.Property(x => x.IsHeld).HasColumnName("is_held"); l.Property(x => x.Reason).HasColumnName("reason").HasMaxLength(1000);
         l.HasIndex(x => new { x.OwnerSiteId, x.ResourceType, x.ResourceId }).IsUnique().HasFilter("owner_site_id IS NOT NULL");
         l.HasIndex(x => new { x.ResourceType, x.ResourceId }).IsUnique().HasFilter("owner_site_id IS NULL");

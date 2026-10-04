@@ -266,6 +266,7 @@ internal static class ServiceRegistration
         builder.Services.AddHostedService<FederationOutboundDeliveryWorker>();
         builder.Services.AddHostedService<WebhookDeliveryWorker>();
         builder.Services.AddHostedService<ApiMaintenanceWorker>();
+        builder.Services.AddHostedService<Fylkren.Api.InformationLifecycle.WorkLifecycleWorker>();
         builder.Services.AddHostedService<DirectoryLifecycleWorker>();
         return new FylkrenStartupSettings(fylkrenOptions, trustForwardedHeaders, requireHttps);
     }

@@ -86,7 +86,9 @@ internal static class WorkItemCompletionEndpoints
             }
             if (root.ParentWorkItemId is not null) return Results.Conflict(new { error = "The entire chain must be cancelled from the primary task." });
             if (root.Status is "completed" or "cancelled") return Results.Conflict(new { error = "A closed primary task cannot be cancelled." });
-            var items = await WorkItemDescendantLoader.Load(root, db, ct);
+            // Terminal branches retain their final decision and locked history.
+            // Cancellation closes the remaining live chain, without reopening archives.
+            var items = (await WorkItemDescendantLoader.Load(root, db, ct)).Where(x => !Fylkren.Api.InformationLifecycle.WorkLifecyclePolicy.Terminal(x.Status)).ToList();
             var affectedIds = items.Select(x => x.Id).ToHashSet();
             var now = DateTimeOffset.UtcNow;
             foreach (var item in items) item.TransitionWithinLevel("cancelled", note, now);

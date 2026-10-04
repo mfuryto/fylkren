@@ -90,6 +90,10 @@ export async function testLearning({ leader, reader, sibling, unrelated, platfor
   assert.equal((await list(leader, `/api/work/learning?siteId=${siteId}&workItemId=${sectionTask.body.id}&view=all`)).total, 0);
   assert.equal((await leader.request(`/api/work/learning?siteId=${siteId}&unitId=${sectionId}`)).status, 403, 'Top-level leader accessed subordinate learning');
   assert.equal((await leader.request(`/api/work/learning/${privatePoint.id}/entries`)).status, 403);
+  const completedLifecycle = await sectionLeader.request(`/api/information/sites/${siteId}/work-items/${sectionTask.body.id}`);
+  assert.ok(['closed', 'archived'].includes(completedLifecycle.body.stage));
+  assert.equal((await sectionLeader.post(`/api/work/learning/${privatePoint.id}/comments`, { text: 'Follow up learning while the task is locked' })).status, 201);
+  assert.equal((await sectionLeader.put(`/api/work/learning/${privatePoint.id}/review`, { version: 1, status: 'in_progress', priority: 'high', actionPlan: 'Resolve independently of task archive', treatmentNote: '', dueOn: '2026-11-01' })).status, 204);
   const versions = await leader.request(`/api/approvals/sites/${siteId}/items/${sectionTask.body.id}/versions`);
   assert.equal(versions.status, 200, JSON.stringify(versions.body));
   assert.ok(!JSON.stringify(versions.body).includes(privatePoint.text), 'Internal learning leaked into approved report versions');

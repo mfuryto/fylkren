@@ -34,16 +34,26 @@ export async function testActivityLifecycle({ leader, manager, sibling, unrelate
     const noCsrf = await fetch(`${base}${path}/transitions`, { method: 'POST', headers: { Cookie: leader.cookieHeader(), 'Content-Type': 'application/json' }, body: JSON.stringify({ stage: 'closed', expectedVersion: state.version, reason: 'Missing CSRF' }) }); assert.equal(noCsrf.status, 400);
     assert.equal((await platform.request(path)).status, 403); assert.equal((await sibling.post(`${path}/transitions`, { stage: 'closed', expectedVersion: state.version, reason: 'Wrong authority' })).status, 403);
     assert.equal((await leader.put(`${work}/status`, { status: 'under_review', priority: 'normal' })).status, 204);
-    assert.equal((await leader.put(`${work}/status`, { status: 'rejected', decisionNote: 'Synthetic terminal decision' })).status, 204);
     const decisionBody = { title: 'Archive guard decision', decision: 'Reject this synthetic work', rationale: 'Check the locked decision revision guard', status: 'recorded', references: [] };
     const decision = await leader.post(`/api/decisions/sites/${siteId}/tasks/${id}`, decisionBody); assert.equal(decision.status, 201, JSON.stringify(decision.body));
+    assert.equal((await leader.put(`${work}/status`, { status: 'rejected', decisionNote: 'Synthetic terminal decision' })).status, 204);
+    state = (await leader.request(path)).body;
+    assert.ok(['closed', 'archived'].includes(state.stage), 'Terminal rejection did not lock automatically');
+    const automaticHistory = (await leader.request(`${activity}?workItemId=${id}&eventType=information.closed`)).body;
+    assert.equal(automaticHistory.items.length, 1);
+    assert.equal(automaticHistory.items[0].source, 'system');
+    // Preserve manual transition contract coverage after an explicit editing pause.
+    const editable = await move('active'); assert.equal(editable.status, 200, JSON.stringify(editable.body)); state = editable.body;
+    assert.equal(state.automationPaused, true);
     const closed = await move('closed'); assert.equal(closed.status, 200, JSON.stringify(closed.body)); state = closed.body;
     assert.equal((await move('archived', state.version - 1)).status, 409);
     const blockedComment = await leader.post(`${work}/comments`, { text: 'Forbidden closed write' });
     assert.equal(blockedComment.status, 409); assert.equal(blockedComment.body.code, 'information_locked');
     const blockedDecision = await leader.put(`/api/decisions/${decision.body.id}`, { ...decisionBody, expectedRevision: 1 });
     assert.equal(blockedDecision.status, 409); assert.equal(blockedDecision.body.code, 'information_locked', 'Decision handling masked the archive guard');
-    const archived = await move('archived'); assert.equal(archived.status, 200, JSON.stringify(archived.body)); state = archived.body;
+    let archived = await move('archived');
+    if (archived.status === 409) { state = (await leader.request(path)).body; assert.equal(state.stage, 'archived'); }
+    else { assert.equal(archived.status, 200, JSON.stringify(archived.body)); state = archived.body; }
     const blockedStatus = await leader.put(`${work}/status`, { status: 'under_review', priority: 'normal' });
     assert.equal(blockedStatus.status, 409); assert.equal(blockedStatus.body.code, 'information_locked');
     const history = await leader.request(`${activity}?workItemId=${id}`); assert.equal(history.status, 200); assert.ok(history.body.items.some(x => x.type === 'information.archived'));

@@ -1743,6 +1743,10 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("archived_at");
 
+                    b.Property<bool>("AutomationPaused")
+                        .HasColumnType("boolean")
+                        .HasColumnName("automation_paused");
+
                     b.Property<DateTimeOffset>("ChangedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("changed_at");

@@ -66,6 +66,7 @@ await migrator.MigrateAsync(foundation);
 var upgraded = await db.DomainEvents.AsNoTracking().SingleAsync(x => x.Id == legacy.Id);
 Require(upgraded.Source == "legacy" && upgraded.ActorPersonId == actor && upgraded.PayloadJson.Contains("synthetic") && upgraded.RecordedAt is null, "Populated upgrade changed legacy history.");
 Require(await db.EventProjections.CountAsync() == 0, "Upgrade scheduled historical deliveries.");
+await db.Database.MigrateAsync();
 db.Sites.Add(new Site(site, "Synthetic foundation site", now)); await db.SaveChangesAsync();
 db.DomainEvents.Add(fact); db.EventProjections.Add(new EventProjection("webhooks", fact.Id, now)); db.InformationLifecycles.Add(lifecycle); await db.SaveChangesAsync();
 await using (var transaction = await db.Database.BeginTransactionAsync())
@@ -109,3 +110,5 @@ await PreservationTests.Run(db);
 await LegacyHoldUpgradeTests.Run(db);
 
 await ConsumerReconciliationTests.Run(db);
+
+await AutomaticLifecycleTests.Run(db);

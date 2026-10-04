@@ -907,6 +907,15 @@ const dependencies = await testDependencies({
   leader: leader.account, siteId, otherSiteTaskId: noLongerChild.body.id, suffix, executeDefault,
 });
 
+// Later feature fixtures deliberately add content to the completed task.
+// Exercise the explicit authorized editing pause; normal completion remains locked.
+const completedLifecyclePath = `/api/information/sites/${siteId}/work-items/${task.body.id}`;
+const completedLifecycle = (await leader.account.request(completedLifecyclePath)).body;
+assert.ok(['closed', 'archived'].includes(completedLifecycle.stage));
+const reopenedFixture = await leader.account.post(`${completedLifecyclePath}/transitions`, { stage: 'active', expectedVersion: completedLifecycle.version, reason: 'Add synthetic decision and comment regression fixtures' });
+assert.equal(reopenedFixture.status, 200, JSON.stringify(reopenedFixture.body));
+assert.equal(reopenedFixture.body.automationPaused, true);
+
 const decisionsRisksVersions = await testDecisionsRisksVersions({
   leader: leader.account, sibling: sectionTwoLeader, unrelated: newParentLeader,
   siteId, otherSiteId: newParentId, personId: leader.personId,

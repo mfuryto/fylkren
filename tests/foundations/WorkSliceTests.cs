@@ -55,7 +55,6 @@ internal static class WorkSliceTests
             await db.DomainEvents.CountAsync(x => x.ContextWorkItemId == root) == 1 &&
             await db.EventProjections.CountAsync(x => db.DomainEvents.Any(e => e.Id == x.DomainEventId && e.ContextWorkItemId == root)) == 2,
             "Rollback split authoritative state, audit, activity or projection records.");
-        item.TransitionWithinLevel("rejected", "Synthetic terminal state", now); await db.SaveChangesAsync();
         var foreignSite = Guid.NewGuid();
         db.Sites.Add(new Fylkren.Api.Organization.Site(foreignSite, "Synthetic independent owner", now));
         db.SiteReferenceSettings.Add(new(foreignSite, "FOREIGN", now, null));
@@ -66,6 +65,7 @@ internal static class WorkSliceTests
         foreach (var child in new[] { ownChild, foreignChild })
             WorkActivity.Add(db, AuditEvent.FromSystem(Guid.NewGuid(), "synthetic-command", "work-item.registered", "work-item", child.Id, now), "task.created");
         await db.SaveChangesAsync();
+        item.TransitionWithinLevel("rejected", "Synthetic terminal state", now); await db.SaveChangesAsync();
         Require(!await WorkLifecycleEndpoints.Eligible(item, db, default), "Unfinished owned child did not block closure.");
         ownChild.TransitionWithinLevel("rejected", "Synthetic owned child closure", now);
         await db.SaveChangesAsync();

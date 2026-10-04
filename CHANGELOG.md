@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Automatically lock terminal tasks and archive them after operational follow-up and required delivery resolve; preserve explicit reopening for editing, find retained tasks with the Archived filter, and continue private learning treatment independently. Chain cancellation preserves already terminal history. Site/global-user retirement remains administrative; deletion and anonymisation remain disabled.
+
 - Show information state as a green square, red padlock or blue archive icon; identify the selected resource and clarify Site/user archive guidance with administration controls below the primary action. Rename Site removal to Deactivate and its retained status to Inactive.
 
 - Retired the live audit-derived notification projector after resumable legacy reconciliation, unified webhook projection bookkeeping, and added typed machine/system activity for Site and access lifecycle effects.

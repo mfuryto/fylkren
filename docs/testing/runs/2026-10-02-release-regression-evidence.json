@@ -685,7 +685,7 @@
         "apps/web/src/reports/printReport.ts:58:  frame.srcdoc = `<!doctype html><html lang=\"${language.replace(/[^A-Za-z0-9-]/g, \"\") || \"en\"}\"><head><meta charset=\"UTF-8\"><title>${title.replace(/[<>&]/g, \"\")}</title>${styles}<style>",
         "apps/web/src/components/RichText.tsx:82:    element.innerHTML = markdownToEditorHtml(value);",
         "apps/web/src/components/RichText.tsx:87:  function emitChange() { const element = editor.current; if (!element) return; const next = editorHtmlToMarkdown(element); if (next.length > maxLength) { element.innerHTML = markdownToEditorHtml(value); return; } lastValue.current = next; onChange(next); rememberSelection(); }",
-        "apps/web/src/components/RichText.tsx:95:  return <div className=\"rich-text-editor\"><div className=\"rich-text-toolbar\" role=\"toolbar\" aria-label={t(\"textFormatting\")}><button className=\"secondary-button\" type=\"button\" onMouseDown={(event) => { event.preventDefault(); format(\"normal\"); }}>{t(\"normalText\")}</button><label><span className=\"sr-only\">{t(\"headingLevel\")}</span><select aria-label={t(\"headingLevel\")} value=\"\" onChange={(event) => format(event.target.value as \"h1\" | \"h2\" | \"h3\" | \"h4\")}><option value=\"\" disabled>{t(\"heading\")}</option><option value=\"h1\">H1</option><option value=\"h2\">H2</option><option value=\"h3\">H3</option><option value=\"h4\">H4</option></select></label><button className=\"secondary-button\" type=\"button\" onMouseDown={(event) => { event.preventDefault(); format(\"ul\"); }} aria-label={t(\"bulletedList\")}>\u2022 {t(\"list\")}</button><button className=\"secondary-button\" type=\"button\" onMouseDown={(event) => { event.preventDefault(); format(\"ol\"); }} aria-label={t(\"numberedList\")}>1. {t(\"list\")}</button></div><div ref={editor} className=\"workflow-document-editor\" contentEditable role=\"textbox\" aria-multiline=\"true\" data-placeholder={t(\"writeHere\")} style={{ minHeight: `${Math.max(180, rows * 24)}px` }} onInput={emitChange} onPaste={(event) => { event.preventDefault(); insertPlainText(event.clipboardData.getData(\"text/plain\")); }} onDrop={(event) => { event.preventDefault(); insertPlainText(event.dataTransfer.getData(\"text/plain\")); }} onDragOver={(event) => event.preventDefault()} onKeyUp={rememberSelection} onMouseUp={rememberSelection} onFocus={(event) => { if (!event.currentTarget.innerHTML) event.currentTarget.innerHTML = markdownToEditorHtml(value); rememberSelection(); }} /></div>;",
+        "apps/web/src/components/RichText.tsx:95:  return <div className=\"rich-text-editor\"><div className=\"rich-text-toolbar\" role=\"toolbar\" aria-label={t(\"textFormatting\")}><button className=\"secondary-button\" type=\"button\" onMouseDown={(event) => { event.preventDefault(); format(\"normal\"); }}>{t(\"normalText\")}</button><label><span className=\"sr-only\">{t(\"headingLevel\")}</span><select aria-label={t(\"headingLevel\")} value=\"\" onChange={(event) => format(event.target.value as \"h1\" | \"h2\" | \"h3\" | \"h4\")}><option value=\"\" disabled>{t(\"heading\")}</option><option value=\"h1\">H1</option><option value=\"h2\">H2</option><option value=\"h3\">H3</option><option value=\"h4\">H4</option></select></label><button className=\"secondary-button\" type=\"button\" onMouseDown={(event) => { event.preventDefault(); format(\"ul\"); }} aria-label={t(\"bulletedList\")}>• {t(\"list\")}</button><button className=\"secondary-button\" type=\"button\" onMouseDown={(event) => { event.preventDefault(); format(\"ol\"); }} aria-label={t(\"numberedList\")}>1. {t(\"list\")}</button></div><div ref={editor} className=\"workflow-document-editor\" contentEditable role=\"textbox\" aria-multiline=\"true\" data-placeholder={t(\"writeHere\")} style={{ minHeight: `${Math.max(180, rows * 24)}px` }} onInput={emitChange} onPaste={(event) => { event.preventDefault(); insertPlainText(event.clipboardData.getData(\"text/plain\")); }} onDrop={(event) => { event.preventDefault(); insertPlainText(event.dataTransfer.getData(\"text/plain\")); }} onDragOver={(event) => event.preventDefault()} onKeyUp={rememberSelection} onMouseUp={rememberSelection} onFocus={(event) => { if (!event.currentTarget.innerHTML) event.currentTarget.innerHTML = markdownToEditorHtml(value); rememberSelection(); }} /></div>;",
         "apps/web/src/api/authClient.ts:10:    atob(input.replace(/-/g, \"+\").replace(/_/g, \"/\")),",
         "apps/web/src/platform/federationApi.ts:80:const peerPath = (id: string) => `${base}/peers/${encodeURIComponent(id)}`;",
         "apps/web/src/platform/federationApi.ts:122:  apiMutate(`${peerPath(id)}/deliveries/${encodeURIComponent(messageId)}/retry`, \"POST\", undefined,",
@@ -2917,5 +2917,374 @@
     "asvsStatusesChanged": false,
     "irreversibleDispositionEnabled": false,
     "productionTouched": false
+  },
+  "automaticWorkLifecycleContinuation": {
+    "recordedAtUtc": "2026-10-04T09:49:14.362815+00:00",
+    "baseRevision": "4bcd2bcc0fb43bb17af079828f617120db5c8dca",
+    "apiImage": "sha256:5dbcddde46baf40ddee0d849858b58bf9a616abf853ef33184b012472817fbcd",
+    "webImage": "sha256:95c69456ec0870a718f167db181344235d23ccd5744ec99a0879df61d3c9f497",
+    "apiAndFederationGatewayWebImage": "sha256:d1ce2a9dd7ec9fe8c99d7048ca3c41eb0a0e4df0d1ed336ce19332d853a3d570",
+    "gatewayScope": "Final API and federation use the unchanged nginx/gateway. The last web-only change displays unmet prerequisites and disables Finish editing until eligible; final Chromium qualifies the final UI image.",
+    "schema": "20261004085939_AutomaticWorkLifecycle",
+    "status": "passed within documented scope",
+    "sourceSha256": {
+      "apps/api/InformationLifecycle/InformationLifecycleRecord.cs": "5f67e5dc07a4392777021be12cb32f4b0b458c93334a149707ff7389e6590571",
+      "apps/api/InformationLifecycle/WorkLifecycleAutomation.cs": "079165919ed9b13e25f59b1d74e724c8c504f6fbaccb6c9bcf5c636c7a7ac9d6",
+      "apps/api/InformationLifecycle/WorkLifecycleEndpoints.cs": "c6395c5e291bf81751243a107f78ef9b72303184eabbf5fcc7cb8a6a6c6d7de2",
+      "apps/api/InformationLifecycle/WorkLifecyclePolicy.cs": "fd004749ca2b1e390d52826c9229f644d2ef9c1826b73a7897a832de2fb64fab",
+      "apps/api/InformationLifecycle/WorkLifecycleWorker.cs": "6d4780f314cbc2b773afaae848149c406628f31da2f5eb0b80a6d3197a054401",
+      "apps/api/Persistence/ActivityFoundationModelConfiguration.cs": "29ac32a0ee852ca9428f2c39bb09264c4179d636416c2ed7baa49455552ae6f8",
+      "apps/api/Persistence/FylkrenDbContext.cs": "a61fb3998c17932e6b5762d71761b4a63d6c66171bee5da57f6abdcdc6e3b5ce",
+      "apps/api/Persistence/Migrations/20261004085939_AutomaticWorkLifecycle.Designer.cs": "b5c318c5b3437e8b8fd659a94b3a2cf90dec8b89d409cda63864e2d109d658fe",
+      "apps/api/Persistence/Migrations/20261004085939_AutomaticWorkLifecycle.cs": "fbe18e18fde550ae77573080a25fa1f60fa1d783726e9aeadb757e2c689ee850",
+      "apps/api/Persistence/Migrations/FylkrenDbContextModelSnapshot.cs": "623415275e758e88c056bc1a5721637ce51278c6843ee1a3733edd88822a76c0",
+      "apps/api/ServiceRegistration.cs": "99f77dbc3cacfb56ce75d8cf0b80c4863ffc074b00985d207816ab815205866c",
+      "apps/api/WorkManagement/WorkItemCompletionEndpoints.cs": "1b77bb7546beed831283cb9360c046670b7b8340660b3a558f43ef5f8f6a5aa5",
+      "apps/api/WorkManagement/WorkItemQueuePager.cs": "84ae2084e7bda76dd43de688a8b8d8d6141cfb142c7134858758b420318db4c5",
+      "apps/web/src/components/WorkLifecycleButton.tsx": "ba501add984715eb2ee8fec55c79bd83702fb8779d59c2a91f1fb44f58c48672",
+      "apps/web/src/localization/catalogs/supplements/activity.ts": "1ee3ae36c4d6d295c8dfae7f71c38ec4fc30019f76756486965d90119b388e5c",
+      "apps/web/src/localization/catalogs/supplements/lifecycleAutomation.ts": "3cb97c463585a90bc4b7f57644a7978682abc3b739dcf4369fc5836322fc6971",
+      "apps/web/src/tasks/TaskQueueControls.tsx": "522c3a70d8b4a61398d426dbfde504fd23efdafbd5d77ab4cf90537d805725aa",
+      "tests/foundations/AutomaticLifecycleTests.cs": "0c1238782138080d9b1f372b9c7059acf7d7fae3e5367c26db4a6fec2612ed2f",
+      "tests/foundations/LegacyHoldUpgradeTests.cs": "1c557b4465b399c914a7c99117e9559ce8233957d32fdda3c0a9961e0f1c5dc3",
+      "tests/foundations/Program.cs": "afe217e2b7d8e8db65c4dbe17178c815e67a9367bbbfc48cd4ce96b0af7ed6d5",
+      "tests/foundations/WorkSliceTests.cs": "e14dc5243c9f7c4178deb3bb3b8a83c98c4e888b141d9d9c5a55155fdec48060",
+      "tools/e2e/activity-lifecycle.mjs": "13cf485adcbaddb7153bcbbefc179bc89ded6cf21b81aee6fe211fe77c912352",
+      "tools/e2e/community-browser-smoke.mjs": "2e23e57d3079a4ae82126ffe660d1a23b2f49aa352e4214802130fa81ae49722",
+      "tools/e2e/learning.mjs": "7b875e280722ecf59ba604aac8c9e31f2e353dedd4ed73a79a691cbe16d990b5",
+      "tools/e2e/lifecycle-browser.mjs": "decec8174d4019f77258e67ac85a3ac5b0694a81cb3a371f233692165a4c2a92",
+      "tools/e2e/transition-chains.mjs": "2e42e5a54b374d874411ad7302b5b2d01228a6e8e6eec41fb64eda1d77630fd0",
+      "tools/test-e2e-local.mjs": "8210bb0dd1d03b751d07dbb9248f9ab83f8ae92b7b8a371debe541d7f7c874cd"
+    },
+    "logSha256": {
+      "foundations": "3b8d308740596beecc1a87b8df9a31d222e35ac13b1b58e26fa1a0c87de8876d",
+      "apiRecovery": "7335be65c050617530a543bc9b7e5e0bc00dd01e55fe7809112989843db51194",
+      "browser": "0d9b656d4e814bdba3cfc153bcbc2826fdf95d028e5b715192545d56ae424a1e",
+      "operationalFederation": "97f0e9fd278f805e88cb918b863b9b96fd7732912673f72604893c629ea1595d",
+      "productionFederation": "6c4f84b055476ee2997d775ae9f0a46ebbab5a879e39368f10dcfe99070a3520",
+      "transportRetention": "00adc9b26dda00f5f9ad4ba8addbf3d39783225ec4e04279c81a32a7b7ac21f6",
+      "frontendTests": "8a2dc786df73330bbbade775a9e501c535d5f7fb2a536958b400a2b695c7ef82",
+      "typecheck": "5cfb036289d819b2a87e947d65f4532031dd37753f3cf2def0f77d398eea1737",
+      "docs": "b7b2422149de706208dc08cc9f06f7770445be802e60e57199c8751ca88c78d3",
+      "structureLanguage": "1f1b35d04fa9d600a944780c3984b6c006c2c7646668aaa33f25ecf64fb5168e",
+      "version": "30a82c355072b30049a50c28fc1a6e402282bc4d7b291f331f69330b0edc3dbb",
+      "efModel": "17b4b833624d8f2c98eab351da13397451ba99c9f7501023a3a4f1f5f49d22a3",
+      "repositoryHistory": "d5e3168900ccf8ce0f3da197ce2a683f92fbc5e4eeb0bd20c3ffb521db1f3bcb"
+    },
+    "rawLogsStoredOutsideRepository": true,
+    "foundations": "passed including atomic terminal lock/audit/activity rollback, delivery/failure/projection gating, concurrent archive idempotence, editing pause, own/descendant holds, concurrent child preservation under savepoint, protected independent learning, Site guards, archived child/all/search and stable counters, populated pause-aware upgrade without fabricated activity/dispatch, downgrade protection",
+    "apiResults": {
+      "editionsAndTransitions": "passed",
+      "activityTimeline": "passed",
+      "informationArchive": "passed",
+      "activityAccessBoundaries": "passed",
+      "preservationHolds": "passed",
+      "immutablePolicyVersions": "passed",
+      "retentionExecutionDisabled": "passed",
+      "verifiedExportCustody": "passed",
+      "siteArchiveCustody": "passed",
+      "archiveAccessBoundaries": "passed",
+      "siteArchiveRestore": "passed",
+      "irreversibleDispositionDisabled": "passed",
+      "bootstrap": "passed",
+      "sessionCookieAttributes": "passed",
+      "csrfSignOut": "passed",
+      "signedOutCookieReplay": "passed",
+      "passwordChangeSessionRevocation": "passed",
+      "concurrentPasswordReset": "passed",
+      "passwordResetSessionRevocation": "passed",
+      "deactivationSessionRevocation": "passed",
+      "reactivationCookieReplay": "passed",
+      "genericAuthenticationFailure": "passed",
+      "authenticationRateLimit": "passed",
+      "roleSetup": "passed",
+      "lookupSorting": "passed",
+      "operationalIsolation": "passed",
+      "localPlanningExecutionReport": "passed",
+      "threeLevelDistribution": "passed",
+      "parentChildReporting": "passed",
+      "crossSiteIsolation": "passed",
+      "reportArchives": "passed",
+      "activeSiteMoveRouting": "passed",
+      "detachedSiteRouting": "passed",
+      "placementValidation": "passed",
+      "senderSnapshots": "passed",
+      "threeSiteReporting": "passed",
+      "recursiveSiteWorkload": "passed",
+      "crossSiteRequestResponse": "passed",
+      "crossSiteRequestCancellation": "passed",
+      "combinedBranches": "passed",
+      "transitionChains": "passed",
+      "authorizationBoundaries": "passed",
+      "crossSiteGuidSubstitution": "passed",
+      "administrationReportApis": "passed",
+      "dependencies": "passed",
+      "learning": "passed",
+      "learningPrivacy": "passed",
+      "learningTreatment": "passed",
+      "learningConcurrency": "passed",
+      "learningHistoryPagination": "passed",
+      "taskComments": "passed",
+      "decisionsRisksVersions": "passed",
+      "webhookFailureIsolation": "passed",
+      "portability": "passed",
+      "federationCandidates": "passed",
+      "requestNotificationsQueued": "passed",
+      "portableParserBoundaries": "passed",
+      "clientTypeMetadataIgnored": true
+    },
+    "workloadLoad": {
+      "workloadLoad": "passed",
+      "createdTasks": 1000,
+      "metrics": [
+        {
+          "concurrency": 1,
+          "authorizedRequests": 100,
+          "unauthorizedRequestsRejected": 100,
+          "p50Ms": 16,
+          "p95Ms": 102,
+          "p99Ms": 108,
+          "maxMs": 111,
+          "byEndpoint": [
+            {
+              "endpoint": "/api/work/sites/{siteId}/items?filter=active",
+              "p95Ms": 49,
+              "maxMs": 70
+            },
+            {
+              "endpoint": "/api/work/navigation-counts",
+              "p95Ms": 108,
+              "maxMs": 111
+            },
+            {
+              "endpoint": "/api/work/learning?siteId={siteId}&view=all",
+              "p95Ms": 17,
+              "maxMs": 31
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/reports",
+              "p95Ms": 19,
+              "maxMs": 22
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/workload-history",
+              "p95Ms": 28,
+              "maxMs": 89
+            }
+          ]
+        },
+        {
+          "concurrency": 10,
+          "authorizedRequests": 100,
+          "unauthorizedRequestsRejected": 100,
+          "p50Ms": 29,
+          "p95Ms": 195,
+          "p99Ms": 223,
+          "maxMs": 244,
+          "byEndpoint": [
+            {
+              "endpoint": "/api/work/learning?siteId={siteId}&view=all",
+              "p95Ms": 43,
+              "maxMs": 44
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/reports",
+              "p95Ms": 55,
+              "maxMs": 58
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/workload-history",
+              "p95Ms": 52,
+              "maxMs": 56
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/items?filter=active",
+              "p95Ms": 94,
+              "maxMs": 101
+            },
+            {
+              "endpoint": "/api/work/navigation-counts",
+              "p95Ms": 223,
+              "maxMs": 244
+            }
+          ]
+        },
+        {
+          "concurrency": 25,
+          "authorizedRequests": 100,
+          "unauthorizedRequestsRejected": 100,
+          "p50Ms": 154,
+          "p95Ms": 342,
+          "p99Ms": 376,
+          "maxMs": 418,
+          "byEndpoint": [
+            {
+              "endpoint": "/api/work/learning?siteId={siteId}&view=all",
+              "p95Ms": 178,
+              "maxMs": 202
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/reports",
+              "p95Ms": 190,
+              "maxMs": 221
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/items?filter=active",
+              "p95Ms": 331,
+              "maxMs": 347
+            },
+            {
+              "endpoint": "/api/work/sites/{siteId}/workload-history",
+              "p95Ms": 197,
+              "maxMs": 269
+            },
+            {
+              "endpoint": "/api/work/navigation-counts",
+              "p95Ms": 376,
+              "maxMs": 418
+            }
+          ]
+        }
+      ]
+    },
+    "apiRecovery": "matched PostgreSQL and Data Protection key restore passed on final API and recorded gateway web",
+    "browserResults": {
+      "topLevelTaskBrowserFlow": "passed",
+      "taskRegistration": true,
+      "leaderAssessment": true,
+      "directExecution": true,
+      "finalReport": true,
+      "reportArchive": true,
+      "overviewCounts": true,
+      "siteAudit": true,
+      "objectActivityTimeline": true,
+      "siteActivityTimeline": true,
+      "activityKeyboard": true,
+      "lifecycleDialogLayout": true,
+      "lifecycleVisibleState": true,
+      "lifecycleArchiveRestore": true,
+      "notificationQueue": true,
+      "classifiedReport": true,
+      "workloadPresentation": true,
+      "separateReportApprover": true,
+      "storedContentInjection": true,
+      "pdfOutput": true,
+      "multiPageClassifiedReport": true,
+      "siteArchiveGovernance": true,
+      "archiveCustodianSearch": true,
+      "archiveOnlyBrowserSession": true,
+      "readOnlyArchiveTimeline": true,
+      "savedExportCustodyBrowser": true,
+      "personArchiveGuidance": true,
+      "siteDeactivationLabel": true,
+      "keyboardModalNavigation": true,
+      "accessibleDialogTree": true,
+      "visibleKeyboardFocus": true,
+      "smtpHandoff": true,
+      "smtpRetry": true,
+      "mailboxReceipt": true,
+      "smtpHeaderInjectionRejected": true,
+      "templateExpressionsLiteral": true,
+      "templateValuesNotRecursivelyExpanded": true,
+      "templateRejectedUpdatesUnchanged": true,
+      "smtpDotContentPreserved": true,
+      "firstRunSetup": true,
+      "authenticatedShell": true,
+      "communityEdition": true,
+      "siteCreation": true,
+      "desktopOverflow": false,
+      "mobileOverflow": false,
+      "browserErrors": 0,
+      "chromium": "Chrome/152.0.7977.82"
+    },
+    "operationalFederation": {
+      "operationalWorkActivity": "passed",
+      "signedReceiptAndRetry": "passed",
+      "activityFactDeduplication": "passed",
+      "progressAndOfficialAnswer": "passed",
+      "privateLearningBoundary": "passed",
+      "sideAndPlannedRequests": "passed",
+      "cancellation": "passed"
+    },
+    "productionFederation": {
+      "federationProductionBoundary": "passed",
+      "environment": "Production",
+      "administrativeFoundationAvailable": true,
+      "routingDisabledByDefault": true,
+      "activatedThroughPlatformApi": true,
+      "productionWorkDelivered": true,
+      "ordinaryReportReturned": true,
+      "privateLearningExcludedFromFederation": true,
+      "deactivationVerified": true,
+      "peerWorkRoutesGatedWhileDisabled": 4,
+      "syntheticRoutesAbsent": 5,
+      "remoteRecipientSelectionAbsentBeforeActivation": true,
+      "noFederationWorkCreatedBeforeActivation": true
+    },
+    "federationRetention": {
+      "federationRetention": "passed",
+      "retentionDays": 2555,
+      "expiredRowsRemoved": {
+        "outbound": 5000,
+        "receipts": 5000,
+        "audit": 0
+      },
+      "recentRowsRetained": {
+        "outbound": 50002,
+        "receipts": 50002,
+        "audit": 50000
+      },
+      "activeAndUnresolvedRowsRetained": true,
+      "securityAuditRetained": true,
+      "nonFederationAuditRetained": true,
+      "plans": {
+        "deliveryCounts": {
+          "executionMs": 4.56,
+          "indexes": [
+            "IX_federation_outbound_messages_peer_instance_id_status"
+          ]
+        },
+        "newestDeliveries": {
+          "executionMs": 0.142,
+          "indexes": [
+            "IX_federation_outbound_messages_peer_instance_id_created_at"
+          ]
+        },
+        "receiptLookup": {
+          "executionMs": 0.085,
+          "indexes": [
+            "PK_federation_inbound_receipts"
+          ]
+        },
+        "newestAudit": {
+          "executionMs": 19.923,
+          "indexes": [
+            "IX_audit_events_occurred_at_id"
+          ]
+        }
+      }
+    },
+    "frontendTests": {
+      "filesPassed": 40,
+      "testsPassed": 157,
+      "typecheck": "passed"
+    },
+    "efPendingModelChanges": false,
+    "documentationLanguageStructureVersion": "passed",
+    "repositoryAndReachableHistorySecrets": "passed",
+    "excludedAttempts": [
+      "Pre-automation schema fixture used a current EF lifecycle column; corrected historical seeding/model migration timing.",
+      "Full API regression found chain cancellation attempting to rewrite terminal archived branches; live-only cancellation corrected and complete final API chain repeated.",
+      "Concurrent descendant preservation test found Npgsql wrapping the non-blocking row-lock exception; savepoint deferral corrected and foundation/full final API chains repeated.",
+      "Intermediate API/web images are not final UI proof; final API and Chromium scopes identify their exact images."
+    ],
+    "scopeLimits": [
+      "No irreversible deletion/anonymisation or new customer retention periods.",
+      "Site/global Person retirement remains administrative.",
+      "No event sourcing, broker, second event store or replacement audit.",
+      "ASVS remains 35 Passed, 112 In progress, 53 Not assessed and 53 Not applicable; scoped evidence only.",
+      "Navigation-count sizing remains open; final API workload overlapped separate federation laboratories. No performance fix/equivalence claim.",
+      "Unchanged identity-provider laboratories and all historical federation scenarios are not requalified by these runs."
+    ]
   }
 }

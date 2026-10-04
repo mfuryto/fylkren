@@ -173,6 +173,10 @@ Record source and target versions, time, operator, restore point, non-secret con
 
 For `20261002220000_WorkActivityArchiveGuards`, stop every old API/worker instance before starting the new API that applies migrations. The schema rejects old writers of WorkItem-owned content lacking the supported transaction capability. The additive foundation is reversible before cutover; after contextual activity has been recorded, schema downgrade is blocked. Use a forward fix or restore the matched database/configuration/key/image set. Never remove guards or alter migration history to run an old writer. Remote installations retain the existing versioned federation contract and do not share this schema gate. See [delivery and recovery scope](../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md#deployment-and-recovery).
 
+For `20261004085939_AutomaticWorkLifecycle`, the new writer automatically locks eligible terminal WorkItems and archives them after operational follow-up and required delivery are resolved. Existing terminal records are reconciled in bounded batches after startup; they are retained, not deleted. Previously explicitly reopened active records remain paused for editing. Learning treatment can continue against locked/archived WorkItems while original observations and whole-Site boundaries remain protected. Existing delivery failures can keep a task locked but unarchived until resolved. No new customer retention period is introduced.
+
+Once automatic facts or editing pauses exist, downgrade is blocked: use a forward fix or matched database/key/configuration/image restore. Keep all old replicas stopped throughout the upgrade. See [automatic lifecycle scope](../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md#automatic-workitem-lifecycle--2026-10-04).
+
 ## Failure and rollback
 
 Preserve evidence and do not delete containers, volumes or database files:

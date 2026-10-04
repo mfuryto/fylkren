@@ -41,6 +41,10 @@ export async function testTransitionChains({ leader, sectionLeader, siteId, sect
   assert.equal((await item(decisionTaskId)).status, 'under_review');
   await status(decisionTaskId, 'rejected', 'Insufficient basis.');
   assert.equal((await item(decisionTaskId)).status, 'rejected');
+  const rejectedLifecyclePath = `/api/information/sites/${siteId}/work-items/${decisionTaskId}`;
+  const rejectedState = (await leader.request(rejectedLifecyclePath)).body;
+  assert.ok(['closed', 'archived'].includes(rejectedState.stage));
+  assert.equal((await leader.post(`${rejectedLifecyclePath}/transitions`, { stage: 'active', expectedVersion: rejectedState.version, reason: 'Reconsider the rejected task' })).status, 200);
   await status(decisionTaskId, 'under_review');
   assert.equal((await item(decisionTaskId)).status, 'under_review');
 
@@ -95,8 +99,9 @@ export async function testTransitionChains({ leader, sectionLeader, siteId, sect
 
   const cancelled = await leader.post(`${path(reassignmentRootId)}/cancel`, { decisionNote: 'Synthetic chain cancellation.' });
   assert.equal(cancelled.status, 200, `chain cancellation: ${JSON.stringify(cancelled.body)}`);
-  assert.equal(cancelled.body.affected, 4, 'Cancellation did not include root and all three generations');
-  for (const id of [reassignmentRootId, initialChild.id, replacement.id, otherUnit.body.id]) {
+  assert.equal(cancelled.body.affected, 2, 'Cancellation did not close the live root and replacement');
+  for (const id of [initialChild.id, replacement.id]) assert.equal((await item(id)).status, 'reassigned', 'Cancellation rewrote a historical terminal branch');
+  for (const id of [reassignmentRootId, otherUnit.body.id]) {
     assert.equal((await item(id)).status, 'cancelled', `Task ${id} retained active status after chain cancellation`);
   }
   const repeatedCancel = await leader.post(`${path(reassignmentRootId)}/cancel`, { decisionNote: 'Repeated cancellation.' });
