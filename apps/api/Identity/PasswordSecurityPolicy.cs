@@ -34,7 +34,7 @@ internal sealed class PasswordSecurityPolicy
         foreach (var token in ContextTokens(contextualValues.Prepend("Fylkren")))
         {
             if (normalizedPassword.Contains(token, StringComparison.Ordinal))
-                return "The password cannot contain the username, name, email address, organization name, or product name.";
+                return "The password cannot contain Fylkren, the username, display name, or email-address tokens.";
         }
 
         return null;

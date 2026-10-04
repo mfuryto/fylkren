@@ -2,6 +2,17 @@
 
 Fylkren screens locally managed passwords against a bundled blocklist. Runtime checks are entirely local and do not require or attempt internet access, so the same policy works in air-gapped installations.
 
+## Context-specific words
+
+The local password policy rejects a candidate that contains any normalized token of four or more characters from this maintained list:
+
+- the built-in product identifier `Fylkren`;
+- the local identity's username;
+- the person's display name; and
+- the person's email address, including its local and domain components.
+
+Matching uses Unicode NFKC normalization and invariant lowercase. Spaces and the punctuation characters `. , ; : @ \\ / - _ + ( ) [ ]` separate tokens, so case or punctuation changes do not bypass a listed word. Tokens shorter than four characters are omitted to avoid rejecting broad sets of unrelated passphrases. The same inputs are supplied during initial Platform Manager creation, password change and password reset. The separate bundled common-password list covers widely used passwords and common role/department terms independent of a particular account.
+
 The generated resource contains sorted SHA-256 fingerprints, not the source passwords. It covers the first 3,000 entries that satisfy Fylkren's 14–128 character password policy. The current source is `Passwords/Common-Credentials/Pwdb_top-1000000.txt` from SecLists release `2026.1`, pinned by the following values:
 
 - Git commit: `190c6f7bd58c847ceadfe57d9853592737f059e8`

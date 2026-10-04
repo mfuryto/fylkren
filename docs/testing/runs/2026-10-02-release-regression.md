@@ -992,3 +992,16 @@ dotnet run --project tests/foundations/Fylkren.FoundationTests.csproj --no-resto
 The source/documentation lock reports `{"authenticationControlDocumentation":"passed","addressPermitLimit":8,"addressWindowSeconds":60,"identityFailureLimit":20,"identityLockMinutes":15,"documentedLockoutAbuseMitigation":true,"authenticatedReauthenticationRoutesCovered":2,"webauthnRoutesCovered":5}`. The affected current-image route permits seven incorrect current-password checks after the rate-limited bootstrap consumed the first shared permit, then returns 429 with numeric `Retry-After` and `no-store`: `{"authenticatedReauthenticationRateLimit":"passed","sharedPartitionPermitLimit":8,"credentialChecksAfterBootstrap":7,"rejectedStatus":429,"numericRetryAfter":true}`. The separate anonymous run retains generic 401 responses for unknown/malformed identities and reaches the same 429 boundary. The maintained domain test locks exactly on failure 20 and saturates corrupted/exhausted counts without escaping lockout.
 
 API build completed with zero warnings/errors. The candidate API image is `sha256:f17a501afd48a2c2ae8e0fd7e7d87dfef0d8a82fee2a065a3e74026ebacb4d65`; the gateway image is `sha256:126d61a93642f32458538d540177b34524bc71fbb47d6ee1b459aaed855045ed`. SV-093 is closed. Production is untouched.
+
+## Password context-word documentation — 2026-10-04
+
+Completes the documentation requirement ASVS 6.1.2. The existing password policy rejects normalized tokens from the built-in `Fylkren` product identifier and the local identity's username, display name and email address. The password reference now lists those exact four value families, Unicode NFKC/invariant-lower normalization, punctuation separators, the four-character token floor and the three local password-setting flows. It separately records the pinned offline common-password source. Configurable Site, unit and role names are not claimed as policy inputs.
+
+Scoped commands:
+
+```sh
+node tools/test-password-context-documentation.mjs
+dotnet build apps/api/Fylkren.Api.csproj --no-restore
+```
+
+The source/document lock reports `{"passwordContextDocumentation":"passed","contextualValueFamilies":4,"normalization":"NFKC-lowercase","minimumTokenLength":4,"localPasswordSettingFlows":3,"offlineCommonPasswordList":true}`. It matches the production prepend/tokenize rules and verifies that Platform Manager bootstrap, password change and password reset all pass username, display name and email. The user-facing validation error previously mentioned organization/product names generically; it now identifies the actual enforced `Fylkren` and identity tokens. API build completed with zero warnings/errors. ASVS 6.2.11 remains separate for dynamic enforcement cases. No security finding was required. Production is untouched.
