@@ -22,9 +22,9 @@ public static class DirectoryEndpoints
         platform.MapDelete("/directory-links/{id:guid}", UnlinkIdentity);
         platform.MapPost("/directories/{provider}/test", TestConnection)
             .RequireFeature(FeatureCatalog.ExternalIdentity)
-            .RequireRateLimiting("costly-operation");
+            .RequireRateLimiting("integration-test");
         platform.MapPost("/directories/lifecycle/sync", SynchronizeLifecycle)
-            .RequireRateLimiting("costly-operation");
+            .RequireRateLimiting("integration-test");
         return endpoints;
     }
 

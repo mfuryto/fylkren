@@ -661,7 +661,7 @@ The API builds with zero warnings/errors. The tested API image is `sha256:e9612f
 
 Completes ASVS 2.4.1. The inventory retained existing stricter limits for authentication clients, machine identities and federation protocol callers but found no common ceiling for ordinary authenticated API traffic or several costly export and external-integration operations (SV-083). Authorization and per-command validation remained effective, but an authorized account could automate excessive reads, garbage writes, package generation or network probes.
 
-The common limiter now partitions authenticated browser traffic by person, machine traffic by machine identity and anonymous traffic by the trusted client-address boundary. It permits 600 reads and 120 mutating requests per fixed minute; health checks remain unthrottled for monitoring. Export, provider/directory/SMTP tests and remote federation discovery/synchronization permit six calls per identity/client per minute. Portable import validation has a separate 30-call ceiling because each package is already bounded by byte, entry and parser controls and the maintained security regression needs more than six validation cases. Every rejection uses `429` and numeric `Retry-After`.
+The common limiter now partitions authenticated browser traffic by person, machine traffic by machine identity and anonymous traffic by the trusted client-address boundary. It permits 600 reads and 120 mutating requests per fixed minute; health checks remain unthrottled for monitoring. Export and remote federation discovery/synchronization permit six calls per identity/client per minute. Portable import validation and explicit provider/directory/SMTP tests have separate 30-call ceilings because each call retains its own byte/time/destination controls and the maintained negative security suites require more than six cases. Every rejection uses `429` and numeric `Retry-After`.
 
 The focused commands were:
 
@@ -703,3 +703,20 @@ pnpm --filter @fylkren/web test
 All 41 test files and 161 tests pass. These include literal/double-encoded script, image, event-handler, template-expression and JavaScript-URL text in rich content; comment and activity attribution; classification inside generated print CSS; and report rendering. The maintained Chromium run additionally proves stored active-content text and editor paste/drop remain inert. No product correction was required.
 
 ASVS 3.2.2 is Passed. Safe source hashes and results are recorded under `safeTextOutputCompletion` in the evidence manifest. This does not pass cookie controls under 3.3.1 or complete release qualification. Production is untouched.
+
+## Secure host cookie setup — 2026-10-04
+
+Completes ASVS 3.3.1 and 3.3.3 and refreshes the already-passed 3.3.2/3.3.4 evidence. The focused fixture enables the production HTTPS and trusted-forwarder settings while keeping the disposable gateway/API network local. It sends forwarded HTTPS requests directly from the API container and inspects the unmodified `Set-Cookie` headers, avoiding a browser cookie jar that might normalize attributes.
+
+```sh
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-cookies-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-asvs-header-file-web:latest node tools/run-e2e-editions.mjs --asvs-cookie-only --no-build
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-cookies-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-asvs-header-file-web:latest node tools/run-identity-sso-lab.mjs --no-build
+```
+
+Bootstrap sign-in issues `__Host-Fylkren`; antiforgery initialization issues `__Host-Fylkren.Antiforgery`. Both have `Secure`, `HttpOnly`, `SameSite=Strict`, `Path=/` and no `Domain`. Neither fallback `Fylkren.Session` nor `Fylkren.Antiforgery` is present. A request without the forwarded HTTPS boundary returns an HTTPS redirect and no cookie.
+
+Source inventory then found that the framework-owned OIDC correlation/nonce and SAML request-state cookies retained their standard names. This host/subdomain cookie-injection defense gap is recorded and closed as SV-084. Production HTTPS configuration now issues `__Host-Fylkren.Oidc.Correlation.*`, `__Host-Fylkren.Oidc.Nonce.*` and `__Host-Fylkren.Saml2.*`, all with `Secure`, `HttpOnly`, `Path=/`, no `Domain` and the required `SameSite=None` for external-provider callbacks. The complete trusted-TLS lab passed signed OIDC and SAML login plus forged state, nonce, audience, unsigned/tampered assertion, replay and bounded metadata negatives.
+
+The first expanded lab attempt also exposed that the newly introduced six-per-minute integration-test partition interrupted the maintained bounded metadata sequence. Provider, directory and SMTP connection tests now have a separate 30-per-minute identity partition; export and remote federation operations retain the stricter six-per-minute limit, and the common 120-write limit still applies. The final lab passed without removing anti-automation controls.
+
+The API image is `sha256:c79729d6d904a2dd7896de63cb94254bf91256a0fdb734d796c88ca4db1d48d7`; the gateway image remains `sha256:2806135f53e64aaa7c63bcf2ff2e75933bb963361a42243bff84e2b512ae38e7`. ASVS 3.3.1–3.3.4 are Passed. Safe hashes and results are recorded under `secureCookieCompletion` in the evidence manifest. Production is untouched.

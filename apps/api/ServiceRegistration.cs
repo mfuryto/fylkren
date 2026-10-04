@@ -121,6 +121,17 @@ internal static class ServiceRegistration
                 options.ResponseType = "code";
                 options.MapInboundClaims = false;
                 options.SaveTokens = false;
+                if (requireHttps)
+                {
+                    options.CorrelationCookie.Name = "__Host-Fylkren.Oidc.Correlation.";
+                    options.CorrelationCookie.Path = "/";
+                    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.CorrelationCookie.HttpOnly = true;
+                    options.NonceCookie.Name = "__Host-Fylkren.Oidc.Nonce.";
+                    options.NonceCookie.Path = "/";
+                    options.NonceCookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.NonceCookie.HttpOnly = true;
+                }
                 options.GetClaimsFromUserInfoEndpoint = true;
                 options.Scope.Clear(); options.Scope.Add("openid"); options.Scope.Add("profile"); options.Scope.Add("email");
                 options.TokenValidationParameters.NameClaimType = "name";
@@ -172,6 +183,7 @@ internal static class ServiceRegistration
             {
                 var saml = fylkrenOptions.Authentication.Saml;
                 options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                if (requireHttps) options.CookieManager = new HostPrefixCookieManager("__Host-Fylkren.Saml2.");
                 options.SPOptions.EntityId = new EntityId(saml.Enabled ? saml.EntityId! : "https://disabled.invalid/fylkren");
                 options.SPOptions.ModulePath = saml.ModulePath;
                 options.SPOptions.NameIdPolicy = new Saml2NameIdPolicy(null, NameIdFormat.Persistent);
@@ -286,6 +298,9 @@ internal static class ServiceRegistration
                 _ => new FixedWindowRateLimiterOptions { PermitLimit = 6, Window = TimeSpan.FromMinutes(1), QueueLimit = 0, AutoReplenishment = true }));
             options.AddPolicy("bounded-upload", context => RateLimitPartition.GetFixedWindowLimiter(
                 $"bounded-upload:{InteractiveRatePartition(context, trustForwardedHeaders)}",
+                _ => new FixedWindowRateLimiterOptions { PermitLimit = 30, Window = TimeSpan.FromMinutes(1), QueueLimit = 0, AutoReplenishment = true }));
+            options.AddPolicy("integration-test", context => RateLimitPartition.GetFixedWindowLimiter(
+                $"integration-test:{InteractiveRatePartition(context, trustForwardedHeaders)}",
                 _ => new FixedWindowRateLimiterOptions { PermitLimit = 30, Window = TimeSpan.FromMinutes(1), QueueLimit = 0, AutoReplenishment = true }));
         });
         builder.Services.AddDbContext<FylkrenDbContext>(options =>

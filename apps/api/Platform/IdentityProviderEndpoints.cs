@@ -25,7 +25,7 @@ public static class IdentityProviderEndpoints
         group.MapPut("/providers/{provider}", UpdateProvider).RequireFeature(FeatureCatalog.ExternalIdentity);
         group.MapPost("/providers/{provider}/test", TestProvider)
             .RequireFeature(FeatureCatalog.ExternalIdentity)
-            .RequireRateLimiting("costly-operation");
+            .RequireRateLimiting("integration-test");
         group.MapGet("/oidc-links", (FylkrenDbContext database, CancellationToken cancellationToken) =>
             GetLinks("oidc", database, cancellationToken));
         group.MapPost("/oidc-links", (OidcLinkRequest request, IAntiforgery antiforgery,

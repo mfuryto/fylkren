@@ -4,6 +4,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Bind the application, antiforgery, OIDC correlation/nonce and SAML request-state cookies to the exact HTTPS host with explicit secure attributes; retain the cross-site callback behavior required by external identity providers.
 - Bound ordinary authenticated API traffic by identity and apply stricter limits to exports, large import validation and external integration probes, returning `429` with `Retry-After` when exhausted.
 - Return a controlled concurrency conflict when two users claim the same execution item, while preserving the existing single-owner database constraint.
 - Reject invalid administration API result limits instead of silently clamping them, and make the documented 512 MiB portable-import validator reachable through narrowly scoped API and gateway request limits.

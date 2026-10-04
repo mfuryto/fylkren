@@ -254,7 +254,8 @@ function browserClient() {
     const text = await response.text();
     let body;
     try { body = JSON.parse(text); } catch { body = text; }
-    return { status: response.status, body, location: response.headers.get('location') };
+    return { status: response.status, body, location: response.headers.get('location'),
+      setCookies: response.headers.getSetCookie() };
   }
   return {
     request,
@@ -459,6 +460,17 @@ try {
   const challenge = await manager.request('/api/auth/oidc/login');
   assert.equal(challenge.status, 302, `OIDC challenge: ${JSON.stringify(challenge)}`);
   assert.ok(challenge.location?.startsWith(`${authority}/protocol/openid-connect/auth?`), challenge.location);
+  const oidcStateCookies = challenge.setCookies.filter(cookie =>
+    /^__Host-Fylkren\.Oidc\.(?:Correlation|Nonce)\./.test(cookie));
+  assert.ok(oidcStateCookies.length >= 2, 'OIDC challenge did not issue correlation and nonce cookies');
+  for (const cookie of oidcStateCookies) {
+    assert.match(cookie, /^__Host-Fylkren\.Oidc\.(?:Correlation|Nonce)\./);
+    assert.match(cookie, /;\s*path=\/(?:;|$)/i);
+    assert.match(cookie, /;\s*secure(?:;|$)/i);
+    assert.match(cookie, /;\s*httponly(?:;|$)/i);
+    assert.match(cookie, /;\s*samesite=none(?:;|$)/i);
+    assert.doesNotMatch(cookie, /;\s*domain=/i);
+  }
 
   const forgedOidcBrowser = await createCdpSession('about:blank');
   await forgedOidcBrowser.clearCookies(browserBase);
@@ -754,6 +766,17 @@ try {
     'SAML links must retain the exact IdP entity ID');
   const samlChallenge = await manager.request('/api/auth/saml/login');
   assert.ok([302, 303].includes(samlChallenge.status), `SAML challenge: ${JSON.stringify(samlChallenge)}`);
+  const samlStateCookies = samlChallenge.setCookies.filter(cookie =>
+    /^__Host-Fylkren\.Saml2\./.test(cookie));
+  assert.ok(samlStateCookies.length >= 1, 'SAML challenge did not issue request-state cookies');
+  for (const cookie of samlStateCookies) {
+    assert.match(cookie, /^__Host-Fylkren\.Saml2\./);
+    assert.match(cookie, /;\s*path=\/(?:;|$)/i);
+    assert.match(cookie, /;\s*secure(?:;|$)/i);
+    assert.match(cookie, /;\s*httponly(?:;|$)/i);
+    assert.match(cookie, /;\s*samesite=none(?:;|$)/i);
+    assert.doesNotMatch(cookie, /;\s*domain=/i);
+  }
 
   const tamperedSamlBrowser = await createCdpSession('about:blank');
   await tamperedSamlBrowser.clearCookies(browserBase);

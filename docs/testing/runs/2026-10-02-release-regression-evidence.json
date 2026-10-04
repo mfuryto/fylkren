@@ -4517,5 +4517,36 @@
     },
     "matrix": "ASVS 3.2.2 Passed; continue at 3.3.1",
     "scope": "Complete current TypeScript/TSX output-sink inventory and maintained browser evidence; no cookie-control claim"
+  },
+  "secureCookieCompletion": {
+    "date": "2026-10-04",
+    "baseline": "02e2c4e",
+    "sourceHashes": {
+      "apps/api/ServiceRegistration.cs": "74a2aeab357c83923c63233e6c02450724a21bbd4d387f17258f1e99a7ba45de",
+      "apps/api/Identity/HostPrefixCookieManager.cs": "226ae71d8210234d0357628ce1f81be006545e8d937359a5cf15a7ba29b93a0c",
+      "apps/api/Identity/DirectoryEndpoints.cs": "4f04ef0f014605946b2c8da125ac42e0851a45d98d47d85289c6d55ad799726e",
+      "apps/api/Platform/IdentityProviderEndpoints.cs": "2266c9758e6ea8cb44402e49f4ac4a0872c3ca1ea0efbfa5ede2037545076d51",
+      "apps/api/Platform/SmtpEndpoints.cs": "1be6224730c6585d4e22bf1bcb886ed52c7b5896cbf770f9c5925b963cccc6fb",
+      "tools/test-secure-cookies.mjs": "7ac8fe7a57ed40a7ebec438106e9046ccefe0f91f7dcc8e18ac3bb5b45ba17c8",
+      "tools/run-e2e-editions.mjs": "84ca674b8851d2e03475ae97c14b7a13ffb3baa9f95f81b80d5b381a36779966",
+      "tools/run-identity-sso-lab.mjs": "10c2a09a3ef87b45a57aea745f36653d78b1e2a7e558be7d869dc5dde97fd67c"
+    },
+    "apiImage": "sha256:c79729d6d904a2dd7896de63cb94254bf91256a0fdb734d796c88ca4db1d48d7",
+    "reusedWebImage": "sha256:2806135f53e64aaa7c63bcf2ff2e75933bb963361a42243bff84e2b512ae38e7",
+    "results": {
+      "applicationSessionCookie": "__Host-Fylkren",
+      "antiforgeryCookie": "__Host-Fylkren.Antiforgery",
+      "externalStateCookieFamilies": 3,
+      "secure": true,
+      "hostOnlyRootPath": true,
+      "httpOnly": true,
+      "purposeSpecificSameSite": true,
+      "plainHttpRedirectWithoutCookie": true,
+      "signedOidcAndSamlFlows": "passed",
+      "externalAuthenticationNegativeCases": "passed"
+    },
+    "finding": "SV-084 closed after focused and complete SSO retest",
+    "matrix": "ASVS 3.3.1-3.3.4 Passed; continue at 3.4.1",
+    "scope": "Complete current server-cookie inventory, raw HTTPS headers and maintained external identity flows; no browser security-header claim"
   }
 }
