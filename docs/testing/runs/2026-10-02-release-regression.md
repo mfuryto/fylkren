@@ -1383,3 +1383,16 @@ node tools/run-e2e-editions.mjs --asvs-session-token-only
 ```
 
 The run reports `{"dynamicSessionTokenRuntime":"passed","independentLoginsProduceDistinctTokens":true,"selfContainedProtectedCookie":true,"tamperedTokenRejected":true,"staticSessionSecret":false}`. The candidate API image is `sha256:da3872f4381aab7222bdb31ae1e26c0ee4919e185433f9f1a36e1b1fc8b65a28`; the gateway image is `sha256:c30c43d289f98fd521dafed6f61009c57c8da761a9bb3ac710e000f69e399ca9`. No unrelated end-to-end flow was executed and production is untouched.
+
+## Session timeout boundaries — 2026-10-04
+
+Completes ASVS 7.3.1 and 7.3.2 against the same current candidate. A test-only .NET utility copies the disposable candidate's Data Protection keys and unprotects the synthetic login ticket. It then creates correctly protected variants immediately before and after the one-hour ticket-expiry boundary and immediately before and after the twelve-hour `fylkren:session_started_at` boundary. This exercises the actual cookie middleware and principal validator without a long wait, server clock change, production test endpoint or protection bypass.
+
+Scoped commands:
+
+```sh
+dotnet build tools/session-ticket-tool/session-ticket-tool.csproj --configuration Release
+FYLKREN_E2E_API_IMAGE=sha256:da3872f4381aab7222bdb31ae1e26c0ee4919e185433f9f1a36e1b1fc8b65a28 FYLKREN_E2E_WEB_IMAGE=sha256:c30c43d289f98fd521dafed6f61009c57c8da761a9bb3ac710e000f69e399ca9 node tools/run-e2e-editions.mjs --asvs-session-timeout-only --no-build
+```
+
+The focused run reports `{"sessionTimeoutRuntime":"passed","inactivityHours":1,"absoluteHours":12,"inactivityBeforeAccepted":true,"inactivityAfterRejected":true,"absoluteBeforeAccepted":true,"absoluteAfterRejected":true}`. The helper builds with zero warnings and errors. Candidate image IDs are unchanged from the preceding stage; copied keys and generated variants existed only in the disposable run and temporary directory. Production is untouched.
