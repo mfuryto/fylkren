@@ -1537,3 +1537,15 @@ pnpm check:docs
 ```
 
 The control reports `{"objectAuthorizationInventory":"passed","resourceClasses":13,"ownershipBindingDocumented":true,"maintainedEvidenceSuites":8}`. It locks the inventory to maintained negative tests for Site/role/work-item GUID substitution, sibling planning/execution runs, exact-level learning, classified reports, cross-Site receiver internals, activity/lifecycle, archive custody and decisions/risks. The already recorded dynamic executions supply the HTTP and database behavior; this reconciliation did not rerun unrelated workflows. Production is untouched.
+
+## Field-level authorization enforcement — 2026-10-04
+
+Completes ASVS 8.2.3. Every documented field class is bound to maintained enforcement evidence. The inventory includes authentication and integration secrets, self-profile reauthentication, Site-owned personnel, internal work/cross-Site official projections, exact-level learning, classified reports, filtered audit/activity and archive/export isolation. Explicit response projection checks also require identity-provider secrets to be replaced by a presence indicator.
+
+Scoped command:
+
+```sh
+node tools/test-field-authorization-enforcement-inventory.mjs
+```
+
+The control reports `{"fieldAuthorizationEnforcementInventory":"passed","fieldClasses":10,"maintainedEvidenceBindings":10,"explicitResponseProjections":true}`. Its bindings point to already executed dynamic suites; this traceability completion did not rerun unrelated workflows. Production is untouched.
