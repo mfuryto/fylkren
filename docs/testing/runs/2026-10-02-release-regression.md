@@ -1032,3 +1032,16 @@ node tools/run-e2e-editions.mjs --asvs-password-length-only
 The source lock reports `{"passwordLengthBoundary":"passed","minimumLength":14,"maximumLength":128,"localUserSetPasswordFlows":3}`. The current-image run uses distinct non-context/common candidates at exactly 13 and 14 characters for all three flows. Every 13-character value returns validation failure and every 14-character value succeeds: `{"passwordLengthRuntime":"passed","rejectedLength":13,"acceptedLength":14,"testedFlows":["bootstrap","change","reset"],"resetGrantPreservedAfterInvalidPassword":true}`. The invalid reset candidate does not consume its one-time grant before the valid boundary attempt.
 
 The candidate API image is `sha256:922a2f9dfae305cb99f6fd1cd51f215d91875dff95a0a14644bc9fa68364c970`; the gateway image is `sha256:9383959069230a3fa6e6e8dcdcde35204b594692a37e5cc1c5f7364ca9db51bb`. No product correction or finding was required. Production is untouched.
+
+## Password change current and new proof — 2026-10-04
+
+Completes ASVS 6.2.3. The profile password route is authenticated, antiforgery-protected and uses the shared authentication attempt limiter. Source locking confirms that it requires both values, verifies the current hash, rejects reuse, applies the shared policy to the new value and only then replaces the hash.
+
+Scoped commands:
+
+```sh
+node tools/test-password-change-boundary.mjs
+FYLKREN_E2E_API_IMAGE=sha256:922a2f9dfae305cb99f6fd1cd51f215d91875dff95a0a14644bc9fa68364c970 FYLKREN_E2E_WEB_IMAGE=sha256:9383959069230a3fa6e6e8dcdcde35204b594692a37e5cc1c5f7364ca9db51bb node tools/run-e2e-editions.mjs --asvs-password-change-only --no-build
+```
+
+The source lock reports `{"passwordChangeBoundary":"passed","requiresCurrentPassword":true,"requiresNewPassword":true,"verifiesCurrentHash":true,"rejectsReuse":true,"validatesNewPassword":true,"sharedAuthenticationRateLimit":true}`. The current-image run rejects missing current, missing new, incorrect current and identical old/new values, then accepts the valid change. A new client receives 401 with the old password and 204 with the new one: `{"passwordChangeRuntime":"passed","missingCurrentRejected":true,"missingNewRejected":true,"wrongCurrentRejected":true,"reuseRejected":true,"validChangeAccepted":true,"oldPasswordRejected":true,"newPasswordAccepted":true}`. ASVS 6.2.2 remains supported by the earlier identity lifecycle run that exercises user-initiated password change and session invalidation. No correction or finding was required. Production is untouched.
