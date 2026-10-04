@@ -1097,3 +1097,16 @@ pnpm --filter @fylkren/web typecheck
 ```
 
 The test reports `{"passwordInputMasking":"passed","maskedPasswordOrSecretInputs":15,"userPasswordInputs":13,"coveredUserFlows":["bootstrap","login","reset","user-creation","profile","totp","passkey"],"passwordManagerCompatibility":"passed","pasteInterceptors":0,"standardAutocompleteInputs":13}`. It found and corrected absent autocomplete semantics on Site Manager creation (`new-password`) and TOTP deactivation (`current-password`). Frontend typechecking completed without errors. Production is untouched.
+
+## Exact and long password handling — 2026-10-04
+
+Completes ASVS 6.2.8 and 6.2.9. Source locking confirms local login passes the received password unchanged to ASP.NET PasswordHasher verification, while bootstrap, authenticated change and reset hash the received value unchanged. The normalization used by the shared policy applies only to separate common-password and contextual-word comparisons. The supported maximum is 128 characters, exceeding the ASVS 64-character requirement.
+
+Scoped commands:
+
+```sh
+node tools/test-password-exactness-boundary.mjs
+FYLKREN_E2E_API_IMAGE=sha256:922a2f9dfae305cb99f6fd1cd51f215d91875dff95a0a14644bc9fa68364c970 FYLKREN_E2E_WEB_IMAGE=sha256:9383959069230a3fa6e6e8dcdcde35204b594692a37e5cc1c5f7364ca9db51bb node tools/run-e2e-editions.mjs --asvs-password-maximum-only --no-build
+```
+
+The source lock reports `{"passwordExactnessBoundary":"passed","unchangedVerification":true,"unchangedHashingFlows":["bootstrap","change","reset"],"maximumAcceptedLength":128}`. The current-image run accepts exactly 128 characters and rejects 129 during bootstrap, change and reset. It then rejects the otherwise identical 127-character prefix at login and accepts the complete value: `{"passwordMaximumRuntime":"passed","acceptedLength":128,"rejectedLength":129,"testedFlows":["bootstrap","change","reset"],"fullLengthAuthentication":true,"truncatedCandidateRejected":true}`. No correction or finding was required. Production is untouched.
