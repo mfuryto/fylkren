@@ -1260,3 +1260,15 @@ node tools/test-lookup-secret-storage-boundary.mjs
 ```
 
 The source/schema lock reports `{"lookupSecretStorageBoundary":"passed","lookupSecretTypes":["totpRecoveryCode","passwordResetCode"],"entropyBits":128,"persistedRepresentation":"sha256","persistedRawSecrets":false,"standardHashPermittedAboveBits":112}`. Existing dynamic tests separately establish that the raw values returned at issuance are accepted only once. No implementation correction or finding was required. Production is untouched.
+
+## Authentication-secret CSPRNG generation — 2026-10-04
+
+Completes ASVS 6.5.3. The criterion-specific source lock traces every application-generated authentication secret in scope to the operating-system-backed .NET cryptographic random generator: TOTP seeds use 20 bytes, and TOTP recovery codes and administrator-issued password-reset codes use 16 bytes each. The complete Identity C# source set contains no use of `Random` or `Random.Shared`.
+
+Scoped command:
+
+```sh
+node tools/test-authentication-secret-csprng-boundary.mjs
+```
+
+The source lock reports `{"authenticationSecretCsprngBoundary":"passed","generatedSecrets":{"totpSeedBits":160,"recoveryCodeBits":128,"resetCodeBits":128},"generator":"System.Security.Cryptography.RandomNumberGenerator","nonCryptographicRandomInIdentity":false,"outOfBandAuthenticationMechanism":false}`. Fylkren does not implement SMS, voice, email OTP or another out-of-band authentication mechanism. Data-protected setup and sign-in challenges are server-state bindings rather than user-entered authentication codes. No implementation correction or finding was required. Production is untouched.
