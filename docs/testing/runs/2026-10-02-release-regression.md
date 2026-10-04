@@ -1498,3 +1498,17 @@ pnpm check:docs
 ```
 
 The inventory reports `{"authorizationDocumentationInventory":"passed","endpointFiles":94,"endpointOperations":287,"methodCounts":{"GET":103,"POST":114,"PUT":45,"PATCH":0,"DELETE":25},"familyCounts":{"public-bootstrap":7,"identity-session":30,"machine-api":26,"federation":39,"archive-portability":8,"platform-governance":55,"site-administration":45,"operational-work":77}}`. Documentation links and traceability checks pass. Existing dynamic authorization tests remain the behavioral evidence for role, Site, work-level and direct-object boundaries; this documentation-only criterion did not rerun unrelated product flows. Production is untouched.
+
+## Field-level authorization documentation — 2026-10-04
+
+Completes ASVS 8.1.2. The access matrix now defines allowlisted read and write rules for authentication secrets, self-profile data, personnel administration, operational work content, cross-Site official fields, private learning, classified reports, audit/activity, integration secrets and archive/export data. Each class names the consumer rule and the Site, level, ownership, lifecycle, classification or other state attributes that narrow access.
+
+Scoped commands:
+
+```sh
+node tools/test-field-authorization-documentation.mjs
+node tools/test-authorization-documentation-inventory.mjs
+pnpm check:docs
+```
+
+The field control reports `{"fieldAuthorizationDocumentation":"passed","fieldClasses":10,"stateDependentRulesDocumented":true,"maintainedNegativeEvidence":["private-learning","classified-report","archive-export","cross-site-official"]}`. It also locks the inventory to existing negative behavioral assertions that exclude private learning from reports/superior activity, conceal classified reports without the grant flag, omit authentication secrets from exports and prevent a sender reading receiver-internal work. The endpoint inventory and documentation checks still pass. No unrelated product flow was rerun. Production is untouched.
