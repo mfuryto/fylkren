@@ -20,6 +20,7 @@ public static partial class PortabilityEndpoints
         group.MapPost("/sites/{siteId:guid}/exports/{exportId:guid}/acknowledge", Acknowledge);
         group.MapPost("/sites/{siteId:guid}/imports/validate", ValidateImport)
             .DisableAntiforgery()
+            .WithMetadata(new RequestSizeLimitAttribute(PortableExportPackage.MaximumImportRequestBytes))
             .WithMetadata(new RequestFormLimitsAttribute { MultipartBodyLengthLimit = PortableExportPackage.MaximumPackageBytes });
         return endpoints;
     }

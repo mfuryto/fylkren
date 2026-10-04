@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 2026-10-04 after completing ASVS 1.4.2 and validation documentation, context and business-limit tests for 2.1.1–2.1.3; the native DNS residual and next requirement 2.2.1 remain explicit.
+Updated 2026-10-04 after completing ASVS 1.4.2, validation documentation/context/business-limit tests for 2.1.1–2.1.3 and the query, null-body and header/file slices of 2.2.1; the native DNS residual and remaining body inventory remain explicit.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -12,7 +12,7 @@ The additive event/activity foundation and coherent WorkItem slice are delivered
 
 ## Next delivery order
 
-1. Continue ASVS 2.2.1 with remaining body fields plus the header/file portion of the complete input/endpoint inventory. The query and null-body/collection slices are corrected and verified in the [query](../testing/runs/2026-10-02-release-regression.md#query-input-validation--2026-10-04) and [request-body](../testing/runs/2026-10-02-release-regression.md#request-body-shape-validation--2026-10-04) continuations; they do not complete 2.2.1. ASVS 1.4.2 and 2.1.1–2.1.3 are Passed after the linked arithmetic, input-documentation, contextual-validation and [business-limit](../testing/runs/2026-10-02-release-regression.md#business-limit-documentation--2026-10-04) evidence. Missing per-account creation and installation-wide storage controls remain explicit under 2.4.1. HTTP and SMTP/AD/LDAP cases remain recorded; 1.3.6 is a Finding (SV-068) pending verified deployment egress restrictions for native DNS rebinding. Continue independent matrix cases while that qualification remains open.
+1. Continue ASVS 2.2.1 with the remaining request-body field inventory. Query, null-body/collection and header/file slices are corrected and verified in the [query](../testing/runs/2026-10-02-release-regression.md#query-input-validation--2026-10-04), [request-body](../testing/runs/2026-10-02-release-regression.md#request-body-shape-validation--2026-10-04) and [header/file](../testing/runs/2026-10-02-release-regression.md#header-and-file-input-validation--2026-10-04) continuations; they do not complete 2.2.1. ASVS 1.4.2 and 2.1.1–2.1.3 are Passed after the linked arithmetic, input-documentation, contextual-validation and [business-limit](../testing/runs/2026-10-02-release-regression.md#business-limit-documentation--2026-10-04) evidence. Missing per-account creation and installation-wide storage controls remain explicit under 2.4.1. HTTP and SMTP/AD/LDAP cases remain recorded; 1.3.6 is a Finding (SV-068) pending verified deployment egress restrictions for native DNS rebinding. Continue independent matrix cases while that qualification remains open.
 2. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing at this gate.
 
 No irreversible disposition is authorized by this order. Establish and verify its prerequisites before proposing activation; do not choose arbitrary retention periods.

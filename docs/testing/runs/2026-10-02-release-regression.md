@@ -544,3 +544,17 @@ FYLKREN_E2E_API_IMAGE=fylkren-asvs-body-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren
 Seven malformed HTTP bodies return 400: null template content, a null workflow step, a mixed null machine scope, and three null webhook field/element forms, plus a null decision reference. The decision case confirms no revision persisted. Compilation completes with zero warnings/errors. Source guards also cover the homologous planning, execution and learning collection paths; those deeper operational paths retain their existing functional tests and remain part of the continuing full input inventory rather than being claimed as seven additional dynamic cases.
 
 The API image is `sha256:0525d44d4f44f2a8639c179bd9594ca0fd943fd7fdd55286eacaefb4daee88e1`; the reused web is unchanged. ASVS 2.2.1 remains In progress for remaining body fields, headers and file inputs. Safe hashes and results are recorded under `requestBodyShapeContinuation` in the existing evidence manifest. Production is untouched.
+
+## Header and file input validation — 2026-10-04
+
+Continues ASVS 2.2.1 without marking it complete. Header and file source inventory confirmed bounded Bearer parsing, `Idempotency-Key` allowlisting, numeric `If-Match` parsing and image signature/type/size validation. It also found two inconsistent input boundaries. The administration Site list silently clamped invalid `limit` values (SV-078). Portable import advertised a 512 MiB package ceiling, while the gateway and API global 3 MiB request ceilings made that validator unreachable for larger admissible packages (SV-079). Baseline runs against the preceding API/web candidates reproduced HTTP 200 for `limit=0` and HTTP 413 for a 4 MiB multipart package.
+
+The shared query validator now rejects invalid administration limits. The general 3 MiB request ceiling remains; only the UUID-shaped portable import-validation route receives 513 MiB capacity for multipart overhead, while the endpoint continues to reject files above 512 MiB and the existing ZIP entry/count/integrity limits remain unchanged. The focused retest used:
+
+```sh
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-header-file-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-asvs-header-file-web:latest node tools/run-e2e-editions.mjs --asvs-header-file-only --no-build
+```
+
+The run rejects four invalid machine API limits, accepts both documented boundaries, rejects a logo one byte above 2 MiB and sends a 4 MiB invalid ZIP through the intended validator, which returns a bounded invalid result. API compilation completed with zero warnings/errors and the gateway candidate passed its Compose health check. The API image is `sha256:ae67605e2bb6077d3a72f29aa98d681c1e081da0559ab71abc248f245cbe0a38`; the web image is `sha256:2806135f53e64aaa7c63bcf2ff2e75933bb963361a42243bff84e2b512ae38e7`.
+
+ASVS 2.2.1 remains In progress for the remaining request-body field inventory. Safe hashes and results are recorded under `headerFileInputValidationContinuation` in the existing evidence manifest. Production is untouched.

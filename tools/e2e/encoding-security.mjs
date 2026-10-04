@@ -187,6 +187,44 @@ export async function testBodyShapeValidation({ platform, leader, siteManager, s
     nullCollectionElementCases: 5, atomicRejectedBodies: true };
 }
 
+export async function testHeaderFileInputValidation({ platform, siteManager, siteId, base }) {
+  const machine = await platform.post('/api/platform/api-clients/', {
+    name: 'Synthetic header and file validation client',
+    scopes: ['sites:read', 'sites:write'],
+    expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+  });
+  assert.equal(machine.status, 201, JSON.stringify(machine.body));
+  const machineRequest = async (path, options = {}) => {
+    const response = await fetch(`${base}${path}`, {
+      ...options,
+      headers: { Authorization: `Bearer ${machine.body.token}`, ...(options.headers ?? {}) },
+    });
+    return { status: response.status, body: await response.text() };
+  };
+  const packageForm = new FormData();
+  packageForm.append('package', new Blob([Buffer.alloc(4 * 1024 * 1024)], { type: 'application/zip' }), 'bounded-invalid.zip');
+  const packageResult = await siteManager.request(`/api/portability/sites/${siteId}/imports/validate`, {
+    method: 'POST', body: packageForm,
+  });
+  assert.equal(packageResult.status, 200,
+    'Import validation did not apply its documented endpoint-specific package limit');
+  assert.equal(packageResult.body.valid, false, 'Invalid package content was accepted');
+
+  for (const limit of ['0', '101', '-1', '2147483648'])
+    assert.equal((await machineRequest(`/api/v1/administration/sites?limit=${limit}`)).status, 400,
+      `Administration Site limit was silently accepted: ${limit}`);
+  for (const limit of ['1', '100'])
+    assert.equal((await machineRequest(`/api/v1/administration/sites?limit=${limit}`)).status, 200,
+      `Documented administration Site limit was rejected: ${limit}`);
+
+  const oversizedLogo = new FormData();
+  oversizedLogo.append('logo', new Blob([Buffer.alloc(2 * 1024 * 1024 + 1)], { type: 'image/png' }), 'oversized.png');
+  assert.equal((await platform.request('/api/platform/branding/logo', { method: 'PUT', body: oversizedLogo })).status, 400,
+    'Branding logo exceeded the documented two MiB file limit');
+  return { headerFileInputValidation: 'passed', rejectedSiteLimits: 4, acceptedSiteLimits: 2,
+    oversizedImageRejected: true, endpointSpecificPackageLimitReached: true };
+}
+
 export async function testDerivedArithmeticBoundaries({ platform, siteManager, leader, siteId, unitId, workItemTypeId }) {
   const path = `/api/site-audit/sites/${siteId}`;
   const original = await siteManager.request(path);

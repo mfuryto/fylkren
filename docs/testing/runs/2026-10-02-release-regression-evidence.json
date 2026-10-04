@@ -4216,5 +4216,36 @@
     "finding": "SV-077 closed after focused retest",
     "matrix": "ASVS 2.2.1 remains In progress; continue remaining body fields plus header/file inventory",
     "scope": "Required body fields and null object-collection elements; no complete input or release qualification"
+  },
+  "headerFileInputValidationContinuation": {
+    "date": "2026-10-04",
+    "baseline": "c024371",
+    "sourceHashes": {
+      "apps/api/Platform/AdministrationApiEndpoints.cs": "7b645236c31048d15d82a76c3b32ce367e958397364d3ed821aace1b470a4c32",
+      "apps/api/Portability/PortabilityEndpoints.cs": "3e8c1d003e139a3a03e794538e034c9c469add7162a8ecce638f8ebef17c808d",
+      "apps/api/Portability/PortableExportPackage.cs": "40f199dd41d517b1b1bda6108a1a7bb45d21bf751d1655e9172b14b1672ce6a6",
+      "apps/web/nginx.conf": "71e37872a12ff6b5ed30786b70eb8ea8fcdb066f4f2af35713babf3510a51139",
+      "tools/e2e/encoding-security.mjs": "d410deb3a5ec7e2bbb58473ab8c3c41cd88094a190f3e6e7d80e5b89f3cb737d",
+      "tools/run-e2e-editions.mjs": "ef89acf9846c6d5a8c9823db10d9480d2e66d26f58e01b3184678f9c4a09c4cd",
+      "tools/test-e2e-local.mjs": "1575a58bc6893adc834331f0be0ebf1c9760b86282ae44f3bc15a227c86f0b5d"
+    },
+    "baselineApiImage": "sha256:0525d44d4f44f2a8639c179bd9594ca0fd943fd7fdd55286eacaefb4daee88e1",
+    "baselineWebImage": "sha256:95c69456ec0870a718f167db181344235d23ccd5744ec99a0879df61d3c9f497",
+    "apiImage": "sha256:ae67605e2bb6077d3a72f29aa98d681c1e081da0559ab71abc248f245cbe0a38",
+    "webImage": "sha256:2806135f53e64aaa7c63bcf2ff2e75933bb963361a42243bff84e2b512ae38e7",
+    "results": {
+      "baselineInvalidSiteLimit": "HTTP 200 reproduced",
+      "baselineFourMiBImport": "HTTP 413 reproduced",
+      "headerFileInputValidation": "passed",
+      "rejectedSiteLimits": 4,
+      "acceptedSiteLimits": 2,
+      "oversizedImageRejected": true,
+      "endpointSpecificPackageLimitReached": true,
+      "apiBuildWarnings": 0,
+      "gatewayComposeHealth": "passed"
+    },
+    "findings": ["SV-078 closed after focused retest", "SV-079 closed after focused retest"],
+    "matrix": "ASVS 2.2.1 remains In progress; continue remaining request-body field inventory",
+    "scope": "Header and file-input inventory plus focused API/gateway tests; no complete body inventory or release qualification"
   }
 }

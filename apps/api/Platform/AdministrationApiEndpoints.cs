@@ -52,8 +52,12 @@ public static class AdministrationApiEndpoints
         {
             return queryError;
         }
+        if (RequestQueryPolicy.ValidateLimit(limit) is { } limitError)
+        {
+            return limitError;
+        }
 
-        var take = Math.Clamp(limit ?? 50, 1, 100);
+        var take = limit ?? 50;
         var query = db.Sites.AsNoTracking();
         if (!string.IsNullOrWhiteSpace(search))
         {
