@@ -26,6 +26,8 @@ Print-to-PDF is performed by the user's browser and is not a server file upload 
 
 Fylkren has no public upload directory. Uploaded raster bytes live only in PostgreSQL and are returned through fixed API routes; generated exports remain in memory. The API does not serve a filesystem tree. The web container serves only build-time frontend assets from its read-only image, both application containers use read-only root filesystems, and writable temporary mounts are `noexec`.
 
+Client image and package filenames are never used as filesystem paths. Generated export attachment and response names combine fixed prefixes with server-held UUIDs and allowlisted extensions. Portable ZIP entry names are virtual only and are never extracted; traversal, absolute and out-of-prefix paths are rejected before content processing.
+
 ## Malicious-content behavior and present limits
 
 Fylkren fully decodes and re-encodes supported raster uploads, rejects disguised or malformed content and never stores a client-controlled filename or executable path. Re-encoding strips metadata, extra frames and trailing content. Fylkren does not run an antivirus engine; downstream controls remain relevant for exported ZIP packages and any future general attachment feature.

@@ -912,3 +912,18 @@ FYLKREN_E2E_API_IMAGE=sha256:26d095f69ca561ada71afd0dae7d2368cce1c27c2ea4f7388aa
 The source lock reports `{"fileStorageBoundary":"passed","serverMultipartFeatures":3,"databaseStoredUploads":2,"generatedInMemoryDownloads":1,"publicUploadDirectories":0,"readOnlyApplicationContainers":2,"noexecTemporaryMounts":3}`. The live test uploads valid PNGs under the double-extension name `synthetic.aspx.png` to both image endpoints, retrieves only the sanitized database values through their fixed API routes and receives HTML 404 responses for `/synthetic.aspx.png`, `/uploads/synthetic.aspx.png` and `/wwwroot/synthetic.aspx.png`. Result: `{"fileStorageBoundary":"passed","databaseBackedImageEndpoints":2,"publicUploadPathProbes":3,"publicUploadPathStatus":404,"clientFilenamePersistedAsPath":false}`.
 
 The first test attempt expected SPA fallback 200 on these extension-bearing paths; the gateway correctly routes them through its static-file location and returned 404. The assertion was corrected to the stronger maintained behavior and the same candidate passed. No product correction or new finding was required. Production is untouched.
+
+## File path generation and traversal applicability — 2026-10-04
+
+Assesses ASVS 5.3.2 and retains Not applicable with requirement-specific evidence. Fylkren performs no filesystem operation using an uploaded filename or ZIP entry. Image/package names are consulted only for allowlisted final extensions; sanitized image bytes live in PostgreSQL, packages remain in memory and archives are never extracted. The only generated names use fixed prefixes, server-held UUIDs and extensions derived from fixed media types. Operator host-status and backup paths are deployment-owned read-only inputs outside the upload boundary.
+
+Scoped commands:
+
+```sh
+node tools/test-file-path-boundary.mjs
+FYLKREN_E2E_API_IMAGE=sha256:26d095f69ca561ada71afd0dae7d2368cce1c27c2ea4f7388aa1792b7eb9bc5e FYLKREN_E2E_WEB_IMAGE=sha256:1c81106369690b928da8acd2f0a19b19ff3f504d9ed39315c3a03dcceb75e7ee node tools/run-e2e-editions.mjs --asvs-file-content-only --no-build
+```
+
+The source inventory reports `{"filePathBoundary":"passed","clientFilenamesPersisted":0,"filesystemExtractionSites":0,"generatedPathFamilies":2,"rejectedArchivePathFamilies":3}`. The current-image run retains all type/content positives and negatives and additionally rejects ZIP entries named `../synthetic.txt`, `/synthetic.txt` and `\\synthetic.txt` before package processing. Result: `{"portableFileContent":"passed","outerPackageTypeRejections":2,"rejectedInternalTypeCases":4,"unsafeArchivePathsRejected":3,"decodedAttachmentTypes":["png","jpeg","webp"]}`.
+
+This defensive virtual-path validation does not make the requirement applicable to filesystem storage. Reopen 5.3.2 if Fylkren introduces server-side attachment directories, client-derived paths or archive extraction. No product correction or finding was required. Production is untouched.

@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 2026-10-04 after completing ASVS 1.4.2, chapters 2–4, upload/content handling and public storage execution 5.3.1; the native DNS residual and next requirement 5.3.2 remain explicit.
+Updated 2026-10-04 after completing ASVS 1.4.2, chapters 2–4 and file handling/storage through 5.3.2; the native DNS residual and next requirement 5.4.1 remain explicit.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -12,7 +12,7 @@ The additive event/activity foundation and coherent WorkItem slice are delivered
 
 ## Next delivery order
 
-1. Continue in requirement order at ASVS 5.3.2: verify every created/consumed file path uses generated trusted names or rejects traversal/inclusion/remote-path syntax. Public storage execution 5.3.1 is Passed after source inventory and database/API/public-path probes. HTTP and SMTP/AD/LDAP cases remain recorded; 1.3.6 is a Finding (SV-068) pending verified deployment egress restrictions for native DNS rebinding. Continue independent matrix cases while that qualification remains open.
+1. Continue in requirement order at ASVS 5.4.1: verify filename handling and `Content-Disposition` for every download. File-path handling 5.3.2 remains Not applicable because no uploaded filename or ZIP path reaches a filesystem operation; source and live traversal evidence records the reopen condition. HTTP and SMTP/AD/LDAP cases remain recorded; 1.3.6 is a Finding (SV-068) pending verified deployment egress restrictions for native DNS rebinding. Continue independent matrix cases while that qualification remains open.
 2. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing at this gate.
 
 No irreversible disposition is authorized by this order. Establish and verify its prerequisites before proposing activation; do not choose arbitrary retention periods.
@@ -40,7 +40,7 @@ The [ASVS 5.0 Level 2 matrix](../security/ASVS_5.0.0_L2_MATRIX.md) is the single
 
 Use the [security test plan](../security/SECURITY_TEST_PLAN.md) and [threat model](../security/SECURITY_THREAT_MODEL.md). Record findings and remediation in the [finding register](../security/SECURITY_VERIFICATION.md); record completed requirement-specific tests in the ASVS matrix with links to maintained execution evidence. Partial coverage remains partial. Retest affected controls after every change.
 
-HTTP destination/DNS/redirect/download boundaries and bounded runtime SAML metadata are delivered and tested. SMTP/AD/LDAP configured target, TLS and referral cases passed in the [same release record](../testing/runs/2026-10-02-release-regression.md#non-http-service-transport-continuation--2026-10-04). Native DNS rebinding remains SV-068 pending deployment egress qualification; arithmetic, chapters 2–4 and file handling through 5.3.1 are verified; continue at 5.3.2. Do not rerun unrelated full-product chains for scoped corrections. Deployment-sensitive controls require production-equivalent TLS, canonical Host/port and proxy configuration, customer identity-provider behavior, authenticator compatibility and coordinated database/Data Protection key recovery with real backup custody. Disposable restore tests already exist; operational custody qualification remains separate.
+HTTP destination/DNS/redirect/download boundaries and bounded runtime SAML metadata are delivered and tested. SMTP/AD/LDAP configured target, TLS and referral cases passed in the [same release record](../testing/runs/2026-10-02-release-regression.md#non-http-service-transport-continuation--2026-10-04). Native DNS rebinding remains SV-068 pending deployment egress qualification; arithmetic, chapters 2–4 and file handling/storage through 5.3.2 are verified; continue at 5.4.1. Do not rerun unrelated full-product chains for scoped corrections. Deployment-sensitive controls require production-equivalent TLS, canonical Host/port and proxy configuration, customer identity-provider behavior, authenticator compatibility and coordinated database/Data Protection key recovery with real backup custody. Disposable restore tests already exist; operational custody qualification remains separate.
 
 Relevant Level 3 controls, WSTG techniques and API Security Top 10 coverage support this same workflow. An external penetration test is optional if requested, not a prerequisite for completing the authorized testing.
 

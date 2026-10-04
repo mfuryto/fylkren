@@ -4882,5 +4882,28 @@
     "finding": "No control defect; corrected the initial test expectation from SPA 200 to the stronger static-path 404",
     "matrix": "ASVS 5.3.1 Passed; continue at 5.3.2",
     "scope": "Current upload/generated-file persistence, response and public-path topology; operator backup artifacts remain outside the HTTP application boundary"
+  },
+    "filePathApplicabilityCompletion": {
+    "date": "2026-10-04",
+    "baseline": "c47ac21",
+    "sourceHashes": {
+      "apps/api/SafeImageUpload.cs": "702ecb268d806787a7ce21a23c7a53e4b7cb327ed94cc22640fbc1a951a70f27",
+      "apps/api/Portability/PortableExportPackage.cs": "f548cd53646b68570a03d300d71047af5e99c7fb5952a3fbcdebfb02998869e5",
+      "apps/api/Portability/PortableImportValidator.cs": "0bd116065f0d05532145b2004e19b69f69f0820703521f3c9c1e4930f05f18b9",
+      "apps/api/Portability/PortabilityEndpoints.cs": "08ae3db4fb785a60d9f32734183aa1ff60d3b9eda6f8a706f4d027a190fba822",
+      "tools/test-file-path-boundary.mjs": "e40462befa46473779ce0ee0b7e7361ecbec7c874118d813600d2e0dd96c34d2",
+      "tools/e2e/portability.mjs": "81b62b3401e3160bb283d110caa0a04de6a556f42b8b7d3ff05db5c28329be97"
+    },
+    "reusedApiImage": "sha256:26d095f69ca561ada71afd0dae7d2368cce1c27c2ea4f7388aa1792b7eb9bc5e",
+    "reusedWebImage": "sha256:1c81106369690b928da8acd2f0a19b19ff3f504d9ed39315c3a03dcceb75e7ee",
+    "results": {
+      "clientFilenamesPersisted": 0,
+      "filesystemExtractionSites": 0,
+      "generatedPathFamilies": 2,
+      "unsafeArchivePathsRejected": 3
+    },
+    "finding": "No control defect; capability remains absent and virtual archive paths are defensively rejected",
+    "matrix": "ASVS 5.3.2 remains Not applicable with explicit reopen condition; continue at 5.4.1",
+    "scope": "Current HTTP upload, in-memory package and virtual ZIP paths; reopen for server filesystem storage/extraction"
   }
 }
