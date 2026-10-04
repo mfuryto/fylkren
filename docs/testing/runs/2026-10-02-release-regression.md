@@ -641,3 +641,18 @@ node tools/run-foundation-tests.mjs
 The database suite proves rollback across WorkItem state, security audit, canonical activity, notification projections, risk/revisions, automatic terminal lifecycle, export receipts and preservation evidence. It also passes projection lease concurrency, immutable history, consumer reconciliation and repeatable export snapshots. The first foundation attempt stopped because a portable negative fixture set an already-null optional policy ID to null; the test now creates the intended invalid pair, policy version without policy ID. The corrected full run passes, and this was a test-fixture defect rather than an accepted package.
 
 ASVS 2.3.3 is Passed. Safe source/image hashes and the focused outcomes are recorded under `businessTransactionCompletion` in the existing evidence manifest. This result does not pass limited-resource locking under 2.3.4 or complete release qualification. Production is untouched.
+
+## Limited-resource locking — 2026-10-04
+
+Completes ASVS 2.3.4. The limited-resource inventory covers one-time password reset and MFA recovery grants; WebAuthn registration/login state; Community Site capacity; planning and execution ownership; human-readable reference allocation; activity projection leases; webhook and federation delivery claims; inbound federation receipts; and machine-request idempotency. The implementation uses conditional updates, transaction/advisory locks, optimistic row versions and uniqueness constraints at the authoritative database boundary.
+
+The baseline test found SV-082: concurrent execution claims persisted exactly one owner through `IX_execution_runs_work_item_id`, but the losing request returned HTTP 500 because that known uniqueness collision was absent from the central concurrency mapping. The handler now returns bounded `409 concurrency_conflict`. No double booking or unauthorized ownership was observed. The focused retest used:
+
+```sh
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-locking-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-asvs-header-file-web:latest node tools/run-e2e-editions.mjs --asvs-locking-only --no-build
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-locking-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-asvs-header-file-web:latest node tools/run-e2e-editions.mjs --asvs-community-limit-only --no-build
+```
+
+Two separately authenticated users concurrently claim the same planning run and execution item. Each path returns exactly `204/409`, and the persisted queue has one owner. Two concurrent Site creates competing for the final Community slot return `201/409`; the active count remains three, and deactivation releases a replacement slot. Maintained identity and WebAuthn tests already prove exactly one successful concurrent reset/factor consumption. Foundation and federation suites cover projection/delivery leases, idempotency, deduplication and exactly one terminal outcome.
+
+The API builds with zero warnings/errors. The tested API image is `sha256:e9612f18d3b8004ff4be58e572a2d6faf4b2a5fecbba607a76b915471ffec989`; the unchanged web gateway is `sha256:2806135f53e64aaa7c63bcf2ff2e75933bb963361a42243bff84e2b512ae38e7`. ASVS 2.3.4 is Passed. Safe hashes and focused outcomes are recorded under `limitedResourceLockingCompletion` in the evidence manifest. This does not pass anti-automation requirement 2.4.1 or complete release qualification. Production is untouched.

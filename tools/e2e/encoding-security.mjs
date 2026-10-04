@@ -347,27 +347,70 @@ export async function testBusinessLogicLimits({ platform, base }) {
 
 export async function testCommunitySiteLimit({ platform }) {
   const created = [];
-  for (let index = 1; index <= 3; index++) {
+  for (let index = 1; index <= 2; index++) {
     const response = await platform.post('/api/sites/', {
       name: `Synthetic Community Site ${index}`, overviewDesign: 'classic',
     });
     assert.equal(response.status, 201, `Community Site ${index}: ${JSON.stringify(response.body)}`);
     created.push(response.body.id);
   }
-  const fourth = await platform.post('/api/sites/', {
-    name: 'Synthetic refused fourth Community Site', overviewDesign: 'classic',
-  });
-  assert.equal(fourth.status, 409, 'A fourth active Community Site was accepted');
-  assert.equal(fourth.body.code, 'community_site_limit');
+  const competing = await Promise.all(['A', 'B'].map(label => platform.post('/api/sites/', {
+    name: `Synthetic competing Community Site ${label}`, overviewDesign: 'classic',
+  })));
+  assert.deepEqual(competing.map(value => value.status).sort(), [201, 409],
+    'Concurrent Community Site creation did not admit exactly one final slot');
+  assert.equal(competing.find(value => value.status === 409)?.body.code, 'community_site_limit');
   assert.equal((await platform.request('/api/sites/')).body.filter(value => value.isActive).length, 3,
-    'Rejected Site creation changed the active-Site count');
-  assert.equal((await platform.request(`/api/sites/${created[2]}`, { method: 'DELETE' })).status, 204);
+    'Concurrent Site creation exceeded the active-Site limit');
+  assert.equal((await platform.request(`/api/sites/${created[1]}`, { method: 'DELETE' })).status, 204);
   const replacement = await platform.post('/api/sites/', {
     name: 'Synthetic Community replacement Site', overviewDesign: 'classic',
   });
   assert.equal(replacement.status, 201, 'An inactive Site did not release one Community capacity slot');
   return { communitySiteLimit: 'passed', activeSitesAllowed: 3,
+    concurrentFinalSlotResults: competing.map(value => value.status).sort(),
     fourthActiveSiteRejected: true, inactiveSiteReleasedCapacity: true };
+}
+
+export async function testLimitedResourceLocking({ leader, competitor, siteId, unitId, workItemTypeId }) {
+  const root = `/api/work/sites/${siteId}/items`;
+  async function create(label, destination) {
+    const response = await leader.post(root, { title: `Synthetic concurrent ${label}`,
+      description: 'ASVS 2.3.4 limited-resource claim', recommendation: null, referenceUrl: null,
+      assignedUnitId: unitId, workItemTypeId, dueAt: null });
+    assert.equal(response.status, 201, JSON.stringify(response.body));
+    assert.equal((await leader.put(`${root}/${response.body.id}/status`, {
+      status: 'under_review', assignedUnitId: null, decisionNote: null, priority: 'normal',
+    })).status, 204);
+    assert.equal((await leader.put(`${root}/${response.body.id}/status`, {
+      status: destination, assignedUnitId: null, decisionNote: null, priority: null,
+    })).status, 204);
+    return response.body.id;
+  }
+  async function exactlyOneClaim(path, label) {
+    const results = await Promise.all([leader.post(path, {}), competitor.post(path, {})]);
+    const statuses = results.map(value => value.status).sort();
+    assert.deepEqual(statuses, [204, 409], `${label} was double-booked or failed unsafely: ${statuses}`);
+    return statuses;
+  }
+
+  const planningItemId = await create('planning claim', 'planning');
+  const planningQueue = await leader.request(`/api/workflows/planning/sites/${siteId}`);
+  const planningRun = planningQueue.body.items.find(value => value.item.id === planningItemId);
+  assert.ok(planningRun?.id, 'Planning run missing for concurrent claim');
+  const planningClaimStatuses = await exactlyOneClaim(`/api/workflows/planning/${planningRun.id}/claim`, 'Planning claim');
+  const planningAfter = (await leader.request(`/api/workflows/planning/sites/${siteId}`)).body.items
+    .find(value => value.id === planningRun.id);
+  assert.ok(planningAfter?.claimedByPersonId, 'Planning claim has no single owner');
+
+  const executionItemId = await create('execution claim', 'execution');
+  const executionClaimStatuses = await exactlyOneClaim(`/api/execution/items/${executionItemId}/claim`, 'Execution claim');
+  const executionAfter = (await leader.request(`/api/execution/sites/${siteId}`)).body.items
+    .find(value => value.id === executionItemId);
+  assert.ok(executionAfter?.run?.claimedByPersonId, 'Execution claim has no single owner');
+
+  return { limitedResourceLocking: 'passed', planningClaimStatuses,
+    executionClaimStatuses, planningSingleOwner: true, executionSingleOwner: true };
 }
 
 export async function testDerivedArithmeticBoundaries({ platform, siteManager, leader, siteId, unitId, workItemTypeId }) {

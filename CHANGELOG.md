@@ -4,6 +4,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Return a controlled concurrency conflict when two users claim the same execution item, while preserving the existing single-owner database constraint.
 - Reject invalid administration API result limits instead of silently clamping them, and make the documented 512 MiB portable-import validator reachable through narrowly scoped API and gateway request limits.
 - Reject null bulk-user collections and malformed directory/capability collection values at the trusted service boundary instead of allowing null dereferences or external lookup attempts.
 - Document the trusted input-validation boundary, common formats, contextual rules, failure semantics and test expectations in one security reference.

@@ -4397,5 +4397,37 @@
     "finding": "SV-081 closed after focused retest",
     "matrix": "ASVS 2.3.3 Passed; continue at 2.3.4",
     "scope": "Application database transaction and durable outbox boundaries; no claim that external systems can be rolled back"
+  },
+  "limitedResourceLockingCompletion": {
+    "date": "2026-10-04",
+    "baseline": "9e95661",
+    "sourceHashes": {
+      "apps/api/Persistence/ConcurrencyExceptionHandler.cs": "d6805810550f929586168842046514c39185274856912665161529b2912d70d2",
+      "apps/api/Licensing/SiteCapacityPolicy.cs": "8a9b0a3779751fb430a4fec0368430c9951260eebc1fa4f3538688dc1c48076b",
+      "apps/api/WorkManagement/PlanningAssignmentEndpoints.cs": "a2c591ce17889be9fd57d2fe5fe3591315e18835303e2761b2309a0c4886c2ca",
+      "apps/api/WorkManagement/ExecutionAssignmentEndpoints.cs": "c972e68d11f30e832a20d49881e536d642364ed7cd6bf974fe76efedddbd8193",
+      "tools/e2e/encoding-security.mjs": "30d94b7fcf8b63ac59ce35113b2093ebeef0ef69ea7766d1768d72800dc23eaa",
+      "tools/test-e2e-local.mjs": "3eae29acc041f705e5580449270cc14b4377c6332a393a9f81cdd53bea134664",
+      "tools/run-e2e-editions.mjs": "c8acaac02cba1bd5a8c7e30d3bf5d09149e3f8198ea8c9d3c6ee0341f696627d",
+      "tools/e2e/identity-session-lifecycle.mjs": "61a39140512b74db4c7aa9cb410b79dd43632876c9285b1f73b18acdf75d91d4",
+      "tools/e2e/webauthn-security.mjs": "79b85a8017e304cf8b7f24fff87d7c4b667609fee2b74130290873003cb851b3",
+      "tools/run-federation-pair.mjs": "a556694d142677e6d0ba3c9b44f2db5d1f2f096d5ef94e96984f0d83a6d22007"
+    },
+    "apiImage": "sha256:e9612f18d3b8004ff4be58e572a2d6faf4b2a5fecbba607a76b915471ffec989",
+    "reusedWebImage": "sha256:2806135f53e64aaa7c63bcf2ff2e75933bb963361a42243bff84e2b512ae38e7",
+    "results": {
+      "limitedResourceLocking": "passed",
+      "planningClaimStatuses": [204, 409],
+      "executionClaimStatuses": [204, 409],
+      "planningSingleOwner": true,
+      "executionSingleOwner": true,
+      "communitySiteLimit": "passed",
+      "activeSitesAllowed": 3,
+      "concurrentFinalSlotResults": [201, 409],
+      "inactiveSiteReleasedCapacity": true
+    },
+    "finding": "SV-082 closed after focused retest",
+    "matrix": "ASVS 2.3.4 Passed; continue at 2.4.1",
+    "scope": "Application limited-resource inventory and focused live concurrency; no anti-automation or release qualification claim"
   }
 }
