@@ -381,3 +381,27 @@ pnpm check:version
 The transport slice passed explicit SMTP relay delivery to a recipient-domain-independent target, real delivery from the existing notification worker, rejection of required StartTLS against a plaintext-only relay, and a stalled relay rejected with 502 after 10,035 ms. Trusted LDAPS and StartTLS passed; wrong certificate name, NXDOMAIN and wrong protocol/port failed with 502. The reachable referral canary remained at zero after its reachability control was reset. Foundation tests cover literal/mapped metadata targets, named metadata and mixed DNS preflight, explicit private targets and refusal before native client preparation. They do not simulate or prove protection against native DNS rebinding.
 
 The API image contains the final changed sources; the reused web image supplies unchanged login/gateway behavior. This is affected-transport verification, not a matched full release-candidate qualification. Final image IDs, source/test/log hashes and observed summaries are frozen in `serviceTransportContinuation` in the [existing evidence manifest](2026-10-02-release-regression-evidence.json). Raw synthetic diagnostic logs stay outside Git. Initial fixture errors were an unsupported recipient domain, receiver termination on an intentional socket reset and referral cleanup without ManageDsaIT; corrected fixtures were rerun before recording passing results. No unrelated browser, federation, recovery or whole-product suite was repeated.
+
+
+## Derived counts and calendar bounds — 2026-10-04
+
+Continues ASVS 1.4.2 after the non-HTTP transport stage. A targeted mode in the existing API runner omits legacy-upgrade, host snapshot and backup/restore chains; fixture bootstrap still uses the maintained actors and authorization helpers. Actual baseline 9f7b484 returned 500 for `to=9999-12-31` in Site audit. A second source-reviewed case was reproduced against the intermediate count candidate: reports accepted year 9999 as input but returned 500 when computing the next year. Both maximum representable calendar bounds now succeed; unrepresentable dates/years are rejected (SV-071).
+
+Source review identified unchecked sums of separate int database counts in mixed audit totals, multi-Site navigation counts and the three-source failed-delivery archive blocker, plus `total + 19` in comment-page calculation (SV-072). These are source/arithmetic findings; no billion-row deployment was constructed or exploit demonstrated. Relevant database queries now return long counts, sums use checked nonnegative arithmetic and ceiling division avoids addition, floating-point conversion and narrowing. Invalid comment pages use the existing shared bounds; valid large pages retain last-page clamping. No schema, authorization, domain-state or external JSON field/number shape changes are introduced.
+
+Scoped commands, using `FYLKREN_E2E_API_IMAGE=fylkren-asvs-arithmetic-api:latest` and the reused `FYLKREN_E2E_WEB_IMAGE=fylkren-automatic-lifecycle-web:latest` for API tests:
+
+```sh
+dotnet run --project tests/foundations/Fylkren.FoundationTests.csproj -- --arithmetic-only
+node tools/run-foundation-tests.mjs --arithmetic-integration-only
+node tools/run-e2e-editions.mjs --asvs-arithmetic-only --no-build
+pnpm check:docs
+pnpm check:structure
+pnpm check:version
+```
+
+Boundary tests execute production count helpers with two/three int-max operands, exact long-max success, fail-closed long overflow and negative inputs. Page counts succeed at zero, exact/final pages, int-max and long-max; invalid size/sign inputs reject. These are numerical boundary tests, not claims of large physical database capacity. Actual API cases check three inclusive audit dates, three invalid dates, three report-year boundaries and four invalid years, mixed person/machine audit rows created through authorized APIs, and 21 comments across two pages with five rejected page inputs and preserved Platform Manager denial.
+
+Affected database tests retain the 180-task/six-counterpart navigation fixture across three Sites/27 units, role/hierarchy/membership revocation and exact-level learning. Automatic lifecycle tests retain pending/failed delivery blockers, exact failed-delivery count, concurrent idempotent archive, paused editing, preservation, independent learning and transactional rollback. The initial scoped foundation invocation lacked the migrations normally established by the full runner; adding that same migration prerequisite corrected the fixture, followed by a passing retest. No unrelated whole-product, SSO, federation or browser chain was repeated.
+
+The [existing manifest](2026-10-02-release-regression-evidence.json) freezes `derivedArithmeticContinuation` image/source/test/log hashes and summaries. ASVS 1.4.2 stays In progress: version/revision/security-version and other counter increments, plus remaining derived arithmetic, still require their own boundary tests. This stage does not claim completion of all arithmetic or full release qualification.

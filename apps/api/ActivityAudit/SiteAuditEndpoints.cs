@@ -37,7 +37,7 @@ public static class SiteAuditEndpoints
             if (entityTypes is not null) query = query.Where(value => entityTypes.Contains(value.EntityType));
             if (!string.IsNullOrWhiteSpace(eventType)) query = query.Where(value => value.EventType == eventType.Trim());
             if (from is not null) query = query.Where(value => value.OccurredAt >= new DateTimeOffset(from.Value.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero));
-            if (to is not null) query = query.Where(value => value.OccurredAt < new DateTimeOffset(to.Value.AddDays(1).ToDateTime(TimeOnly.MinValue), TimeSpan.Zero));
+            if (to is not null && to.Value < DateOnly.MaxValue) query = query.Where(value => value.OccurredAt < new DateTimeOffset(to.Value.AddDays(1).ToDateTime(TimeOnly.MinValue), TimeSpan.Zero));
             var contextual = query.Select(value => new
             {
                 Event = value,

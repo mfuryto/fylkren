@@ -30,8 +30,12 @@ internal static class ReportQueryEndpoints
             if (year is > 0)
             {
                 var from = new DateTimeOffset(year.Value, 1, 1, 0, 0, 0, TimeSpan.Zero);
-                var until = from.AddYears(1);
-                query = query.Where(x => x.FinalReportApprovedAt >= from && x.FinalReportApprovedAt < until);
+                query = query.Where(x => x.FinalReportApprovedAt >= from);
+                if (year.Value < 9999)
+                {
+                    var until = from.AddYears(1);
+                    query = query.Where(x => x.FinalReportApprovedAt < until);
+                }
             }
             var total = await query.CountAsync(ct);
             var siteName = await db.Sites.Where(x => x.Id == siteId).Select(x => x.Name).SingleAsync(ct);

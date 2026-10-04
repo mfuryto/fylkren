@@ -30,9 +30,9 @@ public static class PlatformAuditEndpoints
                 personEvents = personEvents.Where(value => EF.Functions.ILike(value.EventType, pattern, "\\") || EF.Functions.ILike(value.EntityType, pattern, "\\") || database.People.Any(person => person.Id == value.ActorPersonId && EF.Functions.ILike(person.DisplayName, pattern, "\\")) || value.SiteId != null && database.Sites.Any(site => site.Id == value.SiteId && EF.Functions.ILike(site.Name, pattern, "\\")));
                 machineEvents = machineEvents.Where(value => EF.Functions.ILike(value.EventType, pattern, "\\") || EF.Functions.ILike(value.EntityType, pattern, "\\") || EF.Functions.ILike(value.MachineIdentity.Name, pattern, "\\") || value.SiteId != null && database.Sites.Any(site => site.Id == value.SiteId && EF.Functions.ILike(site.Name, pattern, "\\")));
             }
-            var personTotal = await personEvents.CountAsync(cancellationToken);
-            var machineTotal = await machineEvents.CountAsync(cancellationToken);
-            var total = personTotal + machineTotal;
+            var personTotal = await personEvents.LongCountAsync(cancellationToken);
+            var machineTotal = await machineEvents.LongCountAsync(cancellationToken);
+            var total = NumericBounds.AddCount(personTotal, machineTotal);
             var personTypes = await database.AuditEvents.AsNoTracking()
                 .Where(value => value.ActorWasPlatformManager ||
                     (value.ActorInstanceId != null && value.SiteId == null))
@@ -118,7 +118,7 @@ public static class PlatformAuditEndpoints
                         : "Unknown actor",
                 value.SiteId is Guid siteId ? sites.GetValueOrDefault(siteId) : null,
                 value.CorrelationId)).ToArray();
-            return Results.Ok(new { events = rows, eventTypes, page = pageNumber, pageSize, total, totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)pageSize)) });
+            return Results.Ok(new { events = rows, eventTypes, page = pageNumber, pageSize, total, totalPages = Math.Max(1, NumericBounds.Pages(total, pageSize)) });
         });
         return endpoints;
     }

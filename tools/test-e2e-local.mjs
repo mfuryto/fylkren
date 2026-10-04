@@ -19,7 +19,7 @@ import { testLookupSorting } from './e2e/lookup-sorting.mjs';
 import { testFederationCandidates } from './e2e/federation-candidates.mjs';
 import { testAuthenticationBoundary, testAuthSessionSecurity } from './e2e/auth-session-security.mjs';
 import { testIdentitySessionLifecycle } from './e2e/identity-session-lifecycle.mjs';
-import { testCustomCssEncoding, testStoredEncoding, testNumericInputBoundaries } from './e2e/encoding-security.mjs';
+import { testCustomCssEncoding, testStoredEncoding, testNumericInputBoundaries, testDerivedArithmeticBoundaries } from './e2e/encoding-security.mjs';
 
 const base = process.env.FYLKREN_E2E_BASE_URL ?? 'http://localhost:18080';
 function client() {
@@ -134,6 +134,7 @@ assert.equal((await platform.put('/api/platform/regional-settings', {
   defaultLanguage: 'en-US', timeZone: 'UTC',
   clockFormat: '24-hour', measurementSystem: 'metric',
 })).status, 200);
+if (!process.argv.includes('--asvs-arithmetic-only')) {
 const platformOperations = await platform.request('/api/platform/operations');
 assert.equal(platformOperations.status, 200, JSON.stringify(platformOperations.body));
 assert.equal(platformOperations.body.hostIntegration.available, true, 'Host status snapshot must be available');
@@ -173,6 +174,7 @@ try {
   assert.equal(invalidOperations.body.hostIntegration.problem, 'invalid-content');
 } finally {
   writeFileSync(hostStatusPath, validHostStatus);
+}
 }
 const customCss = '.e2e-css-marker { border-radius: 7px; }';
 const branded = await platform.put('/api/platform/branding/', {
@@ -312,6 +314,11 @@ const assignment = await siteManager.account.post(`/api/sites/${siteId}/access/r
 assert.equal(assignment.status, 201, JSON.stringify(assignment.body));
 
 const { taskTypeId } = await testLookupSorting({ manager: siteManager.account, reader: leader.account, siteId });
+if (process.argv.includes('--asvs-arithmetic-only')) {
+  console.log(JSON.stringify(await testDerivedArithmeticBoundaries({ platform, siteManager: siteManager.account,
+    leader: leader.account, siteId, unitId: leadership.body.id, workItemTypeId: taskTypeId })));
+  process.exit(0);
+}
 if (process.argv.includes('--workload-only')) {
   console.log(JSON.stringify(await measureWorkload({ leader: leader.account, platform, siteId, unitId: leadership.body.id, workItemTypeId: taskTypeId })));
   process.exit(0);

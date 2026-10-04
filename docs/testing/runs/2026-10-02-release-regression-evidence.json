@@ -3806,5 +3806,68 @@
     ],
     "openFinding": "SV-068: native clients re-resolve after DNS preflight; deployment egress is not qualified",
     "scope": "Changed API image, unchanged reused web gateway/login; no whole-product or production deployment qualification."
+  },
+  "derivedArithmeticContinuation": {
+    "recordedAtUtc": "2026-10-04T12:55:06.195759+00:00",
+    "baseRevision": "9f7b4847197313b61805613fc1d562704f3e7d42",
+    "sourceSha256": {
+      "apps/api/NumericBounds.cs": "0506b0fa0c3aafc317fd5b0d3e3db00e788d2bc2a96e2849081df15ee720d498",
+      "apps/api/ActivityAudit/PlatformAuditEndpoints.cs": "dbf0dfe16d4ccf087bfcb8bb1a2d8859e083b787074beeaf19a50ed55669d893",
+      "apps/api/ActivityAudit/SiteAuditEndpoints.cs": "c7dd8a2dc283bfd500fb138da63f72936d888537c870b0091fa7f5e85c981f36",
+      "apps/api/InformationLifecycle/WorkLifecyclePolicy.cs": "a1a0d63d8d789ff5dd1e00f42440f74d17900aecbd160c0ca565490e7c6c08f3",
+      "apps/api/Learning/LearningPolicy.cs": "9919ca02226c6f740f78223966879662b02fcb2241e60e41e8a787931124aa0f",
+      "apps/api/WorkManagement/WorkItemCommentEndpoints.cs": "fe361882cc4f9b61e711d64551e5234e6b0f7a3a496ddaa1749369c265003054",
+      "apps/api/WorkManagement/WorkNavigationCountEndpoints.cs": "f6daec84bd06cd58991887f1a1acf010c7c799d5d17698dc58b03f6e6a531b56",
+      "apps/api/WorkManagement/ReportQueryEndpoints.cs": "8b3f75940cb1858b5810ed12c8f49127d8e3396d0be362e1a5972932602ca756",
+      "tests/foundations/NumericArithmeticTests.cs": "dbce22f0e40f4776154824c5c29d82b7c6f15910b96320642fc7409b83662fbd",
+      "tests/foundations/AutomaticLifecycleTests.cs": "8e71806ffc11af0e9dd3a7029f786e6d42e836b5f75c41503130ad6bbbd08fc5",
+      "tests/foundations/NavigationCountTests.cs": "81d0e098b3b716795a8f06695f20577632036081e914762c0ae94af6d4813e63",
+      "tests/foundations/Program.cs": "4bfe56c17c079e1956e9c3d3a1882689fc4fb9164f764363df201b77bad85228",
+      "tools/e2e/encoding-security.mjs": "1470b0694518bb832bcdeb0f86b3415c7726d606cc5644999d1698b4717468e2",
+      "tools/run-e2e-editions.mjs": "1fde62991c0be8d1d33cc8575f677bc15292680275ab17137162343bdbdc067c",
+      "tools/test-e2e-local.mjs": "11c37b5c8bf5084e64cf8fa7b07f435c094b1f2c763413dbe2844ecc9c6aa431"
+    },
+    "logSha256": {
+      "/tmp/fylkren-asvs-arithmetic-before.log": "5a07c14f12a2dbf00319988fd35e5e3cb99d13387683e9db298f33a5549713db",
+      "/tmp/fylkren-asvs-arithmetic-report-before.log": "87abe3748e69b0e76b6485ea54195f9dd81345c439e09c7aa4e5ab2f8ba22823",
+      "/tmp/fylkren-asvs-arithmetic-unit.log": "b2b8efee59941a8ba76a9e158f07180084189fb0de87e9978d2450acbf228376",
+      "/tmp/fylkren-asvs-arithmetic-integration.log": "382c50b4e0cf4ed56cd0e6a036b8e357394087f7cff4e54b953c043e9c043d87",
+      "/tmp/fylkren-asvs-arithmetic-after.log": "60d998765a6ad9cf347e22eb6fd693449d5057f89a80e9122bfae1c9ebfa388a",
+      "/tmp/fylkren-asvs-arithmetic-api-build.log": "3fcf937f7f3a5560733988a0efd6cfb42a3a3f8a1da1b1ef55bcd167d31894e3",
+      "/tmp/fylkren-asvs-arithmetic-docs.log": "6873a9f3b217ba6475df27a6fc246477044d5f7e6d2e0e779bc9f10e1f06c675",
+      "/tmp/fylkren-asvs-arithmetic-structure.log": "b9a651952dda34e3aec02a9d4ef0fd5b226f939897b032e2fe7044662a8e9708",
+      "/tmp/fylkren-asvs-arithmetic-version.log": "30a82c355072b30049a50c28fc1a6e402282bc4d7b291f331f69330b0edc3dbb"
+    },
+    "images": [
+      "[\"fylkren-asvs-arithmetic-api:latest\",\"fylkren-edition-e2e-api:latest\"] sha256:de62ac85adc79858001f7d84aa6322af607afbeb6541fafab662f798c6bac75a",
+      "[\"fylkren-automatic-lifecycle-web:latest\",\"fylkren-edition-e2e-web:latest\",\"fylkren-federation-pair-test-web:local\"] sha256:95c69456ec0870a718f167db181344235d23ccd5744ec99a0879df61d3c9f497"
+    ],
+    "baseline": {
+      "maxAuditDate": "HTTP 500 on baseline 9f7b484",
+      "maxReportYear": "HTTP 500 on intermediate count image with unchanged report code",
+      "countOverflow": "source/arithmetic finding; no billion-row deployment tested"
+    },
+    "apiResults": {
+      "derivedArithmeticBoundaries": "passed",
+      "inclusiveDateCases": 3,
+      "rejectedDateCases": 3,
+      "reportYearCases": 3,
+      "rejectedReportYears": 4,
+      "platformAuditCount": 2,
+      "commentPageBoundaryRows": 21,
+      "rejectedCommentPages": 5,
+      "commentAuthorizationPreserved": true
+    },
+    "productionNumericalBoundaryTests": "passed int-max sums, exact long-max and fail-closed overflow/sign/page-size boundaries",
+    "databaseResults": {
+      "automaticLifecycle": "passed: delivery blockers, exact failed count, concurrent/idempotent archive, preservation, learning and rollback",
+      "navigation": "passed: 180 base tasks, six counterparts, three Sites/27 units; same-fixture reference counts and access guards"
+    },
+    "closedFindings": [
+      "SV-071",
+      "SV-072"
+    ],
+    "remainingRequirementScope": "ASVS 1.4.2 stays In progress: version/revision/security-version/counter increments and remaining arithmetic inventory",
+    "scope": "Changed API/reused unchanged gateway web; scoped arithmetic/API/database verification, not full release qualification."
   }
 }

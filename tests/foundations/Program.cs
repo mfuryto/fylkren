@@ -6,6 +6,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
+if (args.Contains("--arithmetic-only"))
+{
+    NumericArithmeticTests.Run();
+    return;
+}
 if (args.Contains("--service-transports-only"))
 {
     await ServiceTransportTests.Run();
@@ -67,6 +72,14 @@ var connection = Environment.GetEnvironmentVariable("FYLKREN_FOUNDATION_TEST_DAT
 if (connection is null) throw new Exception("Run with the disposable database harness; integration coverage is mandatory.");
 if (!connection.Contains("Database=fylkren_foundation_test", StringComparison.Ordinal)) throw new Exception("Only the synthetic foundation database is allowed.");
 await using var db = new FylkrenDbContext(new DbContextOptionsBuilder<FylkrenDbContext>().UseNpgsql(connection).Options);
+if (args.Contains("--arithmetic-integration-only"))
+{
+    NumericArithmeticTests.Run();
+    await db.Database.MigrateAsync();
+    await AutomaticLifecycleTests.Run(db);
+    await NavigationCountTests.Run(db, false);
+    return;
+}
 if (args.Contains("--navigation-counts-only"))
 {
     await NavigationCountTests.Run(db, args.Contains("--measure"));
@@ -126,6 +139,7 @@ await DomainCoverageTests.Run(db);
 await OutboundHttpTests.Run();
 await SamlMetadataTests.Run();
 await ServiceTransportTests.Run();
+NumericArithmeticTests.Run();
 await NavigationCountTests.Run(db, false);
 await ExecutionActivityTests.Run(db);
 

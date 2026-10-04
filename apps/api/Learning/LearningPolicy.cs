@@ -25,9 +25,9 @@ internal static class LearningPolicy
         }
         return result;
     }
-    internal static async Task<int> PendingCount(Guid personId, FylkrenDbContext db, CancellationToken ct)
+    internal static async Task<long> PendingCount(Guid personId, FylkrenDbContext db, CancellationToken ct)
     {
         var levels = (await Levels(personId, db, ct)).Where(value => value.CanManage).Select(value => value.UnitId).ToArray();
-        return await db.LearningLessons.CountAsync(value => levels.Contains(value.UnitId) && (value.Status == "new" || value.Status == "in_progress"), ct);
+        return await db.LearningLessons.LongCountAsync(value => levels.Contains(value.UnitId) && (value.Status == "new" || value.Status == "in_progress"), ct);
     }
 }

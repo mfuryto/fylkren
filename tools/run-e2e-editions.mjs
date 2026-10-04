@@ -52,6 +52,9 @@ try {
   run('docker', ['compose', '-p', project, 'exec', '-T', 'postgres', 'psql', '-U', 'fylkren', '-d', 'fylkren',
     '-c', `UPDATE instance_identity SET instance_id = '${fixture.instanceId}' WHERE key = 1`]);
   // Reapply the Site-content preservation migration to a simulated legacy database.
+  if (process.argv.includes('--asvs-arithmetic-only')) {
+    run(process.execPath, ['tools/test-e2e-local.mjs', '--asvs-arithmetic-only']);
+  } else {
   // Complete untouched defaults must be restored; customized Site data must remain byte-for-byte unchanged.
   const legacySiteId = '10000000-0000-4000-8000-000000000001';
   const customSiteId = '10000000-0000-4000-8000-000000000002';
@@ -132,6 +135,7 @@ try {
     }`]);
   run(process.execPath, ['-e', `const response=await fetch('http://localhost:18081/api/configuration/public');const body=await response.json();if(!response.ok||body.setupRequired!==true)throw new Error(JSON.stringify(body));`]);
   run(process.execPath, ['tools/test-e2e-local.mjs', ...['--asvs-input-only', '--workload-only'].filter(flag => process.argv.includes(flag))]);
+  }
 } finally {
   try {
     run('docker', ['compose', '-p', project, 'down', '-v']);

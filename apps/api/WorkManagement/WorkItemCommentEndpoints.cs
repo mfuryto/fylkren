@@ -25,9 +25,10 @@ internal static class WorkItemCommentEndpoints
     {
         if (!PersonId(user, out var personId) || !await CanComment(siteId, itemId, personId, db, ct))
             return Results.Problem(statusCode: 403);
+        if (RequestQueryPolicy.Validate(page, null) is { } queryError) return queryError;
         var query = db.WorkItemComments.AsNoTracking().Where(value => value.SiteId == siteId && value.WorkItemId == itemId);
-        var total = await query.CountAsync(ct);
-        var currentPage = Math.Clamp(page ?? 1, 1, Math.Max(1, (total + 19) / 20));
+        var total = await query.LongCountAsync(ct);
+        var currentPage = checked((int)Math.Clamp((long)(page ?? 1), 1, Math.Max(1, NumericBounds.Pages(total, 20))));
         var items = await query.OrderByDescending(value => value.CreatedAt).ThenByDescending(value => value.Id)
             .Skip((currentPage - 1) * 20).Take(20)
             .Select(value => new { value.Id, value.AuthorPersonId, value.AuthorName, value.Text, value.CreatedAt }).ToListAsync(ct);

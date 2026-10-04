@@ -49,7 +49,7 @@ internal static class AutomaticLifecycleTests
         await WorkLifecycleWorker.Reconcile(work.Id, db, default);
         Require(state.Stage == "closed", "Pending delivery was silently archived.");
         for (var i = 0; i < 5; i++) message.Failed(now, "Synthetic failure"); await db.SaveChangesAsync();
-        Require((await WorkLifecyclePolicy.Blockers(work, db, true, default)).ContainsKey("failed_deliveries"), "Failed required delivery did not remain visible.");
+        Require((await WorkLifecyclePolicy.Blockers(work, db, true, default)).GetValueOrDefault("failed_deliveries") == 1L, "Failed required delivery count did not remain visible.");
         await WorkLifecycleWorker.Reconcile(work.Id, db, default);
         Require(state.Stage == "closed", "Failed delivery was silently archived.");
         message.Sent(now); await db.SaveChangesAsync();
