@@ -1359,3 +1359,15 @@ node tools/test-federated-session-documentation.mjs
 ```
 
 The source/document lock reports `{"federatedSessionDocumentation":"passed","documentedSystems":["fylkren-rp","oidc-idp","saml-idp","ad-ldap"],"localInactivityHours":1,"localAbsoluteHours":12,"oidcUpstreamLogout":false,"samlSingleLogout":false,"upstreamRecentnessEnforced":false,"unlinkRevokesExistingCookie":false,"immediateLocalTermination":"account-security-version"}`. The manual explicitly records that local logout does not terminate the IdP session and that unlink/provider disable does not itself revoke an already issued Fylkren cookie. Those facts remain inputs to later federated reauthentication and termination requirements; passing 7.1.3 means the ecosystem is documented, not that every coordination feature exists. Production is untouched.
+
+## Backend session-token validation — 2026-10-04
+
+Completes ASVS 7.2.1. The ASP.NET backend authentication middleware unprotects browser cookie tickets and runs the principal validator before the authorization fallback admits protected routes. Principal validation enforces the preserved absolute start, account/person state, active access and account security version. The frontend obtains the server's decision from `/api/session`; the complete TypeScript source set contains no cookie read or JWT/session-token decoder.
+
+Scoped command:
+
+```sh
+node tools/test-backend-session-validation-boundary.mjs
+```
+
+The source/execution lock reports `{"backendSessionValidationBoundary":"passed","sessionTokenType":"protected-aspnet-cookie","backendAuthenticationMiddleware":true,"backendPrincipalValidation":true,"authorizationFallback":"authenticated-user","clientTokenValidation":false,"copiedRevokedCookieRejected":true}`. The copied-cookie result is anchored to the maintained runtime that replays a preserved ticket after sign-out and receives `authenticated: false`. No implementation correction or broad rerun was required. Production is untouched.
