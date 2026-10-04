@@ -1296,3 +1296,15 @@ node tools/test-totp-lifetime-boundary.mjs
 ```
 
 The source/execution lock reports `{"totpLifetimeBoundary":"passed","periodSeconds":30,"acceptedWindows":["current"],"previousWindowRejected":true,"nextWindowRejected":true,"outOfBandAuthenticationMechanism":false}`. The linked maintained TOTP runtime is the dynamic source for the adjacent-window assertions. Fylkren has no out-of-band authentication request, code or token mechanism. No implementation correction or finding was required. Production is untouched.
+
+## Out-of-band authentication applicability — 2026-10-04
+
+Assesses ASVS 6.6.2 and 6.6.3 as not applicable. The inventory covers all 32 Identity server files, the login and profile authentication clients and the API project dependencies. Fylkren implements local password, TOTP/recovery code, WebAuthn and configured external-provider sign-in. It has no SMS, voice, email-OTP, push-approval or other separate-channel authentication request, code or token. SMTP is used for operational notifications and never delivers an authentication factor.
+
+Scoped command:
+
+```sh
+node tools/test-oob-authentication-applicability.mjs
+```
+
+The inventory reports `{"oobAuthenticationApplicability":"not-applicable","reviewedServerIdentityFiles":32,"reviewedClientFlows":4,"implementedInteractiveFactors":["password","totp","recoveryCode","webauthn","externalProvider"],"oobMechanisms":[],"reopenOn":["sms-authentication","voice-authentication","email-otp","push-authentication"]}`. The applicability record now carries the same capability boundary and reopen condition. Password-reset grants authorize recovery and do not act as a separate authentication factor. Production is untouched.
