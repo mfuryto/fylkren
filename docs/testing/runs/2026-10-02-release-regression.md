@@ -1320,3 +1320,18 @@ node tools/test-external-authentication-strength-boundary.mjs
 ```
 
 The source/document lock reports `{"externalAuthenticationStrengthBoundary":"passed","providers":["oidc","saml"],"specificStrengthExpected":false,"documentedFallback":"minimum-single-factor","stepUpAuthorization":false,"strengthClaimsUsedForElevation":[],"providerFailureFailsClosed":true}`. Existing signed Keycloak OIDC/SAML labs remain the dynamic positive and attack-path evidence. This result describes the actual minimum-strength fallback and does not resolve SV-094: Fylkren still lacks a policy requiring MFA across local and external pathways. Production is untouched.
+
+## Browser-session timeout policy — 2026-10-04
+
+Completes ASVS 7.1.1 and corrects the earlier undocumented eight-hour inactivity policy. Browser cookies now carry a one-hour sliding inactivity lifetime. A `fylkren:session_started_at` claim is retained across renewal, and principal validation rejects it after twelve hours, so activity cannot slide the absolute boundary. Password, factor, account and explicit sign-out changes independently revoke sessions through the security version.
+
+The access manual uses NIST SP 800-63B-4 AAL2 reauthentication timing as the security-decision reference. One hour matches the recommended inactivity maximum, while twelve hours is stricter than the recommended 24-hour overall maximum. The documentation explicitly does not claim AAL2 while SV-094's mandatory-MFA gap remains open.
+
+Scoped commands:
+
+```sh
+node tools/test-session-policy-documentation.mjs
+dotnet build apps/api/Fylkren.Api.csproj --no-restore
+```
+
+The source/document lock reports `{"sessionPolicyDocumentation":"passed","inactivityHours":1,"absoluteHours":12,"slidingInactivity":true,"absoluteStartPreservedOnRenewal":true,"nistReference":"SP-800-63B-4-AAL2","nistRecommendedMaximums":{"inactivityHours":1,"absoluteHours":24},"aal2Claimed":false,"mandatoryMfaFinding":"SV-094"}`. The affected API compiles with zero warnings and errors. Runtime expiry boundaries remain separate requirements under 7.3.1 and 7.3.2; no unrelated product suite was run. Production is untouched.

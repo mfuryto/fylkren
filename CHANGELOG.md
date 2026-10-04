@@ -4,6 +4,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Limit browser sessions to one hour of inactivity and twelve hours from authentication, following the NIST SP 800-63B-4 AAL2 timing reference without claiming AAL2 while mandatory MFA remains open.
 - Reject policy-compatible passwords from a pinned, PII-free breached-password set in addition to the separate top-3,000 common-password list.
 - Expose standard current/new-password autocomplete semantics on every user-password field so browser password helpers, external managers and paste work consistently.
 - Apply the shared authentication attempt limit to TOTP setup and profile email reauthentication, matching the documented credential-guessing boundary.

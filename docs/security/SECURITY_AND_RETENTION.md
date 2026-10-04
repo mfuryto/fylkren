@@ -27,7 +27,7 @@ MFA capabilities are enabled by default, but enrollment is currently voluntary a
 
 ## Sessions and browser security
 
-Local and linked external sign-in use `HttpOnly`, `SameSite=Strict` cookies with an eight-hour sliding lifetime and a twelve-hour absolute lifetime. With `FYLKREN_REQUIRE_HTTPS=true`, cookies are `Secure` and use the `__Host-` prefix. A bounded internal HTTP deployment uses a separate non-Secure cookie name.
+Local and linked external sign-in use `HttpOnly`, `SameSite=Strict` cookies with a one-hour sliding inactivity lifetime and a twelve-hour absolute lifetime. With `FYLKREN_REQUIRE_HTTPS=true`, cookies are `Secure` and use the `__Host-` prefix. A bounded internal HTTP deployment uses a separate non-Secure cookie name.
 
 Sessions are revalidated against identity, person, site access, and Platform Manager state at least every two minutes. AD/LDAP sessions are revalidated on every request so a directory-lifecycle suspension rejects the next request after the background check. Other deactivation or removal of final access invalidates an existing session within the ordinary validation interval. Data Protection keys live in a dedicated persistent volume so sessions and protected data survive normal container replacement.
 

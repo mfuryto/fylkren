@@ -98,7 +98,7 @@ internal static class ServiceRegistration
                 options.Cookie.HttpOnly = true;
                 options.Cookie.SameSite = SameSiteMode.Strict;
                 options.Cookie.SecurePolicy = requireHttps ? CookieSecurePolicy.Always : CookieSecurePolicy.SameAsRequest;
-                options.ExpireTimeSpan = TimeSpan.FromHours(8);
+                options.ExpireTimeSpan = TimeSpan.FromHours(1);
                 options.SlidingExpiration = true;
                 options.Events.OnRedirectToLogin = context => { context.Response.StatusCode = StatusCodes.Status401Unauthorized; return Task.CompletedTask; };
                 options.Events.OnRedirectToAccessDenied = context => { context.Response.StatusCode = StatusCodes.Status403Forbidden; return Task.CompletedTask; };
