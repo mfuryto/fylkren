@@ -4,6 +4,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Bound profile and branding images at a tested 2 MiB and portable packages at a tested 16 MiB; stream portable uploads through the gateway and serialize their bounded validation to match container memory and temporary-storage capacity.
 - Add one maintained file-handling boundary covering every upload, browser-only file selection and generated download, including current type/size controls and explicit malware-handling limits.
 - Restrict the private application endpoint to the HTTP/1 parser used by the proxy chain and verify ambiguous message lengths, transfer encodings, chunks and header syntax at all three HTTP boundaries.
 - Define and test the trusted reverse-proxy header boundary: intermediary headers are replaced at each owned hop, the API remains unpublished and HTTPS deployments must block direct origin access.
@@ -15,7 +16,7 @@ This file records durable, user-visible release changes. Detailed implementation
 - Bind the application, antiforgery, OIDC correlation/nonce and SAML request-state cookies to the exact HTTPS host with explicit secure attributes; retain the cross-site callback behavior required by external identity providers.
 - Bound ordinary authenticated API traffic by identity and apply stricter limits to exports, large import validation and external integration probes, returning `429` with `Retry-After` when exhausted.
 - Return a controlled concurrency conflict when two users claim the same execution item, while preserving the existing single-owner database constraint.
-- Reject invalid administration API result limits instead of silently clamping them, and make the documented 512 MiB portable-import validator reachable through narrowly scoped API and gateway request limits.
+- Reject invalid administration API result limits instead of silently clamping them, and make the then-documented portable-import validator reachable through narrowly scoped API and gateway request limits; the later ASVS 5.2.1 sizing test supersedes that interim 512 MiB contract.
 - Reject null bulk-user collections and malformed directory/capability collection values at the trusted service boundary instead of allowing null dereferences or external lookup attempts.
 - Document the trusted input-validation boundary, common formats, contextual rules, failure semantics and test expectations in one security reference.
 - Use 64-bit database totals and exact focused-page arithmetic across lifecycle, audit, learning, report, SMTP, user, federation, planning and execution views while retaining bounded page requests.

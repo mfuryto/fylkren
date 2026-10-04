@@ -4773,5 +4773,32 @@
     "finding": "No new vulnerability claim; content/type and malware-control limitations remain open under their own requirements",
     "matrix": "ASVS 5.1.1 Passed; continue at 5.2.1",
     "scope": "Complete current HTTP file selection/upload/download documentation and source inventory; behavioral file requirements remain separate"
+  },
+    "fileUploadSizeBoundaryCompletion": {
+    "date": "2026-10-04",
+    "baseline": "c38a1c6",
+    "sourceHashes": {
+      "apps/api/Portability/PortabilityEndpoints.cs": "d116ff3e4d52679bc432ee312b4826c564b38fadf91749a86a153f315603af41",
+      "apps/api/Portability/PortableExportPackage.cs": "f548cd53646b68570a03d300d71047af5e99c7fb5952a3fbcdebfb02998869e5",
+      "apps/api/Portability/PortableImportValidator.cs": "922218e7ef9bd1cf084dd0fbbe11799575ae339bca7094af5db3a4b4588ee123",
+      "apps/web/nginx.conf": "91adf510747acea3d880a741fee354ba949de2d0815858f317656b1e171b9566",
+      "apps/api/SafeImageUpload.cs": "9a4a3a84c41e40beef11b5b5d787ddb180da0dfbdd685dc410c8e71c40477bf6",
+      "tools/e2e/encoding-security.mjs": "2d62af59022349c56e240b118912473bbc1d903632adaf1cdff639a53fcbfdb0",
+      "tests/foundations/ZipLengthBoundaryTests.cs": "9b49e694baf2f32cc722002bb52472e98170122008621e6082946d11304aa029",
+      "tools/test-file-handling-inventory.mjs": "08d29bfe4372c05c3ca4d4dde3ecb1c8693bb3fb43db12a9f2a9acbd3e5e4e5e"
+    },
+    "apiImage": "sha256:af1701e1c3a9324adc51e2f4f618e0eab92565b65dbfcc13507fd5cb6bc46274",
+    "webImage": "sha256:1c81106369690b928da8acd2f0a19b19ff3f504d9ed39315c3a03dcceb75e7ee",
+    "results": {
+      "serverMultipartFeatures": 3,
+      "exactImageBoundaryEndpoints": 2,
+      "oversizedImageEndpointsRejected": 2,
+      "exactPackageBoundaryMiB": 16,
+      "oversizedPackageRejected": true,
+      "zipDeclaredLengthBoundaries": "passed"
+    },
+    "finding": "SV-090 closed after supported-size correction, gateway streaming and current-image retest",
+    "matrix": "ASVS 5.2.1 Passed; 5.2.3 corrected to applicable/In progress; continue at 5.2.2",
+    "scope": "Current multipart image and portability size boundaries plus declared ZIP length arithmetic; content/type and decompression-specific cases remain separate"
   }
 }

@@ -211,6 +211,25 @@ export async function testHeaderFileInputValidation({ platform, siteManager, sit
     'Import validation did not apply its documented endpoint-specific package limit');
   assert.equal(packageResult.body.valid, false, 'Invalid package content was accepted');
 
+  const boundaryPackage = new FormData();
+  boundaryPackage.append('package', new Blob([Buffer.alloc(16 * 1024 * 1024)],
+    { type: 'application/zip' }), 'boundary-invalid.zip');
+  const boundaryResult = await siteManager.request(`/api/portability/sites/${siteId}/imports/validate`, {
+    method: 'POST', body: boundaryPackage,
+  });
+  assert.equal(boundaryResult.status, 200,
+    `The exact 16 MiB package boundary did not reach validation: ${boundaryResult.status}`);
+  assert.equal(boundaryResult.body.valid, false, 'Invalid boundary package content was accepted');
+
+  const oversizedPackage = new FormData();
+  oversizedPackage.append('package', new Blob([Buffer.alloc(16 * 1024 * 1024 + 1)],
+    { type: 'application/zip' }), 'oversized-invalid.zip');
+  const oversizedPackageResult = await siteManager.request(`/api/portability/sites/${siteId}/imports/validate`, {
+    method: 'POST', body: oversizedPackage,
+  });
+  assert.equal(oversizedPackageResult.status, 400,
+    `A package one byte above 16 MiB returned ${oversizedPackageResult.status}`);
+
   for (const limit of ['0', '101', '-1', '2147483648'])
     assert.equal((await machineRequest(`/api/v1/administration/sites?limit=${limit}`)).status, 400,
       `Administration Site limit was silently accepted: ${limit}`);
@@ -218,12 +237,24 @@ export async function testHeaderFileInputValidation({ platform, siteManager, sit
     assert.equal((await machineRequest(`/api/v1/administration/sites?limit=${limit}`)).status, 200,
       `Documented administration Site limit was rejected: ${limit}`);
 
-  const oversizedLogo = new FormData();
-  oversizedLogo.append('logo', new Blob([Buffer.alloc(2 * 1024 * 1024 + 1)], { type: 'image/png' }), 'oversized.png');
-  assert.equal((await platform.request('/api/platform/branding/logo', { method: 'PUT', body: oversizedLogo })).status, 400,
-    'Branding logo exceeded the documented two MiB file limit');
+  const imageAt = bytes => {
+    const content = Buffer.alloc(bytes); Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).copy(content);
+    return content;
+  };
+  for (const [actor, path, field] of [[platform, '/api/platform/branding/logo', 'logo'],
+    [siteManager, '/api/profile/image', 'image']]) {
+    const exact = new FormData();
+    exact.append(field, new Blob([imageAt(2 * 1024 * 1024)], { type: 'image/png' }), 'boundary.png');
+    assert.equal((await actor.request(path, { method: 'PUT', body: exact })).status, 204,
+      `${path} rejected the exact two MiB image boundary`);
+    const oversized = new FormData();
+    oversized.append(field, new Blob([imageAt(2 * 1024 * 1024 + 1)], { type: 'image/png' }), 'oversized.png');
+    assert.equal((await actor.request(path, { method: 'PUT', body: oversized })).status, 400,
+      `${path} exceeded the documented two MiB file limit`);
+  }
   return { headerFileInputValidation: 'passed', rejectedSiteLimits: 4, acceptedSiteLimits: 2,
-    oversizedImageRejected: true, endpointSpecificPackageLimitReached: true };
+    exactImageBoundaryEndpoints: 2, oversizedImageEndpointsRejected: 2, endpointSpecificPackageLimitReached: true,
+    exactPackageBoundaryMiB: 16, oversizedPackageRejected: true };
 }
 
 export async function testBusinessFlowSequence({ leader, siteId, unitId, workItemTypeId }) {

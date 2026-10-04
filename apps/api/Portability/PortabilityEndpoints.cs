@@ -11,6 +11,8 @@ namespace Fylkren.Api.Portability;
 
 public static partial class PortabilityEndpoints
 {
+    private static readonly SemaphoreSlim ImportValidationSlot = new(1, 1);
+
     public static IEndpointRouteBuilder MapPortabilityEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("/api/portability").RequireAuthorization();
@@ -22,7 +24,7 @@ public static partial class PortabilityEndpoints
             .RequireRateLimiting("bounded-upload")
             .DisableAntiforgery()
             .WithMetadata(new RequestSizeLimitAttribute(PortableExportPackage.MaximumImportRequestBytes))
-            .WithMetadata(new RequestFormLimitsAttribute { MultipartBodyLengthLimit = PortableExportPackage.MaximumPackageBytes });
+            .WithMetadata(new RequestFormLimitsAttribute { MultipartBodyLengthLimit = PortableExportPackage.MaximumImportRequestBytes });
         return endpoints;
     }
 
@@ -72,16 +74,28 @@ public static partial class PortabilityEndpoints
         if (!PersonId(user, out var actorPersonId) || !await CanAdminister(siteId, actorPersonId, user, db, cancellationToken))
             return Results.Problem(statusCode: StatusCodes.Status403Forbidden);
         if (!request.HasFormContentType) return Results.ValidationProblem(new Dictionary<string, string[]> { ["package"] = ["Upload a Fylkren export package."] });
-        var form = await request.ReadFormAsync(cancellationToken);
-        var file = form.Files.GetFile("package");
-        if (file is null || file.Length == 0) return Results.ValidationProblem(new Dictionary<string, string[]> { ["package"] = ["The export package is missing or empty."] });
-        if (file.Length > PortableExportPackage.MaximumPackageBytes) return Results.ValidationProblem(new Dictionary<string, string[]> { ["package"] = ["The export package cannot exceed 512 MiB."] });
-        await using var stream = file.OpenReadStream();
-        var result = await PortableImportValidator.Validate(stream, siteId, cancellationToken);
-        var now = DateTimeOffset.UtcNow;
-        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, actorPersonId, result.Valid ? "portability.import-package-validated" : "portability.import-package-rejected", "portable-export", result.ExportId == Guid.Empty ? siteId : result.ExportId, now));
-        await db.SaveChangesAsync(cancellationToken);
-        return Results.Ok(result);
+        if (!await ImportValidationSlot.WaitAsync(0, cancellationToken))
+        {
+            context.Response.Headers.RetryAfter = "1";
+            return Results.StatusCode(StatusCodes.Status429TooManyRequests);
+        }
+        try
+        {
+            var form = await request.ReadFormAsync(cancellationToken);
+            var file = form.Files.GetFile("package");
+            if (file is null || file.Length == 0) return Results.ValidationProblem(new Dictionary<string, string[]> { ["package"] = ["The export package is missing or empty."] });
+            if (file.Length > PortableExportPackage.MaximumPackageBytes) return Results.ValidationProblem(new Dictionary<string, string[]> { ["package"] = ["The export package cannot exceed 16 MiB."] });
+            await using var stream = file.OpenReadStream();
+            var result = await PortableImportValidator.Validate(stream, siteId, cancellationToken);
+            var now = DateTimeOffset.UtcNow;
+            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, actorPersonId, result.Valid ? "portability.import-package-validated" : "portability.import-package-rejected", "portable-export", result.ExportId == Guid.Empty ? siteId : result.ExportId, now));
+            await db.SaveChangesAsync(cancellationToken);
+            return Results.Ok(result);
+        }
+        finally
+        {
+            ImportValidationSlot.Release();
+        }
     }
 
     private static bool PersonId(ClaimsPrincipal user, out Guid personId) =>

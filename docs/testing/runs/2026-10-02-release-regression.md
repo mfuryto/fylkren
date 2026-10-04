@@ -847,3 +847,19 @@ node tools/check-documentation-links.mjs
 The source lock reported `{"fileHandlingInventory":"passed","serverMultipartFeatures":3,"browserOnlyFileSelections":2,"serverFileResponses":3,"imageMaximumMiB":2,"portabilityMaximumMiB":512,"portabilityMaximumEntries":250,"knownMalwareScannerPresent":false}`. It fails if another `ReadFormAsync` or `Results.File` site appears without inventory review and binds the documented limits/types to the implementation constants. Existing current-candidate image and ZIP behavior evidence remains linked by the later requirement rows; no behavioral pass is inferred from this documentation check.
 
 Safe hashes and outcomes are recorded under `fileHandlingInventoryCompletion` in the evidence manifest. Production is untouched.
+
+## File upload size boundaries — 2026-10-04
+
+Completes ASVS 5.2.1 for all three server multipart features. The first criterion-specific package probe exposed SV-090: the documented 512 MiB portable-package allowance exceeded the maintained gateway `/var/cache/nginx` 16 MiB tmpfs and API `/tmp` 64 MiB tmpfs; a 65 MiB authorized upload returned 500 before bounded validation. The corrected contract limits compressed and declared-unpacked package content to 16 MiB and 250 entries, allows 17 MiB only for multipart overhead, disables gateway request buffering on the UUID-shaped validation route and admits one API validation buffer at a time. Busy validations return 429 with `Retry-After`.
+
+Scoped commands:
+
+```sh
+node tools/test-file-handling-inventory.mjs
+dotnet run --project tests/foundations/Fylkren.FoundationTests.csproj --no-restore -- --zip-length-only
+FYLKREN_E2E_API_IMAGE=sha256:af1701e1c3a9324adc51e2f4f618e0eab92565b65dbfcc13507fd5cb6bc46274 FYLKREN_E2E_WEB_IMAGE=sha256:1c81106369690b928da8acd2f0a19b19ff3f504d9ed39315c3a03dcceb75e7ee node tools/run-e2e-editions.mjs --asvs-header-file-only --no-build
+```
+
+The live gateway/API run accepted exact 2 MiB PNG-signature inputs at both the profile and branding endpoints and rejected one byte above each limit. A 4 MiB invalid ZIP and the exact 16 MiB boundary reached the validator and returned a bounded invalid result; 16 MiB plus one byte returned 400. The focused ZIP64 test still rejects overflow, unsigned maximum and aggregate declared sizes before extraction while allowing exact-limit and zero declarations to continue to manifest validation. Inventory output is `{"fileHandlingInventory":"passed","serverMultipartFeatures":3,"browserOnlyFileSelections":2,"serverFileResponses":3,"imageMaximumMiB":2,"portabilityMaximumMiB":16,"portabilityMaximumEntries":250,"knownMalwareScannerPresent":false}`. The HTTP result is `{"headerFileInputValidation":"passed","rejectedSiteLimits":4,"acceptedSiteLimits":2,"exactImageBoundaryEndpoints":2,"oversizedImageEndpointsRejected":2,"endpointSpecificPackageLimitReached":true,"exactPackageBoundaryMiB":16,"oversizedPackageRejected":true}`.
+
+The API image is `sha256:af1701e1c3a9324adc51e2f4f618e0eab92565b65dbfcc13507fd5cb6bc46274`; the gateway image is `sha256:1c81106369690b928da8acd2f0a19b19ff3f504d9ed39315c3a03dcceb75e7ee`. SV-090 is closed. ASVS 5.2.3 is corrected from Not applicable to In progress because Fylkren accepts ZIP packages; its compression-ratio, entry-count and aggregate-size execution remains separate. Production is untouched.

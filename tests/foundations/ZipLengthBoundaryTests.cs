@@ -5,7 +5,7 @@ internal static class ZipLengthBoundaryTests
 {
     internal static async Task Run()
     {
-        const ulong maximum = 512UL * 1024 * 1024;
+        const ulong maximum = 16UL * 1024 * 1024;
         foreach (var (sizes, oversized) in new (ulong[], bool)[] {
             ([long.MaxValue, long.MaxValue], true), ([ulong.MaxValue, 0], true),
             ([maximum / 2, maximum / 2 + 1], true), ([maximum / 2, maximum / 2], false), ([0, 0], false) })
@@ -19,7 +19,7 @@ internal static class ZipLengthBoundaryTests
                     throw new Exception("ZIP64 declared length was not read.");
             }
             var result = await PortableImportValidator.Validate(new MemoryStream(bytes), Guid.NewGuid(), default);
-            if (result.Valid || !result.Errors.Any(e => e.Contains(oversized ? "512 MiB" : "missing manifest")))
+            if (result.Valid || !result.Errors.Any(e => e.Contains(oversized ? "16 MiB" : "missing manifest")))
                 throw new Exception("ZIP64 size boundary returned the wrong validation result.");
         }
         Console.WriteLine("ZIP64 boundary tests passed: tiny fixtures expose real declared lengths; overflow, unsigned maximum and aggregate size reject before extraction; exact limit and zero proceed to manifest validation.");

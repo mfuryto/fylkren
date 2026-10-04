@@ -23,7 +23,7 @@ internal static class PortableImportValidator
             {
                 // Untrusted ZIP64 lengths must pass the policy bound before addition or opening entries.
                 if (entry.Length < 0 || entry.Length > PortableExportPackage.MaximumPackageBytes - totalBytes)
-                    return Invalid(errors, "The package's extracted size exceeds 512 MiB.");
+                    return Invalid(errors, "The package's extracted size exceeds 16 MiB.");
                 totalBytes += entry.Length;
             }
             foreach (var entry in archive.Entries)

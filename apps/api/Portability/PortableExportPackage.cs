@@ -15,7 +15,7 @@ internal static class PortableExportPackage
 {
     internal const string Format = "fylkren-portable-export";
     internal const string FormatVersion = "1.1";
-    internal const long MaximumPackageBytes = 512L * 1024 * 1024;
+    internal const long MaximumPackageBytes = 16L * 1024 * 1024;
     internal const long MaximumImportRequestBytes = MaximumPackageBytes + 1024 * 1024;
     internal const int MaximumEntries = 250;
 

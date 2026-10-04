@@ -45,7 +45,7 @@ export async function testPortableParserBoundaries({ platform, siteManager, site
     ['negative record count', value => { value.datasets[0].recordCount = -1; }],
     ['negative byte count', value => { value.datasets[0].bytes = -1; }],
     ['record count limit', value => { value.datasets[0].recordCount = 1_000_001; }],
-    ['byte count limit', value => { value.datasets[0].bytes = 512 * 1024 * 1024 + 1; }],
+    ['byte count limit', value => { value.datasets[0].bytes = 16 * 1024 * 1024 + 1; }],
     ['descriptor count limit', value => { value.datasets = Array.from({ length: 251 }, () => value.datasets[0]); }],
     ['metadata text limit', value => { value.site.name = 'a'.repeat(513); }],
     ['encoded site ID', value => { value.site.id = `%25${siteId}`; }],
@@ -179,7 +179,7 @@ export async function testPortability({ platform, siteManager, leader, siteId, o
 export async function testZipLengthArithmetic({ platform, siteManager, siteId }) {
   const endpoint = `/api/portability/sites/${siteId}/imports/validate`;
   const empty = new Map([['a', Buffer.alloc(0)], ['b', Buffer.alloc(0)]]);
-  const maximum = 512n * 1024n * 1024n;
+  const maximum = 16n * 1024n * 1024n;
   const cases = [
     ['long sum overflow', new Map([['a', 9223372036854775807n], ['b', 9223372036854775807n]]), true],
     ['single unsigned maximum', new Map([['a', 18446744073709551615n]]), true],
@@ -196,7 +196,7 @@ export async function testZipLengthArithmetic({ platform, siteManager, siteId })
     assert.equal(response.status, 200, `${label} must return bounded validation`);
     assert.equal(response.body.valid, false);
     const output = JSON.stringify(response.body);
-    if (tooLarge && label !== 'single unsigned maximum') assert.match(output, /size|512 MiB/i);
+    if (tooLarge && label !== 'single unsigned maximum') assert.match(output, /size|16 MiB/i);
     if (!tooLarge) assert.match(output, /missing manifest/i, 'Admissible size must proceed to manifest validation');
     assert.doesNotMatch(output, /OverflowException|stack trace|System\.Runtime/i);
   }

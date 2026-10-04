@@ -13,7 +13,7 @@ export function ExportHandoff({ siteId }: { siteId: string }) {
     if (!receipt || !file || busy || !reason.trim()) return;
     setBusy(true); setError(""); setNotice("");
     try {
-      if (file.size !== receipt.packageBytes || file.size > 512 * 1024 * 1024) throw new Error(t("preservationDigestMismatch"));
+      if (file.size !== receipt.packageBytes || file.size > 16 * 1024 * 1024) throw new Error(t("preservationDigestMismatch"));
       const digest = [...new Uint8Array(await crypto.subtle.digest("SHA-256", await file.arrayBuffer()))].map(b => b.toString(16).padStart(2, "0")).join("");
       if (digest !== receipt.packageSha256) throw new Error(t("preservationDigestMismatch"));
       await apiMutate(`${root}/${receipt.id}/acknowledge`, "POST", { expectedVersion: receipt.version, packageSha256: digest, reason: reason.replace(/[\r\n\t]+/g, " ").trim() }, t("siteActionFailed"));

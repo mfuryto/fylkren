@@ -17,7 +17,7 @@ for (const marker of [
   'POST /api/portability/sites/{siteId}/imports/validate',
   'Enterprise licence selection',
   'Export custody confirmation',
-  '512 MiB aggregate declared entry length; 250 entries',
+  '16 MiB aggregate declared entry length; 250 entries',
   'does not currently decode and re-encode raster images',
   'Validation is not antivirus scanning',
 ]) assert.ok(documentation.includes(marker), `File inventory is missing: ${marker}`);
@@ -30,7 +30,7 @@ for (const type of ['image/png', 'image/jpeg', 'image/webp']) {
 }
 
 const portability = readFileSync('apps/api/Portability/PortableExportPackage.cs', 'utf8');
-assert.match(portability, /MaximumPackageBytes = 512L \* 1024 \* 1024/);
+assert.match(portability, /MaximumPackageBytes = 16L \* 1024 \* 1024/);
 assert.match(portability, /MaximumImportRequestBytes = MaximumPackageBytes \+ 1024 \* 1024/);
 assert.match(portability, /MaximumEntries = 250/);
 
@@ -41,5 +41,5 @@ assert.equal(serverFileResults.length, 3, 'Review and document every server file
 process.stdout.write(`${JSON.stringify({ fileHandlingInventory: 'passed',
   serverMultipartFeatures: formReaders.length, browserOnlyFileSelections: 2,
   serverFileResponses: serverFileResults.length, imageMaximumMiB: 2,
-  portabilityMaximumMiB: 512, portabilityMaximumEntries: 250,
+  portabilityMaximumMiB: 16, portabilityMaximumEntries: 250,
   knownMalwareScannerPresent: false })}\n`);
