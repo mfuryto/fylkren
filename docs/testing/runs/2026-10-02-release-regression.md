@@ -1335,3 +1335,15 @@ dotnet build apps/api/Fylkren.Api.csproj --no-restore
 ```
 
 The source/document lock reports `{"sessionPolicyDocumentation":"passed","inactivityHours":1,"absoluteHours":12,"slidingInactivity":true,"absoluteStartPreservedOnRenewal":true,"nistReference":"SP-800-63B-4-AAL2","nistRecommendedMaximums":{"inactivityHours":1,"absoluteHours":24},"aal2Claimed":false,"mandatoryMfaFinding":"SV-094"}`. The affected API compiles with zero warnings and errors. Runtime expiry boundaries remain separate requirements under 7.3.1 and 7.3.2; no unrelated product suite was run. Production is untouched.
+
+## Concurrent browser-session policy — 2026-10-04
+
+Completes ASVS 7.1.2 by documenting the implemented count and termination behavior. Fylkren permits multiple browser sessions for an account and has no numeric count cap or server-side per-session registry. A new login therefore does not reject or evict an older ticket. Each ticket has independent inactivity and absolute expiry, while the shared account security version invalidates all earlier tickets after explicit sign-out, password change/reset, TOTP or passkey change, deactivation or deletion.
+
+Scoped command:
+
+```sh
+node tools/test-concurrent-session-policy-documentation.mjs
+```
+
+The source/document lock reports `{"concurrentSessionPolicyDocumentation":"passed","numericMaximum":null,"concurrentSessionsAllowed":true,"loginEviction":false,"perSessionRegistry":false,"globalRevocationMechanism":"security-version","selectiveTermination":false}`. The manual states that adding a finite maximum requires a session registry and an explicit reject-or-evict policy. Existing lifecycle tests provide dynamic account-wide invalidation evidence; this documentation step did not rerun them. Production is untouched.
