@@ -1122,3 +1122,16 @@ node tools/test-password-lifetime-boundary.mjs
 ```
 
 The source/document lock reports `{"passwordLifetimeBoundary":"passed","periodicRotation":false,"passwordAgeFields":0,"allowedRotationReasons":["user-change","recovery-or-compromise-reset","account-lifecycle","hash-upgrade"],"directoryPolicyExternal":true}`. No implementation correction or finding was required. Production is untouched.
+
+## Context-specific password words — 2026-10-04
+
+Completes ASVS 6.2.11. The canonical password-policy reference lists the built-in `Fylkren` product identifier and tokens from the local identity's username, display name and email address. Source locking confirms bootstrap, authenticated change and reset all supply those identity values to the shared policy, which applies Unicode NFKC and invariant lowercase normalization and ignores tokens shorter than four characters.
+
+Scoped commands:
+
+```sh
+node tools/test-password-context-documentation.mjs
+FYLKREN_E2E_API_IMAGE=sha256:922a2f9dfae305cb99f6fd1cd51f215d91875dff95a0a14644bc9fa68364c970 FYLKREN_E2E_WEB_IMAGE=sha256:9383959069230a3fa6e6e8dcdcde35204b594692a37e5cc1c5f7364ca9db51bb node tools/run-e2e-editions.mjs --asvs-password-context-only --no-build
+```
+
+The source/document lock reports `{"passwordContextDocumentation":"passed","contextualValueFamilies":4,"normalization":"NFKC-lowercase","minimumTokenLength":4,"localPasswordSettingFlows":3,"offlineCommonPasswordList":true}`. The current-image run rejects product, username, display-name and email-token candidates during bootstrap, change and reset, including a full-width/case-variant `Fylkren` candidate. Distinct controls succeed and the reset grant survives all four invalid candidates: `{"passwordContextRuntime":"passed","rejectedContextFamilies":["product","username","display-name","email"],"testedFlows":["bootstrap","change","reset"],"nfkcCaseNormalization":true,"validControlsAccepted":true,"resetGrantPreservedAfterContextRejections":true}`. The test respects the shared authentication limiter's numeric `Retry-After` response between deliberate invalid batches. No correction or finding was required. Production is untouched.
