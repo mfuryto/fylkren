@@ -405,3 +405,27 @@ Boundary tests execute production count helpers with two/three int-max operands,
 Affected database tests retain the 180-task/six-counterpart navigation fixture across three Sites/27 units, role/hierarchy/membership revocation and exact-level learning. Automatic lifecycle tests retain pending/failed delivery blockers, exact failed-delivery count, concurrent idempotent archive, paused editing, preservation, independent learning and transactional rollback. The initial scoped foundation invocation lacked the migrations normally established by the full runner; adding that same migration prerequisite corrected the fixture, followed by a passing retest. No unrelated whole-product, SSO, federation or browser chain was repeated.
 
 The [existing manifest](2026-10-02-release-regression-evidence.json) freezes `derivedArithmeticContinuation` image/source/test/log hashes and summaries. ASVS 1.4.2 stays In progress: version/revision/security-version and other counter increments, plus remaining derived arithmetic, still require their own boundary tests. This stage does not claim completion of all arithmetic or full release qualification.
+
+
+## Version and retry counter bounds — 2026-10-04
+
+Continues ASVS 1.4.2. Against baseline f581c73 a real LoginIdentity at long.MaxValue accepted a password-hash change and wrapped SecurityVersion to long.MinValue. This was a synthetic in-memory boundary test, not a replayed session or production-scale operation (SV-073). Checked next-version calculation now rejects exhausted or negative versions before changing domain fields. The existing exception handler returns 409 / numeric_capacity_exceeded for affected API mutations; ordinary API/federation payloads and immutable history remain compatible. No schema, retention execution or persistent deletion is introduced.
+
+The existing runners provide scoped commands:
+
+```sh
+dotnet run --project tests/foundations/Fylkren.FoundationTests.csproj -- --version-boundaries-only
+node tools/run-foundation-tests.mjs --version-integration-only
+node tools/run-e2e-editions.mjs --asvs-version-only --no-build
+node tools/run-federation-pair.mjs --outbound-only --no-build
+node tools/run-identity-ad-lab.mjs --no-build
+```
+
+The Docker runners use FYLKREN_E2E_API_IMAGE=fylkren-asvs-versions-api:latest and the reused FYLKREN_E2E_WEB_IMAGE=fylkren-automatic-lifecycle-web:latest. All commands passed. The reused web is an unchanged gateway, not qualification of the latest complete UI/release candidate.
+
+- Twenty actual domain mutations accept their last version and reject exhaustion with unchanged state: identity security versions, information lifecycle, Site settings, learning, archive grants, export acknowledgement, federation publication and projection/webhook attempts. Negative helper versions reject; maximum-version no-ops remain no-ops. Authentication failures saturate at the existing 20 threshold, notification retries at five and directory missing confirmations at their configured threshold. Ordinary threshold sequences and seeded int-max counters pass.
+- Database tests accept the last formal approval number, reject the next approval without added version/signoff/audit rows, and preserve immutable history. Atomic SQL webhook claiming increments int-max-minus-one once; exhausted or negative attempts acquire no lease and change no state.
+- API tests reject Site versions at long-max and long-max-minus-one without saving either partial update; reject exhausted sibling ordering without adding a unit; preserve ordinary decision/risk/measure revisions and PlatformManager authorization. Exhausted risk/measure revisions return 409 and preserve their full retained histories. Historical capacity rows are inserted as synthetic fixtures, not rewritten.
+- Affected domain coverage, governance, preservation and automatic-lifecycle database cases pass, including audit/activity rollback and archive/delivery gates. Existing outbound webhook/federation boundary and live Samba AD suspension/session-revocation/restoration/outage tests pass. This is affected-scope regression, not the complete product suite.
+
+Safe source/image/log hashes are appended under versionCounterContinuation in the [existing evidence manifest](2026-10-02-release-regression-evidence.json). Raw logs and fixture credentials stay outside Git. ASVS 1.4.2 remains In progress pending ZIP64 declared-length aggregation and the remaining arithmetic inventory; security-version boundary coverage does not complete session-management requirements. Native DNS finding SV-068 remains open independently.

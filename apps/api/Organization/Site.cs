@@ -34,13 +34,14 @@ public sealed class Site
     public void Update(string name, Guid? parentOrganizationUnitId, bool isActive)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        var nextVersion = NumericBounds.NextVersion(Version);
         Name = name.Trim();
         NormalizedName = Name.ToUpperInvariant();
         ParentOrganizationUnitId = parentOrganizationUnitId;
         IsActive = isActive;
-        Version++;
+        Version = nextVersion;
     }
 
     public void UpdateFinalReportTemplate(string? content) => FinalReportTemplate = string.IsNullOrWhiteSpace(content) ? null : content.Trim();
-    public void UpdateOverviewDesign(string design) { OverviewDesign = design; Version++; }
+    public void UpdateOverviewDesign(string design) { var nextVersion = NumericBounds.NextVersion(Version); OverviewDesign = design; Version = nextVersion; }
 }

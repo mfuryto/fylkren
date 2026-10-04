@@ -28,14 +28,15 @@ internal sealed class FederationSitePublication
     internal void SetActive(bool active, DateTimeOffset at)
     {
         if (IsActive == active) return;
+        var nextRevision = NumericBounds.NextVersion(Revision);
         IsActive = active;
-        Revision++;
+        Revision = nextRevision;
         UpdatedAt = at;
     }
 
     internal void Refresh(DateTimeOffset at)
     {
-        Revision++;
+        Revision = NumericBounds.NextVersion(Revision);
         UpdatedAt = at;
     }
 }

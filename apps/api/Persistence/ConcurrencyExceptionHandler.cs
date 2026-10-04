@@ -10,6 +10,14 @@ internal sealed class ConcurrencyExceptionHandler : IExceptionHandler
         Exception exception,
         CancellationToken cancellationToken)
     {
+        if (exception is NumericCapacityException)
+        {
+            await Results.Problem(statusCode: StatusCodes.Status409Conflict,
+                title: "The resource has reached its numeric limit.",
+                extensions: new Dictionary<string, object?> { ["code"] = "numeric_capacity_exceeded" })
+                .ExecuteAsync(httpContext);
+            return true;
+        }
         if (exception is not DbUpdateConcurrencyException &&
             exception is not DbUpdateException { InnerException: Npgsql.PostgresException { ConstraintName: "work_lifecycle_guard" or "site_lifecycle_guard" or "person_lifecycle_guard" or "activity_writer_gate" or "domain_activity_immutable" or "activity_context_owner" } }) return false;
 

@@ -3869,5 +3869,63 @@
     ],
     "remainingRequirementScope": "ASVS 1.4.2 stays In progress: version/revision/security-version/counter increments and remaining arithmetic inventory",
     "scope": "Changed API/reused unchanged gateway web; scoped arithmetic/API/database verification, not full release qualification."
+  },
+  "versionCounterContinuation": {
+    "date": "2026-10-04",
+    "baseline": "f581c73",
+    "sourceHashes": {
+      "apps/api/Approvals/FormalApprovalService.cs": "5130f72fae28690c8312302a01d4a10ce9c314ac1643ebea2585f4bab713b05a",
+      "apps/api/Decisions/DecisionEndpoints.cs": "56b60abff49ee691062b65c6af3b0394b14f30642aff229a90031d2754920415",
+      "apps/api/DomainEvents/EventProjection.cs": "ecd6b39a4caf5c92c919612092dff17cdcaa4ef1fa917846df0968fcf4bbb77a",
+      "apps/api/DomainEvents/WebhookSubscription.cs": "7a066f67bfa75bd222072da93e3c891d9d500b7feea476b37951d7ecb69c5f8d",
+      "apps/api/Federation/FederationSitePublication.cs": "04718b0d4d1d713085f13d681bde1ea2e4bf5db841db150599a7415b45bd8bab",
+      "apps/api/Identity/ExternalIdentityLink.cs": "0143beaf9d1466bb755c088ce8c1714a6383ee859d0b21c7864fe36d72a442b3",
+      "apps/api/Identity/LoginIdentity.cs": "6865911d9758a53c5229a393381c00edd71168387fd72b5eaae0295467c54c92",
+      "apps/api/InformationLifecycle/ArchiveGrant.cs": "669ffe510cf554c58c4f0e9acd9d8219b4b6a885f462e405724455e44a26b84e",
+      "apps/api/InformationLifecycle/InformationLifecycleRecord.cs": "b7897b1157a33dd4a77934b1e664f065f8c9fdc5b3f03f7f95009e3381103a85",
+      "apps/api/Learning/LearningCreation.cs": "ee9e9a76fa42c22e99ac57b35629e43ffee6c4ef557721261d1ca666c07c60a1",
+      "apps/api/Learning/LearningLesson.cs": "f0d2f7b990156b67d432cf2e2a81b4a7137b877ca8520facf60816ba4a8f8227",
+      "apps/api/Notifications/NotificationOutboxMessage.cs": "8f8f9c6b3e0b63f4154a777cde9706ccbc43f667e3d37739c946d478dabb4923",
+      "apps/api/NumericBounds.cs": "2636999f8b597c1b7b5531b2d25c03fc377bc5ce5687a0b616830e313e9841a0",
+      "apps/api/Organization/OrganizationUnitEndpoints.cs": "434ac380a3fa48448ca74a708981b4b2bddc961367dbfa7d1e3adedf462feac2",
+      "apps/api/Organization/Site.cs": "b1b8640c55e4d145f30d90a06d60df8cfa6196a29e54b2179e12a8b72c90f3f3",
+      "apps/api/Persistence/ConcurrencyExceptionHandler.cs": "fbc70529f3e34f107069ff2488b06251c0e99cde5efc648f5bfa128c127acf0b",
+      "apps/api/Persistence/DeliveryClaims.cs": "0b16596456268012aa38c73b845b95e0c9751c6d4c2227736e934abf13b1f4ca",
+      "apps/api/Persistence/FylkrenDbContext.cs": "249d35cdc20106fa20f5a2a4a135ff89db80f411731f315a8b596f3de527f3e0",
+      "apps/api/Portability/ExportReceipt.cs": "f4c25f7c4d53403cf20f8be61bebd8d22265c4bef2c5da9fbf722d6c8c421744",
+      "apps/api/Risks/RiskEndpoints.cs": "b11487290167473ddd8b72aa36e5b98092f686147fc54342c32de65ad35f746c",
+      "tests/foundations/Program.cs": "fea38f0557717f07093f424d88d88824eaa9ec83b93f18a4fb803975ff14cbbd",
+      "tools/e2e/encoding-security.mjs": "5a0bcde477f369b973d6d4e63866a86df24f98f4e817f6032ff92459b5650ddf",
+      "tools/run-e2e-editions.mjs": "7b65b7d023030b778f2d080c34645330f59d63c3e1931438f8eeec91369dbb4a",
+      "tools/test-e2e-local.mjs": "09c154edf55360251244c272cfb903f855df02312a1a7670f12a02ef231c76a4",
+      "tests/foundations/VersionBoundaryTests.cs": "5180f73f5e9802a6b9a3d6318289feb4a052d0a6de1a3c80a63c80523b6ad9c4",
+      "tests/foundations/VersionDatabaseBoundaryTests.cs": "2ce0c5366f7b4f64a502779c3b56d8e5f454eb7212994427d84b675cbe17b239"
+    },
+    "logHashes": {
+      "/tmp/fylkren-asvs-versions-ad.log": "d2d754a92bce9c991c12f33ce2c4fdc6b986b90e2805197a8e5b89425057df1b",
+      "/tmp/fylkren-asvs-versions-delivery.log": "554fd55409979e348cb1886c27dba886c1eeb8378898ac01d6f7c1a622ba2d94",
+      "/tmp/fylkren-asvs-versions-api.log": "cc0cdddacaea16bbce7068508268df156de42d2e81fab11e8c4eeec05f0da6f2",
+      "/tmp/fylkren-asvs-versions-api-build.log": "7c6f801ee242258b3fce8147830516a1f24ca5e23088e2089326349609ed13fa",
+      "/tmp/fylkren-asvs-versions-integration.log": "5c3b6635e9936d8dc2aeabd553c2321d12fe37f3a702b1f4b5b6f162d466347d",
+      "/tmp/fylkren-asvs-versions-build.log": "1b8021507b1db6c26c0fa28f47995eab5555cfae550cd2805720e313fd5e44c4",
+      "/tmp/fylkren-asvs-versions-unit.log": "02ed315fa5e38a5ed5cac477a5483c8ca5903df7f4c78e95552a76d379650968",
+      "/tmp/fylkren-asvs-versions-before.log": "69df854210b4024be75df8542b1b41196bd4cd23bf26684290c0c53f63da85bc"
+    },
+    "images": [
+      "[\"fylkren-asvs-versions-api:latest\",\"fylkren-edition-e2e-api:latest\",\"fylkren-federation-pair-test-api:local\"] sha256:947a02d37002134af1cf7ace16a9273dff4dbe0236a99981a385e44e73206f9a",
+      "[\"fylkren-automatic-lifecycle-web:latest\",\"fylkren-edition-e2e-web:latest\",\"fylkren-federation-pair-test-web:local\"] sha256:95c69456ec0870a718f167db181344235d23ccd5744ec99a0879df61d3c9f497"
+    ],
+    "baselineResult": "Synthetic actual LoginIdentity long-max password mutation wrapped to long-min; no replayed session or production exploit",
+    "results": {
+      "domainBoundaryMutations": 20,
+      "unit": "passed",
+      "databaseAndAffectedFoundations": "passed",
+      "apiAtomicityAndNormalRevisionAuthorization": "passed",
+      "outboundDelivery": "passed",
+      "liveSambaAD": "passed"
+    },
+    "findingClosed": "SV-073",
+    "remaining": "ASVS 1.4.2 ZIP64 declared-length aggregation and remaining arithmetic inventory; SV-068 native DNS requires deployment egress qualification",
+    "scope": "Affected API/domain/database/AD/delivery tests, reused unchanged gateway; not full release qualification"
   }
 }

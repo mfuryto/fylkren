@@ -25,7 +25,7 @@ public sealed class InformationLifecycleRecord
     public Guid? ExportId { get; private set; }
     public bool IsHeld { get; private set; }
     public bool AutomationPaused { get; private set; }
-    public void SetAutomationPaused(bool paused) { if (AutomationPaused != paused) { AutomationPaused = paused; Version++; } }
+    public void SetAutomationPaused(bool paused) { if (AutomationPaused != paused) { var nextVersion = NumericBounds.NextVersion(Version); AutomationPaused = paused; Version = nextVersion; } }
     public string Reason { get; private set; } = "";
     public void Transition(string next, long expectedVersion, string reason, DateTimeOffset now)
     {
@@ -33,7 +33,8 @@ public sealed class InformationLifecycleRecord
         if ((Stage, next) is not (("active", "closed") or ("closed", "active") or ("closed", "archived") or ("archived", "closed")))
             throw new InvalidOperationException("Only reversible closure/archive transitions are enabled.");
         if (string.IsNullOrWhiteSpace(reason) || reason.Length > 1000 || reason.Any(char.IsControl)) throw new ArgumentException("A bounded lifecycle reason is required.");
-        Stage = next; ChangedAt = now; Version++; Reason = reason.Trim();
+        var nextVersion = NumericBounds.NextVersion(Version);
+        Stage = next; ChangedAt = now; Version = nextVersion; Reason = reason.Trim();
         if (next == "closed") ClosedAt = now;
         if (next == "archived") ArchivedAt = now;
     }
@@ -41,12 +42,14 @@ public sealed class InformationLifecycleRecord
     {
         if (expectedVersion != Version || policyId == Guid.Empty || policyVersion < 1 || string.IsNullOrWhiteSpace(reason) || reason.Length > 1000 || reason.Any(char.IsControl))
             throw new InvalidOperationException("A current version, policy and bounded reason are required.");
-        PolicyId = policyId; PolicyVersion = policyVersion; EligibleAt = null; Reason = reason.Trim(); ChangedAt = now; Version++;
+        var nextVersion = NumericBounds.NextVersion(Version);
+        PolicyId = policyId; PolicyVersion = policyVersion; EligibleAt = null; Reason = reason.Trim(); ChangedAt = now; Version = nextVersion;
     }
     public void SetHold(bool held, long expectedVersion, string reason, DateTimeOffset now)
     {
         if (expectedVersion != Version || string.IsNullOrWhiteSpace(reason) || reason.Length > 1000 || reason.Any(char.IsControl))
             throw new InvalidOperationException("A current version and bounded hold reason are required.");
-        IsHeld = held; Reason = reason.Trim(); ChangedAt = now; Version++;
+        var nextVersion = NumericBounds.NextVersion(Version);
+        IsHeld = held; Reason = reason.Trim(); ChangedAt = now; Version = nextVersion;
     }
 }

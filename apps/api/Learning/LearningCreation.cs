@@ -23,7 +23,7 @@ internal static class LearningCreation
         var fresh = drafts.Where(value => existing.All(saved => saved.Id != value.Id)).ToArray();
         if (fresh.Length == 0) return null;
         var number = await db.LearningLessons.Where(value => value.WorkItemId == item.Id).Select(value => (int?)value.Number).MaxAsync(ct) ?? 0;
-        if (number + fresh.Length > 100) return Results.Conflict(new { error = "This task already has the maximum of 100 learning points." });
+        if (number < 0 || number > 100 - fresh.Length) return Results.Conflict(new { error = "This task already has the maximum of 100 learning points." });
         var unitId = await WorkLevelAuthorization.ResolveLevelId(item.SiteId, item.AssignedUnitId, db, ct);
         if (unitId is null) return Results.Conflict(new { error = "The work level is no longer active." });
         var author = await db.People.Where(value => value.Id == personId).Select(value => value.DisplayName).SingleAsync(ct);

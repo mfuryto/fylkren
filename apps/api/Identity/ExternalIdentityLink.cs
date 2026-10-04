@@ -73,7 +73,8 @@ public sealed class ExternalIdentityLink
     }
     public bool RecordDirectoryMissing(DateTimeOffset now, int confirmationCount)
     {
-        DirectoryMissingCount = Math.Min(DirectoryMissingCount + 1, confirmationCount);
+        ArgumentOutOfRangeException.ThrowIfLessThan(confirmationCount, 1);
+        DirectoryMissingCount = Math.Clamp(DirectoryMissingCount, 0, confirmationCount - 1) + 1;
         DirectoryLastCheckedAt = now;
         if (DirectoryMissingCount < confirmationCount)
         {

@@ -28,6 +28,7 @@ public sealed class ExportReceipt
         if (version != Version || AcknowledgedAt is not null || !string.Equals(PackageSha256, digest, StringComparison.OrdinalIgnoreCase) || actor == Guid.Empty ||
             string.IsNullOrWhiteSpace(reason) || reason.Length > 1000 || reason.Any(char.IsControl))
             throw new InvalidOperationException("A current receipt, matching package digest and bounded custody reason are required.");
-        AcknowledgedAt = now; AcknowledgedByPersonId = actor; AcknowledgementReason = reason.Trim(); Version++;
+        var nextVersion = NumericBounds.NextVersion(Version);
+        AcknowledgedAt = now; AcknowledgedByPersonId = actor; AcknowledgementReason = reason.Trim(); Version = nextVersion;
     }
 }

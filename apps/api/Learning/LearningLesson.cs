@@ -30,8 +30,9 @@ public sealed class LearningLesson
     public long Version { get; private set; } = 1;
     public void Review(string status, string priority, string actionPlan, string treatmentNote, DateOnly? dueOn, Guid personId, string authorName, DateTimeOffset now)
     {
+        var nextVersion = NumericBounds.NextVersion(Version);
         Status = status; Priority = priority; ActionPlan = actionPlan; TreatmentNote = treatmentNote; DueOn = dueOn;
-        OwnerPersonId = personId; OwnerName = authorName; UpdatedAt = now; Version++;
+        OwnerPersonId = personId; OwnerName = authorName; UpdatedAt = now; Version = nextVersion;
     }
 }
 

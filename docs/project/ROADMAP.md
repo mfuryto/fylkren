@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 2026-10-04 after verified service transports and derived count/calendar bounds; native DNS residual and remaining version/counter tests are explicit.
+Updated 2026-10-04 after verified service transports and derived count/calendar bounds; version/counter boundary verification; native DNS residual and remaining ZIP64/arithmetic tests are explicit.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -12,7 +12,7 @@ The additive event/activity foundation and coherent WorkItem slice are delivered
 
 ## Next delivery order
 
-1. Resume the existing ASVS matrix in its established requirement order: incomplete chapter-1 requirement 1.4.2 (remaining version/revision/security-version/counter increments and arithmetic inventory). Aggregate counts and maximal calendar bounds are delivered and verified in the [derived continuation](../testing/runs/2026-10-02-release-regression.md#derived-counts-and-calendar-bounds--2026-10-04). HTTP and SMTP/AD/LDAP service-target/TLS/referral cases are recorded; 1.3.6 remains a concrete Finding (SV-068) pending verified deployment egress restrictions for native DNS rebinding. Continue independent matrix cases while that deployment qualification remains open. HTTP integration limits under 1.3.3 are delivered and tested in the [outbound continuation](../testing/runs/2026-10-02-release-regression.md#outbound-integration-boundaries--2026-10-04). Scoped navigation-authorization retests are recorded under 8.2.1/8.2.2; they do not complete either requirement.
+1. Resume the existing ASVS matrix in its established requirement order: incomplete chapter-1 requirement 1.4.2 (ZIP64 declared-length aggregation and remaining arithmetic inventory). Version/counter boundaries are verified in the [version continuation](../testing/runs/2026-10-02-release-regression.md#version-and-retry-counter-bounds--2026-10-04). Aggregate counts and maximal calendar bounds are delivered and verified in the [derived continuation](../testing/runs/2026-10-02-release-regression.md#derived-counts-and-calendar-bounds--2026-10-04). HTTP and SMTP/AD/LDAP service-target/TLS/referral cases are recorded; 1.3.6 remains a concrete Finding (SV-068) pending verified deployment egress restrictions for native DNS rebinding. Continue independent matrix cases while that deployment qualification remains open. HTTP integration limits under 1.3.3 are delivered and tested in the [outbound continuation](../testing/runs/2026-10-02-release-regression.md#outbound-integration-boundaries--2026-10-04). Scoped navigation-authorization retests are recorded under 8.2.1/8.2.2; they do not complete either requirement.
 2. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing at this gate.
 
 No irreversible disposition is authorized by this order. Establish and verify its prerequisites before proposing activation; do not choose arbitrary retention periods.
@@ -36,7 +36,7 @@ Earlier HTTP p95 readings varied from subsecond values to multiple seconds and w
 
 ## Security verification
 
-The [ASVS 5.0 Level 2 matrix](../security/ASVS_5.0.0_L2_MATRIX.md) is the single security-testing work list and status authority. At this update it contains 36 Passed, 111 In progress, 53 Not assessed and 53 Not applicable requirements. Counts are a dated baseline, not a separate maintained matrix or security certification.
+The [ASVS 5.0 Level 2 matrix](../security/ASVS_5.0.0_L2_MATRIX.md) is the single security-testing work list and status authority. At this update it contains 36 Passed, 111 In progress, 52 Not assessed, 53 Not applicable and one Finding requirements. Counts are a dated baseline, not a separate maintained matrix or security certification.
 
 Use the [security test plan](../security/SECURITY_TEST_PLAN.md) and [threat model](../security/SECURITY_THREAT_MODEL.md). Record findings and remediation in the [finding register](../security/SECURITY_VERIFICATION.md); record completed requirement-specific tests in the ASVS matrix with links to maintained execution evidence. Partial coverage remains partial. Retest affected controls after every change.
 

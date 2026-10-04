@@ -15,7 +15,7 @@ internal static class FormalApprovalService
     {
         var json = JsonSerializer.Serialize(snapshot, JsonOptions);
         var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(json))).ToLowerInvariant();
-        var number = (await db.DomainObjectVersions.Where(x => x.SiteId == siteId && x.ObjectType == objectType && x.ObjectId == objectId).MaxAsync(x => (int?)x.VersionNumber, ct) ?? 0) + 1;
+        var number = NumericBounds.NextVersion(await db.DomainObjectVersions.Where(x => x.SiteId == siteId && x.ObjectType == objectType && x.ObjectId == objectId).MaxAsync(x => (int?)x.VersionNumber, ct) ?? 0);
         var approverName = await db.People.Where(x => x.Id == approverId).Select(x => x.DisplayName).SingleAsync(ct);
         var version = new DomainObjectVersion(Guid.NewGuid(), siteId, objectType, objectId, contextWorkItemId, number, title, json, hash, approverId, now);
         version.MarkApproved();

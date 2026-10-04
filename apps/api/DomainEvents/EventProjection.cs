@@ -21,7 +21,8 @@ public sealed class EventProjection
     {
         if (owner == Guid.Empty || Status is "completed" or "skipped" || NextAttemptAt > now || LeaseExpiresAt > now)
             throw new InvalidOperationException("Projection is not claimable.");
-        Status = "processing"; LeaseOwner = owner; LeaseExpiresAt = now.AddMinutes(5); AttemptCount++;
+        var nextAttempt = NumericBounds.NextVersion(AttemptCount);
+        Status = "processing"; LeaseOwner = owner; LeaseExpiresAt = now.AddMinutes(5); AttemptCount = nextAttempt;
     }
     public void Complete(Guid owner, DateTimeOffset now, bool skipped = false)
     {

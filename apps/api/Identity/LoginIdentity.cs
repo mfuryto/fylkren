@@ -39,9 +39,10 @@ public sealed class LoginIdentity
     public void SetPasswordHash(string passwordHash, bool mustChangePassword = false)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(passwordHash);
+        var nextVersion = NumericBounds.NextVersion(SecurityVersion);
         PasswordHash = passwordHash;
         MustChangePassword = mustChangePassword;
-        SecurityVersion++;
+        SecurityVersion = nextVersion;
     }
 
     public void Update(string username, bool isActive)
@@ -51,14 +52,16 @@ public sealed class LoginIdentity
         var updatedNormalizedUsername = updatedUsername.ToUpperInvariant();
         var securityRelevantChange = IsActive != isActive ||
             !string.Equals(NormalizedUsername, updatedNormalizedUsername, StringComparison.Ordinal);
+        var nextVersion = securityRelevantChange ? NumericBounds.NextVersion(SecurityVersion) : SecurityVersion;
         Username = updatedUsername;
         NormalizedUsername = updatedNormalizedUsername;
         IsActive = isActive;
-        if (securityRelevantChange) SecurityVersion++;
+        SecurityVersion = nextVersion;
     }
 
     public void Delete()
     {
+        var nextVersion = NumericBounds.NextVersion(SecurityVersion);
         Username = $"deleted-{Id:N}";
         NormalizedUsername = Username.ToUpperInvariant();
         PasswordHash = string.Empty;
@@ -68,28 +71,30 @@ public sealed class LoginIdentity
         LastTotpTimeStep = null;
         TotpEnabled = false;
         IsActive = false;
-        SecurityVersion++;
+        SecurityVersion = nextVersion;
     }
 
     public void EnableTotp(string protectedSecret, IEnumerable<string> recoveryCodeHashes)
     {
+        var nextVersion = NumericBounds.NextVersion(SecurityVersion);
         TotpSecret = protectedSecret;
         RecoveryCodeHashes = string.Join(';', recoveryCodeHashes);
         LastTotpTimeStep = null;
         TotpEnabled = true;
-        SecurityVersion++;
+        SecurityVersion = nextVersion;
     }
 
     public void DisableTotp()
     {
+        var nextVersion = NumericBounds.NextVersion(SecurityVersion);
         TotpSecret = null;
         RecoveryCodeHashes = null;
         LastTotpTimeStep = null;
         TotpEnabled = false;
-        SecurityVersion++;
+        SecurityVersion = nextVersion;
     }
 
-    public void AdvanceSecurityVersion() => SecurityVersion++;
+    public void AdvanceSecurityVersion() => SecurityVersion = NumericBounds.NextVersion(SecurityVersion);
 
     public void RecordSignIn(DateTimeOffset now) => LastSignedInAt = now;
 
@@ -102,7 +107,7 @@ public sealed class LoginIdentity
             FailedAuthenticationCount = 0;
             AuthenticationLockedUntil = null;
         }
-        FailedAuthenticationCount++;
+        FailedAuthenticationCount = Math.Clamp(FailedAuthenticationCount, 0, 19) + 1;
         if (FailedAuthenticationCount >= 20)
             AuthenticationLockedUntil = now.AddMinutes(15);
     }

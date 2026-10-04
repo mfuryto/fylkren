@@ -14,5 +14,5 @@ public sealed class ArchiveGrant
     public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset? RevokedAt { get; private set; }
     public void Revoke(long version, DateTimeOffset now)
-    { if (Version != version || !IsActive) throw new InvalidOperationException("Archive grant has changed."); IsActive = false; RevokedAt = now; Version++; }
+    { if (Version != version || !IsActive) throw new InvalidOperationException("Archive grant has changed."); var nextVersion = NumericBounds.NextVersion(Version); IsActive = false; RevokedAt = now; Version = nextVersion; }
 }

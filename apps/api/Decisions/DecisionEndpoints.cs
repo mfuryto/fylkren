@@ -83,7 +83,7 @@ public static class DecisionEndpoints
         if (!await ReferencesAreValid(decision.SiteId, references, db, ct)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["references"] = ["One or more object references are invalid or belong to another site."] });
 
         var now = DateTimeOffset.UtcNow;
-        var revision = CreateRevision(decision.Id, latest.RevisionNumber + 1, request, personId, now, makers, references);
+        var revision = CreateRevision(decision.Id, NumericBounds.NextVersion(latest.RevisionNumber), request, personId, now, makers, references);
         db.DecisionRevisions.Add(revision);
         if (request.Status == "recorded")
             await FormalApprovalService.Approve(db, decision.SiteId, "decision", decision.Id, itemId, request.Title!, new { revision = revision.RevisionNumber, title = request.Title, decision = request.Decision, request.Rationale, request.Status, decidedAt = request.DecidedAt ?? now, decisionMakers = makers.Select(x => new { personId = x.Id, displayName = x.Name }), references }, personId, now, ct);

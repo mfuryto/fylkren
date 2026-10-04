@@ -2,6 +2,18 @@ namespace Fylkren.Api;
 
 internal static class NumericBounds
 {
+    internal static int NextVersion(int current)
+    {
+        if (current < 0 || current == int.MaxValue) throw new NumericCapacityException();
+        return current + 1;
+    }
+
+    internal static long NextVersion(long current)
+    {
+        if (current < 0 || current == long.MaxValue) throw new NumericCapacityException();
+        return current + 1;
+    }
+
     internal static long AddCount(long total, long count)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(total);
@@ -17,3 +29,5 @@ internal static class NumericBounds
         return total / pageSize + (total % pageSize == 0 ? 0 : 1);
     }
 }
+
+internal sealed class NumericCapacityException() : InvalidOperationException("The resource has reached its numeric limit.");

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 
 export async function testCustomCssEncoding({ platform }) {
   const initial = await platform.request('/api/branding');
@@ -159,4 +160,67 @@ export async function testDerivedArithmeticBoundaries({ platform, siteManager, l
   return { derivedArithmeticBoundaries: 'passed', inclusiveDateCases: 3, rejectedDateCases: 3,
     reportYearCases: 3, rejectedReportYears: 4, platformAuditCount: audit.body.total,
     commentPageBoundaryRows: 21, rejectedCommentPages: 5, commentAuthorizationPreserved: true };
+}
+
+export async function testVersionMutationBoundaries({ platform, siteManager, leader, personId, siteId, unitId, workItemTypeId }) {
+  assert.equal(process.env.FYLKREN_COMPOSE_PROJECT, 'fylkren-edition-e2e', 'Capacity seeding is restricted to the disposable API lab');
+  const guid = value => { assert.match(value, /^[0-9a-f-]{36}$/i); return value; };
+  const sql = query => execFileSync('docker', ['compose', '-p', 'fylkren-edition-e2e', 'exec', '-T', 'postgres',
+    'psql', '-U', 'fylkren', '-d', 'fylkren', '-tA', '-v', 'ON_ERROR_STOP=1', '-c', query], { encoding: 'utf8' }).trim();
+  const siteSnapshot = () => sql(`SELECT json_build_object('name',name,'version',version::text,'active',is_active,'design',overview_design) FROM sites WHERE id='${guid(siteId)}'`);
+  const original = JSON.parse(siteSnapshot());
+  for (const capacity of ['9223372036854775807', '9223372036854775806']) {
+    sql(`UPDATE sites SET version=${capacity} WHERE id='${guid(siteId)}'`);
+    const before = siteSnapshot();
+    const response = await platform.put(`/api/sites/${siteId}`, { name: 'Synthetic refused capacity', parentOrganizationUnitId: null,
+      isActive: true, overviewDesign: 'classic' });
+    assert.equal(response.status, 409); assert.equal(response.body.code, 'numeric_capacity_exceeded');
+    assert.equal(siteSnapshot(), before, 'Capacity refusal partially persisted the multi-mutation Site action');
+  }
+  assert.match(original.version, /^\d+$/);
+  sql(`UPDATE sites SET version=${original.version} WHERE id='${guid(siteId)}'`);
+  const oldOrder = sql(`SELECT sort_order FROM organization_units WHERE id='${guid(unitId)}'`);
+  sql(`UPDATE organization_units SET sort_order=2147483647 WHERE id='${guid(unitId)}'`);
+  const unitBody = { name: 'Synthetic capacity unit', parentId: null, isTemporary: false, worksAtParentLevel: false, isSiteLeadership: false };
+  const unitsBefore = sql(`SELECT count(*) FROM organization_units WHERE site_id='${guid(siteId)}'`);
+  const unitResponse = await siteManager.post(`/api/sites/${siteId}/organization-units`, unitBody);
+  assert.equal(unitResponse.status, 409); assert.equal(unitResponse.body.code, 'numeric_capacity_exceeded');
+  assert.equal(sql(`SELECT count(*) FROM organization_units WHERE site_id='${guid(siteId)}'`), unitsBefore);
+  assert.match(oldOrder, /^\d+$/);
+  sql(`UPDATE organization_units SET sort_order=${oldOrder} WHERE id='${guid(unitId)}'`);
+  assert.equal((await siteManager.post(`/api/sites/${siteId}/organization-units`, unitBody)).status, 201);
+  const root = `/api/work/sites/${siteId}/items`;
+  const task = await leader.post(root, { title: 'Synthetic version context', description: 'Synthetic', recommendation: null,
+    referenceUrl: null, assignedUnitId: unitId, workItemTypeId, dueAt: null });
+  assert.equal(task.status, 201);
+  const decisions = `/api/decisions/sites/${siteId}/tasks/${task.body.id}`;
+  const decisionBody = { title: 'Synthetic version decision', decision: 'Synthetic decision', rationale: 'Synthetic rationale',
+    status: 'recorded', decisionMakerIds: [personId], references: [] };
+  const decision = await leader.post(decisions, decisionBody); assert.equal(decision.status, 201);
+  assert.equal((await leader.put(`/api/decisions/${decision.body.id}`, { ...decisionBody, expectedRevision: 1 })).status, 200);
+  const decisionResult = (await leader.request(decisions)).body.find(value => value.id === decision.body.id);
+  assert.equal(decisionResult.current.revisionNumber, 2); assert.equal(decisionResult.revisions.length, 2);
+  assert.equal((await platform.put(`/api/decisions/${decision.body.id}`, { ...decisionBody, expectedRevision: 2 })).status, 403);
+  const risks = `/api/risks/sites/${siteId}/task/${task.body.id}`;
+  const riskBody = { title: 'Synthetic version risk', description: 'Synthetic operational risk', probability: 4, impact: 5,
+    ownerPersonId: personId, status: 'identified', dueDate: null, residualProbability: null, residualImpact: null };
+  const risk = await leader.post(risks, riskBody); assert.equal(risk.status, 201);
+  assert.equal((await leader.put(`/api/risks/${risk.body.id}`, { ...riskBody, expectedVersion: 1 })).status, 200);
+  const measureBody = { action: 'Synthetic mitigation action', ownerPersonId: personId, status: 'planned', dueDate: null };
+  const measure = await leader.post(`/api/risks/${risk.body.id}/mitigations`, measureBody); assert.equal(measure.status, 201);
+  assert.equal((await leader.put(`/api/risks/mitigations/${measure.body.id}`, { ...measureBody, expectedVersion: 1 })).status, 200);
+  for (const [table, column, id] of [['risk_revisions', 'risk_id', risk.body.id], ['risk_mitigation_revisions', 'mitigation_id', measure.body.id]]) {
+    // Insert synthetic historical capacity rows; never rewrite a retained revision.
+    sql(`BEGIN; SELECT set_config('fylkren.activity_writer','1',true);
+      INSERT INTO ${table} SELECT (jsonb_populate_record(NULL::${table},to_jsonb(r)||jsonb_build_object('id',gen_random_uuid(),'version',2147483647))).*
+      FROM ${table} r WHERE ${column}='${guid(id)}' AND version=2; COMMIT;`);
+  }
+  const before = (await leader.request(risks)).body;
+  for (const [path, body] of [[`/api/risks/${risk.body.id}`, riskBody], [`/api/risks/mitigations/${measure.body.id}`, measureBody]]) {
+    const response = await leader.put(path, { ...body, expectedVersion: 2147483647 });
+    assert.equal(response.status, 409); assert.equal(response.body.code, 'numeric_capacity_exceeded');
+  }
+  assert.deepEqual((await leader.request(risks)).body, before, 'Capacity refusal changed risk/mitigation history');
+  return { versionMutationBoundaries: 'passed', atomicSiteCapacityCases: 2, sortOrderCapacityRejected: true,
+    decisionNormalRevisions: 2, decisionAuthorizationPreserved: true, riskAndMeasureNormalRevisions: 2, riskAndMeasureCapacityRejected: true };
 }

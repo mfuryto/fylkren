@@ -39,7 +39,7 @@ internal static class OrganizationUnitEndpoints
         if (await database.OrganizationUnits.AnyAsync(unit => unit.SiteId == siteId && unit.ParentId == effectiveParentId && unit.NormalizedName == name.ToUpperInvariant(), cancellationToken))
             return Results.Conflict(new { error = "A unit with this name already exists at the same level." });
 
-        var nextSortOrder = await database.OrganizationUnits.Where(value => value.SiteId == siteId && value.ParentId == effectiveParentId).Select(value => (int?)value.SortOrder).MaxAsync(cancellationToken) + 1 ?? 0;
+        var nextSortOrder = (await database.OrganizationUnits.Where(value => value.SiteId == siteId && value.ParentId == effectiveParentId).Select(value => (int?)value.SortOrder).MaxAsync(cancellationToken)) is { } lastOrder ? NumericBounds.NextVersion(lastOrder) : 0;
         var now = DateTimeOffset.UtcNow;
         var unit = new OrganizationUnit(Guid.NewGuid(), siteId, effectiveParentId, name, request.IsTemporary, now, sortOrder: nextSortOrder, worksAtParentLevel: request.WorksAtParentLevel, isSiteLeadership: request.IsSiteLeadership);
         database.OrganizationUnits.Add(unit);
@@ -81,7 +81,7 @@ internal static class OrganizationUnitEndpoints
         if (!request.IsActive && await database.Sites.AnyAsync(value => value.ParentOrganizationUnitId == unitId && value.IsActive, cancellationToken)) return Results.Conflict(new { error = "The unit is the attachment point for an active site and cannot be disabled until the site is moved." });
         var movedToAnotherParent = unit.ParentId != effectiveParentId;
         var nextSortOrder = movedToAnotherParent
-            ? await database.OrganizationUnits.Where(value => value.SiteId == siteId && value.ParentId == effectiveParentId && value.Id != unitId).Select(value => (int?)value.SortOrder).MaxAsync(cancellationToken) + 1 ?? 0
+            ? (await database.OrganizationUnits.Where(value => value.SiteId == siteId && value.ParentId == effectiveParentId && value.Id != unitId).Select(value => (int?)value.SortOrder).MaxAsync(cancellationToken)) is { } lastOrder ? NumericBounds.NextVersion(lastOrder) : 0
             : unit.SortOrder;
         unit.Update(effectiveParentId, name, request.IsTemporary, request.IsActive, request.WorksAtParentLevel, nextSortOrder, request.IsSiteLeadership);
         if (!request.WorksAtParentLevel)

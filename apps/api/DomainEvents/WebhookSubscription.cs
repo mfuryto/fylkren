@@ -37,7 +37,7 @@ public sealed class WebhookDelivery
     public int? LastHttpStatus { get; private set; }
     public string? LastError { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
-    public void Start(DateTimeOffset now) { Status = "delivering"; LastAttemptAt = now; AttemptCount++; }
+    public void Start(DateTimeOffset now) { var nextAttempt = NumericBounds.NextVersion(AttemptCount); Status = "delivering"; LastAttemptAt = now; AttemptCount = nextAttempt; }
     public void Succeed(DateTimeOffset now, int status) { Status = "succeeded"; CompletedAt = now; LastHttpStatus = status; LastError = null; }
     public void Fail(DateTimeOffset now, int? status, string error, TimeSpan delay, bool terminal) { Status = terminal ? "failed" : "retry"; NextAttemptAt = now.Add(delay); LastHttpStatus = status; LastError = error[..Math.Min(error.Length, 1000)]; }
 }

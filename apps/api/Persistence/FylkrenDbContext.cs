@@ -298,7 +298,7 @@ public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options,
                     .Select(item => (long?)item.ReferenceNumber).Max() ?? 0;
                 foreach (var item in group.OrderBy(item => item.CreatedAt).ThenBy(item => item.Id))
                 {
-                    next++;
+                    next = NumericBounds.NextVersion(next);
                     item.AssignReference($"{parent.ReferenceCode}-{next}", next);
                     remaining.Remove(item);
                 }
@@ -336,7 +336,7 @@ public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options,
                     .Select(item => (long?)item.ReferenceNumber).MaxAsync(cancellationToken) ?? 0;
                 foreach (var item in group.OrderBy(item => item.CreatedAt).ThenBy(item => item.Id))
                 {
-                    next++;
+                    next = NumericBounds.NextVersion(next);
                     item.AssignReference($"{parent.ReferenceCode}-{next}", next);
                     remaining.Remove(item);
                 }

@@ -25,7 +25,7 @@ public sealed class NotificationOutboxMessage
     public DateTimeOffset? SentAt { get; private set; }
     public string? LastError { get; private set; }
     public void Sent(DateTimeOffset at) { Status = "sent"; SentAt = at; LastError = null; }
-    public void Failed(DateTimeOffset at, string error) { Attempts++; Status = Attempts >= 5 ? "failed" : "pending"; NextAttemptAt = at + TimeSpan.FromMinutes(Math.Pow(2, Attempts - 1)); LastError = error.Length > 300 ? error[..300] : error; }
+    public void Failed(DateTimeOffset at, string error) { Attempts = Math.Clamp(Attempts, 0, 4) + 1; Status = Attempts >= 5 ? "failed" : "pending"; NextAttemptAt = at + TimeSpan.FromMinutes(Math.Pow(2, Attempts - 1)); LastError = error.Length > 300 ? error[..300] : error; }
 }
 
 public sealed class NotificationProjectionCursor
