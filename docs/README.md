@@ -68,6 +68,7 @@ Before public publication, run `bash tools/security/verify-repository-safety.sh 
 ## Security
 
 - [Input validation rules](security/INPUT_VALIDATION.md)
+- [File handling boundary](security/FILE_HANDLING.md)
 - [Security policy](../SECURITY.md)
 - [Security test plan](security/SECURITY_TEST_PLAN.md)
 - [Threat model](security/SECURITY_THREAT_MODEL.md)

@@ -4746,5 +4746,32 @@
     "finding": "SV-089 closed after explicit API protocol restriction and current-image retest",
     "matrix": "ASVS 4.2.1 Passed; continue at 5.1.1",
     "scope": "Current supported HTTP/1.x outer proxy, built gateway and private API parser boundaries; reopen if HTTP/2 or HTTP/3 is enabled"
+  },
+  "fileHandlingInventoryCompletion": {
+    "date": "2026-10-04",
+    "baseline": "002ae81",
+    "sourceHashes": {
+      "docs/security/FILE_HANDLING.md": "d032ef62cf274bc7e85531f5ff2261da65a003806a8adeb4fe6c2f5656eb3151",
+      "tools/test-file-handling-inventory.mjs": "092b0d37ef6d037b0cab925fad3c5a276aa75b73fba95b15e69e7707df9cfad0",
+      "apps/api/SafeImageUpload.cs": "9a4a3a84c41e40beef11b5b5d787ddb180da0dfbdd685dc410c8e71c40477bf6",
+      "apps/api/Portability/PortableExportPackage.cs": "40f199dd41d517b1b1bda6108a1a7bb45d21bf751d1655e9172b14b1672ce6a6",
+      "apps/api/Portability/PortableImportValidator.cs": "34c9d8740319cfec475572c77fdc22873602f76967975b85f79dee8e88a4dc9c",
+      "apps/api/Identity/IdentityProfileEndpoints.cs": "6b5f5e42c92de74d5af45263376eca4d20754697de9251fdca66a010bb4b3a7c",
+      "apps/api/Platform/BrandingEndpoints.cs": "ce7850afc580b1cd4879847b1f25b617486b69b3066e9993753a4163d8d88d32",
+      "apps/api/Portability/PortabilityEndpoints.cs": "87d8bd5d37d48040f7bf31cfe6c8bbace46b19e79479020a5b96191feb2ac53b"
+    },
+    "results": {
+      "fileHandlingInventory": "passed",
+      "serverMultipartFeatures": 3,
+      "browserOnlyFileSelections": 2,
+      "serverFileResponses": 3,
+      "imageMaximumMiB": 2,
+      "portabilityMaximumMiB": 512,
+      "portabilityMaximumEntries": 250,
+      "knownMalwareScannerPresent": false
+    },
+    "finding": "No new vulnerability claim; content/type and malware-control limitations remain open under their own requirements",
+    "matrix": "ASVS 5.1.1 Passed; continue at 5.2.1",
+    "scope": "Complete current HTTP file selection/upload/download documentation and source inventory; behavioral file requirements remain separate"
   }
 }

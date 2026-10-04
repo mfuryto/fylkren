@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 2026-10-04 after completing ASVS 1.4.2 and chapters 2–4; the native DNS residual and next requirement 5.1.1 remain explicit.
+Updated 2026-10-04 after completing ASVS 1.4.2, chapters 2–4 and the complete file-handling inventory; the native DNS residual and next requirement 5.2.1 remain explicit.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -12,7 +12,7 @@ The additive event/activity foundation and coherent WorkItem slice are delivered
 
 ## Next delivery order
 
-1. Continue in requirement order at ASVS 5.1.1 with one complete upload/download feature inventory and criterion-specific file-type, extension, size, unpacked-size, storage, serving and malicious-content behavior. Chapters 2–4 are Passed after the linked browser, [HTTP upgrade](../testing/runs/2026-10-02-release-regression.md#browser-only-http-upgrade-boundary--2026-10-04), [intermediary-header](../testing/runs/2026-10-02-release-regression.md#intermediary-owned-http-header-boundary--2026-10-04) and [HTTP message-boundary](../testing/runs/2026-10-02-release-regression.md#http-message-structure-boundary--2026-10-04) completions. Lifetime data capacity remains explicit release/deployment sizing rather than an unlimited-scale claim. HTTP and SMTP/AD/LDAP cases remain recorded; 1.3.6 is a Finding (SV-068) pending verified deployment egress restrictions for native DNS rebinding. Continue independent matrix cases while that qualification remains open.
+1. Continue in requirement order at ASVS 5.2.1 using the [canonical file inventory](../security/FILE_HANDLING.md): execute positive, negative and boundary sizes for every server upload before continuing through type/extension/content and compressed-package controls. Chapters 2–4 and 5.1.1 are Passed after the linked [HTTP message-boundary](../testing/runs/2026-10-02-release-regression.md#http-message-structure-boundary--2026-10-04) and [file inventory](../testing/runs/2026-10-02-release-regression.md#file-handling-inventory--2026-10-04) completions. Lifetime data capacity remains explicit release/deployment sizing rather than an unlimited-scale claim. HTTP and SMTP/AD/LDAP cases remain recorded; 1.3.6 is a Finding (SV-068) pending verified deployment egress restrictions for native DNS rebinding. Continue independent matrix cases while that qualification remains open.
 2. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing at this gate.
 
 No irreversible disposition is authorized by this order. Establish and verify its prerequisites before proposing activation; do not choose arbitrary retention periods.
@@ -36,11 +36,11 @@ Earlier HTTP p95 readings varied from subsecond values to multiple seconds and w
 
 ## Security verification
 
-The [ASVS 5.0 Level 2 matrix](../security/ASVS_5.0.0_L2_MATRIX.md) is the single security-testing work list and status authority. At this update it contains 66 Passed, 92 In progress, 41 Not assessed, 53 Not applicable and one Finding. Counts are a dated baseline, not a separate maintained matrix or security certification.
+The [ASVS 5.0 Level 2 matrix](../security/ASVS_5.0.0_L2_MATRIX.md) is the single security-testing work list and status authority. At this update it contains 67 Passed, 91 In progress, 41 Not assessed, 53 Not applicable and one Finding. Counts are a dated baseline, not a separate maintained matrix or security certification.
 
 Use the [security test plan](../security/SECURITY_TEST_PLAN.md) and [threat model](../security/SECURITY_THREAT_MODEL.md). Record findings and remediation in the [finding register](../security/SECURITY_VERIFICATION.md); record completed requirement-specific tests in the ASVS matrix with links to maintained execution evidence. Partial coverage remains partial. Retest affected controls after every change.
 
-HTTP destination/DNS/redirect/download boundaries and bounded runtime SAML metadata are delivered and tested. SMTP/AD/LDAP configured target, TLS and referral cases passed in the [same release record](../testing/runs/2026-10-02-release-regression.md#non-http-service-transport-continuation--2026-10-04). Native DNS rebinding remains SV-068 pending deployment egress qualification; arithmetic and chapters 2–4 are verified; continue at 5.1.1. Do not rerun unrelated full-product chains for scoped corrections. Deployment-sensitive controls require production-equivalent TLS, canonical Host/port and proxy configuration, customer identity-provider behavior, authenticator compatibility and coordinated database/Data Protection key recovery with real backup custody. Disposable restore tests already exist; operational custody qualification remains separate.
+HTTP destination/DNS/redirect/download boundaries and bounded runtime SAML metadata are delivered and tested. SMTP/AD/LDAP configured target, TLS and referral cases passed in the [same release record](../testing/runs/2026-10-02-release-regression.md#non-http-service-transport-continuation--2026-10-04). Native DNS rebinding remains SV-068 pending deployment egress qualification; arithmetic, chapters 2–4 and file documentation 5.1.1 are verified; continue at 5.2.1. Do not rerun unrelated full-product chains for scoped corrections. Deployment-sensitive controls require production-equivalent TLS, canonical Host/port and proxy configuration, customer identity-provider behavior, authenticator compatibility and coordinated database/Data Protection key recovery with real backup custody. Disposable restore tests already exist; operational custody qualification remains separate.
 
 Relevant Level 3 controls, WSTG techniques and API Security Top 10 coverage support this same workflow. An external penetration test is optional if requested, not a prerequisite for completing the authorized testing.
 

@@ -4,6 +4,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Add one maintained file-handling boundary covering every upload, browser-only file selection and generated download, including current type/size controls and explicit malware-handling limits.
 - Restrict the private application endpoint to the HTTP/1 parser used by the proxy chain and verify ambiguous message lengths, transfer encodings, chunks and header syntax at all three HTTP boundaries.
 - Define and test the trusted reverse-proxy header boundary: intermediary headers are replaced at each owned hop, the API remains unpublished and HTTPS deployments must block direct origin access.
 - Redirect only browser-facing plaintext requests to HTTPS; return an explicit non-redirecting error for API, health and authentication callback traffic.

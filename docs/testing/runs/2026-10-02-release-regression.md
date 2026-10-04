@@ -830,3 +830,20 @@ FYLKREN_E2E_API_IMAGE=sha256:407ce61ae43a5c27e24ce9af4727ccf82870cb2698976325d99
 The protocol inventory reported `{"httpMessageProtocolInventory":"passed","externalProtocols":["HTTP/1.0","HTTP/1.1"],"gatewayExplicitUpstreams":2,"apiProtocol":"HTTP/1","http2AndHttp3Exposed":false}`. The raw run reported 12 rejected messages, nine explicit 400 responses, three silent connection closes and zero processed trailing requests. The affected browser/service HTTP-upgrade regression also retained its three 307 browser upgrades and five non-redirecting 400 service failures.
 
 The API image is `sha256:407ce61ae43a5c27e24ce9af4727ccf82870cb2698976325d99ab50c7b8c50ca`; the reused web image is `sha256:5ab694a72cd4b97d269acaadbc1edf7d0b94adc4dbc70818fcbbb1930be1b263`. Safe hashes and outcomes are recorded under `httpMessageBoundaryCompletion` in the evidence manifest. The supported edge does not expose HTTP/2 or HTTP/3; enabling either later requires reopening this requirement with version-appropriate frame-length tests. Production is untouched.
+
+## File handling inventory — 2026-10-04
+
+Completes ASVS 5.1.1. A criterion-specific source inventory found three server multipart readers: profile image, branding logo and portability-package validation. Two additional browser controls select a signed licence or an already generated export locally and send only parsed JSON or a SHA-256 digest rather than file bytes. Three server file responses return the authenticated profile image, public branding logo and generated portability ZIP. Fylkren has no general operational attachment upload; document fields are references.
+
+The new canonical boundary records permitted media types and expected extensions, compressed/request/unpacked/file-count limits, validation, storage, access, response type/disposition and malicious-content rejection for every feature. It also records actual limitations: raster handling currently recognizes leading signatures without full decode/re-encoding or antivirus, while portability validation bounds and verifies an untrusted ZIP without filesystem extraction or import but does not yet cross-check every attachment's declared type, extension and content signature. Those facts leave ASVS 5.2.2, 5.2.3 and 5.4.3 open rather than implying protection from documentation alone.
+
+Scoped commands:
+
+```sh
+node tools/test-file-handling-inventory.mjs
+node tools/check-documentation-links.mjs
+```
+
+The source lock reported `{"fileHandlingInventory":"passed","serverMultipartFeatures":3,"browserOnlyFileSelections":2,"serverFileResponses":3,"imageMaximumMiB":2,"portabilityMaximumMiB":512,"portabilityMaximumEntries":250,"knownMalwareScannerPresent":false}`. It fails if another `ReadFormAsync` or `Results.File` site appears without inventory review and binds the documented limits/types to the implementation constants. Existing current-candidate image and ZIP behavior evidence remains linked by the later requirement rows; no behavioral pass is inferred from this documentation check.
+
+Safe hashes and outcomes are recorded under `fileHandlingInventoryCompletion` in the evidence manifest. Production is untouched.
