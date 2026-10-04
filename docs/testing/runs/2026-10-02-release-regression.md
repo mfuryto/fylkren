@@ -1512,3 +1512,15 @@ pnpm check:docs
 ```
 
 The field control reports `{"fieldAuthorizationDocumentation":"passed","fieldClasses":10,"stateDependentRulesDocumented":true,"maintainedNegativeEvidence":["private-learning","classified-report","archive-export","cross-site-official"]}`. It also locks the inventory to existing negative behavioral assertions that exclude private learning from reports/superior activity, conceal classified reports without the grant flag, omit authentication secrets from exports and prevent a sender reading receiver-internal work. The endpoint inventory and documentation checks still pass. No unrelated product flow was rerun. Production is untouched.
+
+## Function-level authorization completion — 2026-10-04
+
+Completes ASVS 8.2.1. The source control reconciles every registered operation with the global authenticated fallback and fails on any change to the reviewed anonymous metadata set. The anonymous set is limited to health/public display data, explicit authentication actions and federation protocol receivers. Anonymous federation receivers require HTTPS and, after identity discovery, pinned signed peer messages. Browser administration, Site administration, operational work and machine APIs retain separate role, assignment, level and scope policies.
+
+Scoped command:
+
+```sh
+node tools/test-function-authorization-inventory.mjs
+```
+
+The control reports `{"functionAuthorizationInventory":"passed","operationCount":287,"anonymousDeclarations":24,"globalAuthenticatedFallback":true,"policyFamilies":["platform-role","site-manager-assignment","operational-role-level","machine-scope","signed-federation"],"maintainedNegativeRoleBoundaries":6}`. Existing direct-HTTP authorization evidence rejects Platform/Site administrators entering operational functions, sibling and unrelated leaders, foreign Site administration and route/object substitution. Specialized learning, portability, lifecycle, archive, preservation and machine API tests extend these same policy families. This scoped completion reused those maintained dynamic results and did not rerun unrelated workflows. Production is untouched.
