@@ -1197,3 +1197,18 @@ node tools/test-authentication-pathway-documentation.mjs
 The source/document lock reports `{"authenticationPathwayDocumentation":"passed","documentedPathways":6,"sharedLocalRateBoundary":true,"webauthnUserVerificationRequired":true,"providerStrengthFallbacksDocumented":2,"publicPathwayFlags":7,"reviewedBrowserSessionWriterFiles":6,"reviewedBrowserSessionWriterCalls":11,"machineAuthenticationSeparated":true}`. The exact session-writer set fails review if a new writer is added or moved. OIDC and SAML principal creation is locked separately in the authentication handlers; the machine scheme has no human-principal or cookie sign-in call.
 
 No broad integration rerun was needed because this stage changes documentation and a source inventory only. The current release evidence already records clean local/TOTP/WebAuthn, real OpenLDAP and Samba AD, and signed Keycloak OIDC/SAML positive and attack paths. Each resolves an active linked internal person into the common authorization/session context or fails closed under its documented controls. The result describes consistency with the documented current strengths and does not close SV-094's mandatory-MFA gap. Production is untouched.
+
+## Password-reset grant lifecycle — 2026-10-04
+
+Completes ASVS 6.4.1. A source lock covers the 128-bit OS-CSPRNG code, 30-minute lifetime, SHA-256 storage, revocation of earlier grants, atomic expiry/consumption predicates, fixed-time final comparison and the absence of an automatic sign-in. The reset code authorizes only a user-selected permanent password that passes the shared password policy. Existing identity lifecycle evidence retains the concurrent one-time-use case.
+
+Scoped commands:
+
+```sh
+node tools/test-password-reset-grant-boundary.mjs
+FYLKREN_E2E_API_IMAGE=sha256:a988e8e706d10ea77b77957b56299a3253ee51192640f0641275d3de25cd1acb FYLKREN_E2E_WEB_IMAGE=sha256:125e3c8e99cd6bb7034333f32915afd0c7c1a35142aea8f182c093ab090cc8d0 node tools/run-e2e-editions.mjs --asvs-reset-grant-only --no-build
+```
+
+The source lock reports `{"passwordResetGrantBoundary":"passed","entropyBits":128,"lifetimeMinutes":30,"storedAsSha256":true,"fixedTimeFinalComparison":true,"atomicExpiryAndConsumption":true,"replacementRevokesPriorGrants":true,"resetDoesNotCreateSession":true}`. The disposable current-image run accepts a fresh grant, moves a separate grant just beyond its stored expiry boundary, rejects that grant with the generic invalid/expired response and proves that the rejected candidate password was not installed: `{"passwordResetExpiryRuntime":"passed","freshGrantAccepted":true,"expiredGrantRejected":true,"expiredGrantDidNotSetPassword":true,"testedLifetimeMinutes":30}`.
+
+The candidate API image is `sha256:a988e8e706d10ea77b77957b56299a3253ee51192640f0641275d3de25cd1acb`; the gateway image is `sha256:125e3c8e99cd6bb7034333f32915afd0c7c1a35142aea8f182c093ab090cc8d0`. No broad suite was rerun and production is untouched.
