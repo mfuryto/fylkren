@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -75,7 +76,13 @@ internal static class ServiceRegistration
         builder.Services.AddExceptionHandler<ConcurrencyExceptionHandler>();
         builder.Services.AddProblemDetails();
         builder.WebHost.ConfigureKestrel(options =>
-            options.Limits.MaxRequestBodySize = 3 * 1024 * 1024);
+        {
+            // The supported edge and gateway chain uses HTTP/1.x. Keeping the
+            // unpublished API on the same parser contract avoids an untested
+            // clear-text HTTP/2 message boundary behind the gateway.
+            options.ConfigureEndpointDefaults(endpoint => endpoint.Protocols = HttpProtocols.Http1);
+            options.Limits.MaxRequestBodySize = 3 * 1024 * 1024;
+        });
         builder.Services.Configure<FormOptions>(options => options.MultipartBodyLengthLimit = 3 * 1024 * 1024);
         builder.Services.AddHealthChecks();
         if (requireHttps)

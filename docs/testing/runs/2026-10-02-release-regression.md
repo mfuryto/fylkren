@@ -811,3 +811,22 @@ FYLKREN_E2E_API_IMAGE=sha256:2ad803d912e730690ccee35ac52d254457323fe70fe62b71a69
 The live two-hop request supplied `X-Forwarded-Proto: http`, a two-address hostile `X-Forwarded-For`, a foreign `X-Forwarded-Host` and a false Fylkren gateway client address. The canonical HTTPS resource returned 200 without a redirect, proving the outer and inner owned values prevailed. After 20 allowed concurrent federation probes, request 21 and another request with a spoofed forwarded IP both returned 429. Two actual clients behind the same proxy each returned 200 in distinct partitions. Four endpoint families retained their existing 413 body limits. The source inventory result was `{"intermediaryHeaderInventory":"passed","apiHostPorts":0,"gatewayProxyLocations":4,"outerProxyApplications":2,"forwardedHostTrustedByApi":false,"forwardedHopLimit":"configured:1-2"}`.
 
 The reused API image is `sha256:2ad803d912e730690ccee35ac52d254457323fe70fe62b71a69d39e9f16653e4`; the reused web image is `sha256:5ab694a72cd4b97d269acaadbc1edf7d0b94adc4dbc70818fcbbb1930be1b263`. Safe hashes and outcomes are recorded under `intermediaryHeaderBoundaryCompletion` in the evidence manifest. This verifies the maintained proxy contract and disposable test topology; the deployment owner must still enforce the documented origin network restriction. Production is untouched.
+
+## HTTP message structure boundary — 2026-10-04
+
+Completes ASVS 4.2.1. The supported request path is HTTP/1.x at all three parser boundaries: the outer Nginx TLS proxy, built Nginx gateway and unpublished Kestrel API. Neither Nginx configuration enables HTTP/2, HTTP/3 or QUIC, and explicit upstream proxy connections use HTTP/1.1. Source review found that Kestrel still retained default protocol selection despite receiving traffic only from this HTTP/1 gateway; the internal endpoint is now explicitly HTTP/1, closing SV-089 rather than carrying an untested clear-text HTTP/2 parser.
+
+Four raw malformed-message families were sent separately to each boundary: conflicting `Content-Length` fields; `Transfer-Encoding: chunked` together with `Content-Length` and a trailing health request; an invalid chunk size followed by the same trailing request; and whitespace before a header-name colon. Nine combinations returned 400. Kestrel closed three conflicting/invalid framing connections without an HTTP response. All twelve connections terminated within the bound, none produced a second response and none processed the trailing health request.
+
+Scoped commands:
+
+```sh
+node tools/test-http-message-boundary.mjs
+dotnet build apps/api/Fylkren.Api.csproj --no-restore
+FYLKREN_E2E_API_IMAGE=sha256:407ce61ae43a5c27e24ce9af4727ccf82870cb2698976325d99ab50c7b8c50ca FYLKREN_E2E_WEB_IMAGE=sha256:5ab694a72cd4b97d269acaadbc1edf7d0b94adc4dbc70818fcbbb1930be1b263 node tools/run-federation-pair.mjs --message-boundary-only --no-build
+FYLKREN_E2E_API_IMAGE=sha256:407ce61ae43a5c27e24ce9af4727ccf82870cb2698976325d99ab50c7b8c50ca FYLKREN_E2E_WEB_IMAGE=sha256:5ab694a72cd4b97d269acaadbc1edf7d0b94adc4dbc70818fcbbb1930be1b263 node tools/run-e2e-editions.mjs --asvs-http-upgrade-only --no-build
+```
+
+The protocol inventory reported `{"httpMessageProtocolInventory":"passed","externalProtocols":["HTTP/1.0","HTTP/1.1"],"gatewayExplicitUpstreams":2,"apiProtocol":"HTTP/1","http2AndHttp3Exposed":false}`. The raw run reported 12 rejected messages, nine explicit 400 responses, three silent connection closes and zero processed trailing requests. The affected browser/service HTTP-upgrade regression also retained its three 307 browser upgrades and five non-redirecting 400 service failures.
+
+The API image is `sha256:407ce61ae43a5c27e24ce9af4727ccf82870cb2698976325d99ab50c7b8c50ca`; the reused web image is `sha256:5ab694a72cd4b97d269acaadbc1edf7d0b94adc4dbc70818fcbbb1930be1b263`. Safe hashes and outcomes are recorded under `httpMessageBoundaryCompletion` in the evidence manifest. The supported edge does not expose HTTP/2 or HTTP/3; enabling either later requires reopening this requirement with version-appropriate frame-length tests. Production is untouched.

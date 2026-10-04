@@ -4,7 +4,7 @@ import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync,
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
-import { getCACertificates, setDefaultCACertificates } from 'node:tls';
+import { connect as tlsConnect, getCACertificates, setDefaultCACertificates } from 'node:tls';
 
 const composeFile = 'tools/e2e/federation-pair.compose.yaml';
 const currentImage = 'fylkren-federation-pair-test-api:local';
@@ -16,7 +16,8 @@ const loadOnly = process.argv.includes('--load-only');
 const restoreOnly = process.argv.includes('--restore-only');
 const retentionOnly = process.argv.includes('--retention-only');
 const productionBoundaryOnly = process.argv.includes('--production-boundary-only');
-if ([loadOnly, restoreOnly, retentionOnly, productionBoundaryOnly, operationalOnly, outboundOnly].filter(Boolean).length > 1)
+const messageBoundaryOnly = process.argv.includes('--message-boundary-only');
+if ([loadOnly, restoreOnly, retentionOnly, productionBoundaryOnly, operationalOnly, outboundOnly, messageBoundaryOnly].filter(Boolean).length > 1)
   throw new Error('Federation pair modes are mutually exclusive');
 const project = `fylkren-pair-${randomBytes(4).toString('hex')}`;
 const temporary = mkdtempSync(join(tmpdir(), 'fylkren-federation-pair-'));
@@ -28,7 +29,7 @@ const env = {
   FYLKREN_PAIR_ISSUER_PUBLIC_KEY: publicKey.export({ type: 'spki', format: 'der' }).toString('base64'),
   FYLKREN_PAIR_API_B_IMAGE: currentImage,
 };
-const productionBoundary = productionBoundaryOnly || (!loadOnly && !restoreOnly && !retentionOnly && !operationalOnly && !outboundOnly);
+const productionBoundary = productionBoundaryOnly || messageBoundaryOnly || (!loadOnly && !restoreOnly && !retentionOnly && !operationalOnly && !outboundOnly);
 if (productionBoundary) env.FYLKREN_PAIR_ASPNETCORE_ENVIRONMENT = 'Production';
 
 function command(executable, args, options = {}) {
@@ -338,6 +339,65 @@ async function assertProxyLoadControls(receiver) {
 async function runLoadPair() {
   const receiver = await setup('https://localhost:18444', 'load');
   await assertProxyLoadControls(receiver);
+}
+
+function rawTlsRequest(payload) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    const socket = tlsConnect({ host: 'localhost', port: 18444, servername: 'localhost' }, () =>
+      socket.end(payload));
+    socket.setEncoding('latin1');
+    socket.on('data', chunk => chunks.push(chunk));
+    socket.setTimeout(4_000, () => socket.destroy());
+    socket.on('error', error => {
+      if (chunks.length === 0) reject(error);
+    });
+    socket.on('close', () => resolve(chunks.join('')));
+  });
+}
+
+function rawInternalRequest(host, payload) {
+  const result = spawnSync('docker', ['compose', '-p', project, '-f', composeFile,
+    'exec', '-T', 'tls', 'nc', '-w', '4', host, '8080'],
+  { env, input: payload, encoding: 'latin1', timeout: 6_000 });
+  if (result.error) throw result.error;
+  return result.stdout ?? '';
+}
+
+function assertSingleRejectedMessage(response, target, probe) {
+  const statuses = [...response.matchAll(/^HTTP\/1\.[01]\s+(\d{3})/gm)].map(match => Number(match[1]));
+  assert.ok(statuses.length === 0 || (statuses.length === 1 && statuses[0] === 400),
+    `${target}/${probe}: unexpected raw response: ${response.slice(0, 500)}`);
+  assert.doesNotMatch(response, /\r?\nHealthy\r?\n/i,
+    `${target}/${probe}: a trailing health request crossed the message boundary`);
+  return statuses.length === 0 ? 'closed' : '400';
+}
+
+async function runMessageBoundaryPair() {
+  const host = 'localhost:18444';
+  const trailing = `GET /health HTTP/1.1\r\nHost: ${host}\r\nConnection: close\r\n\r\n`;
+  const probes = new Map([
+    ['conflicting-content-length', `POST /api/session HTTP/1.1\r\nHost: ${host}\r\nContent-Type: application/json\r\nContent-Length: 0\r\nContent-Length: 4\r\nConnection: close\r\n\r\ntest`],
+    ['transfer-encoding-and-content-length', `POST /api/session HTTP/1.1\r\nHost: ${host}\r\nContent-Type: application/json\r\nContent-Length: 64\r\nTransfer-Encoding: chunked\r\nConnection: close\r\n\r\n0\r\n\r\n${trailing}`],
+    ['invalid-chunk-size', `POST /api/session HTTP/1.1\r\nHost: ${host}\r\nContent-Type: application/json\r\nTransfer-Encoding: chunked\r\nConnection: close\r\n\r\nZ\r\nprobe\r\n0\r\n\r\n${trailing}`],
+    ['whitespace-before-header-colon', `POST /api/session HTTP/1.1\r\nHost: ${host}\r\nContent-Length : 0\r\nConnection: close\r\n\r\n${trailing}`],
+  ]);
+  const targets = new Map([
+    ['outer-tls-proxy', payload => rawTlsRequest(payload)],
+    ['built-web-gateway', payload => rawInternalRequest('web-b', payload)],
+    ['kestrel-api', payload => rawInternalRequest('api-b', payload)],
+  ]);
+  const outcomes = { 400: 0, closed: 0 };
+  for (const [target, request] of targets) {
+    for (const [probe, payload] of probes) {
+      const outcome = assertSingleRejectedMessage(await request(payload), target, probe);
+      outcomes[outcome]++;
+    }
+  }
+  process.stdout.write(`${JSON.stringify({ httpMessageBoundary: 'passed', protocol: 'HTTP/1.x',
+    components: targets.size, malformedProbeFamilies: probes.size,
+    malformedRequests: targets.size * probes.size, explicit400: outcomes[400], silentClose: outcomes.closed,
+    trailingRequestsProcessed: 0, http2AndHttp3Exposed: false })}\n`);
 }
 
 function receiverServicesDown(remove = false) {
@@ -2462,6 +2522,7 @@ try {
     if (outboundOnly) await runOutboundPair();
     else if (operationalOnly) await runWorkActivityPair();
     else if (loadOnly) await runLoadPair();
+    else if (messageBoundaryOnly) await runMessageBoundaryPair();
     else if (restoreOnly) await runRestorePair();
     else if (retentionOnly) await runRetentionPair();
     else await runProductionBoundaryPair();
