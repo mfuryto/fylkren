@@ -1058,3 +1058,16 @@ FYLKREN_E2E_API_IMAGE=sha256:922a2f9dfae305cb99f6fd1cd51f215d91875dff95a0a14644b
 ```
 
 The source test reports `{"passwordBlocklistBoundary":"passed","fingerprints":3000,"fingerprintBytes":32,"sortedUnique":true,"policyCompatibleKnownCases":3,"pinnedSource":true}` and confirms `12345678901234`, `password123456` and `qwertyuiop1234` are present. The current-image run rejects `password123456` during bootstrap, password change and password reset while distinct generated controls succeed: `{"passwordBlocklistRuntime":"passed","rejectedCommonPassword":"password123456","testedFlows":["bootstrap","change","reset"],"validControlsAccepted":true,"resetGrantPreservedAfterBlockedPassword":true}`. No correction or finding was required. Production is untouched.
+
+## Password character composition — 2026-10-04
+
+Completes ASVS 6.2.5. Source review finds no required upper, lower, digit or non-alphanumeric character classes; the shared policy applies length, common/breached-password fingerprints and context-token checks independently of composition.
+
+Scoped commands:
+
+```sh
+node tools/test-password-composition-boundary.mjs
+FYLKREN_E2E_API_IMAGE=sha256:922a2f9dfae305cb99f6fd1cd51f215d91875dff95a0a14644bc9fa68364c970 FYLKREN_E2E_WEB_IMAGE=sha256:9383959069230a3fa6e6e8dcdcde35204b594692a37e5cc1c5f7364ca9db51bb node tools/run-e2e-editions.mjs --asvs-password-composition-only --no-build
+```
+
+The source lock reports `{"passwordCompositionBoundary":"passed","requiredCharacterClasses":0,"allowedCompositionFamilies":4}`. The current-image run accepts lowercase-only at bootstrap, uppercase-only and symbols-only through consecutive authenticated changes, and digits-only through one-time-code reset: `{"passwordCompositionRuntime":"passed","acceptedCompositions":["lowercase-only","uppercase-only","symbols-only","digits-only"],"testedFlows":["bootstrap","change","reset"]}`. No correction or finding was required. Production is untouched.
