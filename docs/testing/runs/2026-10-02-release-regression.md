@@ -1236,3 +1236,15 @@ FYLKREN_E2E_API_IMAGE=sha256:a988e8e706d10ea77b77957b56299a3253ee51192640f064127
 ```
 
 The final disposable run reports `{"passwordResetMfaRuntime":"passed","enrolledFactorPreserved":true,"passwordStageDidNotCreateSession":true,"secondFactorRequiredAfterReset":true,"existingRecoveryFactorAcceptedAfterReset":true,"authenticatedOnlyAfterSecondFactor":true}`. Existing identity lifecycle evidence separately covers reset-code one-time use and security-version invalidation of preserved sessions. The candidate API image is `sha256:a988e8e706d10ea77b77957b56299a3253ee51192640f0641275d3de25cd1acb`; the gateway image is `sha256:125e3c8e99cd6bb7034333f32915afd0c7c1a35142aea8f182c093ab090cc8d0`. Production is untouched.
+
+## Lost MFA factor recovery — 2026-10-04
+
+Completes ASVS 6.4.4. The application enrolls TOTP only from an authenticated password session after current-password reauthentication and proof of the newly provisioned TOTP. If that authenticator is lost, recovery requires the same account password plus one of the 128-bit one-time recovery codes issued at enrollment. Removing TOTP from the recovered session requires the current password again. Losing both the authenticator and all recovery codes provides no application or administrator bypass; the separately tested password reset preserves MFA.
+
+Scoped command:
+
+```sh
+FYLKREN_E2E_API_IMAGE=sha256:a988e8e706d10ea77b77957b56299a3253ee51192640f0641275d3de25cd1acb FYLKREN_E2E_WEB_IMAGE=sha256:125e3c8e99cd6bb7034333f32915afd0c7c1a35142aea8f182c093ab090cc8d0 node tools/run-e2e-editions.mjs --asvs-lost-mfa-only --no-build
+```
+
+The disposable current-image run reports `{"lostMfaRecoveryRuntime":"passed","enrollmentProof":["currentPassword","newTotp"],"recoveryProof":["password","preIssuedRecoveryCode"],"removalReauthenticationRequired":true,"wrongPasswordRejected":true,"passwordOnlyAcceptedOnlyAfterExplicitRemoval":true}`. It signs in through a recovery code, rejects an incorrect removal password, removes TOTP only with the correct current password, signs out and then confirms that password-only login becomes possible only after that explicit removal. The candidate image IDs remain unchanged from the preceding stage. Production is untouched.
