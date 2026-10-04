@@ -1248,3 +1248,15 @@ FYLKREN_E2E_API_IMAGE=sha256:a988e8e706d10ea77b77957b56299a3253ee51192640f064127
 ```
 
 The disposable current-image run reports `{"lostMfaRecoveryRuntime":"passed","enrollmentProof":["currentPassword","newTotp"],"recoveryProof":["password","preIssuedRecoveryCode"],"removalReauthenticationRequired":true,"wrongPasswordRejected":true,"passwordOnlyAcceptedOnlyAfterExplicitRemoval":true}`. It signs in through a recovery code, rejects an incorrect removal password, removes TOTP only with the correct current password, signs out and then confirms that password-only login becomes possible only after that explicit removal. The candidate image IDs remain unchanged from the preceding stage. Production is untouched.
+
+## Lookup-secret storage — 2026-10-04
+
+Completes ASVS 6.5.2. Fylkren's persisted lookup secrets are TOTP recovery codes and password-reset codes. Each is generated from 16 random bytes, providing 128 bits of entropy and therefore using the requirement's branch that permits a standard cryptographic hash above 112 bits. Recovery codes are mapped through SHA-256 before assignment to `RecoveryCodeHashes`; reset grants receive SHA-256 `CodeHash` bytes. The current entities and persistence configuration contain no raw lookup-secret field.
+
+Scoped command:
+
+```sh
+node tools/test-lookup-secret-storage-boundary.mjs
+```
+
+The source/schema lock reports `{"lookupSecretStorageBoundary":"passed","lookupSecretTypes":["totpRecoveryCode","passwordResetCode"],"entropyBits":128,"persistedRepresentation":"sha256","persistedRawSecrets":false,"standardHashPermittedAboveBits":112}`. Existing dynamic tests separately establish that the raw values returned at issuance are accepted only once. No implementation correction or finding was required. Production is untouched.
