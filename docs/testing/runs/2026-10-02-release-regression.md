@@ -958,3 +958,19 @@ FYLKREN_E2E_API_IMAGE=sha256:be1f78e21528ae8d73ead04c2c9ada5fd42a2abeff48461a499
 ```
 
 The source lock reports `{"fileDownloadHeaderSafety":"passed","fileResponses":3,"emailAttachments":0,"callerControlledHeaderFields":0,"asciiFilenameFamilies":3,"responseHeaderInjectionCharacters":0}`. The live test submits the image filename `caller"; filename*=UTF-8''evil%0D%0AX-Synthetic=yes.png`; both responses retain their exact fixed dispositions without caller text or CR/LF, and the Site export matches one attachment parameter with the expected safe UUID filename. Result: `{"fileDownloadBoundary":"passed","callerControlledResponseFilenames":0,"fixedInlineImageNames":2,"serverGeneratedAttachmentNames":1,"responseHeaderStructurePreserved":true}`. No product correction or new finding was required beyond the preceding 5.4.1 fix. Production is untouched.
+
+## Malware-scanning applicability — 2026-10-04
+
+Assesses ASVS 5.4.3 as Not applicable to the current file-response boundary. Fylkren has no antivirus engine and does not claim scanning. It also has no path that returns an obtained untrusted file: profile and branding inputs are fully decoded and re-encoded before persistence, package uploads are validation-only and are neither applied nor retained, and Site exports are generated from application records plus the already re-encoded raster values. The two browser-only file selections send only parsed signed strings or a digest and are never server file responses.
+
+Scoped commands:
+
+```sh
+node tools/test-malware-scanning-applicability.mjs
+dotnet run --project tests/foundations/Fylkren.FoundationTests.csproj --no-restore -- --image-validation-only
+node tools/test-file-handling-inventory.mjs
+```
+
+The source lock reports `{"malwareScanningApplicability":"not-applicable","untrustedFilesServedWithoutTransformation":0,"rasterTransformationPipelines":1,"validationOnlyPackageInputs":1,"generatedFileResponses":3,"antivirusEngines":0}`. The maintained image boundary accepts PNG/JPEG/WebP only after decode/re-encode and proves that trailing synthetic active content is absent from the returned bytes; truncation, active text, mismatch, excessive dimensions and over-limit input remain rejected. The complete file inventory still reports zero known malware scanners rather than treating decode/re-encoding as antivirus.
+
+Reopen this requirement and design a fail-closed malware control before adding general file attachments, package application/persistence or any file response that can return obtained bytes without the maintained transformation/generation boundary. Generated exports remain customer data subject to the receiving organization's classification and malware-control policy. No product correction or finding was required. Production is untouched.
