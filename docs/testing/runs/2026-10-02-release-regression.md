@@ -1447,3 +1447,15 @@ FYLKREN_E2E_API_IMAGE=sha256:46fb3ab50fadff9189132fdaca312fd576a975cdd42dc9fd889
 ```
 
 The current-candidate run reports `{"sensitiveAccountReauthenticationRuntime":"passed","sensitiveAttributes":["email","totp","webauthn"],"phoneAttributePresent":false,"blankEmailReauthenticationRejected":true,"wrongEmailReauthenticationRejected":true,"rejectedChangeAtomic":true,"nonsensitiveDisplayNameChangeWithoutReauthentication":true,"correctEmailReauthenticationAccepted":true,"factorRuntimeEvidence":true}`. Blank and incorrect current passwords return `400` and preserve the original email. A display-name-only update succeeds without unnecessary reauthentication; the correct current password authorizes the email change. No unrelated product suite was run. Production is untouched.
+
+## User session management assessment — 2026-10-04
+
+Assesses ASVS 7.5.2 as Finding SV-096. Fylkren uses protected self-contained browser cookies and an account security version. Explicit sign-out, authentication-factor changes and administrator termination can invalidate all existing account sessions, but the application does not maintain per-session records. The profile therefore cannot show active devices/times or let a reauthenticated user revoke one selected session.
+
+Scoped command:
+
+```sh
+node tools/test-user-session-management-assessment.mjs
+```
+
+The capability inventory reports `{"userSessionManagementAssessment":"finding","finding":"SV-096","selfContainedCookies":true,"serverSessionRegistry":false,"userCanViewActiveSessions":false,"selectiveTermination":false,"explicitSignOutTerminatesAccountSessions":true,"requiredRemediation":"reauthenticated-server-session-registry"}`. The remediation boundary is one authoritative registry with opaque session IDs, bounded metadata, backend validation/cleanup and reauthenticated profile controls. It must reconcile local and external sign-in, expiry and the new administrator termination operations before this requirement can pass. Production is untouched.
