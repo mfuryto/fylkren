@@ -1212,3 +1212,15 @@ FYLKREN_E2E_API_IMAGE=sha256:a988e8e706d10ea77b77957b56299a3253ee51192640f064127
 The source lock reports `{"passwordResetGrantBoundary":"passed","entropyBits":128,"lifetimeMinutes":30,"storedAsSha256":true,"fixedTimeFinalComparison":true,"atomicExpiryAndConsumption":true,"replacementRevokesPriorGrants":true,"resetDoesNotCreateSession":true}`. The disposable current-image run accepts a fresh grant, moves a separate grant just beyond its stored expiry boundary, rejects that grant with the generic invalid/expired response and proves that the rejected candidate password was not installed: `{"passwordResetExpiryRuntime":"passed","freshGrantAccepted":true,"expiredGrantRejected":true,"expiredGrantDidNotSetPassword":true,"testedLifetimeMinutes":30}`.
 
 The candidate API image is `sha256:a988e8e706d10ea77b77957b56299a3253ee51192640f0641275d3de25cd1acb`; the gateway image is `sha256:125e3c8e99cd6bb7034333f32915afd0c7c1a35142aea8f182c093ab090cc8d0`. No broad suite was rerun and production is untouched.
+
+## Password recovery without knowledge questions — 2026-10-04
+
+Completes ASVS 6.4.2 with a criterion-specific inventory rather than a broad integration rerun. The inventory covers all 32 Identity C# files plus the current identity persistence configuration/model snapshot, the three local reset-issuing endpoint files and the login/reset client. Seven forbidden mechanism families cover password hints and security, secret or recovery questions and answers, including knowledge-based naming variants.
+
+Scoped command:
+
+```sh
+node tools/test-password-recovery-knowledge-boundary.mjs
+```
+
+The source/schema lock reports `{"passwordRecoveryKnowledgeBoundary":"passed","reviewedFiles":39,"forbiddenMechanisms":7,"resetRequestFields":["resetCode","newPassword"],"resetUiFields":["oneTimeCode","newPassword","repeatPassword"],"passwordHints":false,"knowledgeBasedRecovery":false}`. The anonymous reset contract accepts only possession of the independently issued one-time code and a new policy-checked password. TOTP recovery codes remain separate one-time possession factors and are not answers to knowledge questions. No implementation correction or finding was required. Production is untouched.
