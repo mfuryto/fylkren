@@ -1017,3 +1017,18 @@ node tools/test-authentication-pathway-documentation.mjs
 ```
 
 The source/document lock reports `{"authenticationPathwayDocumentation":"passed","documentedPathways":6,"sharedLocalRateBoundary":true,"webauthnUserVerificationRequired":true,"providerStrengthFallbacksDocumented":2,"publicPathwayFlags":7}`. It matches local/directory rate-limited endpoints, required WebAuthn user verification, OIDC/SAML challenge handlers and every public enablement flag. `/?local=1` is documented as explicit selection of the separately enabled emergency pathway rather than a control bypass, and password reset as credential recovery rather than session creation. No implementation change or finding was required. Production is untouched.
+
+## Local password length boundary — 2026-10-04
+
+Completes ASVS 6.2.1. The maintained policy has a 14-character minimum and 128-character maximum, and initial Platform Manager creation, authenticated password change and one-time-code password reset each call that shared policy exactly once.
+
+Scoped commands:
+
+```sh
+node tools/test-password-length-boundary.mjs
+node tools/run-e2e-editions.mjs --asvs-password-length-only
+```
+
+The source lock reports `{"passwordLengthBoundary":"passed","minimumLength":14,"maximumLength":128,"localUserSetPasswordFlows":3}`. The current-image run uses distinct non-context/common candidates at exactly 13 and 14 characters for all three flows. Every 13-character value returns validation failure and every 14-character value succeeds: `{"passwordLengthRuntime":"passed","rejectedLength":13,"acceptedLength":14,"testedFlows":["bootstrap","change","reset"],"resetGrantPreservedAfterInvalidPassword":true}`. The invalid reset candidate does not consume its one-time grant before the valid boundary attempt.
+
+The candidate API image is `sha256:922a2f9dfae305cb99f6fd1cd51f215d91875dff95a0a14644bc9fa68364c970`; the gateway image is `sha256:9383959069230a3fa6e6e8dcdcde35204b594692a37e5cc1c5f7364ca9db51bb`. No product correction or finding was required. Production is untouched.
