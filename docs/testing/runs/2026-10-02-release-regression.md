@@ -1154,3 +1154,18 @@ node tools/run-e2e-editions.mjs --asvs-breached-password-only
 The source/resource lock reports `{"breachedPasswordBoundary":"passed","fingerprints":8249,"fingerprintBytes":32,"sortedUnique":true,"knownBreachedCases":3,"independentFromCommonSet":true,"pinnedPiiFreeSource":true}`. All three selected known cases are absent from the separate common-password resource. The previous common, context and composition controls remain green, and the API build completes with zero warnings/errors. The current-image run rejects `__GettingCloser#@@` during bootstrap, authenticated change and reset, accepts distinct controls and preserves the reset grant: `{"breachedPasswordRuntime":"passed","testedFlows":["bootstrap","change","reset"],"breachedCandidateAbsentFromCommonSet":true,"validControlsAccepted":true,"resetGrantPreservedAfterBreachedPassword":true}`.
 
 The candidate API image is `sha256:a988e8e706d10ea77b77957b56299a3253ee51192640f0641275d3de25cd1acb`; the gateway image is `sha256:125e3c8e99cd6bb7034333f32915afd0c7c1a35142aea8f182c093ab090cc8d0`. Production is untouched.
+
+## Credential-stuffing and brute-force controls — 2026-10-04
+
+Completes ASVS 6.3.1 by joining the already maintained account-lock evidence with an explicit client and provider-path run. The security plan defines eight locally verified credential checks per client address in a fixed minute, followed by generic non-cacheable `429` with numeric `Retry-After`. The independent known-identity counter locks after 20 failed password checks for 15 minutes, which protects the same account when guesses arrive through multiple client partitions. Successful authentication after expiry clears the count.
+
+Scoped commands:
+
+```sh
+node tools/test-authentication-control-documentation.mjs
+FYLKREN_E2E_API_IMAGE=sha256:a988e8e706d10ea77b77957b56299a3253ee51192640f0641275d3de25cd1acb FYLKREN_E2E_WEB_IMAGE=sha256:125e3c8e99cd6bb7034333f32915afd0c7c1a35142aea8f182c093ab090cc8d0 node tools/run-e2e-editions.mjs --asvs-authentication-attacks-only --no-build
+```
+
+The source/document lock reports `{"authenticationControlDocumentation":"passed","addressPermitLimit":8,"addressWindowSeconds":60,"identityFailureLimit":20,"identityLockMinutes":15,"documentedLockoutAbuseMitigation":true,"trustedClientAddressReplacement":true,"directorySignInRateLimited":true,"authenticatedReauthenticationRoutesCovered":2,"webauthnRoutesCovered":5}`. The current-image run sends a different hostile `X-Fylkren-Gateway-Client-IP` and `X-Forwarded-For` on every request. Both local and AD/LDAP sign-in still permit eight generic 401 responses and reject attempt nine, proving the owned gateway's client-address replacement prevents caller partition bypass: `{"authenticationAttackBoundary":"passed","permitLimit":8,"localSignInLimited":true,"directorySignInLimited":true,"spoofedClientAddressHeadersIgnored":true,"numericRetryAfter":true,"genericNonCacheableFailures":true}`.
+
+The maintained SQL authentication case remains the account-wide distributed-guessing boundary: three concurrent client instances atomically saturate at 20, a correct password remains rejected while locked, an exhausted synthetic count cannot overflow, and a correct post-expiry login succeeds and clears the count. The release evidence manifest records `{"sqlAuthenticationCounter":"passed","postExpiryLoginAccepted":true}`; the maintained test contains the explicit saturation, concurrency and locked-password assertions. No correction or finding was required. Production is untouched.
