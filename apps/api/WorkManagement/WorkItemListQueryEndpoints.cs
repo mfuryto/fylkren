@@ -14,6 +14,8 @@ internal static class WorkItemListQueryEndpoints
         {
             if (!PersonId(user, out var personId) || !await WorkLevelAuthorization.HasOperationalAccess(siteId, personId, db, ct)) return Results.Problem(statusCode: 403);
             if (RequestQueryPolicy.Validate(page, search) is { } queryError) return queryError;
+            if (RequestQueryPolicy.ValidateChoice("filter", filter, "active", "unassigned", "all", "archived", "registered", "under_review", "on_hold", "planning", "planning_approval", "planning_approved", "execution", "assigned", "in_progress", "in_review", "rejected", "completed", "cancelled", "request_cancelled", "reassigned") is { } filterError) return filterError;
+            if (RequestQueryPolicy.ValidateChoice("sort", sort, "newest", "oldest", "name-asc", "name-desc", "reference-asc", "reference-desc") is { } sortError) return sortError;
             var now = DateTimeOffset.UtcNow;
             var query = await WorkItemVisibility.QueryForPerson(siteId, personId, now, db, ct);
             var selection = await WorkItemQueuePager.Select(query, siteId, unitId, filter ?? "active", search, sort ?? "newest", page ?? 1, focusItemId, db, ct);

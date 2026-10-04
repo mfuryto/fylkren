@@ -18,6 +18,8 @@ internal static class ExecutionQueryEndpoints
                 return Results.Problem(statusCode: 403);
             if (RequestQueryPolicy.Validate(page, null) is { } queryError)
                 return queryError;
+            if (RequestQueryPolicy.ValidateChoice("sort", sort, "newest", "oldest", "name-asc", "name-desc", "reference-asc", "reference-desc") is { } sortError)
+                return sortError;
 
             var candidateLevels = await db.WorkItems
                 .AsNoTracking()

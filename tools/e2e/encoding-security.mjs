@@ -106,6 +106,57 @@ export async function testNumericInputBoundaries({ platform, leader, siteManager
   return { numericInputBoundaries: 'passed', pagedEndpoints: routes.length, rejectedNumericCases: routes.length * 5 + 7 };
 }
 
+export async function testQueryInputValidation({ platform, leader, siteManager, siteId, unitId, workItemTypeId }) {
+  const invalid = [
+    [platform, '/api/platform-audit?sort=sideways'],
+    [platform, `/api/platform-audit?eventType=${'x'.repeat(101)}`],
+    [siteManager, `/api/site-audit/sites/${siteId}?area=unknown`],
+    [siteManager, `/api/site-audit/sites/${siteId}?sort=sideways`],
+    [siteManager, `/api/site-audit/sites/${siteId}?eventType=${'x'.repeat(101)}`],
+    [siteManager, `/api/site-audit/sites/${siteId}?from=2026-10-02&to=2026-10-01`],
+    [leader, '/api/work/learning?view=unknown'],
+    [leader, '/api/work/learning?kind=unknown'],
+    [leader, '/api/work/learning?priority=urgent'],
+    [leader, '/api/work/learning?sort=sideways'],
+    [leader, `/api/work/sites/${siteId}/items?filter=unknown`],
+    [leader, `/api/work/sites/${siteId}/items?sort=sideways`],
+    [leader, `/api/work/sites/${siteId}/reports?sort=sideways`],
+    [leader, `/api/workflows/planning/sites/${siteId}?sort=sideways`],
+    [leader, `/api/execution/sites/${siteId}?sort=sideways`],
+    [platform, `/api/people?siteId=${siteId}&q=${'x'.repeat(201)}`],
+    [platform, '/api/platform/operations/logs?level=Trace'],
+    [platform, '/api/platform/operations/logs?limit=0'],
+    [platform, '/api/platform/operations/logs?limit=301'],
+  ];
+  for (const [actor, path] of invalid)
+    assert.equal((await actor.request(path)).status, 400, `Unsupported query input was accepted: ${path}`);
+
+  const root = `/api/work/sites/${siteId}/items`;
+  const task = await leader.post(root, { title: 'Synthetic query validation task', description: 'Synthetic',
+    recommendation: null, referenceUrl: null, assignedUnitId: unitId, workItemTypeId, dueAt: null });
+  assert.equal(task.status, 201, JSON.stringify(task.body));
+  assert.equal((await leader.put(`${root}/${task.body.id}/status`, {
+    status: 'under_review', assignedUnitId: unitId, decisionNote: null, priority: 'normal' })).status, 204);
+  const oversizedDependencySearch = await leader.request(`${root}/${task.body.id}/dependency-candidates?search=${'x'.repeat(201)}`);
+  assert.equal(oversizedDependencySearch.status, 400, 'Oversized dependency search was accepted');
+
+  const valid = [
+    [platform, '/api/platform-audit?sort=oldest'],
+    [siteManager, `/api/site-audit/sites/${siteId}?area=tasks&sort=newest`],
+    [leader, '/api/work/learning?view=active&sort=priority'],
+    [leader, `/api/work/sites/${siteId}/items?filter=active&sort=reference-asc`],
+    [leader, `/api/work/sites/${siteId}/reports?sort=name-desc`],
+    [leader, `/api/workflows/planning/sites/${siteId}?sort=reference-desc`],
+    [leader, `/api/execution/sites/${siteId}?sort=name-asc`],
+    [platform, '/api/platform/operations/logs?level=Warning&limit=300'],
+  ];
+  for (const [actor, path] of valid)
+    assert.equal((await actor.request(path)).status, 200, `Documented query input failed: ${path}`);
+
+  return { queryInputValidation: 'passed', rejectedQueryCases: invalid.length + 1,
+    acceptedQueryCases: valid.length, queryEndpoints: 10 };
+}
+
 export async function testDerivedArithmeticBoundaries({ platform, siteManager, leader, siteId, unitId, workItemTypeId }) {
   const path = `/api/site-audit/sites/${siteId}`;
   const original = await siteManager.request(path);

@@ -18,6 +18,8 @@ internal static class PlanningQueueEndpoints
                 return Results.Problem(statusCode: 403);
             if (RequestQueryPolicy.Validate(page, null) is { } queryError)
                 return queryError;
+            if (RequestQueryPolicy.ValidateChoice("sort", sort, "newest", "oldest", "name-asc", "name-desc", "reference-asc", "reference-desc") is { } sortError)
+                return sortError;
 
             var candidateLevels = await ActivePlanningRuns(db, siteId)
                 .Select(x => x.WorkItem.AssignedUnitId)

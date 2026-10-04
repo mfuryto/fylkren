@@ -4137,5 +4137,44 @@
     },
     "matrix": "ASVS 2.1.3 Passed; continue at 2.2.1 while ASVS 2.4.1 and SV-068 remain open",
     "scope": "Business-limit documentation and focused client-address authentication limit; no complete anti-automation, global-capacity or release qualification claim"
+  },
+  "queryInputValidationContinuation": {
+    "date": "2026-10-04",
+    "baseline": "09f72fa",
+    "sourceHashes": {
+      "apps/api/RequestQueryPolicy.cs": "3aee7ecb3f99742a900c7e63b022c3fdc69028205f8fa08ea87b8ba60df84470",
+      "apps/api/ActivityAudit/PlatformAuditEndpoints.cs": "1907c2b5393929f91d58887e1b81bdd2c51a9c1531895b2eb6517eccb7ca3fcc",
+      "apps/api/ActivityAudit/SiteAuditEndpoints.cs": "af888cbc7f624ef26eef7e2f6546c112ce574a26f8add4c9642c92f4e1c11934",
+      "apps/api/Learning/LearningEndpoints.cs": "84ae1ed27fe0957c745250ab3710462a0ad904703332315589a90f31a9944acd",
+      "apps/api/Organization/OrganizationQueryEndpoints.cs": "d1a568aaea452274156cf50fd38142cfd3159a075592d5be63c43169e5f32a61",
+      "apps/api/Platform/PlatformOperationsEndpoints.cs": "24f8c038f4fa7ea6c888b5bb09e0ca3ddcf60f9baf2f25bae90c4011615473b2",
+      "apps/api/WorkManagement/ExecutionQueryEndpoints.cs": "3639a4ead72f7ad8f9578487222dddcf97d49818b9d8f87eb8f2050fccf20a1a",
+      "apps/api/WorkManagement/PlanningQueueEndpoints.cs": "de57917e8a99bd3d0490e3526c71184713cfb97674e99a5bfb6cd43e94fa022b",
+      "apps/api/WorkManagement/ReportQueryEndpoints.cs": "2505a329bd603a4474edd9b880b278bc7ca021eda5d4d0fbc4cbbfb1fcd00d60",
+      "apps/api/WorkManagement/WorkItemDependencyEndpoints.cs": "b5b96483f8e499312a139bbdecf863716c4020b4e6561aeab9b2066b5b71cf92",
+      "apps/api/WorkManagement/WorkItemListQueryEndpoints.cs": "707454d49b166e5cb26d3b8ec63a200308360e97085945ec200453a1c9e47d07",
+      "tools/e2e/encoding-security.mjs": "cbb75107ba13f9aa62612d42bd3fe7b24220396f7c7d75dfeb918af81a7ed7f4",
+      "tools/run-e2e-editions.mjs": "598863fd411bf37b04b0f5a8ee92c8ee2df3bea9e62cbcaaf0dab0b66fed7b43",
+      "tools/test-e2e-local.mjs": "fa3f99090ef0eb00080066fc9a1f578099406c73ca6e36e1ad9273e824ac9fb6"
+    },
+    "logHashes": {
+      "/tmp/fylkren-asvs-query.log": "70ce209d04ae674ab1858cc33fff2ee6149b402c5aa4668ffdc2f69e43429af8",
+      "/tmp/fylkren-asvs-query-api-build.log": "93d700b44fab57fbdac80db3fcbb3e6b691af372028b2e152257ab5976ce320f",
+      "/tmp/fylkren-asvs-query-docs.log": "c799ad40ae4245f05f3036394d1d88dd69c423c1e5eb9a6bc45b3f1f9d8bf411",
+      "/tmp/fylkren-asvs-query-structure.log": "b9a651952dda34e3aec02a9d4ef0fd5b226f939897b032e2fe7044662a8e9708",
+      "/tmp/fylkren-asvs-query-version.log": "30a82c355072b30049a50c28fc1a6e402282bc4d7b291f331f69330b0edc3dbb"
+    },
+    "apiImage": "sha256:1bc6249515e33704232d787e3cf5ca2cd292890c8ecc68a17fe0771060fafdb6",
+    "reusedWebImage": "sha256:95c69456ec0870a718f167db181344235d23ccd5744ec99a0879df61d3c9f497",
+    "results": {
+      "queryInputValidation": "passed",
+      "rejectedQueryCases": 20,
+      "acceptedQueryCases": 8,
+      "queryEndpointFamilies": 10,
+      "apiBuildWarnings": 0
+    },
+    "finding": "SV-076 closed after focused retest",
+    "matrix": "ASVS 2.2.1 remains In progress; continue body, header and file-input inventory",
+    "scope": "Query-bound application inputs and focused API tests; no complete request-body/header/file inventory or release qualification"
   }
 }

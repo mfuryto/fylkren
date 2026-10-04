@@ -16,6 +16,10 @@ internal static class LearningEndpoints
         {
             if (!WorkItemPolicy.PersonId(user, out var personId)) return Results.Problem(statusCode: 403);
             if (RequestQueryPolicy.Validate(page, search) is { } queryError) return queryError;
+            if (RequestQueryPolicy.ValidateChoice("view", view, "active", "closed", "all") is { } viewError) return viewError;
+            if (RequestQueryPolicy.ValidateChoice("kind", kind, "positive", "improvement") is { } kindError) return kindError;
+            if (RequestQueryPolicy.ValidateChoice("priority", priority, "high", "normal", "low") is { } priorityError) return priorityError;
+            if (RequestQueryPolicy.ValidateChoice("sort", sort, "priority", "due", "newest", "oldest") is { } sortError) return sortError;
             var levels = await LearningPolicy.Levels(personId, db, ct);
             if (levels.Count == 0) return Results.Problem(statusCode: 403);
             if (siteId is Guid site && !levels.Any(value => value.SiteId == site) || unitId is Guid unit && !levels.Any(value => value.UnitId == unit && (siteId == null || value.SiteId == siteId)))

@@ -142,6 +142,8 @@ internal static class OrganizationQueryEndpoints
         var term = q?.Trim();
         if (siteId is null || string.IsNullOrWhiteSpace(term) || term.Length < 2)
             return Results.Ok(Array.Empty<PersonSearchResult>());
+        if (RequestQueryPolicy.ValidateMaximumLength("q", term, RequestQueryPolicy.MaximumSearchLength) is { } queryError)
+            return queryError;
         var escapedTerm = term.Replace("\\", "\\\\", StringComparison.Ordinal)
             .Replace("%", "\\%", StringComparison.Ordinal)
             .Replace("_", "\\_", StringComparison.Ordinal);

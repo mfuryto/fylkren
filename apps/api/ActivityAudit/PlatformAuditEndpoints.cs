@@ -11,6 +11,8 @@ public static class PlatformAuditEndpoints
         group.MapGet("", async (string? eventType, string? search, string? sort, int? page, FylkrenDbContext database, CancellationToken cancellationToken) =>
         {
             if (RequestQueryPolicy.Validate(page, search) is { } queryError) return queryError;
+            if (RequestQueryPolicy.ValidateMaximumLength("eventType", eventType, 100) is { } eventTypeError) return eventTypeError;
+            if (RequestQueryPolicy.ValidateChoice("sort", sort, "newest", "oldest") is { } sortError) return sortError;
             var pageNumber = Math.Max(page ?? 1, 1);
             const int pageSize = 50;
             var personEvents = database.AuditEvents.AsNoTracking()

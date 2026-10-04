@@ -28,6 +28,10 @@ public static class SiteAuditEndpoints
             if (!PersonId(user, out var personId) || !await database.SiteManagerAssignments.AnyAsync(value => value.SiteId == siteId && value.PersonId == personId && value.IsActive && value.Site.IsActive, cancellationToken))
                 return Results.Problem(statusCode: 403);
             if (RequestQueryPolicy.Validate(page, search) is { } queryError) return queryError;
+            if (RequestQueryPolicy.ValidateChoice("area", area, "organization", "personnel", "workflows", "tasks") is { } areaError) return areaError;
+            if (RequestQueryPolicy.ValidateMaximumLength("eventType", eventType, 100) is { } eventTypeError) return eventTypeError;
+            if (RequestQueryPolicy.ValidateChoice("sort", sort, "newest", "oldest") is { } sortError) return sortError;
+            if (from > to) return Results.ValidationProblem(new Dictionary<string, string[]> { ["period"] = ["The start date cannot be after the end date."] });
 
             var pageNumber = Math.Max(page ?? 1, 1);
             const int pageSize = 50;

@@ -90,6 +90,8 @@ public static class PlatformOperationsEndpoints
         group.MapGet("/logs", (string? level, string? search, int? limit, TechnicalLogBuffer buffer) =>
         {
             if (RequestQueryPolicy.Validate(null, search) is { } queryError) return queryError;
+            if (RequestQueryPolicy.ValidateChoice("level", level, "Warning", "Error", "Critical", "None") is { } levelError) return levelError;
+            if (RequestQueryPolicy.ValidateLimit(limit, 300) is { } limitError) return limitError;
             var minimumLevel = Enum.TryParse<LogLevel>(level, true, out var parsed) ? parsed : LogLevel.Warning;
             return Results.Ok(new
             {

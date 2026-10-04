@@ -56,6 +56,8 @@ internal static class WorkItemDependencyEndpoints
 
         var term = (search ?? string.Empty).Trim().ToLower();
         if (term.Length < 2) return Results.Ok(Array.Empty<object>());
+        if (RequestQueryPolicy.ValidateMaximumLength("search", term, RequestQueryPolicy.MaximumSearchLength) is { } queryError)
+            return queryError;
         var existing = db.WorkItemDependencies.Where(value => value.DependentWorkItemId == itemId).Select(value => value.PredecessorWorkItemId);
         var visible = await WorkItemVisibility.QueryForPerson(siteId, personId, DateTimeOffset.UtcNow, db, ct);
         var visibleIds = visible.Select(value => value.Id);

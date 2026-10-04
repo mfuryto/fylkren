@@ -516,3 +516,17 @@ FYLKREN_E2E_API_IMAGE=fylkren-asvs-pagination-api:latest FYLKREN_E2E_WEB_IMAGE=f
 The test starts before synthetic user bootstrap so earlier authentication calls cannot consume the same client-address partition. It verifies generic and cache-resistant unknown/oversized identity failures, then the documented fixed-window limit with `429` and numeric `Retry-After`. The first runner attempt reached `429` before the expected baseline because setup had already consumed the shared partition; no product defect was inferred, and the maintained scoped runner was corrected before the passing rerun.
 
 ASVS 2.1.3 is Passed as a documentation requirement. The result does not pass ASVS 2.4.1, distributed guessing, account/client combined throttling, global storage capacity, or the complete release candidate. Safe hashes and results are recorded under `businessLimitDocumentationContinuation` in the [existing evidence manifest](2026-10-02-release-regression-evidence.json). Continue at 2.2.1. Production is untouched.
+
+## Query-input validation — 2026-10-04
+
+Continues ASVS 2.2.1 without marking it complete. Source inventory of query-bound endpoint parameters found that page/search bounds were generally shared, but unsupported filter, sort, view, area, kind, priority and log-level values could silently select a default. People and dependency searches lacked the documented 200-character ceiling, technical-log limits were silently clamped and Site audit accepted a reversed period. These authorized requests did not expand the caller's data scope or demonstrate service failure (SV-076).
+
+The shared query policy now supplies explicit choice, maximum-length and result-limit checks. Ten endpoint families apply their own positive allowlists and existing authorization remains independent. The focused command used a newly built API image and the unchanged web gateway:
+
+```sh
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-query-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-automatic-lifecycle-web:latest node tools/run-e2e-editions.mjs --asvs-query-only --no-build
+```
+
+Twenty negative cases reject unsupported choices, oversized event/search input, reversed audit dates and invalid log limits. Eight documented positive combinations still return 200. The dependency-search case creates one disposable task and proves its oversized input is rejected after normal authorization and lifecycle checks. API compilation and runner syntax checks pass. The image is `sha256:1bc6249515e33704232d787e3cf5ca2cd292890c8ecc68a17fe0771060fafdb6`; the reused web image remains an unchanged gateway.
+
+ASVS 2.2.1 remains In progress because the full request-body, header and file-input inventory is not yet complete. Safe hashes and results are recorded under `queryInputValidationContinuation` in the existing evidence manifest. Production is untouched.
