@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { testServiceTransportBoundaries } from './e2e/service-transports.mjs';
 import { randomBytes } from 'node:crypto';
 import { chmodSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -76,6 +77,12 @@ dn: ou=quarantine,dc=example,dc=test
 objectClass: organizationalUnit
 ou: quarantine
 
+dn: ou=referral,dc=example,dc=test
+objectClass: referral
+objectClass: extensibleObject
+ou: referral
+ref: ldap://transport-sink:1389/dc=canary,dc=test
+
 dn: uid=live-ldap,ou=people,dc=example,dc=test
 objectClass: inetOrgPerson
 uid: live-ldap
@@ -120,11 +127,11 @@ function browserClient() {
   };
 }
 
-function ldapModify(lines) {
+function ldapModify(lines, manageReferral = false) {
   const result = spawnSync('docker', ['compose', ...composeFiles, '-p', project, 'exec', '-T',
     '-e', 'LDAPTLS_CACERT=/container/service/slapd/assets/certs/ca.crt', '-e', 'LDAPTLS_REQCERT=demand', 'ldap',
     'ldapmodify', '-x', '-H', 'ldaps://ldap:636',
-    '-D', 'cn=admin,dc=example,dc=test', '-w', ldapAdminPassword],
+    '-D', 'cn=admin,dc=example,dc=test', '-w', ldapAdminPassword, ...(manageReferral ? ['-M'] : [])],
   { env, encoding: 'utf8', input: `${lines.trim()}\n` });
   if (result.status !== 0) {
     if (result.stdout) process.stdout.write(result.stdout);
@@ -189,8 +196,8 @@ try {
 
   const configuration = {
     server: 'ldap',
-    port: 636,
-    security: 'ldaps',
+    port: process.argv.includes('--starttls') ? 389 : 636,
+    security: process.argv.includes('--starttls') ? 'starttls' : 'ldaps',
     baseDn: 'dc=example,dc=test',
     userSearchBase: 'ou=people,dc=example,dc=test',
     bindDn: 'cn=admin,dc=example,dc=test',
@@ -229,6 +236,9 @@ try {
   const activated = await manager.put('/api/platform/identity/providers/ldap', { enabled: true, clearSecret: false, configuration: stored.body.configuration });
   assert.equal(activated.status, 204, JSON.stringify(activated.body));
 
+  if (process.argv.includes('--transport-only')) {
+    await testServiceTransportBoundaries({ manager, configuration, compose });
+  } else {
   env.FYLKREN_IDENTITY_LAB_IMPORTED_LDAP_SERVER = 'environment-change-must-not-overwrite';
   compose(['up', '-d', '--force-recreate', '--wait', 'api'], { stdio: 'inherit' });
   const afterRestart = await manager.request('/api/platform/identity/providers/ldap');
@@ -361,6 +371,22 @@ changetype: modrdn
 newrdn: uid=live-ldap
 deleteoldrdn: 1
 newsuperior: ou=quarantine,dc=example,dc=test`);
+  ldapModify(`dn: ou=referral,ou=people,dc=example,dc=test
+changetype: add
+objectClass: referral
+objectClass: extensibleObject
+ou: referral
+ref: ldap://transport-sink:1389/dc=canary,dc=test`);
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const incomplete = await manager.post('/api/platform/identity/directories/lifecycle/sync', {});
+    assert.equal(incomplete.body.unavailable, 1, 'A referral must not become authoritative missing-account evidence');
+    currentLinks = await manager.request('/api/platform/identity/directory-links');
+    assert.equal(currentLinks.body[0].accessEnabled, true, 'Referral-only search suspended the linked account');
+  }
+  const canary = JSON.parse(compose(['exec', '-T', 'api', 'curl', '--fail', '--silent', 'http://transport-sink:2526/messages']));
+  assert.equal(canary.canaryConnections, 0, 'Lifecycle search followed a directory referral');
+  ldapModify(`dn: ou=referral,ou=people,dc=example,dc=test
+changetype: delete`, true);
   for (let confirmation = 1; confirmation <= 2; confirmation += 1) {
     const pending = await manager.post('/api/platform/identity/directories/lifecycle/sync', {});
     assert.equal(pending.status, 200, JSON.stringify(pending.body));
@@ -454,12 +480,17 @@ displayName: Changed directory profile after closure`);
     malformedDirectoryDataFailSafe: 'passed',
     invalidLookupBindFailSafe: 'passed',
     missingAccountConfirmationAndSessionRevocation: 'passed',
+    referralSearchNotAuthoritativeMissing: 'passed',
     unlinkRelinkAndAccessPreservation: 'passed',
     lifecycleAndActorAudit: 'passed',
     secretSafeLogging: 'passed',
     outageFailSafe: 'passed',
     archivedProfilePreservedDuringDirectorySync: 'passed',
   }, null, 2)}\n`);
+  }
+} catch (error) {
+  if (started) writeFileSync('/tmp/fylkren-directory-lab-api-diagnostic.log', compose(['logs', '--no-color', 'api']), { mode: 0o600 });
+  throw error;
 } finally {
   if (started) {
     try { compose(['down', '-v'], { stdio: 'inherit' }); }

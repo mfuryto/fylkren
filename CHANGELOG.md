@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Reject malformed/reserved SMTP and directory destinations without changing saved configuration; reuse one SMTP transport preparation path. Restore Linux LDAP StartTLS without plaintext credential binding, reject referral-only provider probes and preserve account access on incomplete referral searches. Enforce the SMTP test send deadline; native DNS rebinding still requires deployment egress controls.
+
 - Harden outgoing HTTPS integration traffic with checked DNS/IP destinations, explicit private-origin approval and bounded identity/federation downloads. Prepare SAML metadata through this shared path while preserving signed SSO and local administration on provider failure; require direct metadata responses and disable artifact resolution. See upgrade notes for internal integrations.
 
 - Speed up pending-work menu counters with a database aggregate instead of materializing full task cards; preserve existing role/level boundaries, dependency and request-progress semantics, planning/execution ownership and private-learning counts.

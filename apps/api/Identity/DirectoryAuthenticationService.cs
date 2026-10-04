@@ -2,6 +2,7 @@ using System.DirectoryServices.Protocols;
 using System.Net;
 using System.Text;
 using Fylkren.Api.Platform;
+using Fylkren.Api.Networking;
 
 namespace Fylkren.Api.Identity;
 
@@ -9,7 +10,7 @@ public sealed record DirectoryUser(string Provider, string StableId, string User
 public enum DirectoryAccountState { Active, Disabled, Missing, Unavailable }
 public sealed record DirectoryLifecycleResult(DirectoryAccountState State, DirectoryUser? User, string Status);
 
-public sealed class DirectoryAuthenticationService(FylkrenOptions options)
+public sealed class DirectoryAuthenticationService(FylkrenOptions options, ServiceDestinationPolicy destinations)
 {
     private const int MaximumConcurrentOperations = 8;
     private readonly SemaphoreSlim operationSlots = new(MaximumConcurrentOperations, MaximumConcurrentOperations);
@@ -88,7 +89,7 @@ public sealed class DirectoryAuthenticationService(FylkrenOptions options)
         catch (DirectoryOperationException) { return []; }
     }
 
-    private static DirectoryUser? FindUser(Settings settings, string username)
+    private DirectoryUser? FindUser(Settings settings, string username)
     {
         if (string.IsNullOrWhiteSpace(username) || username.Length > 256) return null;
         try
@@ -137,15 +138,15 @@ public sealed class DirectoryAuthenticationService(FylkrenOptions options)
         catch (InvalidOperationException) { return false; }
     }
 
-    private static bool TestConnection(Settings settings)
+    private bool TestConnection(Settings settings)
     {
         try
         {
             using var connection = CreateConnection(settings, new NetworkCredential(settings.BindDn, settings.BindPassword));
             connection.Bind();
             var request = new SearchRequest(settings.BaseDn, "(objectClass=*)", SearchScope.Base, "dn");
-            _ = connection.SendRequest(request, TimeSpan.FromSeconds(10));
-            return true;
+            var response = (SearchResponse)connection.SendRequest(request, TimeSpan.FromSeconds(10));
+            return response.Entries.Count == 1 && response.References.Count == 0 && response.Referral.Length == 0;
         }
         catch (LdapException) { return false; }
         catch (DirectoryOperationException) { return false; }
@@ -178,6 +179,8 @@ public sealed class DirectoryAuthenticationService(FylkrenOptions options)
             var request = new SearchRequest(settings.SearchBase, stableFilter, SearchScope.Subtree, attributes.ToArray())
             { SizeLimit = 2 };
             var response = (SearchResponse)connection.SendRequest(request, TimeSpan.FromSeconds(10));
+            if (response.References.Count > 0 || response.Referral.Length > 0)
+                return new(DirectoryAccountState.Unavailable, null, "referral-not-supported");
             if (response.Entries.Count == 0)
                 return new(DirectoryAccountState.Missing, null, "missing");
             if (response.Entries.Count != 1)
@@ -242,15 +245,32 @@ public sealed class DirectoryAuthenticationService(FylkrenOptions options)
             source.EmailAttribute, source.StableIdAttribute, source.LifecycleActiveFilter);
     }
 
-    private static LdapConnection CreateConnection(Settings settings, NetworkCredential credential)
+    private LdapConnection CreateConnection(Settings settings, NetworkCredential credential)
     {
+        if (!destinations.Allowed(settings.Server)) throw new LdapException("The configured directory destination is not allowed or available.");
         var identifier = new LdapDirectoryIdentifier(settings.Server, settings.Port, false, false);
-        var connection = new LdapConnection(identifier, credential, AuthType.Basic) { Timeout = TimeSpan.FromSeconds(10) };
-        connection.SessionOptions.ProtocolVersion = 3;
-        connection.SessionOptions.ReferralChasing = ReferralChasingOptions.None;
-        if (settings.UseSsl) connection.SessionOptions.SecureSocketLayer = true;
-        if (settings.UseStartTls) connection.SessionOptions.StartTransportLayerSecurity(null);
-        return connection;
+        var connection = new LdapConnection(identifier, credential, AuthType.Basic)
+        { Timeout = TimeSpan.FromSeconds(10), AutoBind = false };
+        try
+        {
+            connection.SessionOptions.ProtocolVersion = 3;
+            connection.SessionOptions.ReferralChasing = ReferralChasingOptions.None;
+            if (settings.UseSsl) connection.SessionOptions.SecureSocketLayer = true;
+            if (settings.UseStartTls)
+            {
+                // On Linux the native target/network timeout is initialized by
+                // SendRequest/Bind, not the constructor. Establish it without
+                // automatic credential binding before negotiating StartTLS.
+                if (OperatingSystem.IsLinux())
+                {
+                    try { connection.SendRequest(new SearchRequest("", "(objectClass=*)", SearchScope.Base, "1.1"), TimeSpan.FromSeconds(10)); }
+                    catch (DirectoryOperationException error) when (error.Response?.ResultCode == ResultCode.ConfidentialityRequired) { }
+                }
+                connection.SessionOptions.StartTransportLayerSecurity(null);
+            }
+            return connection;
+        }
+        catch { connection.Dispose(); throw; }
     }
 
     private static string? ReadStableId(SearchResultEntry entry, Settings settings)

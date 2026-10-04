@@ -685,7 +685,7 @@
         "apps/web/src/reports/printReport.ts:58:  frame.srcdoc = `<!doctype html><html lang=\"${language.replace(/[^A-Za-z0-9-]/g, \"\") || \"en\"}\"><head><meta charset=\"UTF-8\"><title>${title.replace(/[<>&]/g, \"\")}</title>${styles}<style>",
         "apps/web/src/components/RichText.tsx:82:    element.innerHTML = markdownToEditorHtml(value);",
         "apps/web/src/components/RichText.tsx:87:  function emitChange() { const element = editor.current; if (!element) return; const next = editorHtmlToMarkdown(element); if (next.length > maxLength) { element.innerHTML = markdownToEditorHtml(value); return; } lastValue.current = next; onChange(next); rememberSelection(); }",
-        "apps/web/src/components/RichText.tsx:95:  return <div className=\"rich-text-editor\"><div className=\"rich-text-toolbar\" role=\"toolbar\" aria-label={t(\"textFormatting\")}><button className=\"secondary-button\" type=\"button\" onMouseDown={(event) => { event.preventDefault(); format(\"normal\"); }}>{t(\"normalText\")}</button><label><span className=\"sr-only\">{t(\"headingLevel\")}</span><select aria-label={t(\"headingLevel\")} value=\"\" onChange={(event) => format(event.target.value as \"h1\" | \"h2\" | \"h3\" | \"h4\")}><option value=\"\" disabled>{t(\"heading\")}</option><option value=\"h1\">H1</option><option value=\"h2\">H2</option><option value=\"h3\">H3</option><option value=\"h4\">H4</option></select></label><button className=\"secondary-button\" type=\"button\" onMouseDown={(event) => { event.preventDefault(); format(\"ul\"); }} aria-label={t(\"bulletedList\")}>• {t(\"list\")}</button><button className=\"secondary-button\" type=\"button\" onMouseDown={(event) => { event.preventDefault(); format(\"ol\"); }} aria-label={t(\"numberedList\")}>1. {t(\"list\")}</button></div><div ref={editor} className=\"workflow-document-editor\" contentEditable role=\"textbox\" aria-multiline=\"true\" data-placeholder={t(\"writeHere\")} style={{ minHeight: `${Math.max(180, rows * 24)}px` }} onInput={emitChange} onPaste={(event) => { event.preventDefault(); insertPlainText(event.clipboardData.getData(\"text/plain\")); }} onDrop={(event) => { event.preventDefault(); insertPlainText(event.dataTransfer.getData(\"text/plain\")); }} onDragOver={(event) => event.preventDefault()} onKeyUp={rememberSelection} onMouseUp={rememberSelection} onFocus={(event) => { if (!event.currentTarget.innerHTML) event.currentTarget.innerHTML = markdownToEditorHtml(value); rememberSelection(); }} /></div>;",
+        "apps/web/src/components/RichText.tsx:95:  return <div className=\"rich-text-editor\"><div className=\"rich-text-toolbar\" role=\"toolbar\" aria-label={t(\"textFormatting\")}><button className=\"secondary-button\" type=\"button\" onMouseDown={(event) => { event.preventDefault(); format(\"normal\"); }}>{t(\"normalText\")}</button><label><span className=\"sr-only\">{t(\"headingLevel\")}</span><select aria-label={t(\"headingLevel\")} value=\"\" onChange={(event) => format(event.target.value as \"h1\" | \"h2\" | \"h3\" | \"h4\")}><option value=\"\" disabled>{t(\"heading\")}</option><option value=\"h1\">H1</option><option value=\"h2\">H2</option><option value=\"h3\">H3</option><option value=\"h4\">H4</option></select></label><button className=\"secondary-button\" type=\"button\" onMouseDown={(event) => { event.preventDefault(); format(\"ul\"); }} aria-label={t(\"bulletedList\")}>\u2022 {t(\"list\")}</button><button className=\"secondary-button\" type=\"button\" onMouseDown={(event) => { event.preventDefault(); format(\"ol\"); }} aria-label={t(\"numberedList\")}>1. {t(\"list\")}</button></div><div ref={editor} className=\"workflow-document-editor\" contentEditable role=\"textbox\" aria-multiline=\"true\" data-placeholder={t(\"writeHere\")} style={{ minHeight: `${Math.max(180, rows * 24)}px` }} onInput={emitChange} onPaste={(event) => { event.preventDefault(); insertPlainText(event.clipboardData.getData(\"text/plain\")); }} onDrop={(event) => { event.preventDefault(); insertPlainText(event.dataTransfer.getData(\"text/plain\")); }} onDragOver={(event) => event.preventDefault()} onKeyUp={rememberSelection} onMouseUp={rememberSelection} onFocus={(event) => { if (!event.currentTarget.innerHTML) event.currentTarget.innerHTML = markdownToEditorHtml(value); rememberSelection(); }} /></div>;",
         "apps/web/src/api/authClient.ts:10:    atob(input.replace(/-/g, \"+\").replace(/_/g, \"/\")),",
         "apps/web/src/platform/federationApi.ts:80:const peerPath = (id: string) => `${base}/peers/${encodeURIComponent(id)}`;",
         "apps/web/src/platform/federationApi.ts:122:  apiMutate(`${peerPath(id)}/deliveries/${encodeURIComponent(messageId)}/retry`, \"POST\", undefined,",
@@ -3741,5 +3741,70 @@
       "No cloud-metadata exfiltration or authentication bypass demonstrated.",
       "Private internal destinations now require explicit deployment-owned exact HTTPS origins; system HTTP proxies, redirects and SAML artifact fetching are disabled."
     ]
+  },
+  "serviceTransportContinuation": {
+    "recordedAtUtc": "2026-10-04T12:40:14.524303+00:00",
+    "baseRevision": "e9b8314c24384e5812d990a21764d5d0fedc0b4e",
+    "sourceSha256": {
+      "apps/api/Networking/ServiceDestinationPolicy.cs": "49a03a9f28233be74b48a9f121027265b24a4517a3f7b5447cde16bf6ffbb82f",
+      "apps/api/Notifications/SmtpTransport.cs": "138c749e16f6df6461779a93be4d7315fe3d2858e300184d927b0416dd72d52c",
+      "apps/api/Identity/DirectoryAuthenticationService.cs": "b9be3fad476cf02c615f83f0e60423685918d56dace606a99fcf08258fc8487a",
+      "apps/api/Notifications/NotificationDeliveryWorker.cs": "e15108f9fda55a57d189d6637c6a50a236c292afe751d06fa69f53cdf0d4ad4c",
+      "apps/api/Platform/FylkrenOptions.cs": "cf4f2a19c04aabe0f45613e3cf80f38a12bf0fcf4f041c0b64210038d5f05b5e",
+      "apps/api/Platform/IdentityProviderEndpoints.cs": "42b1cfb7a0590b2882d71738069ce21e5efa7d351144c2a6253a70787beb875c",
+      "apps/api/Platform/SmtpEndpoints.cs": "65a7ae05dff8e1b47adddf704f145bb53e6d79e372513e115d1c642421bf2dd9",
+      "apps/api/ServiceRegistration.cs": "0ed7557caf58f5aa96dfd46802ed952f81c726b7c9ca1aee87494f737fec2ad2",
+      "tests/foundations/Program.cs": "d7c9c9a968a8b868a09360990de29d534aa7c4ef7b71fcff1268c50336acb97f",
+      "tests/foundations/ServiceTransportTests.cs": "d21fe949647ea41b08c889dc6d857bcf78224e87bc17a888c3bbda6172367323",
+      "tools/e2e/service-transports.mjs": "4aa66ee470c2b81bab73b30bb44fdb6d9b2137c39c06f408391077c62060e1b5",
+      "tools/e2e/smtp-sink.mjs": "968b39ff4812bf98f131ca4b7d4f072f8e389ba3f016620218a58bc5c004139a",
+      "tools/e2e/identity-lab.compose.yaml": "8bbba16882dcc0606367b33afc3da210e7c4bd971ffc1d8ea33a225882d6e082",
+      "tools/run-identity-directory-lab.mjs": "ba9575a414010c9dcafb39cee1f8e1fae08b1dad6590276c18cf8d20c12c548c",
+      "tools/run-identity-ad-lab.mjs": "0f20719bcba5a274b28b7f47062ce6c3f8b0df2a2e530a84e2180b0996f8ba79"
+    },
+    "logSha256": {
+      "/tmp/fylkren-asvs-service-before.log": "2682ec6fb63a8415178455601534b0cffc44b7414fa3b2523ae33ca369ba36b1",
+      "/tmp/fylkren-asvs-services-unit.log": "cab642be6471098dec20229c5407f434c2d38dbcab9bdb620454d2411c24b780",
+      "/tmp/fylkren-asvs-services-after.log": "fbf669fc893757b7c98ffc83c35b3bebf66512fe691a4d2fc34645a7229a3382",
+      "/tmp/fylkren-asvs-services-ldap.log": "15f9df8a407e4236e35c74fbec44d67ccc974ab43cfa8febdbb74280b65dd247",
+      "/tmp/fylkren-asvs-services-ad.log": "8fc7064429d247edf883bb4d4c6ebbe20d53206dcf3cc19bb564c781aac385ea",
+      "/tmp/fylkren-asvs-services-api-build.log": "3d3d348e98ee39eb7ea1d3931bb5c0ae48b78d9c85204400e117fd11d7e2b812",
+      "/tmp/fylkren-asvs-services-docs.log": "52a96857fc6294d3fefb525ff561febe085c6fbff58e41270d18a70237ca7a80",
+      "/tmp/fylkren-asvs-services-structure.log": "98d2b43920418bfa668cc844893fc5ea864e51d5cbdc7f520ccdfc50bacb014c",
+      "/tmp/fylkren-asvs-services-version.log": "30a82c355072b30049a50c28fc1a6e402282bc4d7b291f331f69330b0edc3dbb"
+    },
+    "images": [
+      "[\"fylkren-asvs-services-api:latest\"] sha256:f7a9fc1b8926eb6bede34038a9b2393675914cda517edd885e3db35b054b0a24",
+      "[\"fylkren-automatic-lifecycle-web:latest\",\"fylkren-federation-pair-test-web:local\"] sha256:95c69456ec0870a718f167db181344235d23ccd5744ec99a0879df61d3c9f497"
+    ],
+    "baseline": {
+      "malformedTargetUpdates": 36,
+      "accepted204": 34,
+      "alreadyRejected400": 2,
+      "metadataAccessAttempted": false
+    },
+    "transportResults": {
+      "nonHttpTransportBoundaries": "passed",
+      "unsafeHostsRejected": 36,
+      "portAndProtocolBounds": "passed",
+      "smtpFixedRelay": "passed",
+      "smtpDeliveryWorker": "passed",
+      "smtpStartTlsNoDowngrade": "passed",
+      "smtpDeadlineMs": 10035,
+      "ldapLdapsAndStartTls": "passed",
+      "ldapCertificateDnsProtocolNegatives": "passed",
+      "referralCanaryRequests": 0
+    },
+    "foundation": "passed",
+    "ldapStartTlsAuthenticationLifecycleAndReferralFailSafe": "passed",
+    "sambaAdLdapsAuthenticationLifecycle": "passed",
+    "documentationStructureVersion": "passed",
+    "closedFindings": [
+      "SV-067",
+      "SV-069",
+      "SV-070"
+    ],
+    "openFinding": "SV-068: native clients re-resolve after DNS preflight; deployment egress is not qualified",
+    "scope": "Changed API image, unchanged reused web gateway/login; no whole-product or production deployment qualification."
   }
 }

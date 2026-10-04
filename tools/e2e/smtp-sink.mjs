@@ -11,6 +11,11 @@ assert.ok(Number.isInteger(port) && port > 0 && port < 65536);
 assert.ok(Number.isInteger(inspectPort) && inspectPort > 0 && inspectPort < 65536);
 assert.ok(Number.isInteger(transientFailures) && transientFailures >= 0);
 
+let smtpConnections = 0;
+let canaryConnections = 0;
+let stallConnections = 0;
+const canaryPort = Number(process.env.FYLKREN_SMTP_CANARY_PORT ?? 0);
+const stallPort = Number(process.env.FYLKREN_SMTP_STALL_PORT ?? 0);
 const messages = [];
 const attempts = [];
 
@@ -34,6 +39,8 @@ function inspectMessage(content, recipient) {
 }
 
 const smtp = net.createServer(socket => {
+  smtpConnections++;
+  socket.on('error', () => {}); // Deliberate wrong-protocol tests reset sockets.
   let buffer = '';
   let recipient = '';
   let data = '';
@@ -86,15 +93,24 @@ const smtp = net.createServer(socket => {
 });
 
 const inspect = http.createServer((request, response) => {
+  if (request.method === 'POST' && request.url === '/canary-reset') { canaryConnections = 0; response.writeHead(204).end(); return; }
   if (request.method !== 'GET' || request.url !== '/messages') {
     response.writeHead(404).end();
     return;
   }
   response.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
-  response.end(JSON.stringify({ count: messages.length,
+  response.end(JSON.stringify({ count: messages.length, smtpConnections, canaryConnections, stallConnections,
     rejected: attempts.filter(value => !value.accepted).length, messages, attempts }));
 });
 
+if (canaryPort) {
+  const canary = net.createServer(socket => { canaryConnections++; socket.end('HTTP/1.1 200 OK\r\nContent-Length: 0\r\nConnection: close\r\n\r\n'); });
+  await new Promise((resolve, reject) => canary.listen(canaryPort, host, error => error ? reject(error) : resolve()));
+}
+if (stallPort) {
+  const stalled = net.createServer(socket => { stallConnections++; socket.on('error', () => {}); socket.setTimeout(30_000, () => socket.destroy()); });
+  await new Promise((resolve, reject) => stalled.listen(stallPort, host, error => error ? reject(error) : resolve()));
+}
 await new Promise((resolve, reject) => smtp.listen(port, host, error => error ? reject(error) : resolve()));
 await new Promise((resolve, reject) => inspect.listen(inspectPort, inspectHost, error => error ? reject(error) : resolve()));
 process.stdout.write(`Synthetic SMTP sink ready on ${host}:${port}; inspection on ${inspectHost}:${inspectPort}\n`);

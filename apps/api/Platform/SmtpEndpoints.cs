@@ -1,3 +1,4 @@
+using Fylkren.Api.Networking;
 using System.Net;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
@@ -187,7 +188,7 @@ public static class SmtpEndpoints
         var fromAddress = request.FromAddress?.Trim() ?? string.Empty;
         var username = request.Username?.Trim();
         var fromName = request.FromName?.Trim() ?? string.Empty;
-        if (host.Length is < 1 or > 255 || request.Port is < 1 or > 65535 ||
+        if (!ServiceDestinationPolicy.ValidServer(host) || request.Port is < 1 or > 65535 ||
             request.Security is not ("starttls" or "none") || username?.Length > 255 ||
             request.Password?.Length > 1000 || fromName.Length < 1 ||
             !MailHeaderPolicy.IsValidConfigurationValue(fromName, 200) ||
@@ -218,6 +219,7 @@ public static class SmtpEndpoints
         IDataProtectionProvider dataProtection,
         FylkrenDbContext database,
         ILoggerFactory loggerFactory,
+        ServiceDestinationPolicy destinations,
         CancellationToken cancellationToken)
     {
         if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest();
@@ -226,26 +228,18 @@ public static class SmtpEndpoints
         var value = await database.SmtpSettings.SingleAsync(settings => settings.Id == Id, cancellationToken);
         try
         {
-            using var client = new SmtpClient(value.Host, value.Port)
-            {
-                EnableSsl = value.Security == "starttls",
-                Timeout = 10000
-            };
-            if (value.Username is not null)
-            {
-                if (value.ProtectedPassword is null)
-                    throw new InvalidOperationException("The SMTP password is missing.");
-                client.Credentials = new NetworkCredential(value.Username,
-                    dataProtection.CreateProtector("Fylkren.SmtpPassword.v1")
-                        .Unprotect(value.ProtectedPassword));
-            }
+            using var client = SmtpTransport.Create(value, dataProtection.CreateProtector("Fylkren.SmtpPassword.v1"), destinations);
             using var message = new MailMessage(
                 new MailAddress(value.FromAddress, MailHeaderPolicy.Normalize(value.FromName, 200)), recipient)
             {
                 Subject = "Email configuration test",
                 Body = "This is a test message from the configured installation."
             };
-            await client.SendMailAsync(message, cancellationToken);
+            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeout.CancelAfter(TimeSpan.FromSeconds(10));
+            try { await client.SendMailAsync(message, timeout.Token); }
+            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+            { throw new SmtpException("SMTP test delivery timed out."); }
             value.RecordTest(true, null);
             await database.SaveChangesAsync(cancellationToken);
             return Results.NoContent();

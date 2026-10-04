@@ -72,6 +72,8 @@ public sealed class FylkrenOptions
         if (!options.Enabled) return;
         if (new[] { options.Server, options.BaseDn, options.BindDn, options.BindPassword }.Any(string.IsNullOrWhiteSpace))
             throw new InvalidOperationException($"{name} is enabled, but required connection settings are missing.");
+        if (!Fylkren.Api.Networking.ServiceDestinationPolicy.ValidServer(options.Server))
+            throw new InvalidOperationException($"{name} server must be a single DNS name or allowed IP address, without a scheme, port, path or credentials.");
         if (options.Port is < 1 or > 65535)
             throw new InvalidOperationException($"{name} port must be between 1 and 65535.");
         if (options.UseSsl == options.UseStartTls)

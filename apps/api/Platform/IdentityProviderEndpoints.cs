@@ -264,7 +264,7 @@ public static class IdentityProviderEndpoints
         var valid = provider switch
         {
             "ad" or "ldap" => value.Port is >= 1 and <= 65535 && value.Security is "ldaps" or "starttls" &&
-                Length(value.Server, 255) && Length(value.BaseDn, 1000) && Length(value.UserSearchBase, 1000) && Length(value.BindDn, 1000) && Length(value.Secret, 2000) && Length(value.Domain, 255) &&
+                (string.IsNullOrWhiteSpace(value.Server) || ServiceDestinationPolicy.ValidServer(value.Server)) && Length(value.Server, 255) && Length(value.BaseDn, 1000) && Length(value.UserSearchBase, 1000) && Length(value.BindDn, 1000) && Length(value.Secret, 2000) && Length(value.Domain, 255) &&
                 (!enabled || new[] { value.Server, value.BaseDn, value.BindDn, value.Secret }.All(item => !string.IsNullOrWhiteSpace(item))) &&
                 Attribute(value.UsernameAttribute) && Attribute(value.DisplayNameAttribute) && Attribute(value.EmailAttribute) && Attribute(value.StableIdAttribute) &&
                 value.LifecycleActiveFilter is { Length: >= 3 and <= 512 } lifecycleActiveFilter &&

@@ -354,3 +354,30 @@ The initial OIDC negatives exposed two transient hardening regressions: the chal
 The repository structure check also found a pre-existing English-source language violation in the execution-label test added earlier. Its synthetic labels/assertions now use the English catalog; product translations were not changed. The invoked frontend test command ran all 161 unit tests in 41 files in about three seconds, all passing. Source structure/language and documentation/security-traceability checks passed. No unrelated whole-product API, backup/restore or browser workflow regression was repeated.
 
 ASVS 1.3.3 is now Passed for the completed dangerous-context limits. ASVS 1.3.6 remains In progress because non-HTTP SMTP/AD/LDAP configured server, DNS/port and referral boundaries still need their own dynamic cases. ASVS 1.4.2 remains open for aggregate totals, date bounds and version/counter increments. Findings SV-065 (HTTP boundary) and SV-066 (typed metadata handling) are closed for the retested scope; the remaining transport work stays on the same matrix row. No retention/deletion behavior changed.
+
+
+## Non-HTTP service transport continuation — 2026-10-04
+
+Continues ASVS 1.3.6 in requirement order, using the maintained directory/AD laboratories and foundation harness. Baseline `e9b8314` accepted 34 of 36 malformed/reserved SMTP/LDAP/AD server updates with 204; only the two directory newline cases were already rejected. These were configuration-only tests: no cloud metadata request or credential exfiltration was attempted. Final validation rejects all 36 with 400, preserves complete saved configuration snapshots, rejects eight invalid-port and eight invalid-protocol cases, and makes no SMTP connection while validating updates (SV-067).
+
+Shared service-destination preparation validates server syntax, rejects special/reserved literal and DNS addresses, and bounds DNS preflight to ten seconds. SMTP test and queued delivery reuse one preparation helper, retaining the existing queue and audit mechanisms. Explicit private relays/directories remain supported. Native SmtpClient/libldap resolve the name again; this is not socket pinning. SV-068 remains open pending deployment egress enforcement/verification. ASVS 1.3.6 remains incomplete, with this concrete residual finding rather than a passing claim.
+
+The first real StartTLS case returned 502 although a direct trusted-CA `ldapsearch -ZZ` succeeded against the same server. Linux initializes the native destination when connecting, later than the original StartTLS call. The correction establishes a credential-free RootDSE request with AutoBind disabled, negotiates TLS and only then binds credentials; failed preparation disposes the connection (SV-069). This behavior follows the [.NET native target initialization](https://github.com/dotnet/runtime/blob/v10.0.0/src/libraries/System.DirectoryServices.Protocols/src/System/DirectoryServices/Protocols/ldap/LdapConnection.Linux.cs) and [StartTLS implementation](https://github.com/dotnet/runtime/blob/v10.0.0/src/libraries/System.DirectoryServices.Protocols/src/System/DirectoryServices/Protocols/ldap/LdapSessionOptions.cs), with actual container tests as the acceptance evidence.
+
+The initial referral-only provider probe returned 204 with zero referral-canary connections: existing disabled referral chasing worked, but the probe ignored the incomplete search result. Probes now require a complete base entry; lifecycle lookup treats references as unavailable rather than missing (SV-070). The lifecycle negative moves the local account outside the search base, supplies a referral and synchronizes three times: access remains enabled, no receiver is contacted, and subsequent true-missing confirmation begins at its first count after the referral is removed.
+
+Executed scoped commands use `FYLKREN_E2E_API_IMAGE=fylkren-asvs-services-api:latest` and `FYLKREN_E2E_WEB_IMAGE=fylkren-automatic-lifecycle-web:latest`:
+
+```sh
+dotnet run --project tests/foundations/Fylkren.FoundationTests.csproj -- --service-transports-only
+node tools/run-identity-directory-lab.mjs --transport-only --no-build
+node tools/run-identity-directory-lab.mjs --starttls --no-build
+node tools/run-identity-ad-lab.mjs --no-build
+pnpm check:docs
+pnpm check:structure
+pnpm check:version
+```
+
+The transport slice passed explicit SMTP relay delivery to a recipient-domain-independent target, real delivery from the existing notification worker, rejection of required StartTLS against a plaintext-only relay, and a stalled relay rejected with 502 after 10,035 ms. Trusted LDAPS and StartTLS passed; wrong certificate name, NXDOMAIN and wrong protocol/port failed with 502. The reachable referral canary remained at zero after its reachability control was reset. Foundation tests cover literal/mapped metadata targets, named metadata and mixed DNS preflight, explicit private targets and refusal before native client preparation. They do not simulate or prove protection against native DNS rebinding.
+
+The API image contains the final changed sources; the reused web image supplies unchanged login/gateway behavior. This is affected-transport verification, not a matched full release-candidate qualification. Final image IDs, source/test/log hashes and observed summaries are frozen in `serviceTransportContinuation` in the [existing evidence manifest](2026-10-02-release-regression-evidence.json). Raw synthetic diagnostic logs stay outside Git. Initial fixture errors were an unsupported recipient domain, receiver termination on an intentional socket reset and referral cleanup without ManageDsaIT; corrected fixtures were rerun before recording passing results. No unrelated browser, federation, recovery or whole-product suite was repeated.

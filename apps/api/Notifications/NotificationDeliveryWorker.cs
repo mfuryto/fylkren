@@ -1,3 +1,4 @@
+using Fylkren.Api.Networking;
 using System.Net;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
@@ -58,7 +59,7 @@ public sealed class NotificationDeliveryWorker(
             await db.Entry(message).ReloadAsync(ct);
             try
             {
-                using var client = CreateSmtpClient(smtp, protector);
+                using var client = SmtpTransport.Create(smtp, protector, scope.ServiceProvider.GetRequiredService<ServiceDestinationPolicy>());
                 using var mail = new MailMessage(
                     new MailAddress(smtp.FromAddress,
                         MailHeaderPolicy.Normalize($"{smtp.FromName} – {message.FromName}", 400)),
@@ -85,29 +86,6 @@ public sealed class NotificationDeliveryWorker(
         {
             await db.SaveChangesAsync(ct);
         }
-    }
-
-    private static SmtpClient CreateSmtpClient(SmtpSettings smtp, IDataProtector protector)
-    {
-        var client = new SmtpClient(smtp.Host, smtp.Port)
-        {
-            EnableSsl = smtp.Security == "starttls",
-            Timeout = 10000
-        };
-        if (smtp.Username == null)
-        {
-            return client;
-        }
-
-        if (smtp.ProtectedPassword == null)
-        {
-            client.Dispose();
-            throw new InvalidOperationException("SMTP password missing");
-        }
-
-        client.Credentials = new NetworkCredential(
-            smtp.Username, protector.Unprotect(smtp.ProtectedPassword));
-        return client;
     }
 
     private static string DeliveryFailure(Exception exception)

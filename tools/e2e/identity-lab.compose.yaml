@@ -51,4 +51,19 @@ services:
       retries: 30
       start_period: 10s
     networks:
-      - backend
+      backend:
+        aliases: [ldap-wrong-name]
+
+  transport-sink:
+    image: node:24-alpine
+    command: ["node", "tools/e2e/smtp-sink.mjs", "0.0.0.0", "2525", "2526", "0.0.0.0"]
+    environment:
+      FYLKREN_SMTP_CANARY_PORT: "1389"
+      FYLKREN_SMTP_STALL_PORT: "2527"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    volumes:
+      - ./:/work:ro
+    working_dir: /work
+    networks: [backend]

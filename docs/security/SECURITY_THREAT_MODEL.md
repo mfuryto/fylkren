@@ -45,6 +45,8 @@ SAML metadata is downloaded and parsed with explicit byte/XML/expiry limits befo
 
 This boundary does not govern SMTP/AD/LDAP sockets. Their configured server/port/DNS/referral controls remain the explicit incomplete scope of ASVS 1.3.6. External provider outages must reject sign-in while preserving existing local administrative access; no new event, audit or notification store is introduced.
 
+SMTP and AD/LDAP destinations are explicit Platform Manager configuration: host/IP and separate port, not a URL or user-selected recipient-domain endpoint. Shared syntax/special-address validation and bounded DNS preflight apply to client preparation; LDAP retains disabled referral chasing and required TLS. Native clients perform another DNS lookup, so checked-IP pinning is not established for these transports. Restricted deployment egress remains an open qualification dependency (SV-068). StartTLS binds only after TLS, and directory referral responses are unavailable rather than authoritative missing-account evidence. See the same [deployment notes](../operations/INSTALLATION_AND_UPGRADES.md#outbound-integration-configuration).
+
 ## Actors and assumptions
 
 Threat actors include anonymous users; authenticated users attempting horizontal or vertical escalation; privileged roles acting outside assigned authority; holders of leaked sessions or credentials; compromised or misconfigured identity, mail, or proxy systems; host, volume, backup, or database operators; and accidental misuse such as a wrong recipient or stale identity link.

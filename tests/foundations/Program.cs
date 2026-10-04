@@ -6,6 +6,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
+if (args.Contains("--service-transports-only"))
+{
+    await ServiceTransportTests.Run();
+    return;
+}
 if (args.Contains("--outbound-http-only"))
 {
     await OutboundHttpTests.Run();
@@ -120,6 +125,7 @@ await WorkSliceTests.Run(db);
 await DomainCoverageTests.Run(db);
 await OutboundHttpTests.Run();
 await SamlMetadataTests.Run();
+await ServiceTransportTests.Run();
 await NavigationCountTests.Run(db, false);
 await ExecutionActivityTests.Run(db);
 

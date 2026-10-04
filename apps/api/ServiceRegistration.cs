@@ -42,6 +42,7 @@ internal static class ServiceRegistration
         builder.Services.AddSingleton(fylkrenOptions);
         var outbound = new OutboundHttpPolicy(fylkrenOptions.Outbound.PrivateOrigins, fylkrenOptions.Outbound.AdditionalIdentityOrigins);
         builder.Services.AddSingleton(outbound);
+        builder.Services.AddSingleton<ServiceDestinationPolicy>();
         builder.Services.AddSingleton<SamlMetadataCache>();
         builder.Services.AddSingleton(new LicenseService(builder.Configuration["Fylkren:License:PublicKeySpki"]));
         var technicalLogBuffer = new TechnicalLogBuffer(300);
