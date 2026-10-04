@@ -23,7 +23,7 @@ TOTP secrets are protected with the persistent ASP.NET Data Protection key ring.
 
 WebAuthn stores public credentials and counters; private keys remain on the authenticator. Challenges are short-lived, purpose-bound, and single-use.
 
-MFA is enabled by default. `FYLKREN_MFA_ENABLED=false` hides and disables TOTP, passkeys, security keys, and WebAuthn endpoints without deleting existing credentials. This requires a documented risk decision and compensating controls. Network placement alone is not equivalent to strong authentication.
+MFA capabilities are enabled by default, but enrollment is currently voluntary and Fylkren does not yet enforce a second factor for every account or validate equivalent strength from every external provider (SV-094). `FYLKREN_MFA_ENABLED=false` hides and disables TOTP, passkeys, security keys, and WebAuthn endpoints without deleting existing credentials. This requires a documented risk decision and compensating controls. Network placement alone is not equivalent to strong authentication.
 
 ## Sessions and browser security
 

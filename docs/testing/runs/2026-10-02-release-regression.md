@@ -1169,3 +1169,17 @@ FYLKREN_E2E_API_IMAGE=sha256:a988e8e706d10ea77b77957b56299a3253ee51192640f064127
 The source/document lock reports `{"authenticationControlDocumentation":"passed","addressPermitLimit":8,"addressWindowSeconds":60,"identityFailureLimit":20,"identityLockMinutes":15,"documentedLockoutAbuseMitigation":true,"trustedClientAddressReplacement":true,"directorySignInRateLimited":true,"authenticatedReauthenticationRoutesCovered":2,"webauthnRoutesCovered":5}`. The current-image run sends a different hostile `X-Fylkren-Gateway-Client-IP` and `X-Forwarded-For` on every request. Both local and AD/LDAP sign-in still permit eight generic 401 responses and reject attempt nine, proving the owned gateway's client-address replacement prevents caller partition bypass: `{"authenticationAttackBoundary":"passed","permitLimit":8,"localSignInLimited":true,"directorySignInLimited":true,"spoofedClientAddressHeadersIgnored":true,"numericRetryAfter":true,"genericNonCacheableFailures":true}`.
 
 The maintained SQL authentication case remains the account-wide distributed-guessing boundary: three concurrent client instances atomically saturate at 20, a correct password remains rejected while locked, an exhausted synthetic count cannot overflow, and a correct post-expiry login succeeds and clears the count. The release evidence manifest records `{"sqlAuthenticationCounter":"passed","postExpiryLoginAccepted":true}`; the maintained test contains the explicit saturation, concurrency and locked-password assertions. No correction or finding was required. Production is untouched.
+
+## MFA enforcement assessment — 2026-10-04
+
+Assesses ASVS 6.3.3 as Finding SV-094. Fylkren enables the MFA capability by default and has maintained TOTP/recovery and user-verifying WebAuthn attack tests, but it does not require enrollment. The local sign-in path requests a second factor only when the specific identity already has TOTP enabled. External AD/LDAP and OIDC/SAML strength remains provider-defined and is not verified or elevated by an application policy.
+
+Scoped command:
+
+```sh
+FYLKREN_E2E_API_IMAGE=sha256:a988e8e706d10ea77b77957b56299a3253ee51192640f0641275d3de25cd1acb FYLKREN_E2E_WEB_IMAGE=sha256:125e3c8e99cd6bb7034333f32915afd0c7c1a35142aea8f182c093ab090cc8d0 node tools/run-e2e-editions.mjs --asvs-mfa-enforcement-only --no-build
+```
+
+The disposable run explicitly enables the deployment MFA feature, creates an unenrolled local Platform Manager, signs out and authenticates again with the password alone. The server returns a full session and reports that the identity has no second factor: `{"mfaEnforcementAssessment":"finding","finding":"SV-094","deploymentMfaFeatureEnabled":true,"unenrolledPasswordOnlySession":true,"enforcedSecondFactor":false}`. This is not closed by the existing password policy, client limiter, account lockout, optional TOTP or optional passkey controls.
+
+Remediation requires a product policy for mandatory strength across local and external pathways, a restricted enrollment state that cannot grant operational access, recovery/bootstrap and break-glass behavior, migration of existing accounts and provider-claim verification wherever external MFA is claimed. No speculative enforcement was added because an incomplete rule could lock out administrators or silently weaken another authentication path. Production is untouched.
