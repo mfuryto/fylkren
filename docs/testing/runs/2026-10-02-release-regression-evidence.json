@@ -4833,5 +4833,26 @@
     "finding": "SV-091 closed after full raster decode/re-encoding and current-image retest",
     "matrix": "ASVS 5.2.2 Passed; continue at applicable 5.2.3",
     "scope": "All current direct and portable-package file extension/media/content boundaries; antivirus and decompression-specific execution remain separate"
+  },
+    "compressedPackageExpansionCompletion": {
+    "date": "2026-10-04",
+    "baseline": "212501e",
+    "sourceHashes": {
+      "apps/api/Portability/PortableImportValidator.cs": "0bd116065f0d05532145b2004e19b69f69f0820703521f3c9c1e4930f05f18b9",
+      "apps/api/Portability/PortableExportPackage.cs": "f548cd53646b68570a03d300d71047af5e99c7fb5952a3fbcdebfb02998869e5",
+      "tests/foundations/ZipLengthBoundaryTests.cs": "2737572b60309a963c04c9b4c34e6a32b541bbec952b00a9306fb9c486388e14",
+      "tests/foundations/Program.cs": "b23df31142cbb4c6f56f2dddd70263065897fdec4103d51a137ff23305e36e63"
+    },
+    "results": {
+      "maximumEntries": 250,
+      "entryCountBoundaryCases": 2,
+      "maximumUncompressedMiB": 16,
+      "highCompressionBoundaryCases": 2,
+      "zip64BoundaryCases": 5,
+      "checksBeforeEntryOpen": true
+    },
+    "finding": "No control defect; existing pre-open limits received criterion-specific execution evidence",
+    "matrix": "ASVS 5.2.3 Passed; continue at 5.3.1",
+    "scope": "Current portable ZIP entry count and declared uncompressed-size processing; antivirus and future archive formats remain separate"
   }
 }

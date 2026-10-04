@@ -22,7 +22,24 @@ internal static class ZipLengthBoundaryTests
             if (result.Valid || !result.Errors.Any(e => e.Contains(oversized ? "16 MiB" : "missing manifest")))
                 throw new Exception("ZIP64 size boundary returned the wrong validation result.");
         }
-        Console.WriteLine("ZIP64 boundary tests passed: tiny fixtures expose real declared lengths; overflow, unsigned maximum and aggregate size reject before extraction; exact limit and zero proceed to manifest validation.");
+        var exactCount = await PortableImportValidator.Validate(new MemoryStream(CountFixture(250)), Guid.NewGuid(), default);
+        if (exactCount.Valid || !exactCount.Errors.Any(error => error.Contains("missing manifest")))
+            throw new Exception("The exact 250-entry boundary did not proceed to manifest validation.");
+        var excessiveCount = await PortableImportValidator.Validate(new MemoryStream(CountFixture(251)), Guid.NewGuid(), default);
+        if (excessiveCount.Valid || !excessiveCount.Errors.Any(error => error.Contains("more than 250 files")))
+            throw new Exception("A package above the 250-entry boundary was not rejected.");
+
+        var exactCompressed = HighlyCompressed((int)maximum);
+        if (exactCompressed.Length >= 64 * 1024) throw new Exception("The compression-ratio fixture is not meaningfully compressed.");
+        var exactCompressedResult = await PortableImportValidator.Validate(new MemoryStream(exactCompressed), Guid.NewGuid(), default);
+        if (exactCompressedResult.Valid || !exactCompressedResult.Errors.Any(error => error.Contains("invalid JSON")))
+            throw new Exception("The exact uncompressed-size boundary did not proceed to bounded content validation.");
+        var excessiveCompressedResult = await PortableImportValidator.Validate(
+            new MemoryStream(HighlyCompressed((int)maximum + 1)), Guid.NewGuid(), default);
+        if (excessiveCompressedResult.Valid || !excessiveCompressedResult.Errors.Any(error => error.Contains("16 MiB")))
+            throw new Exception("A highly compressed package above the uncompressed-size boundary was not rejected before content validation.");
+
+        Console.WriteLine("ZIP boundary tests passed: ZIP64 overflow/unsigned/aggregate lengths, 250/251 entries and highly compressed exact/over-limit content are bounded before entry processing.");
     }
 
     private static byte[] Fixture(ulong[] sizes)
@@ -55,5 +72,26 @@ internal static class ZipLengthBoundaryTests
     private static void Extra(BinaryWriter writer, ulong size)
     {
         writer.Write((ushort)1); writer.Write((ushort)8); writer.Write(size);
+    }
+
+    private static byte[] CountFixture(int count)
+    {
+        using var buffer = new MemoryStream();
+        using (var archive = new ZipArchive(buffer, ZipArchiveMode.Create, true))
+            for (var index = 0; index < count; index++) archive.CreateEntry($"empty-{index:D3}");
+        return buffer.ToArray();
+    }
+
+    private static byte[] HighlyCompressed(int uncompressedBytes)
+    {
+        using var buffer = new MemoryStream();
+        using (var archive = new ZipArchive(buffer, ZipArchiveMode.Create, true))
+        {
+            using var output = archive.CreateEntry("manifest.json", CompressionLevel.SmallestSize).Open();
+            var zeros = new byte[64 * 1024];
+            for (var remaining = uncompressedBytes; remaining > 0; remaining -= Math.Min(remaining, zeros.Length))
+                output.Write(zeros, 0, Math.Min(remaining, zeros.Length));
+        }
+        return buffer.ToArray();
     }
 }

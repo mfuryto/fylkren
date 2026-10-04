@@ -883,3 +883,17 @@ trivy image --scanners vuln --severity CRITICAL,HIGH --ignore-unfixed --exit-cod
 The foundation test passes PNG, JPEG and WebP decoding/re-encoding and rejects extension/media mismatches, truncation, active text, excessive dimensions and one byte over the size boundary; an exact 2 MiB raster with trailing active content is accepted only after the marker is removed by re-encoding. The current-image package run accepts an unchanged generated Site package and rejects two outer ZIP extension/media mismatches plus dataset type, attachment type, attachment extension and signature-only attachment mismatches. Result: `{"portableFileContent":"passed","outerPackageTypeRejections":2,"rejectedInternalTypeCases":4,"decodedAttachmentTypes":["png","jpeg","webp"]}`. The affected exact image/package size regression remains green.
 
 SkiaSharp 4.153.1 and its Linux native assets are MIT licensed and recorded in the third-party notices. Runtime-specific publishing keeps only the current Linux architecture and supports Docker `amd64` and `arm64`; the final image is 108,839,988 bytes versus 107,994,693 bytes before the decoder. NuGet reported no known vulnerable packages from its current sources. Trivy's refreshed database reported zero Critical/High findings in the Ubuntu and .NET targets. The final API image is `sha256:26d095f69ca561ada71afd0dae7d2368cce1c27c2ea4f7388aa1792b7eb9bc5e`; the reused gateway is `sha256:1c81106369690b928da8acd2f0a19b19ff3f504d9ed39315c3a03dcceb75e7ee`. SV-091 is closed. Production is untouched.
+
+## Compressed package expansion boundaries — 2026-10-04
+
+Completes ASVS 5.2.3. Portable ZIP is Fylkren's only accepted compressed input. Source review confirms that immediately after `ZipArchive` parses the central directory, the validator checks the 250-entry ceiling and accumulates every declared uncompressed length under the 16 MiB ceiling before the first entry `Open()` call. The accumulation subtracts from the remaining bound before addition, so signed/unsigned ZIP64 extremes cannot wrap the total.
+
+Scoped command:
+
+```sh
+dotnet run --project tests/foundations/Fylkren.FoundationTests.csproj --no-restore -- --zip-length-only
+```
+
+The focused test passes exact 250-entry and 16 MiB cases into manifest/content validation, rejects 251 entries and 16 MiB plus one byte, and rejects signed-long, unsigned-maximum and two-entry aggregate ZIP64 declarations using fixtures smaller than 512 bytes. An actual deflated 16 MiB zero-filled `manifest.json` occupies less than 64 KiB and reaches bounded JSON validation; the same high-ratio fixture one byte above the limit is rejected by declared uncompressed size. Result: `ZIP boundary tests passed: ZIP64 overflow/unsigned/aggregate lengths, 250/251 entries and highly compressed exact/over-limit content are bounded before entry processing.`
+
+No product correction or new finding was required. This evidence tests the maintained API validator directly and does not claim antivirus scanning, import/apply behavior or arbitrary future archive formats. Production is untouched.

@@ -12,7 +12,7 @@ This is the canonical inventory for files selected, uploaded, generated or downl
 | Enterprise licence selection | Platform Manager browser file control; the file itself is not sent as multipart | JSON (`.json`, `application/json`) with string `payload` and `signature` | 32,000 bytes in the browser | Not compressed | The browser parses the selected file and sends only the two strings as JSON. The server verifies the signed licence, instance binding, validity and supported claims. Invalid content does not activate entitlements. |
 | Export custody confirmation | Archive browser file control; the file itself is not sent to the server | Fylkren ZIP (`.zip`, `application/zip`) matching a recorded export receipt | 16 MiB and exactly the receipt byte count | Not opened or unpacked | The browser calculates SHA-256 and sends only the digest, receipt version and reason. A size/digest mismatch is rejected before the acknowledgement request. This confirms custody; it does not validate or import the package. |
 
-Browser `accept` filters guide file selection but are not security controls. Server-side rules above are authoritative. ASVS 5.2.2 verifies these extension, declared-type and decoded-content boundaries; archive expansion limits remain separate under 5.2.3.
+Browser `accept` filters guide file selection but are not security controls. Server-side rules above are authoritative. ASVS 5.2.2 verifies extension, declared-type and decoded-content boundaries; ASVS 5.2.3 verifies archive entry and expansion limits before content is opened.
 
 ## Generated and stored downloads
 
@@ -28,6 +28,6 @@ Print-to-PDF is performed by the user's browser and is not a server file upload 
 
 Fylkren fully decodes and re-encodes supported raster uploads, rejects disguised or malformed content and never stores a client-controlled filename or executable path. Re-encoding strips metadata, extra frames and trailing content. Fylkren does not run an antivirus engine; downstream controls remain relevant for exported ZIP packages and any future general attachment feature.
 
-Portable validation treats the entire ZIP as untrusted structured input. It bounds and verifies it without filesystem extraction and does not make its files downloadable through Fylkren. Validation is not antivirus scanning and is not an import/apply operation. Dataset and attachment descriptors are checked for owner, path, extension, declared media type, length, SHA-256 and structured/decoded content. ASVS 5.2.3 and 5.4.3 remain open until their own execution evidence is complete.
+Portable validation treats the entire ZIP as untrusted structured input. It bounds entry count and total declared uncompressed size before opening content, verifies the package without filesystem extraction and does not make its files downloadable through Fylkren. Validation is not antivirus scanning and is not an import/apply operation. Dataset and attachment descriptors are checked for owner, path, extension, declared media type, length, SHA-256 and structured/decoded content. ASVS 5.4.3 remains open for its own malware-control assessment.
 
 If a future feature accepts operational attachments, enables package application, serves package entries, adds a file type, changes a size limit or introduces HTTP/2/3 upload paths, update this inventory and reopen the affected ASVS rows before release.
