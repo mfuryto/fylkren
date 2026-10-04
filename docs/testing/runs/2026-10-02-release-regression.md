@@ -595,3 +595,19 @@ FYLKREN_E2E_API_IMAGE=fylkren-asvs-body-complete-api:latest FYLKREN_E2E_WEB_IMAG
 It rejected three invalid dependency relationships, a conflicting local recipient pair, three incomplete/out-of-range residual risk pairs and two invalid decision relationships. Rejected commands left dependency graphs, risk lists and decision history unchanged, while valid related values persisted. Maintained dependency, transition, administration, federation and portability tests provide the remaining category evidence, including hierarchy/period conflicts, sender/recipient identity and replay relationships, and cross-Site/package integrity.
 
 ASVS 2.2.3 is Passed. The focused result and maintained source hashes are recorded under `relatedDataValidationCompletion` in the existing evidence manifest. This does not pass sequence enforcement under 2.3.1 or complete release qualification. Production is untouched.
+
+## Business-flow sequence enforcement — 2026-10-04
+
+Completes ASVS 2.3.1. The sequence inventory covers local authentication reset and MFA grants; WorkItem review, planning, routing, execution and final reporting; reversible lifecycle stage/version/hold/custody transitions; machine-request idempotency/version checks; and federated sender, receiver, message-sequence and replay state. Domain objects remain authoritative, and every reviewed sequence is enforced in the API/domain layer rather than by the browser.
+
+The focused raw-API command was:
+
+```sh
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-body-complete-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-asvs-header-file-web:latest node tools/run-e2e-editions.mjs --asvs-sequence-only --no-build
+```
+
+It rejects six direct WorkItem status skips and confirms rejected transitions leave the item registered. It also rejects final-report write and approval before review, execution submission before start, starting the same execution twice, completion before a saved and approved report, approval without a report, duplicate approval and reopening a completed task. The valid registered → under review → execution → claimed → started → submitted for review → report saved → report approved → completed sequence passes.
+
+Maintained transition and dependency suites cover plan claim/submit/approve/release, hold/reopen, blocked work, report return, reassignment and cancellation. Maintained identity, lifecycle and federation suites cover their sequence-specific grants, versions, replay barriers and terminal states. The focused test result is `{"businessFlowSequence":"passed","rejectedStatusSkips":6,"prematureReportActionsRejected":4,"executionOrderRejections":2,"duplicateApprovalRejected":true,"terminalReopenRejected":true}`.
+
+ASVS 2.3.1 is Passed. Safe hashes and the unchanged candidate image IDs are recorded under `businessFlowSequenceCompletion` in the existing evidence manifest. This result does not pass business-limit enforcement under 2.3.2, concurrency/atomicity requirements or complete release qualification. Production is untouched.

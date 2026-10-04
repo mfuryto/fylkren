@@ -4317,5 +4317,29 @@
     },
     "matrix": "ASVS 2.2.3 Passed; continue at 2.3.1",
     "scope": "Related-data combinations across the completed request inventory; no business-flow sequence or release qualification"
+  },
+  "businessFlowSequenceCompletion": {
+    "date": "2026-10-04",
+    "baseline": "5102e6d",
+    "sourceHashes": {
+      "tools/e2e/encoding-security.mjs": "ca0eef573b7f38619ce17f49306b9a627ff600937d35089e2cd17fa8f3c751a6",
+      "tools/e2e/transition-chains.mjs": "2e42e5a54b374d874411ad7302b5b2d01228a6e8e6eec41fb64eda1d77630fd0",
+      "tools/e2e/dependencies.mjs": "38c338624c5ecb239689e3ade4cb3f2c3404d2f5bb2ce9925dc6fd1b2bfb75b0",
+      "tools/e2e/identity-session-lifecycle.mjs": "61a39140512b74db4c7aa9cb410b79dd43632876c9285b1f73b18acdf75d91d4",
+      "tools/e2e/governance-lifecycle.mjs": "adc3ea2acf640df042fb4e5d423c0ccc42de5008bb9034b1743737ad8dea3c41",
+      "tools/run-federation-pair.mjs": "a556694d142677e6d0ba3c9b44f2db5d1f2f096d5ef94e96984f0d83a6d22007"
+    },
+    "apiImage": "sha256:9bbfe923bfc4d302051eec8cfffa47f94e0a64da30fcbc1d66439828bcb076d2",
+    "webImage": "sha256:2806135f53e64aaa7c63bcf2ff2e75933bb963361a42243bff84e2b512ae38e7",
+    "results": {
+      "businessFlowSequence": "passed",
+      "rejectedStatusSkips": 6,
+      "prematureReportActionsRejected": 4,
+      "executionOrderRejections": 2,
+      "duplicateApprovalRejected": true,
+      "terminalReopenRejected": true
+    },
+    "matrix": "ASVS 2.3.1 Passed; continue at 2.3.2",
+    "scope": "Expected same-user sequence across business-flow families; no business-limit, concurrency or release qualification"
   }
 }

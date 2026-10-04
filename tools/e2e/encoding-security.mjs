@@ -226,6 +226,78 @@ export async function testHeaderFileInputValidation({ platform, siteManager, sit
     oversizedImageRejected: true, endpointSpecificPackageLimitReached: true };
 }
 
+export async function testBusinessFlowSequence({ leader, siteId, unitId, workItemTypeId }) {
+  const root = `/api/work/sites/${siteId}/items`;
+  const created = await leader.post(root, {
+    title: 'Synthetic business-flow sequence task', description: 'ASVS 2.3.1 sequence verification',
+    recommendation: null, referenceUrl: null, assignedUnitId: unitId, workItemTypeId, dueAt: null,
+  });
+  assert.equal(created.status, 201, JSON.stringify(created.body));
+  const itemId = created.body.id;
+  const itemPath = `${root}/${itemId}`;
+  const status = (next, priority = null) => leader.put(`${itemPath}/status`, {
+    status: next, assignedUnitId: null, decisionNote: null, priority,
+  });
+  const overviewItem = async () => {
+    const response = await leader.request(`${root}/overview`);
+    assert.equal(response.status, 200);
+    const item = response.body.find(value => value.id === itemId);
+    assert.ok(item, 'Sequence test task disappeared from the overview');
+    return item;
+  };
+
+  let rejectedStatusSkips = 0;
+  for (const next of ['planning', 'execution', 'in_review', 'completed']) {
+    assert.equal((await status(next)).status, 409, `Registered task skipped directly to ${next}`);
+    rejectedStatusSkips++;
+  }
+  assert.equal((await overviewItem()).status, 'registered', 'Rejected status skips changed task state');
+  assert.equal((await leader.put(`${itemPath}/final-report`, {
+    content: 'Premature final report', classification: null,
+  })).status, 409, 'Final report was writable before review');
+  assert.equal((await leader.post(`${itemPath}/final-report/approve`, {})).status, 409,
+    'Final report approval was accepted before review');
+
+  assert.equal((await status('under_review', 'normal')).status, 204);
+  for (const next of ['in_review', 'completed']) {
+    assert.equal((await status(next)).status, 409, `Reviewed task skipped directly to ${next}`);
+    rejectedStatusSkips++;
+  }
+  assert.equal((await status('execution')).status, 204);
+  assert.equal((await leader.post(`/api/execution/items/${itemId}/claim`, {})).status, 204);
+  const queue = await leader.request(`/api/execution/sites/${siteId}`);
+  assert.equal(queue.status, 200, JSON.stringify(queue.body));
+  const item = queue.body.items.find(value => value.id === itemId);
+  const definition = queue.body.definitions.find(value => value.name === 'Standard') ?? queue.body.definitions[0];
+  assert.ok(item?.run?.id, 'Claimed execution run missing');
+  assert.ok(definition?.id, 'Active execution definition missing');
+  const runPath = `/api/execution/${item.run.id}`;
+  assert.equal((await leader.post(`${runPath}/submit`, {})).status, 403,
+    'Execution was submitted before its workflow started');
+  assert.equal((await leader.post(`${runPath}/start`, { definitionId: definition.id })).status, 204);
+  assert.equal((await leader.post(`${runPath}/start`, { definitionId: definition.id })).status, 403,
+    'Execution workflow was started twice');
+  assert.equal((await leader.post(`${runPath}/submit`, {})).status, 204);
+
+  assert.equal((await status('completed')).status, 409, 'Task completed without a final report');
+  assert.equal((await leader.post(`${itemPath}/final-report/approve`, {})).status, 409,
+    'Missing final report was approved');
+  assert.equal((await leader.put(`${itemPath}/final-report`, {
+    content: '# Summary\n\nASVS 2.3.1 sequence verified.', classification: null,
+  })).status, 204);
+  assert.equal((await status('completed')).status, 409, 'Task completed before final-report approval');
+  assert.equal((await leader.post(`${itemPath}/final-report/approve`, {})).status, 204);
+  assert.equal((await leader.post(`${itemPath}/final-report/approve`, {})).status, 409,
+    'The same final-report version was approved twice');
+  assert.equal((await status('completed')).status, 204);
+  assert.equal((await status('under_review')).status, 409, 'Completed task was reopened through the status API');
+  assert.equal((await overviewItem()).status, 'completed');
+
+  return { businessFlowSequence: 'passed', rejectedStatusSkips,
+    prematureReportActionsRejected: 4, executionOrderRejections: 2,
+    duplicateApprovalRejected: true, terminalReopenRejected: true };
+}
+
 export async function testDerivedArithmeticBoundaries({ platform, siteManager, leader, siteId, unitId, workItemTypeId }) {
   const path = `/api/site-audit/sites/${siteId}`;
   const original = await siteManager.request(path);
