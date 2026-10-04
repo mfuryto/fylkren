@@ -581,3 +581,17 @@ Completes ASVS 2.2.2 by reviewing where the validations established under 2.2.1 
 The negative test clients construct raw JSON, query strings, headers and multipart bodies and call the gateway/API directly. They do not render or submit React forms. The current focused body and header/file runs therefore demonstrate rejection with client-side validation completely bypassed. The capability test calls the trusted protocol validator directly. No additional product change or broad rerun was needed for this distinct architecture placement check.
 
 ASVS 2.2.2 is Passed. This conclusion is limited to the completed 2.2.1 input inventory and does not pass related-data combinations under 2.2.3 or complete release qualification. Source hashes and reused current-candidate results are recorded under `trustedServiceValidationCompletion` in the existing evidence manifest. Production is untouched.
+
+## Related-data combination validation — 2026-10-04
+
+Completes ASVS 2.2.3. The related-field inventory followed the same 106 request/payload contracts and grouped the rules that only make sense together: identity names/passwords; hierarchy placement and exclusive leadership; role time periods and overlap; recipient/site/instance selection; workflow step/unit allocation; dependency graphs; initial/residual risk pairs and ownership; decision actors/references; federation identity, sequence and message relationships; lifecycle stage/version/hold/custody; and portable package identifiers, relationships, versions and hashes.
+
+The current focused command was:
+
+```sh
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-body-complete-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-asvs-header-file-web:latest node tools/run-e2e-editions.mjs --asvs-context-only --no-build
+```
+
+It rejected three invalid dependency relationships, a conflicting local recipient pair, three incomplete/out-of-range residual risk pairs and two invalid decision relationships. Rejected commands left dependency graphs, risk lists and decision history unchanged, while valid related values persisted. Maintained dependency, transition, administration, federation and portability tests provide the remaining category evidence, including hierarchy/period conflicts, sender/recipient identity and replay relationships, and cross-Site/package integrity.
+
+ASVS 2.2.3 is Passed. The focused result and maintained source hashes are recorded under `relatedDataValidationCompletion` in the existing evidence manifest. This does not pass sequence enforcement under 2.3.1 or complete release qualification. Production is untouched.

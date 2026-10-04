@@ -4294,5 +4294,28 @@
     },
     "matrix": "ASVS 2.2.2 Passed; continue at 2.2.3",
     "scope": "Placement of validation for the completed 2.2.1 inventory; no related-data or release qualification"
+  },
+  "relatedDataValidationCompletion": {
+    "date": "2026-10-04",
+    "baseline": "91fbcbd",
+    "sourceHashes": {
+      "tools/e2e/encoding-security.mjs": "2add4e154d4685382e7ad58266b0e3f3e7f69fcf668ed80cc04be80c4799a826",
+      "tools/e2e/dependencies.mjs": "38c338624c5ecb239689e3ade4cb3f2c3404d2f5bb2ce9925dc6fd1b2bfb75b0",
+      "tools/e2e/transition-chains.mjs": "2e42e5a54b374d874411ad7302b5b2d01228a6e8e6eec41fb64eda1d77630fd0",
+      "tools/e2e/portability.mjs": "eac8cc9ea9f32e81f104fec061fd57c0e431cb57fb4cb6d9c2964384575e9f56",
+      "tools/e2e/administration-report-apis.mjs": "5cf7e57ba50ca70735dc2b49302859d21919978f9e950b39715715e030a44598"
+    },
+    "apiImage": "sha256:9bbfe923bfc4d302051eec8cfffa47f94e0a64da30fcbc1d66439828bcb076d2",
+    "webImage": "sha256:2806135f53e64aaa7c63bcf2ff2e75933bb963361a42243bff84e2b512ae38e7",
+    "results": {
+      "contextualInputRules": "passed",
+      "dependencyRelationshipRejections": 3,
+      "conflictingRecipientRejected": true,
+      "residualPairRejections": 3,
+      "decisionRelationshipRejections": 2,
+      "rejectedCommandsAtomic": true
+    },
+    "matrix": "ASVS 2.2.3 Passed; continue at 2.3.1",
+    "scope": "Related-data combinations across the completed request inventory; no business-flow sequence or release qualification"
   }
 }
