@@ -1471,3 +1471,17 @@ node tools/test-federated-reauthentication-assessment.mjs
 ```
 
 The capability inventory reports `{"federatedReauthenticationAssessment":"finding","finding":"SV-097","localAbsoluteHours":12,"oidcMaxAgeRequested":false,"oidcAuthTimeVerified":false,"samlForcedReauthentication":false,"coordinatedProviderLogout":false,"documentedBoundary":true,"signedProviderFlowsPreviouslyExercised":true}`. Existing live Keycloak OIDC/SAML tests prove signed provider pathways, state, issuer/entity, nonce/audience and replay boundaries but do not prove authentication recentness. Passing documentation under 7.1.3 did not imply this behavioral requirement passed. Production is untouched.
+
+## Federated session creation action — 2026-10-04
+
+Completes ASVS 7.6.2 and closes SV-098. Direct OIDC/SAML mode previously navigated to the provider from a React effect as soon as an unauthenticated browser opened Fylkren. A retained upstream session could consequently complete the protected callback and create a local session without an explicit action in Fylkren. Direct mode now presents only the configured single-sign-on pathway and requires a button press before its challenge starts. Ordinary SSO, local password, passkey and first-run setup likewise require an explicit click or form submission.
+
+Scoped commands:
+
+```sh
+node tools/test-federated-session-creation-action.mjs
+pnpm --filter @fylkren/web typecheck
+pnpm --filter @fylkren/web test
+```
+
+The source/composition control reports `{"federatedSessionCreationAction":"passed","automaticProviderNavigation":false,"directSsoRequiresButton":true,"ordinarySsoRequiresAction":true,"localPasswordRequiresSubmit":true,"passkeyRequiresAction":true,"callbackAloneCannotCreateUnlinkedSession":true}`. It rejects effect-driven provider navigation and locks the explicit direct-SSO button, ordinary sign-in form and passkey action. Existing signed OIDC/SAML laboratories remain the callback state/link/signature evidence; SV-097 separately tracks upstream authentication recentness and coordinated termination. Production is untouched.

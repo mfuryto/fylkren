@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type React from "react";
 import type { Branding, LoginConfiguration } from "../app/models";
 import { bootstrapPlatformManager, completePasswordReset, signIn, signInWithPasskey } from "../api/authClient";
@@ -40,10 +40,6 @@ export function LoginPage({
   ];
   const breakGlassLogin = new URLSearchParams(window.location.search).get("local") === "1";
   const automaticSso = configuration.authentication.ssoAutoRedirectProvider;
-  useEffect(()=>{
-    if(!configuration.setupRequired&&automaticSso&&!breakGlassLogin)
-      window.location.replace(`/api/auth/${automaticSso}/login`);
-  },[automaticSso,breakGlassLogin,configuration.setupRequired]);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -126,7 +122,7 @@ export function LoginPage({
     </div>
   );
 
-  if(automaticSso&&!breakGlassLogin)return <div className="product-shell"><main className="login-page"><section className="panel login-panel"><h1>{t("singleSignOn")}</h1><p className="status-message">{t("redirectingToOrganization")}</p></section></main></div>;
+  if(automaticSso&&!breakGlassLogin)return <div className="product-shell"><main className="login-page"><section className="panel login-panel"><h1>{t("singleSignOn")}</h1><p className="muted">{t("signInIntro")}</p><button className="primary-button" type="button" onClick={()=>window.location.assign(`/api/auth/${automaticSso}/login`)}>{t("singleSignOn")}</button></section></main></div>;
 
   return (
     <div className="product-shell">
