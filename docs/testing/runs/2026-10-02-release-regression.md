@@ -1045,3 +1045,16 @@ FYLKREN_E2E_API_IMAGE=sha256:922a2f9dfae305cb99f6fd1cd51f215d91875dff95a0a14644b
 ```
 
 The source lock reports `{"passwordChangeBoundary":"passed","requiresCurrentPassword":true,"requiresNewPassword":true,"verifiesCurrentHash":true,"rejectsReuse":true,"validatesNewPassword":true,"sharedAuthenticationRateLimit":true}`. The current-image run rejects missing current, missing new, incorrect current and identical old/new values, then accepts the valid change. A new client receives 401 with the old password and 204 with the new one: `{"passwordChangeRuntime":"passed","missingCurrentRejected":true,"missingNewRejected":true,"wrongCurrentRejected":true,"reuseRejected":true,"validChangeAccepted":true,"oldPasswordRejected":true,"newPasswordAccepted":true}`. ASVS 6.2.2 remains supported by the earlier identity lifecycle run that exercises user-initiated password change and session invalidation. No correction or finding was required. Production is untouched.
+
+## Common-password blocklist enforcement — 2026-10-04
+
+Completes ASVS 6.2.4. The bundled offline resource contains exactly 3,000 unique sorted SHA-256 fingerprints selected from the pinned SecLists 2026.1 source after filtering to Fylkren's 14–128 character policy. Runtime lookup is local and uses binary search; the generator refuses a changed source checksum.
+
+Scoped commands:
+
+```sh
+node tools/test-password-blocklist-boundary.mjs
+FYLKREN_E2E_API_IMAGE=sha256:922a2f9dfae305cb99f6fd1cd51f215d91875dff95a0a14644bc9fa68364c970 FYLKREN_E2E_WEB_IMAGE=sha256:9383959069230a3fa6e6e8dcdcde35204b594692a37e5cc1c5f7364ca9db51bb node tools/run-e2e-editions.mjs --asvs-password-blocklist-only --no-build
+```
+
+The source test reports `{"passwordBlocklistBoundary":"passed","fingerprints":3000,"fingerprintBytes":32,"sortedUnique":true,"policyCompatibleKnownCases":3,"pinnedSource":true}` and confirms `12345678901234`, `password123456` and `qwertyuiop1234` are present. The current-image run rejects `password123456` during bootstrap, password change and password reset while distinct generated controls succeed: `{"passwordBlocklistRuntime":"passed","rejectedCommonPassword":"password123456","testedFlows":["bootstrap","change","reset"],"validControlsAccepted":true,"resetGrantPreservedAfterBlockedPassword":true}`. No correction or finding was required. Production is untouched.
