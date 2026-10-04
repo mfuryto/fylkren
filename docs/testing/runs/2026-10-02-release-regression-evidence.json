@@ -3286,5 +3286,62 @@
       "Navigation-count sizing remains open; final API workload overlapped separate federation laboratories. No performance fix/equivalence claim.",
       "Unchanged identity-provider laboratories and all historical federation scenarios are not requalified by these runs."
     ]
+  },
+  "executionActivityClarityContinuation": {
+    "recordedAtUtc": "2026-10-04T10:22:50.708296+00:00",
+    "baseRevision": "776b212",
+    "status": "targeted-tests-passed",
+    "sourceSha256": {
+      "apps/api/WorkManagement/ExecutionDocumentEndpoints.cs": "59791b447af2cede0c41ddf31756f476338d840069dd494b628d31c4702e8d96",
+      "apps/api/WorkManagement/ExecutionStepActivity.cs": "dee6997b13e95654ce2bc1061ad75c99f8698528bcf3fdcc99c92af1f2366db8",
+      "apps/api/DomainEvents/ActivityEventCatalog.cs": "ba8c5b79d1c7f54b42ff0a7e7a84e4e297432a2d89144cdaa52c3f00d788051a",
+      "apps/api/DomainEvents/ActivityQueryEndpoints.cs": "363b75a596f49720b8ab4a9b1231b612dc145de4f325597c353b580b750e7989",
+      "apps/api/DomainEvents/ExecutionActivityDetails.cs": "41ccb8535622e881ff5968834dfdd66a2180b6cac88cfff7f3de1090c874e0de",
+      "apps/api/ActivityAudit/SiteAuditEndpoints.cs": "66466ea473b2f1c82470a285f2d8d6c9d2a1ad18a1a14f64670a31b8aab5bfd0",
+      "apps/web/src/components/ActivityTimeline.tsx": "8aea2a59eae95b0b5351a628f44bdcf7c72d2df985c88a5e7f345fa1cbcc3d49",
+      "apps/web/src/components/executionActivityLabel.ts": "3f5b2d9b2434d16811b3c73317093bca5044f41604c1dc229e8667908db49af5",
+      "apps/web/src/audit/SiteAuditPage.tsx": "f82dd90262c3fcf9ad925df19242e8005cce94dbfda4156331bb350ed82b8552",
+      "tests/foundations/ExecutionActivityTests.cs": "d0ff30407261609d970c5a61e311cb331a08602c2f353b09ccb0e8c107c4f7de",
+      "apps/web/src/components/executionActivityLabel.test.tsx": "dc7e3330adea7659db725871db46d989fb11af9de33d763523c5d5964bd76a14"
+    },
+    "logSha256": {
+      "fylkren-execution-activity-test.log": "285c097cf660fda267068c77ec8048f0d2805957da900422b33705d1048ea82b",
+      "fylkren-execution-activity-web-test.log": "29142d71a3c365ec2da5839a0a8204eca650c3e03b953e0df4ac18c4388c9427",
+      "fylkren-execution-activity-typecheck.log": "5cfb036289d819b2a87e947d65f4532031dd37753f3cf2def0f77d398eea1737"
+    },
+    "rawLogsStoredOutsideRepository": true,
+    "database": {
+      "command": "node tools/run-foundation-tests.mjs --execution-activity-only",
+      "provider": "disposable PostgreSQL 18",
+      "passed": true,
+      "assertions": [
+        "three documentation facts and two selections for three steps",
+        "empty/template/repeated/trimmed saves produce no new facts or audit entries",
+        "unchanged/text-only edits preserve timeline IDs",
+        "timeline order/removal remains significant",
+        "step-number/name snapshots exclude private document/timeline text",
+        "independent audit correlation and actual activity page reads",
+        "legacy snapshot fallback and invalid step metadata rejected"
+      ]
+    },
+    "frontend": {
+      "files": 3,
+      "tests": 8,
+      "passed": true,
+      "scope": [
+        "shared execution activity labels",
+        "activity timeline fallback/escaping",
+        "existing execution editor presentation"
+      ]
+    },
+    "typecheck": true,
+    "documentationLinks": true,
+    "scopeLimits": [
+      "No full product, browser, federation, security or workload suite rerun for this focused correction.",
+      "Site-audit uses the tested shared formatter; no new full administrative browser test.",
+      "Existing historical facts/audit are retained; absent step snapshots are not reconstructed.",
+      "Navigation-count sizing remains the next roadmap item.",
+      "Production deployment not performed."
+    ]
   }
 }

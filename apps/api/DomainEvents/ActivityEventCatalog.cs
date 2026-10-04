@@ -13,7 +13,7 @@ public static class ActivityEventCatalog
         "comment.created", "learning.created", "learning.updated", "learning.comment_added",
         "report.updated", "report.submitted", "report.approved", "information.closed", "information.archived", "information.restored"];
     public static readonly string[] Resources = ["work_item", "task", "assignment", "plan", "execution", "decision", "risk", "measure", "report", "site", "person", "comment", "learning"];
-    private static readonly HashSet<string> MetadataFields = ["status", "previousStatus", "changedFields", "revision", "phase", "resourceVersionId", "reasonCode", "workKind"];
+    private static readonly HashSet<string> MetadataFields = ["status", "previousStatus", "changedFields", "revision", "phase", "resourceVersionId", "reasonCode", "workKind", "stepNumber", "stepName"];
     public static string ValidateMetadata(string eventType, string json)
     {
         if (!Types.Contains(eventType) || System.Text.Encoding.UTF8.GetByteCount(json) > 4096)
@@ -27,6 +27,12 @@ public static class ActivityEventCatalog
                 field.Value.ValueKind == JsonValueKind.String && (field.Value.GetString()!.Length > 200 || field.Value.GetString()!.Any(char.IsControl)))
                 throw new ArgumentException("Only bounded activity metadata fields are allowed.");
         }
+        if (document.RootElement.TryGetProperty("stepNumber", out var number) &&
+            (eventType != "execution.updated" || number.ValueKind != JsonValueKind.Number || !number.TryGetInt32(out var index) || index < 1))
+            throw new ArgumentException("Execution step numbers must be positive integers.");
+        if (document.RootElement.TryGetProperty("stepName", out var name) &&
+            (eventType != "execution.updated" || name.ValueKind != JsonValueKind.String))
+            throw new ArgumentException("Execution step names must be bounded strings.");
         return json;
     }
 }

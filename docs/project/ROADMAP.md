@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 2026-10-04 after automatic WorkItem locking/archive, retained editing pauses and independent learning treatment.
+Updated 2026-10-04 after automatic WorkItem locking/archive and the targeted execution-activity clarity correction.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -28,6 +28,8 @@ Use the [single architecture/requirements/test reference](../architecture/EVENT_
 - Legacy notification obligations are reconciled once at startup; SMTP no longer scans audit, and webhook workers consume the common projection ledger. Retained old cursor/marker fields are compatibility evidence. Never introduce a second activity store, replacement security audit, broker or event sourcing.
 
 ## Navigation-count performance
+
+Pending-treatment counters already exist on Tasks, Planning, Execution and Learning and refresh on work changes, focus and navigation. This next delivery improves and qualifies their query performance; it does not add a second counter mechanism or change them to unread counts. The execution-activity correction is complete and does not claim to resolve this sizing issue.
 
 Multi-second `/api/work/navigation-counts` reads were observed under 10/25 concurrent readers against both the additive checkpoint and the WorkItem candidate. The fixtures differ, so this is not a controlled performance-equivalence result. The maintained workload harness records per-endpoint measurements; the [staged run](../testing/runs/2026-10-02-release-regression.md#work-owned-domain-activity-coverage--2026-10-03) contains the evidence.
 

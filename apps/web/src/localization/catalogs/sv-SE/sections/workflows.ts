@@ -50,7 +50,7 @@ export const workflowsSvSE = {
   workflowsExecutionWorkflowEditorSelectExecutionWorkflow: "Välj utförande arbetsflöde",
   workflowsExecutionWorkflowEditorSelectWorkflow: "Välj arbetsflöde",
   workflowsExecutionWorkflowEditorStartWorkflow: "Starta arbetsflödet",
-  workflowsExecutionWorkflowEditorStep: "Steg Steg",
+  workflowsExecutionWorkflowEditorStep: "Steg",
   workflowsExecutionWorkflowEditorDialogueSubject: "Vad är dialogen om?",
   workflowsPlanAllocationsSelectARecipientAndEnterTask: "Välj en mottagare och ange uppgiftstext på högst 10 000 tecken.",
   workflowsPlanAllocationsTheUnitAlreadyHasASubtask: "Enheten har redan en underuppgift i detta planeringssteg. Redigera uppgiftslistan ovan.",

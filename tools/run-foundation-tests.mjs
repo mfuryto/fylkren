@@ -12,6 +12,6 @@ try {
   if (!ready) throw new Error('Disposable foundation database did not become ready.');
   const address = execFileSync('docker', ['port', name, '5432/tcp'], { encoding: 'utf8' }).trim();
   const port = Number(address.split(':').at(-1));
-  run('dotnet', ['run', '--project', 'tests/foundations/Fylkren.FoundationTests.csproj'], { env: { ...process.env,
+  run('dotnet', ['run', '--project', 'tests/foundations/Fylkren.FoundationTests.csproj', '--', ...process.argv.slice(2)], { env: { ...process.env,
     FYLKREN_FOUNDATION_TEST_DATABASE: `Host=127.0.0.1;Port=${port};Database=fylkren_foundation_test;Username=fylkren;Password=synthetic-foundation-only` } });
 } finally { run('docker', ['rm', '-f', '-v', name]); }

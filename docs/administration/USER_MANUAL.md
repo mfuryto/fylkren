@@ -176,6 +176,8 @@ The user selects an eligible execution workflow. The default **Standard** workfl
 
 Execution fields, links, timeline and internal external-follow-up records autosave. **External follow-up** on the active step's button row opens the log for dialogue conducted outside Fylkren; the platform does not send these messages. **Send request** is a separate button and creates a request that is sent and handled inside Fylkren. The two actions are independent.
 
+Activity history identifies **Step N: Name — Documentation updated** separately from switching to a step and external follow-up. Autosave and Next may save the same content, but unchanged saves do not add history. Three steps are not an activity-count limit: subsequent edits and actual step switches have their own entries. Existing entries remain; older records without a step snapshot show the recorded action without inventing a step number or name.
+
 Only completed execution can be sent to control. `Send to control` is not an alternative to execution.
 
 ## 9. Final reports

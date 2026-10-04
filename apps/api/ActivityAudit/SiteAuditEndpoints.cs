@@ -69,6 +69,7 @@ public static class SiteAuditEndpoints
                 .Select(value => new
                 {
                     value.Id,
+                    value.DomainEventId,
                     value.OccurredAt,
                     value.EventType,
                     value.EntityType,
@@ -89,7 +90,13 @@ public static class SiteAuditEndpoints
                 .Select(value => new { value.Event.Id, work = database.WorkItems.Where(item => item.Id == value.WorkItemId && item.SiteId == siteId)
                     .Select(item => new { item.ReferenceCode, item.Title }).FirstOrDefault() }).ToListAsync(cancellationToken);
             var workContext = contextRows.ToDictionary(value => value.Id, value => value.work);
-            var rows = rawRows.Select(value => new { value.Id, value.OccurredAt, value.EventType, value.EntityType, value.EntityId, value.actor, entityName = names.GetValueOrDefault(value.EntityId), workReference = workContext.GetValueOrDefault(value.Id)?.ReferenceCode, workTitle = workContext.GetValueOrDefault(value.Id)?.Title }).ToList();
+            var factIds = rawRows.Where(x => x.EntityType == "execution-run" && x.DomainEventId != null).Select(x => x.DomainEventId!.Value).ToArray();
+            var metadata = await database.DomainEvents.AsNoTracking().Where(x => x.SiteId == siteId && factIds.Contains(x.Id) && x.ResourceType == "execution")
+                .Select(x => new { x.Id, x.ActivityMetadataJson }).ToDictionaryAsync(x => x.Id, x => x.ActivityMetadataJson, cancellationToken);
+            var rows = rawRows.Select(value => {
+                var step = Fylkren.Api.DomainEvents.ExecutionActivityDetails.Read(value.DomainEventId is Guid id ? metadata.GetValueOrDefault(id) : null);
+                return new { value.Id, value.OccurredAt, value.EventType, value.EntityType, value.EntityId, value.actor, entityName = names.GetValueOrDefault(value.EntityId), workReference = workContext.GetValueOrDefault(value.Id)?.ReferenceCode, workTitle = workContext.GetValueOrDefault(value.Id)?.Title, step.StepNumber, step.StepName };
+            }).ToList();
             return Results.Ok(new { events = rows, eventTypes, page = pageNumber, pageSize, total, totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)pageSize)) });
         });
 

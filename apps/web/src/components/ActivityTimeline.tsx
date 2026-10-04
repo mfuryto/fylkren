@@ -2,6 +2,7 @@ import { useEffect, useId, useState } from "react";
 import { apiGet } from "../api/client";
 import { useLanguage, useTranslation } from "../localization/LocalizationProvider";
 import type { MessageKey } from "../localization";
+import { executionActivityLabel } from "./executionActivityLabel";
 import { Modal } from "./Modal";
 
 const labels: Record<string, MessageKey> = {
@@ -11,7 +12,7 @@ const labels: Record<string, MessageKey> = {
   "assignment.completed": "taskStatusCompleted", "assignment.cancelled": "taskStatusCancelled", "assignment.reassigned": "auditWorkReassigned",
   "assignment.claimed": "responsibilityClaimed", "assignment.released": "auditWorkflowReleased", "assignment.reopened": "lifecycleReopen",
   "plan.published": "auditPlanApproved", "plan.updated": "auditPlanningStepDocumented", "plan.submitted": "taskStatusPlanningApproval",
-  "execution.started": "auditExecutionStarted", "execution.updated": "auditExecutionStepDocumented", "execution.submitted": "auditExecutionSubmitted",
+  "execution.started": "auditExecutionStarted", "execution.updated": "auditExecutionUpdated", "execution.submitted": "auditExecutionSubmitted",
   "decision.created": "auditDecisionCreated", "decision.updated": "auditDecisionRevised",
   "risk.created": "activityRiskCreated", "risk.updated": "activityRiskUpdated", "risk.closed": "activityRiskClosed",
   "measure.created": "activityMeasureCreated", "measure.updated": "activityMeasureUpdated", "measure.completed": "activityMeasureCompleted",
@@ -20,7 +21,7 @@ const labels: Record<string, MessageKey> = {
   "site.created": "auditSiteCreated", "site.updated": "auditSiteUpdated", "site.deactivated": "auditSiteDeactivated", "membership.deactivated": "auditSiteMemberDeactivated",
   "information.closed": "lifecycleClosed", "information.archived": "lifecycleArchived", "information.restored": "lifecycleRestore",
 };
-export type ActivityRow = { id: string; type: string | null; occurredAt: string; source: string; actorKind: string; actorName?: string | null; workReference?: string; contextWorkItemId: string };
+export type ActivityRow = { id: string; type: string | null; occurredAt: string; source: string; actorKind: string; actorName?: string | null; workReference?: string; contextWorkItemId: string; action?: string | null; stepNumber?: number | null; stepName?: string | null };
 type Page = { items: ActivityRow[]; hasMore: boolean; next: { before: string; beforeId: string } | null };
 type Props = { siteId: string; itemId?: string; title?: string; timeZone?: string; archive?: boolean };
 export function ActivityButton(props: Props) {
@@ -30,7 +31,7 @@ export function ActivityButton(props: Props) {
 }
 export function ActivityEntry({ row, timeZone, siteId }: { row: ActivityRow; timeZone?: string; siteId?: string }) {
   const t = useTranslation(); const language = useLanguage();
-  return <li><strong>{t(labels[row.type ?? ""] ?? "activityUnknown")}</strong> <time dateTime={row.occurredAt}>{new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short", timeZone }).format(new Date(row.occurredAt))}</time>
+  return <li><strong>{(row.type === "execution.updated" ? executionActivityLabel(row.action, row.stepNumber, row.stepName, t) : null) ?? t(labels[row.type ?? ""] ?? "activityUnknown")}</strong> <time dateTime={row.occurredAt}>{new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short", timeZone }).format(new Date(row.occurredAt))}</time>
     {siteId && row.workReference && <a href={`/#/tasks?site=${encodeURIComponent(siteId)}&item=${encodeURIComponent(row.contextWorkItemId)}`}> · {row.workReference}</a>}
     {row.actorName && <span> · {row.actorName}</span>}</li>;
 }

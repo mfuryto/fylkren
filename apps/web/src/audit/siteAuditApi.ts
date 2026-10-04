@@ -2,7 +2,7 @@ import { apiGet } from "../api/client";
 import { translateActive } from "../localization";
 
 export type AuditSite = { id: string; name: string };
-export type SiteAuditRow = { id: string; occurredAt: string; eventType: string; entityType: string; entityId: string; entityName: string | null; actor: string; workReference: string | null; workTitle: string | null };
+export type SiteAuditRow = { id: string; occurredAt: string; eventType: string; entityType: string; entityId: string; entityName: string | null; actor: string; workReference: string | null; workTitle: string | null; stepNumber?: number | null; stepName?: string | null };
 export type SiteAuditPage = { events: SiteAuditRow[]; eventTypes: string[]; page: number; totalPages: number; total: number };
 export type SiteAuditFilters = { area: string; eventType: string; from: string; to: string; search: string; sort: string };
 

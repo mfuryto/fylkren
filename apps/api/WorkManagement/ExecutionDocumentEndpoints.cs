@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using Fylkren.Api.ActivityAudit;
 using Fylkren.Api.Organization;
 using Fylkren.Api.Persistence;
 using Microsoft.AspNetCore.Antiforgery;
@@ -22,13 +21,9 @@ internal static class ExecutionDocumentEndpoints
             var run = await db.ExecutionRuns.Include(x => x.WorkItem).SingleOrDefaultAsync(x => x.Id == runId && x.ClaimedByPersonId == personId && x.Status == "in_progress", ct);
             var step = run is null ? null : await db.WorkflowSteps.SingleOrDefaultAsync(x => x.Id == stepId && x.DefinitionId == run.DefinitionId, ct);
             if (run is null || step is null || !await WorkLevelAuthorization.BelongsToLevel(run.WorkItem.SiteId, run.WorkItem.AssignedUnitId, personId, db, ct) || events.Count > 0 && !step.HasTimeline || events.Any(x => run.TimelineStartedOn.HasValue && x.Date < run.TimelineStartedOn.Value)) return Results.Problem(statusCode: 403);
-            var now = DateTimeOffset.UtcNow;
-            var document = await db.ExecutionStepDocuments.SingleOrDefaultAsync(x => x.RunId == runId && x.StepId == stepId, ct);
-            if (document is null) db.ExecutionStepDocuments.Add(new ExecutionStepDocument(Guid.NewGuid(), runId, stepId, content, now)); else document.Update(content, now);
-            db.ExecutionTimelineEvents.RemoveRange(await db.ExecutionTimelineEvents.Where(x => x.RunId == runId && x.StepId == stepId).ToListAsync(ct));
-            for (var index = 0; index < events.Count; index++) db.ExecutionTimelineEvents.Add(new ExecutionTimelineEvent(Guid.NewGuid(), runId, stepId, events[index].Date, events[index].Description!.Trim(), index));
-            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "execution.step-documented", "execution-run", run.Id, now), "execution.updated", null);
-            await db.SaveChangesAsync(ct);
+            var values = events.Select(x => new ExecutionDocumentTimeline(x.Date, x.Description!.Trim())).ToArray();
+            if (await ExecutionStepActivity.Document(db, run, step, personId, content, values, ct))
+                await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });
 
@@ -38,12 +33,10 @@ internal static class ExecutionDocumentEndpoints
             if (!PersonId(user, out var personId)) return Results.Problem(statusCode: 403);
             var run = await db.ExecutionRuns.Include(x => x.WorkItem).SingleOrDefaultAsync(x => x.Id == runId && x.ClaimedByPersonId == personId && x.Status == "in_progress", ct);
             if (run is null || !await WorkLevelAuthorization.BelongsToLevel(run.WorkItem.SiteId, run.WorkItem.AssignedUnitId, personId, db, ct)) return Results.Problem(statusCode: 403);
-            var count = await db.WorkflowSteps.CountAsync(x => x.DefinitionId == run.DefinitionId, ct);
-            if (request.Step < 0 || request.Step >= count) return Results.ValidationProblem(new Dictionary<string, string[]> { ["step"] = ["Invalid step."] });
-            var now = DateTimeOffset.UtcNow;
-            run.Advance(request.Step, now);
-            Fylkren.Api.DomainEvents.WorkActivity.Add(db, new AuditEvent(Guid.NewGuid(), run.WorkItem.SiteId, personId, "execution.step-changed", "execution-run", run.Id, now), "execution.updated", null);
-            await db.SaveChangesAsync(ct);
+            var steps = await db.WorkflowSteps.Where(x => x.DefinitionId == run.DefinitionId).OrderBy(x => x.SortOrder).ToListAsync(ct);
+            if (request.Step < 0 || request.Step >= steps.Count) return Results.ValidationProblem(new Dictionary<string, string[]> { ["step"] = ["Invalid step."] });
+            if (ExecutionStepActivity.Select(db, run, steps[request.Step], request.Step, personId))
+                await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });
     }
