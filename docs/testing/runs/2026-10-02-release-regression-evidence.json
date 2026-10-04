@@ -4247,5 +4247,32 @@
     "findings": ["SV-078 closed after focused retest", "SV-079 closed after focused retest"],
     "matrix": "ASVS 2.2.1 remains In progress; continue remaining request-body field inventory",
     "scope": "Header and file-input inventory plus focused API/gateway tests; no complete body inventory or release qualification"
+  },
+  "bodyContractInventoryCompletion": {
+    "date": "2026-10-04",
+    "baseline": "999b9d5",
+    "sourceHashes": {
+      "apps/api/Federation/FederationCapabilityProtocol.cs": "78b8a5a2ec9c0f74a583c73f2a1a348eefaf9f5d6b5489bb10475733afbad41f",
+      "apps/api/Organization/AccessDirectoryCommandEndpoints.cs": "3c52200b2ba1ad4d4ce39df223e00dc651fe9c8b7563fa4997587156d881b377",
+      "apps/api/Platform/PlatformUserBulkEndpoints.cs": "69dc2bf2ceb8dd860ad281eaffbf368e4f34d5758a80845d16744ed2a6d46345",
+      "tools/e2e/encoding-security.mjs": "2add4e154d4685382e7ad58266b0e3f3e7f69fcf668ed80cc04be80c4799a826",
+      "tests/foundations/InputValidationTests.cs": "ee7f3401e88b65576c787ea3259c23b434b4613579a3f5d59f1c0f1978ed0e2b",
+      "tests/foundations/Program.cs": "0734f305a37153f8dffdbb47453393852d12eda42b7939e322b572b17dd8a908"
+    },
+    "baselineApiImage": "sha256:ae67605e2bb6077d3a72f29aa98d681c1e081da0559ab71abc248f245cbe0a38",
+    "apiImage": "sha256:9bbfe923bfc4d302051eec8cfffa47f94e0a64da30fcbc1d66439828bcb076d2",
+    "reusedWebImage": "sha256:2806135f53e64aaa7c63bcf2ff2e75933bb963361a42243bff84e2b512ae38e7",
+    "results": {
+      "requestPayloadContractsReviewed": 106,
+      "baselineNullBulkCollection": "HTTP 500 reproduced",
+      "bodyShapeValidation": "passed",
+      "rejectedBodyCases": 8,
+      "atomicRejectedBodies": true,
+      "capabilityCollectionBoundaryCases": 4,
+      "apiBuildWarnings": 0
+    },
+    "finding": "SV-080 closed after focused retest",
+    "matrix": "ASVS 2.2.1 Passed; continue at 2.2.2",
+    "scope": "Complete API input inventory with focused server-side boundary tests; no claim for separate trusted-layer or release qualification"
   }
 }

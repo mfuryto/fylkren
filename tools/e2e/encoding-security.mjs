@@ -160,6 +160,7 @@ export async function testQueryInputValidation({ platform, leader, siteManager, 
 export async function testBodyShapeValidation({ platform, leader, siteManager, siteId, unitId, workItemTypeId }) {
   const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
   const cases = [
+    [platform, '/api/platform/identity/users/password', { personIds: null }],
     [siteManager, `/api/templates/sites/${siteId}`, { name: 'Synthetic null-content template', content: null, ownerUnitId: null }],
     [siteManager, `/api/workflows/sites/${siteId}`, { name: 'Synthetic null-step workflow', ownerUnitId: null, kind: 'execution', steps: [null] }],
     [platform, '/api/platform/api-clients/', { name: 'Synthetic null-scope client', scopes: ['sites:read', null], expiresAt }],
@@ -184,7 +185,7 @@ export async function testBodyShapeValidation({ platform, leader, siteManager, s
   assert.equal((await leader.request(`/api/decisions/sites/${siteId}/tasks/${task.body.id}`)).body.length, 0,
     'Malformed body partially persisted a decision');
   return { bodyShapeValidation: 'passed', rejectedBodyCases: cases.length + 1,
-    nullCollectionElementCases: 5, atomicRejectedBodies: true };
+    nullCollectionElementCases: 5, nullCollectionCases: 2, atomicRejectedBodies: true };
 }
 
 export async function testHeaderFileInputValidation({ platform, siteManager, siteId, base }) {

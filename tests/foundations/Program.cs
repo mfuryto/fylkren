@@ -6,6 +6,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
+if (args.Contains("--input-validation-only"))
+{
+    InputValidationTests.Run();
+    return;
+}
 if (args.Contains("--zip-length-only"))
 {
     await ZipLengthBoundaryTests.Run();

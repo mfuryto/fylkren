@@ -35,7 +35,9 @@ internal static class AccessDirectoryCommandEndpoints
         var actor = await AccessAuthorization.Actor(siteId, user, database, cancellationToken);
         if (actor is null) return Results.Problem(statusCode: 403);
         var provider = NormalizeProvider(request.Provider);
-        if (provider is null || !Enabled(provider, options)) return Results.NotFound();
+        if (provider is null || !Enabled(provider, options) || string.IsNullOrWhiteSpace(request.StableId) ||
+            request.StableId.Length > 512 || string.IsNullOrWhiteSpace(request.Username) || request.Username.Length > 256)
+            return Results.NotFound();
         DirectoryUser? directoryUser;
         try
         {

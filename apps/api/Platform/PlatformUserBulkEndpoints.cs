@@ -93,7 +93,7 @@ public static partial class PlatformUserEndpoints
     }
 
     private static async Task<(Guid Actor, IResult? Error)> ValidateBulkRequest(
-        Guid[] personIds,
+        Guid[]? personIds,
         IAntiforgery antiforgery,
         HttpContext context,
         FylkrenDbContext database,
@@ -103,6 +103,8 @@ public static partial class PlatformUserEndpoints
             return (Guid.Empty, Results.BadRequest(new { error = "The security check expired. Reload the page and try again." }));
         if (!Guid.TryParse(context.User.FindFirst("fylkren:person_id")?.Value, out var actor))
             return (Guid.Empty, Results.Problem(statusCode: 403, title: "The signed-in Platform Manager could not be identified."));
+        if (personIds is null)
+            return (actor, Results.ValidationProblem(new Dictionary<string, string[]> { ["personIds"] = ["Select between 1 and 200 users."] }));
         var ids = personIds.Distinct().ToArray();
         if (ids.Length is < 1 or > 200)
             return (actor, Results.ValidationProblem(new Dictionary<string, string[]> { ["personIds"] = ["Select between 1 and 200 users."] }));

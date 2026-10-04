@@ -51,7 +51,7 @@ internal static class FederationCapabilityProtocol
         values.All(value => value >= 1) && values.SequenceEqual(values.Distinct().Order());
 
     private static bool ValidTypes(string[]? values) => values is { Length: > 0 and <= 32 } &&
-        values.All(value => value.Length is > 0 and <= 80 &&
+        values.All(value => value is not null && value.Length is > 0 and <= 80 &&
             value.All(character => char.IsAsciiLetterOrDigit(character) || character is '.' or '-' or '_')) &&
         values.SequenceEqual(values.Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal));
 

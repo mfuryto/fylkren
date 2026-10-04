@@ -5,6 +5,7 @@ This file records durable, user-visible release changes. Detailed implementation
 ## Unreleased
 
 - Reject invalid administration API result limits instead of silently clamping them, and make the documented 512 MiB portable-import validator reachable through narrowly scoped API and gateway request limits.
+- Reject null bulk-user collections and malformed directory/capability collection values at the trusted service boundary instead of allowing null dereferences or external lookup attempts.
 - Document the trusted input-validation boundary, common formats, contextual rules, failure semantics and test expectations in one security reference.
 - Use 64-bit database totals and exact focused-page arithmetic across lifecycle, audit, learning, report, SMTP, user, federation, planning and execution views while retaining bounded page requests.
 - Saturate failed-login counters at the existing account-lock threshold, reject exhausted federation grant revisions before mutation and stop federation delivery claims at their existing terminal attempt.

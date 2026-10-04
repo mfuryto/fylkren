@@ -558,3 +558,18 @@ FYLKREN_E2E_API_IMAGE=fylkren-asvs-header-file-api:latest FYLKREN_E2E_WEB_IMAGE=
 The run rejects four invalid machine API limits, accepts both documented boundaries, rejects a logo one byte above 2 MiB and sends a 4 MiB invalid ZIP through the intended validator, which returns a bounded invalid result. API compilation completed with zero warnings/errors and the gateway candidate passed its Compose health check. The API image is `sha256:ae67605e2bb6077d3a72f29aa98d681c1e081da0559ab71abc248f245cbe0a38`; the web image is `sha256:2806135f53e64aaa7c63bcf2ff2e75933bb963361a42243bff84e2b512ae38e7`.
 
 ASVS 2.2.1 remains In progress for the remaining request-body field inventory. Safe hashes and results are recorded under `headerFileInputValidationContinuation` in the existing evidence manifest. Production is untouched.
+
+## Request-body contract inventory completion — 2026-10-04
+
+Completes ASVS 2.2.1. The source inventory reviewed 106 API request/payload contract declarations and their server-side consumers after the separate query and header/file passes. The baseline candidate reproduced HTTP 500 for an authenticated Platform Manager bulk-password request containing `personIds: null` (SV-080). The same inspection found that a null element in a federation capability type list could be dereferenced during positive validation, and that directory-user identifiers could reach provider lookup without local presence/length bounds. No unauthorized action or partial persistence was observed.
+
+The shared bulk-user validator now rejects a null collection before enumeration, covering password reset, assignment and cleanup. Federation capability validation rejects null collections and elements before canonicalization or signature decisions. Directory-user creation bounds provider identifiers and usernames before external provider access. The focused API retest used:
+
+```sh
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-body-complete-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-asvs-header-file-web:latest node tools/run-e2e-editions.mjs --asvs-body-only --no-build
+dotnet run --project tests/foundations/Fylkren.FoundationTests.csproj --no-restore -- --input-validation-only
+```
+
+Eight malformed HTTP bodies now return 400, including the reproduced null bulk collection; the decision case remains atomic. The focused foundation test accepts a valid capability offer and rejects null schema/type collections plus a null type element without throwing. API compilation completed with zero warnings/errors. The API image is `sha256:9bbfe923bfc4d302051eec8cfffa47f94e0a64da30fcbc1d66439828bcb076d2`; the gateway image remains `sha256:2806135f53e64aaa7c63bcf2ff2e75933bb963361a42243bff84e2b512ae38e7`.
+
+Together with the prior query, contextual, arithmetic, header, file, portable-parser and body-shape evidence, this closes the complete input inventory and marks ASVS 2.2.1 Passed. It does not by itself pass the distinct trusted-layer requirement 2.2.2 or complete release qualification. Safe hashes and results are recorded under `bodyContractInventoryCompletion` in the existing evidence manifest. Production is untouched.
