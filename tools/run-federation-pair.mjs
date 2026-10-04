@@ -10,12 +10,13 @@ const composeFile = 'tools/e2e/federation-pair.compose.yaml';
 const currentImage = 'fylkren-federation-pair-test-api:local';
 const oldCommit = '152d0f2';
 const oldImage = `fylkren-federation-pair-test-api:mixed-${oldCommit}`;
+const outboundOnly = process.argv.includes('--outbound-only');
 const operationalOnly = process.argv.includes('--operational-only');
 const loadOnly = process.argv.includes('--load-only');
 const restoreOnly = process.argv.includes('--restore-only');
 const retentionOnly = process.argv.includes('--retention-only');
 const productionBoundaryOnly = process.argv.includes('--production-boundary-only');
-if ([loadOnly, restoreOnly, retentionOnly, productionBoundaryOnly, operationalOnly].filter(Boolean).length > 1)
+if ([loadOnly, restoreOnly, retentionOnly, productionBoundaryOnly, operationalOnly, outboundOnly].filter(Boolean).length > 1)
   throw new Error('Federation pair modes are mutually exclusive');
 const project = `fylkren-pair-${randomBytes(4).toString('hex')}`;
 const temporary = mkdtempSync(join(tmpdir(), 'fylkren-federation-pair-'));
@@ -27,7 +28,7 @@ const env = {
   FYLKREN_PAIR_ISSUER_PUBLIC_KEY: publicKey.export({ type: 'spki', format: 'der' }).toString('base64'),
   FYLKREN_PAIR_API_B_IMAGE: currentImage,
 };
-const productionBoundary = productionBoundaryOnly || (!loadOnly && !restoreOnly && !retentionOnly && !operationalOnly);
+const productionBoundary = productionBoundaryOnly || (!loadOnly && !restoreOnly && !retentionOnly && !operationalOnly && !outboundOnly);
 if (productionBoundary) env.FYLKREN_PAIR_ASPNETCORE_ENVIRONMENT = 'Production';
 
 function command(executable, args, options = {}) {
@@ -144,7 +145,7 @@ function license(instanceId) {
   const payload = Buffer.from(JSON.stringify({
     schemaVersion: 1, licenseId: randomUUID(), instanceId, customer: 'Synthetic pair test',
     notBefore: '2020-01-01T00:00:00Z', expiresAt: '2100-01-01T00:00:00Z',
-    entitlements: ['instance-federation'],
+    entitlements: outboundOnly ? ['instance-federation', 'webhooks'] : ['instance-federation'],
   }));
   return {
     payload: payload.toString('base64'),
@@ -2145,6 +2146,46 @@ async function assertPopulatedUpgrade(owner) {
   END; $$`);
 }
 
+async function runOutboundPair() {
+  const a = await setup('https://localhost:18443', 'a');
+  const leader = await makeSiteLeader(a, 'https://localhost:18443');
+  for (const port of [446, 447, 448, 449]) {
+    await expectStatus(a.api.post('/api/platform/federation/peers/discover', { baseUrl: `https://tls:${port}` }),
+      502, `reject oversized/redirect/private federation discovery on ${port}`);
+  }
+  const hookRoot = `/api/platform/webhooks/sites/${a.siteId}`;
+  const subscriptions = [];
+  for (const path of ['https://tls/outbound/webhook-large', 'https://tls/outbound/redirect', 'https://tls:448/outbound/canary']) {
+    subscriptions.push(await expectStatus(a.api.post(hookRoot, {
+      name: 'Synthetic outbound HTTPS boundary', endpointUrl: path, eventTypes: ['task.created'],
+    }), 201, 'create outbound boundary webhook'));
+  }
+  await expectStatus(leader.post(`/api/work/sites/${a.siteId}/items`, {
+    title: 'Synthetic outbound boundary event', description: 'Isolated receiver test',
+  }), 201, 'create webhook event');
+  let deliveries;
+  for (let attempt = 0; attempt < 30; attempt++) {
+    deliveries = await expectStatus(a.api.request(`${hookRoot}/deliveries`), 200, 'read outbound deliveries');
+    if (subscriptions.every(subscription => deliveries.items.some(row => row.subscriptionId === subscription.id && row.attemptCount >= 1))) break;
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+  const row = subscription => deliveries.items.find(value => value.subscriptionId === subscription.id);
+  assert.equal(row(subscriptions[0])?.status, 'succeeded', 'Ignored large webhook body changed acknowledgement');
+  assert.equal(row(subscriptions[0])?.lastHttpStatus, 200);
+  assert.equal(row(subscriptions[1])?.status, 'retry', 'Webhook redirect was treated as delivered');
+  assert.equal(row(subscriptions[1])?.lastHttpStatus, 302, 'Webhook redirect status contract changed');
+  assert.equal(row(subscriptions[2])?.status, 'retry', 'Unapproved private webhook was delivered');
+  assert.equal(row(subscriptions[2])?.lastHttpStatus, null, 'Unapproved private receiver was contacted');
+  const canary = commandOutput('docker', ['compose', '-f', composeFile, '-p', project, 'exec', '-T', 'tls',
+    'cat', '/var/log/nginx/outbound-canary.log']);
+  assert.equal(canary.trim(), '', 'An outbound redirect/private-address attack reached the canary');
+  for (const subscription of subscriptions) await expectStatus(a.api.request(`${hookRoot}/${subscription.id}`, 'DELETE'), 204, 'disable synthetic subscription');
+  process.stdout.write(JSON.stringify({ outboundIntegrationBoundaries: 'passed',
+    federationOversizedAndOperationLimit: 'passed', federationRedirectAndPrivateOrigin: 'passed',
+    webhookLargeBodyIgnored: 'passed', webhookRedirectStatusPreserved: 'passed',
+    webhookPrivateOriginRejected: 'passed', outboundCanaryRequests: 0 }) + '\n');
+}
+
 async function runWorkActivityPair() {
   const a = await setup('https://localhost:18443', 'a');
   const b = await setup('https://localhost:18444', 'b');
@@ -2390,6 +2431,8 @@ try {
     '-keyout', join(temporary, 'server.key'), '-out', join(temporary, 'server.pem'),
     '-subj', '/CN=tls', '-addext', 'subjectAltName=DNS:tls,DNS:localhost',
     '-addext', 'basicConstraints=critical,CA:TRUE'], { stdio: 'ignore' });
+  writeFileSync(join(temporary, 'outbound-large.json'), JSON.stringify({ value: 'x'.repeat(1_000_001) }));
+  writeFileSync(join(temporary, 'outbound-small.json'), JSON.stringify({ value: 'x'.repeat(16_385) }));
   copyFileSync(join(temporary, 'server.pem'), join(temporary, 'ca.pem'));
   setDefaultCACertificates([...getCACertificates('default'), readFileSync(join(temporary, 'ca.pem'), 'utf8')]);
   if (process.argv.includes('--no-build')) {
@@ -2400,7 +2443,8 @@ try {
   try
   {
     compose(['up', '-d', '--no-build', '--wait']);
-    if (operationalOnly) await runWorkActivityPair();
+    if (outboundOnly) await runOutboundPair();
+    else if (operationalOnly) await runWorkActivityPair();
     else if (loadOnly) await runLoadPair();
     else if (restoreOnly) await runRestorePair();
     else if (retentionOnly) await runRetentionPair();

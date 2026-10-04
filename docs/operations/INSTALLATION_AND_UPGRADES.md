@@ -18,6 +18,21 @@ Installation backup/restore and customer-data export/import are separate capabil
 - Use a tagged release in production when releases are published. Pulling `main` is appropriate only for the current test environment.
 - Plan a maintenance window because the API applies migrations at startup.
 
+## Outbound integration configuration
+
+Outbound webhook, federation and identity-provider HTTP clients require HTTPS, disable redirects and validate DNS results before connecting to the checked address. System HTTP proxies are not used by these clients. An integration that resolves to loopback or RFC1918/IPv6 private addresses requires a deployment-owned exception in `.env`:
+
+```dotenv
+FYLKREN_OUTBOUND_PRIVATE_ORIGINS=https://idp.internal:8443;https://peer.internal:443
+FYLKREN_OUTBOUND_IDENTITY_ORIGINS=https://keys.identity.example
+```
+
+Use only the exact required HTTPS origins, including nondefault ports. Do not include paths, queries, credentials or wildcards. Private exceptions never permit link-local/cloud metadata, multicast or reserved addresses. Check existing internal IdP, webhook and federation destinations before upgrading; merge these settings deliberately and recreate the API container after changing them. Public integrations need no private exception.
+
+OIDC backchannel requests default to the configured authority's origin. Providers using separate token, userinfo or JWKS origins need those origins in `FYLKREN_OUTBOUND_IDENTITY_ORIGINS`; private destinations need both approvals. Metadata responses are bounded to 2,000,000 bytes, federation responses to 1,000,000 bytes with existing stricter operation limits retained. Webhook delivery accepts status headers and does not read response bodies. No database migration or event/API contract change is required.
+
+SAML metadata uses the same bounded HTTPS download, rejects DTDs and expired/mismatched metadata, and refreshes on demand after at most 15 minutes or at metadata expiry. Failed renewal does not retain stale metadata. Signing certificates from approved metadata still validate SAML responses/assertions in Sustainsys. Redirect/POST SSO remains supported; artifact-resolution downloads are disabled. The identity-provider response must supply metadata directly rather than redirect to another URL.
+
 ## First installation
 
 Prerequisites: Docker Engine, Docker Compose v2, Git, OpenSSH, OpenSSL, repository access and a free local port (default `8080`). Public deployment also requires DNS, HTTPS and a correctly configured reverse proxy.

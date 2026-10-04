@@ -21,17 +21,21 @@ internal sealed class ExternalAuthenticationExceptionHandler(
                 options.Authentication.Saml.ModulePath)) &&
             (string.Equals(exception.GetType().Assembly.GetName().Name,
                 "Sustainsys.Saml2", StringComparison.Ordinal) ||
-             exception is SecurityTokenException or XmlException or HttpRequestException or WebException);
-        if (!isSamlValidationFailure) return false;
+             exception is SecurityTokenException or XmlException or HttpRequestException or WebException or TaskCanceledException);
+        var isOidcChallenge = context.Request.Path.Equals("/api/auth/oidc/login", StringComparison.OrdinalIgnoreCase);
+        var isOidcBackchannelFailure = isOidcChallenge && NetworkFailure(exception);
+        if (!isSamlValidationFailure && !isOidcBackchannelFailure) return false;
 
         logger.LogWarning(
             new EventId(4102, "ExternalAuthenticationRejected"),
             "Security event {SecurityEvent}; authenticationScheme={AuthenticationScheme}; traceId={TraceId}",
             "external-authentication-rejected",
-            "Saml2",
+            isOidcBackchannelFailure ? "OpenIdConnect" : "Saml2",
             context.TraceIdentifier);
-        await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        context.Response.StatusCode = isSamlChallenge ? StatusCodes.Status502BadGateway : StatusCodes.Status400BadRequest;
+        // A failed provider download must not revoke an existing local session.
+        if (!isSamlChallenge && !isOidcChallenge)
+            await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        context.Response.StatusCode = isSamlChallenge || isOidcChallenge ? StatusCodes.Status502BadGateway : StatusCodes.Status400BadRequest;
         context.Response.ContentType = "application/problem+json";
         context.Response.Headers.CacheControl = "no-store";
         await context.Response.WriteAsJsonAsync(new
@@ -40,4 +44,6 @@ internal sealed class ExternalAuthenticationExceptionHandler(
         }, cancellationToken);
         return true;
     }
+    private static bool NetworkFailure(Exception exception) => exception is HttpRequestException or TaskCanceledException ||
+        exception is (InvalidOperationException or IOException) && exception.InnerException is { } inner && NetworkFailure(inner);
 }

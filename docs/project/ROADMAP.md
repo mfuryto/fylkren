@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 2026-10-04 after verified navigation-count query optimization and the targeted execution-activity clarity correction.
+Updated 2026-10-04 after verified outbound HTTP/SSO integration boundaries and documented ASVS continuation.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -12,7 +12,7 @@ The additive event/activity foundation and coherent WorkItem slice are delivered
 
 ## Next delivery order
 
-1. Resume the existing ASVS matrix in its established requirement order: incomplete chapter-1 requirements 1.3.3, 1.3.6 and 1.4.2, including outbound boundaries and derived/aggregate arithmetic. Scoped navigation-authorization retests are recorded under 8.2.1/8.2.2; they do not complete either requirement.
+1. Resume the existing ASVS matrix in its established requirement order: incomplete chapter-1 requirements 1.3.6 (SMTP/AD/LDAP service-target and referral boundaries) and 1.4.2 (aggregate totals, date bounds and version/counter increments). HTTP integration limits under 1.3.3 are delivered and tested in the [outbound continuation](../testing/runs/2026-10-02-release-regression.md#outbound-integration-boundaries--2026-10-04). Scoped navigation-authorization retests are recorded under 8.2.1/8.2.2; they do not complete either requirement.
 2. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing at this gate.
 
 No irreversible disposition is authorized by this order. Establish and verify its prerequisites before proposing activation; do not choose arbitrary retention periods.
@@ -36,11 +36,11 @@ Earlier HTTP p95 readings varied from subsecond values to multiple seconds and w
 
 ## Security verification
 
-The [ASVS 5.0 Level 2 matrix](../security/ASVS_5.0.0_L2_MATRIX.md) is the single security-testing work list and status authority. At this update it contains 35 Passed, 112 In progress, 53 Not assessed and 53 Not applicable requirements. Counts are a dated baseline, not a separate maintained matrix or security certification.
+The [ASVS 5.0 Level 2 matrix](../security/ASVS_5.0.0_L2_MATRIX.md) is the single security-testing work list and status authority. At this update it contains 36 Passed, 111 In progress, 53 Not assessed and 53 Not applicable requirements. Counts are a dated baseline, not a separate maintained matrix or security certification.
 
 Use the [security test plan](../security/SECURITY_TEST_PLAN.md) and [threat model](../security/SECURITY_THREAT_MODEL.md). Record findings and remediation in the [finding register](../security/SECURITY_VERIFICATION.md); record completed requirement-specific tests in the ASVS matrix with links to maintained execution evidence. Partial coverage remains partial. Retest affected controls after every change.
 
-Complete remaining integration/interpreter boundaries, outbound destination/DNS/redirect/size checks and derived/aggregate arithmetic first, then continue the matrix. Deployment-sensitive controls require production-equivalent TLS, canonical Host/port and proxy configuration, customer identity-provider behavior, authenticator compatibility and coordinated database/Data Protection key recovery with real backup custody. Disposable restore tests already exist; operational custody qualification remains separate.
+HTTP destination/DNS/redirect/download boundaries and bounded runtime SAML metadata are delivered and tested. Complete the remaining non-HTTP SMTP/AD/LDAP service-target and referral cases on 1.3.6, then derived/aggregate arithmetic on 1.4.2 and subsequent requirements. Do not rerun unrelated full-product chains for scoped corrections. Deployment-sensitive controls require production-equivalent TLS, canonical Host/port and proxy configuration, customer identity-provider behavior, authenticator compatibility and coordinated database/Data Protection key recovery with real backup custody. Disposable restore tests already exist; operational custody qualification remains separate.
 
 Relevant Level 3 controls, WSTG techniques and API Security Top 10 coverage support this same workflow. An external penetration test is optional if requested, not a prerequisite for completing the authorized testing.
 

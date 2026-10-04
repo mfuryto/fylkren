@@ -1,6 +1,7 @@
 services:
   api:
     environment:
+      Fylkren__Outbound__PrivateOrigins: https://keycloak.test:18443;https://oidc-invalid.test:18445;https://metadata.test:18444
       SSL_CERT_FILE: /run/fylkren-identity-lab/ca.crt
     volumes:
       - ${FYLKREN_IDENTITY_LAB_DIR:?Set FYLKREN_IDENTITY_LAB_DIR}/ca.crt:/run/fylkren-identity-lab/ca.crt:ro

@@ -43,11 +43,13 @@ On the first upgraded startup only, an existing `.env` provider configuration is
 External authentication establishes the same local browser session after resolving an explicitly linked internal person:
 
 - OIDC uses authorization code flow and the exact configured issuer plus stable `sub`;
-- SAML 2.0 uses SP-initiated login, signed metadata and the exact IdP Entity ID plus permanent NameID;
+- SAML 2.0 uses SP-initiated Redirect/POST login, metadata-backed response/assertion signature validation and the exact IdP Entity ID plus permanent NameID;
 - Active Directory uses `objectGUID`;
 - LDAP uses `entryUUID` or the configured stable-ID attribute.
 
 Unknown stable identifiers are rejected. Username is never the permanent link key. Directory search and linking are explicit; AD/LDAP never populate site personnel automatically.
+
+Internal provider destinations and providers with separate OIDC backchannel hosts may require deployment-owned outbound approvals before connection testing. See [outbound integration configuration](../operations/INSTALLATION_AND_UPGRADES.md#outbound-integration-configuration). Invalid or unavailable runtime metadata rejects external sign-in without blocking local administration.
 
 Each external link is visible under its provider card and can be removed there. Removing a link blocks that external sign-in without deleting the internal person, memberships, roles or history; relinking the same provider identity reactivates the retained link. Fylkren refuses to remove the final active external Platform Manager path while local login is disabled. An OIDC `sub` or SAML NameID from a replacement issuer is a different identity even when its text is identical.
 

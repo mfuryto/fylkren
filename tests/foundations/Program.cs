@@ -6,6 +6,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
+if (args.Contains("--outbound-http-only"))
+{
+    await OutboundHttpTests.Run();
+    await SamlMetadataTests.Run();
+    return;
+}
 var now = DateTimeOffset.UtcNow;
 var site = Guid.NewGuid(); var origin = Guid.NewGuid(); var actor = Guid.NewGuid(); var resource = Guid.NewGuid();
 var operation = Guid.NewGuid();
@@ -112,6 +118,8 @@ Console.WriteLine("Foundation tests passed: actor/schema/metadata boundaries, li
 await WorkSliceTests.Run(db);
 
 await DomainCoverageTests.Run(db);
+await OutboundHttpTests.Run();
+await SamlMetadataTests.Run();
 await NavigationCountTests.Run(db, false);
 await ExecutionActivityTests.Run(db);
 

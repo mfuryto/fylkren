@@ -27,7 +27,7 @@ internal static class WebhookManagementEndpoints
         if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest();
         if (!Guid.TryParse(user.FindFirstValue("fylkren:person_id"), out var personId)) return Results.Problem(statusCode: 403);
         if (!await db.Sites.AnyAsync(x => x.Id == siteId && x.IsActive, ct)) return Results.NotFound();
-        if (!Uri.TryCreate(request.EndpointUrl, UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps) return Results.ValidationProblem(new Dictionary<string, string[]> { ["endpointUrl"] = ["The webhook address must be an absolute HTTPS address."] });
+        if (!Uri.TryCreate(request.EndpointUrl, UriKind.Absolute, out var uri) || !Fylkren.Api.Networking.OutboundHttpPolicy.ValidUri(uri)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["endpointUrl"] = ["The webhook address must be an absolute HTTPS address."] });
         var selected = request.EventTypes.Distinct(StringComparer.Ordinal).ToArray();
         if (selected.Length == 0 || selected.Any(x => !DomainEventTypes.ExternallySupported.Contains(x))) return Results.ValidationProblem(new Dictionary<string, string[]> { ["eventTypes"] = ["Select at least one supported event type."] });
         var secret = Convert.ToHexString(RandomNumberGenerator.GetBytes(32)).ToLowerInvariant(); var now = DateTimeOffset.UtcNow;

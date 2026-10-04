@@ -31,6 +31,8 @@ services:
       Fylkren__Http__TrustForwardedHeaders: ${FYLKREN_TRUST_FORWARDED_HEADERS:-false}
       Fylkren__Http__ForwardedHeaderLimit: ${FYLKREN_FORWARDED_HEADER_LIMIT:-1}
       Fylkren__Http__RequireHttps: ${FYLKREN_REQUIRE_HTTPS:-false}
+      Fylkren__Outbound__PrivateOrigins: ${FYLKREN_OUTBOUND_PRIVATE_ORIGINS:-}
+      Fylkren__Outbound__AdditionalIdentityOrigins: ${FYLKREN_OUTBOUND_IDENTITY_ORIGINS:-}
       Fylkren__Federation__RetentionDays: ${FYLKREN_FEDERATION_RETENTION_DAYS:-2555}
       # Legacy values are imported only when the database has no regional settings.
       # All later changes are made in Platform Manager without restarting containers.

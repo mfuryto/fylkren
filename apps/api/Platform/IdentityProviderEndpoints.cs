@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using System.Text.Json;
 using System.Xml;
+using Fylkren.Api.Networking;
 using System.Xml.Linq;
 
 namespace Fylkren.Api.Platform;
@@ -184,11 +185,15 @@ public static class IdentityProviderEndpoints
         if (body is null) return false;
         using var document = JsonDocument.Parse(body);
         var root = document.RootElement;
-        static bool HttpsUri(JsonElement element, out Uri? uri) =>
-            Uri.TryCreate(element.GetString(), UriKind.Absolute, out uri) && uri.Scheme == Uri.UriSchemeHttps;
+        static bool HttpsUri(JsonElement element, out Uri? uri)
+        {
+            uri = null;
+            return element.ValueKind == JsonValueKind.String &&
+                Uri.TryCreate(element.GetString(), UriKind.Absolute, out uri) && OutboundHttpPolicy.ValidUri(uri);
+        }
         static string CanonicalIssuer(Uri uri) => uri.AbsoluteUri.TrimEnd('/');
 
-        return root.TryGetProperty("issuer", out var issuer) && HttpsUri(issuer, out var issuerUri) &&
+        return root.ValueKind == JsonValueKind.Object && root.TryGetProperty("issuer", out var issuer) && HttpsUri(issuer, out var issuerUri) &&
             CanonicalIssuer(issuerUri!) == CanonicalIssuer(new Uri(configuration.Authority)) &&
             root.TryGetProperty("authorization_endpoint", out var authorization) && HttpsUri(authorization, out _) &&
             root.TryGetProperty("token_endpoint", out var token) && HttpsUri(token, out _) &&
@@ -266,10 +271,10 @@ public static class IdentityProviderEndpoints
                 !lifecycleActiveFilter.Any(char.IsControl) &&
                 lifecycleActiveFilter.StartsWith('(') && lifecycleActiveFilter.EndsWith(')') &&
                 lifecycleActiveFilter.Count(character => character == '(') == lifecycleActiveFilter.Count(character => character == ')'),
-            "oidc" => LocalPath(value.CallbackPath) && (!enabled || Uri.TryCreate(value.Authority, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps &&
+            "oidc" => LocalPath(value.CallbackPath) && (!enabled || Uri.TryCreate(value.Authority, UriKind.Absolute, out var uri) && OutboundHttpPolicy.ValidUri(uri) &&
                 !string.IsNullOrWhiteSpace(value.ClientId) && !string.IsNullOrWhiteSpace(value.Secret)) && Length(value.Authority, 1000) && Length(value.ClientId, 500) && Length(value.Secret, 2000),
             "saml" => LocalPath(value.ModulePath) && !value.ModulePath.EndsWith('/') && (!enabled ||
-                Uri.TryCreate(value.MetadataUrl, UriKind.Absolute, out var metadata) && metadata.Scheme == Uri.UriSchemeHttps &&
+                Uri.TryCreate(value.MetadataUrl, UriKind.Absolute, out var metadata) && OutboundHttpPolicy.ValidUri(metadata) &&
                 Uri.TryCreate(value.EntityId, UriKind.Absolute, out _) && Uri.TryCreate(value.IdentityProviderEntityId, UriKind.Absolute, out _)),
             _ => false
         };

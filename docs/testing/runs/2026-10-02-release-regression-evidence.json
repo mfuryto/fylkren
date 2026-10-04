@@ -3671,5 +3671,75 @@
       "ASVS overall status is unchanged; remaining chapter-1 work is next.",
       "Full-card projection source remains in use for real task cards; frozen reference exists only in tests."
     ]
+  },
+  "outboundIntegrationContinuation": {
+    "date": "2026-10-04",
+    "version": "0.70.0-dev.1",
+    "baseCommit": "f1251f94033533b380708bda7b4375efe6b9e30f",
+    "scope": "ASVS 1.3.3 integration limits; HTTP portion of 1.3.6; affected 1.5.1 XML and operational federation/SSO compatibility",
+    "apiImageId": "sha256:3c7284bc76de7c83aebf88000dc718df8ac9ca1b6023d83048cb6c34dfb2a29d",
+    "webImageId": "sha256:95c69456ec0870a718f167db181344235d23ccd5744ec99a0879df61d3c9f497",
+    "webImageScope": "Previously built gateway/login UI reused; no qualification of latest task/activity UI or matched whole-product release candidate.",
+    "sourceSha256": {
+      "apps/api/DomainEvents/WebhookManagementEndpoints.cs": "20bb92e19f0446c89dd20521053ca953893aca6b35dc63f35009e54de54b9673",
+      "apps/api/Identity/ExternalAuthenticationExceptionHandler.cs": "cdfd7eb047c4756f5f2bb0d0af4744051719d45f40f95290867bd848419b9388",
+      "apps/api/Identity/SamlMetadataCache.cs": "d71282e3d326b76440a0a465c587ad38d6e07f1016c4dabeee6e01495830b610",
+      "apps/api/Networking/BoundedResponseHandler.cs": "e85976e28e2ad79ea6ca7ff8a88f76be2e8f6d4b0f1740b9f7a50cba78eb9056",
+      "apps/api/Networking/OutboundHttpPolicy.cs": "bcfb3be5ab425b83f26252f1cf0159203ceeb5d865c54577dac4cb63ab436c84",
+      "apps/api/Platform/FylkrenOptions.cs": "1f0f5673feeb2a21c47199fb7dc87e23ce3e0f48f0e732cc979cc50b9869c5f5",
+      "apps/api/Platform/IdentityProviderEndpoints.cs": "4b43d759efd7c8f11658ff44465613908d16c835672f1e768732af8989b9718a",
+      "apps/api/Program.cs": "5888c8e1ab4df0286831414fe9e1232cbda9a1b7732a29554830df6dea1180ea",
+      "apps/api/ServiceRegistration.cs": "5a7e005b2a1147608db7c5678e8ec000ba007afa7e0be451938ab68e9ca23153",
+      "apps/web/src/components/executionActivityLabel.test.tsx": "3cb2419efa8772737ac6efbacc2c0284c793ad0c5aa9dd9c6f7c1801303ad1b3",
+      "compose.yaml": "0ad9d83eaa0fdca0853f69cc0a93582a3ef22f6ea1cb0ff2f1ad67b7c8c9f992",
+      "tests/foundations/OutboundHttpTests.cs": "99a4d3557c4c2fe662f88320df81d330c269851a43ca458b80398ac7fd06ea7f",
+      "tests/foundations/Program.cs": "7e0551637d7569b2788e9097eecd1180a57bd0163dab0dd043b42c5a063cb989",
+      "tests/foundations/SamlMetadataTests.cs": "b1161ad492ba6a745c53d10ffa0b801580b353bf78ce8e629172aafe0582189e",
+      "tools/e2e/federation-pair.compose.yaml": "eeed471070b27157cdd8cb5b0013590978405e5570ab4760808b72e738485106",
+      "tools/e2e/federation-pair.nginx.conf": "473fa78f34a66d60692e21264e77d3f24f098bfe37c0b2418a8c88e1c4dd443d",
+      "tools/e2e/identity-sso-lab.compose.yaml": "df9db1bd3b0aa68675ee5a5846c05281942446c29a4575bcde7f5636e170bba2",
+      "tools/e2e/oidc-negative-provider.mjs": "1e2fa10197085d90f3d74cde76e806892c6bc9d044205d162f04c89208e15062",
+      "tools/run-federation-pair.mjs": "a556694d142677e6d0ba3c9b44f2db5d1f2f096d5ef94e96984f0d83a6d22007",
+      "tools/run-identity-sso-lab.mjs": "8204f8e7f81d59cd59af31e0d079906c1f8139c52ccdc6670d7697c858565b99"
+    },
+    "rawLogSha256": {
+      "/tmp/fylkren-outbound-tests.log": "f50c8dc71bdbe03f87b0fc5f86e79386537aff8d857d4216d83e19ecef9a1dee",
+      "/tmp/fylkren-asvs-outbound-sso.log": "499884af3526f998275074990948aafeadfeb861c13bd39acfef25b1000592bc",
+      "/tmp/fylkren-asvs-outbound-pair.log": "a0ebd85f742b9f4e93469ccae81aea6fa3e5a586f3c71ff60c79484ef13bf427",
+      "/tmp/fylkren-asvs-outbound-operational.log": "db9301f003c4d3fbbea60116aa376a7d73aa703a50f8db081e300bdcc4e33e96",
+      "/tmp/fylkren-asvs-activity-test.log": "98aa24c2bd1c988419a1eb830812b93e498f743eae03808710defa9d1224adc1",
+      "/tmp/fylkren-asvs-docs.log": "cec5f8a4c36c8929b45b8789fb97ffc953d7ad59c0a6366531f674931702d202",
+      "/tmp/fylkren-asvs-structure.log": "1033be16107b8268a8daa626b2aca874eca037e1676f4064c1dbdc37b5941d54",
+      "/tmp/fylkren-asvs-version.log": "30a82c355072b30049a50c28fc1a6e402282bc4d7b291f331f69330b0edc3dbb",
+      "/tmp/fylkren-asvs-outbound-api-build.log": "2a0a187c091a9de51ffc7c183346ec3827b4a8d6a995b1dbc6e293ef947ff1c5"
+    },
+    "rawEvidenceLocation": "Development server /tmp only; synthetic secrets/raw runtime logs not committed.",
+    "results": {
+      "outboundTlsDnsIpRedirectSizeHeaders": "passed",
+      "samlSignedMetadataCacheRenewalExpiryIdentity": "passed",
+      "oidcSamlPositiveAndNegativeBrowserFlows": "passed",
+      "federationActualResponseAndDestinationNegatives": "passed",
+      "webhookLargeBodyIgnoredRedirectStatusPrivateDestination": "passed",
+      "metadataAndOutboundCanaryRequests": 0,
+      "operationalFederationSignedReceiptRetryDeduplicationAnswerLearningCancellation": "passed",
+      "frontendUnitTests": {
+        "passed": 161,
+        "files": 41,
+        "durationSeconds": 3.09
+      },
+      "documentationStructureLanguageVersion": "passed"
+    },
+    "requirementStatus": {
+      "1.3.3": "Passed",
+      "1.3.6": "In progress: non-HTTP SMTP/AD/LDAP server/DNS/port/referral cases remain",
+      "1.5.1": "Passed (affected controls retested)"
+    },
+    "next": "Finish non-HTTP scope of 1.3.6, then derived arithmetic 1.4.2 (totals, dates, version/counter increments); retain the same canonical matrix.",
+    "limitations": [
+      "No public production deployment or scan.",
+      "No full unrelated API/browser/backup/recovery regression repeated.",
+      "No cloud-metadata exfiltration or authentication bypass demonstrated.",
+      "Private internal destinations now require explicit deployment-owned exact HTTPS origins; system HTTP proxies, redirects and SAML artifact fetching are disabled."
+    ]
   }
 }

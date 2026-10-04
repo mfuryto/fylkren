@@ -13,6 +13,8 @@ const codes = new Map();
 let mode = 'nonce';
 let xmlCanaryRequests = 0;
 let runtimeXmlMode = 'valid';
+let runtimeOidcMode = 'valid';
+let redirectCanaryRequests = 0;
 let runtimeMetadataBody = '';
 
 const encoded = value => Buffer.from(JSON.stringify(value)).toString('base64url');
@@ -37,21 +39,61 @@ createServer({
 }, async (request, response) => {
   const url = new URL(request.url, issuer);
   try {
-  if (url.pathname === '/xml-probes') return json(response, 200, { xmlCanaryRequests });
+  if (url.pathname === '/xml-probes') return json(response, 200, { xmlCanaryRequests, redirectCanaryRequests });
+  if (url.pathname === '/oidc-metadata-mode' && request.method === 'POST') {
+    runtimeOidcMode = new URLSearchParams(await body(request)).get('value');
+    return json(response, 200, { mode: runtimeOidcMode });
+  }
+  const oidcCase = url.pathname.match(/^\/metadata-case\/([a-z-]+)\/\.well-known\/openid-configuration$/);
+  if (oidcCase) {
+    const configuredIssuer = `${issuer}/metadata-case/${oidcCase[1]}`;
+    if (runtimeOidcMode === 'redirect') {
+      response.writeHead(302, { Location: `${issuer}/redirect-canary` });
+      return response.end();
+    }
+    if (runtimeOidcMode === 'oversized') {
+      response.writeHead(200, { 'Content-Type': 'application/json', 'Content-Length': 2_000_001 });
+      return response.end('x'.repeat(2_000_001));
+    }
+    if (runtimeOidcMode === 'chunked') {
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      for (let i = 0; i < 125; i++) response.write('x'.repeat(16_384));
+      return response.end();
+    }
+    if (runtimeOidcMode === 'array') return json(response, 200, []);
+    return json(response, 200, {
+      issuer: configuredIssuer,
+      authorization_endpoint: `${issuer}/authorize`,
+      token_endpoint: runtimeOidcMode === 'typed' ? 123 : `${issuer}/token`,
+      jwks_uri: runtimeOidcMode === 'foreign-keys' ? 'https://keycloak.test:18443/unapproved-jwks' : `${issuer}/jwks`,
+      response_types_supported: ['code'], subject_types_supported: ['public'], id_token_signing_alg_values_supported: ['RS256'],
+    });
+  }
   if (url.pathname === '/metadata-body' && request.method === 'POST') {
     runtimeMetadataBody = await body(request);
     return json(response, 200, { ready: true });
   }
   if (url.pathname === '/xml-mode' && request.method === 'POST') {
     const value = new URLSearchParams(await body(request)).get('value');
-    if (!['valid', 'external', 'internal'].includes(value)) return json(response, 400, {});
+    if (!['valid', 'external', 'internal', 'oversized', 'chunked', 'redirect', 'expired'].includes(value)) return json(response, 400, {});
     runtimeXmlMode = value;
     return json(response, 200, { mode: value });
   }
   if (url.pathname === '/metadata-runtime') {
     const original = runtimeMetadataBody;
     let xml = original;
-    if (runtimeXmlMode !== 'valid') {
+    if (runtimeXmlMode === 'redirect') {
+      response.writeHead(302, { Location: `${issuer}/redirect-canary` });
+      return response.end();
+    }
+    if (runtimeXmlMode === 'oversized') xml = 'x'.repeat(2_000_001);
+    if (runtimeXmlMode === 'chunked') {
+      response.writeHead(200, { 'Content-Type': 'application/xml' });
+      for (let i = 0; i < 125; i++) response.write('x'.repeat(16_384));
+      return response.end();
+    }
+    if (runtimeXmlMode === 'expired') xml = original.replace(/(<[\w:]*EntityDescriptor\b)/, '$1 validUntil="2000-01-01T00:00:00Z"');
+    if (['external', 'internal'].includes(runtimeXmlMode)) {
       const declaration = original.match(/^\s*<\?xml[^?]*\?>/)?.[0] ?? '';
       const document = original.slice(declaration.length);
       const rootName = document.match(/^\s*<([\w:]+)/)?.[1];
@@ -64,6 +106,10 @@ createServer({
     }
     response.writeHead(200, { 'Content-Type': 'application/xml', 'Content-Length': Buffer.byteLength(xml) });
     return response.end(xml);
+  }
+  if (url.pathname === '/redirect-canary') {
+    redirectCanaryRequests++;
+    return json(response, 200, { fetched: true });
   }
   if (url.pathname === '/xml-canary') {
     xmlCanaryRequests++;

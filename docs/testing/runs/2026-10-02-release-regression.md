@@ -318,3 +318,39 @@ Two rounds reverse before/after order, after warming both query paths and the po
 Frontend navigation label/order tests passed **10 tests in 2 files**. The actual API assembly compiled in the targeted database runner. Completed tests are linked in the canonical architecture traceability; scoped aggregate authorization evidence is appended to ASVS 8.2.1/8.2.2 without promoting their status. The roadmap removes navigation-query optimization from next delivery and puts remaining chapter-1 ASVS work first.
 
 Excluded setup attempts were corrected to respect one leader role per unit, bounded task-reference hierarchy depth, complete peer foreign keys and decimal-valued EXPLAIN row counts. The final full targeted scope and all interleaved measurements passed after correction. Raw SQL/plans/logs stay outside the repository; their hashes and safe plan/measurement summaries are appended to the existing evidence manifest. These are local database measurements with 50 samples per variant/concurrency, not production sizing or a long-running saturation test. Production is untouched.
+
+
+## Outbound integration boundaries — 2026-10-04
+
+Continuation of ASVS 1.3.3/1.3.6 and affected 1.5.1, based on `f1251f9` plus the changes committed with this record, version `0.70.0-dev.1`. This is scoped integration verification, not final release qualification. All data, keys and credentials were synthetic; disposable local laboratories were removed afterwards. No production deployment or scan was performed.
+
+The shared `OutboundHttpPolicy`/`BoundedResponseHandler` now govern webhook, federation, identity connection tests and OIDC runtime HTTP clients. SAML prepares metadata through the bounded client before initializing Sustainsys, retaining response/assertion signature checks and renewing metadata on demand. Domain/API/federation payloads remain unchanged; internal integrations now require explicit deployment-owned exact origin approvals. Artifact-resolution downloads, automatic HTTP redirects and system proxy routing are disabled. Read the [upgrade/configuration notes](../../operations/INSTALLATION_AND_UPGRADES.md#outbound-integration-configuration).
+
+Executed commands, with `FYLKREN_E2E_API_IMAGE=fylkren-asvs-outbound-api:latest` and `FYLKREN_E2E_WEB_IMAGE=fylkren-automatic-lifecycle-web:latest` for the maintained container laboratories:
+
+```sh
+dotnet run --project tests/foundations/Fylkren.FoundationTests.csproj -- --outbound-http-only
+node tools/run-identity-sso-lab.mjs --no-build
+node tools/run-federation-pair.mjs --outbound-only --no-build
+node tools/run-federation-pair.mjs --operational-only --no-build
+pnpm check:docs
+pnpm check:structure
+pnpm check:version
+```
+
+The same existing federation laboratory gained an `--outbound-only` mode rather than a separate test system. The API image was built from the final changed API sources. The reused earlier web image supplies unchanged login/gateway behavior; this run does not qualify the latest task/activity UI as part of a full matched release candidate. Immutable image IDs and source/test/log hashes are in the `outboundIntegrationContinuation` section of the [existing evidence manifest](2026-10-02-release-regression-evidence.json).
+
+Observed results:
+
+- Local trusted-TLS tests accepted an explicitly approved exact private origin and ordinary public addresses, and rejected default private/mixed DNS, wrong approved ports, mapped private IPv4, IPv4/IPv6 metadata/link-local/reserved/tunnel/documentation cases, oversized headers and invalid TLS. The first checked connection performed one DNS lookup and connected to the checked IP. Redirect targets received zero requests. Known-length/chunked oversized responses rejected, while the exact byte boundary succeeded.
+- SAML cache tests preserved signing keys, accepted signed metadata, reused a valid snapshot under concurrent challenges and refreshed expired cache entries. Changed configuration, wrong IdP identity, expired metadata and failed renewal exposed no stale snapshot. Signed metadata compatibility is not a claim of independent metadata-signature verification.
+- Actual OIDC connection tests rejected array metadata and numeric endpoint values with 502. Runtime known-length/chunked oversized bodies, redirects and foreign JWKS origins returned bounded 502 while local administration remained available. Normal authorization-code sign-in, exact issuer/subject binding, state/nonce/audience rejection and replay/lockout guards still passed.
+- Actual SAML runtime known-length/chunked oversize, redirect and expired metadata cases rejected with 502. Connection/runtime external/internal DTDs and assertion XXE cases reached zero canaries. Valid signed SSO passed; tampered, unsigned, replayed and double-base64 responses remained rejected. Ordinary session and local administrative routes continued to work during provider failure.
+- Actual federation discovery rejected responses over its 16,384-byte operation limit and the 1,000,000-byte client ceiling, redirected responses and an unapproved private origin. Actual webhook delivery acknowledged a 200 response with a body above the federation ceiling without reading it, retained a 302 retry/status and retried an unapproved private receiver without contacting it. Redirect/private-address canary requests: zero.
+- Existing operational federation passed signed receipts/retry, activity deduplication, progress/official answer, private-learning boundaries, side/planned requests and cancellation with the same shared transport.
+
+The initial OIDC negatives exposed two transient hardening regressions: the challenge error handler invalidated the initiating local session (next admin read 401), and the library's bare redirect IOException escaped as 500. Final retests passed after preserving local sessions on challenge download failure and explicitly rejecting IdP redirects as controlled HttpRequestException. Early federation fixture failures were missing mounted response files and an incorrect test-client DELETE argument; those fixture defects were corrected before recording successful results.
+
+The repository structure check also found a pre-existing English-source language violation in the execution-label test added earlier. Its synthetic labels/assertions now use the English catalog; product translations were not changed. The invoked frontend test command ran all 161 unit tests in 41 files in about three seconds, all passing. Source structure/language and documentation/security-traceability checks passed. No unrelated whole-product API, backup/restore or browser workflow regression was repeated.
+
+ASVS 1.3.3 is now Passed for the completed dangerous-context limits. ASVS 1.3.6 remains In progress because non-HTTP SMTP/AD/LDAP configured server, DNS/port and referral boundaries still need their own dynamic cases. ASVS 1.4.2 remains open for aggregate totals, date bounds and version/counter increments. Findings SV-065 (HTTP boundary) and SV-066 (typed metadata handling) are closed for the retested scope; the remaining transport work stays on the same matrix row. No retention/deletion behavior changed.

@@ -423,6 +423,27 @@ try {
   const mismatchedIssuerTest = await manager.post('/api/platform/identity/providers/oidc/test', {});
   assert.equal(mismatchedIssuerTest.status, 502, 'OIDC metadata with an issuer different from the configured authority must be rejected');
 
+  process.stdout.write('Checking ASVS 1.3.3/1.3.6 OIDC runtime download boundaries...\n');
+  const oidcMetadataMode = value => compose(['exec', '-T', 'api', 'curl', '--fail', '--silent', '--show-error',
+    '--cacert', '/run/fylkren-identity-lab/ca.crt', '-X', 'POST', '-d', `value=${value}`, `${negativeAuthority}/oidc-metadata-mode`]);
+  for (const variant of ['array', 'typed', 'oversized', 'chunked', 'redirect', 'foreign-keys']) {
+    const configuration = { ...oidcConfiguration, authority: `${negativeAuthority}/metadata-case/${variant}` };
+    oidcMetadataMode('valid');
+    assert.equal((await manager.put('/api/platform/identity/providers/oidc', { enabled: false, clearSecret: false, configuration })).status, 204);
+    assert.equal((await manager.post('/api/platform/identity/providers/oidc/test', {})).status, 204);
+    if (['array', 'typed'].includes(variant)) {
+      oidcMetadataMode(variant);
+      assert.equal((await manager.post('/api/platform/identity/providers/oidc/test', {})).status, 502, `Malformed ${variant} metadata did not fail safely`);
+    } else {
+      assert.equal((await manager.put('/api/platform/identity/providers/oidc', { enabled: true, clearSecret: false, configuration })).status, 204);
+      oidcMetadataMode(variant);
+      const rejected = await manager.request('/api/auth/oidc/login');
+      assert.equal(rejected.status, 502, `Runtime OIDC ${variant} was not rejected safely: ${JSON.stringify(rejected.body)}`);
+      assert.equal(rejected.body.error, 'external_authentication_failed');
+      assert.equal((await manager.request('/api/platform/identity/providers/oidc')).status, 200, 'Invalid OIDC metadata blocked local administration');
+    }
+  }
+  oidcMetadataMode('valid');
   const saved = await manager.put('/api/platform/identity/providers/oidc', { enabled: false, clearSecret: false, configuration: oidcConfiguration });
   assert.equal(saved.status, 204, JSON.stringify(saved.body));
   const tested = await manager.post('/api/platform/identity/providers/oidc/test', {});
@@ -689,7 +710,7 @@ try {
     '--cacert', '/run/fylkren-identity-lab/ca.crt', `${authority}/protocol/saml/descriptor`]);
   compose(['exec', '-T', 'api', 'curl', '--fail', '--silent', '--show-error',
     '--cacert', '/run/fylkren-identity-lab/ca.crt', '-X', 'POST', '--data-binary', '@-', `${negativeAuthority}/metadata-body`], { input: runtimeMetadata });
-  for (const variant of ['external', 'internal']) {
+  for (const variant of ['external', 'internal', 'oversized', 'chunked', 'redirect', 'expired']) {
     const setMode = mode => compose(['exec', '-T', 'api', 'curl', '--fail', '--silent', '--show-error',
       '--cacert', '/run/fylkren-identity-lab/ca.crt', '-X', 'POST', '-d', `value=${mode}`, `${negativeAuthority}/xml-mode`]);
     setMode('valid');
@@ -716,6 +737,7 @@ try {
   const runtimeProbes = compose(['exec', '-T', 'api', 'curl', '--fail', '--silent', '--show-error',
     '--cacert', '/run/fylkren-identity-lab/ca.crt', `${negativeAuthority}/xml-probes`]);
   assert.equal(JSON.parse(runtimeProbes).xmlCanaryRequests, 0, 'Runtime metadata parsing fetched an external entity');
+  assert.equal(JSON.parse(runtimeProbes).redirectCanaryRequests, 0, 'Runtime metadata followed a redirect');
   const samlSaved = await manager.put('/api/platform/identity/providers/saml', { enabled: false, clearSecret: false, configuration: samlConfiguration });
   assert.equal(samlSaved.status, 204, JSON.stringify(samlSaved.body));
   const samlTested = await manager.post('/api/platform/identity/providers/saml/test', {});
@@ -900,6 +922,11 @@ try {
     samlSingleBase64Decoding: 'passed',
     samlRuntimeMetadataDtdAndExternalEntityRejection: 'passed',
     samlMetadataFailureIsolation: 'passed',
+    samlRuntimeMetadataDownloadLimits: 'passed',
+    samlRuntimeMetadataDownloadCases: ['oversized', 'chunked', 'redirect', 'expired'],
+    oidcRuntimeMetadataDownloadLimits: 'passed',
+    oidcMetadataShapeAndDownloadCases: ['array', 'typed', 'oversized', 'chunked', 'redirect', 'foreign-keys'],
+    metadataRedirectCanaryRequests: JSON.parse(runtimeProbes).redirectCanaryRequests,
   }, null, 2)}\n`);
 } catch (error) {
   if (started) {

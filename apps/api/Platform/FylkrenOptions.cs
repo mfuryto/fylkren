@@ -9,6 +9,7 @@ public sealed class FylkrenOptions
     public FeatureOptions Features { get; set; } = new();
     public AuthenticationOptions Authentication { get; set; } = new();
     public FederationOptions Federation { get; set; } = new();
+    public OutboundOptions Outbound { get; set; } = new();
     public OperationsOptions Operations { get; set; } = new();
 
     public void Validate()
@@ -21,6 +22,8 @@ public sealed class FylkrenOptions
             !string.IsNullOrEmpty(publicUri.Fragment))
             throw new InvalidOperationException("Fylkren:PublicUrl must be an origin-only HTTP(S) URL without credentials, path, query or fragment.");
         PublicUrl = PublicUrl.TrimEnd('/');
+        Fylkren.Api.Networking.OutboundHttpPolicy.ParseOrigins(Outbound.PrivateOrigins);
+        Fylkren.Api.Networking.OutboundHttpPolicy.ParseOrigins(Outbound.AdditionalIdentityOrigins);
         ValidateOidc();
         ValidateSaml();
         ValidateDirectory("Active Directory", Authentication.ActiveDirectory);
@@ -86,7 +89,7 @@ public sealed class FylkrenOptions
     {
         if (!Authentication.Oidc.Enabled) return;
         if (new[] { Authentication.Oidc.Authority, Authentication.Oidc.ClientId, Authentication.Oidc.ClientSecret }.Any(string.IsNullOrWhiteSpace)) throw new InvalidOperationException("OIDC is enabled, but authority, client ID or client secret is missing.");
-        if (!Uri.TryCreate(Authentication.Oidc.Authority, UriKind.Absolute, out var authority) || authority.Scheme != Uri.UriSchemeHttps) throw new InvalidOperationException("OIDC authority must be an absolute HTTPS URL.");
+        if (!Uri.TryCreate(Authentication.Oidc.Authority, UriKind.Absolute, out var authority) || !Fylkren.Api.Networking.OutboundHttpPolicy.ValidUri(authority)) throw new InvalidOperationException("OIDC authority must be an absolute HTTPS URL.");
         if (!ValidCallbackPath(Authentication.Oidc.CallbackPath))
             throw new InvalidOperationException("OIDC callback path must be a local absolute path without query or fragment.");
     }
@@ -95,7 +98,7 @@ public sealed class FylkrenOptions
         if (!Authentication.Saml.Enabled) return;
         if (new[] { Authentication.Saml.MetadataUrl, Authentication.Saml.EntityId, Authentication.Saml.IdentityProviderEntityId }.Any(string.IsNullOrWhiteSpace))
             throw new InvalidOperationException("SAML is enabled, but metadata URL, SP entity ID or IdP entity ID is missing.");
-        if (!Uri.TryCreate(Authentication.Saml.MetadataUrl, UriKind.Absolute, out var metadata) || metadata.Scheme != Uri.UriSchemeHttps)
+        if (!Uri.TryCreate(Authentication.Saml.MetadataUrl, UriKind.Absolute, out var metadata) || !Fylkren.Api.Networking.OutboundHttpPolicy.ValidUri(metadata))
             throw new InvalidOperationException("SAML metadata URL must be an absolute HTTPS URL.");
         if (!Uri.TryCreate(Authentication.Saml.EntityId, UriKind.Absolute, out _))
             throw new InvalidOperationException("SAML SP entity ID must be an absolute URI.");
@@ -180,3 +183,9 @@ public sealed class DirectoryLifecycleOptions
     public int MissingConfirmationCount { get; set; } = 3;
 }
 public sealed class WebAuthnOptions { public bool Enabled { get; set; } public string RpId { get; set; } = "localhost"; public string DisplayName { get; set; } = "Local installation"; public HashSet<string> Origins { get; set; } = ["http://localhost:8080"]; }
+
+public sealed class OutboundOptions
+{
+    public string PrivateOrigins { get; set; } = "";
+    public string AdditionalIdentityOrigins { get; set; } = "";
+}

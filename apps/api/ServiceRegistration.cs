@@ -1,3 +1,4 @@
+using Fylkren.Api.Networking;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
 using Fido2NetLib;
@@ -39,6 +40,9 @@ internal static class ServiceRegistration
         builder.Configuration.GetSection("Fylkren").Bind(fylkrenOptions);
         fylkrenOptions.Validate();
         builder.Services.AddSingleton(fylkrenOptions);
+        var outbound = new OutboundHttpPolicy(fylkrenOptions.Outbound.PrivateOrigins, fylkrenOptions.Outbound.AdditionalIdentityOrigins);
+        builder.Services.AddSingleton(outbound);
+        builder.Services.AddSingleton<SamlMetadataCache>();
         builder.Services.AddSingleton(new LicenseService(builder.Configuration["Fylkren:License:PublicKeySpki"]));
         var technicalLogBuffer = new TechnicalLogBuffer(300);
         builder.Logging.AddProvider(technicalLogBuffer);
@@ -177,8 +181,9 @@ internal static class ServiceRegistration
                 var identityProvider = new IdentityProvider(new EntityId(saml.Enabled ? saml.IdentityProviderEntityId! : "https://disabled.invalid/idp"), options.SPOptions);
                 if (saml.Enabled)
                 {
-                    identityProvider.MetadataLocation = saml.MetadataUrl;
-                    identityProvider.LoadMetadata = true;
+                    // Metadata is prepared asynchronously before the SAML handler is initialized.
+                    // Library WebClient downloads/redirects and artifact fetches are not enabled.
+                    // The injected options configurator below supplies prepared metadata.
                 }
                 else
                 {
@@ -186,6 +191,16 @@ internal static class ServiceRegistration
                 }
                 options.IdentityProviders.Add(identityProvider);
             });
+        builder.Services.AddOptions<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme)
+            .Configure<IHttpClientFactory>((options, clients) => options.Backchannel = clients.CreateClient("identity-provider-runtime"));
+        builder.Services.AddOptions<Saml2Options>(Saml2Defaults.Scheme).Configure<SamlMetadataCache>((options, metadata) =>
+        {
+            var saml = fylkrenOptions.Authentication.Saml;
+            if (!saml.Enabled) return;
+            var provider = options.IdentityProviders[new EntityId(saml.IdentityProviderEntityId!)];
+            provider.ReadMetadata(metadata.Prepared(saml));
+            provider.ArtifactResolutionServiceUrls.Clear();
+        });
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<IAuthenticationSchemeProvider, SamlRequestSchemeProvider>();
         builder.Services.AddAuthorization(options =>
@@ -257,11 +272,14 @@ internal static class ServiceRegistration
                 postgres => postgres.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
         builder.Services.AddHostedService<NotificationDeliveryWorker>();
         builder.Services.AddHttpClient("webhooks", client => client.Timeout = TimeSpan.FromSeconds(10))
-            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+            .ConfigurePrimaryHttpMessageHandler(() => new BoundedResponseHandler(outbound.CreateTransport(), null));
         builder.Services.AddHttpClient("federation-probe", client => client.Timeout = TimeSpan.FromSeconds(10))
-            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+            .ConfigurePrimaryHttpMessageHandler(() => new BoundedResponseHandler(outbound.CreateTransport(), 1_000_000));
+        builder.Services.AddHttpClient("identity-provider-runtime", client => client.Timeout = TimeSpan.FromSeconds(10))
+            .ConfigurePrimaryHttpMessageHandler(() => new BoundedResponseHandler(outbound.CreateTransport(), 2_000_000,
+                uri => outbound.ValidateIdentityDestination(uri, fylkrenOptions.Authentication.Oidc.Authority), rejectRedirects: true));
         builder.Services.AddHttpClient("identity-provider-test", client => client.Timeout = TimeSpan.FromSeconds(10))
-            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+            .ConfigurePrimaryHttpMessageHandler(() => new BoundedResponseHandler(outbound.CreateTransport(), 2_000_000, rejectRedirects: true));
         builder.Services.AddHostedService<FederationKeyRotationWorker>();
         builder.Services.AddHostedService<FederationOutboundDeliveryWorker>();
         builder.Services.AddHostedService<WebhookDeliveryWorker>();

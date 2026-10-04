@@ -35,6 +35,16 @@ Security objectives are to:
 6. Bearer token → machine identity → scope → exact site/report grant.
 7. Parent/child site or request → explicit work relationship, immutable snapshots, and filtered return data.
 
+## Outbound HTTP integration boundary
+
+A Platform Manager configures webhook URLs, federation peer origins and identity-provider addresses; ordinary domain payloads must not select new transport destinations. All HTTP integration clients use the shared HTTPS-only checked-IP transport. DNS is resolved once per new connection; every returned address must be allowed, and the socket connects to that checked IP while normal hostname/certificate validation remains active. Redirect following and system proxy routing are disabled.
+
+Private network integration origins require exact deployment-owned approval, including port. Approval is separate from OIDC metadata's authority-origin restriction; a distinct JWKS/token/userinfo host requires its own identity-origin approval. Never allow metadata/link-local, multicast or other rejected special-purpose addresses through the private exception. The current source reference is the [IANA IPv4 registry](https://www.iana.org/assignments/iana-ipv4-special-registry/) and [IPv6 registry](https://www.iana.org/assignments/iana-ipv6-special-registry/); ranges require review when those assignments change.
+
+SAML metadata is downloaded and parsed with explicit byte/XML/expiry limits before authentication handler initialization. Metadata signatures are not an independent trust anchor: authenticated HTTPS and the configured exact IdP identity establish metadata trust, and Sustainsys validates response/assertion signatures against its signing keys. Artifact resolution remains disabled to avoid an alternate library network path. Webhooks consume status headers only; federation and identity readers enforce actual byte limits even when Content-Length is absent. See [deployment approvals and compatibility limits](../operations/INSTALLATION_AND_UPGRADES.md#outbound-integration-configuration).
+
+This boundary does not govern SMTP/AD/LDAP sockets. Their configured server/port/DNS/referral controls remain the explicit incomplete scope of ASVS 1.3.6. External provider outages must reject sign-in while preserving existing local administrative access; no new event, audit or notification store is introduced.
+
 ## Actors and assumptions
 
 Threat actors include anonymous users; authenticated users attempting horizontal or vertical escalation; privileged roles acting outside assigned authority; holders of leaked sessions or credentials; compromised or misconfigured identity, mail, or proxy systems; host, volume, backup, or database operators; and accidental misuse such as a wrong recipient or stale identity link.

@@ -60,6 +60,7 @@ app.Use(async (context, next) =>
 
 app.UseExceptionHandler();
 app.UseMiddleware<ExternalAuthenticationFailureCookieMiddleware>();
+app.UseMiddleware<SamlMetadataMiddleware>();
 app.UseAuthentication();
 app.UseMiddleware<ApiMachineAuthenticationMiddleware>();
 app.UseMiddleware<SecurityEventMiddleware>();
