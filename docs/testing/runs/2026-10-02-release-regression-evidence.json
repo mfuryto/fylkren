@@ -4489,5 +4489,33 @@
     },
     "matrix": "ASVS 3.2.1 Passed; continue at 3.2.2",
     "scope": "Current JSON, raster-upload and generated-export response inventory; no claim for distinct frontend rendering contexts under 3.2.2"
+  },
+  "safeTextOutputCompletion": {
+    "date": "2026-10-04",
+    "baseline": "5329c6c",
+    "sourceHashes": {
+      "apps/web/src/components/RichText.tsx": "805e51a425040f42f404f0945c2dbd4106fe70b48e52d9862e7caeeac6f12370",
+      "apps/web/src/components/RichText.test.ts": "2b72f787e713a83a410b43ee928f4ea7aea190b609e65aed53da38265c58c8c2",
+      "apps/web/src/reports/printReport.ts": "d02c1fb3f3d98c03a712e103013ba3a34423f4564e5a2dd14da5df57ab4de637",
+      "apps/web/src/reports/printReport.test.ts": "6ef3dac16c18faf89f6a5c61b733061e47a97f0bc47a2eda86ed3fc195f4518d",
+      "apps/web/src/tasks/TaskCommentsButton.tsx": "85caf448f29758b80cfca7c56cfc5f663b7eef4902747c396211fbd235027b15",
+      "apps/web/src/tasks/TaskCommentsButton.test.tsx": "caf6db80b2373918a653b444795c784e42bd2a268c18f2a9bafab0b9206e51a8",
+      "apps/web/src/components/ActivityTimeline.tsx": "8aea2a59eae95b0b5351a628f44bdcf7c72d2df985c88a5e7f345fa1cbcc3d49",
+      "apps/web/src/components/ActivityTimeline.test.tsx": "a3c210650fb7f3dfbcbbe873e83b97aded569683bc1767160be0e489ad7cff5b",
+      "apps/web/src/workflows/WorkflowFields.tsx": "8e13e694fc04e156bb91f2fd94924e561317e0a2aa8e29107e381d251138bc33",
+      "apps/api/WorkManagement/WorkLinkPolicy.cs": "9ab314cef302f7d0128c7d06a3de44e7fdf3aed95e98dff190141220cf642e8e",
+      "apps/api/Platform/BrandingEndpoints.cs": "ce7850afc580b1cd4879847b1f25b617486b69b3066e9993753a4163d8d88d32"
+    },
+    "results": {
+      "frontendTestFiles": 41,
+      "frontendTests": 161,
+      "frontendTestsPassed": 161,
+      "unsafeDirectHtmlSinks": 0,
+      "richTextEscaping": "passed",
+      "plainTextReactContexts": "passed",
+      "printStyleEncoding": "passed"
+    },
+    "matrix": "ASVS 3.2.2 Passed; continue at 3.3.1",
+    "scope": "Complete current TypeScript/TSX output-sink inventory and maintained browser evidence; no cookie-control claim"
   }
 }

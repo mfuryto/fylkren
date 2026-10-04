@@ -687,3 +687,19 @@ FYLKREN_E2E_API_IMAGE=fylkren-asvs-automation-api:latest FYLKREN_E2E_WEB_IMAGE=f
 Three cross-Site requests advertise `script`, `style` and `document` destinations. Each JSON response remains `application/json`, has `X-Content-Type-Options: nosniff` and receives the restrictive gateway CSP. Active HTML submitted as `image/png` is rejected before persistence; a valid one-pixel PNG is returned as `image/png` with `nosniff`. A Site export requested as document navigation is returned as `application/zip` with `Content-Disposition: attachment`. All cases pass without a product change.
 
 The API image remains `sha256:278bc753880ead9950b1af0fd1366942198c0ba343d329a39e794c429e3bd13a`; the gateway image remains `sha256:2806135f53e64aaa7c63bcf2ff2e75933bb963361a42243bff84e2b512ae38e7`. ASVS 3.2.1 is Passed. Safe hashes and results are recorded under `contentInterpretationCompletion` in the evidence manifest. This does not pass the distinct output-context inventory under 3.2.2 or complete release qualification. Production is untouched.
+
+## Safe text output contexts — 2026-10-04
+
+Completes ASVS 3.2.2. The frontend source inventory searched all TypeScript/TSX for direct HTML/DOM fragment insertion, script evaluation, URL assignment, inline style construction and print-frame generation. There is no `dangerouslySetInnerHTML`, `document.write`, arbitrary DOM parser or executable string sink. Ordinary user/domain strings are React children or attributes and receive React escaping.
+
+Rich text is a small structural renderer that emits React headings, lists, paragraphs and text. The content editor's only `innerHTML` assignments receive `markdownToEditorHtml`, which escapes `&`, `<`, `>` and quotes before emitting the fixed element set; paste and drop use plain-text insertion. The report print frame clones already rendered DOM. Its language, title and classification-to-CSS inputs are encoded independently. Work links and customer CSS are separate URL/style contexts with server allowlists and existing negative tests.
+
+The focused current-source command was:
+
+```sh
+pnpm --filter @fylkren/web test
+```
+
+All 41 test files and 161 tests pass. These include literal/double-encoded script, image, event-handler, template-expression and JavaScript-URL text in rich content; comment and activity attribution; classification inside generated print CSS; and report rendering. The maintained Chromium run additionally proves stored active-content text and editor paste/drop remain inert. No product correction was required.
+
+ASVS 3.2.2 is Passed. Safe source hashes and results are recorded under `safeTextOutputCompletion` in the evidence manifest. This does not pass cookie controls under 3.3.1 or complete release qualification. Production is untouched.
