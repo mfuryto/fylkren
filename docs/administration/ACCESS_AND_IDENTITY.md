@@ -20,6 +20,21 @@ Local passwords are checked against length, context-specific terms and the bundl
 
 Platform Manager controls local login on **Identity**. Keep one local Platform Manager as emergency access until a tested external method preserves administrative access. Direct SSO may hide the ordinary login form and redirect to OIDC or SAML while `/?local=1` remains the documented emergency address. Fylkren refuses to disable local login unless an active Platform Manager is linked to an active external provider that has passed its connection test.
 
+## Authentication pathways and strength
+
+Every successful pathway resolves an active linked internal person, applies the same Site/role authorization after sign-in and creates the same protected Fylkren browser session. Disabling a person, identity or required access blocks all pathways for that person. Local credential-verification routes share the documented anti-automation boundary; provider-side controls remain the provider operator's responsibility.
+
+| Pathway | Proof and assessed strength | Fylkren controls and fallback |
+| --- | --- | --- |
+| Local password | One local knowledge factor | 14–128 characters, offline common/context-word screening, PBKDF2 hashing, generic failures, rate limit and identity lockout. This is the emergency administrative path while enabled. |
+| Local password plus TOTP | Two factors: local password and enrolled TOTP; a single-use recovery code substitutes for the TOTP proof | Five-minute, security-version-bound challenge; replay-resistant time step; one-time recovery codes; shared failure/rate controls. TOTP enrollment and removal require the current password. |
+| WebAuthn/passkey | Passwordless public-key authentication with authenticator user verification required | Exact RP/origin binding, five-minute protected state, one-time persisted grant, credential ownership and signature-counter checks. Registration/removal require the current password. Disabled when the common MFA switch or WebAuthn switch is off. |
+| Active Directory or LDAP | One directory password factor as observed by Fylkren; the application does not receive a separate directory MFA-strength assertion | Required LDAPS/StartTLS, explicit stable-ID link, end-user bind, generic failure and shared rate limit. Directory-managed people cannot use local password/TOTP/passkey fallback; unavailable directory service fails closed. |
+| OIDC authorization code | Provider-authenticated SSO. Fylkren currently treats a successful flow as provider-defined, minimum single-factor strength because it does not require a particular `acr`, `amr` or `auth_time` value. | Exact issuer and linked `(issuer, sub)`, state/correlation/nonce, server-side token handling and signed-token validation. Provider failure does not weaken validation or silently fall back; the separately enabled local emergency path is explicit. Do not use this pathway as application-enforced step-up authentication. |
+| SAML 2.0 SP-initiated SSO | Provider-authenticated SSO. Fylkren currently treats a valid assertion as provider-defined, minimum single-factor strength because it does not enforce an authentication-context class. | Exact IdP Entity ID and linked permanent NameID, metadata-backed response/assertion signature, request-state and replay controls. Provider failure does not weaken validation or silently fall back; the separately enabled local emergency path is explicit. Do not use this pathway as application-enforced step-up authentication. |
+
+OIDC/SAML direct redirect changes only which enabled pathway the login page presents first. `/?local=1` selects the separately enabled local pathway; it does not bypass its password, MFA, rate, lockout or session controls. Password-reset codes recover a local credential and do not themselves create a session.
+
 ## Platform and site administration
 
 Platform Manager is a system-level account and must not have site membership, unit placement, site role or Site Manager assignment. It appears as a system account in the global directory and cannot be moved or assigned to a site.

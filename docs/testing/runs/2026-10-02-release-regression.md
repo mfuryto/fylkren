@@ -1005,3 +1005,15 @@ dotnet build apps/api/Fylkren.Api.csproj --no-restore
 ```
 
 The source/document lock reports `{"passwordContextDocumentation":"passed","contextualValueFamilies":4,"normalization":"NFKC-lowercase","minimumTokenLength":4,"localPasswordSettingFlows":3,"offlineCommonPasswordList":true}`. It matches the production prepend/tokenize rules and verifies that Platform Manager bootstrap, password change and password reset all pass username, display name and email. The user-facing validation error previously mentioned organization/product names generically; it now identifies the actual enforced `Fylkren` and identity tokens. API build completed with zero warnings/errors. ASVS 6.2.11 remains separate for dynamic enforcement cases. No security finding was required. Production is untouched.
+
+## Authentication pathway and strength documentation — 2026-10-04
+
+Completes ASVS 6.1.3. The canonical access manual now presents local password, password plus TOTP/recovery, user-verifying WebAuthn, AD/LDAP, OIDC and SAML together with their proof, assessed strength, application controls, provider responsibility and fallback. All successful paths resolve an active linked internal person and create the same protected session/authorization context. The table explicitly treats OIDC/SAML as provider-defined and minimum single-factor from Fylkren's perspective because the application does not currently enforce OIDC `acr`/`amr`/`auth_time` or a SAML authentication-context class. It therefore does not claim application-enforced step-up through those paths.
+
+Scoped command:
+
+```sh
+node tools/test-authentication-pathway-documentation.mjs
+```
+
+The source/document lock reports `{"authenticationPathwayDocumentation":"passed","documentedPathways":6,"sharedLocalRateBoundary":true,"webauthnUserVerificationRequired":true,"providerStrengthFallbacksDocumented":2,"publicPathwayFlags":7}`. It matches local/directory rate-limited endpoints, required WebAuthn user verification, OIDC/SAML challenge handlers and every public enablement flag. `/?local=1` is documented as explicit selection of the separately enabled emergency pathway rather than a control bypass, and password reset as credential recovery rather than session creation. No implementation change or finding was required. Production is untouched.
