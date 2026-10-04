@@ -14,11 +14,12 @@ public static partial class PortabilityEndpoints
     public static IEndpointRouteBuilder MapPortabilityEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("/api/portability").RequireAuthorization();
-        group.MapPost("/sites/{siteId:guid}/export", Export);
+        group.MapPost("/sites/{siteId:guid}/export", Export).RequireRateLimiting("costly-operation");
         group.MapGet("/sites/{siteId:guid}/exports", Receipts);
         group.MapGet("/sites/{siteId:guid}/exit", ExitStatus);
         group.MapPost("/sites/{siteId:guid}/exports/{exportId:guid}/acknowledge", Acknowledge);
         group.MapPost("/sites/{siteId:guid}/imports/validate", ValidateImport)
+            .RequireRateLimiting("bounded-upload")
             .DisableAntiforgery()
             .WithMetadata(new RequestSizeLimitAttribute(PortableExportPackage.MaximumImportRequestBytes))
             .WithMetadata(new RequestFormLimitsAttribute { MultipartBodyLengthLimit = PortableExportPackage.MaximumPackageBytes });

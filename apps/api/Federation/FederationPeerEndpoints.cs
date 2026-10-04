@@ -53,7 +53,8 @@ internal static class FederationPeerEndpoints
                 return Results.Conflict(new { error = "federation_peer_exists" });
             return Results.Ok(new { discovered.InstanceId, baseUrl,
                 discovered.Fingerprint, verifiedAt = discovered.ProvedAt });
-        }).RequireFeature(FeatureCatalog.InstanceFederation);
+        }).RequireFeature(FeatureCatalog.InstanceFederation)
+            .RequireRateLimiting("costly-operation");
 
         group.MapPost("/{instanceId:guid}/key-recovery/discover", async (Guid instanceId,
             ClaimsPrincipal user, IAntiforgery antiforgery, HttpContext context,
@@ -74,7 +75,8 @@ internal static class FederationPeerEndpoints
                 return Results.Conflict(new { error = "federation_peer_key_unchanged" });
             return Results.Ok(new { discovered.InstanceId, peer.BaseUrl,
                 discovered.Fingerprint, verifiedAt = discovered.ProvedAt });
-        }).RequireFeature(FeatureCatalog.InstanceFederation);
+        }).RequireFeature(FeatureCatalog.InstanceFederation)
+            .RequireRateLimiting("costly-operation");
 
         group.MapPost("/{instanceId:guid}/key-recovery", async (Guid instanceId,
             PeerKeyRecoveryRequest request, ClaimsPrincipal user, IAntiforgery antiforgery,
@@ -121,7 +123,8 @@ internal static class FederationPeerEndpoints
             }
             return Results.Ok(new { peer.InstanceId, discovered.Fingerprint,
                 peer.LastProofAt, grantsSuspended = true, catalogSuspended = true });
-        }).RequireFeature(FeatureCatalog.InstanceFederation);
+        }).RequireFeature(FeatureCatalog.InstanceFederation)
+            .RequireRateLimiting("costly-operation");
 
         group.MapPost("", async (PeerRequest request, ClaimsPrincipal user, IAntiforgery antiforgery,
             HttpContext context, IHttpClientFactory clients, FylkrenDbContext db,
@@ -169,7 +172,8 @@ internal static class FederationPeerEndpoints
             return Results.Created($"/api/platform/federation/peers/{peer.InstanceId}",
                 new { peer.InstanceId, peer.Name, peer.BaseUrl, peer.CreatedAt, peer.IsActive,
                     peer.LastProofAt, discovered.Fingerprint, trusted = true, routable = false });
-        }).RequireFeature(FeatureCatalog.InstanceFederation);
+        }).RequireFeature(FeatureCatalog.InstanceFederation)
+            .RequireRateLimiting("costly-operation");
 
         group.MapPut("/{instanceId:guid}", async (Guid instanceId, PeerDetails request, ClaimsPrincipal user,
             IAntiforgery antiforgery, HttpContext context, FylkrenDbContext db, CancellationToken ct) =>

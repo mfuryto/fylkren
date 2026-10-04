@@ -656,3 +656,20 @@ FYLKREN_E2E_API_IMAGE=fylkren-asvs-locking-api:latest FYLKREN_E2E_WEB_IMAGE=fylk
 Two separately authenticated users concurrently claim the same planning run and execution item. Each path returns exactly `204/409`, and the persisted queue has one owner. Two concurrent Site creates competing for the final Community slot return `201/409`; the active count remains three, and deactivation releases a replacement slot. Maintained identity and WebAuthn tests already prove exactly one successful concurrent reset/factor consumption. Foundation and federation suites cover projection/delivery leases, idempotency, deduplication and exactly one terminal outcome.
 
 The API builds with zero warnings/errors. The tested API image is `sha256:e9612f18d3b8004ff4be58e572a2d6faf4b2a5fecbba607a76b915471ffec989`; the unchanged web gateway is `sha256:2806135f53e64aaa7c63bcf2ff2e75933bb963361a42243bff84e2b512ae38e7`. ASVS 2.3.4 is Passed. Safe hashes and focused outcomes are recorded under `limitedResourceLockingCompletion` in the evidence manifest. This does not pass anti-automation requirement 2.4.1 or complete release qualification. Production is untouched.
+
+## Anti-automation controls — 2026-10-04
+
+Completes ASVS 2.4.1. The inventory retained existing stricter limits for authentication clients, machine identities and federation protocol callers but found no common ceiling for ordinary authenticated API traffic or several costly export and external-integration operations (SV-083). Authorization and per-command validation remained effective, but an authorized account could automate excessive reads, garbage writes, package generation or network probes.
+
+The common limiter now partitions authenticated browser traffic by person, machine traffic by machine identity and anonymous traffic by the trusted client-address boundary. It permits 600 reads and 120 mutating requests per fixed minute; health checks remain unthrottled for monitoring. Export, provider/directory/SMTP tests and remote federation discovery/synchronization permit six calls per identity/client per minute. Portable import validation has a separate 30-call ceiling because each package is already bounded by byte, entry and parser controls and the maintained security regression needs more than six validation cases. Every rejection uses `429` and numeric `Retry-After`.
+
+The focused commands were:
+
+```sh
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-automation-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-asvs-header-file-web:latest node tools/run-e2e-editions.mjs --asvs-automation-only --no-build
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-automation-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-asvs-header-file-web:latest node tools/run-e2e-editions.mjs --asvs-input-only --no-build
+```
+
+Isolated authenticated identities exhaust the read partition after 599 test reads plus their setup read, the mutation partition after 120 requests and the costly export partition after six successful packages. Every next request returns `429` with `Retry-After`. The existing input run still passes nine CSS and nine link rejections, seven stored payloads, 20 malformed portable manifests and 57 numeric cases, proving that the bounded-upload policy does not hide parser coverage. The API builds with zero warnings/errors.
+
+The tested API image is `sha256:278bc753880ead9950b1af0fd1366942198c0ba343d329a39e794c429e3bd13a`; the unchanged web gateway is `sha256:2806135f53e64aaa7c63bcf2ff2e75933bb963361a42243bff84e2b512ae38e7`. ASVS 2.4.1 is Passed. Lifetime installation storage capacity remains documented deployment/release sizing work and is not represented as unlimited scale. Safe hashes and outcomes are recorded under `antiAutomationCompletion` in the evidence manifest. Production is untouched.

@@ -20,8 +20,11 @@ public static class DirectoryEndpoints
         platform.MapGet("/directory-links", ListLinks);
         platform.MapPost("/directory-links", LinkIdentity).RequireFeature(FeatureCatalog.ExternalIdentity);
         platform.MapDelete("/directory-links/{id:guid}", UnlinkIdentity);
-        platform.MapPost("/directories/{provider}/test", TestConnection).RequireFeature(FeatureCatalog.ExternalIdentity);
-        platform.MapPost("/directories/lifecycle/sync", SynchronizeLifecycle);
+        platform.MapPost("/directories/{provider}/test", TestConnection)
+            .RequireFeature(FeatureCatalog.ExternalIdentity)
+            .RequireRateLimiting("costly-operation");
+        platform.MapPost("/directories/lifecycle/sync", SynchronizeLifecycle)
+            .RequireRateLimiting("costly-operation");
         return endpoints;
     }
 

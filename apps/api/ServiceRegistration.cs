@@ -248,6 +248,21 @@ internal static class ServiceRegistration
                 }
                 return ValueTask.CompletedTask;
             };
+            options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+            {
+                if (context.Request.Path.StartsWithSegments("/health"))
+                    return RateLimitPartition.GetNoLimiter("health");
+                var write = context.Request.Method is "POST" or "PUT" or "PATCH" or "DELETE";
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    $"global:{(write ? "write" : "read")}:{InteractiveRatePartition(context, trustForwardedHeaders)}",
+                    _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = write ? 120 : 600,
+                        Window = TimeSpan.FromMinutes(1),
+                        QueueLimit = 0,
+                        AutoReplenishment = true,
+                    });
+            });
             options.AddPolicy("authentication", context =>
                 RateLimitPartition.GetFixedWindowLimiter(
                     AuthenticationRatePartition(context, trustForwardedHeaders),
@@ -266,6 +281,12 @@ internal static class ServiceRegistration
             options.AddPolicy("federation-capability", context => RateLimitPartition.GetFixedWindowLimiter(
                 $"federation-capability:{AuthenticationRatePartition(context, trustForwardedHeaders)}",
                 _ => new FixedWindowRateLimiterOptions { PermitLimit = 20, Window = TimeSpan.FromMinutes(1), QueueLimit = 0, AutoReplenishment = true }));
+            options.AddPolicy("costly-operation", context => RateLimitPartition.GetFixedWindowLimiter(
+                $"costly:{InteractiveRatePartition(context, trustForwardedHeaders)}",
+                _ => new FixedWindowRateLimiterOptions { PermitLimit = 6, Window = TimeSpan.FromMinutes(1), QueueLimit = 0, AutoReplenishment = true }));
+            options.AddPolicy("bounded-upload", context => RateLimitPartition.GetFixedWindowLimiter(
+                $"bounded-upload:{InteractiveRatePartition(context, trustForwardedHeaders)}",
+                _ => new FixedWindowRateLimiterOptions { PermitLimit = 30, Window = TimeSpan.FromMinutes(1), QueueLimit = 0, AutoReplenishment = true }));
         });
         builder.Services.AddDbContext<FylkrenDbContext>(options =>
             options.UseNpgsql(
@@ -291,6 +312,11 @@ internal static class ServiceRegistration
     }
 
     static string ApiRatePartition(HttpContext context) => context.User.FindFirst("fylkren:machine_id")?.Value ?? $"unauthenticated:{context.Connection.RemoteIpAddress}";
+
+    static string InteractiveRatePartition(HttpContext context, bool trustForwardedHeaders) =>
+        context.User.FindFirst("fylkren:person_id")?.Value is { Length: > 0 } personId ? $"person:{personId}" :
+        context.User.FindFirst("fylkren:machine_id")?.Value is { Length: > 0 } machineId ? $"machine:{machineId}" :
+        AuthenticationRatePartition(context, trustForwardedHeaders);
 
     static string AuthenticationRatePartition(HttpContext context, bool trustForwardedHeaders)
     {

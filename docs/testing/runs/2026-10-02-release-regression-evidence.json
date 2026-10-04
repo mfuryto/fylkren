@@ -4429,5 +4429,39 @@
     "finding": "SV-082 closed after focused retest",
     "matrix": "ASVS 2.3.4 Passed; continue at 2.4.1",
     "scope": "Application limited-resource inventory and focused live concurrency; no anti-automation or release qualification claim"
+  },
+  "antiAutomationCompletion": {
+    "date": "2026-10-04",
+    "baseline": "cad2b4d",
+    "sourceHashes": {
+      "apps/api/ServiceRegistration.cs": "899fddd92a5eb90dc906edd72e4c7f225ce60e1f54e11200ca1bc30a9e84f6a5",
+      "apps/api/Portability/PortabilityEndpoints.cs": "87d8bd5d37d48040f7bf31cfe6c8bbace46b19e79479020a5b96191feb2ac53b",
+      "apps/api/Platform/IdentityProviderEndpoints.cs": "8f54eae386b1c87ec8b60e03ae4e5abb3f44ac550350ac0657ffb3e649a124ee",
+      "apps/api/Identity/DirectoryEndpoints.cs": "c1ed9f621b4686c06026fb128304cc91cffc0bfbe63ba8db6e4c4beb9498602d",
+      "apps/api/Platform/SmtpEndpoints.cs": "491e239358166f99a8f73676bb40c32122b0a62cc23738712172e45a64613652",
+      "apps/api/Federation/FederationPeerEndpoints.cs": "41db12a8d6b67e511492e7bcab9d29ec9d9ca879313012813880e677126c4e7a",
+      "apps/api/Federation/FederationCatalogEndpoints.cs": "f0e9314e630f7129a9d1897d071c76d3693945c2e3255677e0aa550f8b08b029",
+      "apps/api/Platform/ApiMachineAuthentication.cs": "0e9afd42bdba15aa0ae7f690d031d670206513ebbf34ae905e612b76a630cb7d",
+      "tools/e2e/encoding-security.mjs": "c19ca0ea7ab305b08da6b5ea52a1a7d546425098beffacb7dcefa72dc9bde3e6",
+      "tools/e2e/auth-session-security.mjs": "72764c9f71df6c61ab6b2dfeeeb7e7873b8f23af21461fb9720a03ba49863f00",
+      "tools/test-e2e-local.mjs": "2d4bfd9eeb2368adae075b71ff932aeacfc1cc7660d27dc3e2c2e5f7fe7d113c",
+      "tools/run-e2e-editions.mjs": "70834f69c41a46316ebe226dbb3326f3cc6e6c56277e9a48211fac5fb2a2af0c"
+    },
+    "apiImage": "sha256:278bc753880ead9950b1af0fd1366942198c0ba343d329a39e794c429e3bd13a",
+    "reusedWebImage": "sha256:2806135f53e64aaa7c63bcf2ff2e75933bb963361a42243bff84e2b512ae38e7",
+    "results": {
+      "antiAutomation": "passed",
+      "authenticatedReadCeiling": 600,
+      "acceptedReadsAfterSetup": 599,
+      "authenticatedWriteCeiling": 120,
+      "costlyOperationCeiling": 6,
+      "retryAfterPresent": true,
+      "portableParserBoundaries": "passed",
+      "rejectedManifestCases": 20,
+      "numericInputRejections": 57
+    },
+    "finding": "SV-083 closed after focused retest",
+    "matrix": "ASVS 2.4.1 Passed; continue at 3.2.1",
+    "scope": "Common request-rate and costly-operation automation controls; lifetime deployment storage capacity remains release sizing"
   }
 }

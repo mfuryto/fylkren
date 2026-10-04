@@ -413,6 +413,44 @@ export async function testLimitedResourceLocking({ leader, competitor, siteId, u
     executionClaimStatuses, planningSingleOwner: true, executionSingleOwner: true };
 }
 
+export async function testAntiAutomation({ reader, writer, siteManager, siteId }) {
+  let acceptedReads = 0;
+  for (; acceptedReads < 600; acceptedReads++) {
+    const response = await reader.request('/api/session');
+    if (response.status === 429) break;
+    assert.equal(response.status, 200, `Global read request ${acceptedReads + 1}: ${JSON.stringify(response.body)}`);
+  }
+  const readLimited = await reader.request('/api/session');
+  assert.equal(readLimited.status, 429, 'Authenticated read automation was not bounded');
+  assert.match(readLimited.retryAfter ?? '', /^\d+$/, 'Global read rejection omitted Retry-After');
+  assert.ok(acceptedReads >= 590 && acceptedReads <= 599,
+    `Unexpected authenticated read allowance after session setup: ${acceptedReads}`);
+
+  for (let index = 0; index < 120; index++) {
+    const response = await writer.post('/api/synthetic-anti-automation-missing', {});
+    assert.equal(response.status, 404, `Global write request ${index + 1}: ${JSON.stringify(response.body)}`);
+  }
+  const writeLimited = await writer.post('/api/synthetic-anti-automation-missing', {});
+  assert.equal(writeLimited.status, 429, 'Authenticated write automation was not bounded');
+  assert.match(writeLimited.retryAfter ?? '', /^\d+$/, 'Global write rejection omitted Retry-After');
+
+  for (let index = 0; index < 6; index++) {
+    const response = await siteManager.request(`/api/portability/sites/${siteId}/export`, {
+      method: 'POST', binary: true,
+    });
+    assert.equal(response.status, 200, `Costly export ${index + 1} was rejected: ${response.status}`);
+  }
+  const costlyLimited = await siteManager.request(`/api/portability/sites/${siteId}/export`, {
+    method: 'POST', binary: true,
+  });
+  assert.equal(costlyLimited.status, 429, 'Repeated costly export was not bounded');
+  assert.match(costlyLimited.retryAfter ?? '', /^\d+$/, 'Costly-operation rejection omitted Retry-After');
+
+  return { antiAutomation: 'passed', authenticatedReadCeiling: 600,
+    acceptedReadsAfterSetup: acceptedReads, authenticatedWriteCeiling: 120,
+    costlyOperationCeiling: 6, retryAfterPresent: true };
+}
+
 export async function testDerivedArithmeticBoundaries({ platform, siteManager, leader, siteId, unitId, workItemTypeId }) {
   const path = `/api/site-audit/sites/${siteId}`;
   const original = await siteManager.request(path);

@@ -29,7 +29,9 @@ internal static class FederationCatalogEndpoints
                 .ToListAsync(ct);
             return Results.Ok(rows);
         });
-        group.MapPost("/sync", Sync).RequireFeature(FeatureCatalog.InstanceFederation);
+        group.MapPost("/sync", Sync)
+            .RequireFeature(FeatureCatalog.InstanceFederation)
+            .RequireRateLimiting("costly-operation");
     }
 
     private static async Task<IResult> Receive(FederationCatalogRequest request, HttpContext context,

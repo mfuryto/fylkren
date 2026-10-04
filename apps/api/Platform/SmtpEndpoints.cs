@@ -28,7 +28,7 @@ public static class SmtpEndpoints
         g.MapGet("/deliveries", GetDeliveries);
         g.MapPut("/templates/{key}", UpdateTemplate);
         g.MapPut("/", UpdateSettings);
-        g.MapPost("/test", SendTestMessage);
+        g.MapPost("/test", SendTestMessage).RequireRateLimiting("costly-operation");
         return e;
     }
 
