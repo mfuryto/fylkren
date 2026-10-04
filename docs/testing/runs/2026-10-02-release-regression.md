@@ -1485,3 +1485,16 @@ pnpm --filter @fylkren/web test
 ```
 
 The source/composition control reports `{"federatedSessionCreationAction":"passed","automaticProviderNavigation":false,"directSsoRequiresButton":true,"ordinarySsoRequiresAction":true,"localPasswordRequiresSubmit":true,"passkeyRequiresAction":true,"callbackAloneCannotCreateUnlinkedSession":true}`. It rejects effect-driven provider navigation and locks the explicit direct-SSO button, ordinary sign-in form and passkey action. Existing signed OIDC/SAML laboratories remain the callback state/link/signature evidence; SV-097 separately tracks upstream authentication recentness and coordinated termination. Production is untouched.
+
+## Authorization documentation reconciliation — 2026-10-04
+
+Completes ASVS 8.1.1. The authoritative access matrix now maps the complete registered HTTP surface to eight named control families. Each family specifies its consumer permission, resource attributes and field/response boundary. The source inventory fails when an endpoint source is unclassified or when an HTTP operation is added or removed without reconciling the documented inventory.
+
+Scoped commands:
+
+```sh
+node tools/test-authorization-documentation-inventory.mjs
+pnpm check:docs
+```
+
+The inventory reports `{"authorizationDocumentationInventory":"passed","endpointFiles":94,"endpointOperations":287,"methodCounts":{"GET":103,"POST":114,"PUT":45,"PATCH":0,"DELETE":25},"familyCounts":{"public-bootstrap":7,"identity-session":30,"machine-api":26,"federation":39,"archive-portability":8,"platform-governance":55,"site-administration":45,"operational-work":77}}`. Documentation links and traceability checks pass. Existing dynamic authorization tests remain the behavioral evidence for role, Site, work-level and direct-object boundaries; this documentation-only criterion did not rerun unrelated product flows. Production is untouched.
