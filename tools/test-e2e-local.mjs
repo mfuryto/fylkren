@@ -19,7 +19,7 @@ import { testLookupSorting } from './e2e/lookup-sorting.mjs';
 import { testFederationCandidates } from './e2e/federation-candidates.mjs';
 import { testAuthenticationBoundary, testAuthSessionSecurity } from './e2e/auth-session-security.mjs';
 import { testIdentitySessionLifecycle } from './e2e/identity-session-lifecycle.mjs';
-import { testCustomCssEncoding, testStoredEncoding, testNumericInputBoundaries, testDerivedArithmeticBoundaries, testVersionMutationBoundaries, testSqlAuthenticationCounter, testContextualInputRules, testQueryInputValidation, testBodyShapeValidation, testHeaderFileInputValidation, testBusinessFlowSequence, testBusinessLogicLimits, testCommunitySiteLimit, testLimitedResourceLocking, testAntiAutomation } from './e2e/encoding-security.mjs';
+import { testCustomCssEncoding, testStoredEncoding, testNumericInputBoundaries, testDerivedArithmeticBoundaries, testVersionMutationBoundaries, testSqlAuthenticationCounter, testContextualInputRules, testQueryInputValidation, testBodyShapeValidation, testHeaderFileInputValidation, testBusinessFlowSequence, testBusinessLogicLimits, testCommunitySiteLimit, testLimitedResourceLocking, testAntiAutomation, testContentInterpretation } from './e2e/encoding-security.mjs';
 
 const base = process.env.FYLKREN_E2E_BASE_URL ?? 'http://localhost:18080';
 function client() {
@@ -36,11 +36,18 @@ function client() {
       const separator = pair.indexOf('=');
       if (separator > 0) cookies.set(pair.slice(0, separator), pair.slice(separator + 1));
     }
-    if (binary) return { status: response.status, body: Buffer.from(await response.arrayBuffer()), contentType: response.headers.get('content-type'), retryAfter: response.headers.get('retry-after') };
+    const securityHeaders = {
+      contentType: response.headers.get('content-type'),
+      contentDisposition: response.headers.get('content-disposition'),
+      nosniff: response.headers.get('x-content-type-options'),
+      contentSecurityPolicy: response.headers.get('content-security-policy'),
+      retryAfter: response.headers.get('retry-after'),
+    };
+    if (binary) return { status: response.status, body: Buffer.from(await response.arrayBuffer()), ...securityHeaders };
     const body = await response.text();
     let parsed;
     try { parsed = JSON.parse(body); } catch { parsed = body; }
-    return { status: response.status, body: parsed, retryAfter: response.headers.get('retry-after') };
+    return { status: response.status, body: parsed, ...securityHeaders };
   }
   return {
     request,
@@ -142,7 +149,7 @@ assert.equal((await platform.put('/api/platform/regional-settings', {
   defaultLanguage: 'en-US', timeZone: 'UTC',
   clockFormat: '24-hour', measurementSystem: 'metric',
 })).status, 200);
-if (!process.argv.includes('--asvs-arithmetic-only') && !process.argv.includes('--asvs-version-only') && !process.argv.includes('--asvs-zip-only') && !process.argv.includes('--asvs-counter-only') && !process.argv.includes('--asvs-input-only') && !process.argv.includes('--asvs-context-only') && !process.argv.includes('--asvs-limits-only') && !process.argv.includes('--asvs-query-only') && !process.argv.includes('--asvs-body-only') && !process.argv.includes('--asvs-header-file-only') && !process.argv.includes('--asvs-sequence-only') && !process.argv.includes('--asvs-business-limits-only') && !process.argv.includes('--asvs-community-limit-only') && !process.argv.includes('--asvs-locking-only') && !process.argv.includes('--asvs-automation-only')) {
+if (!process.argv.includes('--asvs-arithmetic-only') && !process.argv.includes('--asvs-version-only') && !process.argv.includes('--asvs-zip-only') && !process.argv.includes('--asvs-counter-only') && !process.argv.includes('--asvs-input-only') && !process.argv.includes('--asvs-context-only') && !process.argv.includes('--asvs-limits-only') && !process.argv.includes('--asvs-query-only') && !process.argv.includes('--asvs-body-only') && !process.argv.includes('--asvs-header-file-only') && !process.argv.includes('--asvs-sequence-only') && !process.argv.includes('--asvs-business-limits-only') && !process.argv.includes('--asvs-community-limit-only') && !process.argv.includes('--asvs-locking-only') && !process.argv.includes('--asvs-automation-only') && !process.argv.includes('--asvs-content-context-only')) {
 const platformOperations = await platform.request('/api/platform/operations');
 assert.equal(platformOperations.status, 200, JSON.stringify(platformOperations.body));
 assert.equal(platformOperations.body.hostIntegration.available, true, 'Host status snapshot must be available');
@@ -322,6 +329,11 @@ const assignment = await siteManager.account.post(`/api/sites/${siteId}/access/r
 assert.equal(assignment.status, 201, JSON.stringify(assignment.body));
 
 const { taskTypeId } = await testLookupSorting({ manager: siteManager.account, reader: leader.account, siteId });
+if (process.argv.includes('--asvs-content-context-only')) {
+  console.log(JSON.stringify(await testContentInterpretation({ platform,
+    siteManager: siteManager.account, siteId })));
+  process.exit(0);
+}
 if (process.argv.includes('--asvs-automation-only')) {
   const readActor = await makeUser('automation-reader');
   const writeActor = await makeUser('automation-writer');

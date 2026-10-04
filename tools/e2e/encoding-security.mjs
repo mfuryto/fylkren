@@ -451,6 +451,55 @@ export async function testAntiAutomation({ reader, writer, siteManager, siteId }
     costlyOperationCeiling: 6, retryAfterPresent: true };
 }
 
+export async function testContentInterpretation({ platform, siteManager, siteId }) {
+  for (const destination of ['script', 'style', 'document']) {
+    const response = await platform.request('/api/configuration/public', {
+      headers: { 'Sec-Fetch-Site': 'cross-site', 'Sec-Fetch-Mode': 'no-cors', 'Sec-Fetch-Dest': destination },
+    });
+    assert.equal(response.status, 200);
+    assert.match(response.contentType ?? '', /^application\/json\b/i,
+      `API response for ${destination} has an executable content type`);
+    assert.equal(response.nosniff, 'nosniff', `API response for ${destination} omitted nosniff`);
+    assert.match(response.contentSecurityPolicy ?? '', /object-src 'none'/i);
+    assert.match(response.contentSecurityPolicy ?? '', /frame-ancestors 'none'/i);
+    assert.match(response.contentSecurityPolicy ?? '', /base-uri 'none'/i);
+  }
+
+  const invalid = new FormData();
+  invalid.append('logo', new Blob([Buffer.from('<html><script>globalThis.synthetic=1</script></html>')],
+    { type: 'image/png' }), 'active.png');
+  assert.equal((await platform.request('/api/platform/branding/logo', {
+    method: 'PUT', body: invalid,
+  })).status, 400, 'Active text disguised as an image was accepted');
+
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64');
+  const valid = new FormData();
+  valid.append('logo', new Blob([png], { type: 'image/png' }), 'pixel.png');
+  assert.equal((await platform.request('/api/platform/branding/logo', {
+    method: 'PUT', body: valid,
+  })).status, 204, 'Valid raster logo was rejected');
+  const logo = await platform.request('/api/branding/logo', {
+    binary: true,
+    headers: { 'Sec-Fetch-Site': 'cross-site', 'Sec-Fetch-Mode': 'no-cors', 'Sec-Fetch-Dest': 'image' },
+  });
+  assert.equal(logo.status, 200);
+  assert.equal(logo.contentType, 'image/png');
+  assert.equal(logo.nosniff, 'nosniff');
+
+  const exported = await siteManager.request(`/api/portability/sites/${siteId}/export`, {
+    method: 'POST', binary: true,
+    headers: { 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-Dest': 'document' },
+  });
+  assert.equal(exported.status, 200);
+  assert.match(exported.contentType ?? '', /^application\/zip\b/i);
+  assert.match(exported.contentDisposition ?? '', /^attachment;/i,
+    'Portable package can be rendered inline instead of downloaded');
+  assert.equal(exported.nosniff, 'nosniff');
+
+  return { contentInterpretation: 'passed', wrongDestinationApiCases: 3,
+    activeImageContentRejected: true, rasterImageTyped: true, exportAttachment: true };
+}
+
 export async function testDerivedArithmeticBoundaries({ platform, siteManager, leader, siteId, unitId, workItemTypeId }) {
   const path = `/api/site-audit/sites/${siteId}`;
   const original = await siteManager.request(path);

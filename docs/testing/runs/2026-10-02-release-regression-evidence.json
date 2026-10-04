@@ -4463,5 +4463,31 @@
     "finding": "SV-083 closed after focused retest",
     "matrix": "ASVS 2.4.1 Passed; continue at 3.2.1",
     "scope": "Common request-rate and costly-operation automation controls; lifetime deployment storage capacity remains release sizing"
+  },
+  "contentInterpretationCompletion": {
+    "date": "2026-10-04",
+    "baseline": "3f84a79",
+    "sourceHashes": {
+      "apps/api/Program.cs": "5888c8e1ab4df0286831414fe9e1232cbda9a1b7732a29554830df6dea1180ea",
+      "apps/api/SafeImageUpload.cs": "9a4a3a84c41e40beef11b5b5d787ddb180da0dfbdd685dc410c8e71c40477bf6",
+      "apps/api/Identity/IdentityProfileEndpoints.cs": "6b5f5e42c92de74d5af45263376eca4d20754697de9251fdca66a010bb4b3a7c",
+      "apps/api/Platform/BrandingEndpoints.cs": "ce7850afc580b1cd4879847b1f25b617486b69b3066e9993753a4163d8d88d32",
+      "apps/api/Portability/PortabilityEndpoints.cs": "87d8bd5d37d48040f7bf31cfe6c8bbace46b19e79479020a5b96191feb2ac53b",
+      "apps/web/nginx.conf": "71e37872a12ff6b5ed30786b70eb8ea8fcdb066f4f2af35713babf3510a51139",
+      "tools/e2e/encoding-security.mjs": "511718362d66c8f15457851a2e5b08504963e861e9129360bfe991f82babed0f",
+      "tools/test-e2e-local.mjs": "389c6645d23302dbaad0f8d5325e1c3f8869834bdddc94549a678b221a8b14af",
+      "tools/run-e2e-editions.mjs": "2508c71c9c96fe7cd8c17f049b4753f80aa7b717a6ac1e4dc7fa496fbcbad3e9"
+    },
+    "apiImage": "sha256:278bc753880ead9950b1af0fd1366942198c0ba343d329a39e794c429e3bd13a",
+    "webImage": "sha256:2806135f53e64aaa7c63bcf2ff2e75933bb963361a42243bff84e2b512ae38e7",
+    "results": {
+      "contentInterpretation": "passed",
+      "wrongDestinationApiCases": 3,
+      "activeImageContentRejected": true,
+      "rasterImageTyped": true,
+      "exportAttachment": true
+    },
+    "matrix": "ASVS 3.2.1 Passed; continue at 3.2.2",
+    "scope": "Current JSON, raster-upload and generated-export response inventory; no claim for distinct frontend rendering contexts under 3.2.2"
   }
 }

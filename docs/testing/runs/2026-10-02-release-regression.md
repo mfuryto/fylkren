@@ -673,3 +673,17 @@ FYLKREN_E2E_API_IMAGE=fylkren-asvs-automation-api:latest FYLKREN_E2E_WEB_IMAGE=f
 Isolated authenticated identities exhaust the read partition after 599 test reads plus their setup read, the mutation partition after 120 requests and the costly export partition after six successful packages. Every next request returns `429` with `Retry-After`. The existing input run still passes nine CSS and nine link rejections, seven stored payloads, 20 malformed portable manifests and 57 numeric cases, proving that the bounded-upload policy does not hide parser coverage. The API builds with zero warnings/errors.
 
 The tested API image is `sha256:278bc753880ead9950b1af0fd1366942198c0ba343d329a39e794c429e3bd13a`; the unchanged web gateway is `sha256:2806135f53e64aaa7c63bcf2ff2e75933bb963361a42243bff84e2b512ae38e7`. ASVS 2.4.1 is Passed. Lifetime installation storage capacity remains documented deployment/release sizing work and is not represented as unlimited scale. Safe hashes and outcomes are recorded under `antiAutomationCompletion` in the evidence manifest. Production is untouched.
+
+## Unintended content interpretation — 2026-10-04
+
+Completes ASVS 3.2.1. The response/file inventory found JSON API responses, validated PNG/JPEG/WebP profile and branding images, and generated portable ZIP packages. Fylkren does not expose uploaded HTML, SVG or arbitrary attachments as browser resources. The gateway applies `nosniff`, frame denial and CSP with `object-src 'none'`, `frame-ancestors 'none'` and `base-uri 'none'`; the API supplies equivalent direct-access safeguards. Generated ZIP files already use an attachment filename.
+
+The focused current-candidate command was:
+
+```sh
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-automation-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-asvs-header-file-web:latest node tools/run-e2e-editions.mjs --asvs-content-context-only --no-build
+```
+
+Three cross-Site requests advertise `script`, `style` and `document` destinations. Each JSON response remains `application/json`, has `X-Content-Type-Options: nosniff` and receives the restrictive gateway CSP. Active HTML submitted as `image/png` is rejected before persistence; a valid one-pixel PNG is returned as `image/png` with `nosniff`. A Site export requested as document navigation is returned as `application/zip` with `Content-Disposition: attachment`. All cases pass without a product change.
+
+The API image remains `sha256:278bc753880ead9950b1af0fd1366942198c0ba343d329a39e794c429e3bd13a`; the gateway image remains `sha256:2806135f53e64aaa7c63bcf2ff2e75933bb963361a42243bff84e2b512ae38e7`. ASVS 3.2.1 is Passed. Safe hashes and results are recorded under `contentInterpretationCompletion` in the evidence manifest. This does not pass the distinct output-context inventory under 3.2.2 or complete release qualification. Production is untouched.
