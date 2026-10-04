@@ -734,3 +734,17 @@ FYLKREN_E2E_API_IMAGE=fylkren-asvs-cookies-api:latest FYLKREN_E2E_WEB_IMAGE=fylk
 The current-image run passed document and static successes, a static 404, public API, unauthorized API, unknown API, health, mutation and authenticated API responses. Every class has at least one-year HSTS with `includeSubDomains`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, and CSP with the required self allowlist, `object-src 'none'`, `base-uri 'none'`, `frame-ancestors 'none'` and `form-action 'self'`. A hostile-origin simple request and preflight receive no `Access-Control-Allow-Origin`; Fylkren remains same-origin. The result is `{"browserSecurityHeaders":"passed","responseClasses":9,"hstsMinimumSeconds":31536000,"includeSubDomains":true,"cspRequiredDirectives":true,"nosniff":true,"noReferrer":true,"staticSuccessAndError":true,"hostileCorsDenied":true}`.
 
 The API image is `sha256:c79729d6d904a2dd7896de63cb94254bf91256a0fdb734d796c88ca4db1d48d7`; the corrected gateway image is `sha256:9097512eb914b6acc30c143d929b37ce195552601e4ca3d9df4df4e16082e3d6`. SV-085 is closed. Safe hashes and results are recorded under `browserSecurityHeadersCompletion` in the evidence manifest. This does not complete CSRF/safe-method verification under 3.5.1/3.5.3 or production TLS termination qualification. Production is untouched.
+
+## CSRF and safe HTTP method boundary — 2026-10-04
+
+Completes ASVS 3.5.1 and 3.5.3. The route inventory records 103 GET, 112 POST, 45 PUT, zero PATCH and 25 DELETE declarations. Reviewed GET handlers are reads, downloads or external-login challenges. State-changing browser routes use mutation methods and pass through the common `BrowserAntiforgeryMiddleware` before authorization and endpoint dispatch. It requires the bound antiforgery cookie and `X-Fylkren-CSRF` header for every cookie-authenticated non-machine POST, PUT, PATCH and DELETE under `/api`. Signed anonymous federation receivers and bearer-authenticated machine endpoints do not use ambient browser-cookie authority.
+
+The scoped current-image command was:
+
+```sh
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-cookies-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-asvs-browser-headers-web:latest node tools/run-e2e-editions.mjs --asvs-csrf-only --no-build
+```
+
+Actual Site creation, profile update and profile-image deletion requests without tokens return bounded 400 responses before mutation. A hostile-origin profile update and an invalid token also return 400. A correctly bound cookie/header pair permits the valid profile update. GET, HEAD and OPTIONS against the password-mutation route each return 405, and the safe-method probes add no audit records. The test locks the source route counts so a later method addition requires review. Result: `{"csrfMethodBoundary":"passed","routeCounts":{"GET":103,"POST":112,"PUT":45,"PATCH":0,"DELETE":25},"missingTokenRejections":3,"hostileOriginRejected":true,"invalidTokenRejected":true,"validTokenAccepted":true,"safeMethodStatuses":{"GET":405,"HEAD":405,"OPTIONS":405},"safeMethodsCreatedAuditEvents":false}`.
+
+No product correction was required. The reused API image is `sha256:c79729d6d904a2dd7896de63cb94254bf91256a0fdb734d796c88ca4db1d48d7`; the reused gateway image is `sha256:9097512eb914b6acc30c143d929b37ce195552601e4ca3d9df4df4e16082e3d6`. Safe hashes and results are recorded under `csrfMethodBoundaryCompletion` in the evidence manifest. Production is untouched.
