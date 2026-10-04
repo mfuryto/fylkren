@@ -55,7 +55,7 @@ export const sitesNbNO = {
   newLocalUser: "Ny lokal bruker",
   assignSiteManager: "Tildel Site Manager",
   deleteSite: "Slett site",
-  deleteSiteHelp: "Sletting deaktiverer siten og bevarer historikk og audit-spor.",
+  deleteSiteHelp: "Deaktivering stopper vanlig tilgang til Site og bevarer historikk og revisjonslogg.",
   removeSiteManager: "Fjern Site Manager",
   removeSiteManagerQuestion: "Vil du fjerne {name} som Site Manager for {site}?",
   userHistoryRetained: "Brukeren og historiske handlinger beholdes.",

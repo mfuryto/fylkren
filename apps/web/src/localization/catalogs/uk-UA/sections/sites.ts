@@ -57,7 +57,7 @@ export const sitesUkUA = {
   newLocalUser: "Новий локальний користувач",
   assignSiteManager: "Призначте менеджера сайту",
   deleteSite: "Видалити сайт",
-  deleteSiteHelp: "Видалення деактиватів сайту та збереження історії та аудиту.",
+  deleteSiteHelp: "Деактивація припиняє звичайний доступ до Site та зберігає історію й записи аудиту.",
   removeSiteManager: "Видалити менеджера сайту",
   removeSiteManagerQuestion: "Ви хочете видалити {name} як Менеджер сайтів {site}?",
   userHistoryRetained: "Затримуються роботи користувачів та історичні дії.",

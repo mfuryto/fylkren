@@ -57,7 +57,7 @@ export const sitesItIT = {
   newLocalUser: "Nuovo utente locale",
   assignSiteManager: "Assegnare il sito",
   deleteSite: "Eliminare il sito",
-  deleteSiteHelp: "Cancellare disattiva il sito e conserva la storia e i registri di audit.",
+  deleteSiteHelp: "La disattivazione blocca il normale accesso al Site e conserva lo storico e i registri di audit.",
   removeSiteManager: "Rimuovi Site Manager",
   removeSiteManagerQuestion: "Vuoi rimuovere {name} come Site Manager per {site}?",
   userHistoryRetained: "Le azioni dell'utente e della storia sono conservate.",

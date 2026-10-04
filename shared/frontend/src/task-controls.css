@@ -8,3 +8,14 @@
 .task-summary .summary-card { display: flex; align-items: baseline; gap: 8px; padding: 6px 10px; box-shadow: none; background: var(--surface); }
 .task-summary .summary-card span { font-size: .8rem; }
 .task-summary .summary-card strong { margin: 0; font-size: .95rem; }
+
+/* Shape and colour distinguish information state; text remains in accessible names. */
+.lifecycle-state-icon { flex: none; width: 18px; height: 18px; }
+.lifecycle-state-active { color: #25833c; }
+.lifecycle-state-closed { color: #d03131; }
+.lifecycle-state-archived { color: #277ac2; }
+.lifecycle-state-unknown { color: var(--text-muted); }
+.lifecycle-current-state { display: flex; align-items: center; gap: 7px; }
+.lifecycle-administration { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border); }
+.lifecycle-administration h3 { margin: 0 0 8px; font-size: .9rem; }
+.lifecycle-administration > details { margin-top: 6px; }

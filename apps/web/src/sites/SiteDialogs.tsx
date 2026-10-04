@@ -254,7 +254,7 @@ export function SiteDialogs({
                 disabled={busy || !siteEditor.isActive}
                 onClick={deleteSite}
               >
-                {t("deleteSite")}
+                {t("deactivate")}
               </button>
               <span className="action-spacer" />
               <button

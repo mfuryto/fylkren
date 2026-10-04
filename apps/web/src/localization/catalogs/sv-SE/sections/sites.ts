@@ -57,7 +57,7 @@ export const sitesSvSE = {
   newLocalUser: "Ny lokal användare",
   assignSiteManager: "Tilldela Site Manager",
   deleteSite: "Ta bort Site",
-  deleteSiteHelp: "Ta bort inaktiverar webbplatsen och bevarar historia och revisionsrekord.",
+  deleteSiteHelp: "Inaktivering stoppar vanlig åtkomst till Site och bevarar historik och revisionslogg.",
   removeSiteManager: "Ta bort Site Manager",
   removeSiteManagerQuestion: "Vill du ta bort {name} som Site Manager för {site}?",
   userHistoryRetained: "Användaren och historiska handlingar behålls.",

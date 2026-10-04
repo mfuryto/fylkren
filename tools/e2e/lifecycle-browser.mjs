@@ -20,15 +20,15 @@ export async function verifyLifecyclePresentation({ request, requestExpectingHtt
   const blocked = await requestExpectingHttpError(`${work}/comments`, 'POST', { text: 'Blocked browser write' }, 409);
   assert.equal(blocked.status, 409); assert.equal(blocked.body.code, 'information_locked');
   await navigate(`/#/tasks?site=${siteId}&item=${created.body.id}`);
-  await waitFor('document.body.innerText.includes("Lock/Archive · Locked")', 'visible locked state');
-  await clickButton('Lock/Archive · Locked');
+  await waitFor("document.querySelector('button[aria-label=\"Lock/Archive: Locked\"] svg[data-stage=\"closed\"]') !== null", 'visible locked state');
+  await clickButton('Lock/Archive');
   await waitFor('document.querySelector("[role=dialog] textarea") !== null', 'locked dialog');
   await setInput('[role=dialog] textarea', 'Preserve completed information\nFor historical reference');
   await clickButton('Archive', 'document.querySelector("[role=dialog]")');
   await waitFor('document.querySelector("[role=dialog] [role=status]")?.innerText === "Archived"', 'archived dialog state');
   await clickButton('Cancel', 'document.querySelector("[role=dialog]")');
-  await waitFor('document.body.innerText.includes("Lock/Archive · Archived")', 'visible archived state');
-  await clickButton('Lock/Archive · Archived');
+  await waitFor("document.querySelector('button[aria-label=\"Lock/Archive: Archived\"] svg[data-stage=\"archived\"]') !== null", 'visible archived state');
+  await clickButton('Lock/Archive');
   await setInput('[role=dialog] textarea', 'Restore for new evidence');
   await clickButton('Restore to locked', 'document.querySelector("[role=dialog]")');
   await waitFor('document.querySelector("[role=dialog] [role=status]")?.innerText === "Locked"', 'restored locked state');
@@ -37,6 +37,6 @@ export async function verifyLifecyclePresentation({ request, requestExpectingHtt
   await clickButton('Reopen for editing', 'document.querySelector("[role=dialog]")');
   await waitFor('document.querySelector("[role=dialog] [role=status]")?.innerText === "Active"', 'reopened active state');
   await clickButton('Cancel', 'document.querySelector("[role=dialog]")');
-  await waitFor('document.body.innerText.includes("Lock/Archive · Active")', 'visible reopened state');
+  await waitFor("document.querySelector('button[aria-label=\"Lock/Archive: Active\"] svg[data-stage=\"active\"]') !== null", 'visible reopened state');
   assert.equal((await request(`${work}/comments`, 'POST', { text: 'Editable after reopen' })).status, 201);
 }

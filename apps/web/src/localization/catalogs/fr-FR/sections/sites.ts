@@ -57,7 +57,7 @@ export const sitesFrFR = {
   newLocalUser: "Nouvel utilisateur local",
   assignSiteManager: "Assigner le gestionnaire de site",
   deleteSite: "Supprimer le site",
-  deleteSiteHelp: "Supprimer le site et préserver l'historique et les dossiers de vérification.",
+  deleteSiteHelp: "La désactivation bloque l’accès normal au Site et conserve l’historique et les journaux d’audit.",
   removeSiteManager: "Supprimer le gestionnaire de site",
   removeSiteManagerQuestion: "Voulez-vous supprimer {name} en tant que gestionnaire de site pour {site} ?",
   userHistoryRetained: "Les actions de l'utilisateur et les actions historiques sont conservées.",

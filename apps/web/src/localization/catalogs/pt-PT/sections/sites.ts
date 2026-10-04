@@ -57,7 +57,7 @@ export const sitesPtPT = {
   newLocalUser: "Novo usuário local",
   assignSiteManager: "Atribuir o Gerenciador de Sites",
   deleteSite: "Apagar o site",
-  deleteSiteHelp: "A exclusão desativa o site e preserva o histórico e registros de auditoria.",
+  deleteSiteHelp: "A desativação bloqueia o acesso normal ao Site e preserva o histórico e os registos de auditoria.",
   removeSiteManager: "Remover o Gestor de Sites",
   removeSiteManagerQuestion: "Deseja remover {name}  como Gestor de Sites para {site}- Não.",
   userHistoryRetained: "O usuário e as ações históricas são mantidas.",

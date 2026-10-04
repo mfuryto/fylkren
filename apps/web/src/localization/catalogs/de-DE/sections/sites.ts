@@ -57,7 +57,7 @@ export const sitesDeDE = {
   newLocalUser: "Neuer lokaler Nutzer",
   assignSiteManager: "Zuweisung des Site Managers",
   deleteSite: "Site löschen",
-  deleteSiteHelp: "Durch das Löschen wird die Website deaktiviert und die Historie und die Audit-Aufzeichnungen bewahrt.",
+  deleteSiteHelp: "Die Deaktivierung beendet den normalen Site-Zugriff und bewahrt Verlauf und Auditprotokolle.",
   removeSiteManager: "Site Manager entfernen",
   removeSiteManagerQuestion: "Möchten Sie entfernen {name} als Site Manager für {site}?",
   userHistoryRetained: "Der Benutzer und die historischen Aktionen bleiben erhalten.",

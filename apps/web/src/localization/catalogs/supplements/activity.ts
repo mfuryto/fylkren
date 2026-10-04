@@ -1,3 +1,4 @@
+import { lifecycleGuidanceEn, lifecycleGuidanceTranslations } from "./lifecycleGuidance";
 import { preservationEn, preservationTranslations } from "./preservation";
 import { governanceEn, governanceTranslations } from "./governance";
 import { lifecycleUiEn, lifecycleUiTranslations } from "./lifecycleUi";
@@ -5,7 +6,7 @@ import { domainActivityEn, domainActivityTranslations } from "./activityDomain";
 
 export const activityEn = {
   ...domainActivityEn,
-  ...lifecycleUiEn,
+  ...lifecycleUiEn, ...lifecycleGuidanceEn,
   ...governanceEn, ...preservationEn,
 
   "activityTitle": "Activity",
@@ -29,7 +30,7 @@ export type ActivityMessageKey = keyof typeof activityEn;
 export const activityTranslations: Record<string, Record<ActivityMessageKey, string>> = {
   "en-US": {
     ...domainActivityTranslations["en-US"],
-    ...lifecycleUiTranslations["en-US"],
+    ...lifecycleUiTranslations["en-US"], ...lifecycleGuidanceTranslations["en-US"],
     ...governanceTranslations["en-US"], ...preservationTranslations["en-US"],
 
     "lifecycleAction": "Action",
@@ -51,7 +52,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   },
   "nb-NO": {
     ...domainActivityTranslations["nb-NO"],
-    ...lifecycleUiTranslations["nb-NO"],
+    ...lifecycleUiTranslations["nb-NO"], ...lifecycleGuidanceTranslations["nb-NO"],
     ...governanceTranslations["nb-NO"], ...preservationTranslations["nb-NO"],
 
     "lifecycleAction": "Handling",
@@ -73,7 +74,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   },
   "sv-SE": {
     ...domainActivityTranslations["sv-SE"],
-    ...lifecycleUiTranslations["sv-SE"],
+    ...lifecycleUiTranslations["sv-SE"], ...lifecycleGuidanceTranslations["sv-SE"],
     ...governanceTranslations["sv-SE"], ...preservationTranslations["sv-SE"],
 
     "lifecycleAction": "Åtgärd",
@@ -95,7 +96,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   },
   "da-DK": {
     ...domainActivityTranslations["da-DK"],
-    ...lifecycleUiTranslations["da-DK"],
+    ...lifecycleUiTranslations["da-DK"], ...lifecycleGuidanceTranslations["da-DK"],
     ...governanceTranslations["da-DK"], ...preservationTranslations["da-DK"],
 
     "lifecycleAction": "Handling",
@@ -117,7 +118,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   },
   "fi-FI": {
     ...domainActivityTranslations["fi-FI"],
-    ...lifecycleUiTranslations["fi-FI"],
+    ...lifecycleUiTranslations["fi-FI"], ...lifecycleGuidanceTranslations["fi-FI"],
     ...governanceTranslations["fi-FI"], ...preservationTranslations["fi-FI"],
 
     "lifecycleAction": "Toiminto",
@@ -139,7 +140,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   },
   "de-DE": {
     ...domainActivityTranslations["de-DE"],
-    ...lifecycleUiTranslations["de-DE"],
+    ...lifecycleUiTranslations["de-DE"], ...lifecycleGuidanceTranslations["de-DE"],
     ...governanceTranslations["de-DE"], ...preservationTranslations["de-DE"],
 
     "lifecycleAction": "Aktion",
@@ -161,7 +162,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   },
   "fr-FR": {
     ...domainActivityTranslations["fr-FR"],
-    ...lifecycleUiTranslations["fr-FR"],
+    ...lifecycleUiTranslations["fr-FR"], ...lifecycleGuidanceTranslations["fr-FR"],
     ...governanceTranslations["fr-FR"], ...preservationTranslations["fr-FR"],
 
     "lifecycleAction": "Action",
@@ -183,7 +184,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   },
   "pl-PL": {
     ...domainActivityTranslations["pl-PL"],
-    ...lifecycleUiTranslations["pl-PL"],
+    ...lifecycleUiTranslations["pl-PL"], ...lifecycleGuidanceTranslations["pl-PL"],
     ...governanceTranslations["pl-PL"], ...preservationTranslations["pl-PL"],
 
     "lifecycleAction": "Działanie",
@@ -205,7 +206,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   },
   "es-ES": {
     ...domainActivityTranslations["es-ES"],
-    ...lifecycleUiTranslations["es-ES"],
+    ...lifecycleUiTranslations["es-ES"], ...lifecycleGuidanceTranslations["es-ES"],
     ...governanceTranslations["es-ES"], ...preservationTranslations["es-ES"],
 
     "lifecycleAction": "Acción",
@@ -227,7 +228,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   },
   "it-IT": {
     ...domainActivityTranslations["it-IT"],
-    ...lifecycleUiTranslations["it-IT"],
+    ...lifecycleUiTranslations["it-IT"], ...lifecycleGuidanceTranslations["it-IT"],
     ...governanceTranslations["it-IT"], ...preservationTranslations["it-IT"],
 
     "lifecycleAction": "Azione",
@@ -249,7 +250,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   },
   "uk-UA": {
     ...domainActivityTranslations["uk-UA"],
-    ...lifecycleUiTranslations["uk-UA"],
+    ...lifecycleUiTranslations["uk-UA"], ...lifecycleGuidanceTranslations["uk-UA"],
     ...governanceTranslations["uk-UA"], ...preservationTranslations["uk-UA"],
 
     "lifecycleAction": "Дія",
@@ -271,7 +272,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   },
   "nl-NL": {
     ...domainActivityTranslations["nl-NL"],
-    ...lifecycleUiTranslations["nl-NL"],
+    ...lifecycleUiTranslations["nl-NL"], ...lifecycleGuidanceTranslations["nl-NL"],
     ...governanceTranslations["nl-NL"], ...preservationTranslations["nl-NL"],
 
     "lifecycleAction": "Actie",
@@ -293,7 +294,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   },
   "pt-PT": {
     ...domainActivityTranslations["pt-PT"],
-    ...lifecycleUiTranslations["pt-PT"],
+    ...lifecycleUiTranslations["pt-PT"], ...lifecycleGuidanceTranslations["pt-PT"],
     ...governanceTranslations["pt-PT"], ...preservationTranslations["pt-PT"],
 
     "lifecycleAction": "Ação",
@@ -315,7 +316,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   },
   "cs-CZ": {
     ...domainActivityTranslations["cs-CZ"],
-    ...lifecycleUiTranslations["cs-CZ"],
+    ...lifecycleUiTranslations["cs-CZ"], ...lifecycleGuidanceTranslations["cs-CZ"],
     ...governanceTranslations["cs-CZ"], ...preservationTranslations["cs-CZ"],
 
     "lifecycleAction": "Akce",
@@ -337,7 +338,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   },
   "ro-RO": {
     ...domainActivityTranslations["ro-RO"],
-    ...lifecycleUiTranslations["ro-RO"],
+    ...lifecycleUiTranslations["ro-RO"], ...lifecycleGuidanceTranslations["ro-RO"],
     ...governanceTranslations["ro-RO"], ...preservationTranslations["ro-RO"],
 
     "lifecycleAction": "Acțiune",
@@ -359,7 +360,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   },
   "et-EE": {
     ...domainActivityTranslations["et-EE"],
-    ...lifecycleUiTranslations["et-EE"],
+    ...lifecycleUiTranslations["et-EE"], ...lifecycleGuidanceTranslations["et-EE"],
     ...governanceTranslations["et-EE"], ...preservationTranslations["et-EE"],
 
     "lifecycleAction": "Toiming",
@@ -381,7 +382,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   },
   "lv-LV": {
     ...domainActivityTranslations["lv-LV"],
-    ...lifecycleUiTranslations["lv-LV"],
+    ...lifecycleUiTranslations["lv-LV"], ...lifecycleGuidanceTranslations["lv-LV"],
     ...governanceTranslations["lv-LV"], ...preservationTranslations["lv-LV"],
 
     "lifecycleAction": "Darbība",
@@ -403,7 +404,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   },
   "lt-LT": {
     ...domainActivityTranslations["lt-LT"],
-    ...lifecycleUiTranslations["lt-LT"],
+    ...lifecycleUiTranslations["lt-LT"], ...lifecycleGuidanceTranslations["lt-LT"],
     ...governanceTranslations["lt-LT"], ...preservationTranslations["lt-LT"],
 
     "lifecycleAction": "Veiksmas",
@@ -425,7 +426,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
   },
   "en-GB": {
     ...domainActivityTranslations["en-GB"],
-    ...lifecycleUiTranslations["en-GB"],
+    ...lifecycleUiTranslations["en-GB"], ...lifecycleGuidanceTranslations["en-GB"],
     ...governanceTranslations["en-GB"], ...preservationTranslations["en-GB"],
 
     "lifecycleAction": "Action",

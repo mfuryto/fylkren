@@ -334,10 +334,10 @@ export function SitesPage({ configuration }: { configuration: PublicConfiguratio
                       )}
                     </span>
                     <span className={site.isActive ? "status-active" : "muted"}>
-                      {site.isActive ? t("active") : t("deleted")}
+                      {site.isActive ? t("active") : t("inactive")}
                     </span>
                     <div className="row-actions">
-                      <GovernanceLifecycleButton kind="site" id={site.id} />
+                      <GovernanceLifecycleButton kind="site" id={site.id} name={site.name} />
                       <button className="secondary-button" type="button" disabled={busy} onClick={() => void exportSite(site)}>
                         {t("export")}
                       </button>

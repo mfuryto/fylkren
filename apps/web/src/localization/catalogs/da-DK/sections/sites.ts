@@ -57,7 +57,7 @@ export const sitesDaDK = {
   newLocalUser: "Ny lokal bruger",
   assignSiteManager: "Tildel stedhåndtering",
   deleteSite: "Slet sted",
-  deleteSiteHelp: "Sletning deaktiverer stedet og bevarer historik og revisionsoptegnelser.",
+  deleteSiteHelp: "Deaktivering stopper normal adgang til Site og bevarer historik og revisionslog.",
   removeSiteManager: "Fjern sidehåndtering",
   removeSiteManagerQuestion: "Ønsker du at fjerne {name} som Site Manager for {site}?",
   userHistoryRetained: "Brugeren og de historiske handlinger bevares.",

@@ -57,7 +57,7 @@ export const sitesRoRO = {
   newLocalUser: "Utilizator local nou",
   assignSiteManager: "Asignează administratorul site-ului",
   deleteSite: "Șterge site-ul",
-  deleteSiteHelp: "Eliminarea dezactivează site-ul și păstrează istoricul și înregistrările de audit.",
+  deleteSiteHelp: "Dezactivarea oprește accesul normal la Site și păstrează istoricul și înregistrările de audit.",
   removeSiteManager: "Elimină administratorul site-ului",
   removeSiteManagerQuestion: "Vrei să-l scoţi? {name} ca administrator de site pentru {site}?",
   userHistoryRetained: "Se păstrează acțiunile utilizatorilor și cele istorice.",

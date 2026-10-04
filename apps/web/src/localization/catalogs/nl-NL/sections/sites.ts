@@ -57,7 +57,7 @@ export const sitesNlNL = {
   newLocalUser: "Nieuwe lokale gebruiker",
   assignSiteManager: "Sitebeheer toewijzen",
   deleteSite: "Site verwijderen",
-  deleteSiteHelp: "Deleting deactiveert de site en bewaart geschiedenis en audit records.",
+  deleteSiteHelp: "Deactivering stopt normale toegang tot de Site en bewaart de geschiedenis en auditgegevens.",
   removeSiteManager: "Sitebeheer verwijderen",
   removeSiteManagerQuestion: "Wilt u verwijderen {name}  als Site Manager voor {site}?",
   userHistoryRetained: "De gebruiker en historische acties worden behouden.",

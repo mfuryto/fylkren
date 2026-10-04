@@ -57,7 +57,7 @@ export const sitesPlPL = {
   newLocalUser: "Nowy użytkownik lokalny",
   assignSiteManager: "Przypisz menedżera strony",
   deleteSite: "Usuń stronę",
-  deleteSiteHelp: "Usuwanie dezaktywuje stronę i zachowuje historię i dane z audytu.",
+  deleteSiteHelp: "Dezaktywacja blokuje zwykły dostęp do Site i zachowuje historię oraz dziennik audytu.",
   removeSiteManager: "Usuń menedżera strony",
   removeSiteManagerQuestion: "Czy chcesz usunąć {name} jako menedżer witryny {site}?",
   userHistoryRetained: "Zachowane są działania użytkowników i osób z przeszłości.",

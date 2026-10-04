@@ -57,7 +57,7 @@ export const sitesLtLT = {
   newLocalUser: "Naujas vietinis naudotojas",
   assignSiteManager: "Priskirti tinklalapį tvarkyklei",
   deleteSite: "Trinti vietą",
-  deleteSiteHelp: "Šalinama deaktyvuojama svetainė ir išsaugomi istorijos ir audito įrašai.",
+  deleteSiteHelp: "Išjungimas sustabdo įprastą prieigą prie Site ir išsaugo istoriją bei audito įrašus.",
   removeSiteManager: "Pašalinti svetainių tvarkyklę",
   removeSiteManagerQuestion: "Norite pašalinti {name} kaip svetainės valdytoja {site}?",
   userHistoryRetained: "Vartotojas ir istoriniai veiksmai yra išsaugomi.",

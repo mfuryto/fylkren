@@ -386,8 +386,9 @@ async function runTopLevelTaskFlow(suffix, platformCredentials) {
   await clickButton('Approve final report');
   await waitFor(`[...document.querySelectorAll('button')]
     .some(button => button.textContent.trim() === 'Complete')`, 'approved final report');
-  await waitFor('document.body.innerText.includes("Lock/Archive · Active")', 'visible information state');
-  await clickButton('Lock/Archive · Active');
+  await waitFor("document.querySelector('button[aria-label=\"Lock/Archive: Active\"] svg[data-stage=\"active\"]') !== null", 'visible information state');
+  assert.equal(await evaluate(`[...document.querySelectorAll('button')].find(b => b.getAttribute('aria-label') === 'Lock/Archive: Active')?.textContent`), 'Lock/Archive', 'Information state should be carried by the icon and accessible name');
+  await clickButton('Lock/Archive');
   await waitFor('document.querySelector("[role=dialog] textarea") !== null', 'closing and archiving state');
   assert.equal(await evaluate('document.querySelector("[role=dialog]").innerText.includes("Active")'), true);
   assert.equal(await evaluate('document.querySelector("[role=dialog]").innerText.includes("approved final report")'), true);

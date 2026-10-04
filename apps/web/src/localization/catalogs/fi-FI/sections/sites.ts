@@ -57,7 +57,7 @@ export const sitesFiFI = {
   newLocalUser: "Uusi paikallinen käyttäjä",
   assignSiteManager: "Määrittele sivuston hallinta",
   deleteSite: "Poista sivusto",
-  deleteSiteHelp: "Poistaminen sivuston ja säilyttää historian ja tilintarkastus kirjaa.",
+  deleteSiteHelp: "Käytöstä poistaminen estää normaalin Site-käytön ja säilyttää historian ja auditointitiedot.",
   removeSiteManager: "Poista sivuston hallinta",
   removeSiteManagerQuestion: "Haluatko poistaa {name}:n {site}:n kohdehallintana?",
   userHistoryRetained: "Käyttäjä ja historialliset toimet säilytetään.",

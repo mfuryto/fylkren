@@ -57,7 +57,7 @@ export const sitesLvLV = {
   newLocalUser: "Jauns lokāls lietotājs",
   assignSiteManager: "Piešķirt vietņu pārvaldnieku",
   deleteSite: "Dzēst vietu",
-  deleteSiteHelp: "Dzēšot deaktivizē objektu un saglabā vēstures un audita ierakstus.",
+  deleteSiteHelp: "Deaktivizēšana aptur parasto piekļuvi Site un saglabā vēsturi un audita ierakstus.",
   removeSiteManager: "Izņemt vietņu pārvaldnieku",
   removeSiteManagerQuestion: "Vai vēlaties noņemt {name}  kā vietnes pārvaldnieku {site}?",
   userHistoryRetained: "Lietotāja un vēsturiskās darbības tiek saglabātas.",

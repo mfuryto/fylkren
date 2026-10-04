@@ -10,12 +10,27 @@ export async function verifyGovernanceArchive({ request, navigate, waitFor, setI
   const username = `archive-browser-${suffix}`, password = `V8!${randomBytes(24).toString('base64url')}#x`;
   const person = await request(`/api/sites/${siteId}/access/local-users`, 'POST', { displayName, email: `${username}@example.invalid`, username, organizationUnitId: null }); assert.equal(person.status, 201, JSON.stringify(person.body));
   assert.equal((await request('/api/password-reset/complete', 'POST', { resetCode: person.body.resetCode, newPassword: password })).status, 204);
+  await navigate('/#/identity');
+  await waitFor('document.querySelector("#global-user-search") !== null', 'global user search');
+  await setInput('#global-user-search', displayName);
+  await evaluate('document.querySelector(".platform-user-search").requestSubmit()');
+  const userRow = `[...document.querySelectorAll('.platform-user-row')].find(row => row.innerText.includes(${JSON.stringify(displayName)}))`;
+  await waitFor(`${userRow}?.querySelector('button[aria-label="Lock/Archive: Active"]') != null`, 'current person information state');
+  await clickButton('Lock/Archive', userRow);
+  await waitFor('document.querySelector("[role=dialog]")?.innerText.includes("Use for a former user")', 'person-specific preservation guidance');
+  assert.equal(await evaluate(`document.querySelector('[role=dialog] h2')?.textContent.includes(${JSON.stringify(displayName)})`), true);
+  await setInput('[role=dialog] > .field textarea', 'Synthetic still-active person cannot be locked');
+  assert.equal(await evaluate('document.querySelector("[role=dialog] .modal-actions button:last-child").disabled'), true, 'Guidance must retain active-person safety gate');
+  await clickButton('Cancel', 'document.querySelector("[role=dialog]")');
   await navigate('/#/sites');
   await waitFor(`document.body.innerText.includes(${JSON.stringify(name)})`, 'governance Site row');
   const row = `[...document.querySelectorAll('.site-tree-row')].find(row => row.innerText.includes(${JSON.stringify(name)}))`;
-  await waitFor(`${row}?.innerText.includes("Lock/Archive · Active")`, 'Site information state');
-  await clickButton('Lock/Archive · Active', row);
+  await waitFor(`${row}?.querySelector('button[aria-label="Lock/Archive: Active"] svg[data-stage="active"]') !== null`, 'Site information state');
+  await clickButton('Lock/Archive', row);
   await waitFor('document.querySelector("[role=dialog]")?.innerText.includes("Resolve these before closing")', 'explicit Site blockers');
+  assert.equal(await evaluate('document.querySelector("[role=dialog]").innerText.includes("Deactivate it on Sites")'), true, 'Site retirement needs a specific explanation');
+  assert.equal(await evaluate(`document.querySelector('[role=dialog] h2')?.textContent.includes(${JSON.stringify(name)})`), true, 'Governance dialog must identify the Site');
+  assert.equal(await evaluate(`document.querySelector('[role=dialog] > .field textarea').getBoundingClientRect().top < document.querySelector('[role=dialog] .lifecycle-administration').getBoundingClientRect().top`), true, 'Primary action and reason must precede archive administration');
   await evaluate('document.querySelector("[role=dialog] details").open = true');
   const details = 'document.querySelector("[role=dialog] details")';
   await setInput('[role=dialog] details input[type=search]', displayName);
@@ -27,11 +42,13 @@ export async function verifyGovernanceArchive({ request, navigate, waitFor, setI
   await waitFor('document.querySelector("[role=dialog] summary")?.innerText.includes("(1)")', 'custodian granted');
   await assertNoOverflow('Site archive governance dialog');
   await clickButton('Cancel', 'document.querySelector("[role=dialog]")');
-  assert.equal((await request(`/api/sites/${siteId}`, 'DELETE')).status, 204);
-  // Refresh the Site list after a fixture-side API change.
-  await navigate('/#/platform'); await navigate('/#/sites');
-  await waitFor(`${row}?.innerText.includes("Lock/Archive · Active")`, 'inactive Site lifecycle action');
-  await clickButton('Lock/Archive · Active', row);
+  await clickButton('Edit', row);
+  await waitFor('document.querySelector("#edit-site-name") !== null', 'Site operation editor');
+  await clickButton('Deactivate', 'document.querySelector("[role=dialog]")');
+  await waitFor('document.querySelector("[role=dialog]") === null', 'Site deactivation completed');
+  await waitFor(`${row}?.innerText.includes('Inactive')`, 'retained Site is inactive, not deleted');
+  await waitFor(`${row}?.querySelector('button[aria-label="Lock/Archive: Active"] svg[data-stage="active"]') !== null`, 'inactive Site lifecycle action');
+  await clickButton('Lock/Archive', row);
   await waitFor('document.querySelector("[role=dialog] select") !== null', 'Site closure dialog');
   const preservation = 'document.querySelector("[role=dialog] .preservation-controls")';
   await evaluate(`${preservation}.open = true`);
@@ -95,5 +112,5 @@ export async function verifyGovernanceArchive({ request, navigate, waitFor, setI
   } finally { rmSync(packagePath, { force: true }); }
 
   await signIn(platformCredentials, 'Platform');
-  return { siteArchiveGovernance: true, archiveCustodianSearch: true, archiveOnlyBrowserSession: true, readOnlyArchiveTimeline: true, savedExportCustodyBrowser: true };
+  return { siteArchiveGovernance: true, archiveCustodianSearch: true, archiveOnlyBrowserSession: true, readOnlyArchiveTimeline: true, savedExportCustodyBrowser: true, personArchiveGuidance: true, siteDeactivationLabel: true };
 }

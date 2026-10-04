@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Show information state as a green square, red padlock or blue archive icon; identify the selected resource and clarify Site/user archive guidance with administration controls below the primary action. Rename Site removal to Deactivate and its retained status to Inactive.
+
 - Retired the live audit-derived notification projector after resumable legacy reconciliation, unified webhook projection bookkeeping, and added typed machine/system activity for Site and access lifecycle effects.
 
 - Added consistent snapshot exports with lifecycle/federation evidence, verified export custody and versioned preservation holds/rules; protected held/archived records from existing federation transport cleanup without enabling permanent deletion.

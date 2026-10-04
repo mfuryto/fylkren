@@ -15,7 +15,7 @@ describe("shared activity and information actions", () => {
     expect(html).not.toContain("<img"); expect(html).not.toContain("secret.future.event"); expect(html).toContain("&lt;img"); expect(html).toContain("Activity recorded"); expect(html).toContain("10:30");
   });
   it("has lifecycle and incomplete-history wording in every supported language", () => {
-    for (const language of supportedLanguages) for (const key of ["activityTitle", "activityLegacyNotice", "lifecycleReason", "lifecycleRestore", "lifecycleAction", "lifecycleActiveDescription", "lifecycleClosedDescription", "lifecycleArchivedDescription", "lifecycleReasonHelp", "lifecycleHeldNotice", "lifecycleStateActive", "lifecycleStateClosed", "lifecycleStateArchived", "lifecycleLockedError"] as const) expect(translate(language, key)).not.toBe(key);
+    for (const language of supportedLanguages) for (const key of ["activityTitle", "activityLegacyNotice", "lifecycleReason", "lifecycleRestore", "lifecycleAction", "lifecycleActiveDescription", "lifecycleClosedDescription", "lifecycleArchivedDescription", "lifecycleReasonHelp", "lifecycleHeldNotice", "lifecycleStateActive", "lifecycleStateClosed", "lifecycleStateArchived", "lifecycleLockedError", "lifecycleSiteGuide", "lifecyclePersonGuide", "lifecycleGovernanceLocked", "lifecycleAdministration"] as const) expect(translate(language, key)).not.toBe(key);
     expect(translate("nb-NO", "activityLegacyNotice")).toContain("ufullstendig");
   });
 });

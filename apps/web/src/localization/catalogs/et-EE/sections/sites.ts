@@ -57,7 +57,7 @@ export const sitesEtEE = {
   newLocalUser: "Uus kohalik kasutaja",
   assignSiteManager: "Määra saidihaldur",
   deleteSite: "Kustuta sait",
-  deleteSiteHelp: "Kustutamine deaktiveerib saidi ning säilitab ajaloo- ja auditidokumendid.",
+  deleteSiteHelp: "Inaktiveerimine lõpetab tavapärase juurdepääsu Site’ile ning säilitab ajaloo ja auditikirjed.",
   removeSiteManager: "Eemalda saidihaldur",
   removeSiteManagerQuestion: "Kas eemaldada {name} saidihaldurina {site}?",
   userHistoryRetained: "Kasutaja ja ajaloolised tegevused säilitatakse.",

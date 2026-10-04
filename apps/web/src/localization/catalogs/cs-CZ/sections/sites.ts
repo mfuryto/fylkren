@@ -57,7 +57,7 @@ export const sitesCsCZ = {
   newLocalUser: "Nový místní uživatel",
   assignSiteManager: "Přiřadit správce místa",
   deleteSite: "Smazat místo",
-  deleteSiteHelp: "Odstranění deaktivuje stránku a uchovává záznamy historie a auditu.",
+  deleteSiteHelp: "Deaktivace zastaví běžný přístup k Site a zachová historii i auditní záznamy.",
   removeSiteManager: "Odstranit správce stránek",
   removeSiteManagerQuestion: "Chcete odstranit {name} jako správce stránek pro {site}?",
   userHistoryRetained: "Uživatelské a historické akce jsou zachovány.",

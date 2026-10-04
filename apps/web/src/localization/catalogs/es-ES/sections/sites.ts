@@ -57,7 +57,7 @@ export const sitesEsES = {
   newLocalUser: "Nuevo usuario local",
   assignSiteManager: "Asignar Site Manager",
   deleteSite: "Borrar el sitio",
-  deleteSiteHelp: "Eliminar desactiva el sitio y conserva historia y registros de auditoría.",
+  deleteSiteHelp: "La desactivación bloquea el acceso normal al Site y conserva el historial y los registros de auditoría.",
   removeSiteManager: "Quitar Site Manager",
   removeSiteManagerQuestion: "¿Quieres eliminar {name} como Administrador de Sitios para {site}?",
   userHistoryRetained: "Se mantienen las acciones de usuario e histórica.",
