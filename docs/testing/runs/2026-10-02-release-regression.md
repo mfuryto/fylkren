@@ -530,3 +530,17 @@ FYLKREN_E2E_API_IMAGE=fylkren-asvs-query-api:latest FYLKREN_E2E_WEB_IMAGE=fylkre
 Twenty negative cases reject unsupported choices, oversized event/search input, reversed audit dates and invalid log limits. Eight documented positive combinations still return 200. The dependency-search case creates one disposable task and proves its oversized input is rejected after normal authorization and lifecycle checks. API compilation and runner syntax checks pass. The image is `sha256:1bc6249515e33704232d787e3cf5ca2cd292890c8ecc68a17fe0771060fafdb6`; the reused web image remains an unchanged gateway.
 
 ASVS 2.2.1 remains In progress because the full request-body, header and file-input inventory is not yet complete. Safe hashes and results are recorded under `queryInputValidationContinuation` in the existing evidence manifest. Production is untouched.
+
+## Request-body shape validation — 2026-10-04
+
+Continues ASVS 2.2.1 without marking it complete. The focused baseline against `fylkren-asvs-query-api:latest` reproduced HTTP 500 when a Site Manager supplied a valid workflow-template name with `content: null`. Related source review found unguarded null collection elements in workflow steps, planning allocations, planning/execution timeline values, decision references and learning points. Webhook configuration also dereferenced required nullable body values, while machine-client scope input silently removed null elements. No unauthorized access or partial write was demonstrated (SV-077).
+
+Required template/webhook values and fixed object collections now reject null before dereference or domain construction. Webhook names and URLs are bounded to their persisted limits. The focused retest used:
+
+```sh
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-body-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-automatic-lifecycle-web:latest node tools/run-e2e-editions.mjs --asvs-body-only --no-build
+```
+
+Seven malformed HTTP bodies return 400: null template content, a null workflow step, a mixed null machine scope, and three null webhook field/element forms, plus a null decision reference. The decision case confirms no revision persisted. Compilation completes with zero warnings/errors. Source guards also cover the homologous planning, execution and learning collection paths; those deeper operational paths retain their existing functional tests and remain part of the continuing full input inventory rather than being claimed as seven additional dynamic cases.
+
+The API image is `sha256:0525d44d4f44f2a8639c179bd9594ca0fd943fd7fdd55286eacaefb4daee88e1`; the reused web is unchanged. ASVS 2.2.1 remains In progress for remaining body fields, headers and file inputs. Safe hashes and results are recorded under `requestBodyShapeContinuation` in the existing evidence manifest. Production is untouched.

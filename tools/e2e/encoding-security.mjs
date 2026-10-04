@@ -157,6 +157,36 @@ export async function testQueryInputValidation({ platform, leader, siteManager, 
     acceptedQueryCases: valid.length, queryEndpoints: 10 };
 }
 
+export async function testBodyShapeValidation({ platform, leader, siteManager, siteId, unitId, workItemTypeId }) {
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+  const cases = [
+    [siteManager, `/api/templates/sites/${siteId}`, { name: 'Synthetic null-content template', content: null, ownerUnitId: null }],
+    [siteManager, `/api/workflows/sites/${siteId}`, { name: 'Synthetic null-step workflow', ownerUnitId: null, kind: 'execution', steps: [null] }],
+    [platform, '/api/platform/api-clients/', { name: 'Synthetic null-scope client', scopes: ['sites:read', null], expiresAt }],
+    [platform, `/api/platform/webhooks/sites/${siteId}`, { name: null, endpointUrl: 'https://example.invalid/hook', eventTypes: ['assignment.created'] }],
+    [platform, `/api/platform/webhooks/sites/${siteId}`, { name: 'Synthetic null-events webhook', endpointUrl: 'https://example.invalid/hook', eventTypes: null }],
+    [platform, `/api/platform/webhooks/sites/${siteId}`, { name: 'Synthetic null-event webhook', endpointUrl: 'https://example.invalid/hook', eventTypes: ['assignment.created', null] }],
+  ];
+  for (const [actor, path, body] of cases)
+    assert.equal((await actor.post(path, body)).status, 400, `Malformed request collection was accepted or failed unsafely: ${path}`);
+
+  const root = `/api/work/sites/${siteId}/items`;
+  const task = await leader.post(root, { title: 'Synthetic body-shape task', description: 'Synthetic',
+    recommendation: null, referenceUrl: null, assignedUnitId: unitId, workItemTypeId, dueAt: null });
+  assert.equal(task.status, 201, JSON.stringify(task.body));
+  assert.equal((await leader.put(`${root}/${task.body.id}/status`, {
+    status: 'under_review', assignedUnitId: unitId, decisionNote: null, priority: 'normal' })).status, 204);
+  const malformedDecision = await leader.post(`/api/decisions/sites/${siteId}/tasks/${task.body.id}`, {
+    title: 'Synthetic malformed decision', decision: 'Reject malformed collection', rationale: 'Synthetic validation',
+    status: 'recorded', decisionMakerIds: [], references: [null],
+  });
+  assert.equal(malformedDecision.status, 400, 'Null decision reference failed unsafely');
+  assert.equal((await leader.request(`/api/decisions/sites/${siteId}/tasks/${task.body.id}`)).body.length, 0,
+    'Malformed body partially persisted a decision');
+  return { bodyShapeValidation: 'passed', rejectedBodyCases: cases.length + 1,
+    nullCollectionElementCases: 5, atomicRejectedBodies: true };
+}
+
 export async function testDerivedArithmeticBoundaries({ platform, siteManager, leader, siteId, unitId, workItemTypeId }) {
   const path = `/api/site-audit/sites/${siteId}`;
   const original = await siteManager.request(path);

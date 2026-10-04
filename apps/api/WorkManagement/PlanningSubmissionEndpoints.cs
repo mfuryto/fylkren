@@ -44,7 +44,8 @@ internal static class PlanningSubmissionEndpoints
 
     private static async Task<bool> ValidAllocations(WorkflowRun run, IReadOnlyList<PlanAllocation>? allocations, FylkrenDbContext db, CancellationToken ct, bool allowEmptyInstruction = false)
     {
-        if (allocations is null || allocations.Count > 100 || allocations.Select(x => new { x.StepId, x.UnitId }).Distinct().Count() != allocations.Count) return false;
+        if (allocations is null || allocations.Count > 100 || allocations.Any(x => x is null) ||
+            allocations.Select(x => new { x.StepId, x.UnitId }).Distinct().Count() != allocations.Count) return false;
         var stepIds = await db.WorkflowSteps.Where(x => x.DefinitionId == run.DefinitionId && x.AllowsTaskAllocation).Select(x => x.Id).ToListAsync(ct);
         List<Guid> unitIds;
         if (run.WorkItem.AssignedUnitId is Guid ownerUnitId)

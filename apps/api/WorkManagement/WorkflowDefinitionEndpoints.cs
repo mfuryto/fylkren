@@ -72,7 +72,10 @@ internal static class WorkflowDefinitionEndpoints
 
     private static async Task<bool> IsValid(Guid siteId, CreateWorkflow request, bool requireAllocation, FylkrenDbContext db, CancellationToken ct)
     {
-        if ((request.Name ?? "").Trim().Length is < 2 or > 200 || request.Steps is null || request.Steps.Count is < 1 or > 30 || request.Steps.Any(x => (x.Name ?? "").Trim().Length is < 2 or > 200) || request.Steps.Count(x => x.HasTimeline) > 1 || request.Kind is not ("planning" or "execution") || requireAllocation && !request.Steps.Any(x => x.AllowsTaskAllocation)) return false;
+        if ((request.Name ?? "").Trim().Length is < 2 or > 200 || request.Steps is null || request.Steps.Count is < 1 or > 30 ||
+            request.Steps.Any(x => x is null) || request.Steps.Any(x => (x.Name ?? "").Trim().Length is < 2 or > 200) ||
+            request.Steps.Count(x => x.HasTimeline) > 1 || request.Kind is not ("planning" or "execution") ||
+            requireAllocation && !request.Steps.Any(x => x.AllowsTaskAllocation)) return false;
         var templateIds = request.Steps.Where(x => x.TemplateId.HasValue).Select(x => x.TemplateId!.Value).Distinct().ToList();
         return templateIds.Count == 0 || await db.WorkflowStepTemplates.CountAsync(x => templateIds.Contains(x.Id) && x.SiteId == siteId && x.IsActive, ct) == templateIds.Count;
     }

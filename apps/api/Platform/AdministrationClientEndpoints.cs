@@ -45,6 +45,8 @@ internal static class AdministrationClientEndpoints
             if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest();
             if (!Guid.TryParse(user.FindFirstValue("fylkren:person_id"), out var actor)) return Results.Problem(statusCode: 403);
             var name = request.Name?.Trim() ?? "";
+            if (request.Scopes?.Any(value => value is null) == true)
+                return Validation("scopes", "Scopes cannot contain empty entries.");
             var scopes = request.Scopes?.Where(value => value is not null)
                 .Distinct(StringComparer.Ordinal)
                 .Order()

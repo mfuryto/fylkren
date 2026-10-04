@@ -43,7 +43,8 @@ public static class TemplateEndpoints
         return Results.Ok(templates);
     }
 
-    private static bool Valid(Request request) => (request.Name ?? "").Trim().Length is >= 2 and <= 150 && (request.Content ?? "").Trim().Length <= 20000;
+    private static bool Valid(Request request) => (request.Name ?? "").Trim().Length is >= 2 and <= 150 &&
+        request.Content is not null && request.Content.Trim().Length <= 20000;
 
     private static async Task<IResult> GetFinalReportTemplate(Guid siteId, ClaimsPrincipal user, FylkrenDbContext db, CancellationToken ct)
     {

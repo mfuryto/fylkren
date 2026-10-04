@@ -32,7 +32,9 @@ internal static class PlanningDocumentEndpoints
             var links = request.Links ?? [];
             var events = request.TimelineEvents ?? [];
             var content = request.Content ?? "";
-            if (!Pid(user, out var personId) || content.Length > 20000 || links.Count > 30 || links.Any(link => !ValidLink(link)) || events.Count > 100 || events.Any(entry => string.IsNullOrWhiteSpace(entry.Description) || entry.Description.Trim().Length > 1000)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["content"] = ["Check the text, timeline, and document links."] });
+            if (!Pid(user, out var personId) || content.Length > 20000 || links.Count > 30 || links.Any(link => link is null || !ValidLink(link)) ||
+                events.Count > 100 || events.Any(entry => entry is null || string.IsNullOrWhiteSpace(entry.Description) || entry.Description.Trim().Length > 1000))
+                return Results.ValidationProblem(new Dictionary<string, string[]> { ["content"] = ["Check the text, timeline, and document links."] });
             var run = await db.WorkflowRuns.Include(x => x.WorkItem).SingleOrDefaultAsync(x => x.Id == runId && x.ClaimedByPersonId == personId && x.Status == "in_progress", ct);
             var step = run is null ? null : await db.WorkflowSteps.SingleOrDefaultAsync(x => x.Id == stepId && x.DefinitionId == run.DefinitionId, ct);
             if (run is null || step is null || !await OrganizationAuthorization.CanPlanAtLevel(run.WorkItem.SiteId, run.WorkItem.AssignedUnitId, personId, db, ct) || events.Count > 0 && !step.HasTimeline || events.Any(entry => run.TimelineStartedOn.HasValue && entry.Date < run.TimelineStartedOn.Value)) return Results.Problem(statusCode: 403);

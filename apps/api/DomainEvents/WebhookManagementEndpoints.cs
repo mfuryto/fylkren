@@ -27,11 +27,14 @@ internal static class WebhookManagementEndpoints
         if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest();
         if (!Guid.TryParse(user.FindFirstValue("fylkren:person_id"), out var personId)) return Results.Problem(statusCode: 403);
         if (!await db.Sites.AnyAsync(x => x.Id == siteId && x.IsActive, ct)) return Results.NotFound();
-        if (!Uri.TryCreate(request.EndpointUrl, UriKind.Absolute, out var uri) || !Fylkren.Api.Networking.OutboundHttpPolicy.ValidUri(uri)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["endpointUrl"] = ["The webhook address must be an absolute HTTPS address."] });
+        var name = request.Name?.Trim() ?? string.Empty;
+        if (name.Length is < 2 or > 120) return Results.ValidationProblem(new Dictionary<string, string[]> { ["name"] = ["The webhook name must be between 2 and 120 characters."] });
+        if (request.EndpointUrl?.Length > 2000 || !Uri.TryCreate(request.EndpointUrl, UriKind.Absolute, out var uri) || !Fylkren.Api.Networking.OutboundHttpPolicy.ValidUri(uri)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["endpointUrl"] = ["The webhook address must be an absolute HTTPS address of at most 2,000 characters."] });
+        if (request.EventTypes is null || request.EventTypes.Any(x => x is null)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["eventTypes"] = ["Select at least one supported event type."] });
         var selected = request.EventTypes.Distinct(StringComparer.Ordinal).ToArray();
         if (selected.Length == 0 || selected.Any(x => !DomainEventTypes.ExternallySupported.Contains(x))) return Results.ValidationProblem(new Dictionary<string, string[]> { ["eventTypes"] = ["Select at least one supported event type."] });
         var secret = Convert.ToHexString(RandomNumberGenerator.GetBytes(32)).ToLowerInvariant(); var now = DateTimeOffset.UtcNow;
-        var subscription = new WebhookSubscription(Guid.NewGuid(), siteId, request.Name.Trim(), uri.ToString(), protection.CreateProtector("Fylkren.Webhooks.v1").Protect(secret), string.Join(' ', selected), personId, now);
+        var subscription = new WebhookSubscription(Guid.NewGuid(), siteId, name, uri.ToString(), protection.CreateProtector("Fylkren.Webhooks.v1").Protect(secret), string.Join(' ', selected), personId, now);
         db.WebhookSubscriptions.Add(subscription); db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "webhook.created", "webhook-subscription", subscription.Id, now)); await db.SaveChangesAsync(ct);
         return Results.Created($"/api/platform/webhooks/sites/{siteId}/{subscription.Id}", new { subscription.Id, subscription.Name, subscription.EndpointUrl, eventTypes = selected, secret });
     }
@@ -46,5 +49,5 @@ internal static class WebhookManagementEndpoints
         var safePage = page ?? 1; const int size = 20; var query = db.WebhookDeliveries.AsNoTracking().Where(x => x.Subscription.SiteId == siteId).OrderByDescending(x => x.CreatedAt);
         return Results.Ok(new { page = safePage, pageSize = size, total = await query.LongCountAsync(ct), items = await query.Skip((safePage - 1) * size).Take(size).Select(x => new { x.Id, x.SubscriptionId, subscriptionName = x.Subscription.Name, x.DomainEventId, eventType = x.DomainEvent.EventType, x.Status, x.AttemptCount, x.LastAttemptAt, x.CompletedAt, x.LastHttpStatus, x.LastError, x.CreatedAt }).ToListAsync(ct) });
     }
-    private sealed record CreateWebhookRequest(string Name, string EndpointUrl, string[] EventTypes);
+    private sealed record CreateWebhookRequest(string? Name, string? EndpointUrl, string?[]? EventTypes);
 }

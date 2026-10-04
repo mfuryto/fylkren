@@ -13,7 +13,8 @@ internal static class LearningCreation
     internal static async Task<IResult?> AddDrafts(IReadOnlyList<LessonDraft>? drafts, WorkItem item, Guid personId, FylkrenDbContext db, DateTimeOffset now, CancellationToken ct)
     {
         if (drafts is null || drafts.Count == 0) return null;
-        if (drafts.Count > 50 || drafts.Select(value => value.Id).Distinct().Count() != drafts.Count ||
+        if (drafts.Count > 50 || drafts.Any(value => value is null) ||
+            drafts.Select(value => value.Id).Distinct().Count() != drafts.Count ||
             drafts.Any(value => value.Id == Guid.Empty || value.Kind is not ("positive" or "improvement") || (value.Text?.Trim().Length ?? 0) is < 2 or > 4000))
             return Results.ValidationProblem(new Dictionary<string, string[]> { ["lessons"] = ["Add up to 50 distinct learning points, with a category and 2–4,000 characters each."] });
         var ids = drafts.Select(value => value.Id).ToArray();

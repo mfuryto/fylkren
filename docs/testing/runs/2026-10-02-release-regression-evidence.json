@@ -4176,5 +4176,45 @@
     "finding": "SV-076 closed after focused retest",
     "matrix": "ASVS 2.2.1 remains In progress; continue body, header and file-input inventory",
     "scope": "Query-bound application inputs and focused API tests; no complete request-body/header/file inventory or release qualification"
+  },
+  "requestBodyShapeContinuation": {
+    "date": "2026-10-04",
+    "baseline": "3ef26b3",
+    "sourceHashes": {
+      "apps/api/Decisions/DecisionEndpoints.cs": "516eaf0dc0cc6dbae7b080b9d7ab3a7117128010af22d0a00733cd8ed0e14898",
+      "apps/api/DomainEvents/WebhookManagementEndpoints.cs": "73ce6b7a7f7fc204183e1304ad36b9f82daa12de8849074d2686953870a46cde",
+      "apps/api/Learning/LearningCreation.cs": "8d8468741da7897f80a385b4fb845ff5b6d068ea5e4508972786d5113a0d196d",
+      "apps/api/Platform/AdministrationClientEndpoints.cs": "c54a1d9a4ef187d2ad75913440bfb61276ac7bd84aa6a2038c6da37cfdbad2b7",
+      "apps/api/WorkManagement/ExecutionDocumentEndpoints.cs": "96213ade8f9b30a093b555ec165fa85d77c0cdcb7e8af89cd7c5c937f7b50f6b",
+      "apps/api/WorkManagement/PlanningDocumentEndpoints.cs": "a99484e8ce37c3783ab644540e87470265452f63495eb9196abdb19f96ce2da2",
+      "apps/api/WorkManagement/PlanningSubmissionEndpoints.cs": "7c9044f6f56ab93612923fcfad392768037d731ed38600aff447def8fce204ba",
+      "apps/api/WorkManagement/TemplateEndpoints.cs": "deee93b0c8e20eebef65071664493059f6f2169e7e6d6451102ff808fa9663f2",
+      "apps/api/WorkManagement/WorkflowDefinitionEndpoints.cs": "c341b7e276447acbbebf46e7478de0ceeb01958fc04fcc9d9bf3932f1cb6be13",
+      "tools/e2e/encoding-security.mjs": "ac74ea10a9bf7118b5c0022981646ce4e531abd5529d5ea9b0ff58b0b71d09fc",
+      "tools/run-e2e-editions.mjs": "832e3feeba8b25b36ba87b94979d24988aa1d292597389c706bde480e532db38",
+      "tools/test-e2e-local.mjs": "e88f7b8eaf467f6b90eb58ccd365484fac8d9d70b665282c18e1c7b5f2f88154"
+    },
+    "logHashes": {
+      "/tmp/fylkren-asvs-body-baseline.log": "8374232e89621651f458c778c609602c2105757a41595e39b7656e73076a6728",
+      "/tmp/fylkren-asvs-body.log": "1e3c141f3b8d0c8848c79cec7c4f4aa99d82c17b7e4ddbaad196dfc9d0f03356",
+      "/tmp/fylkren-asvs-body-api-build.log": "86f87bfaf130cb9d4d7ca70b67b1fbda9ac866b7700d18f3e8e2e77eab2df76e",
+      "/tmp/fylkren-asvs-body-docs.log": "57437e41f601a070fa749fafd512ea3e41201a5559df66ed6ebb89b7ee169deb",
+      "/tmp/fylkren-asvs-body-structure.log": "b9a651952dda34e3aec02a9d4ef0fd5b226f939897b032e2fe7044662a8e9708",
+      "/tmp/fylkren-asvs-body-version.log": "30a82c355072b30049a50c28fc1a6e402282bc4d7b291f331f69330b0edc3dbb"
+    },
+    "baselineApiImage": "sha256:1bc6249515e33704232d787e3cf5ca2cd292890c8ecc68a17fe0771060fafdb6",
+    "apiImage": "sha256:0525d44d4f44f2a8639c179bd9594ca0fd943fd7fdd55286eacaefb4daee88e1",
+    "reusedWebImage": "sha256:95c69456ec0870a718f167db181344235d23ccd5744ec99a0879df61d3c9f497",
+    "results": {
+      "baselineNullTemplateContent": "HTTP 500 reproduced",
+      "bodyShapeValidation": "passed",
+      "rejectedBodyCases": 7,
+      "nullCollectionElementCases": 5,
+      "atomicRejectedBodies": true,
+      "apiBuildWarnings": 0
+    },
+    "finding": "SV-077 closed after focused retest",
+    "matrix": "ASVS 2.2.1 remains In progress; continue remaining body fields plus header/file inventory",
+    "scope": "Required body fields and null object-collection elements; no complete input or release qualification"
   }
 }

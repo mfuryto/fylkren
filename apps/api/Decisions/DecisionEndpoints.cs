@@ -101,6 +101,7 @@ public static class DecisionEndpoints
         if ((request.Rationale ?? "").Trim().Length is < 2 or > 10000) errors["rationale"] = ["The rationale must be between 2 and 10,000 characters."];
         if (!Statuses.Contains(request.Status ?? "")) errors["status"] = ["Select a valid decision status."];
         if (request.References?.Count > 20 || request.DecisionMakerIds?.Count > 20) errors["decision"] = ["A decision can have at most 20 decision-makers and 20 references."];
+        if (request.References?.Any(value => value is null) == true) errors["references"] = ["Decision references cannot contain empty entries."];
         return errors.Count == 0 ? null : Results.ValidationProblem(errors);
     }
 
