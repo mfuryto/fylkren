@@ -1308,3 +1308,15 @@ node tools/test-oob-authentication-applicability.mjs
 ```
 
 The inventory reports `{"oobAuthenticationApplicability":"not-applicable","reviewedServerIdentityFiles":32,"reviewedClientFlows":4,"implementedInteractiveFactors":["password","totp","recoveryCode","webauthn","externalProvider"],"oobMechanisms":[],"reopenOn":["sms-authentication","voice-authentication","email-otp","push-authentication"]}`. The applicability record now carries the same capability boundary and reopen condition. Password-reset grants authorize recovery and do not act as a separate authentication factor. Production is untouched.
+
+## External-provider strength fallback — 2026-10-04
+
+Completes ASVS 6.8.4 using the requirement's documented minimum-strength fallback. Fylkren does not use OIDC `acr`, `amr` or `auth_time`, SAML authentication context, or another provider claim to authorize step-up functions. The canonical pathway table consequently treats successful OIDC and SAML sign-in as provider-defined, minimum single-factor strength and explicitly prohibits treating either as application-enforced step-up. Rejected provider flows fail closed rather than silently switching pathways.
+
+Scoped command:
+
+```sh
+node tools/test-external-authentication-strength-boundary.mjs
+```
+
+The source/document lock reports `{"externalAuthenticationStrengthBoundary":"passed","providers":["oidc","saml"],"specificStrengthExpected":false,"documentedFallback":"minimum-single-factor","stepUpAuthorization":false,"strengthClaimsUsedForElevation":[],"providerFailureFailsClosed":true}`. Existing signed Keycloak OIDC/SAML labs remain the dynamic positive and attack-path evidence. This result describes the actual minimum-strength fallback and does not resolve SV-094: Fylkren still lacks a policy requiring MFA across local and external pathways. Production is untouched.
