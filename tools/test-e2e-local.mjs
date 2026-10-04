@@ -14,7 +14,7 @@ import { testAdministrationReportApis } from './e2e/administration-report-apis.m
 import { testDependencies } from './e2e/dependencies.mjs';
 import { testDecisionsRisksVersions } from './e2e/decisions-risks-versions.mjs';
 import { testWebhookFailureIsolation } from './e2e/webhooks.mjs';
-import { testPortability, testPortableParserBoundaries, testZipLengthArithmetic } from './e2e/portability.mjs';
+import { testPortability, testPortableFileContent, testPortableParserBoundaries, testZipLengthArithmetic } from './e2e/portability.mjs';
 import { testLookupSorting } from './e2e/lookup-sorting.mjs';
 import { testFederationCandidates } from './e2e/federation-candidates.mjs';
 import { testAuthenticationBoundary, testAuthSessionSecurity } from './e2e/auth-session-security.mjs';
@@ -149,7 +149,7 @@ assert.equal((await platform.put('/api/platform/regional-settings', {
   defaultLanguage: 'en-US', timeZone: 'UTC',
   clockFormat: '24-hour', measurementSystem: 'metric',
 })).status, 200);
-if (!process.argv.includes('--asvs-arithmetic-only') && !process.argv.includes('--asvs-version-only') && !process.argv.includes('--asvs-zip-only') && !process.argv.includes('--asvs-counter-only') && !process.argv.includes('--asvs-input-only') && !process.argv.includes('--asvs-context-only') && !process.argv.includes('--asvs-limits-only') && !process.argv.includes('--asvs-query-only') && !process.argv.includes('--asvs-body-only') && !process.argv.includes('--asvs-header-file-only') && !process.argv.includes('--asvs-sequence-only') && !process.argv.includes('--asvs-business-limits-only') && !process.argv.includes('--asvs-community-limit-only') && !process.argv.includes('--asvs-locking-only') && !process.argv.includes('--asvs-automation-only') && !process.argv.includes('--asvs-content-context-only')) {
+if (!process.argv.includes('--asvs-arithmetic-only') && !process.argv.includes('--asvs-version-only') && !process.argv.includes('--asvs-zip-only') && !process.argv.includes('--asvs-counter-only') && !process.argv.includes('--asvs-input-only') && !process.argv.includes('--asvs-context-only') && !process.argv.includes('--asvs-limits-only') && !process.argv.includes('--asvs-query-only') && !process.argv.includes('--asvs-body-only') && !process.argv.includes('--asvs-header-file-only') && !process.argv.includes('--asvs-file-content-only') && !process.argv.includes('--asvs-sequence-only') && !process.argv.includes('--asvs-business-limits-only') && !process.argv.includes('--asvs-community-limit-only') && !process.argv.includes('--asvs-locking-only') && !process.argv.includes('--asvs-automation-only') && !process.argv.includes('--asvs-content-context-only')) {
 const platformOperations = await platform.request('/api/platform/operations');
 assert.equal(platformOperations.status, 200, JSON.stringify(platformOperations.body));
 assert.equal(platformOperations.body.hostIntegration.available, true, 'Host status snapshot must be available');
@@ -363,6 +363,10 @@ if (process.argv.includes('--asvs-sequence-only')) {
 if (process.argv.includes('--asvs-header-file-only')) {
   console.log(JSON.stringify(await testHeaderFileInputValidation({ platform, siteManager: siteManager.account,
     siteId, base })));
+  process.exit(0);
+}
+if (process.argv.includes('--asvs-file-content-only')) {
+  console.log(JSON.stringify(await testPortableFileContent({ platform, siteManager: siteManager.account, siteId })));
   process.exit(0);
 }
 if (process.argv.includes('--asvs-body-only')) {

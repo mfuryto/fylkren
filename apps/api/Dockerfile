@@ -1,11 +1,14 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+ARG TARGETARCH
 WORKDIR /src
 COPY Directory.Build.props Directory.Packages.props global.json ./
 COPY apps/api/Fylkren.Api.csproj apps/api/
-RUN dotnet restore apps/api/Fylkren.Api.csproj
+RUN case "$TARGETARCH" in amd64) rid=linux-x64 ;; arm64) rid=linux-arm64 ;; *) echo "Unsupported architecture: $TARGETARCH" >&2; exit 1 ;; esac \
+    && dotnet restore apps/api/Fylkren.Api.csproj -r "$rid"
 COPY assets/branding/fylkren-logo-web-256.png assets/branding/fylkren-logo-web-256.png
 COPY apps/api/ apps/api/
-RUN dotnet publish apps/api/Fylkren.Api.csproj -c Release -o /app --no-restore
+RUN case "$TARGETARCH" in amd64) rid=linux-x64 ;; arm64) rid=linux-arm64 ;; *) echo "Unsupported architecture: $TARGETARCH" >&2; exit 1 ;; esac \
+    && dotnet publish apps/api/Fylkren.Api.csproj -c Release -r "$rid" --self-contained false -o /app --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app

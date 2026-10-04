@@ -85,6 +85,9 @@ public static partial class PortabilityEndpoints
             var file = form.Files.GetFile("package");
             if (file is null || file.Length == 0) return Results.ValidationProblem(new Dictionary<string, string[]> { ["package"] = ["The export package is missing or empty."] });
             if (file.Length > PortableExportPackage.MaximumPackageBytes) return Results.ValidationProblem(new Dictionary<string, string[]> { ["package"] = ["The export package cannot exceed 16 MiB."] });
+            if (!string.Equals(Path.GetExtension(file.FileName), ".zip", StringComparison.OrdinalIgnoreCase) ||
+                !string.Equals(file.ContentType, "application/zip", StringComparison.OrdinalIgnoreCase))
+                return Results.ValidationProblem(new Dictionary<string, string[]> { ["package"] = ["Use a .zip Fylkren export package with media type application/zip."] });
             await using var stream = file.OpenReadStream();
             var result = await PortableImportValidator.Validate(stream, siteId, cancellationToken);
             var now = DateTimeOffset.UtcNow;

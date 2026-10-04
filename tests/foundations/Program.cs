@@ -16,6 +16,11 @@ if (args.Contains("--zip-length-only"))
     await ZipLengthBoundaryTests.Run();
     return;
 }
+if (args.Contains("--image-validation-only"))
+{
+    ImageValidationTests.Run();
+    return;
+}
 if (args.Contains("--version-boundaries-only"))
 {
     VersionBoundaryTests.Run();

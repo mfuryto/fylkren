@@ -4,6 +4,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Fully decode and re-encode PNG, JPEG and WebP profile/branding images, enforce matching extensions and media types, bound image dimensions and apply the same content checks to portable-package attachments.
 - Bound profile and branding images at a tested 2 MiB and portable packages at a tested 16 MiB; stream portable uploads through the gateway and serialize their bounded validation to match container memory and temporary-storage capacity.
 - Add one maintained file-handling boundary covering every upload, browser-only file selection and generated download, including current type/size controls and explicit malware-handling limits.
 - Restrict the private application endpoint to the HTTP/1 parser used by the proxy chain and verify ambiguous message lengths, transfer encodings, chunks and header syntax at all three HTTP boundaries.

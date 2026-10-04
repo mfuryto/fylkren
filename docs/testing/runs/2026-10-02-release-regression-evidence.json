@@ -4800,5 +4800,38 @@
     "finding": "SV-090 closed after supported-size correction, gateway streaming and current-image retest",
     "matrix": "ASVS 5.2.1 Passed; 5.2.3 corrected to applicable/In progress; continue at 5.2.2",
     "scope": "Current multipart image and portability size boundaries plus declared ZIP length arithmetic; content/type and decompression-specific cases remain separate"
+  },
+    "fileTypeContentValidationCompletion": {
+    "date": "2026-10-04",
+    "baseline": "81622aa",
+    "sourceHashes": {
+      "Directory.Packages.props": "df520d5de744c6bae71632286ceca932bcafde5625df94777b8ac4c8900d4fb7",
+      "apps/api/Fylkren.Api.csproj": "e756c166d363e08af118de77df92f05748ebf3db4bdf1ab6cbaa2228bcda2e10",
+      "apps/api/Dockerfile": "c3b7afa86cfcd48b15185423719e26603fe13588d841a4d82d648bad73437aef",
+      "apps/api/SafeImageUpload.cs": "702ecb268d806787a7ce21a23c7a53e4b7cb327ed94cc22640fbc1a951a70f27",
+      "apps/api/Portability/PortabilityEndpoints.cs": "08ae3db4fb785a60d9f32734183aa1ff60d3b9eda6f8a706f4d027a190fba822",
+      "apps/api/Portability/PortableImportValidator.cs": "0bd116065f0d05532145b2004e19b69f69f0820703521f3c9c1e4930f05f18b9",
+      "tests/foundations/ImageValidationTests.cs": "458e51a3519ff966806cd9b588926dd454d3806caca4c18a42fbda0377dfe6f5",
+      "tools/e2e/portability.mjs": "b20d6108ce1a0888b63c6aa4b37465a3ed5f79268042b7880e56ee11c05e1a31",
+      "tools/test-file-handling-inventory.mjs": "f3151f416d426938733f25f4beba6473cb2c382817660e27c66b61a2465f5db3"
+    },
+    "apiImage": "sha256:26d095f69ca561ada71afd0dae7d2368cce1c27c2ea4f7388aa1792b7eb9bc5e",
+    "reusedWebImage": "sha256:1c81106369690b928da8acd2f0a19b19ff3f504d9ed39315c3a03dcceb75e7ee",
+    "results": {
+      "imageFormats": [
+        "png",
+        "jpeg",
+        "webp"
+      ],
+      "outerPackageTypeRejections": 2,
+      "rejectedInternalTypeCases": 4,
+      "affectedSizeRegression": "passed",
+      "nugetKnownVulnerabilities": 0,
+      "trivyCriticalHigh": 0,
+      "apiImageBytes": 108839988
+    },
+    "finding": "SV-091 closed after full raster decode/re-encoding and current-image retest",
+    "matrix": "ASVS 5.2.2 Passed; continue at applicable 5.2.3",
+    "scope": "All current direct and portable-package file extension/media/content boundaries; antivirus and decompression-specific execution remain separate"
   }
 }

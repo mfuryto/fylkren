@@ -61,6 +61,11 @@ internal static class PortableImportValidator
                     errors.Add($"Invalid dataset path: {dataset.Path}");
                     continue;
                 }
+                if (!string.Equals(dataset.MediaType, "application/x-ndjson", StringComparison.Ordinal))
+                {
+                    errors.Add($"Invalid dataset media type for {dataset.Path}.");
+                    continue;
+                }
                 var entry = archive.GetEntry(dataset.Path);
                 if (entry is null) { errors.Add($"Missing dataset: {dataset.Path}"); continue; }
                 if (entry.Length != dataset.Bytes) errors.Add($"The file size does not match for {dataset.Path}.");
@@ -80,9 +85,14 @@ internal static class PortableImportValidator
                 var entry = archive.GetEntry(attachment.Path);
                 if (entry is null) { errors.Add($"Missing attachment: {attachment.Path}"); continue; }
                 await using var input = entry.Open();
-                var hash = Convert.ToHexStringLower(await SHA256.HashDataAsync(input, cancellationToken));
+                using var content = new MemoryStream(entry.Length <= int.MaxValue ? (int)entry.Length : 0);
+                await input.CopyToAsync(content, cancellationToken);
+                var bytes = content.ToArray();
+                var hash = Convert.ToHexStringLower(SHA256.HashData(bytes));
                 if (!string.Equals(hash, attachment.Sha256, StringComparison.OrdinalIgnoreCase)) errors.Add($"The integrity check failed for {attachment.Path}.");
                 if (entry.Length != attachment.Bytes) errors.Add($"The file size does not match for {attachment.Path}.");
+                if (SafeImageUpload.Sanitize(bytes, attachment.MediaType, attachment.Path) is null)
+                    errors.Add($"The attachment type, extension or image content is invalid for {attachment.Path}.");
             }
 
             var undeclared = archive.Entries.Where(value => value.FullName is not "manifest.json" and not "README.txt" && !declaredPaths.Contains(value.FullName)).Select(value => value.FullName).ToArray();

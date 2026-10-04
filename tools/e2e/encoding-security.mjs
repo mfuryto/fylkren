@@ -238,7 +238,8 @@ export async function testHeaderFileInputValidation({ platform, siteManager, sit
       `Documented administration Site limit was rejected: ${limit}`);
 
   const imageAt = bytes => {
-    const content = Buffer.alloc(bytes); Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).copy(content);
+    const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64');
+    const content = Buffer.alloc(bytes); png.copy(content);
     return content;
   };
   for (const [actor, path, field] of [[platform, '/api/platform/branding/logo', 'logo'],

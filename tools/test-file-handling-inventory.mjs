@@ -18,12 +18,15 @@ for (const marker of [
   'Enterprise licence selection',
   'Export custody confirmation',
   '16 MiB aggregate declared entry length; 250 entries',
-  'does not currently decode and re-encode raster images',
+  'fully decodes and re-encodes supported raster uploads',
   'Validation is not antivirus scanning',
 ]) assert.ok(documentation.includes(marker), `File inventory is missing: ${marker}`);
 
 const imagePolicy = readFileSync('apps/api/SafeImageUpload.cs', 'utf8');
 assert.match(imagePolicy, /MaximumBytes = 2 \* 1024 \* 1024/);
+assert.match(imagePolicy, /MaximumDimension = 4096/);
+assert.match(imagePolicy, /SKBitmap\.Decode/);
+assert.match(imagePolicy, /bitmap\.Encode/);
 for (const type of ['image/png', 'image/jpeg', 'image/webp']) {
   assert.ok(imagePolicy.includes(`"${type}"`), `Image policy changed without inventory review: ${type}`);
   assert.ok(documentation.includes(type), `Image type is absent from the inventory: ${type}`);

@@ -4,6 +4,46 @@ import { readZip, writeZip } from './zip.mjs';
 
 const digest = value => createHash('sha256').update(value).digest('hex');
 
+export async function testPortableFileContent({ platform, siteManager, siteId }) {
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64');
+  const profile = new FormData(); profile.append('image', new Blob([png], { type: 'image/png' }), 'profile.png');
+  assert.equal((await siteManager.request('/api/profile/image', { method: 'PUT', body: profile })).status, 204);
+  const exported = await siteManager.request(`/api/portability/sites/${siteId}/export`, { method: 'POST', binary: true });
+  assert.equal(exported.status, 200, JSON.stringify(exported.body));
+  const entries = readZip(exported.body), manifest = JSON.parse(entries.get('manifest.json').toString('utf8'));
+  assert.ok(manifest.attachments.length > 0, 'Profile image was absent from the Site portability package');
+  const endpoint = `/api/portability/sites/${siteId}/imports/validate`;
+  async function upload(bytes, type = 'application/zip', name = 'portable.zip', expectedStatus = 200) {
+    const form = new FormData(); form.append('package', new Blob([bytes], { type }), name);
+    const response = await platform.request(endpoint, { method: 'POST', body: form });
+    assert.equal(response.status, expectedStatus, `${name}/${type} returned ${response.status}`);
+    return response.body;
+  }
+  assert.equal((await upload(exported.body)).valid, true, 'Untouched package failed content validation');
+  await upload(exported.body, 'application/zip', 'portable.txt', 400);
+  await upload(exported.body, 'application/octet-stream', 'portable.zip', 400);
+  async function reject(edit, label) {
+    const copy = new Map(entries), metadata = structuredClone(manifest);
+    edit(copy, metadata);
+    copy.set('manifest.json', Buffer.from(JSON.stringify(metadata)));
+    assert.equal((await upload(writeZip(copy))).valid, false, `${label} was accepted`);
+  }
+  await reject((_files, metadata) => { metadata.datasets[0].mediaType = 'text/plain'; }, 'Dataset media-type mismatch');
+  await reject((_files, metadata) => { metadata.attachments[0].mediaType = 'image/jpeg'; }, 'Attachment media-type mismatch');
+  await reject((files, metadata) => {
+    const descriptor = metadata.attachments[0], oldPath = descriptor.path;
+    descriptor.path = oldPath.replace(/\.png$/i, '.jpg');
+    files.set(descriptor.path, files.get(oldPath)); files.delete(oldPath);
+  }, 'Attachment extension/content mismatch');
+  await reject((files, metadata) => {
+    const descriptor = metadata.attachments[0];
+    const disguised = Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), Buffer.from('<script>synthetic()</script>')]);
+    files.set(descriptor.path, disguised); descriptor.bytes = disguised.length; descriptor.sha256 = digest(disguised);
+  }, 'Signature-only active attachment');
+  return { portableFileContent: 'passed', outerPackageTypeRejections: 2,
+    rejectedInternalTypeCases: 4, decodedAttachmentTypes: ['png', 'jpeg', 'webp'] };
+}
+
 export async function testPortableParserBoundaries({ platform, siteManager, siteId, entries, manifest }) {
   if (!entries) {
     const exported = await siteManager.request(`/api/portability/sites/${siteId}/export`, { method: 'POST', binary: true });
