@@ -1435,3 +1435,15 @@ FYLKREN_E2E_API_IMAGE=sha256:46fb3ab50fadff9189132fdaca312fd576a975cdd42dc9fd889
 ```
 
 The current-candidate run reports `{"administratorSessionTerminationRuntime":"passed","individualUserOnly":true,"unrelatedUserPreservedBeforeGlobalAction":true,"allUsersTerminated":true,"actingAdministratorTerminatedByGlobalAction":true,"auditEventsRecorded":true}`. It first terminates one user's preserved session and proves another user and a parallel administrator session remain authenticated. It then terminates all sessions and proves the remaining user, parallel administrator and acting administrator are rejected. The disposable database contains both `platform-user.sessions-terminated` and `platform.sessions-terminated-all`. The API build has zero warnings/errors, TypeScript passes and all 161 web tests pass. Production is untouched.
+
+## Sensitive account reauthentication — 2026-10-04
+
+Completes ASVS 7.5.1. The supported sensitive self-service attributes are email, TOTP and passkeys. Fylkren has no phone attribute or editable recovery contact. Criterion-specific source locking requires current-password verification for email changes, TOTP enrollment/disable and passkey registration/removal, and binds the factor paths to the maintained TOTP and virtual-CTAP2 wrong-password executions.
+
+Scoped command:
+
+```sh
+FYLKREN_E2E_API_IMAGE=sha256:46fb3ab50fadff9189132fdaca312fd576a975cdd42dc9fd889cd425d96d1969 FYLKREN_E2E_WEB_IMAGE=sha256:f1a56fd2f0510b23306731906fc6d91dfa2a54071e0d19fb553642414ea8050a node tools/run-e2e-editions.mjs --asvs-sensitive-account-reauth-only --no-build
+```
+
+The current-candidate run reports `{"sensitiveAccountReauthenticationRuntime":"passed","sensitiveAttributes":["email","totp","webauthn"],"phoneAttributePresent":false,"blankEmailReauthenticationRejected":true,"wrongEmailReauthenticationRejected":true,"rejectedChangeAtomic":true,"nonsensitiveDisplayNameChangeWithoutReauthentication":true,"correctEmailReauthenticationAccepted":true,"factorRuntimeEvidence":true}`. Blank and incorrect current passwords return `400` and preserve the original email. A display-name-only update succeeds without unnecessary reauthentication; the correct current password authorizes the email change. No unrelated product suite was run. Production is untouched.
