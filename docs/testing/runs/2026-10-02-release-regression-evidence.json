@@ -4854,5 +4854,33 @@
     "finding": "No control defect; existing pre-open limits received criterion-specific execution evidence",
     "matrix": "ASVS 5.2.3 Passed; continue at 5.3.1",
     "scope": "Current portable ZIP entry count and declared uncompressed-size processing; antivirus and future archive formats remain separate"
+  },
+    "publicFileStorageExecutionCompletion": {
+    "date": "2026-10-04",
+    "baseline": "35ea3f5",
+    "sourceHashes": {
+      "compose.yaml": "1ccd88ce03e4b18657bac01ee3a58f87401c2d93fd444b05058e0f7bb0496f05",
+      "apps/web/Dockerfile": "7b70ab8f00941e7ca78c7f630880714778bc51223455fd0fd0b330057d3d34cf",
+      "apps/web/nginx.conf": "91adf510747acea3d880a741fee354ba949de2d0815858f317656b1e171b9566",
+      "apps/api/Identity/IdentityProfileEndpoints.cs": "6b5f5e42c92de74d5af45263376eca4d20754697de9251fdca66a010bb4b3a7c",
+      "apps/api/Platform/BrandingEndpoints.cs": "ce7850afc580b1cd4879847b1f25b617486b69b3066e9993753a4163d8d88d32",
+      "apps/api/Portability/PortabilityEndpoints.cs": "08ae3db4fb785a60d9f32734183aa1ff60d3b9eda6f8a706f4d027a190fba822",
+      "tools/test-file-storage-boundary.mjs": "83a14578c2a0a9c763d3752d926660dd763e9651e58c261399cda9c0705fec1c",
+      "tools/e2e/encoding-security.mjs": "75ed1cb613270ef0d5f88292471006ec23d788399f2954ff982420e3987bfbfe"
+    },
+    "reusedApiImage": "sha256:26d095f69ca561ada71afd0dae7d2368cce1c27c2ea4f7388aa1792b7eb9bc5e",
+    "reusedWebImage": "sha256:1c81106369690b928da8acd2f0a19b19ff3f504d9ed39315c3a03dcceb75e7ee",
+    "results": {
+      "databaseStoredUploads": 2,
+      "generatedInMemoryDownloads": 1,
+      "publicUploadDirectories": 0,
+      "publicUploadPathProbes": 3,
+      "publicUploadPathStatus": 404,
+      "readOnlyApplicationContainers": 2,
+      "noexecTemporaryMounts": 3
+    },
+    "finding": "No control defect; corrected the initial test expectation from SPA 200 to the stronger static-path 404",
+    "matrix": "ASVS 5.3.1 Passed; continue at 5.3.2",
+    "scope": "Current upload/generated-file persistence, response and public-path topology; operator backup artifacts remain outside the HTTP application boundary"
   }
 }

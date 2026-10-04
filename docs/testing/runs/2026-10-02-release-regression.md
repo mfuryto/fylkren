@@ -897,3 +897,18 @@ dotnet run --project tests/foundations/Fylkren.FoundationTests.csproj --no-resto
 The focused test passes exact 250-entry and 16 MiB cases into manifest/content validation, rejects 251 entries and 16 MiB plus one byte, and rejects signed-long, unsigned-maximum and two-entry aggregate ZIP64 declarations using fixtures smaller than 512 bytes. An actual deflated 16 MiB zero-filled `manifest.json` occupies less than 64 KiB and reaches bounded JSON validation; the same high-ratio fixture one byte above the limit is rejected by declared uncompressed size. Result: `ZIP boundary tests passed: ZIP64 overflow/unsigned/aggregate lengths, 250/251 entries and highly compressed exact/over-limit content are bounded before entry processing.`
 
 No product correction or new finding was required. This evidence tests the maintained API validator directly and does not claim antivirus scanning, import/apply behavior or arbitrary future archive formats. Production is untouched.
+
+## Public file storage and execution boundary — 2026-10-04
+
+Completes ASVS 5.3.1. A criterion-specific source inventory found no public upload directory or API static-file middleware. Sanitized profile and branding images are stored as PostgreSQL byte columns and returned only from two fixed `Results.File(byte[])` routes. Generated portable ZIP bytes remain in memory and are returned with a fixed server filename. The web image copies only build-time frontend output to its static root. Both application containers have read-only root filesystems; their writable temporary filesystems are `noexec`.
+
+Scoped commands:
+
+```sh
+node tools/test-file-storage-boundary.mjs
+FYLKREN_E2E_API_IMAGE=sha256:26d095f69ca561ada71afd0dae7d2368cce1c27c2ea4f7388aa1792b7eb9bc5e FYLKREN_E2E_WEB_IMAGE=sha256:1c81106369690b928da8acd2f0a19b19ff3f504d9ed39315c3a03dcceb75e7ee node tools/run-e2e-editions.mjs --asvs-file-storage-only --no-build
+```
+
+The source lock reports `{"fileStorageBoundary":"passed","serverMultipartFeatures":3,"databaseStoredUploads":2,"generatedInMemoryDownloads":1,"publicUploadDirectories":0,"readOnlyApplicationContainers":2,"noexecTemporaryMounts":3}`. The live test uploads valid PNGs under the double-extension name `synthetic.aspx.png` to both image endpoints, retrieves only the sanitized database values through their fixed API routes and receives HTML 404 responses for `/synthetic.aspx.png`, `/uploads/synthetic.aspx.png` and `/wwwroot/synthetic.aspx.png`. Result: `{"fileStorageBoundary":"passed","databaseBackedImageEndpoints":2,"publicUploadPathProbes":3,"publicUploadPathStatus":404,"clientFilenamePersistedAsPath":false}`.
+
+The first test attempt expected SPA fallback 200 on these extension-bearing paths; the gateway correctly routes them through its static-file location and returned 404. The assertion was corrected to the stronger maintained behavior and the same candidate passed. No product correction or new finding was required. Production is untouched.

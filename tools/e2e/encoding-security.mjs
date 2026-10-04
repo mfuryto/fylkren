@@ -532,6 +532,30 @@ export async function testContentInterpretation({ platform, siteManager, siteId 
     activeImageContentRejected: true, rasterImageTyped: true, exportAttachment: true };
 }
 
+export async function testFileStorageBoundary({ platform, siteManager }) {
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64');
+  for (const [actor, path, field] of [[platform, '/api/platform/branding/logo', 'logo'],
+    [siteManager, '/api/profile/image', 'image']]) {
+    const form = new FormData(); form.append(field, new Blob([png], { type: 'image/png' }), 'synthetic.aspx.png');
+    assert.equal((await actor.request(path, { method: 'PUT', body: form })).status, 204,
+      `${path} rejected a valid double-extension raster`);
+  }
+  const publicLogo = await platform.request('/api/branding/logo', { binary: true });
+  const privateProfile = await siteManager.request('/api/profile/image', { binary: true });
+  for (const response of [publicLogo, privateProfile]) {
+    assert.equal(response.status, 200); assert.equal(response.contentType, 'image/png');
+    assert.equal(response.nosniff, 'nosniff'); assert.notEqual(response.body.length, 0);
+  }
+  for (const path of ['/synthetic.aspx.png', '/uploads/synthetic.aspx.png', '/wwwroot/synthetic.aspx.png']) {
+    const response = await platform.request(path, { binary: true });
+    assert.equal(response.status, 404, `${path} escaped the static-path not-found boundary`);
+    assert.match(response.contentType ?? '', /^text\/html\b/i, `${path} exposed an uploaded file type`);
+    assert.equal(response.body.equals(publicLogo.body), false, `${path} exposed the stored upload bytes`);
+  }
+  return { fileStorageBoundary: 'passed', databaseBackedImageEndpoints: 2,
+    publicUploadPathProbes: 3, publicUploadPathStatus: 404, clientFilenamePersistedAsPath: false };
+}
+
 export async function testDerivedArithmeticBoundaries({ platform, siteManager, leader, siteId, unitId, workItemTypeId }) {
   const path = `/api/site-audit/sites/${siteId}`;
   const original = await siteManager.request(path);

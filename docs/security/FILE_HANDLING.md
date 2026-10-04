@@ -24,6 +24,8 @@ Browser `accept` filters guide file selection but are not security controls. Ser
 
 Print-to-PDF is performed by the user's browser and is not a server file upload or stored server artifact. Backup archives are operator-created recovery artifacts on the server, not HTTP uploads or end-user downloads.
 
+Fylkren has no public upload directory. Uploaded raster bytes live only in PostgreSQL and are returned through fixed API routes; generated exports remain in memory. The API does not serve a filesystem tree. The web container serves only build-time frontend assets from its read-only image, both application containers use read-only root filesystems, and writable temporary mounts are `noexec`.
+
 ## Malicious-content behavior and present limits
 
 Fylkren fully decodes and re-encodes supported raster uploads, rejects disguised or malformed content and never stores a client-controlled filename or executable path. Re-encoding strips metadata, extra frames and trailing content. Fylkren does not run an antivirus engine; downstream controls remain relevant for exported ZIP packages and any future general attachment feature.
