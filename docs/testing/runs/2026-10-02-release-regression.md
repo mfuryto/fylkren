@@ -1347,3 +1347,15 @@ node tools/test-concurrent-session-policy-documentation.mjs
 ```
 
 The source/document lock reports `{"concurrentSessionPolicyDocumentation":"passed","numericMaximum":null,"concurrentSessionsAllowed":true,"loginEviction":false,"perSessionRegistry":false,"globalRevocationMechanism":"security-version","selectiveTermination":false}`. The manual states that adding a finite maximum requires a session registry and an explicit reject-or-evict policy. Existing lifecycle tests provide dynamic account-wide invalidation evidence; this documentation step did not rerun them. Production is untouched.
+
+## External and federated session boundaries — 2026-10-04
+
+Completes the documentation requirement ASVS 7.1.3. The access manual now inventories the Fylkren relying-party cookie, OIDC provider session, SAML provider session and AD/LDAP direct-bind path. For each it identifies who creates and controls the session, the local lifetime, what terminates it and when credentials or upstream authentication may be required again.
+
+Scoped command:
+
+```sh
+node tools/test-federated-session-documentation.mjs
+```
+
+The source/document lock reports `{"federatedSessionDocumentation":"passed","documentedSystems":["fylkren-rp","oidc-idp","saml-idp","ad-ldap"],"localInactivityHours":1,"localAbsoluteHours":12,"oidcUpstreamLogout":false,"samlSingleLogout":false,"upstreamRecentnessEnforced":false,"unlinkRevokesExistingCookie":false,"immediateLocalTermination":"account-security-version"}`. The manual explicitly records that local logout does not terminate the IdP session and that unlink/provider disable does not itself revoke an already issued Fylkren cookie. Those facts remain inputs to later federated reauthentication and termination requirements; passing 7.1.3 means the ecosystem is documented, not that every coordination feature exists. Production is untouched.
