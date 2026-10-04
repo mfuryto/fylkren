@@ -4274,5 +4274,25 @@
     "finding": "SV-080 closed after focused retest",
     "matrix": "ASVS 2.2.1 Passed; continue at 2.2.2",
     "scope": "Complete API input inventory with focused server-side boundary tests; no claim for separate trusted-layer or release qualification"
+  },
+  "trustedServiceValidationCompletion": {
+    "date": "2026-10-04",
+    "baseline": "4e95d5e",
+    "sourceHashes": {
+      "apps/api/RequestQueryPolicy.cs": "3aee7ecb3f99742a900c7e63b022c3fdc69028205f8fa08ea87b8ba60df84470",
+      "apps/api/SafeImageUpload.cs": "9a4a3a84c41e40beef11b5b5d787ddb180da0dfbdd685dc410c8e71c40477bf6",
+      "tools/e2e/encoding-security.mjs": "2add4e154d4685382e7ad58266b0e3f3e7f69fcf668ed80cc04be80c4799a826",
+      "tools/test-e2e-local.mjs": "1575a58bc6893adc834331f0be0ebf1c9760b86282ae44f3bc15a227c86f0b5d"
+    },
+    "apiImage": "sha256:9bbfe923bfc4d302051eec8cfffa47f94e0a64da30fcbc1d66439828bcb076d2",
+    "webImage": "sha256:2806135f53e64aaa7c63bcf2ff2e75933bb963361a42243bff84e2b512ae38e7",
+    "results": {
+      "requestPayloadContractsReviewed": 106,
+      "rawHttpValidation": "passed",
+      "clientSideValidationBypassed": true,
+      "trustedProtocolValidation": "passed"
+    },
+    "matrix": "ASVS 2.2.2 Passed; continue at 2.2.3",
+    "scope": "Placement of validation for the completed 2.2.1 inventory; no related-data or release qualification"
   }
 }

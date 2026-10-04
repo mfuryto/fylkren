@@ -573,3 +573,11 @@ dotnet run --project tests/foundations/Fylkren.FoundationTests.csproj --no-resto
 Eight malformed HTTP bodies now return 400, including the reproduced null bulk collection; the decision case remains atomic. The focused foundation test accepts a valid capability offer and rejects null schema/type collections plus a null type element without throwing. API compilation completed with zero warnings/errors. The API image is `sha256:9bbfe923bfc4d302051eec8cfffa47f94e0a64da30fcbc1d66439828bcb076d2`; the gateway image remains `sha256:2806135f53e64aaa7c63bcf2ff2e75933bb963361a42243bff84e2b512ae38e7`.
 
 Together with the prior query, contextual, arithmetic, header, file, portable-parser and body-shape evidence, this closes the complete input inventory and marks ASVS 2.2.1 Passed. It does not by itself pass the distinct trusted-layer requirement 2.2.2 or complete release qualification. Safe hashes and results are recorded under `bodyContractInventoryCompletion` in the existing evidence manifest. Production is untouched.
+
+## Trusted service-layer validation — 2026-10-04
+
+Completes ASVS 2.2.2 by reviewing where the validations established under 2.2.1 execute. Query choices and ranges use API policies; request bodies are checked in endpoint/service code before mutation; file content is checked by server readers; federation payloads are checked before signature-dependent processing; domain constructors and database constraints retain invariant backstops. Browser validation remains a usability aid.
+
+The negative test clients construct raw JSON, query strings, headers and multipart bodies and call the gateway/API directly. They do not render or submit React forms. The current focused body and header/file runs therefore demonstrate rejection with client-side validation completely bypassed. The capability test calls the trusted protocol validator directly. No additional product change or broad rerun was needed for this distinct architecture placement check.
+
+ASVS 2.2.2 is Passed. This conclusion is limited to the completed 2.2.1 input inventory and does not pass related-data combinations under 2.2.3 or complete release qualification. Source hashes and reused current-candidate results are recorded under `trustedServiceValidationCompletion` in the existing evidence manifest. Production is untouched.
