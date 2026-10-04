@@ -474,4 +474,5 @@ export const csCZ: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   regionalSaved: "Regionální nastavení uloženo.",
   regionalSaveFailed: "Regionální nastavení nebylo možné uložit.",
   note: "Poznámka:",
+  terminateSessions: "Ukončit relace", terminateAllSessions: "Ukončit všechny relace", terminatingSessions: "Ukončování…", terminateSessionsFailed: "Aktivní relace se nepodařilo ukončit.", userSessionsTerminated: "Všechny aktivní relace uživatele {name} byly ukončeny.", terminateUserSessionsWarning: "Všechny aktivní relace uživatele {name} budou okamžitě ukončeny. Uživatel se musí znovu přihlásit.", terminateAllSessionsWarning: "Všechny aktivní relace ve Fylkrenu, včetně vaší, budou okamžitě ukončeny. Všichni se musí znovu přihlásit.",
 };

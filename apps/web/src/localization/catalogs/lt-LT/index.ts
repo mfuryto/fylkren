@@ -474,4 +474,5 @@ export const ltLT: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   regionalSaved: "Regioniniai nustatymai išsaugoti.",
   regionalSaveFailed: "Regioniniai nustatymai negali būti išsaugoti.",
   note: "Pastaba:",
+  terminateSessions: "Baigti seansus", terminateAllSessions: "Baigti visus seansus", terminatingSessions: "Baigiama…", terminateSessionsFailed: "Nepavyko baigti aktyvių seansų.", userSessionsTerminated: "Visi aktyvūs naudotojo {name} seansai baigti.", terminateUserSessionsWarning: "Visi aktyvūs naudotojo {name} seansai bus nedelsiant baigti. Naudotojas turės prisijungti iš naujo.", terminateAllSessionsWarning: "Visi aktyvūs Fylkren seansai, įskaitant jūsų, bus nedelsiant baigti. Visi turės prisijungti iš naujo.",
 };

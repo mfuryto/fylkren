@@ -474,4 +474,5 @@ export const lvLV: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   regionalSaved: "Reģionālie iestatījumi saglabāti.",
   regionalSaveFailed: "Neizdevās saglabāt reģionālos iestatījumus.",
   note: "Piezīme.",
+  terminateSessions: "Pārtraukt sesijas", terminateAllSessions: "Pārtraukt visas sesijas", terminatingSessions: "Pārtrauc…", terminateSessionsFailed: "Neizdevās pārtraukt aktīvās sesijas.", userSessionsTerminated: "Visas lietotāja {name} aktīvās sesijas ir pārtrauktas.", terminateUserSessionsWarning: "Visas lietotāja {name} aktīvās sesijas tiks nekavējoties pārtrauktas. Lietotājam būs jāpiesakās vēlreiz.", terminateAllSessionsWarning: "Visas Fylkren aktīvās sesijas, arī jūsu sesija, tiks nekavējoties pārtrauktas. Visiem būs jāpiesakās vēlreiz.",
 };

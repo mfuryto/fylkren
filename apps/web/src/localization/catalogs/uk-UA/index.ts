@@ -474,4 +474,5 @@ export const ukUA: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   regionalSaved: "Збережені регіональні налаштування.",
   regionalSaveFailed: "Не вдалося зберегти регіональні налаштування.",
   note: "Примітка:",
+  terminateSessions: "Завершити сеанси", terminateAllSessions: "Завершити всі сеанси", terminatingSessions: "Завершення…", terminateSessionsFailed: "Не вдалося завершити активні сеанси.", userSessionsTerminated: "Усі активні сеанси користувача {name} завершено.", terminateUserSessionsWarning: "Усі активні сеанси користувача {name} буде негайно завершено. Користувач має ввійти знову.", terminateAllSessionsWarning: "Усі активні сеанси у Fylkren, зокрема ваш, буде негайно завершено. Усі мають увійти знову.",
 };

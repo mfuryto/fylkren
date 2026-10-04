@@ -474,4 +474,5 @@ export const fiFI: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   regionalSaved: "Alueelliset asetukset tallennettu.",
   regionalSaveFailed: "Alueasetuksia ei voitu tallentaa.",
   note: "Huomaa:",
+  terminateSessions: "Päätä istunnot", terminateAllSessions: "Päätä kaikki istunnot", terminatingSessions: "Päätetään…", terminateSessionsFailed: "Aktiivisia istuntoja ei voitu päättää.", userSessionsTerminated: "Kaikki käyttäjän {name} aktiiviset istunnot päätettiin.", terminateUserSessionsWarning: "Kaikki käyttäjän {name} aktiiviset istunnot päätetään heti. Käyttäjän on kirjauduttava uudelleen.", terminateAllSessionsWarning: "Kaikki Fylkrenin aktiiviset istunnot, myös omasi, päätetään heti. Kaikkien on kirjauduttava uudelleen.",
 };

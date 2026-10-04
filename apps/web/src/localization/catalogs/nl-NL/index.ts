@@ -474,4 +474,5 @@ export const nlNL: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   regionalSaved: "Regionale instellingen opgeslagen.",
   regionalSaveFailed: "Regionale instellingen konden niet worden opgeslagen.",
   note: "Opmerking:",
+  terminateSessions: "Sessies beëindigen", terminateAllSessions: "Alle sessies beëindigen", terminatingSessions: "Beëindigen…", terminateSessionsFailed: "De actieve sessies konden niet worden beëindigd.", userSessionsTerminated: "Alle actieve sessies van {name} zijn beëindigd.", terminateUserSessionsWarning: "Alle actieve sessies van {name} worden onmiddellijk beëindigd. De gebruiker moet opnieuw inloggen.", terminateAllSessionsWarning: "Alle actieve sessies in Fylkren, ook die van uzelf, worden onmiddellijk beëindigd. Iedereen moet opnieuw inloggen.",
 };

@@ -474,4 +474,5 @@ export const svSE: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   regionalSaved: "Regionala inställningar sparade.",
   regionalSaveFailed: "Regionala inställningar kan inte sparas.",
   note: "Obs:",
+  terminateSessions: "Avsluta sessioner", terminateAllSessions: "Avsluta alla sessioner", terminatingSessions: "Avslutar…", terminateSessionsFailed: "De aktiva sessionerna kunde inte avslutas.", userSessionsTerminated: "Alla aktiva sessioner för {name} har avslutats.", terminateUserSessionsWarning: "Alla aktiva sessioner för {name} avslutas omedelbart. Användaren måste logga in igen.", terminateAllSessionsWarning: "Alla aktiva sessioner i Fylkren, även din egen, avslutas omedelbart. Alla måste logga in igen.",
 };

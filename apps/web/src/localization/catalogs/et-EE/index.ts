@@ -474,4 +474,5 @@ export const etEE: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   regionalSaved: "Piirkondlikud seadistused salvestatud.",
   regionalSaveFailed: "Piirkondlikke seadeid ei õnnestunud salvestada.",
   note: "Märkus:",
+  terminateSessions: "Lõpeta seansid", terminateAllSessions: "Lõpeta kõik seansid", terminatingSessions: "Lõpetamine…", terminateSessionsFailed: "Aktiivseid seansse ei õnnestunud lõpetada.", userSessionsTerminated: "Kõik kasutaja {name} aktiivsed seansid lõpetati.", terminateUserSessionsWarning: "Kõik kasutaja {name} aktiivsed seansid lõpetatakse kohe. Kasutaja peab uuesti sisse logima.", terminateAllSessionsWarning: "Kõik Fylkreni aktiivsed seansid, sealhulgas teie oma, lõpetatakse kohe. Kõik peavad uuesti sisse logima.",
 };

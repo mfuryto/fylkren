@@ -164,4 +164,11 @@ export const identityNbNO = {
   deleteUsersWarning: "Innlogging, e-post, profilbilde og eksterne identitetskoblinger fjernes. Navn og intern person-ID beholdes låst i historiske oppgaver, rapporter, beslutninger og revisjon.",
   deleting: "Sletter …",
   deleteSelected: "Slett valgte",
+  terminateSessions: "Avslutt økter",
+  terminateAllSessions: "Avslutt alle økter",
+  terminatingSessions: "Avslutter …",
+  terminateSessionsFailed: "De aktive øktene kunne ikke avsluttes.",
+  userSessionsTerminated: "Alle aktive økter for {name} er avsluttet.",
+  terminateUserSessionsWarning: "Alle aktive økter for {name} avsluttes umiddelbart. Brukeren må logge inn på nytt.",
+  terminateAllSessionsWarning: "Alle aktive økter i Fylkren, også din egen, avsluttes umiddelbart. Alle må logge inn på nytt.",
 } as const;

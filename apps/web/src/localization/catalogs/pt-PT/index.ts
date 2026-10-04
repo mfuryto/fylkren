@@ -474,4 +474,5 @@ export const ptPT: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   regionalSaved: "Configurações regionais salvas.",
   regionalSaveFailed: "Não foi possível salvar as configurações regionais.",
   note: "Nota:",
+  terminateSessions: "Terminar sessões", terminateAllSessions: "Terminar todas as sessões", terminatingSessions: "A terminar…", terminateSessionsFailed: "Não foi possível terminar as sessões ativas.", userSessionsTerminated: "Todas as sessões ativas de {name} foram terminadas.", terminateUserSessionsWarning: "Todas as sessões ativas de {name} serão terminadas imediatamente. A pessoa terá de iniciar sessão novamente.", terminateAllSessionsWarning: "Todas as sessões ativas no Fylkren, incluindo a sua, serão terminadas imediatamente. Todos terão de iniciar sessão novamente.",
 };

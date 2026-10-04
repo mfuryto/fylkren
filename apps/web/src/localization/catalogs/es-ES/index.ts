@@ -474,4 +474,5 @@ export const esES: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   regionalSaved: "Ajustes regionales guardados.",
   regionalSaveFailed: "No se pueden guardar ajustes regionales.",
   note: "Nota:",
+  terminateSessions: "Cerrar sesiones", terminateAllSessions: "Cerrar todas las sesiones", terminatingSessions: "Cerrando…", terminateSessionsFailed: "No se pudieron cerrar las sesiones activas.", userSessionsTerminated: "Se cerraron todas las sesiones activas de {name}.", terminateUserSessionsWarning: "Todas las sesiones activas de {name} se cerrarán de inmediato. La persona deberá iniciar sesión de nuevo.", terminateAllSessionsWarning: "Todas las sesiones activas de Fylkren, incluida la suya, se cerrarán de inmediato. Todos deberán iniciar sesión de nuevo.",
 };

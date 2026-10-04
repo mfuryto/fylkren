@@ -474,4 +474,5 @@ export const roRO: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   regionalSaved: "Setări regionale salvate.",
   regionalSaveFailed: "Nu s-au putut salva setările regionale.",
   note: "Notã:",
+  terminateSessions: "Încheie sesiunile", terminateAllSessions: "Încheie toate sesiunile", terminatingSessions: "Se încheie…", terminateSessionsFailed: "Sesiunile active nu au putut fi încheiate.", userSessionsTerminated: "Toate sesiunile active pentru {name} au fost încheiate.", terminateUserSessionsWarning: "Toate sesiunile active pentru {name} vor fi încheiate imediat. Utilizatorul trebuie să se autentifice din nou.", terminateAllSessionsWarning: "Toate sesiunile active din Fylkren, inclusiv a dvs., vor fi încheiate imediat. Toți utilizatorii trebuie să se autentifice din nou.",
 };

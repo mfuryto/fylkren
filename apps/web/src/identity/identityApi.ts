@@ -26,6 +26,8 @@ export const loadIdentityProviderSettings = (provider: string) => apiGet<Identit
 export const saveIdentityProviderSettings = (provider: string, enabled: boolean, configuration: IdentityProviderConfiguration, clearSecret: boolean) => apiMutate(providerSettingsUrl(provider), "PUT", { enabled, configuration, clearSecret }, translateActive("identityProviderSaveFailed"));
 export const testIdentityProvider = (provider: string) => apiMutate(`${root}/providers/${provider}/test`, "POST", undefined, translateActive("identityProviderTestFailed"));
 export const moveGlobalUser = (id: string, sourceSiteId: string, targetSiteId: string) => apiMutate(`${root}/users/${id}/move`, "POST", { sourceSiteId, targetSiteId }, translateActive("userMoveFailed"));
+export const terminateGlobalUserSessions = (id: string) => apiMutate(`${root}/users/${id}/terminate-sessions`, "POST", undefined, translateActive("terminateSessionsFailed"));
+export const terminateAllGlobalUserSessions = () => apiMutate(`${root}/users/terminate-sessions`, "POST", undefined, translateActive("terminateSessionsFailed"));
 export type PasswordResetCode = { personId: string; displayName: string; resetCode: string; expiresAt: string };
 export const resetGlobalPasswords = (personIds: string[]) => apiMutate<{ resetCodes: PasswordResetCode[] }>(`${root}/users/password`, "POST", { personIds }, translateActive("resetCodesCreateFailed"));
 export const assignGlobalUsers = (personIds: string[], siteId: string) => apiMutate(`${root}/users/assign`, "POST", { personIds, siteId }, translateActive("usersAssignFailed"));

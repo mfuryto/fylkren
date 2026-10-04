@@ -6,6 +6,8 @@ public static partial class PlatformUserEndpoints
     {
         group.MapGet("/users", GetUsers);
         group.MapPost("/users/{personId:guid}/move", MoveUser);
+        group.MapPost("/users/{personId:guid}/terminate-sessions", TerminateUserSessions);
+        group.MapPost("/users/terminate-sessions", TerminateAllUserSessions);
         group.MapPost("/users/password", ResetUserPasswords);
         group.MapPost("/users/assign", AssignUsers);
         group.MapPost("/users/delete", DeleteUsers);

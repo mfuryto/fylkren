@@ -1419,4 +1419,19 @@ Scoped command:
 node tools/test-visible-logout-access.mjs
 ```
 
-The source/composition control reports `{"visibleLogoutAccess":"passed","authenticatedPageShell":"ProductShell","persistentTrigger":true,"interactionCount":2,"mobileAvailable":true,"accessibleMenu":true,"profileDirectAction":true}`. It locks the authenticated application composition, sticky/responsive visibility, menu roles, callback wiring and Norwegian «Åpne brukermeny» / «Logg ut» labels. No unrelated product suite was run. Production is untouched.
+The source/composition control reports `{"visibleLogoutAccess":"passed","authenticatedPageShell":"ProductShell","persistentTrigger":true,"interactionCount":2,"mobileAvailable":true,"accessibleMenu":true,"profileDirectAction":true}`. It locks the authenticated application composition, sticky/responsive visibility, menu roles, callback wiring and the Norwegian user-menu and sign-out labels. No unrelated product suite was run. Production is untouched.
+
+## Administrator session termination — 2026-10-04
+
+Completes ASVS 7.4.5 and closes SV-095. Source review found no explicit administrator operation for terminating an individual's sessions or every session; password reset and account deactivation were indirect substitutes that changed unrelated state. Fylkren now provides Platform Manager-only, antiforgery-protected individual and global operations. Both use the existing account security version and backend principal validator. The global action includes the acting administrator, causing immediate coordinated reauthentication. The global user directory exposes both controls with explicit confirmation text in every supported language, and the operations record distinct security audit events.
+
+Scoped commands:
+
+```sh
+dotnet build apps/api/Fylkren.Api.csproj --no-restore
+pnpm --filter @fylkren/web typecheck
+pnpm --filter @fylkren/web test -- src/localization/localization.test.ts
+FYLKREN_E2E_API_IMAGE=sha256:46fb3ab50fadff9189132fdaca312fd576a975cdd42dc9fd889cd425d96d1969 FYLKREN_E2E_WEB_IMAGE=sha256:f1a56fd2f0510b23306731906fc6d91dfa2a54071e0d19fb553642414ea8050a node tools/run-e2e-editions.mjs --asvs-admin-session-termination-only --no-build
+```
+
+The current-candidate run reports `{"administratorSessionTerminationRuntime":"passed","individualUserOnly":true,"unrelatedUserPreservedBeforeGlobalAction":true,"allUsersTerminated":true,"actingAdministratorTerminatedByGlobalAction":true,"auditEventsRecorded":true}`. It first terminates one user's preserved session and proves another user and a parallel administrator session remain authenticated. It then terminates all sessions and proves the remaining user, parallel administrator and acting administrator are rejected. The disposable database contains both `platform-user.sessions-terminated` and `platform.sessions-terminated-all`. The API build has zero warnings/errors, TypeScript passes and all 161 web tests pass. Production is untouched.

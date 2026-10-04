@@ -474,4 +474,5 @@ export const frFR: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   regionalSaved: "Paramètres régionaux enregistrés.",
   regionalSaveFailed: "Les paramètres régionaux ne peuvent pas être enregistrés.",
   note: "Remarque:",
+  terminateSessions: "Fermer les sessions", terminateAllSessions: "Fermer toutes les sessions", terminatingSessions: "Fermeture…", terminateSessionsFailed: "Les sessions actives n’ont pas pu être fermées.", userSessionsTerminated: "Toutes les sessions actives de {name} ont été fermées.", terminateUserSessionsWarning: "Toutes les sessions actives de {name} seront fermées immédiatement. La personne devra se reconnecter.", terminateAllSessionsWarning: "Toutes les sessions actives dans Fylkren, y compris la vôtre, seront fermées immédiatement. Tout le monde devra se reconnecter.",
 };

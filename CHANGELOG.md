@@ -4,6 +4,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Let Platform Managers terminate every active session for one user or the whole installation from the global user directory, with explicit confirmation, audit events and immediate security-version revocation.
 - Limit browser sessions to one hour of inactivity and twelve hours from authentication, following the NIST SP 800-63B-4 AAL2 timing reference without claiming AAL2 while mandatory MFA remains open.
 - Reject policy-compatible passwords from a pinned, PII-free breached-password set in addition to the separate top-3,000 common-password list.
 - Expose standard current/new-password autocomplete semantics on every user-password field so browser password helpers, external managers and paste work consistently.

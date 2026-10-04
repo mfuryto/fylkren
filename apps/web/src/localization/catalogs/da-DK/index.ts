@@ -474,4 +474,5 @@ export const daDK: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   regionalSaved: "Regionale indstillinger gemt.",
   regionalSaveFailed: "Regionale indstillinger kunne ikke gemmes.",
   note: "Bemærk:",
+  terminateSessions: "Afslut sessioner", terminateAllSessions: "Afslut alle sessioner", terminatingSessions: "Afslutter…", terminateSessionsFailed: "De aktive sessioner kunne ikke afsluttes.", userSessionsTerminated: "Alle aktive sessioner for {name} er afsluttet.", terminateUserSessionsWarning: "Alle aktive sessioner for {name} afsluttes med det samme. Brugeren skal logge ind igen.", terminateAllSessionsWarning: "Alle aktive sessioner i Fylkren, også din egen, afsluttes med det samme. Alle skal logge ind igen.",
 };

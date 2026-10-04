@@ -23,7 +23,7 @@ assert.match(theme, /\.account-menu-container\s*\{[^}]*position:\s*relative;/);
 assert.match(theme, /@media \(max-width: 850px\)[^]*\.mobile-navigation-toggle \+ \.account-menu-container/);
 
 assert.match(profile, /<button className="secondary-button" type="button" onClick=\{onSignOut\}>[^]*t\("signOut"\)/);
-assert.match(norwegian, /openUserMenu: "Åpne brukermeny"/);
+assert.match(norwegian, /openUserMenu: "\u00c5pne brukermeny"/u);
 assert.match(norwegian, /signOut: "Logg ut"/);
 
 process.stdout.write(`${JSON.stringify({

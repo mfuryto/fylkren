@@ -10,6 +10,49 @@ namespace Fylkren.Api.Platform;
 
 public static partial class PlatformUserEndpoints
 {
+    private static async Task<IResult> TerminateUserSessions(
+        Guid personId,
+        IAntiforgery antiforgery,
+        HttpContext context,
+        FylkrenDbContext database,
+        CancellationToken cancellationToken)
+    {
+        if (!await antiforgery.IsRequestValidAsync(context))
+            return Results.BadRequest(new { error = "The security check expired. Reload the page and try again." });
+        if (!Guid.TryParse(context.User.FindFirst("fylkren:person_id")?.Value, out var actor))
+            return Results.Problem(statusCode: 403, title: "The signed-in Platform Manager could not be identified.");
+
+        var identities = await database.LoginIdentities
+            .Where(value => value.PersonId == personId && value.IsActive)
+            .ToListAsync(cancellationToken);
+        if (identities.Count == 0) return Results.NotFound(new { error = "The user has no active sign-in account." });
+
+        foreach (var identity in identities) identity.AdvanceSecurityVersion();
+        database.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), null, actor,
+            "platform-user.sessions-terminated", "person", personId, DateTimeOffset.UtcNow));
+        await database.SaveChangesAsync(cancellationToken);
+        return Results.Ok(new { terminatedIdentities = identities.Count });
+    }
+
+    private static async Task<IResult> TerminateAllUserSessions(
+        IAntiforgery antiforgery,
+        HttpContext context,
+        FylkrenDbContext database,
+        CancellationToken cancellationToken)
+    {
+        if (!await antiforgery.IsRequestValidAsync(context))
+            return Results.BadRequest(new { error = "The security check expired. Reload the page and try again." });
+        if (!Guid.TryParse(context.User.FindFirst("fylkren:person_id")?.Value, out var actor))
+            return Results.Problem(statusCode: 403, title: "The signed-in Platform Manager could not be identified.");
+
+        var identities = await database.LoginIdentities.Where(value => value.IsActive).ToListAsync(cancellationToken);
+        foreach (var identity in identities) identity.AdvanceSecurityVersion();
+        database.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), null, actor,
+            "platform.sessions-terminated-all", "person", actor, DateTimeOffset.UtcNow));
+        await database.SaveChangesAsync(cancellationToken);
+        return Results.Ok(new { terminatedIdentities = identities.Count });
+    }
+
     private static async Task<IResult> MoveUser(
         Guid personId,
         MoveUserRequest request,

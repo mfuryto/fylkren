@@ -474,4 +474,5 @@ export const deDE: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   regionalSaved: "Regionale Einstellungen gespeichert.",
   regionalSaveFailed: "Regionale Einstellungen konnten nicht gerettet werden.",
   note: "Anmerkung:",
+  terminateSessions: "Sitzungen beenden", terminateAllSessions: "Alle Sitzungen beenden", terminatingSessions: "Wird beendet…", terminateSessionsFailed: "Die aktiven Sitzungen konnten nicht beendet werden.", userSessionsTerminated: "Alle aktiven Sitzungen von {name} wurden beendet.", terminateUserSessionsWarning: "Alle aktiven Sitzungen von {name} werden sofort beendet. Die Person muss sich erneut anmelden.", terminateAllSessionsWarning: "Alle aktiven Sitzungen in Fylkren, einschließlich Ihrer eigenen, werden sofort beendet. Alle müssen sich erneut anmelden.",
 };
