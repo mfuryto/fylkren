@@ -1272,3 +1272,15 @@ node tools/test-authentication-secret-csprng-boundary.mjs
 ```
 
 The source lock reports `{"authenticationSecretCsprngBoundary":"passed","generatedSecrets":{"totpSeedBits":160,"recoveryCodeBits":128,"resetCodeBits":128},"generator":"System.Security.Cryptography.RandomNumberGenerator","nonCryptographicRandomInIdentity":false,"outOfBandAuthenticationMechanism":false}`. Fylkren does not implement SMS, voice, email OTP or another out-of-band authentication mechanism. Data-protected setup and sign-in challenges are server-state bindings rather than user-entered authentication codes. No implementation correction or finding was required. Production is untouched.
+
+## Lookup-secret minimum entropy — 2026-10-04
+
+Completes ASVS 6.5.4 using the same criterion-specific generator lock. TOTP recovery codes and administrator-issued password-reset codes each use 16 independent CSPRNG bytes, providing 128 bits of entropy against the 20-bit minimum. Fylkren has no out-of-band authentication-code mechanism.
+
+Scoped command:
+
+```sh
+node tools/test-authentication-secret-csprng-boundary.mjs
+```
+
+The maintained output records `recoveryCodeBits: 128`, `resetCodeBits: 128`, the cryptographic generator and the absence of a non-cryptographic Identity generator. No additional runtime chain was needed because the tested property is the exact entropy source and byte count; one-time runtime behavior remains covered under 6.5.1. Production is untouched.
