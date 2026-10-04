@@ -944,3 +944,17 @@ FYLKREN_E2E_API_IMAGE=sha256:be1f78e21528ae8d73ead04c2c9ada5fd42a2abeff48461a499
 ```
 
 The source lock inventories three file responses, zero caller-controlled response filenames, two fixed inline names, one server-generated attachment and three allowlisted image extensions. The current-image test uploads both images under `caller-name.final.png`; responses return exactly `inline; filename="branding-logo.png"` and `inline; filename="profile-image.png"`, while the export retains its UUID-derived attachment name. Result: `{"fileDownloadBoundary":"passed","callerControlledResponseFilenames":0,"fixedInlineImageNames":2,"serverGeneratedAttachmentNames":1}`. The affected response-media regression passes 14 body-bearing cases, including PNG signature/disposition and ZIP signature/attachment. API build completed with zero warnings/errors. The candidate API image is `sha256:be1f78e21528ae8d73ead04c2c9ada5fd42a2abeff48461a49962de509a3ff0a`; the candidate gateway image is `sha256:8205bcb733296a85ad03bb4708dac2a03bc947044b0a948390c5e74477b91957`. SV-092 is closed. Production is untouched.
+
+## File download header structure — 2026-10-04
+
+Completes ASVS 5.4.2 for the same three HTTP file responses. No email attachment feature exists. The maintained filenames contain only fixed ASCII letters, digits, period and hyphen: fixed profile/branding stems plus an allowlisted extension, or a fixed Site-export stem plus the parsed UUID in 32-character `N` format. Image parameters are quoted; the framework constructs the export attachment field.
+
+Scoped commands:
+
+```sh
+node tools/test-file-download-header-safety.mjs
+node tools/test-file-download-boundary.mjs
+FYLKREN_E2E_API_IMAGE=sha256:be1f78e21528ae8d73ead04c2c9ada5fd42a2abeff48461a49962de509a3ff0a FYLKREN_E2E_WEB_IMAGE=sha256:8205bcb733296a85ad03bb4708dac2a03bc947044b0a948390c5e74477b91957 node tools/run-e2e-editions.mjs --asvs-file-download-only --no-build
+```
+
+The source lock reports `{"fileDownloadHeaderSafety":"passed","fileResponses":3,"emailAttachments":0,"callerControlledHeaderFields":0,"asciiFilenameFamilies":3,"responseHeaderInjectionCharacters":0}`. The live test submits the image filename `caller"; filename*=UTF-8''evil%0D%0AX-Synthetic=yes.png`; both responses retain their exact fixed dispositions without caller text or CR/LF, and the Site export matches one attachment parameter with the expected safe UUID filename. Result: `{"fileDownloadBoundary":"passed","callerControlledResponseFilenames":0,"fixedInlineImageNames":2,"serverGeneratedAttachmentNames":1,"responseHeaderStructurePreserved":true}`. No product correction or new finding was required beyond the preceding 5.4.1 fix. Production is untouched.

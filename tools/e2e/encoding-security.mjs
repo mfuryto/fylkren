@@ -558,7 +558,7 @@ export async function testFileStorageBoundary({ platform, siteManager }) {
 
 export async function testFileDownloadBoundary({ platform, siteManager, siteId }) {
   const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64');
-  const submittedName = 'caller-name.final.png';
+  const submittedName = 'caller"; filename*=UTF-8\'\'evil%0D%0AX-Synthetic=yes.png';
   for (const [actor, path, field] of [[platform, '/api/platform/branding/logo', 'logo'],
     [siteManager, '/api/profile/image', 'image']]) {
     const form = new FormData(); form.append(field, new Blob([png], { type: 'image/png' }), submittedName);
@@ -569,19 +569,25 @@ export async function testFileDownloadBoundary({ platform, siteManager, siteId }
   assert.equal(logo.status, 200); assert.equal(profile.status, 200);
   assert.equal(logo.contentDisposition, 'inline; filename="branding-logo.png"');
   assert.equal(profile.contentDisposition, 'inline; filename="profile-image.png"');
-  for (const response of [logo, profile])
-    assert.doesNotMatch(response.contentDisposition ?? '', /caller-name/i,
+  for (const response of [logo, profile]) {
+    assert.doesNotMatch(response.contentDisposition ?? '', /[\r\n]/,
+      'An image response disposition changed the HTTP header structure');
+    assert.doesNotMatch(response.contentDisposition ?? '', /caller|synthetic|filename\*/i,
       'A caller-controlled upload filename reached a download response');
+  }
 
   const exported = await siteManager.request(`/api/portability/sites/${siteId}/export`, {
     method: 'POST', binary: true,
   });
   assert.equal(exported.status, 200);
-  assert.match(exported.contentDisposition ?? '', /^attachment;/i);
-  assert.match(exported.contentDisposition ?? '',
-    new RegExp(`filename="?fylkren-site-${siteId.replaceAll('-', '')}-export\\.zip"?`, 'i'));
+  const exportName = `fylkren-site-${siteId.replaceAll('-', '')}-export.zip`;
+  assert.match(exported.contentDisposition ?? '', new RegExp(
+    `^attachment; filename="?${exportName.replace('.', '\\.')}"?(?:; filename\\*=UTF-8''${exportName.replace('.', '\\.')}|; filename\\*=${exportName.replace('.', '\\.')})?$`, 'i'));
+  assert.doesNotMatch(exported.contentDisposition ?? '', /[\r\n]/,
+    'The export disposition changed the HTTP header structure');
   return { fileDownloadBoundary: 'passed', callerControlledResponseFilenames: 0,
-    fixedInlineImageNames: 2, serverGeneratedAttachmentNames: 1 };
+    fixedInlineImageNames: 2, serverGeneratedAttachmentNames: 1,
+    responseHeaderStructurePreserved: true };
 }
 
 export async function testDerivedArithmeticBoundaries({ platform, siteManager, leader, siteId, unitId, workItemTypeId }) {
