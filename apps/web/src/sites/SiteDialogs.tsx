@@ -361,6 +361,7 @@ export function SiteDialogs({
               <input
                 id="manager-password"
                 type="password"
+                autoComplete="new-password"
                 required
                 minLength={14}
                 value={managerUserForm.password}

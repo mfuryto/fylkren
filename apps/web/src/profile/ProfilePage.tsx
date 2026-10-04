@@ -374,6 +374,7 @@ export function ProfilePage({
                   <input
                     id="disable-2fa-password"
                     type="password"
+                    autoComplete="current-password"
                     required
                     value={disablePassword}
                     onChange={(e) => setDisablePassword(e.target.value)}

@@ -1084,3 +1084,16 @@ pnpm --filter @fylkren/web typecheck
 ```
 
 The inventory reports `{"passwordInputMasking":"passed","maskedPasswordOrSecretInputs":15,"userPasswordInputs":13,"coveredUserFlows":["bootstrap","login","reset","user-creation","profile","totp","passkey"]}`. Its explicit expected set and total make additions or removals fail pending review. Frontend typechecking completed without errors. No implementation correction or finding was required. Production is untouched.
+
+## Password-manager and paste compatibility — 2026-10-04
+
+Completes ASVS 6.2.7. The same complete password-input inventory verifies all 13 user-password fields expose the standard `current-password` or `new-password` autocomplete value appropriate to the operation. None attaches a paste or before-input interceptor, and the fields remain ordinary native password inputs available to browser helpers and external password managers.
+
+Scoped commands:
+
+```sh
+node tools/test-password-input-masking.mjs
+pnpm --filter @fylkren/web typecheck
+```
+
+The test reports `{"passwordInputMasking":"passed","maskedPasswordOrSecretInputs":15,"userPasswordInputs":13,"coveredUserFlows":["bootstrap","login","reset","user-creation","profile","totp","passkey"],"passwordManagerCompatibility":"passed","pasteInterceptors":0,"standardAutocompleteInputs":13}`. It found and corrected absent autocomplete semantics on Site Manager creation (`new-password`) and TOTP deactivation (`current-password`). Frontend typechecking completed without errors. Production is untouched.

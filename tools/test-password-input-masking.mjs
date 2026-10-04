@@ -18,6 +18,21 @@ const expectedUserPasswordIds = new Set([
   'setup-2fa-password',
   'passkey-current-password',
 ]);
+const expectedAutocomplete = new Map([
+  ['setup-password', 'new-password'],
+  ['setup-confirm-password', 'new-password'],
+  ['password', 'current-password'],
+  ['password-reset-new', 'new-password'],
+  ['password-reset-confirm', 'new-password'],
+  ['manager-password', 'new-password'],
+  ['profile-current-password', 'current-password'],
+  ['current-password', 'current-password'],
+  ['new-password', 'new-password'],
+  ['confirm-password', 'new-password'],
+  ['disable-2fa-password', 'current-password'],
+  ['setup-2fa-password', 'current-password'],
+  ['passkey-current-password', 'current-password'],
+]);
 
 function sourceFiles(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -38,7 +53,13 @@ for (const path of sourceFiles(sourceRoot)) {
       || (path.endsWith('SmtpPage.tsx') && /\bvalue=\{password\}/.test(input));
     if (!isPasswordInput) continue;
     assert.match(input, /\btype="password"/, `${relative('.', path)} contains an unmasked password or secret input`);
-    if (id && expectedUserPasswordIds.has(id)) userPasswordIds.add(id);
+    if (id && expectedUserPasswordIds.has(id)) {
+      userPasswordIds.add(id);
+      assert.match(input, new RegExp(`\\bautoComplete="${expectedAutocomplete.get(id)}"`),
+        `${relative('.', path)} must expose standard password-manager semantics for ${id}`);
+      assert.doesNotMatch(input, /\bonPaste=|\bonBeforeInput=/,
+        `${relative('.', path)} must not intercept paste into ${id}`);
+    }
     passwordInputs.push({ path: relative('.', path), id: id ?? null });
   }
 }
@@ -53,4 +74,7 @@ process.stdout.write(`${JSON.stringify({
   maskedPasswordOrSecretInputs: passwordInputs.length,
   userPasswordInputs: userPasswordIds.size,
   coveredUserFlows: ['bootstrap', 'login', 'reset', 'user-creation', 'profile', 'totp', 'passkey'],
+  passwordManagerCompatibility: 'passed',
+  pasteInterceptors: 0,
+  standardAutocompleteInputs: userPasswordIds.size,
 })}\n`);
