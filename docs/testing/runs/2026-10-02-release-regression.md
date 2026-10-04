@@ -780,3 +780,17 @@ FYLKREN_E2E_API_IMAGE=fylkren-asvs-redirects-api:latest FYLKREN_E2E_WEB_IMAGE=fy
 Fourteen body-bearing responses passed: SPA HTML, versioned JavaScript and CSS, static error HTML, plain health text, anonymous/authenticated/created JSON, antiforgery JSON, validation problem JSON, stored PNG and portable ZIP. All textual types declare UTF-8. The binary tests additionally require PNG and ZIP magic bytes; the export requires `Content-Disposition: attachment`. A 204 logo update was separately required to contain no body. Result: `{"responseMediaTypes":"passed","bodyBearingResponseCases":14,"textualCharsets":"utf-8","jsonAndProblemJson":true,"staticHtmlJsCss":true,"plainText":true,"pngSignature":true,"zipSignatureAndAttachment":true,"explicitApiFileResponseSites":3}`.
 
 The reused API image is `sha256:0b1413bba64b6ec65b9ee077668bea1a04ad1a706e2442bf14be188e6392369b`; the corrected web image is `sha256:5ab694a72cd4b97d269acaadbc1edf7d0b94adc4dbc70818fcbbb1930be1b263`. The same charset configuration is present in both maintained federation gateways. SV-087 is closed. Safe hashes and results are recorded under `responseMediaTypeCompletion` in the evidence manifest. Production is untouched.
+
+## Browser-only HTTP upgrade boundary — 2026-10-04
+
+Completes ASVS 4.1.2. Source review found that the framework-wide HTTPS redirection middleware applied equally to browser pages, APIs, machine endpoints, health probes and external-authentication callbacks. This could hide a client configuration that had already sent sensitive service data over plaintext and is recorded as SV-088.
+
+The replacement boundary keeps 307 upgrade redirects for browser-facing paths and returns an explicit non-cacheable 400 problem response for `/api`, `/health` and `/signin-oidc`. The failure contains no `Location`, no cookie and no reflected request value. The container healthcheck now explicitly supplies the trusted gateway scheme, representing its actual internal position behind the supported HTTPS gateway rather than weakening the public service boundary.
+
+```sh
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-http-upgrade-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-asvs-media-types-web:latest node tools/run-e2e-editions.mjs --asvs-http-upgrade-only --no-build
+```
+
+Three browser paths, including query preservation, returned 307 to the same HTTPS host/path/query. Public and session APIs, a bearer machine API, health and an OIDC callback returned 400 with zero redirects and cookies. Result: `{"httpUpgradeBoundary":"passed","browserRedirectCases":3,"serviceFailureCases":5,"browserStatus":307,"serviceStatus":400,"serviceRedirects":0,"plaintextCookies":0}`.
+
+The API image is `sha256:2ad803d912e730690ccee35ac52d254457323fe70fe62b71a69d39e9f16653e4`; the reused web image is `sha256:5ab694a72cd4b97d269acaadbc1edf7d0b94adc4dbc70818fcbbb1930be1b263`. SV-088 is closed. Safe hashes and results are recorded under `httpUpgradeBoundaryCompletion` in the evidence manifest. Production is untouched.

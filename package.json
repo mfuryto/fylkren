@@ -23,6 +23,7 @@
     "test:e2e:identity-sso": "node tools/run-identity-sso-lab.mjs",
     "test:security:browser-boundaries": "node tools/test-browser-technology-redirects.mjs",
     "test:security:response-media-types": "node tools/test-response-media-types.mjs",
+    "test:security:http-upgrade": "node tools/test-http-upgrade-boundary.mjs",
     "test:e2e:license-expiry": "node tools/run-license-expiry.mjs",
     "typecheck": "pnpm -r typecheck",
     "test:e2e:browser": "node tools/run-release-browser.mjs",

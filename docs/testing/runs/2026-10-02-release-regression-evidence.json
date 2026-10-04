@@ -4658,5 +4658,32 @@
     "finding": "SV-087 closed after baseline reproduction and current-image retest",
     "matrix": "ASVS 4.1.1 Passed; continue at 4.1.2",
     "scope": "Current source response-family inventory and representative body/type matching through the canonical gateway; production proxy qualification remains separate"
+  },
+  "httpUpgradeBoundaryCompletion": {
+    "date": "2026-10-04",
+    "baseline": "9f1008e",
+    "sourceHashes": {
+      "apps/api/PlainHttpBoundaryMiddleware.cs": "ae3ccd12c06bca3f24cd6b3b2a0488aac7e8a389c5bbe7eddf1487e549c29eb4",
+      "apps/api/Program.cs": "e75f5d53884c646aa33ea3a7139ac6e56014ffa901a9f0cea75214dda4234a19",
+      "compose.yaml": "1ccd88ce03e4b18657bac01ee3a58f87401c2d93fd444b05058e0f7bb0496f05",
+      "tools/e2e/federation-pair.compose.yaml": "f26678c941691120f62a615a936e9cdac239e38e4f4a774b6e625f5a6307d04c",
+      "tools/test-http-upgrade-boundary.mjs": "60880440bced2ea7cf187461da8ebb35246aa4d6103cbac2c8016718d3cdcb9d",
+      "tools/run-e2e-editions.mjs": "2e998b45178ef33a939fe191cb43fa64f294ec2642612790b7de92c75d9852c7"
+    },
+    "apiImage": "sha256:2ad803d912e730690ccee35ac52d254457323fe70fe62b71a69d39e9f16653e4",
+    "reusedWebImage": "sha256:5ab694a72cd4b97d269acaadbc1edf7d0b94adc4dbc70818fcbbb1930be1b263",
+    "results": {
+      "httpUpgradeBoundary": "passed",
+      "browserRedirectCases": 3,
+      "serviceFailureCases": 5,
+      "browserStatus": 307,
+      "serviceStatus": 400,
+      "serviceRedirects": 0,
+      "plaintextCookies": 0,
+      "probeValuesReflected": false
+    },
+    "finding": "SV-088 closed after current production-mode retest",
+    "matrix": "ASVS 4.1.2 Passed; continue at 4.1.3",
+    "scope": "Application HTTP upgrade/failure behavior behind the supported gateway; external TLS termination and network-path confidentiality remain deployment qualification"
   }
 }

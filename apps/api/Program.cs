@@ -35,7 +35,6 @@ app.UseMiddleware<CanonicalHostMiddleware>();
 if (requireHttps)
 {
     app.UseHsts();
-    app.UseHttpsRedirection();
 }
 
 app.Use(async (context, next) =>
@@ -57,6 +56,11 @@ app.Use(async (context, next) =>
     });
     await next();
 });
+
+if (requireHttps)
+{
+    app.UseMiddleware<PlainHttpBoundaryMiddleware>();
+}
 
 app.UseExceptionHandler();
 app.UseMiddleware<ExternalAuthenticationFailureCookieMiddleware>();
