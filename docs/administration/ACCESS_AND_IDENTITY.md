@@ -16,6 +16,8 @@ Profile image content is stored in the database. PNG, JPEG and WebP up to 2 MiB 
 
 Administrators never choose a user's permanent password. Creation or reset issues a cryptographically random one-time code, displayed once and valid for 30 minutes. Only its SHA-256 hash is stored. Issuing a new code revokes older codes; successful reset invalidates older sessions through the person's security version.
 
+Fylkren does not expire local passwords on a schedule or require periodic rotation. A password remains valid until the user changes it, an administrator issues a reset after a recovery or suspected compromise, the account is deactivated/deleted, or an upgraded password hash is written after successful authentication. The temporary first-password-change flag applies only to system-generated bootstrap credentials. Directory-managed password lifetime and compromise policy remain the responsibility of the configured identity provider.
+
 Local passwords are checked against length, context-specific terms and the bundled offline breached/common-password fingerprints. Password hashes use the configured current work factor and are upgraded after successful legacy verification.
 
 Platform Manager controls local login on **Identity**. Keep one local Platform Manager as emergency access until a tested external method preserves administrative access. Direct SSO may hide the ordinary login form and redirect to OIDC or SAML while `/?local=1` remains the documented emergency address. Fylkren refuses to disable local login unless an active Platform Manager is linked to an active external provider that has passed its connection test.

@@ -1110,3 +1110,15 @@ FYLKREN_E2E_API_IMAGE=sha256:922a2f9dfae305cb99f6fd1cd51f215d91875dff95a0a14644b
 ```
 
 The source lock reports `{"passwordExactnessBoundary":"passed","unchangedVerification":true,"unchangedHashingFlows":["bootstrap","change","reset"],"maximumAcceptedLength":128}`. The current-image run accepts exactly 128 characters and rejects 129 during bootstrap, change and reset. It then rejects the otherwise identical 127-character prefix at login and accepts the complete value: `{"passwordMaximumRuntime":"passed","acceptedLength":128,"rejectedLength":129,"testedFlows":["bootstrap","change","reset"],"fullLengthAuthentication":true,"truncatedCandidateRejected":true}`. No correction or finding was required. Production is untouched.
+
+## Password lifetime and rotation — 2026-10-04
+
+Completes ASVS 6.2.10. The local identity and persistence models contain no password age, change-time or expiry field, and the sign-in path has no time-based password invalidation. Local password replacement occurs through user-initiated change, administrator-issued recovery or compromise reset, account deactivation/deletion, or a transparent password-hash upgrade after successful authentication. The first-change flag is reserved for generated bootstrap credentials. The canonical access manual now states the policy and clarifies that directory-managed password lifetime belongs to the configured provider.
+
+Scoped command:
+
+```sh
+node tools/test-password-lifetime-boundary.mjs
+```
+
+The source/document lock reports `{"passwordLifetimeBoundary":"passed","periodicRotation":false,"passwordAgeFields":0,"allowedRotationReasons":["user-change","recovery-or-compromise-reset","account-lifecycle","hash-upgrade"],"directoryPolicyExternal":true}`. No implementation correction or finding was required. Production is untouched.
