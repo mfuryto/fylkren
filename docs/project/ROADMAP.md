@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 2026-10-04 after completing ASVS 1.4.2, chapters 2–5, chapter 6.1, chapter 6.2, chapter 6.4 and assessing authentication requirements through 6.5.4; the native DNS and mandatory-MFA findings and next requirement 6.5.5 remain explicit.
+Updated 2026-10-04 after completing ASVS 1.4.2, chapters 2–5, chapter 6.1, chapter 6.2, chapter 6.4 and assessing authentication requirements through 6.5.5; the native DNS and mandatory-MFA findings and next incomplete requirement 6.6.2 remain explicit.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -12,7 +12,7 @@ The additive event/activity foundation and coherent WorkItem slice are delivered
 
 ## Next delivery order
 
-1. Continue in requirement order at ASVS 6.5.5: verify the defined lifetime of TOTP and any out-of-band authentication requests, codes or tokens. Lookup secrets now exceed the 20-bit minimum with 128 bits under 6.5.4, while mandatory MFA remains Finding SV-094. ASVS 1.3.6 remains Finding SV-068 pending verified deployment egress restrictions for native DNS rebinding. Continue independent matrix cases while both findings remain open.
+1. Continue in requirement order at ASVS 6.6.2: assess applicability of out-of-band request binding; 6.6.1 is already not applicable because Fylkren does not use PSTN authentication. TOTP now has a source-locked and dynamically tested 30-second lifetime under 6.5.5, while mandatory MFA remains Finding SV-094. ASVS 1.3.6 remains Finding SV-068 pending verified deployment egress restrictions for native DNS rebinding. Continue independent matrix cases while both findings remain open.
 2. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing at this gate.
 
 No irreversible disposition is authorized by this order. Establish and verify its prerequisites before proposing activation; do not choose arbitrary retention periods.
@@ -36,11 +36,11 @@ Earlier HTTP p95 readings varied from subsecond values to multiple seconds and w
 
 ## Security verification
 
-The [ASVS 5.0 Level 2 matrix](../security/ASVS_5.0.0_L2_MATRIX.md) is the single security-testing work list and status authority. At this update it contains 96 Passed, 67 In progress, 37 Not assessed, 51 Not applicable and two Findings. Counts are a dated baseline, not a separate maintained matrix or security certification.
+The [ASVS 5.0 Level 2 matrix](../security/ASVS_5.0.0_L2_MATRIX.md) is the single security-testing work list and status authority. At this update it contains 97 Passed, 66 In progress, 37 Not assessed, 51 Not applicable and two Findings. Counts are a dated baseline, not a separate maintained matrix or security certification.
 
 Use the [security test plan](../security/SECURITY_TEST_PLAN.md) and [threat model](../security/SECURITY_THREAT_MODEL.md). Record findings and remediation in the [finding register](../security/SECURITY_VERIFICATION.md); record completed requirement-specific tests in the ASVS matrix with links to maintained execution evidence. Partial coverage remains partial. Retest affected controls after every change.
 
-HTTP destination/DNS/redirect/download boundaries and bounded runtime SAML metadata are delivered and tested. SMTP/AD/LDAP configured target, TLS and referral cases passed in the [same release record](../testing/runs/2026-10-02-release-regression.md#non-http-service-transport-continuation--2026-10-04). Native DNS rebinding remains SV-068 pending deployment egress qualification; mandatory MFA remains SV-094 pending an enforceable cross-pathway strength and enrollment policy. Arithmetic, chapters 2–5, chapter 6.1, chapter 6.2, chapter 6.4 and authentication requirements through 6.5.4 are assessed for the current scope; continue at 6.5.5. Do not rerun unrelated full-product chains for scoped corrections. Deployment-sensitive controls require production-equivalent TLS, canonical Host/port and proxy configuration, customer identity-provider behavior, authenticator compatibility and coordinated database/Data Protection key recovery with real backup custody. Disposable restore tests already exist; operational custody qualification remains separate.
+HTTP destination/DNS/redirect/download boundaries and bounded runtime SAML metadata are delivered and tested. SMTP/AD/LDAP configured target, TLS and referral cases passed in the [same release record](../testing/runs/2026-10-02-release-regression.md#non-http-service-transport-continuation--2026-10-04). Native DNS rebinding remains SV-068 pending deployment egress qualification; mandatory MFA remains SV-094 pending an enforceable cross-pathway strength and enrollment policy. Arithmetic, chapters 2–5, chapter 6.1, chapter 6.2, chapter 6.4 and authentication requirements through 6.5.5 are assessed for the current scope; because 6.6.1 is not applicable, continue at 6.6.2. Do not rerun unrelated full-product chains for scoped corrections. Deployment-sensitive controls require production-equivalent TLS, canonical Host/port and proxy configuration, customer identity-provider behavior, authenticator compatibility and coordinated database/Data Protection key recovery with real backup custody. Disposable restore tests already exist; operational custody qualification remains separate.
 
 Relevant Level 3 controls, WSTG techniques and API Security Top 10 coverage support this same workflow. An external penetration test is optional if requested, not a prerequisite for completing the authorized testing.
 

@@ -1284,3 +1284,15 @@ node tools/test-authentication-secret-csprng-boundary.mjs
 ```
 
 The maintained output records `recoveryCodeBits: 128`, `resetCodeBits: 128`, the cryptographic generator and the absence of a non-cryptographic Identity generator. No additional runtime chain was needed because the tested property is the exact entropy source and byte count; one-time runtime behavior remains covered under 6.5.1. Production is untouched.
+
+## TOTP lifetime — 2026-10-04
+
+Completes ASVS 6.5.5. The implementation derives the TOTP counter from Unix time divided by 30 seconds and advertises the same `period=30` in its provisioning URI. Verification computes only the current counter; it contains no acceptance loop or adjacent-window fallback. The maintained current security test computes otherwise valid codes for the immediately previous and immediately next windows and receives `401` for both.
+
+Scoped command:
+
+```sh
+node tools/test-totp-lifetime-boundary.mjs
+```
+
+The source/execution lock reports `{"totpLifetimeBoundary":"passed","periodSeconds":30,"acceptedWindows":["current"],"previousWindowRejected":true,"nextWindowRejected":true,"outOfBandAuthenticationMechanism":false}`. The linked maintained TOTP runtime is the dynamic source for the adjacent-window assertions. Fylkren has no out-of-band authentication request, code or token mechanism. No implementation correction or finding was required. Production is untouched.
