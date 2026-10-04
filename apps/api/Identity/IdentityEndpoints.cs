@@ -27,10 +27,10 @@ public static partial class IdentityEndpoints
             })
             .RequireAuthorization();
         group.MapGet("/profile", GetProfile).RequireAuthorization();
-        group.MapPost("/profile/2fa/setup", BeginTotpSetup).RequireAuthorization();
+        group.MapPost("/profile/2fa/setup", BeginTotpSetup).RequireAuthorization().RequireRateLimiting("authentication");
         group.MapPost("/profile/2fa/confirm", ConfirmTotpSetup).RequireAuthorization().RequireRateLimiting("authentication");
         group.MapDelete("/profile/2fa", DisableTotp).RequireAuthorization().RequireRateLimiting("authentication");
-        group.MapPut("/profile", UpdateProfile).RequireAuthorization();
+        group.MapPut("/profile", UpdateProfile).RequireAuthorization().RequireRateLimiting("authentication");
         group.MapPut("/profile/password", ChangePassword).RequireAuthorization().RequireRateLimiting("authentication");
         group.MapPut("/profile/image", UpdateProfileImage).RequireAuthorization();
         group.MapDelete("/profile/image", DeleteProfileImage).RequireAuthorization();

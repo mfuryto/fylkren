@@ -4,6 +4,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Apply the shared authentication attempt limit to TOTP setup and profile email reauthentication, matching the documented credential-guessing boundary.
 - Give profile images, branding logos and portable exports explicit server-controlled download names while discarding caller upload filenames.
 - Verify portable ZIP entry-count and declared uncompressed-size limits before opening content, including high-compression and ZIP64 boundary cases.
 - Fully decode and re-encode PNG, JPEG and WebP profile/branding images, enforce matching extensions and media types, bound image dimensions and apply the same content checks to portable-package attachments.

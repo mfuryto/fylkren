@@ -974,3 +974,21 @@ node tools/test-file-handling-inventory.mjs
 The source lock reports `{"malwareScanningApplicability":"not-applicable","untrustedFilesServedWithoutTransformation":0,"rasterTransformationPipelines":1,"validationOnlyPackageInputs":1,"generatedFileResponses":3,"antivirusEngines":0}`. The maintained image boundary accepts PNG/JPEG/WebP only after decode/re-encode and proves that trailing synthetic active content is absent from the returned bytes; truncation, active text, mismatch, excessive dimensions and over-limit input remain rejected. The complete file inventory still reports zero known malware scanners rather than treating decode/re-encoding as antivirus.
 
 Reopen this requirement and design a fail-closed malware control before adding general file attachments, package application/persistence or any file response that can return obtained bytes without the maintained transformation/generation boundary. Generated exports remain customer data subject to the receiving organization's classification and malware-control policy. No product correction or finding was required. Production is untouched.
+
+## Authentication-control documentation and enforcement — 2026-10-04
+
+Completes ASVS 6.1.1. The security test plan already documented an eight-request client-address window, numeric `Retry-After`, non-cacheable generic errors, the known-local-identity threshold of 20 failures, its 15-minute lock, successful clearing and the reason the lower address limit raises the cost of malicious account lockout. Review found SV-093: TOTP setup and profile email change both verified the current password but lacked the shared authentication policy, contrary to the documented local credential boundary. Both routes now use the existing policy. The wording now distinguishes locally verified password/MFA/passkey/reset/directory credentials from OIDC/SAML credentials verified by the configured provider.
+
+Scoped commands:
+
+```sh
+node tools/test-authentication-control-documentation.mjs
+dotnet build apps/api/Fylkren.Api.csproj --no-restore
+node tools/run-e2e-editions.mjs --asvs-reauth-limit-only
+FYLKREN_E2E_API_IMAGE=sha256:f17a501afd48a2c2ae8e0fd7e7d87dfef0d8a82fee2a065a3e74026ebacb4d65 FYLKREN_E2E_WEB_IMAGE=sha256:126d61a93642f32458538d540177b34524bc71fbb47d6ee1b459aaed855045ed node tools/run-e2e-editions.mjs --asvs-limits-only --no-build
+dotnet run --project tests/foundations/Fylkren.FoundationTests.csproj --no-restore -- --version-boundaries-only
+```
+
+The source/documentation lock reports `{"authenticationControlDocumentation":"passed","addressPermitLimit":8,"addressWindowSeconds":60,"identityFailureLimit":20,"identityLockMinutes":15,"documentedLockoutAbuseMitigation":true,"authenticatedReauthenticationRoutesCovered":2,"webauthnRoutesCovered":5}`. The affected current-image route permits seven incorrect current-password checks after the rate-limited bootstrap consumed the first shared permit, then returns 429 with numeric `Retry-After` and `no-store`: `{"authenticatedReauthenticationRateLimit":"passed","sharedPartitionPermitLimit":8,"credentialChecksAfterBootstrap":7,"rejectedStatus":429,"numericRetryAfter":true}`. The separate anonymous run retains generic 401 responses for unknown/malformed identities and reaches the same 429 boundary. The maintained domain test locks exactly on failure 20 and saturates corrupted/exhausted counts without escaping lockout.
+
+API build completed with zero warnings/errors. The candidate API image is `sha256:f17a501afd48a2c2ae8e0fd7e7d87dfef0d8a82fee2a065a3e74026ebacb4d65`; the gateway image is `sha256:126d61a93642f32458538d540177b34524bc71fbb47d6ee1b459aaed855045ed`. SV-093 is closed. Production is untouched.
