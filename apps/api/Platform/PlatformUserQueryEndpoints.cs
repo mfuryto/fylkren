@@ -53,7 +53,7 @@ public static partial class PlatformUserEndpoints
                 !person.SiteManagerAssignments.Any(assignment => assignment.IsActive && assignment.Site.IsActive));
         }
 
-        var total = await query.CountAsync(cancellationToken);
+        var total = await query.LongCountAsync(cancellationToken);
         var ordered = sort switch
         {
             "newest" => query.OrderByDescending(person => person.CreatedAt).ThenBy(person => person.Id),

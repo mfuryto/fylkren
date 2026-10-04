@@ -22,7 +22,7 @@ internal static class SiteCapacityPolicy
 
             var status = await license.Current(db, ct);
             if (status.Edition == "community" &&
-                await db.Sites.CountAsync(site => site.IsActive, ct) >= CommunityActiveSiteLimit)
+                await db.Sites.LongCountAsync(site => site.IsActive, ct) >= CommunityActiveSiteLimit)
             {
                 await transaction.DisposeAsync();
                 return null;

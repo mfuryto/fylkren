@@ -24,7 +24,7 @@ internal static class ReportQueryEndpoints
                 query = query.Where(x => EF.Functions.ILike(x.ReferenceCode, pattern, "\\") || EF.Functions.ILike(x.Title, pattern, "\\") || EF.Functions.ILike(x.FinalReport!, pattern, "\\") || x.CreatedByPerson != null && EF.Functions.ILike(x.CreatedByPerson.DisplayName, pattern, "\\") || x.SenderSiteName != null && EF.Functions.ILike(x.SenderSiteName, pattern, "\\") || x.FinalReportWrittenByPerson != null && EF.Functions.ILike(x.FinalReportWrittenByPerson.DisplayName, pattern, "\\"));
             }
             var yearCounts = await query.GroupBy(x => x.FinalReportApprovedAt!.Value.Year)
-                .Select(group => new { year = group.Key, count = group.Count() })
+                .Select(group => new { year = group.Key, count = group.LongCount() })
                 .OrderByDescending(value => value.year).ToListAsync(ct);
             var years = yearCounts.Select(value => value.year).ToList();
             if (year is > 0)
@@ -37,7 +37,7 @@ internal static class ReportQueryEndpoints
                     query = query.Where(x => x.FinalReportApprovedAt < until);
                 }
             }
-            var total = await query.CountAsync(ct);
+            var total = await query.LongCountAsync(ct);
             var siteName = await db.Sites.Where(x => x.Id == siteId).Select(x => x.Name).SingleAsync(ct);
             var organizationUnits = await OrganizationPath.Load(siteId, db, ct);
             var organizationPath = OrganizationPath.Build(unitId, organizationUnits);
@@ -119,7 +119,7 @@ internal static class ReportQueryEndpoints
                 x.approvedBy,
                 x.FinalReportApprovedAt
             }).ToList();
-            return Results.Ok(new { reports, years, yearCounts, page = pageNumber, pageSize, total, totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)pageSize)) });
+            return Results.Ok(new { reports, years, yearCounts, page = pageNumber, pageSize, total, totalPages = Math.Max(1L, NumericBounds.Pages(total, pageSize)) });
         });
     }
 

@@ -81,7 +81,7 @@ public static class SmtpEndpoints
             .SingleAsync(settings => settings.Id == Id, cancellationToken);
         var cursor = await database.NotificationProjectionCursors.AsNoTracking()
             .SingleAsync(value => value.Id == ProjectionCursorId, cancellationToken);
-        var projectionBacklog = await database.EventProjections.AsNoTracking().CountAsync(value =>
+        var projectionBacklog = await database.EventProjections.AsNoTracking().LongCountAsync(value =>
             value.Consumer == "notifications" && value.Status != "completed" && value.Status != "skipped", cancellationToken);
         var projectedAt = await database.EventProjections.AsNoTracking().Where(p => p.Consumer == "notifications")
             .MaxAsync(p => p.CompletedAt, cancellationToken) ?? cursor.LastOccurredAt;
@@ -91,7 +91,7 @@ public static class SmtpEndpoints
 
         var effectivePage = Math.Max(page ?? 1, 1);
         var effectivePageSize = Math.Clamp(pageSize ?? 25, 1, 100);
-        var total = await query.CountAsync(cancellationToken);
+        var total = await query.LongCountAsync(cancellationToken);
         var items = await query
             .OrderByDescending(message => message.CreatedAt)
             .ThenByDescending(message => message.Id)
@@ -118,9 +118,9 @@ public static class SmtpEndpoints
             })
             .ToListAsync(cancellationToken);
         var pending = await database.NotificationOutboxMessages.AsNoTracking()
-            .CountAsync(message => message.Status == "pending", cancellationToken);
+            .LongCountAsync(message => message.Status == "pending", cancellationToken);
         var failed = await database.NotificationOutboxMessages.AsNoTracking()
-            .CountAsync(message => message.Status == "failed", cancellationToken);
+            .LongCountAsync(message => message.Status == "failed", cancellationToken);
 
         return Results.Ok(new
         {
@@ -133,7 +133,7 @@ public static class SmtpEndpoints
             page = effectivePage,
             pageSize = effectivePageSize,
             total,
-            totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)effectivePageSize))
+            totalPages = Math.Max(1L, NumericBounds.Pages(total, effectivePageSize))
         });
     }
 

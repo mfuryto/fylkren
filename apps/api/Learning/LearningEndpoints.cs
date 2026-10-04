@@ -35,8 +35,9 @@ internal static class LearningEndpoints
                     db.WorkItems.Any(item => item.Id == value.WorkItemId && (EF.Functions.ILike(item.ReferenceCode, pattern, "\\") || EF.Functions.ILike(item.Title, pattern, "\\"))));
             }
             const int pageSize = 20;
-            var total = await query.CountAsync(ct);
-            var pageNumber = Math.Clamp(page ?? 1, 1, Math.Max(1, (int)Math.Ceiling(total / (double)pageSize)));
+            var total = await query.LongCountAsync(ct);
+            var totalPages = Math.Max(1L, NumericBounds.Pages(total, pageSize));
+            var pageNumber = (int)Math.Min(page ?? 1, totalPages);
             var ordered = sort switch
             {
                 "oldest" => query.OrderBy(value => value.CreatedAt),
@@ -54,7 +55,7 @@ internal static class LearningEndpoints
                     workReference = db.WorkItems.Where(item => item.Id == value.WorkItemId).Select(item => item.ReferenceCode).First(),
                     workTitle = db.WorkItems.Where(item => item.Id == value.WorkItemId).Select(item => item.Title).First()
                 }).ToListAsync(ct);
-            return Results.Ok(new { items, levels, total, page = pageNumber, pageSize, totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)pageSize)) });
+            return Results.Ok(new { items, levels, total, page = pageNumber, pageSize, totalPages });
         });
         group.MapGet("/learning/{lessonId:guid}/entries", async (Guid lessonId, int? page, ClaimsPrincipal user, FylkrenDbContext db, CancellationToken ct) =>
         {
@@ -64,10 +65,11 @@ internal static class LearningEndpoints
             if (!(await LearningPolicy.Levels(personId, db, ct)).Any(value => value.UnitId == lesson.UnitId)) return Results.Problem(statusCode: 403);
             if (RequestQueryPolicy.Validate(page, null) is { } error) return error;
             var query = db.LearningEntries.AsNoTracking().Where(value => value.LessonId == lessonId);
-            var total = await query.CountAsync(ct);
-            var pageNumber = Math.Clamp(page ?? 1, 1, Math.Max(1, (int)Math.Ceiling(total / 20d)));
+            var total = await query.LongCountAsync(ct);
+            var totalPages = Math.Max(1L, NumericBounds.Pages(total, 20));
+            var pageNumber = (int)Math.Min(page ?? 1, totalPages);
             var items = await query.OrderByDescending(value => value.CreatedAt).ThenBy(value => value.Id).Skip((pageNumber - 1) * 20).Take(20).ToListAsync(ct);
-            return Results.Ok(new { items, total, page = pageNumber, totalPages = Math.Max(1, (int)Math.Ceiling(total / 20d)) });
+            return Results.Ok(new { items, total, page = pageNumber, totalPages });
         });
         group.MapPost("/learning/{lessonId:guid}/comments", Comment);
         group.MapPut("/learning/{lessonId:guid}/review", Review);

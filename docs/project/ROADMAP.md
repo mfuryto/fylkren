@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 2026-10-04 after verified service transports, derived arithmetic, version/counter, ZIP64 and SQL authentication/federation counter boundaries; native DNS residual and remaining pagination/arithmetic review are explicit.
+Updated 2026-10-04 after completing ASVS 1.4.2 arithmetic verification; the native DNS residual and next requirement 2.1.1 remain explicit.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -12,7 +12,7 @@ The additive event/activity foundation and coherent WorkItem slice are delivered
 
 ## Next delivery order
 
-1. Resume the existing ASVS matrix in its established requirement order: incomplete chapter-1 requirement 1.4.2 (bounded pagination/count paths and final arithmetic inventory). SQL authentication/federation counters and grant revisions are verified in the [SQL counter continuation](../testing/runs/2026-10-02-release-regression.md#sql-authentication-and-federation-counter-bounds--2026-10-04); version/counter, ZIP64, aggregate-count and maximal-calendar evidence remains linked from the matrix. HTTP and SMTP/AD/LDAP service-target/TLS/referral cases are recorded; 1.3.6 remains a concrete Finding (SV-068) pending verified deployment egress restrictions for native DNS rebinding. Continue independent matrix cases while that deployment qualification remains open. Scoped navigation-authorization retests are recorded under 8.2.1/8.2.2; they do not complete either requirement.
+1. Resume the existing ASVS matrix in its established requirement order at 2.1.1, documenting the application's input-validation rules before testing the related 2.1.2/2.1.3 consistency and limit requirements. ASVS 1.4.2 is Passed after the [final pagination/arithmetic review](../testing/runs/2026-10-02-release-regression.md#final-pagination-and-arithmetic-inventory--2026-10-04). HTTP and SMTP/AD/LDAP service-target/TLS/referral cases are recorded; 1.3.6 remains a concrete Finding (SV-068) pending verified deployment egress restrictions for native DNS rebinding. Continue independent matrix cases while that deployment qualification remains open. Scoped navigation-authorization retests remain partial under 8.2.1/8.2.2.
 2. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing at this gate.
 
 No irreversible disposition is authorized by this order. Establish and verify its prerequisites before proposing activation; do not choose arbitrary retention periods.
@@ -36,7 +36,7 @@ Earlier HTTP p95 readings varied from subsecond values to multiple seconds and w
 
 ## Security verification
 
-The [ASVS 5.0 Level 2 matrix](../security/ASVS_5.0.0_L2_MATRIX.md) is the single security-testing work list and status authority. At this update it contains 36 Passed, 111 In progress, 52 Not assessed, 53 Not applicable and one Finding requirements. Counts are a dated baseline, not a separate maintained matrix or security certification.
+The [ASVS 5.0 Level 2 matrix](../security/ASVS_5.0.0_L2_MATRIX.md) is the single security-testing work list and status authority. At this update it contains 37 Passed, 110 In progress, 52 Not assessed, 53 Not applicable and one Finding requirements. Counts are a dated baseline, not a separate maintained matrix or security certification.
 
 Use the [security test plan](../security/SECURITY_TEST_PLAN.md) and [threat model](../security/SECURITY_THREAT_MODEL.md). Record findings and remediation in the [finding register](../security/SECURITY_VERIFICATION.md); record completed requirement-specific tests in the ASVS matrix with links to maintained execution evidence. Partial coverage remains partial. Retest affected controls after every change.
 

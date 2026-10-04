@@ -58,7 +58,7 @@ public static class SiteAuditEndpoints
                         (EF.Functions.ILike(item.ReferenceCode, pattern, "\\") || EF.Functions.ILike(item.Title, pattern, "\\"))));
                 query = contextual.Select(value => value.Event);
             }
-            var total = await query.CountAsync(cancellationToken);
+            var total = await query.LongCountAsync(cancellationToken);
             var eventTypes = await database.AuditEvents.AsNoTracking().Where(value =>
                 value.SiteId == siteId && !value.ActorWasPlatformManager)
                 .Select(value => value.EventType).Distinct().OrderBy(value => value).ToListAsync(cancellationToken);
@@ -97,7 +97,7 @@ public static class SiteAuditEndpoints
                 var step = Fylkren.Api.DomainEvents.ExecutionActivityDetails.Read(value.DomainEventId is Guid id ? metadata.GetValueOrDefault(id) : null);
                 return new { value.Id, value.OccurredAt, value.EventType, value.EntityType, value.EntityId, value.actor, entityName = names.GetValueOrDefault(value.EntityId), workReference = workContext.GetValueOrDefault(value.Id)?.ReferenceCode, workTitle = workContext.GetValueOrDefault(value.Id)?.Title, step.StepNumber, step.StepName };
             }).ToList();
-            return Results.Ok(new { events = rows, eventTypes, page = pageNumber, pageSize, total, totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)pageSize)) });
+            return Results.Ok(new { events = rows, eventTypes, page = pageNumber, pageSize, total, totalPages = Math.Max(1L, NumericBounds.Pages(total, pageSize)) });
         });
 
         return endpoints;

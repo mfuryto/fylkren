@@ -24,7 +24,7 @@ internal static class FederationDeliveryEndpoints
             var query = db.FederationOutboundMessages.AsNoTracking()
                 .Where(message => message.PeerInstanceId == instanceId);
             var counts = await query.GroupBy(message => message.Status)
-                .Select(group => new { Status = group.Key, Count = group.Count() })
+                .Select(group => new { Status = group.Key, Count = group.LongCount() })
                 .ToDictionaryAsync(row => row.Status, row => row.Count, ct);
             var items = await query.OrderByDescending(message => message.CreatedAt)
                 .Take(100)
@@ -39,7 +39,7 @@ internal static class FederationDeliveryEndpoints
                     message.DeliveredAt,
                     message.LastErrorCode
                 }).ToListAsync(ct);
-            int Count(string status) => counts.GetValueOrDefault(status);
+            long Count(string status) => counts.GetValueOrDefault(status);
             return Results.Ok(new
             {
                 pending = Count("pending"), retrying = Count("retrying"),

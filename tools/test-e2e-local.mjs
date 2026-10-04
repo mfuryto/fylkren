@@ -328,8 +328,11 @@ if (process.argv.includes('--asvs-version-only')) {
   process.exit(0);
 }
 if (process.argv.includes('--asvs-arithmetic-only')) {
-  console.log(JSON.stringify(await testDerivedArithmeticBoundaries({ platform, siteManager: siteManager.account,
-    leader: leader.account, siteId, unitId: leadership.body.id, workItemTypeId: taskTypeId })));
+  const numericInput = await testNumericInputBoundaries({ platform, leader: leader.account,
+    siteManager: siteManager.account, siteId });
+  console.log(JSON.stringify({ ...numericInput, ...(await testDerivedArithmeticBoundaries({ platform,
+    siteManager: siteManager.account, leader: leader.account, siteId, unitId: leadership.body.id,
+    workItemTypeId: taskTypeId })) }));
   process.exit(0);
 }
 if (process.argv.includes('--workload-only')) {

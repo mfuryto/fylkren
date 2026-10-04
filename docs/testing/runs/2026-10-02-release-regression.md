@@ -464,3 +464,21 @@ FYLKREN_E2E_API_IMAGE=fylkren-asvs-counter-api:latest FYLKREN_E2E_WEB_IMAGE=fylk
 The 21 domain cases accept their last revision and reject exhaustion unchanged. Database tests prove webhook and federation claims accept their last attempt and reject negative/exhausted counters without lease or state changes. Actual login tests prove int-max saturation, correct-password rejection during lock, three concurrent failures saturating at 20 and successful login/reset of the counter after lock expiry. The maintained outbound integration suite passes its delivery, size, redirect, private-origin and zero-canary assertions. The reused web image is an unchanged gateway, not full UI/release qualification. Safe hashes are stored under `sqlFederationCounterContinuation` in the existing evidence manifest; raw logs and synthetic credentials remain outside Git. Production is untouched.
 
 ASVS 1.4.2 remains In progress for bounded pagination/count paths and the final arithmetic inventory. Native DNS finding SV-068 remains open independently.
+
+## Final pagination and arithmetic inventory — 2026-10-04
+
+Completes the reviewed application scope for ASVS 1.4.2 after the preceding derived, version, ZIP64 and SQL-counter stages. Source inventory found remaining unbounded database totals and grouped counts represented as 32-bit values across Site lifecycle impact, Site audit, learning, report archives/API, SMTP status, platform/Site users, webhook/federation delivery status and planning/execution queues. These were source-level capacity risks; no billion-row database or resulting production failure was constructed. They now use translated 64-bit counts. Total pages and focus ranks use exact integer division without floating-point conversion, narrowing or addition overflow; requested page and page size remain capped by the existing shared policy.
+
+Remaining arithmetic hits were individually classified: retention-policy versions are rejected at 1,000 before increment; workflow steps/templates and bulk user IDs are limited to 30/200; activity/archive lookahead adds one only to bounded sizes; rate-limit retry intervals are fixed at one minute; current-time federation windows cannot approach long extrema; in-memory collection and byte-array lengths are already int-bounded and their maximum configured entry counts keep long sums below overflow; TOTP shifts are intentional cryptographic encoding. Notification failure logging now records the already saturated domain attempt rather than computing a second unchecked display value.
+
+Scoped commands passed:
+
+```sh
+dotnet run --project tests/foundations/Fylkren.FoundationTests.csproj -- --arithmetic-only
+node tools/run-foundation-tests.mjs --arithmetic-integration-only
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-pagination-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-automatic-lifecycle-web:latest node tools/run-e2e-editions.mjs --asvs-arithmetic-only --no-build
+```
+
+Production helpers pass combined int-max counts, long-max totals/pages/focus indices, exact boundary transitions and rejected negative/zero/overflow inputs. Database tests preserve automatic lifecycle blockers and exact navigation counts. The API run accepts pages 1 and 1,000,000 on ten endpoints, rejects 57 invalid/overflow cases, verifies inclusive maximal dates, years 1900/9998/9999, mixed audit totals, 21-row page boundaries and authorization. The API image is `sha256:6360b8b6eec4544f4528893dac857ad6de778aa517758e6a6af1d3ca8060ab55`; the reused web image remains an unchanged gateway and is not final UI qualification.
+
+The [existing evidence manifest](2026-10-02-release-regression-evidence.json) records `paginationArithmeticContinuation` source/image/log hashes and the source-review classification. ASVS 1.4.2 is Passed for this scope. This does not claim billion-row load testing, dependency-level arithmetic review or complete ASVS certification. The next requirement in matrix order is 2.1.1; native DNS finding SV-068 remains open independently. Production is untouched.

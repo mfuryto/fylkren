@@ -4001,5 +4001,58 @@
     "findingClosed": "SV-075",
     "remaining": "ASVS 1.4.2 bounded pagination/count paths and final arithmetic inventory; SV-068 native DNS requires deployment egress qualification",
     "scope": "Affected domain/database/API/federation tests with reused unchanged gateway; not full release qualification"
+  },
+  "paginationArithmeticContinuation": {
+    "date": "2026-10-04",
+    "baseline": "1187d3e",
+    "sourceHashes": {
+      "apps/api/ActivityAudit/SiteAuditEndpoints.cs": "2cb0506820b3dbd742981b846659085011817b689e63205a1dd0b23b81ecfe61",
+      "apps/api/DomainEvents/WebhookManagementEndpoints.cs": "c968b0fce637ae23257eaf3b2b0ded130e4d4e21393af0d652eeeb74ade918a0",
+      "apps/api/Federation/FederationDeliveryEndpoints.cs": "bd88bde0c86b820624addc9d3cf099f17c18eb8ad981bbdd15e5c1b916b3b5f9",
+      "apps/api/InformationLifecycle/LifecycleImpact.cs": "e62e4500ccce71fbe860c46b84c46d812b68a7f8a4a6cba0426f3b69af857f60",
+      "apps/api/Learning/LearningEndpoints.cs": "d14d11ba2d1befcac5ae06edd2109c1d8d10c05af721898061132733edeeebbf",
+      "apps/api/Licensing/SiteCapacityPolicy.cs": "8a9b0a3779751fb430a4fec0368430c9951260eebc1fa4f3538688dc1c48076b",
+      "apps/api/Notifications/NotificationDeliveryWorker.cs": "5d2a9957910401c257063a33c9924429aaf88e72666ac57c3f721ce588270f6d",
+      "apps/api/NumericBounds.cs": "0e5cc1bdfc756e61ae24a16bf388f5c2a6651b6f45474aecb0bc5be4076f21d0",
+      "apps/api/Platform/AdministrationUserQueryEndpoints.cs": "b9c30428c166660f940d0a329301d17ea50af8ba64ce0c1f96ac285b5bfd6cfe",
+      "apps/api/Platform/PlatformUserQueryEndpoints.cs": "bf5db2db5e575c6f85f34e2a68b179b6cc8dd4adc0fc181c9c593af7a0546070",
+      "apps/api/Platform/ReportApiEndpoints.cs": "1dea3c52b71718dc3237a4dbfff6c8dba3a3091b2bdfc11ed198338a214a46e8",
+      "apps/api/Platform/SmtpEndpoints.cs": "1f64f0b645d31bc098b7f9cb2f2b3b5df425eb13368ad037462d1203456cb0b7",
+      "apps/api/WorkManagement/ExecutionQueryEndpoints.cs": "7297232dfc011ab8ef645385ffce71442a5ebafdd7eedb0747d73c35b946bb62",
+      "apps/api/WorkManagement/PlanningQueueEndpoints.cs": "26638ec4a474c9bbb967ac49b6758ba59c2dbc7e97911ee3376bcca373069e45",
+      "apps/api/WorkManagement/ReportQueryEndpoints.cs": "f21862a3e084d2b7f34c6b74641b3f68d9ca73de969cd39237aef8d27092c857",
+      "tests/foundations/NumericArithmeticTests.cs": "1c419e30cc2113ecd1abc937cdbdf7760526ad171faa2c9730efff3d50ab5bc0",
+      "tools/test-e2e-local.mjs": "74a0c6552d40c9d88ae73ece80e585379ee1aa1e0cd23a52a253178567e33218"
+    },
+    "logHashes": {
+      "/tmp/fylkren-asvs-pagination-unit.log": "930ac9d757494a86ce7c0e58dee97475cecbacbca8e44e5b01033ed36f849398",
+      "/tmp/fylkren-asvs-pagination-integration.log": "bb74856756858fdc8e6a48d42f9cbfd48585733cf8f3451144ef19f92c5ec00d",
+      "/tmp/fylkren-asvs-pagination-api.log": "f75b755403ee53d37a500002fe913e8943e990dbb3cbeccad0d1c54bb381fc7b",
+      "/tmp/fylkren-asvs-pagination-build.log": "dc8e43f7f3373c085e515cbced3633f0dbcdf20472f998ab94ede661fe9cd5e3",
+      "/tmp/fylkren-asvs-pagination-build-local.log": "8731113f5da426f6b89d1183e295092355b71d0e4e6615e3fbc30be6c0956cc3",
+      "/tmp/fylkren-asvs-pagination-final-inventory.txt": "2b0d4d88b4b7f89a6ba810168b6d8980ce660965f68a9b70953e9659b443298d"
+    },
+    "apiImage": "sha256:6360b8b6eec4544f4528893dac857ad6de778aa517758e6a6af1d3ca8060ab55",
+    "reusedWebImage": "sha256:95c69456ec0870a718f167db181344235d23ccd5744ec99a0879df61d3c9f497",
+    "results": {
+      "numericHelpers": "passed through long-max",
+      "affectedDatabaseSuites": "passed",
+      "pagedEndpoints": 10,
+      "rejectedNumericCases": 57,
+      "inclusiveDateCases": 3,
+      "reportYearCases": 3,
+      "commentPageRows": 21,
+      "authorizationPreserved": true
+    },
+    "sourceReview": {
+      "unboundedDatabaseTotals": "converted to LongCount",
+      "retentionPolicyVersion": "bounded at 1000 before increment",
+      "workflowAndBulkInputs": "bounded at 30 and 200",
+      "runtimeCollectionAndByteLengths": "type and configured entry bounds keep long sums representable",
+      "federationTimeWindows": "derived from current epoch plus fixed 300 seconds",
+      "totpBitOperations": "intentional encoding/cryptographic arithmetic"
+    },
+    "matrix": "ASVS 1.4.2 Passed; continue at 2.1.1 while SV-068 remains open",
+    "scope": "Application source, production arithmetic helpers, affected database suites and scoped API tests; no billion-row load or complete release qualification"
   }
 }

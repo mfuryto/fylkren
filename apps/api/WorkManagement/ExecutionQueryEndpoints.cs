@@ -33,7 +33,7 @@ internal static class ExecutionQueryEndpoints
                 .Where(x => x.SiteId == siteId &&
                     x.Status == "execution" &&
                     allowedLevels.Contains(x.AssignedUnitId));
-            var total = await baseQuery.CountAsync(ct);
+            var total = await baseQuery.LongCountAsync(ct);
             var pageNumber = Math.Max(page ?? 1, 1);
             if (focusItemId is Guid focusedItemId)
             {
@@ -42,10 +42,11 @@ internal static class ExecutionQueryEndpoints
                     .Select(x => (DateTimeOffset?)x.CreatedAt)
                     .SingleOrDefaultAsync(ct);
                 if (focusedCreatedAt is DateTimeOffset createdAt)
-                    pageNumber = await baseQuery.CountAsync(x => x.CreatedAt > createdAt, ct) / pageSize + 1;
+                    pageNumber = (int)Math.Min(RequestQueryPolicy.MaximumPage,
+                        NumericBounds.PageForZeroBasedIndex(await baseQuery.LongCountAsync(x => x.CreatedAt > createdAt, ct), pageSize));
             }
-            var totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)pageSize));
-            pageNumber = Math.Min(pageNumber, totalPages);
+            var totalPages = Math.Max(1L, NumericBounds.Pages(total, pageSize));
+            pageNumber = (int)Math.Min(pageNumber, totalPages);
             var orderedItems = sort switch
             {
                 "oldest" => baseQuery.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id),

@@ -54,7 +54,7 @@ public static class ReportApiEndpoints
 
         var pageNumber = Math.Max(page ?? 1, 1);
         var effectivePageSize = Math.Clamp(pageSize ?? 50, 1, 100);
-        var total = await query.CountAsync(ct);
+        var total = await query.LongCountAsync(ct);
         var rows = await query
             .OrderByDescending(item => item.FinalReportApprovedAt)
             .ThenBy(item => item.Id)
@@ -106,7 +106,7 @@ public static class ReportApiEndpoints
             page = pageNumber,
             pageSize = effectivePageSize,
             total,
-            totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)effectivePageSize))
+            totalPages = Math.Max(1L, NumericBounds.Pages(total, effectivePageSize))
         });
     }
 

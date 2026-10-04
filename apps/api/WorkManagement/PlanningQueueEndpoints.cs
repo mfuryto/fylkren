@@ -43,7 +43,7 @@ internal static class PlanningQueueEndpoints
             else if (levelId is Guid selectedLevelId)
                 baseQuery = baseQuery.Where(x => x.WorkItem.AssignedUnitId == selectedLevelId);
 
-            var total = await baseQuery.CountAsync(ct);
+            var total = await baseQuery.LongCountAsync(ct);
             var pageNumber = Math.Max(page ?? 1, 1);
             if (focusRunId is Guid focusedRunId)
             {
@@ -52,10 +52,11 @@ internal static class PlanningQueueEndpoints
                     .Select(x => (DateTimeOffset?)x.StartedAt)
                     .SingleOrDefaultAsync(ct);
                 if (focusedStartedAt is DateTimeOffset startedAt)
-                    pageNumber = await baseQuery.CountAsync(x => x.StartedAt > startedAt, ct) / pageSize + 1;
+                    pageNumber = (int)Math.Min(RequestQueryPolicy.MaximumPage,
+                        NumericBounds.PageForZeroBasedIndex(await baseQuery.LongCountAsync(x => x.StartedAt > startedAt, ct), pageSize));
             }
-            var totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)pageSize));
-            pageNumber = Math.Min(pageNumber, totalPages);
+            var totalPages = Math.Max(1L, NumericBounds.Pages(total, pageSize));
+            pageNumber = (int)Math.Min(pageNumber, totalPages);
             var orderedRuns = sort switch
             {
                 "oldest" => baseQuery.OrderBy(x => x.StartedAt).ThenBy(x => x.Id),

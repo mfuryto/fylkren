@@ -76,10 +76,10 @@ public sealed class NotificationDeliveryWorker(
             catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested)
             {
                 var reason = DeliveryFailure(ex);
+                message.Failed(DateTimeOffset.UtcNow, reason);
                 logger.LogWarning(ex,
                     "Notification {NotificationId} delivery failed on attempt {Attempt}: {Reason}",
-                    message.Id, message.Attempts + 1, reason);
-                message.Failed(DateTimeOffset.UtcNow, reason);
+                    message.Id, message.Attempts, reason);
             }
         }
         if (messages.Count > 0)

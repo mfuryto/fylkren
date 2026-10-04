@@ -36,7 +36,7 @@ internal static class AdministrationUserQueryEndpoints
         }
         if (siteId is Guid selectedSiteId)
             query = query.Where(person => person.SiteMemberships.Any(membership => membership.SiteId == selectedSiteId && membership.IsActive && membership.Site.IsActive));
-        var total = await query.CountAsync(ct);
+        var total = await query.LongCountAsync(ct);
         var ids = await query.OrderBy(person => person.DisplayName).ThenBy(person => person.Id)
             .Skip((pageNumber - 1) * size).Take(size).Select(person => person.Id).ToListAsync(ct);
         var users = await LoadUsers(db, ids, ct);
@@ -46,7 +46,7 @@ internal static class AdministrationUserQueryEndpoints
             page = pageNumber,
             pageSize = size,
             total,
-            totalPages = Math.Max(1, (int)Math.Ceiling(total / (double)size)),
+            totalPages = Math.Max(1L, NumericBounds.Pages(total, size)),
         });
     }
 

@@ -28,6 +28,12 @@ internal static class NumericBounds
         ArgumentOutOfRangeException.ThrowIfLessThan(pageSize, 1);
         return total / pageSize + (total % pageSize == 0 ? 0 : 1);
     }
+
+    internal static long PageForZeroBasedIndex(long index, int pageSize)
+    {
+        if (index < 0 || pageSize < 1) throw new ArgumentOutOfRangeException();
+        return index / pageSize + 1;
+    }
 }
 
 internal sealed class NumericCapacityException() : InvalidOperationException("The resource has reached its numeric limit.");
