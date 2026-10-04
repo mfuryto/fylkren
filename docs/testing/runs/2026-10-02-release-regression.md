@@ -626,3 +626,18 @@ FYLKREN_E2E_API_IMAGE=fylkren-asvs-body-complete-api:latest FYLKREN_E2E_WEB_IMAG
 Separate machine identities each receive the documented 30 writes and 120 reads in a fixed minute; the next request returns `429` with numeric `Retry-After`. A clean Community fixture accepts three active Sites, rejects a fourth with `community_site_limit` without changing the count, then accepts a replacement after one Site is deactivated. The production policies centralize the same values used by UI and machine Site creation.
 
 ASVS 2.3.2 is Passed. The documentation explicitly says Fylkren has no per-account quota for ordinary object creation and no installation-wide data-set quota. Those missing anti-automation/capacity controls remain under 2.4.1 and release sizing; they are not counted as implemented limits here. Safe hashes and unchanged candidate image IDs are recorded under `businessLimitEnforcementCompletion` in the existing evidence manifest. This result does not pass transaction/concurrency requirements or complete release qualification. Production is untouched.
+
+## Business transaction boundaries — 2026-10-04
+
+Completes ASVS 2.3.3. The source inventory covers 204 application `SaveChangesAsync` call sites and 38 explicit `BeginTransactionAsync` sites. The shared DbContext gives each logical save a database transaction that includes reference allocation, authoritative state, security audit, canonical activity, notification projection and automatic lifecycle work. Explicit transactions surround read-lock-write decisions, repeatable portability snapshots, one-time identity/federation consumption and operations containing more than one save. Webhook, SMTP and federation network delivery use durable outbox/lease states so an external call is not falsely presented as rollback-capable database work.
+
+The review found one unnecessary split in ordinary local login (SV-081): correct-password cleanup/password rehash state was committed before the successful-sign-in timestamp. No session was issued between these commits, but a database failure could leave partial bookkeeping. Non-MFA login now records both changes in one save; MFA retains one save before returning the protected second-factor challenge. The API build completed with zero warnings/errors. The focused current-image retest passed saturated/concurrent authentication failures, active lock enforcement and successful login/reset after expiry:
+
+```sh
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-transactions-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-asvs-header-file-web:latest node tools/run-e2e-editions.mjs --asvs-counter-only --no-build
+node tools/run-foundation-tests.mjs
+```
+
+The database suite proves rollback across WorkItem state, security audit, canonical activity, notification projections, risk/revisions, automatic terminal lifecycle, export receipts and preservation evidence. It also passes projection lease concurrency, immutable history, consumer reconciliation and repeatable export snapshots. The first foundation attempt stopped because a portable negative fixture set an already-null optional policy ID to null; the test now creates the intended invalid pair, policy version without policy ID. The corrected full run passes, and this was a test-fixture defect rather than an accepted package.
+
+ASVS 2.3.3 is Passed. Safe source/image hashes and the focused outcomes are recorded under `businessTransactionCompletion` in the existing evidence manifest. This result does not pass limited-resource locking under 2.3.4 or complete release qualification. Production is untouched.

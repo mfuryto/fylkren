@@ -18,7 +18,7 @@ internal static class PortableValidationTests
             row => row["owner_site_id"] = 42,
             row => row["policy_id"] = Guid.NewGuid().ToString(),
             row => row["policy_version"] = "1",
-            row => row["policy_id"] = null,
+            row => { row["policy_id"] = null; row["policy_version"] = 1; },
         })
         {
             var path = "data/information-lifecycle.jsonl";

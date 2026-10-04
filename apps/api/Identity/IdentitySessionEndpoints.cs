@@ -90,9 +90,11 @@ public static partial class IdentityEndpoints
             var mustChangePassword = identity.MustChangePassword;
             identity.SetPasswordHash(passwordHasher.HashPassword(identity, password), mustChangePassword);
         }
-        await database.SaveChangesAsync(cancellationToken);
-
-        if (options.Authentication.MfaEnabled && identity.TotpEnabled) return Results.Accepted(value: new { requiresTwoFactor = true, challengeToken = totp.CreateChallenge(identity.Id, identity.SecurityVersion, TimeSpan.FromMinutes(5)) });
+        if (options.Authentication.MfaEnabled && identity.TotpEnabled)
+        {
+            await database.SaveChangesAsync(cancellationToken);
+            return Results.Accepted(value: new { requiresTwoFactor = true, challengeToken = totp.CreateChallenge(identity.Id, identity.SecurityVersion, TimeSpan.FromMinutes(5)) });
+        }
         identity.RecordSignIn(now);
         await database.SaveChangesAsync(cancellationToken);
         var principal = CreatePrincipal(identity);

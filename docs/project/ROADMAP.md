@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 2026-10-04 after completing ASVS 1.4.2, validation documentation/context/business-limit tests for 2.1.1–2.1.3, input-validation requirements 2.2.1–2.2.3 and business-logic requirements 2.3.1–2.3.2; the native DNS residual and next requirement 2.3.3 remain explicit.
+Updated 2026-10-04 after completing ASVS 1.4.2, validation documentation/context/business-limit tests for 2.1.1–2.1.3, input-validation requirements 2.2.1–2.2.3 and business-logic requirements 2.3.1–2.3.3; the native DNS residual and next requirement 2.3.4 remain explicit.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -12,7 +12,7 @@ The additive event/activity foundation and coherent WorkItem slice are delivered
 
 ## Next delivery order
 
-1. Continue in requirement order at ASVS 2.3.3, inventorying transaction boundaries and proving rollback for multi-write business operations. ASVS 2.3.1–2.3.2 are Passed after the [business-flow sequence](../testing/runs/2026-10-02-release-regression.md#business-flow-sequence-enforcement--2026-10-04) and [business-limit enforcement](../testing/runs/2026-10-02-release-regression.md#business-limit-enforcement--2026-10-04) runs. ASVS 2.2.1–2.2.3, 1.4.2 and 2.1.1–2.1.3 are also Passed. Missing per-account creation and installation-wide storage controls remain explicit under 2.4.1. HTTP and SMTP/AD/LDAP cases remain recorded; 1.3.6 is a Finding (SV-068) pending verified deployment egress restrictions for native DNS rebinding. Continue independent matrix cases while that qualification remains open.
+1. Continue in requirement order at ASVS 2.3.4, inventorying limited-quantity resources and current locking/concurrency evidence. ASVS 2.3.1–2.3.3 are Passed after the [business-flow sequence](../testing/runs/2026-10-02-release-regression.md#business-flow-sequence-enforcement--2026-10-04), [business-limit enforcement](../testing/runs/2026-10-02-release-regression.md#business-limit-enforcement--2026-10-04) and [transaction-boundary](../testing/runs/2026-10-02-release-regression.md#business-transaction-boundaries--2026-10-04) runs. ASVS 2.2.1–2.2.3, 1.4.2 and 2.1.1–2.1.3 are also Passed. Missing per-account creation and installation-wide storage controls remain explicit under 2.4.1. HTTP and SMTP/AD/LDAP cases remain recorded; 1.3.6 is a Finding (SV-068) pending verified deployment egress restrictions for native DNS rebinding. Continue independent matrix cases while that qualification remains open.
 2. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing at this gate.
 
 No irreversible disposition is authorized by this order. Establish and verify its prerequisites before proposing activation; do not choose arbitrary retention periods.

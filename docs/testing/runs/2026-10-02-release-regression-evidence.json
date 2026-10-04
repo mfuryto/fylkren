@@ -4370,5 +4370,32 @@
     },
     "matrix": "ASVS 2.3.2 Passed; continue at 2.3.3",
     "scope": "All documented business limits; absent object-creation and installation-wide data quotas remain 2.4.1 scope"
+  },
+  "businessTransactionCompletion": {
+    "date": "2026-10-04",
+    "baseline": "13d8916",
+    "sourceHashes": {
+      "apps/api/Identity/IdentitySessionEndpoints.cs": "62670e28531fde179355fd38c4c458f0a8fae77f13cfecf1799667cb6d586523",
+      "apps/api/Persistence/FylkrenDbContext.cs": "249d35cdc20106fa20f5a2a4a135ff89db80f411731f315a8b596f3de527f3e0",
+      "tests/foundations/WorkSliceTests.cs": "e14dc5243c9f7c4178deb3bb3b8a83c98c4e888b141d9d9c5a55155fdec48060",
+      "tests/foundations/DomainCoverageTests.cs": "2aefff410d14ec0f5ae27ab57eac291013ba5f5b5f222241714cd71976bdcdda",
+      "tests/foundations/AutomaticLifecycleTests.cs": "8e71806ffc11af0e9dd3a7029f786e6d42e836b5f75c41503130ad6bbbd08fc5",
+      "tests/foundations/PreservationTests.cs": "ac23d506ddbe13b2b148040c60193778054f7fc6770a7b34e3987c13ace6357c",
+      "tests/foundations/PortableValidationTests.cs": "20d5f76f6a7ba995597a8f8486c2609fc1146f15550ac2f0faad5d8ca85c6d74"
+    },
+    "apiImage": "sha256:d92a12410842d480a148b123e1c22539d34a29ed23fbf648ccd0a57774b4d34a",
+    "reusedWebImage": "sha256:2806135f53e64aaa7c63bcf2ff2e75933bb963361a42243bff84e2b512ae38e7",
+    "results": {
+      "saveChangesAsyncCallSitesReviewed": 204,
+      "explicitTransactionStartsReviewed": 38,
+      "apiBuildWarnings": 0,
+      "sqlAuthenticationCounter": "passed",
+      "postExpiryLoginAccepted": true,
+      "foundationDatabaseSuite": "passed",
+      "rollbackDomains": ["work-item", "audit", "activity", "projection", "risk", "automatic-lifecycle", "export-receipt", "preservation"]
+    },
+    "finding": "SV-081 closed after focused retest",
+    "matrix": "ASVS 2.3.3 Passed; continue at 2.3.4",
+    "scope": "Application database transaction and durable outbox boundaries; no claim that external systems can be rolled back"
   }
 }
