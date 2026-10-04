@@ -41,35 +41,40 @@ function crc32(buffer) {
   return (crc ^ 0xffffffff) >>> 0;
 }
 
-export function writeZip(entries) {
+export function writeZip(entries, declaredSizes = new Map()) {
   const local = []; const central = [];
   let offset = 0;
   for (const [name, value] of entries) {
     const data = Buffer.isBuffer(value) ? value : Buffer.from(value);
     const label = Buffer.from(name, 'utf8');
+    const declared = declaredSizes.get(name);
+    const extra = Buffer.alloc(declared === undefined ? 0 : 12);
+    if (extra.length) { extra.writeUInt16LE(1); extra.writeUInt16LE(8, 2); extra.writeBigUInt64LE(declared, 4); }
     const crc = crc32(data);
     const header = Buffer.alloc(30);
     header.writeUInt32LE(0x04034b50);
-    header.writeUInt16LE(20, 4);
+    header.writeUInt16LE(extra.length ? 45 : 20, 4);
     header.writeUInt16LE(0x0800, 6);
     header.writeUInt16LE(0, 8);
     header.writeUInt32LE(crc, 14);
     header.writeUInt32LE(data.length, 18);
-    header.writeUInt32LE(data.length, 22);
+    header.writeUInt32LE(extra.length ? 0xffffffff : data.length, 22);
     header.writeUInt16LE(label.length, 26);
-    local.push(header, label, data);
+    header.writeUInt16LE(extra.length, 28);
+    local.push(header, label, extra, data);
     const directory = Buffer.alloc(46);
     directory.writeUInt32LE(0x02014b50);
     directory.writeUInt16LE(20, 4);
-    directory.writeUInt16LE(20, 6);
+    directory.writeUInt16LE(extra.length ? 45 : 20, 6);
     directory.writeUInt16LE(0x0800, 8);
     directory.writeUInt32LE(crc, 16);
     directory.writeUInt32LE(data.length, 20);
-    directory.writeUInt32LE(data.length, 24);
+    directory.writeUInt32LE(extra.length ? 0xffffffff : data.length, 24);
     directory.writeUInt16LE(label.length, 28);
     directory.writeUInt32LE(offset, 42);
-    central.push(directory, label);
-    offset += header.length + label.length + data.length;
+    directory.writeUInt16LE(extra.length, 30);
+    central.push(directory, label, extra);
+    offset += header.length + label.length + extra.length + data.length;
   }
   const directoryData = Buffer.concat(central);
   const end = Buffer.alloc(22);

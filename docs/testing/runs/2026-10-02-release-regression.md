@@ -429,3 +429,19 @@ The Docker runners use FYLKREN_E2E_API_IMAGE=fylkren-asvs-versions-api:latest an
 - Affected domain coverage, governance, preservation and automatic-lifecycle database cases pass, including audit/activity rollback and archive/delivery gates. Existing outbound webhook/federation boundary and live Samba AD suspension/session-revocation/restoration/outage tests pass. This is affected-scope regression, not the complete product suite.
 
 Safe source/image/log hashes are appended under versionCounterContinuation in the [existing evidence manifest](2026-10-02-release-regression-evidence.json). Raw logs and fixture credentials stay outside Git. ASVS 1.4.2 remains In progress pending ZIP64 declared-length aggregation and the remaining arithmetic inventory; security-version boundary coverage does not complete session-management requirements. Native DNS finding SV-068 remains open independently.
+
+
+## ZIP64 declared-length boundaries — 2026-10-04
+
+Continues ASVS 1.4.2 and retests affected 1.5.2 parser controls. A tiny ZIP64 fixture with two long-max declared lengths returned API 500 on 6c6519e / fylkren-asvs-versions-api:latest: Enumerable.Sum overflowed before the package-size rejection. No large data was allocated or extracted and no availability/exfiltration impact beyond this failed request was demonstrated (SV-074). The validator now rejects excessive entry counts immediately and checks every declared length against the remaining existing 512 MiB allowance before addition or opening entries. Existing import validation remains read-only.
+
+Commands passed:
+
+```sh
+dotnet run --project tests/foundations/Fylkren.FoundationTests.csproj -- --zip-length-only
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-zip-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-automatic-lifecycle-web:latest node tools/run-e2e-editions.mjs --asvs-zip-only --no-build
+```
+
+Five small ZIP64 cases exercise signed aggregate overflow, unsigned maximum, aggregate one byte above policy, exact policy limit and zero. Foundation tests assert the real ZipArchive reader exposes the declared 64-bit lengths. Oversized input returns bounded validation errors; exact-limit/zero input reaches missing-manifest validation without extraction. Actual API cases return 200 / valid:false without exception details. An unchanged current Site export validates successfully, three literal metadata cases and ignored client type markers remain accepted, and all 20 maintained malformed manifest cases reject with bounded results. ASVS 1.5.2 was reopened while its changed parser control was unverified and returns to Passed after these retests.
+
+The same [evidence manifest](2026-10-02-release-regression-evidence.json) records zipLengthContinuation baseline/candidate hashes and results. ASVS 1.4.2 remains In progress: the remaining arithmetic review identified separate SQL authentication-failure/federation-delivery increments and federation grant revisions needing their own boundary tests. This stage does not qualify those paths or the complete release; production is untouched.

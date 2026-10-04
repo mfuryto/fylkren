@@ -17,10 +17,15 @@ internal static class PortableImportValidator
         {
             using var archive = new ZipArchive(packageStream, ZipArchiveMode.Read, true);
             if (archive.Entries.Count > PortableExportPackage.MaximumEntries)
-                errors.Add($"The package contains more than {PortableExportPackage.MaximumEntries} files.");
-            var totalBytes = archive.Entries.Sum(value => value.Length);
-            if (totalBytes > PortableExportPackage.MaximumPackageBytes)
-                errors.Add("The package's extracted size exceeds 512 MiB.");
+                return Invalid(errors, $"The package contains more than {PortableExportPackage.MaximumEntries} files.");
+            long totalBytes = 0;
+            foreach (var entry in archive.Entries)
+            {
+                // Untrusted ZIP64 lengths must pass the policy bound before addition or opening entries.
+                if (entry.Length < 0 || entry.Length > PortableExportPackage.MaximumPackageBytes - totalBytes)
+                    return Invalid(errors, "The package's extracted size exceeds 512 MiB.");
+                totalBytes += entry.Length;
+            }
             foreach (var entry in archive.Entries)
             {
                 if (entry.FullName.Contains("..", StringComparison.Ordinal) || entry.FullName.StartsWith('/') || entry.FullName.StartsWith('\\'))

@@ -3927,5 +3927,38 @@
     "findingClosed": "SV-073",
     "remaining": "ASVS 1.4.2 ZIP64 declared-length aggregation and remaining arithmetic inventory; SV-068 native DNS requires deployment egress qualification",
     "scope": "Affected API/domain/database/AD/delivery tests, reused unchanged gateway; not full release qualification"
+  },
+  "zipLengthContinuation": {
+    "date": "2026-10-04",
+    "baseline": "6c6519e",
+    "baselineResult": "Actual tiny two-long-max ZIP64 request returned 500 / OverflowException before size check",
+    "sourceHashes": {
+      "apps/api/Portability/PortableImportValidator.cs": "34c9d8740319cfec475572c77fdc22873602f76967975b85f79dee8e88a4dc9c",
+      "tests/foundations/ZipLengthBoundaryTests.cs": "0078beaf7b0fc87bfda2fff3ee99f609c81cf5861eb8ac2d31884e182ab671fe",
+      "tests/foundations/Program.cs": "4210619b802f7d42c31ddbcabe2bc2c8786db115f66f4f4c0315314a02ac2433",
+      "tools/e2e/zip.mjs": "aa9d23b240dceb6cae125660ddd51d42f8dbec733bcffe0d5326e936369e6378",
+      "tools/e2e/portability.mjs": "eac8cc9ea9f32e81f104fec061fd57c0e431cb57fb4cb6d9c2964384575e9f56",
+      "tools/run-e2e-editions.mjs": "00ccacd0f22ac8ff6031d5c5cbe2e5fadc8a18ae4c6c952eb6e41b3138e6b5a3",
+      "tools/test-e2e-local.mjs": "60e6160a079e11e35a9185bbe474111822cab58bc25f655cf2b029077e8e74d1"
+    },
+    "logHashes": {
+      "/tmp/fylkren-asvs-zip-after.log": "f76bfd054339e3b438ec78800e29108f15e4e4af7de3d51e9d1938a0b869efc5",
+      "/tmp/fylkren-asvs-zip-unit.log": "65dc093c63df35f177041eea3de40b908636514fd775552bfc932fd1ecddcfc7",
+      "/tmp/fylkren-asvs-zip-build.log": "fcbc64d84f4ecae9f0364c1d35e9b22775c2d973eac481dae7eef7af76255437",
+      "/tmp/fylkren-asvs-zip-before.log": "2ee7dd55e849f3f762c787320b93e0cf70641f84708bdaeae6c58432443afc5e"
+    },
+    "apiImage": "sha256:c1dd5a39c284976287d8942e6ab24d94bc497afd28c20ecebde9b6649e08de7e",
+    "reusedWebImage": "sha256:95c69456ec0870a718f167db181344235d23ccd5744ec99a0879df61d3c9f497",
+    "results": {
+      "zip64Unit": "passed",
+      "zip64ApiCases": 5,
+      "unchangedExportAccepted": true,
+      "malformedManifestRejected": 20,
+      "literalMetadataAccepted": 3,
+      "clientTypeIgnored": true
+    },
+    "findingClosed": "SV-074",
+    "matrix": "1.5.2 retested Passed; 1.4.2 remains In progress for SQL counters/grant revisions/arithmetic inventory",
+    "scope": "Read-only validator and scoped API/parser tests, not full release qualification"
   }
 }

@@ -14,7 +14,7 @@ import { testAdministrationReportApis } from './e2e/administration-report-apis.m
 import { testDependencies } from './e2e/dependencies.mjs';
 import { testDecisionsRisksVersions } from './e2e/decisions-risks-versions.mjs';
 import { testWebhookFailureIsolation } from './e2e/webhooks.mjs';
-import { testPortability, testPortableParserBoundaries } from './e2e/portability.mjs';
+import { testPortability, testPortableParserBoundaries, testZipLengthArithmetic } from './e2e/portability.mjs';
 import { testLookupSorting } from './e2e/lookup-sorting.mjs';
 import { testFederationCandidates } from './e2e/federation-candidates.mjs';
 import { testAuthenticationBoundary, testAuthSessionSecurity } from './e2e/auth-session-security.mjs';
@@ -134,7 +134,7 @@ assert.equal((await platform.put('/api/platform/regional-settings', {
   defaultLanguage: 'en-US', timeZone: 'UTC',
   clockFormat: '24-hour', measurementSystem: 'metric',
 })).status, 200);
-if (!process.argv.includes('--asvs-arithmetic-only') && !process.argv.includes('--asvs-version-only')) {
+if (!process.argv.includes('--asvs-arithmetic-only') && !process.argv.includes('--asvs-version-only') && !process.argv.includes('--asvs-zip-only')) {
 const platformOperations = await platform.request('/api/platform/operations');
 assert.equal(platformOperations.status, 200, JSON.stringify(platformOperations.body));
 assert.equal(platformOperations.body.hostIntegration.available, true, 'Host status snapshot must be available');
@@ -314,6 +314,10 @@ const assignment = await siteManager.account.post(`/api/sites/${siteId}/access/r
 assert.equal(assignment.status, 201, JSON.stringify(assignment.body));
 
 const { taskTypeId } = await testLookupSorting({ manager: siteManager.account, reader: leader.account, siteId });
+if (process.argv.includes('--asvs-zip-only')) {
+  console.log(JSON.stringify(await testZipLengthArithmetic({ platform, siteManager: siteManager.account, siteId })));
+  process.exit(0);
+}
 if (process.argv.includes('--asvs-version-only')) {
   console.log(JSON.stringify(await testVersionMutationBoundaries({ platform, siteManager: siteManager.account,
     leader: leader.account, personId: leader.personId, siteId, unitId: leadership.body.id, workItemTypeId: taskTypeId })));

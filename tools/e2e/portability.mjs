@@ -21,6 +21,7 @@ export async function testPortableParserBoundaries({ platform, siteManager, site
     assert.equal(response.status, 200, 'Malformed portable metadata must produce a bounded validation result');
     return response.body;
   }
+  assert.equal((await validate(() => {})).valid, true, 'Unchanged Site export must validate');
   for (const siteName of ['&lt;script&gt;synthetic()&lt;/script&gt;', '%253Cscript%253E', String.raw`\u003cscript\u003e`]) {
     const result = await validate(value => { value.site.name = siteName; });
     assert.equal(result.valid, true); assert.equal(result.siteName, siteName, 'Import metadata was decoded again');
@@ -173,4 +174,31 @@ export async function testPortability({ platform, siteManager, leader, siteId, o
   const noApply = await platform.request(`/api/portability/sites/${siteId}/imports/apply`, { method: 'POST' });
   assert.equal(noApply.status, 404, 'Import-apply endpoint unexpectedly exists');
   return { portableExportId: manifest.exportId, portableDatasetCount: manifest.datasets.length, ...parserBoundaries };
+}
+
+export async function testZipLengthArithmetic({ platform, siteManager, siteId }) {
+  const endpoint = `/api/portability/sites/${siteId}/imports/validate`;
+  const empty = new Map([['a', Buffer.alloc(0)], ['b', Buffer.alloc(0)]]);
+  const maximum = 512n * 1024n * 1024n;
+  const cases = [
+    ['long sum overflow', new Map([['a', 9223372036854775807n], ['b', 9223372036854775807n]]), true],
+    ['single unsigned maximum', new Map([['a', 18446744073709551615n]]), true],
+    ['aggregate size exceeds limit', new Map([['a', maximum / 2n], ['b', maximum / 2n + 1n]]), true],
+    ['exact aggregate limit', new Map([['a', maximum / 2n], ['b', maximum / 2n]]), false],
+    ['zero lengths', new Map([['a', 0n], ['b', 0n]]), false],
+  ];
+  for (const [label, lengths, tooLarge] of cases) {
+    const bytes = writeZip(empty, lengths);
+    assert.ok(bytes.length < 512, 'Synthetic declared lengths must never allocate their claimed data');
+    const form = new FormData();
+    form.append('package', new Blob([bytes], { type: 'application/zip' }), 'synthetic-zip64.zip');
+    const response = await platform.request(endpoint, { method: 'POST', body: form });
+    assert.equal(response.status, 200, `${label} must return bounded validation`);
+    assert.equal(response.body.valid, false);
+    const output = JSON.stringify(response.body);
+    if (tooLarge && label !== 'single unsigned maximum') assert.match(output, /size|512 MiB/i);
+    if (!tooLarge) assert.match(output, /missing manifest/i, 'Admissible size must proceed to manifest validation');
+    assert.doesNotMatch(output, /OverflowException|stack trace|System\.Runtime/i);
+  }
+  return { zipLengthArithmetic: 'passed', zip64BoundaryCases: cases.length, ...(await testPortableParserBoundaries({ platform, siteManager, siteId })) };
 }

@@ -6,6 +6,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
+if (args.Contains("--zip-length-only"))
+{
+    await ZipLengthBoundaryTests.Run();
+    return;
+}
 if (args.Contains("--version-boundaries-only"))
 {
     VersionBoundaryTests.Run();
@@ -156,6 +161,7 @@ await SamlMetadataTests.Run();
 await ServiceTransportTests.Run();
 NumericArithmeticTests.Run();
 VersionBoundaryTests.Run();
+await ZipLengthBoundaryTests.Run();
 await NavigationCountTests.Run(db, false);
 await ExecutionActivityTests.Run(db);
 

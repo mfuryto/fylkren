@@ -52,8 +52,8 @@ try {
   run('docker', ['compose', '-p', project, 'exec', '-T', 'postgres', 'psql', '-U', 'fylkren', '-d', 'fylkren',
     '-c', `UPDATE instance_identity SET instance_id = '${fixture.instanceId}' WHERE key = 1`]);
   // Reapply the Site-content preservation migration to a simulated legacy database.
-  if (process.argv.includes('--asvs-arithmetic-only') || process.argv.includes('--asvs-version-only')) {
-    run(process.execPath, ['tools/test-e2e-local.mjs', process.argv.includes('--asvs-version-only') ? '--asvs-version-only' : '--asvs-arithmetic-only']);
+  if (process.argv.includes('--asvs-arithmetic-only') || process.argv.includes('--asvs-version-only') || process.argv.includes('--asvs-zip-only')) {
+    run(process.execPath, ['tools/test-e2e-local.mjs', process.argv.includes('--asvs-zip-only') ? '--asvs-zip-only' : process.argv.includes('--asvs-version-only') ? '--asvs-version-only' : '--asvs-arithmetic-only']);
   } else {
   // Complete untouched defaults must be restored; customized Site data must remain byte-for-byte unchanged.
   const legacySiteId = '10000000-0000-4000-8000-000000000001';
