@@ -4054,5 +4054,37 @@
     },
     "matrix": "ASVS 1.4.2 Passed; continue at 2.1.1 while SV-068 remains open",
     "scope": "Application source, production arithmetic helpers, affected database suites and scoped API tests; no billion-row load or complete release qualification"
+  },
+  "inputValidationDocumentationContinuation": {
+    "date": "2026-10-04",
+    "baseline": "6f8da6a",
+    "sourceHashes": {
+      "docs/security/INPUT_VALIDATION.md": "10805266f179149789d74e4cb818ae9596ac18c4a74301ac493531032e7dab0d",
+      "tools/run-e2e-editions.mjs": "5ae730cb0af6174d8b5d407024ac3b96cc4b66a52b19c7fbc10e7aeefc0980fc",
+      "tools/test-e2e-local.mjs": "99c9fe8e9a1840293a5d333fd8b6705c8fa2375a9db3a3525af6d20376cf88b5"
+    },
+    "logHashes": {
+      "/tmp/fylkren-asvs-input-documentation.log": "8d6cf55fb8f4e5f2f92a2279259f58e5db88942ad4b2b6958d3ba7d637db865f",
+      "/tmp/fylkren-asvs-input-docs.log": "66d56acd12a3ace0f5dd657eaa25bf8ec2581aa4ed9721bf2a5486c770a9edcc",
+      "/tmp/fylkren-asvs-input-structure.log": "b9a651952dda34e3aec02a9d4ef0fd5b226f939897b032e2fe7044662a8e9708",
+      "/tmp/fylkren-asvs-input-version.log": "30a82c355072b30049a50c28fc1a6e402282bc4d7b291f331f69330b0edc3dbb"
+    },
+    "apiImage": "sha256:6360b8b6eec4544f4528893dac857ad6de778aa517758e6a6af1d3ca8060ab55",
+    "reusedWebImage": "sha256:95c69456ec0870a718f167db181344235d23ccd5744ec99a0879df61d3c9f497",
+    "results": {
+      "documentationLinks": "passed",
+      "asvsTraceability": "passed",
+      "pagedEndpoints": 10,
+      "rejectedNumericCases": 57,
+      "unsafeLinksRejected": 9,
+      "unsafeCssRejected": 9,
+      "storedLiteralPayloads": 7,
+      "singleJsonDecodeCases": 2,
+      "portableLiteralMetadataCases": 3,
+      "malformedManifestCases": 20,
+      "clientTypeMetadataIgnored": true
+    },
+    "matrix": "ASVS 2.1.1 Passed; 2.1.2 and 2.1.3 remain incomplete",
+    "scope": "Documentation and targeted existing validation cases; no claim that all implementation-level input requirements are complete"
   }
 }

@@ -4,6 +4,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Document the trusted input-validation boundary, common formats, contextual rules, failure semantics and test expectations in one security reference.
 - Use 64-bit database totals and exact focused-page arithmetic across lifecycle, audit, learning, report, SMTP, user, federation, planning and execution views while retaining bounded page requests.
 - Saturate failed-login counters at the existing account-lock threshold, reject exhausted federation grant revisions before mutation and stop federation delivery claims at their existing terminal attempt.
 - Reject oversized ZIP64 declared lengths before summing or opening archive entries, returning read-only validation errors instead of server overflow errors.

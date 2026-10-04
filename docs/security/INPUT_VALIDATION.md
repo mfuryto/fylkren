@@ -1,0 +1,53 @@
+# Input validation rules
+
+This document defines Fylkren's application-level input validation rules. It is the design reference for ASVS 2.1.1–2.1.3; requirement status and executed evidence remain in the single [ASVS matrix](ASVS_5.0.0_L2_MATRIX.md).
+
+## Validation boundary and order
+
+The API is the trusted validation boundary. Browser controls improve usability but never establish validity or authorization. ASP.NET decodes route, query and JSON input once into fixed request types. Endpoint or domain validation then applies these checks in order:
+
+1. Reject malformed transport syntax, unsupported media, missing required values and values the fixed request contract cannot represent.
+2. Normalize only where the domain defines normalization, normally `Trim`, case normalization for identifiers, or an explicitly expected base64/base32 decoder. Do not repeatedly URL-, HTML- or JSON-decode values.
+3. Enforce positive structure, allowlists, lengths, counts, numeric ranges and date ranges before arithmetic, persistence or external use.
+4. Resolve referenced records and enforce active state, Site ownership, hierarchy and cross-field consistency at the service layer.
+5. Apply authorization independently of validity. A valid identifier never grants access.
+6. For state changes, recheck expected versions and relationship constraints inside the database transaction before committing activity/audit records.
+
+Validation failures use field-specific HTTP 400 responses where disclosure is safe. Stale versions and capacity conflicts use 409. Missing authority uses 403 without treating a valid object reference as authorization. Authentication failures remain generic. Unhandled exceptions and stack traces are not validation responses.
+
+## Common rules
+
+| Input class | Required rule | Authoritative implementation and evidence |
+| --- | --- | --- |
+| Pagination and search | `page` is 1–1,000,000, `pageSize` is 1–100 and search text is at most 200 characters. Offset arithmetic occurs only after these bounds. Database totals and derived pages use 64-bit exact arithmetic. | [RequestQueryPolicy.cs](../../apps/api/RequestQueryPolicy.cs), [NumericBounds.cs](../../apps/api/NumericBounds.cs), [encoding-security.mjs](../../tools/e2e/encoding-security.mjs) |
+| Identifiers and references | Parsed identifiers must use the declared GUID/integer type and must not be empty when the domain requires identity. Referenced rows must exist, be active where required and belong to the expected Site/resource. Cross-Site references require an explicit federation or ownership rule. | [DecisionEndpoints.cs](../../apps/api/Decisions/DecisionEndpoints.cs), [OrganizationEndpoints.cs](../../apps/api/Organization/OrganizationEndpoints.cs), [authorization-boundaries.mjs](../../tools/e2e/authorization-boundaries.mjs) |
+| Text | Required text is trimmed before length checks. Each domain field has an explicit minimum/maximum; text is never truncated silently to make an invalid command valid. Stored content remains literal and is contextually encoded when rendered. | [LearningCreation.cs](../../apps/api/Learning/LearningCreation.cs), [SideRequestCreationEndpoints.cs](../../apps/api/WorkManagement/SideRequestCreationEndpoints.cs), [encoding-security.mjs](../../tools/e2e/encoding-security.mjs) |
+| Enumerations and states | Accept only named states, directions, categories, priorities, themes and modes defined by the domain. State transitions must also be legal from the current state. | [LearningLesson.cs](../../apps/api/Learning/LearningLesson.cs), [InformationLifecycleRecord.cs](../../apps/api/InformationLifecycle/InformationLifecycleRecord.cs), [transition-chains.mjs](../../tools/e2e/transition-chains.mjs) |
+| Numeric and calendar values | Validate sign and range before addition, multiplication, conversion or date advancement. Use checked next-version helpers and bounded counters. Years accepted by report filters are 1900–9999; maximum representable dates remain valid. | [NumericBounds.cs](../../apps/api/NumericBounds.cs), [ReportQueryEndpoints.cs](../../apps/api/WorkManagement/ReportQueryEndpoints.cs), [NumericArithmeticTests.cs](../../tests/foundations/NumericArithmeticTests.cs) |
+| Collections | Reject null elements where a fixed object is required, duplicates where identity/order must be unique and counts above the domain limit. Current notable maxima are 30 workflow steps, 50 submitted learning points, 100 timeline events, 200 bulk users and 250 portable-package entries. | [WorkflowDefinitionEndpoints.cs](../../apps/api/WorkManagement/WorkflowDefinitionEndpoints.cs), [LearningCreation.cs](../../apps/api/Learning/LearningCreation.cs), [PlatformUserBulkEndpoints.cs](../../apps/api/Platform/PlatformUserBulkEndpoints.cs), [PortableExportPackage.cs](../../apps/api/Portability/PortableExportPackage.cs) |
+| Email and mail fields | Addresses must parse as typed mail addresses. Header values are normalized for control characters and bounded immediately before constructing mail. Bodies remain plain text. | [MailHeaderPolicy.cs](../../apps/api/Notifications/MailHeaderPolicy.cs), [SmtpTransport.cs](../../apps/api/Notifications/SmtpTransport.cs), [smtp-browser.mjs](../../tools/e2e/smtp-browser.mjs) |
+| User-facing links | Work/document links use an explicit scheme allowlist and normalized absolute form. They are stored as references, not fetched by the server. | [WorkLinkPolicy.cs](../../apps/api/WorkManagement/WorkLinkPolicy.cs), [encoding-security.mjs](../../tools/e2e/encoding-security.mjs) |
+| Server-fetched destinations | HTTP integrations require an absolute HTTPS URI, approved origin where configured, checked DNS results, no redirects and bounded response bodies. SMTP/directory server values use a hostname/IP grammar without URL syntax or embedded ports. Deployment egress is still required for the native DNS residual in SV-068. | [OutboundHttpPolicy.cs](../../apps/api/Networking/OutboundHttpPolicy.cs), [ServiceDestinationPolicy.cs](../../apps/api/Networking/ServiceDestinationPolicy.cs), [service-transports.mjs](../../tools/e2e/service-transports.mjs) |
+| Images and archives | Profile/brand images are limited to supported PNG/JPEG/WebP content whose signature matches the declared type and whose size is at most 2 MiB. Portable ZIP input permits at most 250 entries and 512 MiB declared extracted size; paths, duplicates, manifest shape, ownership and SHA-256 integrity are validated before use. Validation is read-only. | [SafeImageUpload.cs](../../apps/api/SafeImageUpload.cs), [PortableImportValidator.cs](../../apps/api/Portability/PortableImportValidator.cs), [portability.mjs](../../tools/e2e/portability.mjs) |
+| Authentication secrets | Passwords, reset grants, MFA values, passkeys and recovery codes use their dedicated parsers/policies, one-time or monotonic checks and generic failure responses. Client-supplied identity fields never select an authentication implementation. | [PasswordSecurityPolicy.cs](../../apps/api/Identity/PasswordSecurityPolicy.cs), [TotpService.cs](../../apps/api/Identity/TotpService.cs), [identity-session-lifecycle.mjs](../../tools/e2e/identity-session-lifecycle.mjs) |
+| External identity configuration | Provider type selects a fixed configuration contract. Required addresses, attributes, certificates, connection modes and secret-preservation choices are validated before save; activation additionally requires a successful saved-configuration test. Runtime metadata uses bounded typed parsing. | [IdentityProviderEndpoints.cs](../../apps/api/Platform/IdentityProviderEndpoints.cs), [SamlMetadataCache.cs](../../apps/api/Identity/SamlMetadataCache.cs), [run-identity-sso-lab.mjs](../../tools/run-identity-sso-lab.mjs) |
+| Federation messages | Fixed message contracts validate schema version, identifiers, type, payload length and current timestamp window. Signatures and replay/idempotency checks precede domain application. The receiving Site and referenced relationship must match the signed envelope and local grant. | [FederationWorkProtocol.cs](../../apps/api/Federation/FederationWorkProtocol.cs), [FederationWorkReceiveEndpoints.cs](../../apps/api/Federation/FederationWorkReceiveEndpoints.cs), [run-federation-pair.mjs](../../tools/run-federation-pair.mjs) |
+| Portable JSON | Use fixed `System.Text.Json` contracts without client-selected runtime types. Validate nullability, strings, signed numeric values, list sizes, Site ownership, relationship closure, declared byte/record counts and hashes. Unknown `$type` values have no type-selection effect. | [PortableImportValidator.cs](../../apps/api/Portability/PortableImportValidator.cs), [PortableValidationTests.cs](../../tests/foundations/PortableValidationTests.cs), [portability.mjs](../../tools/e2e/portability.mjs) |
+
+## Combined and contextual rules
+
+Individual fields can be valid while the command is invalid. Service-layer validation must therefore cover at least these relationships:
+
+- a Site or organizational move must reference an active permitted parent and must not create a cycle;
+- a task dependency must stay within the allowed ownership scope and must not create a dependency cycle;
+- exactly one allowed recipient form is selected for a side request, and internal/federated recipient rules match the source placement;
+- decision makers, risk owners, learning owners and other people references are active and visible at the required Site/level;
+- risk probability and impact pairs are complete and in range before a score is derived; residual values represent the post-measure state;
+- lifecycle transitions use the current expected version, satisfy blockers and preservation holds, and never enable irreversible disposition;
+- report, audit, activity and archive filters remain inside the caller's authorized Site/level scope regardless of filter validity;
+- imported rows belong to the package Site, referenced owners exist in the package or accepted historical scope, and declared content matches its integrity descriptor;
+- federated progress, answers, cancellation and grants match the existing local link, peer, origin and direction.
+
+## Change requirements
+
+Every new or changed input must document its expected structure, normalization, allowlist/range, maximum size/count, relationship rules, authorization boundary and failure response. Tests must include a valid case, invalid type/shape where applicable, boundary values and a related-data or authorization case. Shared rules belong in a shared production validator; UI validation must mirror them for usability without becoming the security control. The ASVS matrix links executed evidence and remains the only requirement-status record.
