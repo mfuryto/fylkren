@@ -26,6 +26,8 @@ Platform Manager controls local login on **Identity**. Keep one local Platform M
 
 Every successful pathway resolves an active linked internal person, applies the same Site/role authorization after sign-in and creates the same protected Fylkren browser session. Disabling a person, identity or required access blocks all pathways for that person. Local credential-verification routes share the documented anti-automation boundary; provider-side controls remain the provider operator's responsibility.
 
+This table is the complete inventory of interactive human sign-in pathways. First-run Platform Manager creation establishes the initial local account once; password reset changes a credential without creating a session; profile, password and factor changes renew an already authenticated session after reauthentication. Machine API credentials and signed federation messages use separate, non-browser service authentication and cannot create a human browser session.
+
 | Pathway | Proof and assessed strength | Fylkren controls and fallback |
 | --- | --- | --- |
 | Local password | One local knowledge factor | 14–128 characters, offline common/context-word screening, PBKDF2 hashing, generic failures, rate limit and identity lockout. This is the emergency administrative path while enabled. |

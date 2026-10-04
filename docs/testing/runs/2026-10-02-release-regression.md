@@ -1183,3 +1183,17 @@ FYLKREN_E2E_API_IMAGE=sha256:a988e8e706d10ea77b77957b56299a3253ee51192640f064127
 The disposable run explicitly enables the deployment MFA feature, creates an unenrolled local Platform Manager, signs out and authenticates again with the password alone. The server returns a full session and reports that the identity has no second factor: `{"mfaEnforcementAssessment":"finding","finding":"SV-094","deploymentMfaFeatureEnabled":true,"unenrolledPasswordOnlySession":true,"enforcedSecondFactor":false}`. This is not closed by the existing password policy, client limiter, account lockout, optional TOTP or optional passkey controls.
 
 Remediation requires a product policy for mandatory strength across local and external pathways, a restricted enrollment state that cannot grant operational access, recovery/bootstrap and break-glass behavior, migration of existing accounts and provider-claim verification wherever external MFA is claimed. No speculative enforcement was added because an incomplete rule could lock out administrators or silently weaken another authentication path. Production is untouched.
+
+## Authentication-pathway inventory and consistency — 2026-10-04
+
+Completes ASVS 6.3.4 for the documented current strength of each pathway. The access manual places local password, password plus TOTP/recovery, user-verifying WebAuthn, AD/LDAP, OIDC and SAML in one table with proof, application controls, provider responsibility and fallback. It now explicitly scopes that table to interactive human sign-in and distinguishes one-time bootstrap, credential recovery, authenticated session renewal, machine API authentication and signed federation traffic.
+
+Scoped command:
+
+```sh
+node tools/test-authentication-pathway-documentation.mjs
+```
+
+The source/document lock reports `{"authenticationPathwayDocumentation":"passed","documentedPathways":6,"sharedLocalRateBoundary":true,"webauthnUserVerificationRequired":true,"providerStrengthFallbacksDocumented":2,"publicPathwayFlags":7,"reviewedBrowserSessionWriterFiles":6,"reviewedBrowserSessionWriterCalls":11,"machineAuthenticationSeparated":true}`. The exact session-writer set fails review if a new writer is added or moved. OIDC and SAML principal creation is locked separately in the authentication handlers; the machine scheme has no human-principal or cookie sign-in call.
+
+No broad integration rerun was needed because this stage changes documentation and a source inventory only. The current release evidence already records clean local/TOTP/WebAuthn, real OpenLDAP and Samba AD, and signed Keycloak OIDC/SAML positive and attack paths. Each resolves an active linked internal person into the common authorization/session context or fails closed under its documented controls. The result describes consistency with the documented current strengths and does not close SV-094's mandatory-MFA gap. Production is untouched.
