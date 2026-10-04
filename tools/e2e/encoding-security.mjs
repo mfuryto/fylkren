@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 
 export async function testCustomCssEncoding({ platform }) {
   const initial = await platform.request('/api/branding');
@@ -160,6 +161,57 @@ export async function testDerivedArithmeticBoundaries({ platform, siteManager, l
   return { derivedArithmeticBoundaries: 'passed', inclusiveDateCases: 3, rejectedDateCases: 3,
     reportYearCases: 3, rejectedReportYears: 4, platformAuditCount: audit.body.total,
     commentPageBoundaryRows: 21, rejectedCommentPages: 5, commentAuthorizationPreserved: true };
+}
+
+export async function testContextualInputRules({ leader, personId, siteId, unitId, workItemTypeId }) {
+  const root = `/api/work/sites/${siteId}/items`;
+  const create = async label => {
+    const response = await leader.post(root, { title: `Synthetic context ${label}`, description: 'Synthetic contextual validation',
+      recommendation: null, referenceUrl: null, assignedUnitId: unitId, workItemTypeId, dueAt: null });
+    assert.equal(response.status, 201, JSON.stringify(response.body));
+    assert.equal((await leader.put(`${root}/${response.body.id}/status`, {
+      status: 'under_review', assignedUnitId: unitId, decisionNote: null, priority: 'normal' })).status, 204);
+    return response.body.id;
+  };
+  const first = await create('first');
+  const second = await create('second');
+  const unrelatedBefore = (await leader.request(`${root}/${first}/dependencies`)).body.length;
+  assert.equal((await leader.post(`${root}/${first}/dependencies`, { predecessorWorkItemId: first })).status, 409);
+  assert.equal((await leader.post(`${root}/${first}/dependencies`, { predecessorWorkItemId: second })).status, 201);
+  assert.equal((await leader.post(`${root}/${first}/dependencies`, { predecessorWorkItemId: second })).status, 409);
+  assert.equal((await leader.post(`${root}/${second}/dependencies`, { predecessorWorkItemId: first })).status, 409);
+  assert.equal((await leader.request(`${root}/${first}/dependencies`)).body.length, unrelatedBefore + 1,
+    'Rejected self/duplicate/cycle dependency changed the graph');
+
+  const invalidRecipient = await leader.post(root, { title: 'Synthetic invalid recipient pair', description: 'Synthetic',
+    recommendation: null, referenceUrl: null, assignedUnitId: unitId, workItemTypeId, dueAt: null,
+    targetSiteId: siteId, targetUnitId: unitId });
+  assert.equal(invalidRecipient.status, 400, 'Conflicting recipient fields were accepted');
+
+  const riskPath = `/api/risks/sites/${siteId}/task/${first}`;
+  const risk = { title: 'Synthetic contextual risk', description: 'Synthetic paired risk values', probability: 3,
+    impact: 4, ownerPersonId: personId, status: 'identified', dueDate: null };
+  for (const residual of [{ residualProbability: 2, residualImpact: null },
+    { residualProbability: null, residualImpact: 2 }, { residualProbability: 0, residualImpact: 2 }])
+    assert.equal((await leader.post(riskPath, { ...risk, ...residual })).status, 400);
+  assert.equal((await leader.request(riskPath)).body.length, 0, 'Invalid residual pairs partially created risks');
+  const validRisk = await leader.post(riskPath, { ...risk, residualProbability: 2, residualImpact: 2 });
+  assert.equal(validRisk.status, 201);
+  assert.equal((await leader.request(riskPath)).body[0].current.residualScore, 4);
+
+  const decisionPath = `/api/decisions/sites/${siteId}/tasks/${first}`;
+  const decision = { title: 'Synthetic contextual decision', decision: 'Proceed', rationale: 'Synthetic rationale',
+    status: 'recorded', decisionMakerIds: [personId], references: [] };
+  assert.equal((await leader.post(decisionPath, { ...decision, decisionMakerIds: [randomUUID()] })).status, 400);
+  assert.equal((await leader.post(decisionPath, { ...decision,
+    references: [{ objectType: 'work_item', objectId: randomUUID() }] })).status, 400);
+  assert.equal((await leader.request(decisionPath)).body.length, 0, 'Invalid related decision fields partially created history');
+  assert.equal((await leader.post(decisionPath, decision)).status, 201);
+  assert.equal((await leader.request(decisionPath)).body.length, 1);
+
+  return { contextualInputRules: 'passed', dependencyRelationshipRejections: 3,
+    conflictingRecipientRejected: true, residualPairRejections: 3, decisionRelationshipRejections: 2,
+    rejectedCommandsAtomic: true };
 }
 
 export async function testVersionMutationBoundaries({ platform, siteManager, leader, personId, siteId, unitId, workItemTypeId }) {

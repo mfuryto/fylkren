@@ -19,7 +19,7 @@ import { testLookupSorting } from './e2e/lookup-sorting.mjs';
 import { testFederationCandidates } from './e2e/federation-candidates.mjs';
 import { testAuthenticationBoundary, testAuthSessionSecurity } from './e2e/auth-session-security.mjs';
 import { testIdentitySessionLifecycle } from './e2e/identity-session-lifecycle.mjs';
-import { testCustomCssEncoding, testStoredEncoding, testNumericInputBoundaries, testDerivedArithmeticBoundaries, testVersionMutationBoundaries, testSqlAuthenticationCounter } from './e2e/encoding-security.mjs';
+import { testCustomCssEncoding, testStoredEncoding, testNumericInputBoundaries, testDerivedArithmeticBoundaries, testVersionMutationBoundaries, testSqlAuthenticationCounter, testContextualInputRules } from './e2e/encoding-security.mjs';
 
 const base = process.env.FYLKREN_E2E_BASE_URL ?? 'http://localhost:18080';
 function client() {
@@ -134,7 +134,7 @@ assert.equal((await platform.put('/api/platform/regional-settings', {
   defaultLanguage: 'en-US', timeZone: 'UTC',
   clockFormat: '24-hour', measurementSystem: 'metric',
 })).status, 200);
-if (!process.argv.includes('--asvs-arithmetic-only') && !process.argv.includes('--asvs-version-only') && !process.argv.includes('--asvs-zip-only') && !process.argv.includes('--asvs-counter-only') && !process.argv.includes('--asvs-input-only')) {
+if (!process.argv.includes('--asvs-arithmetic-only') && !process.argv.includes('--asvs-version-only') && !process.argv.includes('--asvs-zip-only') && !process.argv.includes('--asvs-counter-only') && !process.argv.includes('--asvs-input-only') && !process.argv.includes('--asvs-context-only')) {
 const platformOperations = await platform.request('/api/platform/operations');
 assert.equal(platformOperations.status, 200, JSON.stringify(platformOperations.body));
 assert.equal(platformOperations.body.hostIntegration.available, true, 'Host status snapshot must be available');
@@ -314,6 +314,11 @@ const assignment = await siteManager.account.post(`/api/sites/${siteId}/access/r
 assert.equal(assignment.status, 201, JSON.stringify(assignment.body));
 
 const { taskTypeId } = await testLookupSorting({ manager: siteManager.account, reader: leader.account, siteId });
+if (process.argv.includes('--asvs-context-only')) {
+  console.log(JSON.stringify(await testContextualInputRules({ leader: leader.account, personId: leader.personId,
+    siteId, unitId: leadership.body.id, workItemTypeId: taskTypeId })));
+  process.exit(0);
+}
 if (process.argv.includes('--asvs-counter-only')) {
   console.log(JSON.stringify(await testSqlAuthenticationCounter({ actor: leader, client, authenticationPost })));
   process.exit(0);

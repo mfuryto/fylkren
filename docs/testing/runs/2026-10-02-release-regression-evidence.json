@@ -4086,5 +4086,30 @@
     },
     "matrix": "ASVS 2.1.1 Passed; 2.1.2 and 2.1.3 remain incomplete",
     "scope": "Documentation and targeted existing validation cases; no claim that all implementation-level input requirements are complete"
+  },
+  "contextualValidationContinuation": {
+    "date": "2026-10-04",
+    "baseline": "5f85717",
+    "sourceHashes": {
+      "docs/security/INPUT_VALIDATION.md": "10805266f179149789d74e4cb818ae9596ac18c4a74301ac493531032e7dab0d",
+      "tools/e2e/encoding-security.mjs": "68aab08e55db99a5d8fb81e954ab3bfcc37630aedf34f9b8fc29326ad2eca436",
+      "tools/run-e2e-editions.mjs": "4569b9a4531ea5bae4d44956ad8d98be55f39fd4283ceb84750aaad2ae63d750",
+      "tools/test-e2e-local.mjs": "8b1ef7b4433a06dda05037aaa5c6a39ffa760a59a30e3facc5a0185ac6df049e"
+    },
+    "logHashes": {
+      "/tmp/fylkren-asvs-contextual.log": "7b4bd8cbaace526002d4b34e93bae26a483e3dd2fdfff169d18ca8119bdd94bd"
+    },
+    "apiImage": "sha256:6360b8b6eec4544f4528893dac857ad6de778aa517758e6a6af1d3ca8060ab55",
+    "reusedWebImage": "sha256:95c69456ec0870a718f167db181344235d23ccd5744ec99a0879df61d3c9f497",
+    "results": {
+      "dependencyRelationshipRejections": 3,
+      "conflictingRecipientRejected": true,
+      "residualPairRejections": 3,
+      "decisionRelationshipRejections": 2,
+      "rejectedCommandsAtomic": true,
+      "validRelatedValuesPersisted": true
+    },
+    "matrix": "ASVS 2.1.2 Passed; continue at 2.1.3",
+    "scope": "Documented combined-data rules and focused API cases; no full operational regression or 2.1.3 limit claim"
   }
 }

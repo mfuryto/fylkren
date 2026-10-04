@@ -490,3 +490,15 @@ Completes ASVS 2.1.1. The new [authoritative rule document](../../security/INPUT
 The existing API runner received a targeted `--asvs-input-only` path that skips legacy-upgrade and backup/restore chains while retaining normal actor/Site/role bootstrap. Against `fylkren-asvs-pagination-api:latest`, it passed 57 rejected numeric cases across ten paged APIs, nine rejected links, nine rejected CSS values without saved mutation, seven literal stored payloads, two single-JSON-decode cases, three literal portable metadata cases, 20 malformed manifest cases and ignored client `$type` metadata. Valid pagination limits and four allowed link schemes still pass. Documentation links, ASVS traceability, source structure and repository language checks pass.
 
 The [evidence manifest](2026-10-02-release-regression-evidence.json) records `inputValidationDocumentationContinuation` hashes and scope. ASVS 2.1.1 is Passed; this documentation result does not by itself pass 2.1.2/2.1.3 or every input-validation implementation requirement. Continue at 2.1.2. Production is untouched.
+
+## Contextual input validation — 2026-10-04
+
+Completes ASVS 2.1.2 by pairing the documented combined-data rules with a focused API run. The existing disposable Site/leader bootstrap creates two tasks, then tests related values without executing the full operational chain. Self-dependency, duplicate dependency and the reverse edge that would create a cycle all reject; exactly one valid edge remains. A request with conflicting recipient fields rejects. Three incomplete or out-of-range residual-risk pairs reject without creating a risk, while a complete pair persists with the expected score. Invalid decision-maker and object-reference relationships reject without decision/history side effects, while the valid member/reference form persists.
+
+Command:
+
+```sh
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-pagination-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-automatic-lifecycle-web:latest node tools/run-e2e-editions.mjs --asvs-context-only --no-build
+```
+
+The API image is unchanged from the completed arithmetic stage; only the focused maintained test path is added. Safe hashes and results are stored under `contextualValidationContinuation` in the existing evidence manifest. ASVS 2.1.2 is Passed; this does not pass the separate global/per-user business-limit requirement 2.1.3 or all implementation-level validation requirements. Continue at 2.1.3. Production is untouched.

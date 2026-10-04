@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 2026-10-04 after completing ASVS 1.4.2 and documenting input-validation rules for 2.1.1; the native DNS residual and next requirement 2.1.2 remain explicit.
+Updated 2026-10-04 after completing ASVS 1.4.2 and validation documentation/context tests for 2.1.1–2.1.2; the native DNS residual and next requirement 2.1.3 remain explicit.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -12,7 +12,7 @@ The additive event/activity foundation and coherent WorkItem slice are delivered
 
 ## Next delivery order
 
-1. Resume the existing ASVS matrix in its established requirement order at 2.1.2, verifying that related fields are checked together against the documented contextual rules, then continue to 2.1.3 global/per-user limits. ASVS 1.4.2 and 2.1.1 are Passed after the [arithmetic review](../testing/runs/2026-10-02-release-regression.md#final-pagination-and-arithmetic-inventory--2026-10-04) and [input-validation documentation](../testing/runs/2026-10-02-release-regression.md#input-validation-documentation--2026-10-04). HTTP and SMTP/AD/LDAP cases remain recorded; 1.3.6 is a Finding (SV-068) pending verified deployment egress restrictions for native DNS rebinding. Continue independent matrix cases while that qualification remains open.
+1. Resume the existing ASVS matrix in its established requirement order at 2.1.3, documenting and verifying per-command, per-user/Site and installation-wide business limits before continuing to 2.2.1. ASVS 1.4.2 and 2.1.1–2.1.2 are Passed after the linked arithmetic, input-documentation and [contextual validation](../testing/runs/2026-10-02-release-regression.md#contextual-input-validation--2026-10-04) evidence. HTTP and SMTP/AD/LDAP cases remain recorded; 1.3.6 is a Finding (SV-068) pending verified deployment egress restrictions for native DNS rebinding. Continue independent matrix cases while that qualification remains open.
 2. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing at this gate.
 
 No irreversible disposition is authorized by this order. Establish and verify its prerequisites before proposing activation; do not choose arbitrary retention periods.
@@ -36,7 +36,7 @@ Earlier HTTP p95 readings varied from subsecond values to multiple seconds and w
 
 ## Security verification
 
-The [ASVS 5.0 Level 2 matrix](../security/ASVS_5.0.0_L2_MATRIX.md) is the single security-testing work list and status authority. At this update it contains 38 Passed, 110 In progress, 51 Not assessed, 53 Not applicable and one Finding. Counts are a dated baseline, not a separate maintained matrix or security certification.
+The [ASVS 5.0 Level 2 matrix](../security/ASVS_5.0.0_L2_MATRIX.md) is the single security-testing work list and status authority. At this update it contains 39 Passed, 110 In progress, 50 Not assessed, 53 Not applicable and one Finding. Counts are a dated baseline, not a separate maintained matrix or security certification.
 
 Use the [security test plan](../security/SECURITY_TEST_PLAN.md) and [threat model](../security/SECURITY_THREAT_MODEL.md). Record findings and remediation in the [finding register](../security/SECURITY_VERIFICATION.md); record completed requirement-specific tests in the ASVS matrix with links to maintained execution evidence. Partial coverage remains partial. Retest affected controls after every change.
 
