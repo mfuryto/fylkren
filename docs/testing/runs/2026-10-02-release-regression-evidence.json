@@ -4630,5 +4630,33 @@
     "finding": "SV-086 closed after trusted-TLS negative and full SSO retest",
     "matrix": "ASVS 3.7.1 and 3.7.2 Passed; continue at 4.1.1",
     "scope": "Production client technology and automatic redirect inventory plus current trusted-TLS identity redirects; user-initiated links and production identity-provider qualification remain separate"
+  },
+  "responseMediaTypeCompletion": {
+    "date": "2026-10-04",
+    "baseline": "deeb829",
+    "sourceHashes": {
+      "apps/web/nginx.conf": "d17803d8c117e58618f88cb53fa691338aa5a603204090ffe6dff6e3e8c2cc7e",
+      "tools/e2e/federation-pair.web-a.nginx.conf": "e47716bbfb34808641a37af12ccfce480e104192e46e92abcfe2e7f7157ce5b0",
+      "tools/e2e/federation-pair.web-b.nginx.conf": "8609ff04739aaf11f5404bcaf4967aa421f15cf830b871a290f3c5c5df7758e5",
+      "tools/test-response-media-types.mjs": "09a68e3e30a7b7414fa84f29346e9b1eaccb044269f5d2c5e5246f885650be33",
+      "tools/run-e2e-editions.mjs": "bef6f5b8180afd8a3917b5fdf3515a61b005ab8bfab4764876c0b763e74c3519"
+    },
+    "reusedApiImage": "sha256:0b1413bba64b6ec65b9ee077668bea1a04ad1a706e2442bf14be188e6392369b",
+    "webImage": "sha256:5ab694a72cd4b97d269acaadbc1edf7d0b94adc4dbc70818fcbbb1930be1b263",
+    "results": {
+      "responseMediaTypes": "passed",
+      "bodyBearingResponseCases": 14,
+      "textualCharsets": "utf-8",
+      "jsonAndProblemJson": true,
+      "staticHtmlJsCss": true,
+      "plainText": true,
+      "pngSignature": true,
+      "zipSignatureAndAttachment": true,
+      "explicitApiFileResponseSites": 3,
+      "noContentBodyAbsent": true
+    },
+    "finding": "SV-087 closed after baseline reproduction and current-image retest",
+    "matrix": "ASVS 4.1.1 Passed; continue at 4.1.2",
+    "scope": "Current source response-family inventory and representative body/type matching through the canonical gateway; production proxy qualification remains separate"
   }
 }

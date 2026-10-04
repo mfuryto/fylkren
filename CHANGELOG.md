@@ -4,6 +4,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Declare UTF-8 explicitly for gateway-served textual response types and verify that HTML, static assets, API JSON/errors, health text, images and exports match their advertised media types.
 - Constrain OIDC and SAML browser sign-in destinations to configured or deployment-approved identity origins, and maintain a supported-browser-technology and automatic-redirect inventory.
 - Add a maintained full route-method inventory and live CSRF boundary check for cookie-authenticated POST, PUT and DELETE requests, including hostile-origin, invalid-token and safe-method negatives.
 - Preserve HSTS, CSP, framing, referrer and content-type protections on cached static-file successes and errors; verify the same browser-header policy across public, authenticated and error responses.

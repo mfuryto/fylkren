@@ -766,3 +766,17 @@ FYLKREN_E2E_API_IMAGE=fylkren-asvs-redirects-api:latest FYLKREN_E2E_WEB_IMAGE=fy
 The inventory reported `{"supportedBrowserTechnology":"passed","javascriptTarget":"ES2022","runtimeDependencies":4,"productionClientFiles":498,"legacyPluginSinks":0,"automaticClientNavigationSinks":1,"automaticExternalProviderFamilies":["oidc","saml"],"externalDestinationPolicy":"exact configured origin or deployment allowlist"}`. Foundation outbound/SAML cache tests passed. The trusted-TLS laboratory rejected foreign OIDC authorization and SAML sign-in origins while preserving the complete signed OIDC/SAML positive flows and all maintained state, issuer, nonce, audience, signature, replay, XML and metadata-boundary negatives.
 
 The API image is `sha256:0b1413bba64b6ec65b9ee077668bea1a04ad1a706e2442bf14be188e6392369b`; the reused gateway image is `sha256:9097512eb914b6acc30c143d929b37ce195552601e4ca3d9df4df4e16082e3d6`. SV-086 is closed. Safe hashes and results are recorded under `browserTechnologyRedirectCompletion` in the evidence manifest. Production is untouched.
+
+## Response media types and character encoding — 2026-10-04
+
+Completes ASVS 4.1.1. Source inventory records three explicit API file responses, no custom `Results.Text`/`Results.Content` responses and only `application/problem+json` direct content-type assignments. Framework JSON/problem results and the gateway's static/proxy types cover the remaining body-bearing families.
+
+The first current-candidate run reproduced SV-087: `/` returned `text/html` without a charset. After applying the gateway UTF-8 policy, the next run progressed to `/health` and found the same omission on proxied `text/plain`; the policy was extended to that type. The final focused command was:
+
+```sh
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-redirects-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-asvs-media-types-web:latest node tools/run-e2e-editions.mjs --asvs-media-types-only --no-build
+```
+
+Fourteen body-bearing responses passed: SPA HTML, versioned JavaScript and CSS, static error HTML, plain health text, anonymous/authenticated/created JSON, antiforgery JSON, validation problem JSON, stored PNG and portable ZIP. All textual types declare UTF-8. The binary tests additionally require PNG and ZIP magic bytes; the export requires `Content-Disposition: attachment`. A 204 logo update was separately required to contain no body. Result: `{"responseMediaTypes":"passed","bodyBearingResponseCases":14,"textualCharsets":"utf-8","jsonAndProblemJson":true,"staticHtmlJsCss":true,"plainText":true,"pngSignature":true,"zipSignatureAndAttachment":true,"explicitApiFileResponseSites":3}`.
+
+The reused API image is `sha256:0b1413bba64b6ec65b9ee077668bea1a04ad1a706e2442bf14be188e6392369b`; the corrected web image is `sha256:5ab694a72cd4b97d269acaadbc1edf7d0b94adc4dbc70818fcbbb1930be1b263`. The same charset configuration is present in both maintained federation gateways. SV-087 is closed. Safe hashes and results are recorded under `responseMediaTypeCompletion` in the evidence manifest. Production is untouched.
