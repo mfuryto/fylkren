@@ -1549,3 +1549,15 @@ node tools/test-field-authorization-enforcement-inventory.mjs
 ```
 
 The control reports `{"fieldAuthorizationEnforcementInventory":"passed","fieldClasses":10,"maintainedEvidenceBindings":10,"explicitResponseProjections":true}`. Its bindings point to already executed dynamic suites; this traceability completion did not rerun unrelated workflows. Production is untouched.
+
+## Trusted service authorization — 2026-10-04
+
+Completes ASVS 8.3.1. Authorization is enforced by the API fallback and server-side Platform, Site, operational-level, learning and archive policies. The maintained negative role and object tests call HTTP endpoints directly and do not depend on client-side navigation, hidden buttons or browser state.
+
+Scoped command:
+
+```sh
+node tools/test-trusted-service-authorization.mjs
+```
+
+The control reports `{"trustedServiceAuthorization":"passed","serverPolicyLayers":5,"globalAuthenticatedFallback":true,"directHttpNegativeEvidence":true,"clientUiDependency":false}`. Production is untouched.
