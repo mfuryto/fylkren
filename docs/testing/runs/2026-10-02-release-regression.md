@@ -1071,3 +1071,16 @@ FYLKREN_E2E_API_IMAGE=sha256:922a2f9dfae305cb99f6fd1cd51f215d91875dff95a0a14644b
 ```
 
 The source lock reports `{"passwordCompositionBoundary":"passed","requiredCharacterClasses":0,"allowedCompositionFamilies":4}`. The current-image run accepts lowercase-only at bootstrap, uppercase-only and symbols-only through consecutive authenticated changes, and digits-only through one-time-code reset: `{"passwordCompositionRuntime":"passed","acceptedCompositions":["lowercase-only","uppercase-only","symbols-only","digits-only"],"testedFlows":["bootstrap","change","reset"]}`. No correction or finding was required. Production is untouched.
+
+## Password input masking — 2026-10-04
+
+Completes ASVS 6.2.6. A complete TSX input inventory covers all 15 fields that accept a user password or a stored service secret. It verifies `type="password"` for 13 user-password fields across Platform Manager bootstrap, sign-in, password reset, Site Manager creation, profile re-authentication and password change, TOTP and passkey actions. The SMTP password and OIDC/directory secret fields are also masked.
+
+Scoped commands:
+
+```sh
+node tools/test-password-input-masking.mjs
+pnpm --filter @fylkren/web typecheck
+```
+
+The inventory reports `{"passwordInputMasking":"passed","maskedPasswordOrSecretInputs":15,"userPasswordInputs":13,"coveredUserFlows":["bootstrap","login","reset","user-creation","profile","totp","passkey"]}`. Its explicit expected set and total make additions or removals fail pending review. Frontend typechecking completed without errors. No implementation correction or finding was required. Production is untouched.
