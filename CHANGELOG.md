@@ -4,6 +4,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Define and test the trusted reverse-proxy header boundary: intermediary headers are replaced at each owned hop, the API remains unpublished and HTTPS deployments must block direct origin access.
 - Redirect only browser-facing plaintext requests to HTTPS; return an explicit non-redirecting error for API, health and authentication callback traffic.
 - Declare UTF-8 explicitly for gateway-served textual response types and verify that HTML, static assets, API JSON/errors, health text, images and exports match their advertised media types.
 - Constrain OIDC and SAML browser sign-in destinations to configured or deployment-approved identity origins, and maintain a supported-browser-technology and automatic-redirect inventory.

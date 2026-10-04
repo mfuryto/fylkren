@@ -239,6 +239,20 @@ function percentile(values, percentage) {
 }
 
 async function assertProxyLoadControls(receiver) {
+  const hostileHeaders = await fetch('https://localhost:18444/api/configuration/public', {
+    redirect: 'manual',
+    headers: {
+      'X-Forwarded-Proto': 'http',
+      'X-Forwarded-For': '203.0.113.77, 198.51.100.88',
+      'X-Forwarded-Host': 'attacker.example.invalid',
+      'X-Fylkren-Gateway-Client-IP': '192.0.2.99',
+    },
+  });
+  assert.equal(hostileHeaders.status, 200,
+    'Caller-controlled intermediary headers overrode the trusted TLS/Host boundary');
+  assert.equal(hostileHeaders.headers.get('location'), null,
+    'Caller-controlled intermediary headers caused an application redirect');
+
   // Start with empty in-memory limiter partitions while retaining the initialized database/key ring.
   compose(['restart', 'api-b', 'api-b-replica']);
   compose(['up', '-d', '--no-build', '--wait', 'api-b', 'api-b-replica', 'web-b', 'tls']);
@@ -313,6 +327,8 @@ async function assertProxyLoadControls(receiver) {
     maxResponseBytes: Math.max(...samples.map(sample => sample.responseBytes)),
   };
   process.stdout.write(`${JSON.stringify({ federationProxyLoad: 'passed',
+    hostileIntermediaryHeadersStatus: hostileHeaders.status,
+    hostileIntermediaryHeadersRedirected: false,
     bodyLimits: oversizedCases.map(([path, limit]) => ({ path, limit, status: 413 })),
     rateLimitStatus: limited.status, spoofedForwardedForStatus: spoofed.status,
     capabilityPartitionStatus: capability.status, distinctClientStatuses: [200, 200],

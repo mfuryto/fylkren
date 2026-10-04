@@ -102,7 +102,9 @@ Local login is controlled in **Platform Manager → Identity**. An existing `FYL
 
 ## Reverse proxy
 
-Configure one HTTPS virtual host that forwards to the web gateway's host port (default `8080`). Preserve the original host and the trusted forwarded scheme. Do not expose API or PostgreSQL ports and do not forward the gateway's internal HTTP port directly from the internet.
+Configure one HTTPS virtual host that forwards to the web gateway's host port (default `8080`). The proxy must replace `Host`, `X-Forwarded-Proto` and `X-Forwarded-For` for every request; appending or preserving values supplied by the internet client is not supported. Set `Host` to the public authority, `X-Forwarded-Proto` to `https` and `X-Forwarded-For` to the proxy-observed client address. Fylkren's gateway then adds its own hop and replaces `X-Forwarded-Host` and `X-Fylkren-Gateway-Client-IP` before calling the private API.
+
+The API and PostgreSQL have no host ports. Block direct access to the web gateway's origin port whenever forwarded-header trust is enabled. If the reverse proxy runs on the Fylkren host, use `FYLKREN_HTTP_PORT=127.0.0.1:8080`. If it runs elsewhere, bind a firewall-restricted address that accepts only that proxy. A publicly reachable origin lets a caller impersonate the intermediary and is an invalid deployment.
 
 A typical proxy definition uses:
 
@@ -112,6 +114,8 @@ A typical proxy definition uses:
 - upstream port: `8080`;
 - public certificate for the configured domain;
 - HTTP-to-HTTPS redirect after certificate validation.
+
+Verify the proxy configuration with a request that supplies false `X-Forwarded-Proto`, `X-Forwarded-For`, `X-Forwarded-Host` and `X-Fylkren-Gateway-Client-IP` values. The proxy must replace them before forwarding. Recheck this after proxy upgrades or configuration imports.
 
 WebSocket support can remain enabled at the proxy but Fylkren does not currently depend on WebSockets.
 

@@ -4685,5 +4685,38 @@
     "finding": "SV-088 closed after current production-mode retest",
     "matrix": "ASVS 4.1.2 Passed; continue at 4.1.3",
     "scope": "Application HTTP upgrade/failure behavior behind the supported gateway; external TLS termination and network-path confidentiality remain deployment qualification"
+  },
+  "intermediaryHeaderBoundaryCompletion": {
+    "date": "2026-10-04",
+    "baseline": "ff3c4a9",
+    "sourceHashes": {
+      "apps/api/ServiceRegistration.cs": "74a2aeab357c83923c63233e6c02450724a21bbd4d387f17258f1e99a7ba45de",
+      "apps/web/nginx.conf": "d17803d8c117e58618f88cb53fa691338aa5a603204090ffe6dff6e3e8c2cc7e",
+      "compose.yaml": "1ccd88ce03e4b18657bac01ee3a58f87401c2d93fd444b05058e0f7bb0496f05",
+      "tools/e2e/federation-pair.nginx.conf": "473fa78f34a66d60692e21264e77d3f24f098bfe37c0b2418a8c88e1c4dd443d",
+      "tools/e2e/federation-pair.web-a.nginx.conf": "e47716bbfb34808641a37af12ccfce480e104192e46e92abcfe2e7f7157ce5b0",
+      "tools/e2e/federation-pair.web-b.nginx.conf": "8609ff04739aaf11f5404bcaf4967aa421f15cf830b871a290f3c5c5df7758e5",
+      "tools/run-federation-pair.mjs": "e1169178f74275daa6cff06d13d2aa5c1a4862db328d7f1d57db9f911c74fbfc",
+      "tools/test-intermediary-header-boundary.mjs": "ea9071bd4e321de8a6a92ba1d898b9f616d53c03df558467b3f0c3b51154d4b4",
+      "deploy/compose/.env.example": "7cb4f50ed784b21cc48b1455e102e7d071ed9d73dd0b6c2d72e65d93b2351ac0"
+    },
+    "reusedApiImage": "sha256:2ad803d912e730690ccee35ac52d254457323fe70fe62b71a69d39e9f16653e4",
+    "reusedWebImage": "sha256:5ab694a72cd4b97d269acaadbc1edf7d0b94adc4dbc70818fcbbb1930be1b263",
+    "results": {
+      "intermediaryHeaderInventory": "passed",
+      "apiHostPorts": 0,
+      "gatewayProxyLocations": 4,
+      "outerProxyApplications": 2,
+      "hostileIntermediaryHeadersStatus": 200,
+      "hostileIntermediaryHeadersRedirected": false,
+      "allowedConcurrentRequests": 20,
+      "rateLimitStatus": 429,
+      "spoofedForwardedForStatus": 429,
+      "distinctClientStatuses": [200, 200],
+      "boundedBodyFamilies": 4
+    },
+    "finding": "No application control defect; corrected the deployment example to match the existing blocked-origin requirement",
+    "matrix": "ASVS 4.1.3 Passed; continue at 4.2.1",
+    "scope": "Current source intermediary-header inventory and production-shaped disposable two-hop TLS proxy run; deployment owner still enforces origin network reachability"
   }
 }

@@ -794,3 +794,20 @@ FYLKREN_E2E_API_IMAGE=fylkren-asvs-http-upgrade-api:latest FYLKREN_E2E_WEB_IMAGE
 Three browser paths, including query preservation, returned 307 to the same HTTPS host/path/query. Public and session APIs, a bearer machine API, health and an OIDC callback returned 400 with zero redirects and cookies. Result: `{"httpUpgradeBoundary":"passed","browserRedirectCases":3,"serviceFailureCases":5,"browserStatus":307,"serviceStatus":400,"serviceRedirects":0,"plaintextCookies":0}`.
 
 The API image is `sha256:2ad803d912e730690ccee35ac52d254457323fe70fe62b71a69d39e9f16653e4`; the reused web image is `sha256:5ab694a72cd4b97d269acaadbc1edf7d0b94adc4dbc70818fcbbb1930be1b263`. SV-088 is closed. Safe hashes and results are recorded under `httpUpgradeBoundaryCompletion` in the evidence manifest. Production is untouched.
+
+## Intermediary-owned HTTP header boundary — 2026-10-04
+
+Completes ASVS 4.1.3 for the supported deployment topology. The source inventory confirms that the API has no published host port, trusts only forwarded scheme and client address with an explicit one/two-hop limit, and does not make `X-Forwarded-Host` authoritative. All four built-in gateway proxy locations replace `Host`, forward the trusted outer-proxy scheme and append their own IP hop. Application routes also replace `X-Forwarded-Host`; API routes replace `X-Fylkren-Gateway-Client-IP`. Both production-shaped outer TLS proxy fixtures replace Host, scheme and the complete caller-supplied IP chain.
+
+The earlier example origin binding used all host interfaces even though production guidance required direct origin access to be blocked. The example now binds a same-host proxy origin to loopback. The operating contract explicitly requires the outer proxy to replace intermediary headers and either a loopback binding or a firewall-restricted origin accessible only to the proxy. Forwarded-header trust on a publicly reachable origin remains an invalid deployment.
+
+Scoped commands:
+
+```sh
+node tools/test-intermediary-header-boundary.mjs
+FYLKREN_E2E_API_IMAGE=sha256:2ad803d912e730690ccee35ac52d254457323fe70fe62b71a69d39e9f16653e4 FYLKREN_E2E_WEB_IMAGE=sha256:5ab694a72cd4b97d269acaadbc1edf7d0b94adc4dbc70818fcbbb1930be1b263 node tools/run-federation-pair.mjs --load-only --no-build
+```
+
+The live two-hop request supplied `X-Forwarded-Proto: http`, a two-address hostile `X-Forwarded-For`, a foreign `X-Forwarded-Host` and a false Fylkren gateway client address. The canonical HTTPS resource returned 200 without a redirect, proving the outer and inner owned values prevailed. After 20 allowed concurrent federation probes, request 21 and another request with a spoofed forwarded IP both returned 429. Two actual clients behind the same proxy each returned 200 in distinct partitions. Four endpoint families retained their existing 413 body limits. The source inventory result was `{"intermediaryHeaderInventory":"passed","apiHostPorts":0,"gatewayProxyLocations":4,"outerProxyApplications":2,"forwardedHostTrustedByApi":false,"forwardedHopLimit":"configured:1-2"}`.
+
+The reused API image is `sha256:2ad803d912e730690ccee35ac52d254457323fe70fe62b71a69d39e9f16653e4`; the reused web image is `sha256:5ab694a72cd4b97d269acaadbc1edf7d0b94adc4dbc70818fcbbb1930be1b263`. Safe hashes and outcomes are recorded under `intermediaryHeaderBoundaryCompletion` in the evidence manifest. This verifies the maintained proxy contract and disposable test topology; the deployment owner must still enforce the documented origin network restriction. Production is untouched.

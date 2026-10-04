@@ -32,7 +32,7 @@ The current Compose profile is not redundant. Customers requiring high availabil
 | HTTPS at a trusted reverse proxy | `true` | `true` |
 | Direct HTTPS through separately managed TLS termination | `false` | `true` |
 
-Forwarded headers are trusted only in the documented private-gateway topology. `FYLKREN_FORWARDED_HEADER_LIMIT` is `1` for the built-in gateway and `2` when one additional trusted outer proxy is present and direct origin access is blocked. Other values are rejected.
+Forwarded headers are trusted only in the documented private-gateway topology. The outer proxy must replace client-supplied `Host`, `X-Forwarded-Proto` and `X-Forwarded-For`; the built-in gateway replaces its own intermediary headers before calling the unpublished API. `FYLKREN_FORWARDED_HEADER_LIMIT` is `1` for the built-in gateway and `2` when one additional trusted outer proxy is present and direct origin access is blocked. Other values are rejected. Bind the origin to loopback for a same-host proxy or restrict it by firewall to the proxy address.
 
 HTTPS mode uses Secure `__Host-` cookies, HSTS and redirect behavior. Changing mode invalidates existing browser sessions but not accounts. The outer proxy must preserve or strengthen CSP, content-type, framing, referrer and permissions headers.
 
