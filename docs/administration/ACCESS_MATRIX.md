@@ -88,6 +88,28 @@ API request contracts and explicit response projections are allowlists: unknown 
 
 Adding a protected request or response field requires assigning it to one of these classes or documenting a new class, then adding positive and negative coverage for the applicable consumer and resource state. The maintained [field authorization documentation test](../../tools/test-field-authorization-documentation.mjs) locks this inventory to the existing private-learning, classified-report, portability and cross-Site boundary tests.
 
+### Object authorization and ID binding
+
+Every resource route loads the referenced object and derives its owning Site, level, root, parent or relationship from persisted data. A client-supplied Site or parent identifier is never accepted as proof of ownership. When both a route parent and object ID are supplied, both must describe the same persisted relationship. Collections apply the same predicate before paging; inaccessible direct IDs return forbidden or concealed-not-found according to the route contract.
+
+| Resource class | Authoritative binding | Required object permission and negative boundary |
+| --- | --- | --- |
+| `site-configuration` | Persisted Site ID and active Site Manager assignment | Platform-only Site lifecycle fields or Site Manager authority in that exact Site; a managed Site ID cannot authorize a foreign Site |
+| `person-membership-role` | Person plus persisted Site membership, unit placement, role owner and assignment period | Global identity operations require Platform Manager; Site changes require the person's Site-owned relationship and cannot alter a shared identity globally |
+| `work-item` | Work item Site, assigned level, root/parent chain and current responsibility | Visibility/action at the exact level or documented ancestor context; swapping either Site or item GUID must fail and sibling branches remain concealed |
+| `planning-execution` | Persisted run to work item, Site, level and responsibility lock | Current planner/leader/member capability for that run's level; a sibling run ID or stale responsibility never grants access |
+| `decision-risk-measure-comment` | Persisted child object to its work item/root and Site | Read or manage permission is recomputed on the owning work tree; direct child IDs cannot bypass task visibility or lock state |
+| `learning` | Lesson to originating work item, Site and exact unit | Exact-level read/comment/treatment permission; superior, sibling and unrelated IDs cannot expose private text or discussion |
+| `report` | Approved report to work item, assigned level and classification | Operational report visibility or exact machine Site/level grant; classified content additionally requires its explicit flag and is concealed otherwise |
+| `template-workflow` | Persisted definition owner Site/unit | Active Site Manager or authorized owner-level leader as documented by the operation; a foreign Site or owner unit cannot be substituted |
+| `audit-activity` | Event Site plus resource owner/root and current resource visibility | Platform audit is global-role only, Site audit is managed-Site only, and operational activity is filtered by current object visibility before paging |
+| `lifecycle-archive-preservation` | Governance root/version, object owner Site and lifecycle/custody records | Platform governance or current explicit archive custody; foreign roots, sibling work and revoked grants cannot be recovered through a direct ID |
+| `portable-export` | Export receipt/package to exact Site, requesting actor and package digest/version | Active Site Manager or custodian with `CanExport`; receipts, acknowledgement and validation cannot cross Site ownership |
+| `machine-client-grant` | Machine identity plus exact scope and persisted report Site/level grant | Each operation requires its own scope; client/grant IDs do not imply broader scopes or classified access |
+| `federation-peer-message` | Pinned peer instance, addressed local/remote Site, nonce and persisted work link | Signed active peer and exact message relationship; instance, Site, work-link or resource substitution is rejected without creating/updating a local object |
+
+The maintained [object authorization inventory test](../../tools/test-object-authorization-inventory.mjs) requires all resource classes and their existing negative evidence suites. A new direct-ID resource must be added here and tested with an authorized ID under a foreign parent, a foreign ID under an authorized parent, and an unauthorized actor where those dimensions apply.
+
 ## Enforcement requirements
 
 - Authentication is required by the global fallback policy except for explicitly documented public setup/login/configuration/health routes.

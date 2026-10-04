@@ -1524,3 +1524,16 @@ node tools/test-function-authorization-inventory.mjs
 ```
 
 The control reports `{"functionAuthorizationInventory":"passed","operationCount":287,"anonymousDeclarations":24,"globalAuthenticatedFallback":true,"policyFamilies":["platform-role","site-manager-assignment","operational-role-level","machine-scope","signed-federation"],"maintainedNegativeRoleBoundaries":6}`. Existing direct-HTTP authorization evidence rejects Platform/Site administrators entering operational functions, sibling and unrelated leaders, foreign Site administration and route/object substitution. Specialized learning, portability, lifecycle, archive, preservation and machine API tests extend these same policy families. This scoped completion reused those maintained dynamic results and did not rerun unrelated workflows. Production is untouched.
+
+## Object-level authorization completion — 2026-10-04
+
+Completes ASVS 8.2.2. The authoritative access matrix now binds every direct-ID resource family to its persisted Site, level, owner, root, parent or relationship and explicitly rejects using client-supplied parent identifiers as authorization evidence. It requires both parent/object substitution directions plus an unauthorized actor when a new direct-ID resource is introduced.
+
+Scoped commands:
+
+```sh
+node tools/test-object-authorization-inventory.mjs
+pnpm check:docs
+```
+
+The control reports `{"objectAuthorizationInventory":"passed","resourceClasses":13,"ownershipBindingDocumented":true,"maintainedEvidenceSuites":8}`. It locks the inventory to maintained negative tests for Site/role/work-item GUID substitution, sibling planning/execution runs, exact-level learning, classified reports, cross-Site receiver internals, activity/lifecycle, archive custody and decisions/risks. The already recorded dynamic executions supply the HTTP and database behavior; this reconciliation did not rerun unrelated workflows. Production is untouched.
