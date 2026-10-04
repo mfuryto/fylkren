@@ -36,8 +36,9 @@ internal sealed class FederationSiteGrant
     internal bool SetActive(bool active, DateTimeOffset at)
     {
         if (IsActive == active) return false;
+        var nextRevision = NumericBounds.NextVersion(Revision);
         IsActive = active;
-        Revision++;
+        Revision = nextRevision;
         UpdatedAt = at;
         return true;
     }

@@ -224,3 +224,30 @@ export async function testVersionMutationBoundaries({ platform, siteManager, lea
   return { versionMutationBoundaries: 'passed', atomicSiteCapacityCases: 2, sortOrderCapacityRejected: true,
     decisionNormalRevisions: 2, decisionAuthorizationPreserved: true, riskAndMeasureNormalRevisions: 2, riskAndMeasureCapacityRejected: true };
 }
+
+export async function testSqlAuthenticationCounter({ actor, client, authenticationPost }) {
+  assert.equal(process.env.FYLKREN_COMPOSE_PROJECT, 'fylkren-edition-e2e');
+  assert.match(actor.personId, /^[0-9a-f-]{36}$/i);
+  const sql = query => execFileSync('docker', ['compose', '-p', 'fylkren-edition-e2e', 'exec', '-T', 'postgres',
+    'psql', '-U', 'fylkren', '-d', 'fylkren', '-tA', '-v', 'ON_ERROR_STOP=1', '-c', query], { encoding: 'utf8' }).trim();
+  const row = `person_id='${actor.personId}'`;
+  const snapshot = () => JSON.parse(sql(`SELECT json_build_object('count',failed_authentication_count,'locked',coalesce(authentication_locked_until > now(),false)) FROM login_identities WHERE ${row}`));
+  sql(`UPDATE login_identities SET failed_authentication_count=2147483647,authentication_locked_until=NULL WHERE ${row}`);
+  const exhausted = await authenticationPost(client(), '/api/session',
+    { username: actor.username, password: 'Synthetic deliberately invalid password' });
+  assert.equal(exhausted.status, 401, 'Exhausted counter must fail generically without SQL overflow');
+  assert.deepEqual(snapshot(), {count:20,locked:true});
+  const correctWhileLocked = await authenticationPost(client(), '/api/session',
+    { username: actor.username, password: actor.password });
+  assert.equal(correctWhileLocked.status, 401, 'Correct password must still respect the account lock');
+  sql(`UPDATE login_identities SET failed_authentication_count=18,authentication_locked_until=NULL WHERE ${row}`);
+  const failures = await Promise.all(Array.from({ length: 3 }, () => authenticationPost(client(), '/api/session',
+    {username: actor.username, password: 'Synthetic deliberately invalid password'})));
+  assert.deepEqual(failures.map(x => x.status), [401,401,401]);
+  assert.deepEqual(snapshot(), {count:20,locked:true}, 'Concurrent failures must saturate atomically');
+  sql(`UPDATE login_identities SET authentication_locked_until=now()-interval '1 minute' WHERE ${row}`);
+  assert.equal((await authenticationPost(client(), '/api/session', { username: actor.username, password: actor.password })).status, 204);
+  assert.equal(snapshot().count, 0, 'Successful post-lock login clears the failure count');
+  return {sqlAuthenticationCounter:'passed', exhaustedCounterSaturated:true, concurrentFailures:3,
+    activeLockRespected:true, postExpiryLoginAccepted:true};
+}

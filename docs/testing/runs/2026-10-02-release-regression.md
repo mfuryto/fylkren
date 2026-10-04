@@ -445,3 +445,22 @@ FYLKREN_E2E_API_IMAGE=fylkren-asvs-zip-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-
 Five small ZIP64 cases exercise signed aggregate overflow, unsigned maximum, aggregate one byte above policy, exact policy limit and zero. Foundation tests assert the real ZipArchive reader exposes the declared 64-bit lengths. Oversized input returns bounded validation errors; exact-limit/zero input reaches missing-manifest validation without extraction. Actual API cases return 200 / valid:false without exception details. An unchanged current Site export validates successfully, three literal metadata cases and ignored client type markers remain accepted, and all 20 maintained malformed manifest cases reject with bounded results. ASVS 1.5.2 was reopened while its changed parser control was unverified and returns to Passed after these retests.
 
 The same [evidence manifest](2026-10-02-release-regression-evidence.json) records zipLengthContinuation baseline/candidate hashes and results. ASVS 1.4.2 remains In progress: the remaining arithmetic review identified separate SQL authentication-failure/federation-delivery increments and federation grant revisions needing their own boundary tests. This stage does not qualify those paths or the complete release; production is untouched.
+
+## SQL authentication and federation counter bounds — 2026-10-04
+
+Continues ASVS 1.4.2. Against f071c9a, an actual failed login with a synthetically seeded int-max failure count returned 500 from PostgreSQL integer overflow. A real FederationSiteGrant seeded at long-max changed active state and wrapped its revision negative. Source review also found the federation delivery SQL claim incremented without its existing six-attempt terminal bound. These are synthetic boundary cases; no authentication bypass, session replay or production-scale counter exhaustion was demonstrated (SV-075).
+
+Failed-login SQL now saturates atomically at the existing count 20 and sets the existing 15-minute lock. Federation grant revision uses the common checked next-version calculation before state mutation. The existing federation outbox remains authoritative; its atomic claim now permits attempts zero through five and refuses negative or terminal counters without acquiring a lease. No schema, broker, event store, audit replacement or API payload change is introduced.
+
+Scoped tests passed:
+
+```sh
+dotnet run --project tests/foundations/Fylkren.FoundationTests.csproj -- --version-boundaries-only
+node tools/run-foundation-tests.mjs --version-integration-only
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-counter-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-automatic-lifecycle-web:latest node tools/run-e2e-editions.mjs --asvs-counter-only --no-build
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-counter-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-automatic-lifecycle-web:latest node tools/run-federation-pair.mjs --outbound-only --no-build
+```
+
+The 21 domain cases accept their last revision and reject exhaustion unchanged. Database tests prove webhook and federation claims accept their last attempt and reject negative/exhausted counters without lease or state changes. Actual login tests prove int-max saturation, correct-password rejection during lock, three concurrent failures saturating at 20 and successful login/reset of the counter after lock expiry. The maintained outbound integration suite passes its delivery, size, redirect, private-origin and zero-canary assertions. The reused web image is an unchanged gateway, not full UI/release qualification. Safe hashes are stored under `sqlFederationCounterContinuation` in the existing evidence manifest; raw logs and synthetic credentials remain outside Git. Production is untouched.
+
+ASVS 1.4.2 remains In progress for bounded pagination/count paths and the final arithmetic inventory. Native DNS finding SV-068 remains open independently.

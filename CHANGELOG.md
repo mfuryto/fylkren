@@ -4,6 +4,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Saturate failed-login counters at the existing account-lock threshold, reject exhausted federation grant revisions before mutation and stop federation delivery claims at their existing terminal attempt.
 - Reject oversized ZIP64 declared lengths before summing or opening archive entries, returning read-only validation errors instead of server overflow errors.
 - Reject exhausted security/domain/revision versions before mutation, preserve atomic API/history writes and prevent retry/failure counters wrapping past their existing terminal thresholds.
 - Accept the last representable audit date/report year without server errors; use checked long aggregate counts and exact comment-page arithmetic. Retain normal counts and archive delivery guards while rejecting invalid comment pages through the shared input policy.

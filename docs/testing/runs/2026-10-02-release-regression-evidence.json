@@ -3960,5 +3960,46 @@
     "findingClosed": "SV-074",
     "matrix": "1.5.2 retested Passed; 1.4.2 remains In progress for SQL counters/grant revisions/arithmetic inventory",
     "scope": "Read-only validator and scoped API/parser tests, not full release qualification"
+  },
+  "sqlFederationCounterContinuation": {
+    "date": "2026-10-04",
+    "baseline": "f071c9a",
+    "baselineResults": {
+      "failedLoginAtIntMax": "500 from PostgreSQL integer overflow",
+      "federationGrantAtLongMax": "revision wrapped to long-min and state changed"
+    },
+    "sourceHashes": {
+      "apps/api/Federation/FederationOutboundDeliveryWorker.cs": "1a7bbfb9a3ad59877103bf74ab7f40dd8c691dc9109d7d4d518fc1391629678a",
+      "apps/api/Federation/FederationSiteGrant.cs": "44afd09758f0ce2449b0835a81f98189aef20d6b1814d840d49bba41f292524f",
+      "apps/api/Identity/IdentitySessionEndpoints.cs": "17f6916505aa7c2cd5e4f8daf9ebf7c568b3f4a98f2f36ac790f6bdefd79524a",
+      "apps/api/Persistence/DeliveryClaims.cs": "6141d8c541eeac4ab2fd5efe7ea8548bb35babb43369a65d9160a44ded4e8b66",
+      "tests/foundations/VersionBoundaryTests.cs": "68c4459b54beaed98e011e45cb2d924a20f1e89f0fa9547055730600f9403082",
+      "tests/foundations/VersionDatabaseBoundaryTests.cs": "6e4331f455bcc333abe9245934790056b05c0d0b6eb05adb9b715d3417ec0c24",
+      "tools/e2e/encoding-security.mjs": "7a78fe892f5316a63a672a9f57fe737daf97c2f26c56f6ddde1013557ac1f94d",
+      "tools/run-e2e-editions.mjs": "9aa8562f9d5e5e009ae79a2ec1f6362b0e7434a3495555e014cd37853e04b57e",
+      "tools/test-e2e-local.mjs": "b3f3f1f40af6674a25f28b30dbadd2a91d17e2966f093d75d5b8a30251f16930"
+    },
+    "logHashes": {
+      "/tmp/fylkren-asvs-grant-before.log": "8faa32877718bb4bdfa0def7a45c377813dd3c5fa6a5dbe047cc194251beceb5",
+      "/tmp/fylkren-asvs-sql-counter-before.log": "c15bfcddc2846f36286da77b70cdb60de984d8f5d810545d58950d322c169fa0",
+      "/tmp/fylkren-asvs-counter-unit.log": "231d248447a0b1dce89c11ad13f608c5f68b89585d12ab298b15ef4b29c6dd4f",
+      "/tmp/fylkren-asvs-counter-integration.log": "f79cdbd222b7ceb63668093a56c27ba80b77f60233cb759280a7fde16f818cd5",
+      "/tmp/fylkren-asvs-sql-counter-after.log": "714984a37f557c940ad8f17e20ab05cc19ba073622e3ccd71d16528edb8c5bdf",
+      "/tmp/fylkren-asvs-counter-federation.log": "64a1504c64d5a7bceae95f9516f7356e015ac7b733933ed855ae0b865d8b7791",
+      "/tmp/fylkren-asvs-counter-build.log": "27e2635636ebf61644cdbc0b0e30ce9cf39310097bc6cb861068f1d3aebdf29e"
+    },
+    "apiImage": "sha256:567d5b519e0ef5df69a2b3d8d85f72a49dea895149c8e2be7aa59e4100d1879c",
+    "reusedWebImage": "sha256:95c69456ec0870a718f167db181344235d23ccd5744ec99a0879df61d3c9f497",
+    "results": {
+      "domainBoundaryMutations": 21,
+      "databaseLeaseBoundaries": "passed",
+      "actualLoginCounter": "passed",
+      "concurrentLoginFailures": 3,
+      "activeLockAndExpiry": "passed",
+      "outboundFederationBoundaries": "passed"
+    },
+    "findingClosed": "SV-075",
+    "remaining": "ASVS 1.4.2 bounded pagination/count paths and final arithmetic inventory; SV-068 native DNS requires deployment egress qualification",
+    "scope": "Affected domain/database/API/federation tests with reused unchanged gateway; not full release qualification"
   }
 }

@@ -75,9 +75,11 @@ public static partial class IdentityEndpoints
             await database.LoginIdentities
                 .Where(value => value.Id == identity.Id)
                 .ExecuteUpdateAsync(update => update
-                    .SetProperty(value => value.FailedAuthenticationCount, value => value.FailedAuthenticationCount + 1)
+                    .SetProperty(value => value.FailedAuthenticationCount, value =>
+                        value.FailedAuthenticationCount >= 19 ? 20 :
+                        value.FailedAuthenticationCount < 0 ? 1 : value.FailedAuthenticationCount + 1)
                     .SetProperty(value => value.AuthenticationLockedUntil, value =>
-                        value.FailedAuthenticationCount + 1 >= 20 ? lockedUntil : value.AuthenticationLockedUntil),
+                        value.FailedAuthenticationCount >= 19 ? lockedUntil : value.AuthenticationLockedUntil),
                     cancellationToken);
         }
         if (!isEligible || passwordResult == PasswordVerificationResult.Failed || identity.IsAuthenticationLocked(now))

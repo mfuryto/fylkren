@@ -2,6 +2,7 @@ using Fylkren.Api;
 using Fylkren.Api.ActivityAudit;
 using Fylkren.Api.Approvals;
 using Fylkren.Api.DomainEvents;
+using Fylkren.Api.Federation;
 using Fylkren.Api.Organization;
 using Fylkren.Api.Persistence;
 using Fylkren.Api.WorkManagement;
@@ -61,7 +62,31 @@ internal static class VersionDatabaseBoundaryTests
         Require(await DeliveryClaims.Webhook(db, delivery.Id, now.AddMinutes(6), default) == 0, "SQL claim accepted a negative counter.");
         Require((await db.WebhookDeliveries.AsNoTracking().SingleAsync(value => value.Id == delivery.Id)).AttemptCount == -1,
             "Rejected SQL sign boundary changed the stored counter.");
+
+        var peer = new FederationPeer(Guid.NewGuid(), "Synthetic capacity peer", "https://peer.example.invalid", now);
+        var message = new FederationOutboundMessage(Guid.NewGuid(), peer.InstanceId, site.Id, Guid.NewGuid(), Guid.NewGuid(),
+            site.Id, work.Id, "assignment.created", 1, "{}", now);
+        db.Add(peer); db.Add(message); await db.SaveChangesAsync();
+        await db.FederationOutboundMessages.Where(value => value.MessageId == message.MessageId)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(value => value.AttemptCount, 5));
+        Require(await DeliveryClaims.Federation(db, message.MessageId, now, default) == 1,
+            "Final federation delivery attempt was rejected.");
+        var finalFederation = await db.FederationOutboundMessages.AsNoTracking()
+            .SingleAsync(value => value.MessageId == message.MessageId);
+        Require(finalFederation.AttemptCount == 6 && finalFederation.Status == "retrying",
+            "Federation claim lost its existing terminal attempt boundary.");
+        Require(await DeliveryClaims.Federation(db, message.MessageId, now.AddMinutes(2), default) == 0,
+            "Federation claim exceeded its terminal attempt boundary.");
+        await db.FederationOutboundMessages.Where(value => value.MessageId == message.MessageId)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(value => value.AttemptCount, -1));
+        Require(await DeliveryClaims.Federation(db, message.MessageId, now.AddMinutes(2), default) == 0,
+            "Federation claim accepted a negative attempt counter.");
+        var rejectedFederation = await db.FederationOutboundMessages.AsNoTracking()
+            .SingleAsync(value => value.MessageId == message.MessageId);
+        Require(rejectedFederation.AttemptCount == -1 && rejectedFederation.Status == "retrying" &&
+            rejectedFederation.NextAttemptAt == finalFederation.NextAttemptAt,
+            "Rejected federation claim partially changed its lease.");
         db.ChangeTracker.Clear();
-        Console.WriteLine("Version database boundaries passed: formal int-max approval then atomic rejection with immutable history/audit preserved; SQL webhook claim at int-max then zero mutation.");
+        Console.WriteLine("Version database boundaries passed: formal int-max approval remains atomic; webhook and federation SQL claims preserve their last attempts and reject exhausted/negative counters without mutation.");
     }
 }

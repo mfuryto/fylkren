@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Fylkren.Api.Federation;
 
 namespace Fylkren.Api.Persistence;
 
@@ -14,4 +15,12 @@ internal static class DeliveryClaims
             (x.Status == "pending" || x.Status == "retry" || x.Status == "delivering" && x.LastAttemptAt < now.AddMinutes(-5)))
             .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.Status, "delivering")
                 .SetProperty(x => x.LastAttemptAt, now).SetProperty(x => x.AttemptCount, x => x.AttemptCount + 1), ct);
+
+    internal static Task<int> Federation(FylkrenDbContext db, Guid id, DateTimeOffset now, CancellationToken ct) =>
+        db.FederationOutboundMessages.Where(row => row.MessageId == id && row.AttemptCount >= 0 && row.AttemptCount < 6 &&
+                (row.Status == "pending" || row.Status == "retrying") && row.NextAttemptAt <= now)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(row => row.Status, "retrying")
+                .SetProperty(row => row.NextAttemptAt, now.AddSeconds(60))
+                .SetProperty(row => row.AttemptCount, row => row.AttemptCount + 1), ct);
 }

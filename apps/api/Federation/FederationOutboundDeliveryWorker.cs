@@ -41,20 +41,15 @@ internal sealed class FederationOutboundDeliveryWorker(
             .AnyAsync(row => row.Key == 1 && row.ActiveRotationId != null, ct)) return;
         var now = DateTimeOffset.UtcNow;
         var id = await db.FederationOutboundMessages.AsNoTracking()
-            .Where(row => (row.Status == "pending" || row.Status == "retrying") &&
+            .Where(row => row.AttemptCount >= 0 && row.AttemptCount < 6 &&
+                (row.Status == "pending" || row.Status == "retrying") &&
                 row.NextAttemptAt <= now)
             .OrderBy(row => row.NextAttemptAt).ThenBy(row => row.MessageId)
             .Select(row => (Guid?)row.MessageId).FirstOrDefaultAsync(ct);
         if (id is null) return;
         // A future NextAttemptAt is a bounded lease. The conditional UPDATE is
         // the cross-replica claim; a crash leaves the row retryable after 60 s.
-        var claimed = await db.FederationOutboundMessages.Where(row =>
-                row.MessageId == id && (row.Status == "pending" || row.Status == "retrying") &&
-                row.NextAttemptAt <= now)
-            .ExecuteUpdateAsync(setters => setters
-                .SetProperty(row => row.Status, "retrying")
-                .SetProperty(row => row.NextAttemptAt, now.AddSeconds(60))
-                .SetProperty(row => row.AttemptCount, row => row.AttemptCount + 1), ct);
+        var claimed = await DeliveryClaims.Federation(db, id.Value, now, ct);
         if (claimed != 1) return;
         var message = await db.FederationOutboundMessages.SingleAsync(row => row.MessageId == id, ct);
         string? error = null;

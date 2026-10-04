@@ -60,6 +60,8 @@ internal static class VersionBoundaryTests
         FederationSitePublication Publication() => new(Guid.NewGuid(), Guid.NewGuid(), now);
         Boundary(Publication, "Revision", value => value.Refresh(now));
         Boundary(Publication, "Revision", value => value.SetActive(false, now));
+        Boundary(() => new FederationSiteGrant(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "outbound", now),
+            "Revision", value => value.SetActive(false, now));
         Boundary(() => new EventProjection("webhooks", Guid.NewGuid(), now), "AttemptCount",
             value => value.Claim(Guid.NewGuid(), now));
         Boundary(() => new WebhookDelivery(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), now), "AttemptCount",
