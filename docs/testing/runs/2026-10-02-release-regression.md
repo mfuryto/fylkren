@@ -1224,3 +1224,15 @@ node tools/test-password-recovery-knowledge-boundary.mjs
 ```
 
 The source/schema lock reports `{"passwordRecoveryKnowledgeBoundary":"passed","reviewedFiles":39,"forbiddenMechanisms":7,"resetRequestFields":["resetCode","newPassword"],"resetUiFields":["oneTimeCode","newPassword","repeatPassword"],"passwordHints":false,"knowledgeBasedRecovery":false}`. The anonymous reset contract accepts only possession of the independently issued one-time code and a new policy-checked password. TOTP recovery codes remain separate one-time possession factors and are not answers to knowledge questions. No implementation correction or finding was required. Production is untouched.
+
+## Password reset preserves MFA — 2026-10-04
+
+Completes ASVS 6.4.3 against the current candidate. The isolated run creates a local Site member, completes the initial reset, enrolls TOTP, and then has the Platform Manager issue a new reset grant. After the password replacement, the new password receives only a two-factor challenge. The previously enrolled recovery factor remains valid and is required before an authenticated session exists, proving that reset neither removes nor bypasses enabled MFA.
+
+Scoped command:
+
+```sh
+FYLKREN_E2E_API_IMAGE=sha256:a988e8e706d10ea77b77957b56299a3253ee51192640f0641275d3de25cd1acb FYLKREN_E2E_WEB_IMAGE=sha256:125e3c8e99cd6bb7034333f32915afd0c7c1a35142aea8f182c093ab090cc8d0 node tools/run-e2e-editions.mjs --asvs-reset-mfa-only --no-build
+```
+
+The final disposable run reports `{"passwordResetMfaRuntime":"passed","enrolledFactorPreserved":true,"passwordStageDidNotCreateSession":true,"secondFactorRequiredAfterReset":true,"existingRecoveryFactorAcceptedAfterReset":true,"authenticatedOnlyAfterSecondFactor":true}`. Existing identity lifecycle evidence separately covers reset-code one-time use and security-version invalidation of preserved sessions. The candidate API image is `sha256:a988e8e706d10ea77b77957b56299a3253ee51192640f0641275d3de25cd1acb`; the gateway image is `sha256:125e3c8e99cd6bb7034333f32915afd0c7c1a35142aea8f182c093ab090cc8d0`. Production is untouched.
