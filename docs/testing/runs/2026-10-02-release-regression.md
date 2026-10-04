@@ -1408,3 +1408,15 @@ node tools/test-factor-change-session-revocation.mjs
 ```
 
 The control reports `{"factorChangeSessionRevocation":"passed","mutations":["password-change","password-reset","totp-enable","totp-disable","webauthn-register","webauthn-remove"],"accountVersionInvalidatesOtherSessions":true,"actingSessionRenewed":true,"passwordRuntimeEvidence":true,"factorRuntimeEvidence":true}`. It binds the six source paths and common validator to the maintained dynamic evidence: parallel sessions were invalidated after password change/reset, stale TOTP and WebAuthn flows were rejected after revocation, and a removed passkey could not complete an already-started login. This scoped review did not rerun unrelated product flows. Production is untouched.
+
+## Visible logout access — 2026-10-04
+
+Completes ASVS 7.4.4. All authenticated views, including operational and administrative pages, render as children of the common `ProductShell`. Its 48-pixel sticky top bar contains an always-present, accessibly named user-menu button. The menu exposes the localized sign-out action in two interactions from every authenticated view, retains the account control in the responsive layout and supports keyboard menu semantics. Profile also offers a direct sign-out button.
+
+Scoped command:
+
+```sh
+node tools/test-visible-logout-access.mjs
+```
+
+The source/composition control reports `{"visibleLogoutAccess":"passed","authenticatedPageShell":"ProductShell","persistentTrigger":true,"interactionCount":2,"mobileAvailable":true,"accessibleMenu":true,"profileDirectAction":true}`. It locks the authenticated application composition, sticky/responsive visibility, menu roles, callback wiring and Norwegian «Åpne brukermeny» / «Logg ut» labels. No unrelated product suite was run. Production is untouched.
