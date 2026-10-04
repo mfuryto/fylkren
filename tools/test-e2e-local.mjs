@@ -72,6 +72,10 @@ assert.deepEqual({
 }, { defaultLanguage: 'en-US', timeZone: 'UTC', clockFormat: '24-hour', measurementSystem: 'metric' });
 const unauthenticatedDetails = await platform.request('/api/configuration');
 assert.equal(unauthenticatedDetails.status, 401, 'Detailed configuration requires a session');
+if (process.argv.includes('--asvs-limits-only')) {
+  console.log(JSON.stringify(await testAuthenticationBoundary({ base })));
+  process.exit(0);
+}
 
 const suffix = randomBytes(6).toString('hex');
 const managerUsername = `e2e-${suffix}`;
@@ -134,7 +138,7 @@ assert.equal((await platform.put('/api/platform/regional-settings', {
   defaultLanguage: 'en-US', timeZone: 'UTC',
   clockFormat: '24-hour', measurementSystem: 'metric',
 })).status, 200);
-if (!process.argv.includes('--asvs-arithmetic-only') && !process.argv.includes('--asvs-version-only') && !process.argv.includes('--asvs-zip-only') && !process.argv.includes('--asvs-counter-only') && !process.argv.includes('--asvs-input-only') && !process.argv.includes('--asvs-context-only')) {
+if (!process.argv.includes('--asvs-arithmetic-only') && !process.argv.includes('--asvs-version-only') && !process.argv.includes('--asvs-zip-only') && !process.argv.includes('--asvs-counter-only') && !process.argv.includes('--asvs-input-only') && !process.argv.includes('--asvs-context-only') && !process.argv.includes('--asvs-limits-only')) {
 const platformOperations = await platform.request('/api/platform/operations');
 assert.equal(platformOperations.status, 200, JSON.stringify(platformOperations.body));
 assert.equal(platformOperations.body.hostIntegration.available, true, 'Host status snapshot must be available');

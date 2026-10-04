@@ -48,6 +48,22 @@ Individual fields can be valid while the command is invalid. Service-layer valid
 - imported rows belong to the package Site, referenced owners exist in the package or accepted historical scope, and declared content matches its integrity descriptor;
 - federated progress, answers, cancellation and grants match the existing local link, peer, origin and direction.
 
+## Business limits and scope
+
+Limits have an explicit scope. Per-command limits prevent one request from creating an unexpectedly large object. Per-account/client limits slow repeated security-sensitive work. Site/installation limits constrain licensed or operational capacity. A limit in one scope must not be described as protection in another scope.
+
+| Scope | Current expectation and enforcement | Residual or follow-up |
+| --- | --- | --- |
+| One command | Apply the field, collection and package limits above before persistence. Examples include 20 decision makers/references, 30 workflow steps, 50 learning points, 100 allocations/timeline events, 200 bulk users, 250 portable entries and 512 MiB declared portable size. Rejected commands are atomic. | Every new command must declare its own text/count/byte and relationship limits. |
+| One local account | Twenty failed password checks lock the account for 15 minutes. The counter saturates rather than wrapping. Session/version, reset, MFA and passkey operations retain their one-time or monotonic rules. | Fylkren currently has no per-account creation quota for tasks, comments, decisions, risks, reports or attachments. This is explicit scope for ASVS 2.4.1 anti-automation review, not an implied unlimited-capacity guarantee. |
+| One authentication client address | Browser authentication permits eight requests per fixed one-minute window and returns 429 with `Retry-After`. Forwarded client identity is trusted only through the configured gateway boundary. | Distributed attempts across addresses and account/client combined throttling remain anti-automation assessment scope. |
+| One machine API identity | Administration API endpoints permit 120 reads and 30 writes per fixed one-minute window after authentication. Credential verification has a separate bounded/concurrent gate documented in the [API conventions](../api/API.md#rate-limiting-and-credential-protection). | These limits protect each machine partition; deployment-wide traffic capacity is measured separately. |
+| One federation client partition | Probe and capability endpoints each permit 20 requests per fixed one-minute window. Message bodies, discovery documents, remote responses and retry attempts also have explicit size/count ceilings. | A deployment proxy may add stricter global/network controls; application partitions do not replace them. |
+| One Community installation | At most three active Sites, including child Sites. The same shared policy applies to UI and machine creation. A fourth active Site returns 409 without disabling existing Sites. Enterprise entitlement removes this edition limit. | This is a licensing/business limit, not a tested hardware or database-capacity statement. |
+| One installation/data set | There is currently no product-wide quota for total users, tasks, comments, decisions, risks, reports, attachments, audit events or activity events. Database/storage sizing, monitoring and backup capacity are deployment responsibilities. Pagination and per-request bounds still apply. | Global creation/storage anti-automation controls and supported capacity require explicit decisions and tests under ASVS 2.4.1 and release sizing; absence of a product quota must not be presented as verified unlimited scale. |
+
+Rate and edition values are centralized in [ServiceRegistration.cs](../../apps/api/ServiceRegistration.cs) and [SiteCapacityPolicy.cs](../../apps/api/Licensing/SiteCapacityPolicy.cs). Operational capacity claims require the separate [performance verification](../operations/PERFORMANCE_VERIFICATION.md); they are not inferred from validation tests.
+
 ## Change requirements
 
 Every new or changed input must document its expected structure, normalization, allowlist/range, maximum size/count, relationship rules, authorization boundary and failure response. Tests must include a valid case, invalid type/shape where applicable, boundary values and a related-data or authorization case. Shared rules belong in a shared production validator; UI validation must mirror them for usability without becoming the security control. The ASVS matrix links executed evidence and remains the only requirement-status record.

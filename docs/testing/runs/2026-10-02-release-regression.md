@@ -502,3 +502,17 @@ FYLKREN_E2E_API_IMAGE=fylkren-asvs-pagination-api:latest FYLKREN_E2E_WEB_IMAGE=f
 ```
 
 The API image is unchanged from the completed arithmetic stage; only the focused maintained test path is added. Safe hashes and results are stored under `contextualValidationContinuation` in the existing evidence manifest. ASVS 2.1.2 is Passed; this does not pass the separate global/per-user business-limit requirement 2.1.3 or all implementation-level validation requirements. Continue at 2.1.3. Production is untouched.
+
+## Business-limit documentation — 2026-10-04
+
+Completes ASVS 2.1.3. The authoritative [input-validation rules](../../security/INPUT_VALIDATION.md#business-limits-and-scope) now separate per-command, local-account, client-address, machine-identity, federation-client, Site/edition and installation-wide limits. The documented values are tied to the production policies that enforce them. Areas without a current product quota are stated directly: Fylkren has no per-account creation quota for ordinary domain objects and no installation-wide total-data quota. Those are retained as incomplete anti-automation scope under ASVS 2.4.1 rather than presented as verified controls.
+
+The focused command passed against the unchanged arithmetic candidate:
+
+```sh
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-pagination-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-automatic-lifecycle-web:latest node tools/run-e2e-editions.mjs --asvs-limits-only --no-build
+```
+
+The test starts before synthetic user bootstrap so earlier authentication calls cannot consume the same client-address partition. It verifies generic and cache-resistant unknown/oversized identity failures, then the documented fixed-window limit with `429` and numeric `Retry-After`. The first runner attempt reached `429` before the expected baseline because setup had already consumed the shared partition; no product defect was inferred, and the maintained scoped runner was corrected before the passing rerun.
+
+ASVS 2.1.3 is Passed as a documentation requirement. The result does not pass ASVS 2.4.1, distributed guessing, account/client combined throttling, global storage capacity, or the complete release candidate. Safe hashes and results are recorded under `businessLimitDocumentationContinuation` in the [existing evidence manifest](2026-10-02-release-regression-evidence.json). Continue at 2.2.1. Production is untouched.
