@@ -1371,3 +1371,15 @@ node tools/test-backend-session-validation-boundary.mjs
 ```
 
 The source/execution lock reports `{"backendSessionValidationBoundary":"passed","sessionTokenType":"protected-aspnet-cookie","backendAuthenticationMiddleware":true,"backendPrincipalValidation":true,"authorizationFallback":"authenticated-user","clientTokenValidation":false,"copiedRevokedCookieRejected":true}`. The copied-cookie result is anchored to the maintained runtime that replays a preserved ticket after sign-out and receives `authenticated: false`. No implementation correction or broad rerun was required. Production is untouched.
+
+## Dynamic protected session tokens — 2026-10-04
+
+Completes ASVS 7.2.2 against a newly built candidate that includes the one-hour inactivity policy. The focused run authenticates one identity through bootstrap and then through an independent ordinary login. Both responses issue protected ASP.NET cookie tickets, and the two values differ. A one-character mutation of the second ticket is rejected by backend protection and `/api/session` reports unauthenticated.
+
+Scoped command:
+
+```sh
+node tools/run-e2e-editions.mjs --asvs-session-token-only
+```
+
+The run reports `{"dynamicSessionTokenRuntime":"passed","independentLoginsProduceDistinctTokens":true,"selfContainedProtectedCookie":true,"tamperedTokenRejected":true,"staticSessionSecret":false}`. The candidate API image is `sha256:da3872f4381aab7222bdb31ae1e26c0ee4919e185433f9f1a36e1b1fc8b65a28`; the gateway image is `sha256:c30c43d289f98fd521dafed6f61009c57c8da761a9bb3ac710e000f69e399ca9`. No unrelated end-to-end flow was executed and production is untouched.
