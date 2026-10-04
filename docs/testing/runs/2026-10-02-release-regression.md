@@ -1396,3 +1396,15 @@ FYLKREN_E2E_API_IMAGE=sha256:da3872f4381aab7222bdb31ae1e26c0ee4919e185433f9f1a36
 ```
 
 The focused run reports `{"sessionTimeoutRuntime":"passed","inactivityHours":1,"absoluteHours":12,"inactivityBeforeAccepted":true,"inactivityAfterRejected":true,"absoluteBeforeAccepted":true,"absoluteAfterRejected":true}`. The helper builds with zero warnings and errors. Candidate image IDs are unchanged from the preceding stage; copied keys and generated variants existed only in the disposable run and temporary directory. Production is untouched.
+
+## Factor-change session revocation — 2026-10-04
+
+Completes ASVS 7.4.3. A criterion-specific control inventories every supported authentication-factor mutation: ordinary password change, password reset/recovery, TOTP enable/disable and passkey registration/removal. Every path advances the same account security version. Backend principal validation compares that version with each protected session ticket and rejects all earlier sessions. Authenticated changes renew only the acting browser; anonymous password reset creates no session.
+
+Scoped command:
+
+```sh
+node tools/test-factor-change-session-revocation.mjs
+```
+
+The control reports `{"factorChangeSessionRevocation":"passed","mutations":["password-change","password-reset","totp-enable","totp-disable","webauthn-register","webauthn-remove"],"accountVersionInvalidatesOtherSessions":true,"actingSessionRenewed":true,"passwordRuntimeEvidence":true,"factorRuntimeEvidence":true}`. It binds the six source paths and common validator to the maintained dynamic evidence: parallel sessions were invalidated after password change/reset, stale TOTP and WebAuthn flows were rejected after revocation, and a removed passkey could not complete an already-started login. This scoped review did not rerun unrelated product flows. Production is untouched.
