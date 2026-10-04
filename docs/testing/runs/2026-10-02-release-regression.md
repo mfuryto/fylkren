@@ -748,3 +748,21 @@ FYLKREN_E2E_API_IMAGE=fylkren-asvs-cookies-api:latest FYLKREN_E2E_WEB_IMAGE=fylk
 Actual Site creation, profile update and profile-image deletion requests without tokens return bounded 400 responses before mutation. A hostile-origin profile update and an invalid token also return 400. A correctly bound cookie/header pair permits the valid profile update. GET, HEAD and OPTIONS against the password-mutation route each return 405, and the safe-method probes add no audit records. The test locks the source route counts so a later method addition requires review. Result: `{"csrfMethodBoundary":"passed","routeCounts":{"GET":103,"POST":112,"PUT":45,"PATCH":0,"DELETE":25},"missingTokenRejections":3,"hostileOriginRejected":true,"invalidTokenRejected":true,"validTokenAccepted":true,"safeMethodStatuses":{"GET":405,"HEAD":405,"OPTIONS":405},"safeMethodsCreatedAuditEvents":false}`.
 
 No product correction was required. The reused API image is `sha256:c79729d6d904a2dd7896de63cb94254bf91256a0fdb734d796c88ca4db1d48d7`; the reused gateway image is `sha256:9097512eb914b6acc30c143d929b37ce195552601e4ca3d9df4df4e16082e3d6`. Safe hashes and results are recorded under `csrfMethodBoundaryCompletion` in the evidence manifest. Production is untouched.
+
+## Browser technology and automatic redirect boundaries — 2026-10-04
+
+Completes ASVS 3.7.1 and 3.7.2. The maintained source inventory covers 498 production TypeScript, TSX, CSS and HTML files. The client targets ES2022 and has four explicit runtime dependency families: the workspace UI, React, React DOM and QR-code canvas generation. It found no applet, plug-in, ActiveX, Flash, Shockwave, Silverlight or NaCl sink. It also locks the automatic navigation inventory to one same-origin client path, the OIDC and SAML server challenges and one same-origin administration `Location` header.
+
+Review of the provider boundary found SV-086: valid metadata could select an OIDC authorization endpoint or SAML sign-in endpoint on a different, unapproved origin. The final OIDC response `Location` is now checked when headers start; rejection returns 502 with no redirect or transient SSO cookies. SAML metadata is rejected before caching when its sign-in destination is outside the metadata origin and the deployment-owned additional identity-origin allowlist. User-clicked document and licence links remain ordinary explicit navigation and are not automatic redirects.
+
+Scoped commands:
+
+```sh
+node tools/test-browser-technology-redirects.mjs
+dotnet run --project tests/foundations/Fylkren.FoundationTests.csproj --no-build -- --outbound-http-only
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-redirects-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-asvs-browser-headers-web:latest node tools/run-identity-sso-lab.mjs --no-build
+```
+
+The inventory reported `{"supportedBrowserTechnology":"passed","javascriptTarget":"ES2022","runtimeDependencies":4,"productionClientFiles":498,"legacyPluginSinks":0,"automaticClientNavigationSinks":1,"automaticExternalProviderFamilies":["oidc","saml"],"externalDestinationPolicy":"exact configured origin or deployment allowlist"}`. Foundation outbound/SAML cache tests passed. The trusted-TLS laboratory rejected foreign OIDC authorization and SAML sign-in origins while preserving the complete signed OIDC/SAML positive flows and all maintained state, issuer, nonce, audience, signature, replay, XML and metadata-boundary negatives.
+
+The API image is `sha256:0b1413bba64b6ec65b9ee077668bea1a04ad1a706e2442bf14be188e6392369b`; the reused gateway image is `sha256:9097512eb914b6acc30c143d929b37ce195552601e4ca3d9df4df4e16082e3d6`. SV-086 is closed. Safe hashes and results are recorded under `browserTechnologyRedirectCompletion` in the evidence manifest. Production is untouched.

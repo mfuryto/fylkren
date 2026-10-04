@@ -63,7 +63,9 @@ createServer({
     if (runtimeOidcMode === 'array') return json(response, 200, []);
     return json(response, 200, {
       issuer: configuredIssuer,
-      authorization_endpoint: `${issuer}/authorize`,
+      authorization_endpoint: runtimeOidcMode === 'foreign-authorization'
+        ? 'https://keycloak.test:18443/unapproved-authorization'
+        : `${issuer}/authorize`,
       token_endpoint: runtimeOidcMode === 'typed' ? 123 : `${issuer}/token`,
       jwks_uri: runtimeOidcMode === 'foreign-keys' ? 'https://keycloak.test:18443/unapproved-jwks' : `${issuer}/jwks`,
       response_types_supported: ['code'], subject_types_supported: ['public'], id_token_signing_alg_values_supported: ['RS256'],
@@ -75,7 +77,7 @@ createServer({
   }
   if (url.pathname === '/xml-mode' && request.method === 'POST') {
     const value = new URLSearchParams(await body(request)).get('value');
-    if (!['valid', 'external', 'internal', 'oversized', 'chunked', 'redirect', 'expired'].includes(value)) return json(response, 400, {});
+    if (!['valid', 'external', 'internal', 'oversized', 'chunked', 'redirect', 'expired', 'foreign-sso'].includes(value)) return json(response, 400, {});
     runtimeXmlMode = value;
     return json(response, 200, { mode: value });
   }
@@ -93,6 +95,8 @@ createServer({
       return response.end();
     }
     if (runtimeXmlMode === 'expired') xml = original.replace(/(<[\w:]*EntityDescriptor\b)/, '$1 validUntil="2000-01-01T00:00:00Z"');
+    if (runtimeXmlMode === 'foreign-sso')
+      xml = original.replace(/(<[\w:]*SingleSignOnService\b[^>]*\bLocation=")[^"]+/, `$1https://metadata.test:18444/unapproved-sso`);
     if (['external', 'internal'].includes(runtimeXmlMode)) {
       const declaration = original.match(/^\s*<\?xml[^?]*\?>/)?.[0] ?? '';
       const document = original.slice(declaration.length);
@@ -128,7 +132,7 @@ createServer({
   }
   if (url.pathname === '/.well-known/openid-configuration') return json(response, 200, {
     issuer,
-    authorization_endpoint: `${issuer}/authorize`,
+    authorization_endpoint: runtimeOidcMode === 'foreign-authorization' ? 'https://keycloak.test:18443/unapproved-authorization' : `${issuer}/authorize`,
     token_endpoint: `${issuer}/token`,
     userinfo_endpoint: `${issuer}/userinfo`,
     jwks_uri: `${issuer}/jwks`,

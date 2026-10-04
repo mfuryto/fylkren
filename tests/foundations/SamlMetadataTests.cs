@@ -4,6 +4,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography.Xml;
 using System.Xml;
 using Fylkren.Api.Identity;
+using Fylkren.Api.Networking;
 using Fylkren.Api.Platform;
 using Microsoft.Extensions.Options;
 using Sustainsys.Saml2;
@@ -20,11 +21,11 @@ internal static class SamlMetadataTests
         using var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
         var clock = new TestClock();
         var expires = clock.GetUtcNow().AddHours(1);
-        string Document(string entity = "https://idp.test/realm") => $"""
+        string Document(string entity = "https://idp.test/realm", string signIn = "https://idp.test/sso") => $"""
             <EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" entityID="{entity}" validUntil="{expires:yyyy-MM-ddTHH:mm:ssZ}">
               <IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
                 <KeyDescriptor use="signing"><KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#"><X509Data><X509Certificate>{Convert.ToBase64String(certificate.RawData)}</X509Certificate></X509Data></KeyInfo></KeyDescriptor>
-                <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://idp.test/sso"/>
+                <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="{signIn}"/>
               </IDPSSODescriptor>
             </EntityDescriptor>
             """;
@@ -41,7 +42,7 @@ internal static class SamlMetadataTests
         var body = signedDocument.OuterXml;
         var calls = 0;
         using var transport = new ResponseHandler(() => { calls++; return body; });
-        using var cache = new SamlMetadataCache(new Factory(transport), new OptionsCache<Saml2Options>(), clock);
+        using var cache = new SamlMetadataCache(new Factory(transport), new OptionsCache<Saml2Options>(), new OutboundHttpPolicy(""), clock);
         var options = new SamlOptions { Enabled = true, MetadataUrl = "https://idp.test/metadata", IdentityProviderEntityId = "https://idp.test/realm" };
         await cache.Prepare(options, default);
         var original = cache.Prepared(options);
@@ -57,6 +58,12 @@ internal static class SamlMetadataTests
         options.MetadataUrl += "?revision=2";
         Reject(() => cache.Prepared(options));
         body = Document("https://other-idp.test/realm");
+        await RejectAsync(() => cache.Prepare(options, default));
+        Reject(() => cache.Prepared(options));
+        body = Document();
+        await cache.Prepare(options, default);
+        options.MetadataUrl += "?revision=foreign-sso";
+        body = Document(signIn: "https://other-idp.test/sso");
         await RejectAsync(() => cache.Prepare(options, default));
         Reject(() => cache.Prepared(options));
         body = Document();

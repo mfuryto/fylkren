@@ -1,4 +1,5 @@
 using System.Xml;
+using Fylkren.Api.Networking;
 using Fylkren.Api.Platform;
 using Microsoft.Extensions.Options;
 using Sustainsys.Saml2;
@@ -10,7 +11,8 @@ namespace Fylkren.Api.Identity;
 
 // One configured IdP, refreshed on demand before expiry. Never delegate remote
 // downloads to the library's unbounded WebClient or keep expired metadata active.
-internal sealed class SamlMetadataCache(IHttpClientFactory clients, IOptionsMonitorCache<Saml2Options> options, TimeProvider? clock = null) : IDisposable
+internal sealed class SamlMetadataCache(IHttpClientFactory clients, IOptionsMonitorCache<Saml2Options> options,
+    OutboundHttpPolicy destinations, TimeProvider? clock = null) : IDisposable
 {
     private readonly TimeProvider time = clock ?? TimeProvider.System;
     private Snapshot? current;
@@ -43,6 +45,9 @@ internal sealed class SamlMetadataCache(IHttpClientFactory clients, IOptionsMoni
                 throw new HttpRequestException("Unexpected SAML metadata identity.");
             var idp = new IdentityProvider(new EntityId(entityId), new SPOptions());
             idp.ReadMetadata(metadata);
+            if (idp.SingleSignOnServiceUrl is null)
+                throw new HttpRequestException("SAML metadata has no supported sign-in destination.");
+            destinations.ValidateIdentityDestination(idp.SingleSignOnServiceUrl, configuration.MetadataUrl);
             var expiry = idp.MetadataValidUntil ?? time.GetUtcNow().UtcDateTime.AddMinutes(15);
             if (expiry <= time.GetUtcNow().UtcDateTime) throw new HttpRequestException("SAML metadata has expired.");
             // Refresh before certificate/metadata expiry, with a bounded default cache.

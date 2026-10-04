@@ -24,6 +24,9 @@ public sealed class FylkrenOptions
         PublicUrl = PublicUrl.TrimEnd('/');
         Fylkren.Api.Networking.OutboundHttpPolicy.ParseOrigins(Outbound.PrivateOrigins);
         Fylkren.Api.Networking.OutboundHttpPolicy.ParseOrigins(Outbound.AdditionalIdentityOrigins);
+        Authentication.SsoAutoRedirectProvider = Authentication.SsoAutoRedirectProvider?.Trim().ToLowerInvariant();
+        if (Authentication.SsoAutoRedirectProvider is not (null or "" or "oidc" or "saml"))
+            throw new InvalidOperationException("The automatic SSO provider must be OIDC or SAML.");
         ValidateOidc();
         ValidateSaml();
         ValidateDirectory("Active Directory", Authentication.ActiveDirectory);

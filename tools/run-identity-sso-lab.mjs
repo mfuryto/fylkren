@@ -427,7 +427,7 @@ try {
   process.stdout.write('Checking ASVS 1.3.3/1.3.6 OIDC runtime download boundaries...\n');
   const oidcMetadataMode = value => compose(['exec', '-T', 'api', 'curl', '--fail', '--silent', '--show-error',
     '--cacert', '/run/fylkren-identity-lab/ca.crt', '-X', 'POST', '-d', `value=${value}`, `${negativeAuthority}/oidc-metadata-mode`]);
-  for (const variant of ['array', 'typed', 'oversized', 'chunked', 'redirect', 'foreign-keys']) {
+  for (const variant of ['array', 'typed', 'oversized', 'chunked', 'redirect', 'foreign-keys', 'foreign-authorization']) {
     const configuration = { ...oidcConfiguration, authority: `${negativeAuthority}/metadata-case/${variant}` };
     oidcMetadataMode('valid');
     assert.equal((await manager.put('/api/platform/identity/providers/oidc', { enabled: false, clearSecret: false, configuration })).status, 204);
@@ -439,8 +439,12 @@ try {
       assert.equal((await manager.put('/api/platform/identity/providers/oidc', { enabled: true, clearSecret: false, configuration })).status, 204);
       oidcMetadataMode(variant);
       const rejected = await manager.request('/api/auth/oidc/login');
-      assert.equal(rejected.status, 502, `Runtime OIDC ${variant} was not rejected safely: ${JSON.stringify(rejected.body)}`);
-      assert.equal(rejected.body.error, 'external_authentication_failed');
+      assert.equal(rejected.status, 502, `Runtime OIDC ${variant} was not rejected safely: ${JSON.stringify(rejected)}`);
+      if (variant !== 'foreign-authorization') assert.equal(rejected.body.error, 'external_authentication_failed');
+      else {
+        assert.equal(rejected.location, null, 'Unapproved OIDC authorization redirect remained in the response');
+        assert.equal(rejected.setCookies.length, 0, 'Rejected OIDC redirect issued transient authentication cookies');
+      }
       assert.equal((await manager.request('/api/platform/identity/providers/oidc')).status, 200, 'Invalid OIDC metadata blocked local administration');
     }
   }
@@ -720,9 +724,12 @@ try {
   assert.equal(JSON.parse(xmlProbes).xmlCanaryRequests, 0, 'XML parsing fetched an external entity');
   const runtimeMetadata = compose(['exec', '-T', 'api', 'curl', '--fail', '--silent', '--show-error',
     '--cacert', '/run/fylkren-identity-lab/ca.crt', `${authority}/protocol/saml/descriptor`]);
+  const boundedRuntimeMetadata = runtimeMetadata.replace(
+    /(<[\w:]*SingleSignOnService\b[^>]*\bLocation=")[^"]+/,
+    `$1${negativeAuthority}/saml-sso`);
   compose(['exec', '-T', 'api', 'curl', '--fail', '--silent', '--show-error',
-    '--cacert', '/run/fylkren-identity-lab/ca.crt', '-X', 'POST', '--data-binary', '@-', `${negativeAuthority}/metadata-body`], { input: runtimeMetadata });
-  for (const variant of ['external', 'internal', 'oversized', 'chunked', 'redirect', 'expired']) {
+    '--cacert', '/run/fylkren-identity-lab/ca.crt', '-X', 'POST', '--data-binary', '@-', `${negativeAuthority}/metadata-body`], { input: boundedRuntimeMetadata });
+  for (const variant of ['external', 'internal', 'oversized', 'chunked', 'redirect', 'expired', 'foreign-sso']) {
     const setMode = mode => compose(['exec', '-T', 'api', 'curl', '--fail', '--silent', '--show-error',
       '--cacert', '/run/fylkren-identity-lab/ca.crt', '-X', 'POST', '-d', `value=${mode}`, `${negativeAuthority}/xml-mode`]);
     setMode('valid');
@@ -946,9 +953,9 @@ try {
     samlRuntimeMetadataDtdAndExternalEntityRejection: 'passed',
     samlMetadataFailureIsolation: 'passed',
     samlRuntimeMetadataDownloadLimits: 'passed',
-    samlRuntimeMetadataDownloadCases: ['oversized', 'chunked', 'redirect', 'expired'],
+    samlRuntimeMetadataDownloadCases: ['oversized', 'chunked', 'redirect', 'expired', 'foreign-sso'],
     oidcRuntimeMetadataDownloadLimits: 'passed',
-    oidcMetadataShapeAndDownloadCases: ['array', 'typed', 'oversized', 'chunked', 'redirect', 'foreign-keys'],
+    oidcMetadataShapeAndDownloadCases: ['array', 'typed', 'oversized', 'chunked', 'redirect', 'foreign-keys', 'foreign-authorization'],
     metadataRedirectCanaryRequests: JSON.parse(runtimeProbes).redirectCanaryRequests,
   }, null, 2)}\n`);
 } catch (error) {
