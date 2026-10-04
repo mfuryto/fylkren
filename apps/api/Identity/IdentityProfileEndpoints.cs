@@ -83,10 +83,13 @@ public static partial class IdentityEndpoints
         await database.SaveChangesAsync(cancellationToken); return Results.NoContent();
     }
 
-    private static async Task<IResult> GetProfileImage(ClaimsPrincipal user, FylkrenDbContext database, CancellationToken cancellationToken)
+    private static async Task<IResult> GetProfileImage(ClaimsPrincipal user, HttpContext context, FylkrenDbContext database, CancellationToken cancellationToken)
     {
         var identity = await CurrentIdentity(user, database, cancellationToken);
-        return identity?.Person.ProfileImage is null ? Results.NotFound() : Results.File(identity.Person.ProfileImage, identity.Person.ProfileImageContentType ?? "application/octet-stream", enableRangeProcessing: false);
+        if (identity?.Person.ProfileImage is null) return Results.NotFound();
+        var contentType = identity.Person.ProfileImageContentType ?? "application/octet-stream";
+        context.Response.Headers.ContentDisposition = $"inline; filename=\"profile-image{SafeImageUpload.DownloadExtension(contentType)}\"";
+        return Results.File(identity.Person.ProfileImage, contentType, enableRangeProcessing: false);
     }
 
     private sealed record UpdateProfileRequest(string? DisplayName, string? Email, string? CurrentPassword);

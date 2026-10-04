@@ -556,6 +556,34 @@ export async function testFileStorageBoundary({ platform, siteManager }) {
     publicUploadPathProbes: 3, publicUploadPathStatus: 404, clientFilenamePersistedAsPath: false };
 }
 
+export async function testFileDownloadBoundary({ platform, siteManager, siteId }) {
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64');
+  const submittedName = 'caller-name.final.png';
+  for (const [actor, path, field] of [[platform, '/api/platform/branding/logo', 'logo'],
+    [siteManager, '/api/profile/image', 'image']]) {
+    const form = new FormData(); form.append(field, new Blob([png], { type: 'image/png' }), submittedName);
+    assert.equal((await actor.request(path, { method: 'PUT', body: form })).status, 204);
+  }
+  const logo = await platform.request('/api/branding/logo', { binary: true });
+  const profile = await siteManager.request('/api/profile/image', { binary: true });
+  assert.equal(logo.status, 200); assert.equal(profile.status, 200);
+  assert.equal(logo.contentDisposition, 'inline; filename="branding-logo.png"');
+  assert.equal(profile.contentDisposition, 'inline; filename="profile-image.png"');
+  for (const response of [logo, profile])
+    assert.doesNotMatch(response.contentDisposition ?? '', /caller-name/i,
+      'A caller-controlled upload filename reached a download response');
+
+  const exported = await siteManager.request(`/api/portability/sites/${siteId}/export`, {
+    method: 'POST', binary: true,
+  });
+  assert.equal(exported.status, 200);
+  assert.match(exported.contentDisposition ?? '', /^attachment;/i);
+  assert.match(exported.contentDisposition ?? '',
+    new RegExp(`filename="?fylkren-site-${siteId.replaceAll('-', '')}-export\\.zip"?`, 'i'));
+  return { fileDownloadBoundary: 'passed', callerControlledResponseFilenames: 0,
+    fixedInlineImageNames: 2, serverGeneratedAttachmentNames: 1 };
+}
+
 export async function testDerivedArithmeticBoundaries({ platform, siteManager, leader, siteId, unitId, workItemTypeId }) {
   const path = `/api/site-audit/sites/${siteId}`;
   const original = await siteManager.request(path);

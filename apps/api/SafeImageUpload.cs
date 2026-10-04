@@ -8,6 +8,14 @@ internal static class SafeImageUpload
     internal const int MaximumDimension = 4096;
     internal const long MaximumPixels = 16_777_216;
 
+    internal static string DownloadExtension(string? contentType) => contentType?.ToLowerInvariant() switch
+    {
+        "image/png" => ".png",
+        "image/jpeg" => ".jpg",
+        "image/webp" => ".webp",
+        _ => ".bin"
+    };
+
     internal static async Task<Result?> ReadAsync(IFormFile? file, CancellationToken cancellationToken)
     {
         if (file is null || file.Length == 0 || file.Length > MaximumBytes) return null;

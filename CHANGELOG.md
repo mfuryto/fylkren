@@ -4,6 +4,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Give profile images, branding logos and portable exports explicit server-controlled download names while discarding caller upload filenames.
 - Verify portable ZIP entry-count and declared uncompressed-size limits before opening content, including high-compression and ZIP64 boundary cases.
 - Fully decode and re-encode PNG, JPEG and WebP profile/branding images, enforce matching extensions and media types, bound image dimensions and apply the same content checks to portable-package attachments.
 - Bound profile and branding images at a tested 2 MiB and portable packages at a tested 16 MiB; stream portable uploads through the gateway and serialize their bounded validation to match container memory and temporary-storage capacity.

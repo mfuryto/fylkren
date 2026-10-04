@@ -927,3 +927,20 @@ FYLKREN_E2E_API_IMAGE=sha256:26d095f69ca561ada71afd0dae7d2368cce1c27c2ea4f7388aa
 The source inventory reports `{"filePathBoundary":"passed","clientFilenamesPersisted":0,"filesystemExtractionSites":0,"generatedPathFamilies":2,"rejectedArchivePathFamilies":3}`. The current-image run retains all type/content positives and negatives and additionally rejects ZIP entries named `../synthetic.txt`, `/synthetic.txt` and `\\synthetic.txt` before package processing. Result: `{"portableFileContent":"passed","outerPackageTypeRejections":2,"rejectedInternalTypeCases":4,"unsafeArchivePathsRejected":3,"decodedAttachmentTypes":["png","jpeg","webp"]}`.
 
 This defensive virtual-path validation does not make the requirement applicable to filesystem storage. Reopen 5.3.2 if Fylkren introduces server-side attachment directories, client-derived paths or archive extraction. No product correction or finding was required. Production is untouched.
+
+## File download filename handling — 2026-10-04
+
+Completes ASVS 5.4.1 for all three API file responses. Source review found that the portable Site export already used an attachment filename derived from a fixed prefix and the parsed server-held Site UUID. Profile and branding image responses ignored their uploaded filenames but omitted `Content-Disposition` entirely (SV-092), so they did not meet the requirement's explicit response-filename contract.
+
+The image responses now use inline disposition with the fixed stems `profile-image` and `branding-logo`. Their extension is selected only from the validated stored `image/png`, `image/jpeg` or `image/webp` media type; legacy unknown values receive fixed `.bin`. The caller's upload filename is still neither stored nor reflected. The export behavior remains an attachment named `fylkren-site-{32 lowercase hexadecimal UUID characters}-export.zip`.
+
+Scoped commands:
+
+```sh
+node tools/test-file-download-boundary.mjs
+dotnet build apps/api/Fylkren.Api.csproj --no-restore
+node tools/run-e2e-editions.mjs --asvs-file-download-only
+FYLKREN_E2E_API_IMAGE=sha256:be1f78e21528ae8d73ead04c2c9ada5fd42a2abeff48461a49962de509a3ff0a FYLKREN_E2E_WEB_IMAGE=sha256:8205bcb733296a85ad03bb4708dac2a03bc947044b0a948390c5e74477b91957 node tools/run-e2e-editions.mjs --asvs-media-types-only --no-build
+```
+
+The source lock inventories three file responses, zero caller-controlled response filenames, two fixed inline names, one server-generated attachment and three allowlisted image extensions. The current-image test uploads both images under `caller-name.final.png`; responses return exactly `inline; filename="branding-logo.png"` and `inline; filename="profile-image.png"`, while the export retains its UUID-derived attachment name. Result: `{"fileDownloadBoundary":"passed","callerControlledResponseFilenames":0,"fixedInlineImageNames":2,"serverGeneratedAttachmentNames":1}`. The affected response-media regression passes 14 body-bearing cases, including PNG signature/disposition and ZIP signature/attachment. API build completed with zero warnings/errors. The candidate API image is `sha256:be1f78e21528ae8d73ead04c2c9ada5fd42a2abeff48461a49962de509a3ff0a`; the candidate gateway image is `sha256:8205bcb733296a85ad03bb4708dac2a03bc947044b0a948390c5e74477b91957`. SV-092 is closed. Production is untouched.

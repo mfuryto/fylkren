@@ -95,6 +95,7 @@ assert.equal(logoUpdate.status, 204, logoUpdateBytes.toString('utf8'));
 assert.equal(logoUpdateBytes.length, 0, '204 response unexpectedly contained a body');
 const logo = await typed('/api/branding/logo', 200, /^image\/png$/i);
 assert.equal(logo.bytes.subarray(0, 8).toString('hex'), '89504e470d0a1a0a', 'PNG response body did not match its declared type');
+assert.equal(logo.response.headers.get('content-disposition'), 'inline; filename="branding-logo.png"');
 
 const exported = await typed(`/api/portability/sites/${siteId}/export`, 200, /^application\/zip$/i, {
   method: 'POST', headers: protectedHeaders,

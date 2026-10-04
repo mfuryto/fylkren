@@ -37,7 +37,15 @@ public static partial class BrandingEndpoints
             var value = await db.BrandingSettings.SingleAsync(x => x.Id == SettingsId, ct); value.SetLogo(validatedLogo.Bytes, validatedLogo.ContentType); Record(db, context, "branding.logo-updated"); await db.SaveChangesAsync(ct); return Results.NoContent();
         });
         admin.MapDelete("/logo", async (IAntiforgery antiforgery, HttpContext context, FylkrenDbContext db, CancellationToken ct) => { if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest(); var value = await db.BrandingSettings.SingleAsync(x => x.Id == SettingsId, ct); value.SetLogo(null, null); Record(db, context, "branding.logo-removed"); await db.SaveChangesAsync(ct); return Results.NoContent(); });
-        endpoints.MapGet("/api/branding/logo", async (HttpContext context, FylkrenDbContext db, CancellationToken ct) => { context.Response.Headers.CacheControl = "no-store"; var value = await db.BrandingSettings.AsNoTracking().SingleAsync(x => x.Id == SettingsId, ct); return value.Logo is null ? Results.NotFound() : Results.File(value.Logo, value.LogoContentType ?? "application/octet-stream"); }).AllowAnonymous();
+        endpoints.MapGet("/api/branding/logo", async (HttpContext context, FylkrenDbContext db, CancellationToken ct) =>
+        {
+            context.Response.Headers.CacheControl = "no-store";
+            var value = await db.BrandingSettings.AsNoTracking().SingleAsync(x => x.Id == SettingsId, ct);
+            if (value.Logo is null) return Results.NotFound();
+            var contentType = value.LogoContentType ?? "application/octet-stream";
+            context.Response.Headers.ContentDisposition = $"inline; filename=\"branding-logo{SafeImageUpload.DownloadExtension(contentType)}\"";
+            return Results.File(value.Logo, contentType);
+        }).AllowAnonymous();
         return endpoints;
     }
     [GeneratedRegex("^#[0-9a-fA-F]{6}$")]
