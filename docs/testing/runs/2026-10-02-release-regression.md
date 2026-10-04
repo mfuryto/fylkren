@@ -720,3 +720,17 @@ Source inventory then found that the framework-owned OIDC correlation/nonce and 
 The first expanded lab attempt also exposed that the newly introduced six-per-minute integration-test partition interrupted the maintained bounded metadata sequence. Provider, directory and SMTP connection tests now have a separate 30-per-minute identity partition; export and remote federation operations retain the stricter six-per-minute limit, and the common 120-write limit still applies. The final lab passed without removing anti-automation controls.
 
 The API image is `sha256:c79729d6d904a2dd7896de63cb94254bf91256a0fdb734d796c88ca4db1d48d7`; the gateway image remains `sha256:2806135f53e64aaa7c63bcf2ff2e75933bb963361a42243bff84e2b512ae38e7`. ASVS 3.3.1–3.3.4 are Passed. Safe hashes and results are recorded under `secureCookieCompletion` in the evidence manifest. Production is untouched.
+
+## Browser security mechanism headers — 2026-10-04
+
+Completes ASVS 3.4.1–3.4.6. Source review found that the cached static-file location defined its own `Cache-Control` header and therefore did not inherit nginx's server-level `add_header` values. A baseline run against the preceding gateway image reproduced the defect on the actual versioned JavaScript asset: HSTS was absent. This is SV-085.
+
+The static-file location now repeats the canonical policy with `always`, including in the maintained federation gateway fixtures. The final scoped command was:
+
+```sh
+FYLKREN_E2E_API_IMAGE=fylkren-asvs-cookies-api:latest FYLKREN_E2E_WEB_IMAGE=fylkren-asvs-browser-headers-web:latest node tools/run-e2e-editions.mjs --asvs-browser-headers-only --no-build
+```
+
+The current-image run passed document and static successes, a static 404, public API, unauthorized API, unknown API, health, mutation and authenticated API responses. Every class has at least one-year HSTS with `includeSubDomains`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, and CSP with the required self allowlist, `object-src 'none'`, `base-uri 'none'`, `frame-ancestors 'none'` and `form-action 'self'`. A hostile-origin simple request and preflight receive no `Access-Control-Allow-Origin`; Fylkren remains same-origin. The result is `{"browserSecurityHeaders":"passed","responseClasses":9,"hstsMinimumSeconds":31536000,"includeSubDomains":true,"cspRequiredDirectives":true,"nosniff":true,"noReferrer":true,"staticSuccessAndError":true,"hostileCorsDenied":true}`.
+
+The API image is `sha256:c79729d6d904a2dd7896de63cb94254bf91256a0fdb734d796c88ca4db1d48d7`; the corrected gateway image is `sha256:9097512eb914b6acc30c143d929b37ce195552601e4ca3d9df4df4e16082e3d6`. SV-085 is closed. Safe hashes and results are recorded under `browserSecurityHeadersCompletion` in the evidence manifest. This does not complete CSRF/safe-method verification under 3.5.1/3.5.3 or production TLS termination qualification. Production is untouched.
