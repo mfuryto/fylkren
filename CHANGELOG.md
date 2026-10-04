@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Speed up pending-work menu counters with a database aggregate instead of materializing full task cards; preserve existing role/level boundaries, dependency and request-progress semantics, planning/execution ownership and private-learning counts.
+
 - Clarify execution activity with step number/name and separate documentation edits, step selection and external follow-up; repeated unchanged saves no longer create new activity/audit entries or replace timeline records. Retain existing history.
 
 - Automatically lock terminal tasks and archive them after operational follow-up and required delivery resolve; preserve explicit reopening for editing, find retained tasks with the Archived filter, and continue private learning treatment independently. Chain cancellation preserves already terminal history. Site/global-user retirement remains administrative; deletion and anonymisation remain disabled.

@@ -56,6 +56,11 @@ var connection = Environment.GetEnvironmentVariable("FYLKREN_FOUNDATION_TEST_DAT
 if (connection is null) throw new Exception("Run with the disposable database harness; integration coverage is mandatory.");
 if (!connection.Contains("Database=fylkren_foundation_test", StringComparison.Ordinal)) throw new Exception("Only the synthetic foundation database is allowed.");
 await using var db = new FylkrenDbContext(new DbContextOptionsBuilder<FylkrenDbContext>().UseNpgsql(connection).Options);
+if (args.Contains("--navigation-counts-only"))
+{
+    await NavigationCountTests.Run(db, args.Contains("--measure"));
+    return;
+}
 if (args.Contains("--execution-activity-only"))
 {
     await ExecutionActivityTests.Run(db);
@@ -107,6 +112,7 @@ Console.WriteLine("Foundation tests passed: actor/schema/metadata boundaries, li
 await WorkSliceTests.Run(db);
 
 await DomainCoverageTests.Run(db);
+await NavigationCountTests.Run(db, false);
 await ExecutionActivityTests.Run(db);
 
 await GovernanceTests.Run(db);

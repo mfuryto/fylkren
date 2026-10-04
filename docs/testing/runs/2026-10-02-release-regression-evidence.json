@@ -3343,5 +3343,333 @@
       "Navigation-count sizing remains the next roadmap item.",
       "Production deployment not performed."
     ]
+  },
+  "navigationCountQueryContinuation": {
+    "recordedAtUtc": "2026-10-04T10:58:39.701622+00:00",
+    "baseRevision": "ce14e17",
+    "status": "targeted-tests-and-same-fixture-measurements-passed",
+    "sourceSha256": {
+      "apps/api/WorkManagement/WorkNavigationCountEndpoints.cs": "f93ddafedd3915e0203aefd5093b1059e56afee5fb56d14ec69fa7fdae2b09f9",
+      "apps/api/WorkManagement/WorkNavigationCountQuery.cs": "46f7208af91a810834adc060c61ac38ad96871e0f5628d73b45e62ed7f18905a",
+      "tests/foundations/NavigationCountTests.cs": "81d0e098b3b716795a8f06695f20577632036081e914762c0ae94af6d4813e63",
+      "tests/foundations/NavigationCountReference.cs": "959f3237b233d0b1e4704405d37f184609665d47d624b8722da20d483e71055f",
+      "tests/foundations/NavigationCountMeasurements.cs": "5fb728e5e9ac87aa50456579c94845c757ea45d29459d407e2c91fb609b736f8",
+      "tests/foundations/Program.cs": "bc39122b44a82bcddee1553470a19b43ad7813ba77c350bb5d024b5a3bedef76"
+    },
+    "logSha256": {
+      "fylkren-navigation-counts-final.log": "ec18e01033bc33ad62787bd01d028703c3b16d93e2ee271205f2256755963619",
+      "fylkren-navigation-web-tests.log": "cd801dd0a917ffe62d9a2c9851213e2e40d29fda682472ca2649212498c0d412"
+    },
+    "queryAndPlanSha256": {
+      "after-plan-0.json": "c0ae414078615ca283cf6887327091238300e41a4f5ea8ccdfaf53cb85aeb17a",
+      "after-plan-1.json": "25a8bee55fb8cebee165aaa0729837bff1adde366318fbc883ccf964f264494e",
+      "after-query-0.sql": "a85f866f4d32dc5c1144a24e929795ee4eb93590bb22edaa55b9a7accd120b9e",
+      "after-query-1.sql": "a85f866f4d32dc5c1144a24e929795ee4eb93590bb22edaa55b9a7accd120b9e",
+      "before-plan-0.json": "a7de409a36c281b45c9ea27e94964d7e4e9edab078ca574b3faf94ff82a7db8a",
+      "before-plan-1.json": "cf84c9e7a69fae2c4d91322924fef1b7c2039701551471175a1f055cee940c91",
+      "before-query-0.sql": "abd16bfcdf53c4f286fb77713ae1af2a035fb5478e511fb9af6cff2f521bd3f3",
+      "before-query-1.sql": "abd16bfcdf53c4f286fb77713ae1af2a035fb5478e511fb9af6cff2f521bd3f3"
+    },
+    "rawLogsAndPlansStoredOutsideRepository": true,
+    "command": "FYLKREN_NAVIGATION_EVIDENCE_DIR=/tmp/fylkren-navigation-evidence-final node tools/run-foundation-tests.mjs --navigation-counts-only --measure",
+    "fixture": {
+      "registeredLoadTasks": 1000,
+      "hierarchyCases": 180,
+      "crossSiteCounterparts": 6,
+      "sites": 3,
+      "organizationalUnits": 27,
+      "timedActorAuthorizedSites": 2,
+      "unchangedTotals": {
+        "tasks": 1075,
+        "planning": 3,
+        "execution": 5,
+        "learning": 28
+      }
+    },
+    "plans": [
+      {
+        "navigationPlan": "before",
+        "siteQuery": 0,
+        "sqlCharacters": 24422,
+        "planningMs": 11.963,
+        "executionMs": 5.623,
+        "outputRows": 40,
+        "jit": null
+      },
+      {
+        "navigationPlan": "before",
+        "siteQuery": 1,
+        "sqlCharacters": 24422,
+        "planningMs": 11.953,
+        "executionMs": 323.309,
+        "outputRows": 1040,
+        "jit": {
+          "Functions": 910,
+          "Options": {
+            "Inlining": false,
+            "Optimization": false,
+            "Expressions": true,
+            "Deforming": true
+          },
+          "Timing": {
+            "Generation": {
+              "Deform": 14.75,
+              "Total": 33.749
+            },
+            "Inlining": 0.0,
+            "Optimization": 13.722,
+            "Emission": 214.526,
+            "Total": 261.997
+          }
+        }
+      },
+      {
+        "navigationPlan": "after",
+        "siteQuery": 0,
+        "sqlCharacters": 2194,
+        "planningMs": 0.536,
+        "executionMs": 0.273,
+        "outputRows": 1,
+        "jit": null
+      },
+      {
+        "navigationPlan": "after",
+        "siteQuery": 1,
+        "sqlCharacters": 2194,
+        "planningMs": 0.524,
+        "executionMs": 1.419,
+        "outputRows": 1,
+        "jit": null
+      }
+    ],
+    "measurements": [
+      {
+        "navigationMeasurement": "before",
+        "concurrency": 1,
+        "round": 0,
+        "requests": 25,
+        "p50Ms": 394.07,
+        "p95Ms": 403.12,
+        "maxMs": 406.74,
+        "counts": {
+          "Tasks": 1075,
+          "Planning": 3,
+          "Execution": 5,
+          "Learning": 28
+        }
+      },
+      {
+        "navigationMeasurement": "after",
+        "concurrency": 1,
+        "round": 0,
+        "requests": 25,
+        "p50Ms": 15.47,
+        "p95Ms": 16.28,
+        "maxMs": 16.52,
+        "counts": {
+          "Tasks": 1075,
+          "Planning": 3,
+          "Execution": 5,
+          "Learning": 28
+        }
+      },
+      {
+        "navigationMeasurement": "after",
+        "concurrency": 1,
+        "round": 1,
+        "requests": 25,
+        "p50Ms": 15.35,
+        "p95Ms": 16.71,
+        "maxMs": 16.8,
+        "counts": {
+          "Tasks": 1075,
+          "Planning": 3,
+          "Execution": 5,
+          "Learning": 28
+        }
+      },
+      {
+        "navigationMeasurement": "before",
+        "concurrency": 1,
+        "round": 1,
+        "requests": 25,
+        "p50Ms": 395.91,
+        "p95Ms": 413.81,
+        "maxMs": 418.87,
+        "counts": {
+          "Tasks": 1075,
+          "Planning": 3,
+          "Execution": 5,
+          "Learning": 28
+        }
+      },
+      {
+        "navigationMeasurement": "before",
+        "concurrency": 10,
+        "round": 0,
+        "requests": 25,
+        "p50Ms": 533.57,
+        "p95Ms": 698.91,
+        "maxMs": 708.47,
+        "counts": {
+          "Tasks": 1075,
+          "Planning": 3,
+          "Execution": 5,
+          "Learning": 28
+        }
+      },
+      {
+        "navigationMeasurement": "after",
+        "concurrency": 10,
+        "round": 0,
+        "requests": 25,
+        "p50Ms": 21.98,
+        "p95Ms": 24.24,
+        "maxMs": 24.7,
+        "counts": {
+          "Tasks": 1075,
+          "Planning": 3,
+          "Execution": 5,
+          "Learning": 28
+        }
+      },
+      {
+        "navigationMeasurement": "after",
+        "concurrency": 10,
+        "round": 1,
+        "requests": 25,
+        "p50Ms": 23.35,
+        "p95Ms": 25.07,
+        "maxMs": 25.27,
+        "counts": {
+          "Tasks": 1075,
+          "Planning": 3,
+          "Execution": 5,
+          "Learning": 28
+        }
+      },
+      {
+        "navigationMeasurement": "before",
+        "concurrency": 10,
+        "round": 1,
+        "requests": 25,
+        "p50Ms": 538.01,
+        "p95Ms": 701.82,
+        "maxMs": 733.22,
+        "counts": {
+          "Tasks": 1075,
+          "Planning": 3,
+          "Execution": 5,
+          "Learning": 28
+        }
+      },
+      {
+        "navigationMeasurement": "before",
+        "concurrency": 25,
+        "round": 0,
+        "requests": 25,
+        "p50Ms": 1342.84,
+        "p95Ms": 1429.09,
+        "maxMs": 1466.34,
+        "counts": {
+          "Tasks": 1075,
+          "Planning": 3,
+          "Execution": 5,
+          "Learning": 28
+        }
+      },
+      {
+        "navigationMeasurement": "after",
+        "concurrency": 25,
+        "round": 0,
+        "requests": 25,
+        "p50Ms": 48.68,
+        "p95Ms": 51.88,
+        "maxMs": 52.05,
+        "counts": {
+          "Tasks": 1075,
+          "Planning": 3,
+          "Execution": 5,
+          "Learning": 28
+        }
+      },
+      {
+        "navigationMeasurement": "after",
+        "concurrency": 25,
+        "round": 1,
+        "requests": 25,
+        "p50Ms": 48.78,
+        "p95Ms": 51.49,
+        "maxMs": 52.06,
+        "counts": {
+          "Tasks": 1075,
+          "Planning": 3,
+          "Execution": 5,
+          "Learning": 28
+        }
+      },
+      {
+        "navigationMeasurement": "before",
+        "concurrency": 25,
+        "round": 1,
+        "requests": 25,
+        "p50Ms": 1300.46,
+        "p95Ms": 1416.59,
+        "maxMs": 1425.69,
+        "counts": {
+          "Tasks": 1075,
+          "Planning": 3,
+          "Execution": 5,
+          "Learning": 28
+        }
+      }
+    ],
+    "method": {
+      "provider": "disposable PostgreSQL 18",
+      "warmBothQueryPaths": true,
+      "interleavedRounds": 2,
+      "requestsPerVariantPerRoundPerConcurrency": 25,
+      "concurrency": [
+        1,
+        10,
+        25
+      ],
+      "fixedFixtureAndDatabase": true,
+      "countEqualityOnEveryRead": true,
+      "includesAuthorizationAndLearningReads": true,
+      "includesHttpProxy": false
+    },
+    "frontend": {
+      "passed": true,
+      "files": 2,
+      "tests": 10,
+      "scope": "existing navigation labels and visibility/order"
+    },
+    "databaseAssertions": [
+      "frozen pre-change count parity across all four counters",
+      "Site/level and exact-level private learning boundaries",
+      "leader/planner/member/admin, expired/future and parent-level grants",
+      "dependency/descendant and local/federated progress semantics",
+      "available/claimed planning/execution",
+      "immediate membership/role revocation and inactive Site exclusion",
+      "unchanged JSON field names",
+      "no report materialization/sort in aggregate plans"
+    ],
+    "compilation": "API assembly compiled in the targeted database runner",
+    "documentationAndMatrixTraceability": "passed; ASVS 8.2.1/8.2.2 scoped evidence added with statuses unchanged",
+    "excludedSetupAttempts": [
+      "leader-role uniqueness corrected",
+      "task reference depth bounded",
+      "synthetic peer foreign keys completed",
+      "EXPLAIN decimal row-count parsing corrected",
+      "capture both Site plans rather than longest SQL alone"
+    ],
+    "scopeLimits": [
+      "Local database measurements, not production HTTP/proxy sizing or a prolonged saturation test.",
+      "No full product/browser/edition/federation/security suite rerun.",
+      "No production deployment, arbitrary retention changes or schema migration.",
+      "ASVS overall status is unchanged; remaining chapter-1 work is next.",
+      "Full-card projection source remains in use for real task cards; frozen reference exists only in tests."
+    ]
   }
 }

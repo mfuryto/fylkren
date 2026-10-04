@@ -297,3 +297,24 @@ Executed `node tools/run-foundation-tests.mjs --execution-activity-only` against
 Frontend: `pnpm --filter @fylkren/web exec vitest run src/components/executionActivityLabel.test.tsx src/components/ActivityTimeline.test.tsx src/workflows/ExecutionWorkflowEditor.test.tsx` passed **8 tests in 3 files**. Web typecheck and documentation links passed. The new tests cover the shared Site-audit/timeline formatter, correlated navigation label, historical missing snapshots, external response, inert step names and generic localized updates.
 
 Source and raw-log hashes are appended to the existing evidence manifest under `executionActivityClarityContinuation`. Logs remain outside the repository. This continuation does not rerun full-product/browser/federation/security/workload qualification, change ASVS statuses, deploy production or claim a navigation-count performance fix. Pending-treatment menu counters are already implemented; their remaining performance qualification is next in the roadmap.
+
+
+## Navigation-count query performance — 2026-10-04
+
+Targeted continuation from `ce14e17`. `WorkNavigationCountQuery` replaces full card projection/materialization with a database aggregate. The endpoint's authenticated actor, current active Site memberships and shared level authorization are preserved. Dependency blocking, unresolved descendants for assigned/in-progress work, outgoing local/federated request progress, available/claimed planning and execution and exact-level learning retain the prior semantics. The response still contains `tasks`, `planning`, `execution`, `learning`. There is no cache, migration or new count mechanism.
+
+Executed `FYLKREN_NAVIGATION_EVIDENCE_DIR=/tmp/fylkren-navigation-evidence-final node tools/run-foundation-tests.mjs --navigation-counts-only --measure` on disposable PostgreSQL 18. The frozen pre-change implementation and final implementation read the **same** analyzed fixture: the maintained 1,000 registered tasks at Site leadership, plus 180 cases and six cross-site counterparts, three Sites and 27 units. Differential assertions passed leader/planner/member/administrative identities, null leadership, parent-level staff, expired/future roles, foreign membership, dependencies and task hierarchy, local and federated pending/received/terminal/official-answer cases, planning/execution ownership, private learning, immediate Site-membership and role revocation, inactive Sites and unchanged JSON fields. All timed reads returned Tasks **1,075**, Planning **3**, Execution **5**, Learning **28**.
+
+Two rounds reverse before/after order, after warming both query paths and the pool. Each variant has 25 reads per round/concurrency: 150 reads each, 300 total. Timing covers the complete counter database service including authorization and learning reads, without HTTP/proxy overhead. No other workload/browser/edition/federation/security suite was rerun.
+
+| Simultaneous readers | Before p95, round 0 / 1 (ms) | After p95, round 0 / 1 (ms) |
+| --- | --- | --- |
+| 1 | 403.12 / 413.81 | 16.28 / 16.71 |
+| 10 | 698.91 / 701.82 | 24.24 / 25.07 |
+| 25 | 1429.09 / 1416.59 | 51.88 / 51.49 |
+
+`EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)` captures both authorized Site task queries. The prior SQL is 24,422 characters and returns sorted card rows with estimated row width 6,645 bytes. Its larger-Site plan returns 1,040 rows, costs 340,168.5 and executes in 323.309 ms, including 910 JIT functions/261.997 ms compilation. The smaller Site returns 40 rows in 5.623 ms without JIT. New SQL is 2,194 characters; each plan returns one count, width 4 bytes, estimated costs 5,783.99/61.92, execution 1.419/0.273 ms, no JIT. The plan assertions reject report-body projection and sorting in the aggregate. This identifies a cardinality-sensitive mechanism for varied prior results; it does not retrospectively prove the cause of every old HTTP timing.
+
+Frontend navigation label/order tests passed **10 tests in 2 files**. The actual API assembly compiled in the targeted database runner. Completed tests are linked in the canonical architecture traceability; scoped aggregate authorization evidence is appended to ASVS 8.2.1/8.2.2 without promoting their status. The roadmap removes navigation-query optimization from next delivery and puts remaining chapter-1 ASVS work first.
+
+Excluded setup attempts were corrected to respect one leader role per unit, bounded task-reference hierarchy depth, complete peer foreign keys and decimal-valued EXPLAIN row counts. The final full targeted scope and all interleaved measurements passed after correction. Raw SQL/plans/logs stay outside the repository; their hashes and safe plan/measurement summaries are appended to the existing evidence manifest. These are local database measurements with 50 samples per variant/concurrency, not production sizing or a long-running saturation test. Production is untouched.
