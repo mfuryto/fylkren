@@ -1459,3 +1459,15 @@ node tools/test-user-session-management-assessment.mjs
 ```
 
 The capability inventory reports `{"userSessionManagementAssessment":"finding","finding":"SV-096","selfContainedCookies":true,"serverSessionRegistry":false,"userCanViewActiveSessions":false,"selectiveTermination":false,"explicitSignOutTerminatesAccountSessions":true,"requiredRemediation":"reauthenticated-server-session-registry"}`. The remediation boundary is one authoritative registry with opaque session IDs, bounded metadata, backend validation/cleanup and reauthenticated profile controls. It must reconcile local and external sign-in, expiry and the new administrator termination operations before this requirement can pass. Production is untouched.
+
+## Federated reauthentication assessment — 2026-10-04
+
+Assesses ASVS 7.6.1 as Finding SV-097. Fylkren enforces its one-hour inactivity and twelve-hour absolute cookie limits, while OIDC and SAML providers independently own their upstream sessions. The documented boundary accurately says that local sign-out/expiry does not terminate the provider session. Source review confirms that Fylkren sends no OIDC `max_age`, verifies no `auth_time`, requests no forced SAML reauthentication and implements no coordinated provider logout. A still-active upstream session can consequently create a new Fylkren session without another visible credential prompt.
+
+Scoped command:
+
+```sh
+node tools/test-federated-reauthentication-assessment.mjs
+```
+
+The capability inventory reports `{"federatedReauthenticationAssessment":"finding","finding":"SV-097","localAbsoluteHours":12,"oidcMaxAgeRequested":false,"oidcAuthTimeVerified":false,"samlForcedReauthentication":false,"coordinatedProviderLogout":false,"documentedBoundary":true,"signedProviderFlowsPreviouslyExercised":true}`. Existing live Keycloak OIDC/SAML tests prove signed provider pathways, state, issuer/entity, nonce/audience and replay boundaries but do not prove authentication recentness. Passing documentation under 7.1.3 did not imply this behavioral requirement passed. Production is untouched.
