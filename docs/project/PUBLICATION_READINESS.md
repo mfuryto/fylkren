@@ -42,7 +42,7 @@ The current personal private-repository plan does not provide branch protection,
 - [ ] Enterprise customer/commercial terms define installation scope, term, transfer, renewal, entitlement bypass and modified-build treatment, and match the order flow and signed license payload.
 - [x] Final public Git history contains no commercial issuer implementation or sensitive material; private development provenance was retained separately and is not part of the publishable repository.
 - [ ] Security contact/private reporting and supported-version policy are published.
-- [ ] Third-party notices and dependency/license scan are reviewed.
+- [ ] Third-party notices, dependency/license scan and the API/web CycloneDX SBOMs bound to the immutable release images are reviewed.
 - [ ] Repository safety, docs, builds and isolated E2E checks pass on the exact release candidate.
 - [ ] The `staging` branch, immutable staging deployment and recorded promotion gate in `RELEASE_VERSIONING.md` are operational; the accepted commit is promoted unchanged to `main`.
 - [ ] GitHub rules protect `staging` and `main`, require the maintained status checks, prevent deletion/force-push and restrict `main` updates to the owner or narrowly scoped release automation without enabling public pull requests.

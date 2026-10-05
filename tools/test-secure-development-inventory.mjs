@@ -9,10 +9,18 @@ const registration = read('apps/api/ServiceRegistration.cs');
 const bounded = read('apps/api/Networking/BoundedResponseHandler.cs');
 const apiDockerfile = read('apps/api/Dockerfile');
 const webDockerfile = read('apps/web/Dockerfile');
+const sbom = read('tools/security/generate-release-sbom.mjs');
 
 for (const target of ['72 hours for Critical', '14 days for High', '60 days for Medium', '180 days for Low']) assert.match(policy, new RegExp(target));
 for (const family of ['Authentication', 'Upload/import/image decoding', 'Search, lists, timelines and audit', 'Outbound HTTP, federation and webhooks', 'Background notifications']) assert.match(policy, new RegExp(family));
-assert.match(policy, /SV-106/);
+assert.match(policy, /CycloneDX JSON SBOMs/);
+assert.match(sbom, /docker.*image.*inspect/s);
+assert.match(sbom, /trivy.*image.*cyclonedx/s);
+assert.match(sbom, /trivy.*fs.*cyclonedx/s);
+assert.match(sbom, /pkg:npm/);
+assert.match(sbom, /pkg:nuget/);
+assert.match(sbom, /sourceCommit/);
+assert.match(sbom, /sha256/);
 assert.match(registration, /KnownProxies|KnownNetworks/);
 assert.match(bounded, /rejectRedirects/);
 assert.match(bounded, /Outbound response exceeds the allowed size/);
@@ -33,5 +41,5 @@ console.log(JSON.stringify({
   resourceDemandFamilies: 8,
   automaticRedirectBoundary: true,
   unsafeObjectMergeUses: 0,
-  finding: 'SV-106',
+  releaseSbomGenerator: true,
 }));

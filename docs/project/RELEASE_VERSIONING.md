@@ -17,7 +17,7 @@ Before the first `1.0.0` release candidate, repository development changes from 
 
 1. `staging` is the integration branch. Product changes are committed there or promoted there from short-lived owner-controlled branches.
 2. Every `staging` commit must pass repository safety, documentation, language-pack completeness, version consistency, API build, web typecheck/build/unit tests, isolated edition E2E tests and the applicable security suites.
-3. The exact tested commit is built once as an immutable release candidate, identified by its full Git commit and artifact digests, and deployed to the controlled staging environment.
+3. The exact tested commit is built once as an immutable release candidate, identified by its full Git commit and artifact digests. Generate CycloneDX SBOMs for the immutable API/web image IDs and source dependencies with `pnpm security:sbom -- --api IMAGE --web IMAGE`, retain the resulting manifest/SBOM hashes with release evidence, and deploy those same images to the controlled staging environment.
 4. Staging acceptance covers installation and upgrade from the latest supported release, database migrations with retained data, backup/restore, Community and Enterprise behavior, configured identity providers, federation where applicable, browser workflows and operational health reporting.
 5. Failed checks or staging findings are corrected on `staging` and restart the gate. A failing candidate is never patched directly on `main`.
 6. After recorded acceptance, the exact accepted commit is fast-forwarded to `main`. Promotion must not rebuild, amend, squash or otherwise create a different source commit.
@@ -32,7 +32,7 @@ This model does not require accepting public pull requests. External pull reques
 For every public release from `v1.0.0` onward:
 
 1. Prepare the version and changelog on `staging`: set `VERSION` and `Directory.Build.props`, update the README marker and move the relevant `Unreleased` entries beneath a dated version heading.
-2. Complete the automated, staging acceptance and security gates against that exact commit and record its commit ID and artifact digests.
+2. Complete the automated, staging acceptance and security gates against that exact commit and record its commit ID, artifact digests and validated API/web CycloneDX SBOM manifest.
 3. Fast-forward the accepted commit to protected `main` without rebuilding or changing it.
 4. Create an annotated, signed Git tag named `vMAJOR.MINOR.PATCH` on that commit.
 5. Publish a GitHub Release from the tag with the changelog entry, upgrade notes, artifact digests and any security notes.

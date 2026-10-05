@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Generate CycloneDX SBOMs for immutable API/web release images and source npm/NuGet dependencies, with a manifest binding component inventories and hashes to the source commit and image IDs.
+
 - Apply explicit self-contained-token algorithm policies: RS256 for OIDC, RSA-SHA256 or stronger known SAML signatures, AES-256-CBC/HMAC-SHA256 Data Protection keys, and maintained asymmetric WebAuthn algorithms.
 - Require OIDC authentication tokens to carry the ID-token JWT type, rejecting access-token types even when their signature and other claims are valid.
 - Require an explicit sign-in action before direct OIDC or SAML mode starts a provider challenge, preventing a retained provider session from silently creating a new Fylkren session.

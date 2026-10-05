@@ -27,6 +27,7 @@
     "test:security:intermediary-headers": "node tools/test-intermediary-header-boundary.mjs",
     "test:security:http-message-boundary": "node tools/test-http-message-boundary.mjs",
     "test:security:file-inventory": "node tools/test-file-handling-inventory.mjs",
+    "security:sbom": "node tools/security/generate-release-sbom.mjs",
     "test:e2e:license-expiry": "node tools/run-license-expiry.mjs",
     "typecheck": "pnpm -r typecheck",
     "test:e2e:browser": "node tools/run-release-browser.mjs",

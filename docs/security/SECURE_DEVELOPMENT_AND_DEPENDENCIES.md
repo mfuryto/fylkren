@@ -4,7 +4,7 @@
 
 The maintainer triages a newly reported dependency vulnerability within one business day. The target for an available, compatible fix is 72 hours for Critical, 14 days for High, 60 days for Medium and 180 days for Low severity. Active exploitation, exposed attack surface and compensating controls can shorten these targets. An exception must record the affected version, exposure, compensating controls, owner, review date and acceptance authority in the finding register. A release cannot exceed these targets silently.
 
-JavaScript and .NET lock/central package files are authoritative inputs, and container base images are explicit in Dockerfiles. Repository and image scans are release gates. SV-106 records that Fylkren does not yet produce and retain one release-candidate SBOM that also identifies operating-system packages and their relationship to the shipped images.
+JavaScript and .NET lock/central package files are authoritative inputs, and container base images are explicit in Dockerfiles. Repository and image scans are release gates. Every release candidate produces CycloneDX JSON SBOMs for the immutable API and web image IDs plus a source dependency SBOM that retains bundled npm and NuGet components with `pnpm security:sbom -- --api IMAGE --web IMAGE`. The generated manifest binds every SBOM hash and component count to the full source commit and binds image SBOMs to their image IDs. Retain the manifest and SBOMs with release evidence; do not commit generated SBOMs to the source tree.
 
 ## Resource-demand inventory
 

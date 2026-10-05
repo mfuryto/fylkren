@@ -1845,3 +1845,17 @@ pnpm check:docs
 ```
 
 Result: `{"securityLoggingInventory":"assessed","documentedLayers":5,"structuredAccessDenials":true,"centralSanitizer":true,"findings":["SV-107","SV-108"]}`. SV-107 records missing deployment time-synchronization qualification; SV-108 records missing logically separate log forwarding/detection. All 253 Level 1/2 rows are now assessed; open findings and final candidate qualification remain release work. No production state was changed.
+
+## Release SBOM qualification — 2026-10-05
+
+Closes SV-106 and passes ASVS 15.1.2. The maintained release tool generates CycloneDX JSON inventories for the immutable API and web image IDs plus a source-dependency inventory that retains bundled npm/NuGet dependencies not discoverable from the final static web image. The manifest binds each SBOM hash/component count to source commit `5ee8d1bf2df4ce2d76fe825c7ab238c0da392d30` and binds the image inventories to their complete local content IDs.
+
+```sh
+docker build -f apps/api/Dockerfile -t fylkren-sbom-candidate-api:latest .
+docker build -f apps/web/Dockerfile -t fylkren-sbom-candidate-web:latest .
+pnpm security:sbom -- --api fylkren-sbom-candidate-api:latest --web fylkren-sbom-candidate-web:latest
+node tools/test-secure-development-inventory.mjs
+pnpm check:docs
+```
+
+The final run reports 148 API-image components, 72 web-image components and 153 source-dependency components. The immutable image IDs are `sha256:e8bfc6a0eea4ff7d99deb2a6f51e49dd6b42516c16c5409f20ec9d9514fc8a5d` and `sha256:69e1bbad5e35cae175c37f57c17651187d4673cc046b516afac6e500e64d03cb`; the final recorded SBOM hashes are `6d003ad5dfb66b5e41b947a0262208ebffc2d4cece438933eeb11912025113ac`, `1d2f43cb0876c35c1d4b0209d2fd17440ff06fbfa59ce13944cf71df4bc77ce8` and `3b97cd8496e256fa3c986a50fd6343776f9daa37578853db849b5bf15e48e089`. Generated artifacts remain under ignored `output/sbom` for release-evidence custody and are not committed. No production image or installation was changed.
