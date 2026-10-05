@@ -60,10 +60,14 @@ services:
     environment:
       FYLKREN_SMTP_CANARY_PORT: "1389"
       FYLKREN_SMTP_STALL_PORT: "2527"
+      FYLKREN_SMTP_CERTIFICATE: /run/fylkren-identity-lab/smtp.crt
+      FYLKREN_SMTP_PRIVATE_KEY: /run/fylkren-identity-lab/smtp.key
     read_only: true
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
     volumes:
       - ./:/work:ro
+      - ${FYLKREN_IDENTITY_LAB_DIR}/smtp.crt:/run/fylkren-identity-lab/smtp.crt:ro
+      - ${FYLKREN_IDENTITY_LAB_DIR}/smtp.key:/run/fylkren-identity-lab/smtp.key:ro
     working_dir: /work
     networks: [backend]

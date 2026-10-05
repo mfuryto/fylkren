@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import net from 'node:net';
 import http from 'node:http';
+import tls from 'node:tls';
+import { readFileSync } from 'node:fs';
 
 const [host, portText = '2525', inspectPortText = '2526', inspectHost = '127.0.0.1'] = process.argv.slice(2);
 assert.ok(host, 'Usage: node tools/e2e/smtp-sink.mjs <Docker bridge gateway> [SMTP port] [inspection port]');
@@ -18,6 +20,9 @@ const canaryPort = Number(process.env.FYLKREN_SMTP_CANARY_PORT ?? 0);
 const stallPort = Number(process.env.FYLKREN_SMTP_STALL_PORT ?? 0);
 const messages = [];
 const attempts = [];
+const tlsContext = process.env.FYLKREN_SMTP_CERTIFICATE && process.env.FYLKREN_SMTP_PRIVATE_KEY
+  ? tls.createSecureContext({ cert: readFileSync(process.env.FYLKREN_SMTP_CERTIFICATE), key: readFileSync(process.env.FYLKREN_SMTP_PRIVATE_KEY) })
+  : null;
 
 function inspectMessage(content, recipient) {
   const separator = content.search(/\r?\n\r?\n/);
@@ -38,8 +43,8 @@ function inspectMessage(content, recipient) {
   };
 }
 
-const smtp = net.createServer(socket => {
-  smtpConnections++;
+function smtpSession(socket, secure = false, greet = true) {
+  if (greet) smtpConnections++;
   socket.on('error', () => {}); // Deliberate wrong-protocol tests reset sockets.
   let buffer = '';
   let recipient = '';
@@ -47,7 +52,7 @@ const smtp = net.createServer(socket => {
   let readingData = false;
   socket.setEncoding('utf8');
   socket.setTimeout(10_000, () => socket.destroy());
-  socket.write('220 synthetic-e2e ESMTP\r\n');
+  if (greet) socket.write('220 synthetic-e2e ESMTP\r\n');
   socket.on('data', chunk => {
     buffer += chunk;
     if (buffer.length > 1_000_000) return socket.destroy();
@@ -75,7 +80,18 @@ const smtp = net.createServer(socket => {
         continue;
       }
       const command = line.split(' ', 1)[0].toUpperCase();
-      if (command === 'EHLO' || command === 'HELO') socket.write('250 synthetic-e2e\r\n');
+      if (command === 'EHLO' || command === 'HELO') socket.write(secure || !tlsContext
+        ? '250 synthetic-e2e\r\n'
+        : '250-synthetic-e2e\r\n250 STARTTLS\r\n');
+      else if (command === 'STARTTLS' && tlsContext && !secure) {
+        socket.removeAllListeners('data');
+        socket.write('220 2.0.0 ready to start TLS\r\n', () => {
+          const encrypted = new tls.TLSSocket(socket, { isServer: true, secureContext: tlsContext });
+          encrypted.once('secure', () => smtpSession(encrypted, true, false));
+          encrypted.on('error', () => encrypted.destroy());
+        });
+        return;
+      }
       else if (command === 'MAIL') socket.write('250 2.1.0 sender accepted\r\n');
       else if (command === 'RCPT') {
         recipient = line.match(/^RCPT TO:\s*<?([^>\s]+)>?/i)?.[1] ?? '';
@@ -90,7 +106,9 @@ const smtp = net.createServer(socket => {
       else socket.write('502 5.5.1 unsupported\r\n');
     }
   });
-});
+}
+
+const smtp = net.createServer(socket => smtpSession(socket));
 
 const inspect = http.createServer((request, response) => {
   if (request.method === 'POST' && request.url === '/canary-reset') { canaryConnections = 0; response.writeHead(204).end(); return; }

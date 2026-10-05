@@ -228,7 +228,6 @@ public static class SmtpEndpoints
         var value = await database.SmtpSettings.SingleAsync(settings => settings.Id == Id, cancellationToken);
         try
         {
-            using var client = SmtpTransport.Create(value, dataProtection.CreateProtector("Fylkren.SmtpPassword.v1"), destinations);
             using var message = new MailMessage(
                 new MailAddress(value.FromAddress, MailHeaderPolicy.Normalize(value.FromName, 200)), recipient)
             {
@@ -237,7 +236,7 @@ public static class SmtpEndpoints
             };
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             timeout.CancelAfter(TimeSpan.FromSeconds(10));
-            try { await client.SendMailAsync(message, timeout.Token); }
+            try { await SmtpTransport.SendAsync(value, dataProtection.CreateProtector("Fylkren.SmtpPassword.v1"), destinations, message, timeout.Token); }
             catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
             { throw new SmtpException("SMTP test delivery timed out."); }
             value.RecordTest(true, null);

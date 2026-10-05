@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Bind SMTP STARTTLS delivery to the approved DNS result while retaining certificate hostname validation; extend the live relay fixture and keep the remaining native LDAP DNS limitation explicit.
+
 - Replace the API runtime with a qualified Alpine/musl image, retain full ICU localization and remove the previously reported Medium/Low runtime-package vulnerability set.
 - Authenticate API-to-PostgreSQL connections with an installation-issued client certificate instead of a database password, and remove the conflicting ASP.NET port setting that produced a harmless Platform Manager warning.
 - Encrypt gateway-to-API and API-to-PostgreSQL traffic with installation-specific, hostname-verified TLS; isolate service/CA private keys, reject plaintext database connections and require STARTTLS for SMTP.

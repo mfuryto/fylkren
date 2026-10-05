@@ -58,15 +58,27 @@ function createCertificates() {
   const ldapRequest = join(labDirectory, 'ldap.csr');
   const ldapCertificate = join(labDirectory, 'ldap.crt');
   const extensions = join(labDirectory, 'ldap.ext');
+  const smtpKey = join(labDirectory, 'smtp.key');
+  const smtpRequest = join(labDirectory, 'smtp.csr');
+  const smtpCertificate = join(labDirectory, 'smtp.crt');
+  const smtpExtensions = join(labDirectory, 'smtp.ext');
   openssl(['genpkey', '-algorithm', 'EC', '-pkeyopt', 'ec_paramgen_curve:P-256', '-out', caKey]);
   openssl(['req', '-x509', '-new', '-key', caKey, '-sha256', '-days', '2', '-subj', '/CN=Fylkren identity lab CA', '-out', caCertificate]);
   openssl(['genpkey', '-algorithm', 'EC', '-pkeyopt', 'ec_paramgen_curve:P-256', '-out', ldapKey]);
   openssl(['req', '-new', '-key', ldapKey, '-subj', '/CN=ldap', '-out', ldapRequest]);
   writeFileSync(extensions, 'subjectAltName=DNS:ldap\nextendedKeyUsage=serverAuth\nkeyUsage=digitalSignature,keyAgreement\n');
   openssl(['x509', '-req', '-in', ldapRequest, '-CA', caCertificate, '-CAkey', caKey, '-CAcreateserial', '-days', '2', '-sha256', '-extfile', extensions, '-out', ldapCertificate]);
+  openssl(['genpkey', '-algorithm', 'EC', '-pkeyopt', 'ec_paramgen_curve:P-256', '-out', smtpKey]);
+  openssl(['req', '-new', '-key', smtpKey, '-subj', '/CN=transport-sink', '-out', smtpRequest]);
+  writeFileSync(smtpExtensions, 'subjectAltName=DNS:transport-sink\nextendedKeyUsage=serverAuth\nkeyUsage=digitalSignature,keyAgreement\n');
+  openssl(['x509', '-req', '-in', smtpRequest, '-CA', caCertificate, '-CAkey', caKey, '-CAcreateserial', '-days', '2', '-sha256', '-extfile', smtpExtensions, '-out', smtpCertificate]);
   chmodSync(caCertificate, 0o644);
   chmodSync(ldapCertificate, 0o644);
   chmodSync(ldapKey, 0o600);
+  chmodSync(smtpCertificate, 0o644);
+  // The disposable, two-day test key is bind-mounted read-only into the
+  // rootless Node fixture whose remapped UID must be able to read it.
+  chmodSync(smtpKey, 0o644);
 }
 
 function createLdif() {
@@ -490,7 +502,7 @@ displayName: Changed directory profile after closure`);
   }, null, 2)}\n`);
   }
 } catch (error) {
-  if (started) writeFileSync('/tmp/fylkren-directory-lab-api-diagnostic.log', compose(['logs', '--no-color', 'api']), { mode: 0o600 });
+  if (started) writeFileSync('/tmp/fylkren-directory-lab-diagnostic.log', compose(['logs', '--no-color']), { mode: 0o600 });
   throw error;
 } finally {
   if (started) {

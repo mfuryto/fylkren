@@ -59,7 +59,6 @@ public sealed class NotificationDeliveryWorker(
             await db.Entry(message).ReloadAsync(ct);
             try
             {
-                using var client = SmtpTransport.Create(smtp, protector, scope.ServiceProvider.GetRequiredService<ServiceDestinationPolicy>());
                 using var mail = new MailMessage(
                     new MailAddress(smtp.FromAddress,
                         MailHeaderPolicy.Normalize($"{smtp.FromName} – {message.FromName}", 400)),
@@ -70,7 +69,8 @@ public sealed class NotificationDeliveryWorker(
                     Body = message.Body
                 };
                 using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct); timeout.CancelAfter(TimeSpan.FromSeconds(30));
-                await client.SendMailAsync(mail, timeout.Token);
+                await SmtpTransport.SendAsync(smtp, protector,
+                    scope.ServiceProvider.GetRequiredService<ServiceDestinationPolicy>(), mail, timeout.Token);
                 message.Sent(DateTimeOffset.UtcNow);
             }
             catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested)

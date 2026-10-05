@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 export async function testServiceTransportBoundaries({ manager, configuration, compose }) {
   const inspect = () => JSON.parse(compose(['exec', '-T', 'api', 'curl', '--fail', '--silent',
     'http://transport-sink:2526/messages']));
-  const smtp = { enabled: true, host: 'transport-sink', port: 2525, security: 'none',
+  const smtp = { enabled: true, host: 'transport-sink', port: 2525, security: 'starttls',
     username: null, password: null, clearPassword: true,
     fromAddress: 'sender@example.invalid', fromName: 'Synthetic transport sender' };
   const rejected = [];
@@ -60,9 +60,6 @@ export async function testServiceTransportBoundaries({ manager, configuration, c
     await new Promise(resolve => setTimeout(resolve, 1000));
   assert.equal(inspect().count, 2, 'Existing notification worker failed the shared SMTP transport');
   assert.equal(sql("SELECT status FROM notification_outbox WHERE subject='SERVICE_TRANSPORT_WORKER'"), 'sent');
-  assert.equal((await manager.put('/api/platform/smtp/', { ...smtp, security: 'starttls' })).status, 204);
-  assert.equal((await manager.post('/api/platform/smtp/test', { recipient: 'recipient@example.invalid' })).status, 502);
-  assert.equal(inspect().count, 2, 'Required StartTLS silently downgraded to plaintext');
   assert.equal((await manager.put('/api/platform/smtp/', { ...smtp, port: 2527 })).status, 204);
   const began = performance.now();
   assert.equal((await manager.post('/api/platform/smtp/test', { recipient: 'recipient@example.invalid' })).status, 502);
@@ -98,6 +95,6 @@ export async function testServiceTransportBoundaries({ manager, configuration, c
   await save(configuration);
   assert.equal((await manager.post('/api/platform/identity/providers/ldap/test', {})).status, 204);
   process.stdout.write(`${JSON.stringify({ nonHttpTransportBoundaries: 'passed', unsafeHostsRejected: rejected.length,
-    portAndProtocolBounds: 'passed', smtpFixedRelay: 'passed', smtpDeliveryWorker: 'passed', smtpStartTlsNoDowngrade: 'passed', smtpDeadlineMs: deadlineMs,
+    portAndProtocolBounds: 'passed', smtpFixedRelay: 'passed', smtpDeliveryWorker: 'passed', smtpStartTls: 'passed', smtpDeadlineMs: deadlineMs,
     ldapLdapsAndStartTls: 'passed', ldapCertificateDnsProtocolNegatives: 'passed', referralCanaryRequests: 0 })}\n`);
 }

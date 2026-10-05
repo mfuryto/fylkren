@@ -5,8 +5,8 @@ namespace Fylkren.Api.Networking;
 
 // SMTP/directory hosts are explicit administrator-owned configuration and may
 // be private. Share HTTP's special-address rules; do not accept URLs/host lists.
-// Native clients still resolve the approved name again: this is DNS preflight,
-// not socket pinning. Deployment egress must cover that remaining rebind window.
+// Resolve once and pass these approved addresses to the actual transport. Native
+// clients must never receive the original DNS name as their network destination.
 public sealed class ServiceDestinationPolicy
 {
     private readonly Func<string, CancellationToken, Task<IPAddress[]>> resolve;
@@ -19,20 +19,31 @@ public sealed class ServiceDestinationPolicy
         if (IPAddress.TryParse(host, out var ip)) return OutboundHttpPolicy.AllowedAddress(ip, allowPrivate: true);
         return Uri.CheckHostName(host) == UriHostNameType.Dns;
     }
-    internal async Task<bool> Allowed(string host, CancellationToken ct)
+    internal async Task<IPAddress[]> ResolveAllowed(string host, CancellationToken ct)
     {
-        if (!ValidServer(host)) return false;
+        if (!ValidServer(host)) return [];
         try
         {
             var addresses = await resolve(host, ct);
-            return addresses.Length > 0 && addresses.All(ip => OutboundHttpPolicy.AllowedAddress(ip, allowPrivate: true));
+            return addresses.Length > 0 && addresses.All(ip => OutboundHttpPolicy.AllowedAddress(ip, allowPrivate: true))
+                ? addresses.Distinct().ToArray()
+                : [];
         }
-        catch (SocketException) { return false; }
+        catch (SocketException) { return []; }
     }
+    internal async Task<bool> Allowed(string host, CancellationToken ct) =>
+        (await ResolveAllowed(host, ct)).Length > 0;
     internal bool Allowed(string host)
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         try { return Allowed(host, timeout.Token).GetAwaiter().GetResult(); }
         catch (OperationCanceledException) { return false; }
+    }
+
+    internal IPAddress[] ResolveAllowed(string host)
+    {
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        try { return ResolveAllowed(host, timeout.Token).GetAwaiter().GetResult(); }
+        catch (OperationCanceledException) { return []; }
     }
 }

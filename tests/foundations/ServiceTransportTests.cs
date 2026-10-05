@@ -31,14 +31,16 @@ internal static class ServiceTransportTests
         var directory = new DirectoryAuthenticationService(configuration, forbidden);
         Require(!await directory.TestConnectionAsync("ldap", default), "LDAP metadata DNS destination passed connection preparation.");
         var smtp = new SmtpSettings(Guid.NewGuid());
-        smtp.Update(true, "metadata-alias.test", 25, "none", null, null, "sender@example.invalid", "Synthetic");
+        smtp.Update(true, "metadata-alias.test", 25, "starttls", null, null, "sender@example.invalid", "Synthetic");
         try
         {
-            using var client = SmtpTransport.Create(smtp, new EphemeralDataProtectionProvider().CreateProtector("Synthetic"), forbidden);
+            using var message = new MailMessage("sender@example.invalid", "recipient@example.invalid", "Synthetic", "Synthetic");
+            await SmtpTransport.SendAsync(smtp, new EphemeralDataProtectionProvider().CreateProtector("Synthetic"),
+                forbidden, message, default);
             throw new Exception("SMTP metadata DNS destination passed connection preparation.");
         }
         catch (SmtpException) { }
         Require(lookups == 3, "Directory/SMTP native client preparation bypassed the DNS policy.");
-        Console.WriteLine("Service transport tests passed: host/port syntax, reserved/mapped metadata hosts, named and mixed metadata DNS preflight, explicit private service hosts, LDAP/SMTP client preparation rejection. Native second DNS lookup is a documented deployment-egress gap, not proven socket pinning.");
+        Console.WriteLine("Service transport tests passed: host/port syntax, reserved/mapped metadata hosts, named and mixed metadata DNS rejection, explicit private service hosts, LDAP/SMTP client preparation rejection.");
     }
 }

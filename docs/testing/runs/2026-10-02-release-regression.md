@@ -2032,3 +2032,11 @@ The cryptographic inventory was reconciled in the same change and now reports 13
 Trivy 0.75.0 scanned the newly built API, web, TLS initializer and PostgreSQL images for High/Critical vulnerabilities and reported zero in all four images. This scoped severity check does not replace SV-055's separately recorded Medium/Low API-image inventory.
 
 The same scoped change corrects two presentation ambiguities. System-created leader roles use the active locale, so Norwegian displays **Leder** rather than the stored internal `Manager` name. Automatic lock/archive events retain their typed system actor and now display **System** in activity, Site audit and Platform audit; a genuinely unresolved person remains **Unknown user**. API/web builds and `test-system-actor-presentation.mjs` pass.
+
+### SMTP checked-address continuation — 2026-10-05
+
+SV-068 was retested after replacing the native SMTP connection with MailKit 4.17.0. `ServiceDestinationPolicy` resolves and rejects the complete DNS result set once; the SMTP client receives a socket connected directly to an approved address and the original configured hostname for TLS certificate validation. The existing notification outbox and audit mechanisms remain unchanged. STARTTLS remains mandatory. Certificate revocation lookup is disabled for compatibility with private and air-gapped CAs; certificate chain, validity and hostname validation remain active.
+
+The focused foundation build passed with zero warnings. The maintained disposable OpenLDAP/SMTP transport laboratory passed 36 unsafe-host rejections, port/protocol bounds, trusted STARTTLS test delivery, queued worker delivery, a 10,027 ms stalled-relay deadline, trusted LDAPS and LDAP StartTLS, wrong certificate/DNS/protocol negatives, and zero referral-canary requests. Synthetic certificates, credentials, database and containers were removed by the harness. SV-068 remains open only for native AD/LDAP DNS re-resolution; no full closure or server-firewall egress qualification is claimed.
+
+Trivy 0.75.0 then scanned the final Alpine 3.24.2 API image with the current local database and reported zero Low, Medium, High or Critical vulnerabilities, including the new MailKit/MimeKit dependency graph.
