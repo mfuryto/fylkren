@@ -1,6 +1,7 @@
 import type { AccessSummary } from "../siteAdmin/models";
 import type { OrderedOrganizationUnit } from "./organizationHierarchy";
 import { useLanguage, useTranslation } from "../localization/LocalizationProvider";
+import { roleDisplayName } from "./roleDisplayName";
 
 export function OrganizationRoles({
   orderedUnits,
@@ -47,7 +48,7 @@ export function OrganizationRoles({
               return (
                 <div className="role-row" key={role.id}>
                   <strong style={{ paddingLeft: `${roleDepth * 20}px` }}>
-                    {role.name}
+                    {roleDisplayName(role, t("managerFallback"), language)}
                   </strong>
                   <span className="muted">
                     {role.isLeader ? t("leaderRole") : t("workRole")}

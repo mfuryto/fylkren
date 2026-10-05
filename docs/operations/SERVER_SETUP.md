@@ -2,6 +2,8 @@
 
 This guide describes the supported Docker Compose profile for a single Fylkren host. Use synthetic data until the deployment has completed the organization's security, backup, identity, and acceptance checks.
 
+Compose provisions a private installation CA and separate internal certificates for API and PostgreSQL. Gateway-to-API and API-to-database connections verify the CA and exact Compose service name, and PostgreSQL rejects plaintext network connections. Do not copy, expose or manually mount the CA private-key volume into a running service.
+
 On Windows Server, the host runs Hyper-V and Fylkren runs inside a dedicated
 Linux VM. Complete [Windows Server installation](WINDOWS_SERVER_INSTALLATION.md)
 before applying the configuration in this guide.

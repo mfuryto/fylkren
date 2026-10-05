@@ -1,4 +1,26 @@
 services:
+  tls-init:
+    build:
+      context: .
+      dockerfile: apps/tls-init/Dockerfile
+    restart: "no"
+    read_only: true
+    network_mode: none
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - FOWNER
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=8m,mode=1777
+    volumes:
+      - fylkren-tls-ca-private:/var/lib/fylkren-tls/ca-private
+      - fylkren-tls-trust:/var/lib/fylkren-tls/trust
+      - fylkren-tls-api:/var/lib/fylkren-tls/api
+      - fylkren-tls-postgres:/var/lib/fylkren-tls/postgres
+
   web:
     build:
       context: .
@@ -17,6 +39,10 @@ services:
     depends_on:
       api:
         condition: service_healthy
+      tls-init:
+        condition: service_completed_successfully
+    volumes:
+      - fylkren-tls-trust:/run/fylkren-trust:ro
     networks:
       - frontend
 
@@ -25,7 +51,10 @@ services:
       context: .
       dockerfile: apps/api/Dockerfile
     environment:
-      ConnectionStrings__Fylkren: Host=postgres;Port=5432;Database=fylkren;Username=fylkren;Password=${FYLKREN_DB_PASSWORD:?Run ./deploy/compose/install.sh before starting Fylkren}
+      ConnectionStrings__Fylkren: Host=postgres;Port=5432;Database=fylkren;Username=fylkren;Password=${FYLKREN_DB_PASSWORD:?Run ./deploy/compose/install.sh before starting Fylkren};SSL Mode=VerifyFull;Root Certificate=/run/fylkren-trust/ca.crt
+      ASPNETCORE_URLS: https://+:8443
+      ASPNETCORE_Kestrel__Certificates__Default__Path: /run/fylkren-tls/api.crt
+      ASPNETCORE_Kestrel__Certificates__Default__KeyPath: /run/fylkren-tls/api.key
       Fylkren__DataProtection__KeyPath: /var/lib/fylkren/keys
       Fylkren__PublicUrl: ${FYLKREN_PUBLIC_URL:-http://localhost:8080}
       Fylkren__Http__TrustForwardedHeaders: ${FYLKREN_TRUST_FORWARDED_HEADERS:-false}
@@ -97,9 +126,9 @@ services:
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=64m,mode=1777
     expose:
-      - "8080"
+      - "8443"
     healthcheck:
-      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "--header", "X-Forwarded-Proto: https", "http://localhost:8080/health"]
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "--cacert", "/run/fylkren-trust/ca.crt", "--resolve", "api:8443:127.0.0.1", "--header", "X-Forwarded-Proto: https", "https://api:8443/health"]
       interval: 5s
       timeout: 5s
       retries: 12
@@ -107,9 +136,13 @@ services:
     volumes:
       - fylkren-keys:/var/lib/fylkren/keys
       - ./runtime:/run/fylkren-host-status:ro
+      - fylkren-tls-api:/run/fylkren-tls:ro
+      - fylkren-tls-trust:/run/fylkren-trust:ro
     depends_on:
       postgres:
         condition: service_healthy
+      tls-init:
+        condition: service_completed_successfully
     networks:
       - frontend
       - backend
@@ -127,8 +160,24 @@ services:
       POSTGRES_DB: fylkren
       POSTGRES_USER: fylkren
       POSTGRES_PASSWORD: ${FYLKREN_DB_PASSWORD:?Run ./deploy/compose/install.sh before starting Fylkren}
+    command:
+      - postgres
+      - -c
+      - ssl=on
+      - -c
+      - ssl_cert_file=/run/fylkren-tls/postgres.crt
+      - -c
+      - ssl_key_file=/run/fylkren-tls/postgres.key
+      - -c
+      - ssl_ca_file=/run/fylkren-trust/ca.crt
+      - -c
+      - ssl_min_protocol_version=TLSv1.2
+      - -c
+      - hba_file=/etc/postgresql/pg_hba.fylkren.conf
     volumes:
       - fylkren-postgres:/var/lib/postgresql
+      - fylkren-tls-postgres:/run/fylkren-tls:ro
+      - fylkren-tls-trust:/run/fylkren-trust:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U fylkren -d fylkren"]
       interval: 5s
@@ -136,10 +185,17 @@ services:
       retries: 10
     networks:
       - backend
+    depends_on:
+      tls-init:
+        condition: service_completed_successfully
 
 volumes:
   fylkren-postgres:
   fylkren-keys:
+  fylkren-tls-ca-private:
+  fylkren-tls-trust:
+  fylkren-tls-api:
+  fylkren-tls-postgres:
 
 networks:
   frontend:

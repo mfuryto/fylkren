@@ -8,6 +8,7 @@ import type { PersonnelUnit } from "./personnelHierarchy";
 import { useLanguage, useTranslation } from "../localization/LocalizationProvider";
 import { useState } from "react";
 import { ListSortControl, sortList, type ListSort } from "../components/ListSortControl";
+import { roleDisplayName } from "../organization/roleDisplayName";
 
 type Props = {
   access: AccessSummary;
@@ -35,6 +36,7 @@ export function PersonnelLists({
   const t = useTranslation();
   const language = useLanguage();
   const [memberSort,setMemberSort]=useState<ListSort>("name-asc"),[roleSort,setRoleSort]=useState<ListSort>("name-asc");
+  const displayRole = (role: RoleSummary) => roleDisplayName(role, t("managerFallback"), language);
   const knownUnitIds = new Set(units.map(({ unit }) => unit.id));
   const unplacedMembers = access.members.filter(
     (member) =>
@@ -58,11 +60,11 @@ export function PersonnelLists({
             .filter((assignment) => assignment.personId === member.id)
             .map((assignment) => (
               <span className="manager-chip" key={assignment.id}>
-                {role.organizationUnitName} · {role.name}
+                {role.organizationUnitName} · {displayRole(role)}
                 {canManage && (
                   <button
                     type="button"
-                    aria-label={t("removeNamedRole", { name: role.name })}
+                    aria-label={t("removeNamedRole", { name: displayRole(role) })}
                     disabled={busy}
                     onClick={() => onRemoveAssignment(assignment)}
                   >
@@ -160,7 +162,7 @@ export function PersonnelLists({
         </div>
         {units.flatMap(({ unit, depth }) => {
           const roles = sortList(access.roles
-            .filter((role) => role.organizationUnitId === unit.id),roleSort,{name:role=>role.name},language);
+            .filter((role) => role.organizationUnitId === unit.id),roleSort,{name:displayRole},language);
           const membersWithoutRole = access.members.filter(
             (member) =>
               member.organizationUnitId === unit.id &&
@@ -191,7 +193,7 @@ export function PersonnelLists({
                     paddingLeft: `${(depth + 1 + (role.isLeader ? 0 : 1)) * 20}px`,
                   }}
                 >
-                  <strong>{role.name}</strong>
+                  <strong>{displayRole(role)}</strong>
                   <span className="muted">
                     {role.isLeader
                       ? t("leaderRole")

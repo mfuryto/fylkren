@@ -189,7 +189,7 @@ public static class SmtpEndpoints
         var username = request.Username?.Trim();
         var fromName = request.FromName?.Trim() ?? string.Empty;
         if (!ServiceDestinationPolicy.ValidServer(host) || request.Port is < 1 or > 65535 ||
-            request.Security is not ("starttls" or "none") || username?.Length > 255 ||
+            request.Security != "starttls" || username?.Length > 255 ||
             request.Password?.Length > 1000 || fromName.Length < 1 ||
             !MailHeaderPolicy.IsValidConfigurationValue(fromName, 200) ||
             !MailAddress.TryCreate(fromAddress, out _))

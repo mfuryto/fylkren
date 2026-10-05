@@ -1,9 +1,10 @@
 import type React from "react";
 import { Modal } from "../components/Modal";
-import { useTranslation } from "../localization/LocalizationProvider";
+import { useLanguage, useTranslation } from "../localization/LocalizationProvider";
 import type { AccessSummary, MemberSummary, OrganizationUnitSummary, RoleAssignmentSummary, RoleSummary } from "../siteAdmin/models";
 import type { PersonnelUnit } from "./personnelHierarchy";
 import { PersonnelUnitOptions } from "./PersonnelUnitOptions";
+import { roleDisplayName } from "../organization/roleDisplayName";
 
 export function RoleEditDialog({ role, units, busy, onChange, onSubmit, onDelete, onClose }: {
   role: RoleSummary | null;
@@ -56,6 +57,7 @@ export function MemberEditDialog({ member, units, personnelUnits, access, assign
   onClose: () => void;
 }) {
   const t = useTranslation();
+  const language = useLanguage();
   if (!member) return null;
   const directoryManaged = Boolean(member.directoryProvider);
   const assignedRoles = access.roles.flatMap((role) => role.assignments.filter((value) => value.personId === member.id).map((value) => ({ role, assignment: value })));
@@ -78,14 +80,14 @@ export function MemberEditDialog({ member, units, personnelUnits, access, assign
           {assignedRoles.map(({ role, assignment: roleAssignment }) => {
             const unit = units.find((value) => value.id === role.organizationUnitId);
             return <div className="assigned-role-control" key={roleAssignment.id}>
-              <span className="manager-chip">{role.organizationUnitName} · {role.name}<button type="button" aria-label={t("removeNamedRole", { name: role.name })} disabled={busy} onClick={() => onRemoveAssignment(roleAssignment)}>×</button></span>
+              <span className="manager-chip">{role.organizationUnitName} · {roleDisplayName(role, t("managerFallback"), language)}<button type="button" aria-label={t("removeNamedRole", { name: roleDisplayName(role, t("managerFallback"), language) })} disabled={busy} onClick={() => onRemoveAssignment(roleAssignment)}>×</button></span>
               {role.isLeader && unit?.worksAtParentLevel && <label className="checkbox-field compact-checkbox"><input type="checkbox" checked={roleAssignment.canLeadParentLevel} disabled={busy} onChange={(event) => onParentLeadershipChange(roleAssignment, event.target.checked)} /> {t("canLeadParentLevel")}</label>}
             </div>;
           })}
           {assignedRoles.length === 0 && <span className="muted">{t("noAssignedRoles")}</span>}
         </div>
       </div>
-      <div className="field"><label htmlFor="edit-person-role">{t("assignRole")}</label><select id="edit-person-role" value={assignment.roleId} onChange={(event) => onAssignmentChange({ ...assignment, roleId: event.target.value, canLeadParentLevel: false })}>{access.roles.map((role) => <option key={role.id} value={role.id}>{role.organizationUnitName} – {role.name}</option>)}</select></div>
+      <div className="field"><label htmlFor="edit-person-role">{t("assignRole")}</label><select id="edit-person-role" value={assignment.roleId} onChange={(event) => onAssignmentChange({ ...assignment, roleId: event.target.value, canLeadParentLevel: false })}>{access.roles.map((role) => <option key={role.id} value={role.id}>{role.organizationUnitName} – {roleDisplayName(role, t("managerFallback"), language)}</option>)}</select></div>
       {canGrantParentLeadership && <label className="checkbox-field"><input type="checkbox" checked={assignment.canLeadParentLevel} onChange={(event) => onAssignmentChange({ ...assignment, canLeadParentLevel: event.target.checked })} /> {t("canLeadParentLevel")}</label>}
       <div className="field"><label htmlFor="edit-person-role-valid-to">{t("roleValidTo")}</label><input id="edit-person-role-valid-to" type="date" value={assignment.validTo} onChange={(event) => onAssignmentChange({ ...assignment, validTo: event.target.value })} /></div>
       <div className="inline-actions"><button className="secondary-button" type="button" disabled={busy || !assignment.roleId} onClick={onAssignRole}>{t("assignRole")}</button></div>

@@ -8,6 +8,8 @@ RUN apk upgrade --no-cache \
     && sed -i 's/exec gosu postgres/exec su-exec postgres/' /usr/local/bin/docker-entrypoint.sh \
     && rm -f /usr/local/bin/gosu
 
+COPY --chown=postgres:postgres apps/postgres/pg_hba.fylkren.conf /etc/postgresql/pg_hba.fylkren.conf
+
 USER postgres
 
 HEALTHCHECK --interval=10s --timeout=5s --start-period=10s --retries=5 \

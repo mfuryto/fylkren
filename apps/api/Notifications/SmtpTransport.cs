@@ -10,8 +10,10 @@ internal static class SmtpTransport
 {
     internal static SmtpClient Create(SmtpSettings smtp, IDataProtector protector, ServiceDestinationPolicy destinations)
     {
+        if (smtp.Security != "starttls")
+            throw new SmtpException("Unencrypted SMTP is not supported. Configure STARTTLS.");
         if (!destinations.Allowed(smtp.Host)) throw new SmtpException("The configured SMTP destination is not allowed or available.");
-        var client = new SmtpClient(smtp.Host, smtp.Port) { EnableSsl = smtp.Security == "starttls", Timeout = 10000 };
+        var client = new SmtpClient(smtp.Host, smtp.Port) { EnableSsl = true, Timeout = 10000 };
         if (smtp.Username is null) return client;
         try
         {

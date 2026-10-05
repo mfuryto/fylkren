@@ -14,6 +14,7 @@ const restore = read('deploy/compose/restore.sh');
 const federation = read('apps/api/Federation/FederationIdentityEndpoints.cs');
 const machine = read('apps/api/Platform/ApiMachineAuthentication.cs');
 const webhooks = read('apps/api/DomainEvents/WebhookManagementEndpoints.cs');
+const internalTls = read('apps/tls-init/initialize-internal-tls.sh');
 
 for (const phase of ['Create and register', 'Distribute and activate', 'Operate and store',
   'Rotate and replace', 'Revoke and recover', 'Back up and archive', 'Destroy'])
@@ -37,6 +38,10 @@ requireText(federation, /ECDsa\.Create\(ECCurve\.NamedCurves\.nistP256\)/, 'fede
 requireText(federation, /federation_key_still_usable_use_rotation/, 'lost-key recovery guard');
 requireText(machine, /RandomNumberGenerator\.GetBytes\(32\)/, 'machine credential entropy');
 requireText(webhooks, /RandomNumberGenerator\.GetBytes\(32\)/, 'webhook secret entropy');
+requireText(policy, /runtime services receive only their own key and the public CA/, 'internal TLS key separation policy');
+requireText(policy, /a CA replacement requires a coordinated restart/, 'internal TLS CA rotation procedure');
+requireText(compose, /tls-init:[\s\S]*network_mode: none/, 'networkless internal TLS initialization boundary');
+requireText(internalTls, /issue_leaf api[\s\S]*issue_leaf postgres/, 'separate internal TLS service identities');
 
 console.log(JSON.stringify({
   cryptographicKeyManagementPolicy: 'passed',

@@ -78,7 +78,7 @@ public static class SiteAuditEndpoints
                     value.EventType,
                     value.EntityType,
                     value.EntityId,
-                    actor = database.People.Where(person => person.Id == value.ActorPersonId).Select(person => person.DisplayName).FirstOrDefault() ?? (value.ActorSiteName != null ? "Federated site: " + value.ActorSiteName : "Unknown user")
+                    actor = database.People.Where(person => person.Id == value.ActorPersonId).Select(person => person.DisplayName).FirstOrDefault() ?? (value.ActorSystem != null ? "System" : value.ActorSiteName != null ? "Federated site: " + value.ActorSiteName : "Unknown user")
                 }).ToListAsync(cancellationToken);
             var entityIds = rawRows.Select(value => value.EntityId).Distinct().ToList();
             var names = new Dictionary<Guid, string>();

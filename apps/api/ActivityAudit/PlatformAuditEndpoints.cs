@@ -114,7 +114,7 @@ public static class PlatformAuditEndpoints
                     : value.ActorInstanceId is Guid instanceId
                         ? $"Federated instance: {instanceId}"
                     : value.ActorSystem is not null
-                        ? $"System: {value.ActorSystem}"
+                        ? "System"
                     : value.MachineIdentityId is Guid machineId
                         ? $"API: {machines.GetValueOrDefault(machineId, "Unknown client")}"
                         : "Unknown actor",

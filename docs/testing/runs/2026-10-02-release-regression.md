@@ -1965,3 +1965,30 @@ pnpm check:docs
 ```
 
 Shell validation, a real local snapshot with explicit unavailable synchronization state, API compilation and logging-inventory/document controls pass. SV-107 remains open because the deployment owner must install the updated collector and supply production-equivalent evidence of an approved synchronized NTP source, alert handling and correlated timestamps across every participating system. Production was not changed.
+
+## Internal service transport TLS closure — 2026-10-05
+
+Closes SV-103 and passes ASVS 12.3.1, 12.3.3 and newly applicable 12.3.4 for the supported single-host Compose topology. A networkless initializer creates one installation-specific P-256 CA and separate `api` and `postgres` leaf keys in four isolated volumes. Nginx verifies the CA and exact `api` name over TLS; Npgsql uses `VerifyFull` for `postgres`; PostgreSQL explicitly rejects `hostnossl`; SMTP now accepts only STARTTLS. Runtime services never mount the CA private key or the peer service's private key.
+
+Scoped current-image checks:
+
+```sh
+FYLKREN_DB_PASSWORD=sv103-synthetic-only FYLKREN_HTTP_PORT=18081 FYLKREN_MFA_REQUIRED=false \
+  docker compose -p fylkren-sv103 up -d --build --wait
+node tools/test-communication-security-inventory.mjs
+FYLKREN_INTERNAL_TLS_PROJECT=fylkren-sv103 \
+FYLKREN_INTERNAL_TLS_DB_PASSWORD=sv103-synthetic-only \
+FYLKREN_INTERNAL_TLS_BASE_URL=http://127.0.0.1:18081 \
+  node tools/test-internal-transport-runtime.mjs
+FYLKREN_COMPOSE_PROJECT=fylkren-sv103 ./deploy/compose/backup.sh /tmp/fylkren-sv103-backups
+FYLKREN_COMPOSE_PROJECT=fylkren-sv103 ./deploy/compose/restore.sh \
+  /tmp/fylkren-sv103-backups/fylkren-20261005T203722Z --confirm-destructive-restore
+```
+
+The first and post-restore runtime runs both report `{"internalTransportTls":"passed","gatewayToApi":"verified-hostname","apiToPostgres":"TLSv1.3|TLS_AES_256_GCM_SHA384","plaintextFallbacksAccepted":0,"wrongHostnameAccepted":0,"caPrivateKeyMountedInRuntimeServices":false}`. The public gateway health request succeeds, while plaintext API, plaintext PostgreSQL and wrong-host certificate probes fail. The complete matched database/environment/Data Protection-key backup restores into fresh database and key volumes; all three services become healthy and the same TLS negatives remain rejected. The supported topology has one API replica; adding replicas requires issuing a separately scoped service identity and rerunning this boundary.
+
+The cryptographic inventory was reconciled in the same change and now reports 13 key/secret classes and 13 primitive/certificate classes. The added class records the isolated internal CA, separate service keys, exact DNS identities, server-only purpose, renewal boundary and fenced CA replacement; the initializer source is directly bound by the inventory and lifecycle policy tests.
+
+Trivy 0.75.0 scanned the newly built API, web, TLS initializer and PostgreSQL images for High/Critical vulnerabilities and reported zero in all four images. This scoped severity check does not replace SV-055's separately recorded Medium/Low API-image inventory.
+
+The same scoped change corrects two presentation ambiguities. System-created leader roles use the active locale, so Norwegian displays **Leder** rather than the stored internal `Manager` name. Automatic lock/archive events retain their typed system actor and now display **System** in activity, Site audit and Platform audit; a genuinely unresolved person remains **Unknown user**. API/web builds and `test-system-actor-presentation.mjs` pass.

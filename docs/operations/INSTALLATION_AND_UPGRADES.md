@@ -202,6 +202,8 @@ Mandatory MFA is enabled by default through `FYLKREN_MFA_REQUIRED=true`. Existin
 
 A customer-approved single-factor exception must set `FYLKREN_MFA_REQUIRED=false` and explicitly choose `FYLKREN_MFA_ENABLED=true` for optional MFA or `false` to disable it. Record the owner, scope, rationale, risks, compensating controls and review date described in [Access and identity](../administration/ACCESS_AND_IDENTITY.md#mfa-and-passkeys). Platform Manager displays the exception as reduced security. Existing `.env` files are preserved during upgrade, so add both variables before stopping the old API; `MFA_ENABLED=false` with an absent/default-true requirement deliberately fails startup instead of silently weakening policy.
 
+The supported Compose topology automatically creates installation-specific internal TLS certificates for gateway-to-API and API-to-PostgreSQL traffic. `docker compose up` runs the bounded `tls-init` service before PostgreSQL and API, then mounts only the trust anchor and each service's own key. Keep the four `fylkren-tls-*` volumes with the installation. They are transport identities rather than customer-data backup artifacts and can be regenerated during a fenced recovery. Restart the complete Compose project after certificate renewal. A previously saved unencrypted SMTP configuration no longer sends mail; select STARTTLS and successfully test the relay before re-enabling delivery.
+
 Once automatic facts or editing pauses exist, downgrade is blocked: use a forward fix or matched database/key/configuration/image restore. Keep all old replicas stopped throughout the upgrade. See [automatic lifecycle scope](../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md#automatic-workitem-lifecycle--2026-10-04).
 
 ## Failure and rollback

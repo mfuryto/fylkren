@@ -9,6 +9,7 @@ const totp = readFileSync('apps/api/Identity/TotpService.cs', 'utf8');
 const webhook = readFileSync('apps/api/DomainEvents/WebhookDeliveryWorker.cs', 'utf8');
 const license = readFileSync('apps/api/Licensing/LicenseService.cs', 'utf8');
 const webAuthn = readFileSync('apps/api/Identity/WebAuthnEndpoints.cs', 'utf8');
+const internalTls = readFileSync('apps/tls-init/initialize-internal-tls.sh', 'utf8');
 
 const expectedFiles = [
   'apps/api/Approvals/FormalApprovalService.cs',
@@ -84,6 +85,7 @@ assert.deepEqual(actualFiles, expectedFiles,
 
 for (const label of ['ASP.NET Data Protection key ring', 'Federation signing identity',
   'Pinned federation peer keys', 'Enterprise license issuer keys', 'TLS private keys and certificates',
+  'Internal transport CA and service certificates',
   'OIDC/SAML trust material and client secret', 'WebAuthn credential keys',
   'TOTP secret and recovery codes', 'Local passwords', 'Machine API credentials',
   'Webhook signing secrets', 'Password-reset grants'])
@@ -92,6 +94,7 @@ for (const label of ['ASP.NET Data Protection key ring', 'Federation signing ide
 for (const primitive of ['AES-256-CBC plus HMAC-SHA-256', 'PBKDF2 through ASP.NET Identity v3',
   'PBKDF2-HMAC-SHA-256', 'ECDSA NIST P-256 with SHA-256', 'HMAC-SHA-256', 'HMAC-SHA-1',
   'SHA-256', 'OIDC RS256', 'SAML RSA-SHA256', 'WebAuthn COSE', 'TLS 1.2 and 1.3',
+  'Internal P-256 TLS CA and service certificates',
   'Operating-system CSPRNG'])
   assert.ok(policy.includes(primitive), `Missing algorithm inventory entry: ${primitive}`);
 
@@ -103,11 +106,17 @@ assert.match(webhook, /HMACSHA256\.HashData/, 'webhook MAC algorithm');
 assert.match(license, /ECDsa\.Create\(\)/, 'license public-key implementation');
 assert.match(license, /verifier\.KeySize != 256/, 'license P-256 restriction');
 assert.match(webAuthn, /COSE\.Algorithm\.(EdDSA|ES256)/, 'WebAuthn asymmetric allowlist');
+assert.match(internalTls, /ecparam -name prime256v1/, 'internal TLS P-256 key generation');
+assert.match(internalTls, /CA:TRUE,pathlen:0/, 'internal TLS constrained CA');
+assert.match(internalTls, /extendedKeyUsage=serverAuth/, 'internal TLS server-only leaf purpose');
+assert.match(internalTls, /subjectAltName=DNS:\$name/, 'internal TLS exact service DNS identity');
+assert.match(internalTls, /ca_private=\/var\/lib\/fylkren-tls\/ca-private[\s\S]*api_private=\/var\/lib\/fylkren-tls\/api[\s\S]*postgres_private=\/var\/lib\/fylkren-tls\/postgres/, 'internal TLS private-key separation');
+assert.match(internalTls, /checkend 2592000/, 'internal TLS leaf renewal boundary');
 
 console.log(JSON.stringify({
   cryptographicInventory: 'passed',
   productionSourceFiles: actualFiles.length,
-  keyAndSecretClasses: 12,
-  primitiveAndCertificateClasses: 12,
+  keyAndSecretClasses: 13,
+  primitiveAndCertificateClasses: 13,
   newCryptographicUsageFailsClosed: true,
 }));

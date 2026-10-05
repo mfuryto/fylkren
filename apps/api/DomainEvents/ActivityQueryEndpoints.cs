@@ -42,7 +42,7 @@ internal static class ActivityQueryEndpoints
         if (before is not null) query = query.Where(x => x.OccurredAt < before || x.OccurredAt == before && x.Id.CompareTo(beforeId!.Value) < 0);
         var size = limit ?? 25;
         var rows = await query.OrderByDescending(x => x.OccurredAt).ThenByDescending(x => x.Id).Take(size + 1)
-            .Select(x => new { x.Id, type = x.ActivityType, x.OccurredAt, x.Source, x.ActorKind, x.ResourceType, x.ResourceId, x.ContextWorkItemId, x.ActivityMetadataJson, x.EffectKey, workReference = db.WorkItems.Where(w => w.Id == x.ContextWorkItemId).Select(w => w.ReferenceCode).FirstOrDefault(), actorName = db.People.Where(p => p.Id == x.ActorPersonId).Select(p => p.DisplayName).FirstOrDefault() }).ToListAsync(ct);
+            .Select(x => new { x.Id, type = x.ActivityType, x.OccurredAt, x.Source, x.ActorKind, x.ResourceType, x.ResourceId, x.ContextWorkItemId, x.ActivityMetadataJson, x.EffectKey, workReference = db.WorkItems.Where(w => w.Id == x.ContextWorkItemId).Select(w => w.ReferenceCode).FirstOrDefault(), actorName = x.ActorKind == "system" ? "System" : db.People.Where(p => p.Id == x.ActorPersonId).Select(p => p.DisplayName).FirstOrDefault() }).ToListAsync(ct);
         var items = rows.Take(size).ToArray(); var last = items.LastOrDefault();
         // Command effects carry the correlated audit UUID. Resolve this bounded page by
         // primary key rather than scanning all audit records for every timeline row.

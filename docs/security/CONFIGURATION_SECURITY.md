@@ -6,14 +6,14 @@ This inventory complements the communication and cryptographic inventories. It d
 
 | Consumer | Service | Identity and privilege | Lifetime and replacement |
 |---|---|---|---|
-| API | PostgreSQL | Dedicated randomly passworded `fylkren` database owner on the internal backend network | Long-lived installation secret in owner-only `.env`; replace through a coordinated database/configuration change |
-| Gateway | API | No separate service credential; fixed private Docker service route. End-user/session or machine authorization is enforced by the API | Network/topology identity only |
+| API | PostgreSQL | Exact `postgres` server identity verified against the installation CA; dedicated randomly passworded `fylkren` database owner on the internal backend network | Server certificate is renewed by the fenced TLS initializer; the long-lived client secret remains in owner-only `.env` and requires a coordinated database/configuration change |
+| Gateway | API | Exact `api` server identity verified against the installation CA. End-user/session or machine authorization is enforced by the API | Server certificate is renewed by the fenced TLS initializer; no separate gateway client credential |
 | Machine integration | Administration/report API | Individually named client, explicit scope allowlist, expiry of at most 366 days, hashed secret and revocation | Long-lived random bearer secret; create replacement and deactivate old client |
 | API | OIDC token endpoint | Per-installation client ID/secret protected in PostgreSQL | Replace through Platform Manager/provider |
 | API | SMTP or AD/LDAP | Dedicated configured integration credential protected in PostgreSQL | Replace through Platform Manager/service owner |
 | Federation peer | Federation API | Pinned per-installation signing key plus exact grants | Two-phase key rotation or explicit lost-key recovery |
 
-SV-104 tracks that PostgreSQL and machine integrations use long-lived bearer/password credentials rather than short-term tokens or certificate-bound service identities. Their randomness, scoping, isolation, expiry/revocation and hashing reduce exposure but do not meet ASVS 13.2.1's stated credential model.
+SV-104 tracks that PostgreSQL client access and machine integrations use long-lived bearer/password credentials rather than short-term tokens or certificate-bound client identities. Internal server certificates now authenticate the PostgreSQL and API endpoints, but do not replace those client credentials. Their randomness, scoping, isolation, expiry/revocation and hashing reduce exposure but do not meet ASVS 13.2.1's stated credential model.
 
 ## Secret custody
 

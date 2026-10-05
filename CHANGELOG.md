@@ -4,6 +4,9 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Encrypt gateway-to-API and API-to-PostgreSQL traffic with installation-specific, hostname-verified TLS; isolate service/CA private keys, reject plaintext database connections and require STARTTLS for SMTP.
+- Show automatically locked or archived work as performed by **System** in activity and audit views, while retaining **Unknown user** for a genuinely unresolved person reference.
+- Display the system-created leader role with the active language, including **Leder** in Norwegian, instead of exposing its stored internal English name.
 - Require multi-factor authentication by default: password, directory and SSO first factors receive only a restricted TOTP enrollment/completion session, while user-verifying passkeys satisfy the boundary directly.
 - Enforce a 128-bit classical minimum for external public keys by rejecting RSA keys below 3072 bits in OIDC, SAML metadata and WebAuthn registration/assertion, with an upgrade path for existing provider and passkey keys.
 - Show host time synchronization and measured clock offset in Platform Manager with a 1,000 ms health boundary through the maintained host-status collector.

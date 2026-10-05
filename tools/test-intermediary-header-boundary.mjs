@@ -9,7 +9,7 @@ const apiRegistration = readFileSync('apps/api/ServiceRegistration.cs', 'utf8');
 const apiBlock = /\n  api:\n([\s\S]*?)\n  postgres:/.exec(compose)?.[1];
 assert.ok(apiBlock, 'Could not locate the API service in compose.yaml');
 assert.doesNotMatch(apiBlock, /^\s+ports:/m, 'The API must not publish a host port');
-assert.match(apiBlock, /^\s+expose:\n\s+- "8080"/m, 'The API must remain private to the Compose network');
+assert.match(apiBlock, /^\s+expose:\n\s+- "8443"/m, 'The TLS API must remain private to the Compose network');
 
 const proxiedLocations = [...gateway.matchAll(/location\s+[^\{]+\{([\s\S]*?)\n\s*\}/g)]
   .map(match => match[1])
@@ -23,7 +23,7 @@ for (const body of proxiedLocations) {
   assert.match(body, /proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;/,
     'A proxied location did not append its own forwarding hop');
 }
-for (const body of proxiedLocations.filter(body => !body.includes('proxy_pass http://api:8080/health'))) {
+for (const body of proxiedLocations.filter(body => !body.includes('proxy_pass https://api:8443/health'))) {
   assert.match(body, /proxy_set_header X-Forwarded-Host \$http_host;/,
     'An application proxy location did not replace X-Forwarded-Host');
 }
