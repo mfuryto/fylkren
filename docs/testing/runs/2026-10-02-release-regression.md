@@ -1769,3 +1769,16 @@ pnpm check:docs
 ```
 
 The control reports `{"authenticatedEncryptionBoundary":"passed","approvedCipherContexts":1,"cipher":"AES-256-CBC","authentication":"HMAC-SHA-256","modifiedCiphertextRejected":true}`. It binds the explicit production configuration to the maintained focused session runtime, which issues distinct protected cookies and rejects a one-character modification without authenticating the browser. The unchanged runtime was not rerun in this criterion-only reconciliation. Continue at 11.4.1. Production is untouched.
+
+## Hash, KDF, entropy and public-key boundaries — 2026-10-05
+
+Completes ASVS 11.4.1–11.4.3, 11.5.1 and 11.6.1; 11.4.4 is not applicable because Fylkren derives no encryption/MAC/signing key from a password. The source inventory contains no MD5 or unkeyed/signature SHA-1. TOTP alone uses HMAC-SHA-1 with a random 160-bit secret, while collision-dependent uses, signatures, integrity and other MACs use SHA-256 or stronger. Local passwords use versioned, salted Identity v3 PBKDF2-HMAC-SHA-512 at 220,000 iterations with opportunistic rehash.
+
+Scoped commands:
+
+```sh
+node tools/test-hash-kdf-random-public-key-boundaries.mjs
+pnpm check:docs
+```
+
+The control reports `{"hashKdfRandomPublicKeyBoundaries":"passed","collisionDependentMinimum":"SHA-256","passwordKdf":"PBKDF2-HMAC-SHA-512/220000","minimumUnpredictableBits":128,"uuidSecrets":0,"localSigningKeyGeneration":"P-256/CSPRNG"}`. All application-created secrets use the OS CSPRNG with at least 128 bits; UUIDs have only identifier or signed replay-uniqueness roles. Fylkren-generated signing keys are P-256 from the platform provider. Existing authentication and token-algorithm runtime evidence remains linked and was not rerun. Continue at 12.1.2. Production is untouched.

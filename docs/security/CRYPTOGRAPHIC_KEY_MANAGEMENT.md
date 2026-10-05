@@ -97,6 +97,14 @@ AES-256/HMAC-SHA-256, SHA-256 collision resistance, P-256 ECDSA, 256-bit webhook
 
 SV-102 records the unresolved RSA boundary. OIDC accepts a configured provider's valid RS256 key without requiring RSA-3072; SAML enforces the signature algorithm but not a 3072-bit signing-key minimum; the WebAuthn allowlist includes RSA algorithms without an application key-size rule. RSA-2048 is therefore accepted and provides roughly 112-bit classical strength. Deployment guidance may require stronger provider keys, but that does not replace application enforcement for ASVS 11.2.3.
 
+## Hash, KDF and entropy boundaries
+
+SHA-256 is the minimum hash for collision-dependent integrity, digital signatures and public-key fingerprints. HMAC-SHA-256 authenticates protected data and webhooks. HMAC-SHA-1 is restricted to the interoperable TOTP construction with a 160-bit random per-user key; it is never used for digital signatures, collision-dependent integrity or unkeyed hashing. This scope follows [NIST's hash-function policy](https://csrc.nist.gov/projects/hash-functions/nist-policy-on-hash-functions), which permits SHA-1 for HMAC while requiring SHA-2 for collision-resistant applications.
+
+ASP.NET Identity v3 stores local passwords with a versioned, salted PBKDF2-HMAC-SHA-512 verifier and Fylkren configures 220,000 iterations. Successful authentication opportunistically replaces a verifier whose format or work factor is old. This matches the current [OWASP PBKDF2-HMAC-SHA-512 work factor](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html). Machine credentials are 256-bit random values rather than human passwords; their salted PBKDF2-HMAC-SHA-256 verifier adds database-compromise cost but does not substitute for their CSPRNG entropy.
+
+Every application-created value that must be unpredictable uses the operating-system CSPRNG: 160-bit TOTP secrets, 128-bit recovery/reset codes, 256-bit webhook and machine secrets, 128-bit salts and 384-bit unusable placeholder passwords. Frameworks generate cookie, antiforgery, OIDC/SAML correlation and WebAuthn challenge state. UUIDs identify records or provide uniqueness inside signed federation replay messages; they are never accepted as a password, bearer secret or unkeyed authentication proof.
+
 ## Review, incident and evidence
 
 Review this policy and inventory for every new cryptographic use, algorithm or storage location, and during each release security review. A code change that introduces cryptography must update the inventory, identify its owner and lifecycle, and add a requirement-linked test. The security owner records detected compromise, revocation, replacement and recovery in the security finding and operational incident records without copying secret material.
