@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 2026-10-05 after completing ASVS 9.1.2 token-algorithm verification; the open security findings and next incomplete requirement 9.1.3 remain explicit.
+Updated 2026-10-05 after completing ASVS 9.1.3 trusted token-key verification; the open security findings and next incomplete requirement 9.2.1 remain explicit.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -12,7 +12,7 @@ The additive event/activity foundation and coherent WorkItem slice are delivered
 
 ## Next delivery order
 
-1. Continue in requirement order at ASVS 9.1.3 for trusted token-validation key sources. ASVS 9.1.1–9.1.2 now inventory integrity and bounded algorithms for every accepted self-contained token context. User-visible per-session inventory remains SV-096 and coordinated IdP recentness/termination remains SV-097. Mandatory MFA remains SV-094, and ASVS 1.3.6 remains SV-068 pending verified deployment egress restrictions for native DNS rebinding. Continue independent matrix cases while these findings remain open.
+1. Continue in requirement order at ASVS 9.2.1 for token validity periods. ASVS 9.1.1–9.1.3 now inventory integrity, bounded algorithms and trusted key sources for every accepted self-contained token context. User-visible per-session inventory remains SV-096 and coordinated IdP recentness/termination remains SV-097. Mandatory MFA remains SV-094, and ASVS 1.3.6 remains SV-068 pending verified deployment egress restrictions for native DNS rebinding. Continue independent matrix cases while these findings remain open.
 2. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing at this gate.
 
 No irreversible disposition is authorized by this order. Establish and verify its prerequisites before proposing activation; do not choose arbitrary retention periods.
@@ -38,11 +38,11 @@ Earlier HTTP p95 readings varied from subsecond values to multiple seconds and w
 
 ## Security verification
 
-The [ASVS 5.0 Level 2 matrix](../security/ASVS_5.0.0_L2_MATRIX.md) is the single security-testing work list and status authority. At this update it contains 119 Passed, 49 In progress, 28 Not assessed, 53 Not applicable and four Findings. Counts are a dated baseline, not a separate maintained matrix or security certification.
+The [ASVS 5.0 Level 2 matrix](../security/ASVS_5.0.0_L2_MATRIX.md) is the single security-testing work list and status authority. At this update it contains 120 Passed, 48 In progress, 28 Not assessed, 53 Not applicable and four Findings. Counts are a dated baseline, not a separate maintained matrix or security certification.
 
 Use the [security test plan](../security/SECURITY_TEST_PLAN.md) and [threat model](../security/SECURITY_THREAT_MODEL.md). Record findings and remediation in the [finding register](../security/SECURITY_VERIFICATION.md); record completed requirement-specific tests in the ASVS matrix with links to maintained execution evidence. Partial coverage remains partial. Retest affected controls after every change.
 
-HTTP destination/DNS/redirect/download boundaries and bounded runtime SAML metadata are delivered and tested. SMTP/AD/LDAP configured target, TLS and referral cases passed in the [same release record](../testing/runs/2026-10-02-release-regression.md#non-http-service-transport-continuation--2026-10-04). Native DNS rebinding remains SV-068 pending deployment egress qualification; mandatory MFA remains SV-094; user session inventory/selective revocation remains SV-096; coordinated external-provider recentness/termination remains SV-097. Arithmetic, chapters 2–8 and self-contained-token integrity/algorithms in 9.1.1–9.1.2 are assessed for the current scope; continue at 9.1.3. Do not rerun unrelated full-product chains for scoped corrections. Deployment-sensitive controls require production-equivalent TLS, canonical Host/port and proxy configuration, customer identity-provider behavior, authenticator compatibility and coordinated database/Data Protection key recovery with real backup custody. Disposable restore tests already exist; operational custody qualification remains separate.
+HTTP destination/DNS/redirect/download boundaries and bounded runtime SAML metadata are delivered and tested. SMTP/AD/LDAP configured target, TLS and referral cases passed in the [same release record](../testing/runs/2026-10-02-release-regression.md#non-http-service-transport-continuation--2026-10-04). Native DNS rebinding remains SV-068 pending deployment egress qualification; mandatory MFA remains SV-094; user session inventory/selective revocation remains SV-096; coordinated external-provider recentness/termination remains SV-097. Arithmetic, chapters 2–8 and self-contained-token source/integrity controls in 9.1.1–9.1.3 are assessed for the current scope; continue at 9.2.1. Do not rerun unrelated full-product chains for scoped corrections. Deployment-sensitive controls require production-equivalent TLS, canonical Host/port and proxy configuration, customer identity-provider behavior, authenticator compatibility and coordinated database/Data Protection key recovery with real backup custody. Disposable restore tests already exist; operational custody qualification remains separate.
 
 Relevant Level 3 controls, WSTG techniques and API Security Top 10 coverage support this same workflow. An external penetration test is optional if requested, not a prerequisite for completing the authorized testing.
 

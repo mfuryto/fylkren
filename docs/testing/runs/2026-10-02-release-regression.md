@@ -1608,3 +1608,17 @@ pnpm check:docs
 The API build passed with zero warnings/errors. The inventory reports `{"selfContainedTokenAlgorithms":"passed","contexts":{"dataProtection":["AES-256-CBC","HMAC-SHA256"],"oidc":["RS256"],"samlMinimum":"RSA-SHA256","webAuthnCose":[-7,-8,-35,-36,-37,-38,-39,-257,-258,-259],"license":["ECDSA-P256-SHA256-P1363"],"federation":["ECDSA-P256-SHA256-P1363"]},"noneAllowed":false,"symmetricAsymmetricKeyConfusion":false}`.
 
 The live identity lab accepts the normal RS256 Keycloak flow and rejects a correctly signed RS512 ID token from a trusted provider that advertises both algorithms; issuer, audience and nonce remain correct, the callback returns 400 and no local session is created. Existing OIDC/SAML integrity, issuer, replay and state checks remain green. The CTAP2 lab reports `credentialAlgorithmAllowlist` `[-8,-7,-257,-37,-35,-258,-38,-36,-259,-39]` and passes registration/login, origin, RP-ID, replay, counter and revocation checks. The focused session run issues distinct protected cookies and rejects a modified cookie under the explicit Data Protection configuration. Continue at 9.1.3. Production is untouched.
+
+## Trusted self-contained token key sources — 2026-10-05
+
+Completes ASVS 9.1.3. The maintained seven-context inventory binds verification to the deployment-owned Data Protection key ring, exact configured OIDC metadata/JWKS, prepared configured SAML metadata, registered WebAuthn credential keys, built-in/deployment-configured license issuer keys and pinned federation peer keys. No accepted token field selects a replacement verification key.
+
+Scoped commands:
+
+```sh
+node tools/test-self-contained-token-key-sources.mjs
+node tools/run-identity-sso-lab.mjs
+pnpm check:docs
+```
+
+The inventory reports `{"selfContainedTokenKeySources":"passed","contexts":7,"tokenControlledJkuFetched":false,"tokenEmbeddedJwkTrusted":false,"configuredOrPinnedSourcesOnly":true}`. The live OIDC fixture issued an issuer/audience/nonce-valid RS256 ID token signed with a separate attacker key and supplied that key through both embedded `jwk` and `jku`. The callback returned 400 with no local session. The `jku` endpoint recorded zero requests, proving the token header did not become a network/key source. The same run retained exact issuer, foreign-JWKS metadata, valid configured-key sign-in and SAML signature checks. Existing WebAuthn, license and federation negative evidence remains linked through the inventory. Continue at 9.2.1. Production is untouched.

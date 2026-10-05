@@ -540,7 +540,7 @@ try {
     username: anchorUsername, subjectId: negativeSubject,
   });
   assert.equal(negativeLink.status, 201, JSON.stringify(negativeLink.body));
-  for (const [mode, label] of [['signature', 'signature mismatch'], ['algorithm', 'non-allowlisted algorithm'], ['nonce', 'nonce mismatch'], ['audience', 'audience mismatch']]) {
+  for (const [mode, label] of [['signature', 'signature mismatch'], ['algorithm', 'non-allowlisted algorithm'], ['header-key', 'untrusted header key'], ['nonce', 'nonce mismatch'], ['audience', 'audience mismatch']]) {
     compose(['exec', '-T', 'api', 'curl', '--fail', '--silent', '--show-error',
       '--cacert', '/run/fylkren-identity-lab/ca.crt', '-X', 'POST', '-d', `value=${mode}`,
       `${negativeAuthority}/mode`]);
@@ -556,6 +556,10 @@ try {
     assert.equal(rejectedSession.authenticated, false, `An OIDC ${label} must not establish a session`);
     await negativeBrowser.close();
   }
+  const tokenKeyProbes = compose(['exec', '-T', 'api', 'curl', '--fail', '--silent', '--show-error',
+    '--cacert', '/run/fylkren-identity-lab/ca.crt', `${negativeAuthority}/token-key-probes`]);
+  assert.equal(JSON.parse(tokenKeyProbes).tokenHeaderKeyRequests, 0,
+    'OIDC validation fetched a token-controlled jku source');
   assert.equal((await manager.delete(`/api/platform/identity/oidc-links/${negativeLink.body.id}`)).status, 204);
   assert.equal((await manager.put('/api/platform/identity/providers/oidc', {
     enabled: false, clearSecret: false, configuration: oidcConfiguration,
@@ -942,6 +946,7 @@ try {
     oidcForgedStateAndReplayRejection: 'passed',
     oidcSignatureMismatchRejection: 'passed',
     oidcNonAllowlistedAlgorithmRejection: 'passed',
+    oidcTokenHeaderKeyRejection: 'passed',
     oidcNonceMismatchRejection: 'passed',
     oidcAudienceMismatchRejection: 'passed',
     exactIssuerAndSubjectLink: 'passed',

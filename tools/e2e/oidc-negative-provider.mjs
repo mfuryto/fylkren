@@ -9,19 +9,22 @@ if (!clientSecret) throw new Error('OIDC_NEGATIVE_CLIENT_SECRET is required.');
 const subject = '44444444-4444-4444-8444-444444444444';
 const { publicKey, privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
 const publicJwk = publicKey.export({ format: 'jwk' });
+const { publicKey: attackerPublicKey, privateKey: attackerPrivateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
+const attackerPublicJwk = attackerPublicKey.export({ format: 'jwk' });
 const codes = new Map();
 let mode = 'nonce';
 let xmlCanaryRequests = 0;
 let runtimeXmlMode = 'valid';
 let runtimeOidcMode = 'valid';
 let redirectCanaryRequests = 0;
+let tokenHeaderKeyRequests = 0;
 let runtimeMetadataBody = '';
 
 const encoded = value => Buffer.from(JSON.stringify(value)).toString('base64url');
-function jwt(payload, algorithm = 'RS256') {
-  const unsigned = `${encoded({ alg: algorithm, typ: 'JWT', kid: 'negative-lab-key' })}.${encoded(payload)}`;
+function jwt(payload, algorithm = 'RS256', signingKey = privateKey, header = {}) {
+  const unsigned = `${encoded({ alg: algorithm, typ: 'JWT', kid: 'negative-lab-key', ...header })}.${encoded(payload)}`;
   const signingAlgorithm = algorithm === 'RS512' ? 'RSA-SHA512' : 'RSA-SHA256';
-  return `${unsigned}.${sign(signingAlgorithm, Buffer.from(unsigned), privateKey).toString('base64url')}`;
+  return `${unsigned}.${sign(signingAlgorithm, Buffer.from(unsigned), signingKey).toString('base64url')}`;
 }
 function corruptSignature(value) {
   const parts = value.split('.');
@@ -150,9 +153,14 @@ createServer({
     claims_supported: ['sub', 'iss', 'aud', 'exp', 'iat', 'nonce', 'name', 'email'],
   });
   if (url.pathname === '/jwks') return json(response, 200, { keys: [{ ...publicJwk, kid: 'negative-lab-key', use: 'sig' }] });
+  if (url.pathname === '/header-jwks') {
+    tokenHeaderKeyRequests += 1;
+    return json(response, 200, { keys: [{ ...attackerPublicJwk, kid: 'attacker-header-key', use: 'sig', alg: 'RS256' }] });
+  }
+  if (url.pathname === '/token-key-probes') return json(response, 200, { tokenHeaderKeyRequests });
   if (url.pathname === '/mode' && request.method === 'POST') {
     const requested = new URLSearchParams(await body(request)).get('value');
-    if (!['nonce', 'audience', 'signature', 'algorithm'].includes(requested)) return json(response, 400, { error: 'invalid_mode' });
+    if (!['nonce', 'audience', 'signature', 'algorithm', 'header-key'].includes(requested)) return json(response, 400, { error: 'invalid_mode' });
     mode = requested;
     return json(response, 200, { mode });
   }
@@ -182,7 +190,12 @@ createServer({
       nonce: mode === 'nonce' ? 'wrong-nonce' : record.nonce,
       name: 'Negative OIDC Fixture',
       email: 'negative-oidc@example.invalid',
-    }, mode === 'algorithm' ? 'RS512' : 'RS256');
+    }, mode === 'algorithm' ? 'RS512' : 'RS256', mode === 'header-key' ? attackerPrivateKey : privateKey,
+    mode === 'header-key' ? {
+      kid: 'attacker-header-key',
+      jku: `${issuer}/header-jwks`,
+      jwk: { ...attackerPublicJwk, kid: 'attacker-header-key', use: 'sig', alg: 'RS256' },
+    } : {});
     return json(response, 200, {
       token_type: 'Bearer', expires_in: 300, access_token: randomBytes(24).toString('base64url'),
       id_token: mode === 'signature' ? corruptSignature(idToken) : idToken,
