@@ -540,7 +540,7 @@ try {
     username: anchorUsername, subjectId: negativeSubject,
   });
   assert.equal(negativeLink.status, 201, JSON.stringify(negativeLink.body));
-  for (const [mode, label] of [['nonce', 'nonce mismatch'], ['audience', 'audience mismatch']]) {
+  for (const [mode, label] of [['signature', 'signature mismatch'], ['nonce', 'nonce mismatch'], ['audience', 'audience mismatch']]) {
     compose(['exec', '-T', 'api', 'curl', '--fail', '--silent', '--show-error',
       '--cacert', '/run/fylkren-identity-lab/ca.crt', '-X', 'POST', '-d', `value=${mode}`,
       `${negativeAuthority}/mode`]);
@@ -650,7 +650,12 @@ try {
   const directSsoBrowser = await createCdpSession('about:blank');
   await directSsoBrowser.clearCookies(browserBase);
   await directSsoBrowser.navigate(`${browserBase}/`);
-  await directSsoBrowser.waitFor(`location.hostname === 'keycloak.test'`, 'automatic OIDC redirect');
+  await directSsoBrowser.waitFor('document.querySelector("button.primary-button") !== null', 'direct OIDC sign-in presentation');
+  const directSsoStart = directSsoBrowser.networkResponses.length;
+  await directSsoBrowser.evaluate('document.querySelector("button.primary-button").click()');
+  await directSsoBrowser.waitForResponse(
+    response => response.url.startsWith(authority) && response.url.includes('/protocol/openid-connect/auth'),
+    'direct OIDC sign-in redirect', directSsoStart);
   await directSsoBrowser.close();
   const emergencyLocalBrowser = await createCdpSession('about:blank');
   await emergencyLocalBrowser.clearCookies(browserBase);
@@ -935,6 +940,7 @@ try {
     oidcAuthorizationCodeSignIn: 'passed',
     oidcIssuerMismatchRejection: 'passed',
     oidcForgedStateAndReplayRejection: 'passed',
+    oidcSignatureMismatchRejection: 'passed',
     oidcNonceMismatchRejection: 'passed',
     oidcAudienceMismatchRejection: 'passed',
     exactIssuerAndSubjectLink: 'passed',

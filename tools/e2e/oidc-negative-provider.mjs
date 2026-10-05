@@ -22,6 +22,11 @@ function jwt(payload) {
   const unsigned = `${encoded({ alg: 'RS256', typ: 'JWT', kid: 'negative-lab-key' })}.${encoded(payload)}`;
   return `${unsigned}.${sign('RSA-SHA256', Buffer.from(unsigned), privateKey).toString('base64url')}`;
 }
+function corruptSignature(value) {
+  const parts = value.split('.');
+  parts[2] = `${parts[2][0] === 'A' ? 'B' : 'A'}${parts[2].slice(1)}`;
+  return parts.join('.');
+}
 function json(response, status, body) {
   const value = JSON.stringify(body);
   response.writeHead(status, { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(value), 'Cache-Control': 'no-store' });
@@ -146,7 +151,7 @@ createServer({
   if (url.pathname === '/jwks') return json(response, 200, { keys: [{ ...publicJwk, kid: 'negative-lab-key', use: 'sig', alg: 'RS256' }] });
   if (url.pathname === '/mode' && request.method === 'POST') {
     const requested = new URLSearchParams(await body(request)).get('value');
-    if (requested !== 'nonce' && requested !== 'audience') return json(response, 400, { error: 'invalid_mode' });
+    if (!['nonce', 'audience', 'signature'].includes(requested)) return json(response, 400, { error: 'invalid_mode' });
     mode = requested;
     return json(response, 200, { mode });
   }
@@ -167,18 +172,19 @@ createServer({
         form.get('redirect_uri') !== record.redirectUri)
       return json(response, 400, { error: 'invalid_grant' });
     const now = Math.floor(Date.now() / 1000);
+    const idToken = jwt({
+      iss: issuer,
+      aud: mode === 'audience' ? 'wrong-audience' : clientId,
+      sub: subject,
+      iat: now,
+      exp: now + 300,
+      nonce: mode === 'nonce' ? 'wrong-nonce' : record.nonce,
+      name: 'Negative OIDC Fixture',
+      email: 'negative-oidc@example.invalid',
+    });
     return json(response, 200, {
       token_type: 'Bearer', expires_in: 300, access_token: randomBytes(24).toString('base64url'),
-      id_token: jwt({
-        iss: issuer,
-        aud: mode === 'audience' ? 'wrong-audience' : clientId,
-        sub: subject,
-        iat: now,
-        exp: now + 300,
-        nonce: mode === 'nonce' ? 'wrong-nonce' : record.nonce,
-        name: 'Negative OIDC Fixture',
-        email: 'negative-oidc@example.invalid',
-      }),
+      id_token: mode === 'signature' ? corruptSignature(idToken) : idToken,
     });
   }
   if (url.pathname === '/userinfo') return json(response, 200, { sub: subject, name: 'Negative OIDC Fixture', email: 'negative-oidc@example.invalid' });

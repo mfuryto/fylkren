@@ -1573,3 +1573,19 @@ node tools/test-cross-site-isolation-inventory.mjs
 ```
 
 The control reports `{"crossSiteIsolationInventory":"passed","resourceClasses":10,"directHttpBoundaries":14,"specializedSuites":6,"concurrentSnapshotIsolation":true,"concurrentCountIsolation":true}`. Existing PostgreSQL evidence proves that a concurrent independent-Site writer cannot enter another Site's repeatable-read export, and concurrent navigation counts cannot broaden authorization. This criterion-specific reconciliation reused the recorded dynamic executions and did not rerun unrelated workflows. Production is untouched.
+
+## Self-contained token integrity — 2026-10-05
+
+Completes ASVS 9.1.1. A source/evidence inventory now covers the seven accepted self-contained token families: application sessions, TOTP setup/challenge state, WebAuthn flow state, OIDC ID token/callback state, SAML assertions, enterprise licenses and federation envelopes/receipts. Each family binds the production validation-before-use path to maintained negative tamper or replay evidence; protected configuration values and webhook/SMTP secrets are encrypted storage, not accepted bearer/state tokens, and are therefore outside this token inventory.
+
+Scoped commands:
+
+```sh
+node tools/run-identity-sso-lab.mjs
+node tools/test-self-contained-token-integrity.mjs
+pnpm check:docs
+```
+
+The identity lab passed live signed OIDC and SAML flows and rejection of forged/replayed state, nonce and audience mismatches, unsigned/tampered/replayed SAML, and a new OIDC case whose issuer, audience and nonce are valid while its signature is modified. The case returns a controlled 400 and creates no local session. The lab's outdated direct-SSO assertion was corrected to press the product's explicit sign-in button before observing the provider redirect; no product authentication behavior changed.
+
+The inventory reports `{"selfContainedTokenIntegrity":"passed","tokenFamilies":7,"integrityValidatedBeforeUse":true,"maintainedTamperEvidenceFamilies":7,"families":["application session cookie","TOTP setup and challenge state","WebAuthn flow state","OIDC ID token and protected callback state","SAML assertion","enterprise license token","federation signed envelope and receipt"]}`. This result establishes integrity validation only. Algorithm allowlists, expiry, key strength and key-management requirements remain under their own ASVS rows. Continue at 9.1.2. Production is untouched.
