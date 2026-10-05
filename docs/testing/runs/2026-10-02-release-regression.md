@@ -1589,3 +1589,22 @@ pnpm check:docs
 The identity lab passed live signed OIDC and SAML flows and rejection of forged/replayed state, nonce and audience mismatches, unsigned/tampered/replayed SAML, and a new OIDC case whose issuer, audience and nonce are valid while its signature is modified. The case returns a controlled 400 and creates no local session. The lab's outdated direct-SSO assertion was corrected to press the product's explicit sign-in button before observing the provider redirect; no product authentication behavior changed.
 
 The inventory reports `{"selfContainedTokenIntegrity":"passed","tokenFamilies":7,"integrityValidatedBeforeUse":true,"maintainedTamperEvidenceFamilies":7,"families":["application session cookie","TOTP setup and challenge state","WebAuthn flow state","OIDC ID token and protected callback state","SAML assertion","enterprise license token","federation signed envelope and receipt"]}`. This result establishes integrity validation only. Algorithm allowlists, expiry, key strength and key-management requirements remain under their own ASVS rows. Continue at 9.1.2. Production is untouched.
+
+## Self-contained token algorithm allowlists — 2026-10-05
+
+Completes ASVS 9.1.2 and closes SV-099. Source review found that OIDC relied on provider metadata without an application allowlist and SAML had no explicit incoming minimum. Fylkren now accepts only RS256 OIDC ID-token signatures and configures SAML's maintained known-algorithm set to reject signatures weaker than RSA-SHA256. Data Protection creation is explicit AES-256-CBC/HMAC-SHA256. WebAuthn advertises only its ten maintained asymmetric COSE algorithms. License and federation verification remain fixed P-256 ECDSA/SHA-256 P1363. No context accepts `none` or shares symmetric/asymmetric verification material.
+
+Scoped commands:
+
+```sh
+dotnet build apps/api/Fylkren.Api.csproj --no-restore
+node tools/test-self-contained-token-algorithms.mjs
+node tools/run-identity-sso-lab.mjs
+node tools/run-release-browser.mjs --webauthn-only
+node tools/run-e2e-editions.mjs --asvs-session-token-only
+pnpm check:docs
+```
+
+The API build passed with zero warnings/errors. The inventory reports `{"selfContainedTokenAlgorithms":"passed","contexts":{"dataProtection":["AES-256-CBC","HMAC-SHA256"],"oidc":["RS256"],"samlMinimum":"RSA-SHA256","webAuthnCose":[-7,-8,-35,-36,-37,-38,-39,-257,-258,-259],"license":["ECDSA-P256-SHA256-P1363"],"federation":["ECDSA-P256-SHA256-P1363"]},"noneAllowed":false,"symmetricAsymmetricKeyConfusion":false}`.
+
+The live identity lab accepts the normal RS256 Keycloak flow and rejects a correctly signed RS512 ID token from a trusted provider that advertises both algorithms; issuer, audience and nonce remain correct, the callback returns 400 and no local session is created. Existing OIDC/SAML integrity, issuer, replay and state checks remain green. The CTAP2 lab reports `credentialAlgorithmAllowlist` `[-8,-7,-257,-37,-35,-258,-38,-36,-259,-39]` and passes registration/login, origin, RP-ID, replay, counter and revocation checks. The focused session run issues distinct protected cookies and rejects a modified cookie under the explicit Data Protection configuration. Continue at 9.1.3. Production is untouched.

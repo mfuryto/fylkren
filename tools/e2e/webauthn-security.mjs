@@ -35,6 +35,11 @@ try {
   await evaluate("fetch('/api/security/antiforgery').then(r => r.json()).then(value => globalThis.labCsrf = value.token)");
   assert.equal((await request('/api/webauthn/register/options', { name: 'Synthetic passkey', currentPassword: 'incorrect-synthetic-password' })).status, 400);
   const registration = await request('/api/webauthn/register/options', { name: 'Synthetic passkey', currentPassword: password }); assert.equal(registration.status, 200);
+  const permittedCredentialAlgorithms = new Set([-7, -8, -35, -36, -37, -38, -39, -257, -258, -259]);
+  const advertisedCredentialAlgorithms = registration.body.options.pubKeyCredParams.map(value => value.alg);
+  assert.ok(advertisedCredentialAlgorithms.length > 0);
+  assert.equal(advertisedCredentialAlgorithms.every(value => permittedCredentialAlgorithms.has(value)), true,
+    `WebAuthn advertised a non-allowlisted credential algorithm: ${JSON.stringify(advertisedCredentialAlgorithms)}`);
   const attestation = await credential(registration.body.options, 'create');
   const registerBody = { token: registration.body.token, credential: attestation };
   assert.equal((await request('/api/session', undefined, 'DELETE')).status, 204);
@@ -125,5 +130,5 @@ try {
   assert.equal((await request('/api/webauthn/login/options', { name: username })).status, 401);
   assert.equal((await request('/api/session', undefined, 'GET')).body.authenticated, false);
   await call('WebAuthn.removeVirtualAuthenticator', { authenticatorId: authenticator.authenticatorId });
-  console.log(JSON.stringify({ webAuthnSecurity: 'passed', virtualCtap2Authenticator: true, passwordReauthentication: true, staleRegistrationAfterSignOutRejected: true, parallelRegistrationSingleUse: true, parallelLoginSingleUse: true, registrationReplayRejected: true, signIn: true, assertionReplayRejected: true, wrongOriginRejected: true, wrongRpIdRejected: true, regressedCounterRejected: true, staleLoginAfterSignOutRejected: true, deletionReauthentication: true, deletedCredentialPendingLoginRejected: true, failedFlowsLeaveNoSession: true }));
+  console.log(JSON.stringify({ webAuthnSecurity: 'passed', virtualCtap2Authenticator: true, credentialAlgorithmAllowlist: advertisedCredentialAlgorithms, passwordReauthentication: true, staleRegistrationAfterSignOutRejected: true, parallelRegistrationSingleUse: true, parallelLoginSingleUse: true, registrationReplayRejected: true, signIn: true, assertionReplayRejected: true, wrongOriginRejected: true, wrongRpIdRejected: true, regressedCounterRejected: true, staleLoginAfterSignOutRejected: true, deletionReauthentication: true, deletedCredentialPendingLoginRejected: true, failedFlowsLeaveNoSession: true }));
 } finally { await call('Target.closeTarget', { targetId: target.id }); socket.close(); }

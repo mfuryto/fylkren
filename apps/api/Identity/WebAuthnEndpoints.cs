@@ -15,6 +15,20 @@ namespace Fylkren.Api.Identity;
 
 public static class WebAuthnEndpoints
 {
+    private static readonly IReadOnlyList<PubKeyCredParam> CredentialAlgorithms =
+    [
+        new(COSE.Algorithm.EdDSA, PublicKeyCredentialType.PublicKey),
+        new(COSE.Algorithm.ES256, PublicKeyCredentialType.PublicKey),
+        new(COSE.Algorithm.RS256, PublicKeyCredentialType.PublicKey),
+        new(COSE.Algorithm.PS256, PublicKeyCredentialType.PublicKey),
+        new(COSE.Algorithm.ES384, PublicKeyCredentialType.PublicKey),
+        new(COSE.Algorithm.RS384, PublicKeyCredentialType.PublicKey),
+        new(COSE.Algorithm.PS384, PublicKeyCredentialType.PublicKey),
+        new(COSE.Algorithm.ES512, PublicKeyCredentialType.PublicKey),
+        new(COSE.Algorithm.RS512, PublicKeyCredentialType.PublicKey),
+        new(COSE.Algorithm.PS512, PublicKeyCredentialType.PublicKey)
+    ];
+
     public static IEndpointRouteBuilder MapWebAuthnEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("/api/webauthn");
@@ -97,7 +111,8 @@ public static class WebAuthnEndpoints
             },
             ExcludeCredentials = existing,
             AuthenticatorSelection = AuthenticatorSelection.Default,
-            AttestationPreference = AttestationConveyancePreference.None
+            AttestationPreference = AttestationConveyancePreference.None,
+            PubKeyCredParams = CredentialAlgorithms
         });
         var now = DateTimeOffset.UtcNow;
         var expiresAt = now.AddMinutes(5);

@@ -4,6 +4,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Apply explicit self-contained-token algorithm policies: RS256 for OIDC, RSA-SHA256 or stronger known SAML signatures, AES-256-CBC/HMAC-SHA256 Data Protection keys, and maintained asymmetric WebAuthn algorithms.
 - Require an explicit sign-in action before direct OIDC or SAML mode starts a provider challenge, preventing a retained provider session from silently creating a new Fylkren session.
 - Let Platform Managers terminate every active session for one user or the whole installation from the global user directory, with explicit confirmation, audit events and immediate security-version revocation.
 - Limit browser sessions to one hour of inactivity and twelve hours from authentication, following the NIST SP 800-63B-4 AAL2 timing reference without claiming AAL2 while mandatory MFA remains open.

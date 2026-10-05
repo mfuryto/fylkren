@@ -18,9 +18,10 @@ let redirectCanaryRequests = 0;
 let runtimeMetadataBody = '';
 
 const encoded = value => Buffer.from(JSON.stringify(value)).toString('base64url');
-function jwt(payload) {
-  const unsigned = `${encoded({ alg: 'RS256', typ: 'JWT', kid: 'negative-lab-key' })}.${encoded(payload)}`;
-  return `${unsigned}.${sign('RSA-SHA256', Buffer.from(unsigned), privateKey).toString('base64url')}`;
+function jwt(payload, algorithm = 'RS256') {
+  const unsigned = `${encoded({ alg: algorithm, typ: 'JWT', kid: 'negative-lab-key' })}.${encoded(payload)}`;
+  const signingAlgorithm = algorithm === 'RS512' ? 'RSA-SHA512' : 'RSA-SHA256';
+  return `${unsigned}.${sign(signingAlgorithm, Buffer.from(unsigned), privateKey).toString('base64url')}`;
 }
 function corruptSignature(value) {
   const parts = value.split('.');
@@ -143,15 +144,15 @@ createServer({
     jwks_uri: `${issuer}/jwks`,
     response_types_supported: ['code'],
     subject_types_supported: ['public'],
-    id_token_signing_alg_values_supported: ['RS256'],
+    id_token_signing_alg_values_supported: ['RS256', 'RS512'],
     token_endpoint_auth_methods_supported: ['client_secret_post'],
     scopes_supported: ['openid', 'profile', 'email'],
     claims_supported: ['sub', 'iss', 'aud', 'exp', 'iat', 'nonce', 'name', 'email'],
   });
-  if (url.pathname === '/jwks') return json(response, 200, { keys: [{ ...publicJwk, kid: 'negative-lab-key', use: 'sig', alg: 'RS256' }] });
+  if (url.pathname === '/jwks') return json(response, 200, { keys: [{ ...publicJwk, kid: 'negative-lab-key', use: 'sig' }] });
   if (url.pathname === '/mode' && request.method === 'POST') {
     const requested = new URLSearchParams(await body(request)).get('value');
-    if (!['nonce', 'audience', 'signature'].includes(requested)) return json(response, 400, { error: 'invalid_mode' });
+    if (!['nonce', 'audience', 'signature', 'algorithm'].includes(requested)) return json(response, 400, { error: 'invalid_mode' });
     mode = requested;
     return json(response, 200, { mode });
   }
@@ -181,7 +182,7 @@ createServer({
       nonce: mode === 'nonce' ? 'wrong-nonce' : record.nonce,
       name: 'Negative OIDC Fixture',
       email: 'negative-oidc@example.invalid',
-    });
+    }, mode === 'algorithm' ? 'RS512' : 'RS256');
     return json(response, 200, {
       token_type: 'Bearer', expires_in: 300, access_token: randomBytes(24).toString('base64url'),
       id_token: mode === 'signature' ? corruptSignature(idToken) : idToken,

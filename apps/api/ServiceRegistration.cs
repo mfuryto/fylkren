@@ -14,11 +14,14 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
+using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Sustainsys.Saml2;
 using Sustainsys.Saml2.AspNetCore2;
 using Sustainsys.Saml2.Configuration;
@@ -90,7 +93,12 @@ internal static class ServiceRegistration
         builder.Services.AddDataProtection()
             .PersistKeysToFileSystem(new DirectoryInfo(
                 builder.Configuration["Fylkren:DataProtection:KeyPath"] ?? "/var/lib/fylkren/keys"))
-            .SetApplicationName("Fylkren");
+            .SetApplicationName("Fylkren")
+            .UseCryptographicAlgorithms(new AuthenticatedEncryptorConfiguration
+            {
+                EncryptionAlgorithm = EncryptionAlgorithm.AES_256_CBC,
+                ValidationAlgorithm = ValidationAlgorithm.HMACSHA256
+            });
         var authentication = builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
             {
@@ -142,6 +150,7 @@ internal static class ServiceRegistration
                 options.GetClaimsFromUserInfoEndpoint = true;
                 options.Scope.Clear(); options.Scope.Add("openid"); options.Scope.Add("profile"); options.Scope.Add("email");
                 options.TokenValidationParameters.NameClaimType = "name";
+                options.TokenValidationParameters.ValidAlgorithms = [SecurityAlgorithms.RsaSha256];
                 options.Events.OnRemoteFailure = async context =>
                 {
                     var logger = context.HttpContext.RequestServices
@@ -194,6 +203,7 @@ internal static class ServiceRegistration
                 options.SPOptions.EntityId = new EntityId(saml.Enabled ? saml.EntityId! : "https://disabled.invalid/fylkren");
                 options.SPOptions.ModulePath = saml.ModulePath;
                 options.SPOptions.NameIdPolicy = new Saml2NameIdPolicy(null, NameIdFormat.Persistent);
+                options.SPOptions.MinIncomingSigningAlgorithm = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
                 // Fylkren does not currently provision a private SP signing certificate. Explicitly
                 // send unsigned AuthnRequests while continuing to require the IdP metadata-backed
                 // signature validation performed by Sustainsys for SAML responses and assertions.

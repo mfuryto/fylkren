@@ -66,6 +66,8 @@ External authentication establishes the same local browser session after resolvi
 - Active Directory uses `objectGUID`;
 - LDAP uses `entryUUID` or the configured stable-ID attribute.
 
+The OIDC provider must sign ID tokens with RS256. Incoming SAML signatures must use RSA-SHA256 or a stronger signing algorithm recognized by the maintained SAML library. Verify these settings at the identity provider before activation.
+
 Unknown stable identifiers are rejected. Username is never the permanent link key. Directory search and linking are explicit; AD/LDAP never populate site personnel automatically.
 
 Internal provider destinations and providers with separate OIDC backchannel hosts may require deployment-owned outbound approvals before connection testing. See [outbound integration configuration](../operations/INSTALLATION_AND_UPGRADES.md#outbound-integration-configuration). Invalid or unavailable runtime metadata rejects external sign-in without blocking local administration.
