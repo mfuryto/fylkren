@@ -6,7 +6,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 - Correct the Identity guidance to reflect direct AD/LDAP personnel creation, and record configurable OIDC/SAML first-sign-in provisioning without duplicate AD/LDAP people, with a restricted unassigned-access state, as required work before release qualification.
 
-- Bind SMTP STARTTLS delivery to the approved DNS result while retaining certificate hostname validation; extend the live relay fixture and keep the remaining native LDAP DNS limitation explicit.
+- Bind SMTP STARTTLS delivery and AD/LDAP connections to approved DNS results while retaining certificate hostname validation; verify changed-DNS rejection and preserve LDAPS, StartTLS and Samba AD behavior.
 
 - Replace the API runtime with a qualified Alpine/musl image, retain full ICU localization and remove the previously reported Medium/Low runtime-package vulnerability set.
 - Authenticate API-to-PostgreSQL connections with an installation-issued client certificate instead of a database password, and remove the conflicting ASP.NET port setting that produced a harmless Platform Manager warning.
@@ -53,7 +53,7 @@ This file records durable, user-visible release changes. Detailed implementation
 - Reject exhausted security/domain/revision versions before mutation, preserve atomic API/history writes and prevent retry/failure counters wrapping past their existing terminal thresholds.
 - Accept the last representable audit date/report year without server errors; use checked long aggregate counts and exact comment-page arithmetic. Retain normal counts and archive delivery guards while rejecting invalid comment pages through the shared input policy.
 
-- Reject malformed/reserved SMTP and directory destinations without changing saved configuration; reuse one SMTP transport preparation path. Restore Linux LDAP StartTLS without plaintext credential binding, reject referral-only provider probes and preserve account access on incomplete referral searches. Enforce the SMTP test send deadline; native DNS rebinding still requires deployment egress controls.
+- Reject malformed/reserved SMTP and directory destinations without changing saved configuration; reuse one SMTP transport preparation path. Restore Linux LDAP StartTLS without plaintext credential binding, reject referral-only provider probes and preserve account access on incomplete referral searches. Enforce the SMTP test send deadline.
 
 - Harden outgoing HTTPS integration traffic with checked DNS/IP destinations, explicit private-origin approval and bounded identity/federation downloads. Prepare SAML metadata through this shared path while preserving signed SSO and local administration on provider failure; require direct metadata responses and disable artifact resolution. See upgrade notes for internal integrations.
 

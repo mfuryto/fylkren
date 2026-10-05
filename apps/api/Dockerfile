@@ -14,7 +14,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine
 WORKDIR /app
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 RUN apk upgrade --no-cache \
-    && apk add --no-cache curl icu-data-full icu-libs krb5-libs libldap tzdata \
+    && apk add --no-cache curl icu-data-full icu-libs krb5-libs tzdata \
     && mkdir -p /var/lib/fylkren/keys \
     && chown -R "$APP_UID:$APP_UID" /var/lib/fylkren \
     && chmod 700 /var/lib/fylkren/keys

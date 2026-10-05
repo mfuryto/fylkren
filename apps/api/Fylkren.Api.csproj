@@ -10,7 +10,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" />
     <PackageReference Include="Sustainsys.Saml2.AspNetCore2" />
-    <PackageReference Include="System.DirectoryServices.Protocols" />
+    <PackageReference Include="Novell.Directory.Ldap.NETStandard" />
     <PackageReference Include="MailKit" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <PrivateAssets>all</PrivateAssets>

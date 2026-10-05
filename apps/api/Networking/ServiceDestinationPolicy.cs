@@ -5,8 +5,9 @@ namespace Fylkren.Api.Networking;
 
 // SMTP/directory hosts are explicit administrator-owned configuration and may
 // be private. Share HTTP's special-address rules; do not accept URLs/host lists.
-// Resolve once and pass these approved addresses to the actual transport. Native
-// clients must never receive the original DNS name as their network destination.
+// Resolve once and bind the actual transport to this approved set. A transport
+// may retain the original name for TLS only when its socket candidates are
+// filtered to these addresses.
 public sealed class ServiceDestinationPolicy
 {
     private readonly Func<string, CancellationToken, Task<IPAddress[]>> resolve;

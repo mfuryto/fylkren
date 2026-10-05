@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Mail;
+using System.Net.Sockets;
 using Fylkren.Api.Identity;
 using Fylkren.Api.Networking;
 using Fylkren.Api.Notifications;
@@ -41,6 +42,24 @@ internal static class ServiceTransportTests
         }
         catch (SmtpException) { }
         Require(lookups == 3, "Directory/SMTP native client preparation bypassed the DNS policy.");
-        Console.WriteLine("Service transport tests passed: host/port syntax, reserved/mapped metadata hosts, named and mixed metadata DNS rejection, explicit private service hosts, LDAP/SMTP client preparation rejection.");
+
+        // Simulate a DNS change between policy resolution and the LDAP client's
+        // own resolution. Only the preflight-approved address may reach a socket.
+        using var canary = new TcpListener(IPAddress.Loopback, 0);
+        canary.Start();
+        var rebindingOptions = new FylkrenOptions();
+        rebindingOptions.Authentication.Ldap.Enabled = true;
+        rebindingOptions.Authentication.Ldap.Server = "localhost";
+        rebindingOptions.Authentication.Ldap.Port = ((IPEndPoint)canary.LocalEndpoint).Port;
+        rebindingOptions.Authentication.Ldap.BaseDn = "dc=synthetic,dc=test";
+        rebindingOptions.Authentication.Ldap.BindDn = "cn=synthetic,dc=synthetic,dc=test";
+        rebindingOptions.Authentication.Ldap.BindPassword = "Synthetic-in-memory-only";
+        var changedDns = new ServiceDestinationPolicy((_, _) =>
+            Task.FromResult(new[] { IPAddress.Parse("127.0.0.2") }));
+        var reboundDirectory = new DirectoryAuthenticationService(rebindingOptions, changedDns);
+        Require(!await reboundDirectory.TestConnectionAsync("ldap", default),
+            "LDAP accepted a second-resolution address outside the approved result set.");
+        Require(!canary.Pending(), "LDAP opened a socket to a DNS-rebound address.");
+        Console.WriteLine("Service transport tests passed: host/port syntax, reserved/mapped metadata hosts, named and mixed metadata DNS rejection, explicit private service hosts, LDAP/SMTP client preparation rejection, and LDAP second-resolution address pinning.");
     }
 }

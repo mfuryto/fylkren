@@ -1,8 +1,10 @@
-using System.DirectoryServices.Protocols;
 using System.Net;
+using System.Net.Sockets;
+using System.Security.Authentication;
 using System.Text;
 using Fylkren.Api.Platform;
 using Fylkren.Api.Networking;
+using Novell.Directory.Ldap;
 
 namespace Fylkren.Api.Identity;
 
@@ -55,11 +57,14 @@ public sealed class DirectoryAuthenticationService(FylkrenOptions options, Servi
         if (user is null) return null;
         try
         {
-            using var connection = CreateConnection(settings, new NetworkCredential(user.DistinguishedName, password));
-            connection.Bind();
+            using var connection = CreateConnection(settings);
+            connection.BindAsync(user.DistinguishedName, password).GetAwaiter().GetResult();
             return user;
         }
         catch (LdapException) { return null; }
+        catch (InvalidOperationException) { return null; }
+        catch (ArgumentException) { return null; }
+        catch (Exception error) when (IsTransportFailure(error)) { return null; }
     }
 
     private DirectoryUser? FindUser(string provider, string username) => FindUser(GetSettings(provider), username);
@@ -70,15 +75,14 @@ public sealed class DirectoryAuthenticationService(FylkrenOptions options, Servi
         var settings = GetSettings(provider);
         try
         {
-            using var connection = CreateConnection(settings, new NetworkCredential(settings.BindDn, settings.BindPassword));
-            connection.Bind();
+            using var connection = CreateConnection(settings);
+            connection.BindAsync(settings.BindDn, settings.BindPassword).GetAwaiter().GetResult();
             var value = EscapeFilterValue(query.Trim());
             var filter = $"(|({settings.UsernameAttribute}=*{value}*)({settings.DisplayNameAttribute}=*{value}*)({settings.EmailAttribute}=*{value}*))";
-            var request = new SearchRequest(settings.SearchBase, filter, SearchScope.Subtree,
-                settings.UsernameAttribute, settings.StableIdAttribute, settings.DisplayNameAttribute, settings.EmailAttribute)
-            { SizeLimit = Math.Clamp(limit, 1, 20) };
-            var response = (SearchResponse)connection.SendRequest(request, TimeSpan.FromSeconds(10));
-            return response.Entries.Cast<SearchResultEntry>()
+            var entries = Search(connection, settings.SearchBase, LdapConnection.ScopeSub, filter,
+                Math.Clamp(limit, 1, 20), settings.UsernameAttribute, settings.StableIdAttribute,
+                settings.DisplayNameAttribute, settings.EmailAttribute);
+            return entries
                 .Select(entry => ReadUser(entry, settings))
                 .Where(user => user is not null)
                 .Select(user => user!)
@@ -86,7 +90,9 @@ public sealed class DirectoryAuthenticationService(FylkrenOptions options, Servi
                 .ToList();
         }
         catch (LdapException) { return []; }
-        catch (DirectoryOperationException) { return []; }
+        catch (InvalidOperationException) { return []; }
+        catch (ArgumentException) { return []; }
+        catch (Exception error) when (IsTransportFailure(error)) { return []; }
     }
 
     private DirectoryUser? FindUser(Settings settings, string username)
@@ -94,21 +100,23 @@ public sealed class DirectoryAuthenticationService(FylkrenOptions options, Servi
         if (string.IsNullOrWhiteSpace(username) || username.Length > 256) return null;
         try
         {
-            using var connection = CreateConnection(settings, new NetworkCredential(settings.BindDn, settings.BindPassword));
-            connection.Bind();
+            using var connection = CreateConnection(settings);
+            connection.BindAsync(settings.BindDn, settings.BindPassword).GetAwaiter().GetResult();
             var filter = $"({settings.UsernameAttribute}={EscapeFilterValue(username.Trim())})";
-            var request = new SearchRequest(settings.SearchBase, filter, SearchScope.Subtree,
-                settings.UsernameAttribute, settings.StableIdAttribute, settings.DisplayNameAttribute, settings.EmailAttribute);
-            var response = (SearchResponse)connection.SendRequest(request, TimeSpan.FromSeconds(10));
-            if (response.Entries.Count != 1) return null;
-            var entry = response.Entries[0];
+            var entries = Search(connection, settings.SearchBase, LdapConnection.ScopeSub, filter, 2,
+                settings.UsernameAttribute, settings.StableIdAttribute, settings.DisplayNameAttribute,
+                settings.EmailAttribute);
+            if (entries.Count != 1) return null;
+            var entry = entries[0];
             return ReadUser(entry, settings);
         }
         catch (LdapException) { return null; }
-        catch (DirectoryOperationException) { return null; }
+        catch (InvalidOperationException) { return null; }
+        catch (ArgumentException) { return null; }
+        catch (Exception error) when (IsTransportFailure(error)) { return null; }
     }
 
-    private static DirectoryUser? ReadUser(SearchResultEntry entry, Settings settings)
+    private static DirectoryUser? ReadUser(LdapEntry entry, Settings settings)
     {
         var stableId = ReadStableId(entry, settings)?.Trim();
         var resolvedUsername = ReadText(entry, settings.UsernameAttribute)?.Trim();
@@ -121,7 +129,7 @@ public sealed class DirectoryAuthenticationService(FylkrenOptions options, Servi
             displayName is null && resolvedUsername!.Length > 200)
             return null;
         if (email is not null && !ValidDirectoryText(email, 254)) email = null;
-        return new DirectoryUser(settings.Provider, stableId!, resolvedUsername!, entry.DistinguishedName,
+        return new DirectoryUser(settings.Provider, stableId!, resolvedUsername!, entry.Dn,
             displayName, email);
     }
 
@@ -142,14 +150,15 @@ public sealed class DirectoryAuthenticationService(FylkrenOptions options, Servi
     {
         try
         {
-            using var connection = CreateConnection(settings, new NetworkCredential(settings.BindDn, settings.BindPassword));
-            connection.Bind();
-            var request = new SearchRequest(settings.BaseDn, "(objectClass=*)", SearchScope.Base, "dn");
-            var response = (SearchResponse)connection.SendRequest(request, TimeSpan.FromSeconds(10));
-            return response.Entries.Count == 1 && response.References.Count == 0 && response.Referral.Length == 0;
+            using var connection = CreateConnection(settings);
+            connection.BindAsync(settings.BindDn, settings.BindPassword).GetAwaiter().GetResult();
+            var entries = Search(connection, settings.BaseDn, LdapConnection.ScopeBase, "(objectClass=*)", 2, "dn");
+            return entries.Count == 1;
         }
         catch (LdapException) { return false; }
-        catch (DirectoryOperationException) { return false; }
+        catch (InvalidOperationException) { return false; }
+        catch (ArgumentException) { return false; }
+        catch (Exception error) when (IsTransportFailure(error)) { return false; }
     }
 
     private DirectoryLifecycleResult LookupLifecycle(string provider, string stableId)
@@ -161,8 +170,8 @@ public sealed class DirectoryAuthenticationService(FylkrenOptions options, Servi
             return new(DirectoryAccountState.Unavailable, null, "invalid-stable-id");
         try
         {
-            using var connection = CreateConnection(settings, new NetworkCredential(settings.BindDn, settings.BindPassword));
-            connection.Bind();
+            using var connection = CreateConnection(settings);
+            connection.BindAsync(settings.BindDn, settings.BindPassword).GetAwaiter().GetResult();
             var stableFilter = StableIdFilter(settings, stableId);
             if (stableFilter is null)
                 return new(DirectoryAccountState.Unavailable, null, "invalid-stable-id");
@@ -176,16 +185,13 @@ public sealed class DirectoryAuthenticationService(FylkrenOptions options, Servi
                 attributes.Add("userAccountControl");
                 attributes.Add("accountExpires");
             }
-            var request = new SearchRequest(settings.SearchBase, stableFilter, SearchScope.Subtree, attributes.ToArray())
-            { SizeLimit = 2 };
-            var response = (SearchResponse)connection.SendRequest(request, TimeSpan.FromSeconds(10));
-            if (response.References.Count > 0 || response.Referral.Length > 0)
-                return new(DirectoryAccountState.Unavailable, null, "referral-not-supported");
-            if (response.Entries.Count == 0)
+            var entries = Search(connection, settings.SearchBase, LdapConnection.ScopeSub, stableFilter, 2,
+                attributes.ToArray());
+            if (entries.Count == 0)
                 return new(DirectoryAccountState.Missing, null, "missing");
-            if (response.Entries.Count != 1)
+            if (entries.Count != 1)
                 return new(DirectoryAccountState.Unavailable, null, "duplicate-stable-id");
-            var entry = response.Entries[0];
+            var entry = entries[0];
             var user = ReadUser(entry, settings);
             if (user is null || !string.Equals(user.StableId, stableId, StringComparison.OrdinalIgnoreCase))
                 return new(DirectoryAccountState.Unavailable, null, "invalid-entry");
@@ -202,16 +208,18 @@ public sealed class DirectoryAuthenticationService(FylkrenOptions options, Servi
                     return new(DirectoryAccountState.Disabled, user, "expired");
             }
 
-            var activeRequest = new SearchRequest(entry.DistinguishedName, settings.LifecycleActiveFilter,
-                SearchScope.Base, "dn") { SizeLimit = 1 };
-            var activeResponse = (SearchResponse)connection.SendRequest(activeRequest, TimeSpan.FromSeconds(10));
-            return activeResponse.Entries.Count == 1
+            var activeEntries = Search(connection, entry.Dn, LdapConnection.ScopeBase,
+                settings.LifecycleActiveFilter, 1, "dn");
+            return activeEntries.Count == 1
                 ? new(DirectoryAccountState.Active, user, "active")
                 : new(DirectoryAccountState.Disabled, user, "inactive-filter");
         }
+        catch (LdapReferralException) { return new(DirectoryAccountState.Unavailable, null, "referral-not-supported"); }
         catch (LdapException) { return new(DirectoryAccountState.Unavailable, null, "directory-unavailable"); }
-        catch (DirectoryOperationException) { return new(DirectoryAccountState.Unavailable, null, "directory-unavailable"); }
+        catch (InvalidOperationException) { return new(DirectoryAccountState.Unavailable, null, "directory-unavailable"); }
         catch (ArgumentOutOfRangeException) { return new(DirectoryAccountState.Unavailable, null, "invalid-account-expiry"); }
+        catch (ArgumentException) { return new(DirectoryAccountState.Unavailable, null, "directory-unavailable"); }
+        catch (Exception error) when (IsTransportFailure(error)) { return new(DirectoryAccountState.Unavailable, null, "directory-unavailable"); }
     }
 
     private static string? StableIdFilter(Settings settings, string stableId)
@@ -223,12 +231,9 @@ public sealed class DirectoryAuthenticationService(FylkrenOptions options, Servi
         return $"({settings.StableIdAttribute}={binary})";
     }
 
-    private static bool TryReadInt64(SearchResultEntry entry, string attribute, out long result)
+    private static bool TryReadInt64(LdapEntry entry, string attribute, out long result)
     {
-        var value = ReadValue(entry, attribute);
-        if (value is byte[] bytes)
-            return long.TryParse(Encoding.UTF8.GetString(bytes), out result);
-        return long.TryParse(value?.ToString(), out result);
+        return long.TryParse(ReadText(entry, attribute), out result);
     }
 
     private Settings GetSettings(string provider, bool requireEnabled = true)
@@ -245,51 +250,66 @@ public sealed class DirectoryAuthenticationService(FylkrenOptions options, Servi
             source.EmailAttribute, source.StableIdAttribute, source.LifecycleActiveFilter);
     }
 
-    private LdapConnection CreateConnection(Settings settings, NetworkCredential credential)
+    private LdapConnection CreateConnection(Settings settings)
     {
-        if (!destinations.Allowed(settings.Server)) throw new LdapException("The configured directory destination is not allowed or available.");
-        var identifier = new LdapDirectoryIdentifier(settings.Server, settings.Port, false, false);
-        var connection = new LdapConnection(identifier, credential, AuthType.Basic)
-        { Timeout = TimeSpan.FromSeconds(10), AutoBind = false };
+        var approvedAddresses = destinations.ResolveAllowed(settings.Server);
+        if (approvedAddresses.Length == 0)
+            throw new InvalidOperationException("The configured directory destination is not allowed or available.");
+        var approved = approvedAddresses.ToHashSet();
+        var connectionOptions = new LdapConnectionOptions()
+            .ConfigureIpAddressFilter(approved.Contains);
+        if (settings.UseSsl) connectionOptions.UseSsl();
+        var connection = new LdapConnection(connectionOptions) { ConnectionTimeout = 10_000 };
         try
         {
-            connection.SessionOptions.ProtocolVersion = 3;
-            connection.SessionOptions.ReferralChasing = ReferralChasingOptions.None;
-            if (settings.UseSsl) connection.SessionOptions.SecureSocketLayer = true;
-            if (settings.UseStartTls)
-            {
-                // On Linux the native target/network timeout is initialized by
-                // SendRequest/Bind, not the constructor. Establish it without
-                // automatic credential binding before negotiating StartTLS.
-                if (OperatingSystem.IsLinux())
-                {
-                    try { connection.SendRequest(new SearchRequest("", "(objectClass=*)", SearchScope.Base, "1.1"), TimeSpan.FromSeconds(10)); }
-                    catch (DirectoryOperationException error) when (error.Response?.ResultCode == ResultCode.ConfidentialityRequired) { }
-                }
-                connection.SessionOptions.StartTransportLayerSecurity(null);
-            }
+            connection.ConnectAsync(settings.Server, settings.Port).GetAwaiter().GetResult();
+            if (settings.UseStartTls) connection.StartTlsAsync().GetAwaiter().GetResult();
             return connection;
         }
-        catch { connection.Dispose(); throw; }
+        catch
+        {
+            // A TLS handshake can fail before the client's reader/socket state is
+            // fully initialized. Cleanup must not replace that controlled failure.
+            try { connection.Dispose(); } catch { }
+            throw;
+        }
     }
 
-    private static string? ReadStableId(SearchResultEntry entry, Settings settings)
+    private static List<LdapEntry> Search(LdapConnection connection, string baseDn, int scope, string filter,
+        int maximumResults, params string[] attributes)
     {
-        var value = ReadValue(entry, settings.StableIdAttribute);
-        if (value is null) return null;
-        if (settings.Provider == "ad" && value is byte[] bytes && bytes.Length == 16) return new Guid(bytes).ToString("D");
-        return value is byte[] binary ? Encoding.UTF8.GetString(binary).Trim().ToLowerInvariant() : value.ToString()?.Trim().ToLowerInvariant();
+        var constraints = new LdapSearchConstraints
+        {
+            TimeLimit = 10_000,
+            ServerTimeLimit = 10,
+            MaxResults = maximumResults,
+            ReferralFollowing = false
+        };
+        var results = connection.SearchAsync(baseDn, scope, filter, attributes, false, constraints)
+            .GetAwaiter().GetResult();
+        var entries = new List<LdapEntry>(maximumResults);
+        while (results.HasMoreAsync().GetAwaiter().GetResult())
+            entries.Add(results.NextAsync().GetAwaiter().GetResult());
+        return entries;
     }
 
-    private static string? ReadText(SearchResultEntry entry, string attribute) => ReadValue(entry, attribute) switch
+    private static string? ReadStableId(LdapEntry entry, Settings settings)
     {
-        byte[] bytes => Encoding.UTF8.GetString(bytes).Trim(),
-        { } value => value.ToString()?.Trim(),
-        _ => null
-    };
+        if (!entry.Contains(settings.StableIdAttribute)) return null;
+        var attribute = entry.Get(settings.StableIdAttribute);
+        if (settings.Provider == "ad")
+        {
+            var bytes = attribute.ByteValue;
+            return bytes.Length == 16 ? new Guid(bytes).ToString("D") : null;
+        }
+        return attribute.StringValue?.Trim().ToLowerInvariant();
+    }
 
-    private static object? ReadValue(SearchResultEntry entry, string attribute) =>
-        entry.Attributes.Contains(attribute) && entry.Attributes[attribute].Count > 0 ? entry.Attributes[attribute][0] : null;
+    private static string? ReadText(LdapEntry entry, string attribute) =>
+        entry.Contains(attribute) ? entry.Get(attribute).StringValue?.Trim() : null;
+
+    private static bool IsTransportFailure(Exception error) =>
+        error is AuthenticationException or IOException or SocketException or TimeoutException;
 
     internal static string EscapeFilterValue(string value)
     {
