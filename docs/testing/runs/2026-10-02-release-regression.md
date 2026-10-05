@@ -1743,3 +1743,16 @@ pnpm check:docs
 ```
 
 The assessment reports `{"cryptographicStrengthAssessment":"finding","finding":"SV-102","localSymmetricAndEcMinimumBits":128,"externalRsaMinimumBitsEnforced":false,"acceptedRsa2048ClassicalStrengthBits":112}`. It locks the strong local configuration and fails if RSA minimum enforcement is later introduced without reassessing the finding. No signature forgery or authentication bypass was attempted or demonstrated. Continue at 11.3.1 independently of SV-102. Production is untouched.
+
+## Encryption mode and padding boundary — 2026-10-05
+
+Completes ASVS 11.3.1. A fail-closed scan of all non-migration production C# source finds no ECB, DES/3DES/RC2 construction, manual zero/no padding, RSA PKCS#1 v1.5 encryption or weak OAEP selection. Fylkren has no RSA encryption operation. The one application-selected block mode is the framework Data Protection configuration, where AES-256-CBC is authenticated by HMAC-SHA-256.
+
+Scoped commands:
+
+```sh
+node tools/test-encryption-mode-boundary.mjs
+pnpm check:docs
+```
+
+The control reports `{"encryptionModeBoundary":"passed","productionSourceFiles":308,"ecbUses":0,"weakRsaEncryptionPaddingUses":0,"authenticatedCbcContexts":1}`. RS256 and SAML RSA references are signature verification and are not misclassified as RSA encryption padding. This source-boundary verification did not rerun unchanged product flows. Continue at 11.3.2. Production is untouched.
