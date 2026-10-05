@@ -4,6 +4,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Require fresh upstream authentication for every new OIDC or SAML session: OIDC now requests explicit login and verifies signed authentication time, while SAML requests forced authentication.
 - Generate CycloneDX SBOMs for immutable API/web release images and source npm/NuGet dependencies, with a manifest binding component inventories and hashes to the source commit and image IDs.
 
 - Apply explicit self-contained-token algorithm policies: RS256 for OIDC, RSA-SHA256 or stronger known SAML signatures, AES-256-CBC/HMAC-SHA256 Data Protection keys, and maintained asymmetric WebAuthn algorithms.

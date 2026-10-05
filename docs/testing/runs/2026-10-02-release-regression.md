@@ -1859,3 +1859,21 @@ pnpm check:docs
 ```
 
 The final run reports 148 API-image components, 72 web-image components and 153 source-dependency components. The immutable image IDs are `sha256:e8bfc6a0eea4ff7d99deb2a6f51e49dd6b42516c16c5409f20ec9d9514fc8a5d` and `sha256:69e1bbad5e35cae175c37f57c17651187d4673cc046b516afac6e500e64d03cb`; the final recorded SBOM hashes are `6d003ad5dfb66b5e41b947a0262208ebffc2d4cece438933eeb11912025113ac`, `1d2f43cb0876c35c1d4b0209d2fd17440ff06fbfa59ce13944cf71df4bc77ce8` and `3b97cd8496e256fa3c986a50fd6343776f9daa37578853db849b5bf15e48e089`. Generated artifacts remain under ignored `output/sbom` for release-evidence custody and are not committed. No production image or installation was changed.
+
+## Federated reauthentication closure — 2026-10-05
+
+Closes SV-097 and passes ASVS 7.6.1. Every OIDC challenge sends `prompt=login` and `max_age=300`; the callback requires signed `auth_time` within five minutes, with one minute for clock skew and transit. Every SAML authentication request sets `ForceAuthn=true`. Providers that omit or cannot honor these contracts fail closed. Local sign-out still does not terminate the upstream provider session, but that retained session cannot silently create a later Fylkren session.
+
+Scoped commands:
+
+```sh
+dotnet build apps/api/Fylkren.Api.csproj --no-restore
+node tools/test-federated-reauthentication-assessment.mjs
+node tools/test-federated-session-documentation.mjs
+node tools/test-authentication-pathway-documentation.mjs
+node tools/test-external-authentication-strength-boundary.mjs
+node tools/run-identity-sso-lab.mjs
+pnpm check:docs
+```
+
+The API build passed with zero warnings and errors. The focused control reports a five-minute OIDC maximum, one-minute skew, verified authentication time and forced SAML authentication. The isolated live lab passed valid Keycloak authorization-code and signed SAML flows, required the OIDC request parameters, rejected a correctly signed ID token with an hour-old `auth_time`, and retained all existing signature, algorithm, token-type, nonce, audience, replay, XML and metadata-boundary negatives. The Keycloak fixture explicitly uses its standard `basic` scope so the signed ID token includes `auth_time`; this is now part of the provider-compatibility contract. Production was not changed.

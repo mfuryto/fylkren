@@ -1,4 +1,5 @@
 using Fylkren.Api.Networking;
+using System.Globalization;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
 using Fido2NetLib;
@@ -136,6 +137,9 @@ internal static class ServiceRegistration
                 options.ResponseType = "code";
                 options.MapInboundClaims = false;
                 options.SaveTokens = false;
+                // Every new Fylkren session requires a fresh provider authentication. The local
+                // cookie then governs the bounded application session independently.
+                options.MaxAge = TimeSpan.FromMinutes(5);
                 if (requireHttps)
                 {
                     options.CorrelationCookie.Name = "__Host-Fylkren.Oidc.Correlation.";
@@ -152,6 +156,11 @@ internal static class ServiceRegistration
                 options.TokenValidationParameters.NameClaimType = "name";
                 options.TokenValidationParameters.ValidAlgorithms = [SecurityAlgorithms.RsaSha256];
                 options.TokenValidationParameters.ValidTypes = ["JWT"];
+                options.Events.OnRedirectToIdentityProvider = context =>
+                {
+                    context.ProtocolMessage.Prompt = "login";
+                    return Task.CompletedTask;
+                };
                 options.Events.OnRemoteFailure = async context =>
                 {
                     var logger = context.HttpContext.RequestServices
@@ -177,6 +186,37 @@ internal static class ServiceRegistration
                 };
                 options.Events.OnTokenValidated = async context =>
                 {
+                    if (!context.SecurityToken.Payload.TryGetValue("auth_time", out var authenticationTimeValue) ||
+                        !long.TryParse(
+                            Convert.ToString(authenticationTimeValue, CultureInfo.InvariantCulture),
+                            NumberStyles.Integer,
+                            CultureInfo.InvariantCulture,
+                            out var authenticationTimeSeconds))
+                    {
+                        context.Fail("OIDC authentication time is missing or invalid.");
+                        return;
+                    }
+
+                    DateTimeOffset authenticationTime;
+                    try
+                    {
+                        authenticationTime = DateTimeOffset.FromUnixTimeSeconds(authenticationTimeSeconds);
+                    }
+                    catch (ArgumentOutOfRangeException)
+                    {
+                        context.Fail("OIDC authentication time is invalid.");
+                        return;
+                    }
+
+                    var now = DateTimeOffset.UtcNow;
+                    var allowedClockSkew = TimeSpan.FromMinutes(1);
+                    if (authenticationTime > now.Add(allowedClockSkew) ||
+                        now - authenticationTime > options.MaxAge!.Value.Add(allowedClockSkew))
+                    {
+                        context.Fail("OIDC authentication is too old.");
+                        return;
+                    }
+
                     var subject = context.Principal?.FindFirst("sub")?.Value;
                     if (string.IsNullOrWhiteSpace(subject)) { context.Fail("OIDC subject is missing."); return; }
                     var providerInstanceId = fylkrenOptions.Authentication.Oidc.Authority?.TrimEnd('/');
@@ -205,6 +245,8 @@ internal static class ServiceRegistration
                 options.SPOptions.ModulePath = saml.ModulePath;
                 options.SPOptions.NameIdPolicy = new Saml2NameIdPolicy(null, NameIdFormat.Persistent);
                 options.SPOptions.MinIncomingSigningAlgorithm = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+                options.Notifications.AuthenticationRequestCreated = (request, _, _) =>
+                    request.ForceAuthentication = true;
                 // Fylkren does not currently provision a private SP signing certificate. Explicitly
                 // send unsigned AuthnRequests while continuing to require the IdP metadata-backed
                 // signature validation performed by Sustainsys for SAML responses and assertions.

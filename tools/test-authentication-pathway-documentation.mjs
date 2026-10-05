@@ -14,7 +14,7 @@ const machineAuthentication = readFileSync('apps/api/Platform/ApiMachineAuthenti
 for (const pathway of ['Local password |', 'Local password plus TOTP |', 'WebAuthn/passkey |',
   'Active Directory or LDAP |', 'OIDC authorization code |', 'SAML 2.0 SP-initiated SSO |'])
   assert.ok(documentation.includes(pathway), `Authentication pathway is undocumented: ${pathway}`);
-for (const limitation of ['minimum single-factor strength', 'does not require a particular `acr`, `amr` or `auth_time`',
+for (const limitation of ['minimum single-factor strength', 'does not require a particular `acr` or `amr`',
   'does not enforce an authentication-context class', 'does not bypass its password, MFA, rate, lockout or session controls',
   'complete inventory of interactive human sign-in pathways', 'cannot create a human browser session'])
   assert.ok(documentation.includes(limitation), `Authentication strength/fallback statement is missing: ${limitation}`);

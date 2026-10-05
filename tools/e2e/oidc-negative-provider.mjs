@@ -150,7 +150,7 @@ createServer({
     id_token_signing_alg_values_supported: ['RS256', 'RS512'],
     token_endpoint_auth_methods_supported: ['client_secret_post'],
     scopes_supported: ['openid', 'profile', 'email'],
-    claims_supported: ['sub', 'iss', 'aud', 'exp', 'iat', 'nonce', 'name', 'email'],
+    claims_supported: ['sub', 'iss', 'aud', 'exp', 'iat', 'auth_time', 'nonce', 'name', 'email'],
   });
   if (url.pathname === '/jwks') return json(response, 200, { keys: [{ ...publicJwk, kid: 'negative-lab-key', use: 'sig' }] });
   if (url.pathname === '/header-jwks') {
@@ -160,11 +160,12 @@ createServer({
   if (url.pathname === '/token-key-probes') return json(response, 200, { tokenHeaderKeyRequests });
   if (url.pathname === '/mode' && request.method === 'POST') {
     const requested = new URLSearchParams(await body(request)).get('value');
-    if (!['nonce', 'audience', 'signature', 'algorithm', 'header-key', 'expired', 'not-yet-valid', 'wrong-type'].includes(requested)) return json(response, 400, { error: 'invalid_mode' });
+    if (!['nonce', 'audience', 'signature', 'algorithm', 'header-key', 'expired', 'not-yet-valid', 'wrong-type', 'stale-auth-time'].includes(requested)) return json(response, 400, { error: 'invalid_mode' });
     mode = requested;
     return json(response, 200, { mode });
   }
   if (url.pathname === '/authorize') {
+    if (url.searchParams.get('prompt') !== 'login' || url.searchParams.get('max_age') !== '300') return json(response, 400, { error: 'fresh_authentication_required' });
     const code = randomBytes(24).toString('base64url');
     codes.set(code, { nonce: url.searchParams.get('nonce'), redirectUri: url.searchParams.get('redirect_uri') });
     const redirect = new URL(url.searchParams.get('redirect_uri'));
@@ -186,6 +187,7 @@ createServer({
       aud: mode === 'audience' ? 'wrong-audience' : clientId,
       sub: subject,
       iat: now,
+      auth_time: mode === 'stale-auth-time' ? now - 3600 : now,
       exp: mode === 'expired' ? now - 600 : now + 300,
       ...(mode === 'not-yet-valid' && { nbf: now + 600 }),
       nonce: mode === 'nonce' ? 'wrong-nonce' : record.nonce,

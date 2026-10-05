@@ -164,7 +164,7 @@ function createRealm() {
       redirectUris: [`${browserBase}/signin-oidc`],
       webOrigins: [browserBase],
       attributes: { 'post.logout.redirect.uris': `${browserBase}/*` },
-      defaultClientScopes: ['profile', 'email', 'roles', 'web-origins'],
+      defaultClientScopes: ['basic', 'profile', 'email', 'roles', 'web-origins'],
     }, {
       clientId: `${browserBase}/api/auth/saml2`,
       name: 'Fylkren SAML laboratory',
@@ -211,7 +211,7 @@ function createRealm() {
       directAccessGrantsEnabled: false,
       redirectUris: [`${browserBase}/signin-oidc`],
       webOrigins: [browserBase],
-      defaultClientScopes: ['profile', 'email', 'roles', 'web-origins'],
+      defaultClientScopes: ['basic', 'profile', 'email', 'roles', 'web-origins'],
     }],
   }, null, 2));
 }
@@ -540,7 +540,7 @@ try {
     username: anchorUsername, subjectId: negativeSubject,
   });
   assert.equal(negativeLink.status, 201, JSON.stringify(negativeLink.body));
-  for (const [mode, label] of [['signature', 'signature mismatch'], ['algorithm', 'non-allowlisted algorithm'], ['header-key', 'untrusted header key'], ['expired', 'expired token'], ['not-yet-valid', 'not-yet-valid token'], ['wrong-type', 'wrong token type'], ['nonce', 'nonce mismatch'], ['audience', 'audience mismatch']]) {
+  for (const [mode, label] of [['signature', 'signature mismatch'], ['algorithm', 'non-allowlisted algorithm'], ['header-key', 'untrusted header key'], ['expired', 'expired token'], ['not-yet-valid', 'not-yet-valid token'], ['wrong-type', 'wrong token type'], ['stale-auth-time', 'stale provider authentication'], ['nonce', 'nonce mismatch'], ['audience', 'audience mismatch']]) {
     compose(['exec', '-T', 'api', 'curl', '--fail', '--silent', '--show-error',
       '--cacert', '/run/fylkren-identity-lab/ca.crt', '-X', 'POST', '-d', `value=${mode}`,
       `${negativeAuthority}/mode`]);
@@ -949,6 +949,8 @@ try {
     oidcTokenHeaderKeyRejection: 'passed',
     oidcExpiredAndNotYetValidRejection: 'passed',
     oidcWrongTokenTypeRejection: 'passed',
+    oidcFreshAuthenticationRequest: 'passed',
+    oidcStaleAuthenticationRejection: 'passed',
     oidcNonceMismatchRejection: 'passed',
     oidcAudienceMismatchRejection: 'passed',
     exactIssuerAndSubjectLink: 'passed',
@@ -956,6 +958,7 @@ try {
     directSsoAndLocalLockoutGuards: 'passed',
     serverSideSessionWithoutBrowserTokens: 'passed',
     liveSamlSignedAssertion: 'passed',
+    samlForcedAuthenticationRequest: 'passed',
     samlTamperedUnsignedAndReplayRejection: 'passed',
     exactSamlEntityAndPersistentNameIdLink: 'passed',
     samlUnlinkAndRelink: 'passed',
