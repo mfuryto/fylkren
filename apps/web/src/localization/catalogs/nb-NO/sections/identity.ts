@@ -16,7 +16,7 @@ export const identityNbNO = {
   existingUserLinks: "Kobling av eksisterende brukere",
   identityMigrationPrinciple: "Eksterne identiteter bruker stabile identifikatorer fra leverandøren. Site, organisatorisk tilknytning, roller og rettigheter forvaltes i Fylkren.",
   identityUsernameMatching: "Bruk stabile identifikatorer fra leverandøren. Brukernavn, e-post og visningsnavn skal ikke brukes som permanente koblingsnøkler.",
-  externalIdentityLinkNotice: "AD- og LDAP-brukere kan søkes fram og legges direkte til fra Personell i en site. OIDC- og SAML-identiteter må foreløpig kobles til en eksisterende intern person. Automatisk oppretting ved første innlogging er ikke tilgjengelig ennå.",
+  externalIdentityLinkNotice: "AD- og LDAP-brukere opprettes når de legges til fra Personell i en site. OIDC- og SAML-identiteter må foreløpig kobles til en eksisterende person. Valgfri oppretting ved første OIDC- eller SAML-innlogging er ikke tilgjengelig ennå.",
   externalIdentityEnterpriseNotice: "Enterprise kreves for å opprette nye koblinger til AD, LDAP, OIDC og SAML. Eksisterende koblinger er fortsatt synlige, og tilknyttede brukere kan fortsatt logge inn.",
   linkDirectoryIdentity: "Koble katalogidentitet",
   provider: "Leverandør",

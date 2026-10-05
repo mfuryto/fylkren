@@ -4,7 +4,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
-- Correct the Identity guidance to reflect direct AD/LDAP personnel addition, and record configurable external-user provisioning with a restricted unassigned-access state as required work before release qualification.
+- Correct the Identity guidance to reflect direct AD/LDAP personnel creation, and record configurable OIDC/SAML first-sign-in provisioning without duplicate AD/LDAP people, with a restricted unassigned-access state, as required work before release qualification.
 
 - Bind SMTP STARTTLS delivery to the approved DNS result while retaining certificate hostname validation; extend the live relay fixture and keep the remaining native LDAP DNS limitation explicit.
 
