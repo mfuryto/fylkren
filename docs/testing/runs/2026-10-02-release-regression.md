@@ -1665,3 +1665,16 @@ pnpm check:docs
 ```
 
 The inventory reports `{"selfContainedTokenAudience":"passed","contexts":7,"oidcWrongAudienceRejected":true,"webAuthnWrongRpAndOriginRejected":true,"wrongInstanceLicenseAndFederationRejected":true}`. It binds to the current same-stage identity lab's trusted-key wrong-audience 400/no-session result, the current CTAP2 wrong-RP/origin results, the maintained wrong-instance signed-license rejection and the current operational federation pair's wrong-recipient rejection. This criterion-specific reconciliation did not rerun those unchanged dynamic cases again. Continue at 9.2.4. Production is untouched.
+
+## Unique audience restrictions for shared issuer keys — 2026-10-05
+
+Completes ASVS 9.2.4 and chapter 9. The five applicable shared-key contexts bind protected or signed content to an application, configured client/service provider, installation or federation recipient. The identity fixture proves the critical reuse case directly: its ordinary and wrong-audience ID tokens use the same trusted RSA private key, issuer, subject, nonce, lifetime and algorithm. Fylkren accepts only the configured client ID and returns 400 without a session for the alternative audience. Existing signed-license and federation negatives similarly reject another installation or receiver even though the signature comes from the trusted issuer or peer key. Token content cannot select an audience that Fylkren will trust.
+
+Scoped commands:
+
+```sh
+node tools/test-self-contained-token-unique-audiences.mjs
+pnpm check:docs
+```
+
+The inventory reports `{"selfContainedTokenUniqueAudiences":"passed","applicableContexts":5,"sameOidcIssuerKeyWrongAudienceRejected":true,"signedInstallationAndFederationAudienceBound":true,"dynamicallySelectedTokenAudienceAccepted":false}`. It binds to the current same-stage OIDC run and maintained license/federation dynamic cases, so those unchanged product flows were not rerun. WebAuthn is credential/RP scoped and does not use an issuer key to mint tokens for multiple audiences. Continue at 11.1.1; chapter 10 was already fully assessed. Production is untouched.
