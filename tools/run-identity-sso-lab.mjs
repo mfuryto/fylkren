@@ -136,12 +136,21 @@ http {
 }
 
 function createRealm() {
+  const strongSigningKeys = {
+    'org.keycloak.keys.KeyProvider': [{
+      name: 'rsa-generated-4096',
+      providerId: 'rsa-generated',
+      subComponents: {},
+      config: { priority: ['100'], enabled: ['true'], active: ['true'], algorithm: ['RS256'], keySize: ['4096'] },
+    }],
+  };
   const realm = {
     realm: 'fylkren-lab',
     enabled: true,
     sslRequired: 'all',
     registrationAllowed: false,
     loginWithEmailAllowed: false,
+    components: strongSigningKeys,
     users: [{
       id: externalSubject,
       username: 'live-sso',
@@ -191,6 +200,7 @@ function createRealm() {
     sslRequired: 'all',
     registrationAllowed: false,
     loginWithEmailAllowed: false,
+    components: strongSigningKeys,
     users: [{
       id: secondIssuerSubject,
       username: 'live-sso',

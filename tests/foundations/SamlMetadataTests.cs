@@ -16,7 +16,7 @@ internal static class SamlMetadataTests
 {
     internal static async Task Run()
     {
-        using var rsa = RSA.Create(2048);
+        using var rsa = RSA.Create(3072);
         var request = new CertificateRequest("CN=Synthetic SAML signing key", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
         using var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
         var clock = new TestClock();
@@ -51,10 +51,23 @@ internal static class SamlMetadataTests
         Require(idp.SigningKeys.Count() == 1, "Signing certificate was lost during bounded metadata parsing.");
         await Task.WhenAll(Enumerable.Range(0, 8).Select(_ => cache.Prepare(options, default)));
         Require(calls == 1, "Concurrent challenges duplicated valid metadata downloads.");
+        using (var weakRsa = RSA.Create(2048))
+        {
+            var weakRequest = new CertificateRequest("CN=Weak synthetic SAML signing key", weakRsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            using var weakCertificate = weakRequest.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
+            options.MetadataUrl += "?weak-key";
+            body = Document().Replace(Convert.ToBase64String(certificate.RawData), Convert.ToBase64String(weakCertificate.RawData));
+            await RejectAsync(() => cache.Prepare(options, default));
+            Reject(() => cache.Prepared(options));
+            body = Document();
+            options.MetadataUrl = "https://idp.test/metadata";
+            await cache.Prepare(options, default);
+        }
+        var callsBeforeExpiry = calls;
         clock.Advance(TimeSpan.FromMinutes(16));
         Reject(() => cache.Prepared(options));
         await cache.Prepare(options, default);
-        Require(calls == 2 && !ReferenceEquals(original, cache.Prepared(options)), "Expired cache did not renew metadata.");
+        Require(calls == callsBeforeExpiry + 1 && !ReferenceEquals(original, cache.Prepared(options)), "Expired cache did not renew metadata.");
         options.MetadataUrl += "?revision=2";
         Reject(() => cache.Prepared(options));
         body = Document("https://other-idp.test/realm");

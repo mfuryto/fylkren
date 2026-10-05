@@ -66,7 +66,7 @@ External authentication establishes the same local browser session after resolvi
 - Active Directory uses `objectGUID`;
 - LDAP uses `entryUUID` or the configured stable-ID attribute.
 
-The OIDC provider must sign ID tokens with RS256. Incoming SAML signatures must use RSA-SHA256 or a stronger signing algorithm recognized by the maintained SAML library. Verify these settings at the identity provider before activation.
+The OIDC provider must sign ID tokens with RS256 using RSA-3072 or stronger. Incoming SAML signatures must use RSA-SHA256 or a stronger recognized signing algorithm and every metadata signing key must be RSA-3072 or stronger. Verify algorithm and key size at the identity provider before activation; weaker keys are rejected.
 
 Unknown stable identifiers are rejected. Username is never the permanent link key. Directory search and linking are explicit; AD/LDAP never populate site personnel automatically.
 
@@ -105,7 +105,7 @@ An unenrolled user is sent directly to the compact TOTP enrollment flow after th
 
 `FYLKREN_MFA_REQUIRED=true` is the supported default. `FYLKREN_MFA_ENABLED=false` is valid only together with `FYLKREN_MFA_REQUIRED=false`; that explicit deployment exception hides and disables TOTP, passkeys and WebAuthn enforcement while preserving stored configuration for later reactivation. `FYLKREN_WEBAUTHN_ENABLED` is the subordinate WebAuthn switch.
 
-WebAuthn/passkeys require HTTPS except for browser-supported localhost development. Registered credentials are origin/RP-bound, user-named and removable from Profile. Authentication challenges are short-lived and replay-protected, including authenticators without a useful signature counter.
+WebAuthn/passkeys require HTTPS except for browser-supported localhost development. Registered credentials are origin/RP-bound, user-named and removable from Profile. Authentication challenges are short-lived and replay-protected, including authenticators without a useful signature counter. EC and EdDSA credentials remain supported; an RSA authenticator must produce a key of at least 3072 bits. An older RSA-2048 credential must be replaced from Profile while another factor is available.
 
 ## Membership and roles
 

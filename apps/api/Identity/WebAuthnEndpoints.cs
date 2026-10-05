@@ -177,6 +177,8 @@ public static class WebAuthnEndpoints
                     credential => credential.CredentialId == args.CredentialId,
                     token)
         }, ct);
+        if (!ExternalKeyStrength.MeetsWebAuthnMinimum(result.PublicKey))
+            return Results.Problem(statusCode: 400, title: "The authenticator key does not meet the minimum security strength.");
 
         var now = DateTimeOffset.UtcNow;
         if (!await ConsumeFlowGrant(state.grantId, "register", now, db, ct))
@@ -296,6 +298,8 @@ public static class WebAuthnEndpoints
             ct);
         if (credential is null)
             return Results.Problem(statusCode: 401);
+        if (!ExternalKeyStrength.MeetsWebAuthnMinimum(credential.PublicKey))
+            return Results.Problem(statusCode: 401, title: "This passkey must be replaced before it can be used.");
 
         var assertionOptions = AssertionOptions.FromJson(state.json);
         var result = await fido2.MakeAssertionAsync(new MakeAssertionParams

@@ -10,23 +10,25 @@ const webAuthn = read('apps/api/Identity/WebAuthnEndpoints.cs');
 const negativeOidc = read('tools/e2e/oidc-negative-provider.mjs');
 
 assert.match(policy, /Minimum security-strength assessment/, 'documented strength assessment');
-assert.match(policy, /SV-102/, 'tracked RSA strength finding');
+assert.match(policy, /Fylkren enforces RSA-3072/, 'documented RSA strength boundary and migration');
 assert.match(registration, /EncryptionAlgorithm\.AES_256_CBC/, 'AES-256 Data Protection');
 assert.match(registration, /ValidationAlgorithm\.HMACSHA256/, 'HMAC-SHA-256 Data Protection');
 assert.match(license, /verifier\.KeySize != 256/, 'P-256 license restriction');
 assert.match(federation, /ECDsa\.Create\(ECCurve\.NamedCurves\.nistP256\)/, 'P-256 federation generation');
 assert.match(webAuthn, /COSE\.Algorithm\.EdDSA/, '128-bit WebAuthn EdDSA option');
 assert.match(webAuthn, /COSE\.Algorithm\.RS256/, 'RSA WebAuthn option requiring key-size assessment');
-assert.match(negativeOidc, /modulusLength: 2048/, 'accepted-provider RSA-2048 test fixture');
-assert.doesNotMatch(registration, /IssuerSigningKeyValidator|rsaKeySize|KeySize\s*>?=\s*3072/,
-  'OIDC RSA minimum is now enforced; reassess SV-102');
-assert.doesNotMatch(registration, /saml[\s\S]{0,300}KeySize\s*>?=\s*3072/i,
-  'SAML RSA minimum is now enforced; reassess SV-102');
+assert.match(negativeOidc, /modulusLength: 3072/, 'OIDC test fixture uses RSA-3072');
+assert.match(registration, /IssuerSigningKeyValidator[\s\S]{0,150}ExternalKeyStrength\.MeetsMinimum/,
+  'OIDC RSA minimum enforcement');
+assert.match(webAuthn, /MeetsWebAuthnMinimum\(result\.PublicKey\)/, 'WebAuthn registration strength enforcement');
+assert.match(webAuthn, /MeetsWebAuthnMinimum\(credential\.PublicKey\)/, 'WebAuthn assertion strength enforcement');
+assert.match(read('apps/api/Identity/SamlMetadataCache.cs'), /SigningKeys[\s\S]{0,250}ExternalKeyStrength\.MeetsMinimum/,
+  'SAML metadata strength enforcement');
 
 console.log(JSON.stringify({
-  cryptographicStrengthAssessment: 'finding',
-  finding: 'SV-102',
+  cryptographicStrengthAssessment: 'passed',
+  findingClosed: 'SV-102',
   localSymmetricAndEcMinimumBits: 128,
-  externalRsaMinimumBitsEnforced: false,
-  acceptedRsa2048ClassicalStrengthBits: 112,
+  externalRsaMinimumBitsEnforced: 3072,
+  weakRsaRejectedAt: ['oidc', 'saml-metadata', 'webauthn-registration', 'webauthn-assertion'],
 }));

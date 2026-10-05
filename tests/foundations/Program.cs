@@ -42,6 +42,12 @@ if (args.Contains("--outbound-http-only"))
     await SamlMetadataTests.Run();
     return;
 }
+if (args.Contains("--external-key-strength-only"))
+{
+    ExternalKeyStrengthTests.Run();
+    await SamlMetadataTests.Run();
+    return;
+}
 var now = DateTimeOffset.UtcNow;
 var site = Guid.NewGuid(); var origin = Guid.NewGuid(); var actor = Guid.NewGuid(); var resource = Guid.NewGuid();
 var operation = Guid.NewGuid();
@@ -168,6 +174,7 @@ await WorkSliceTests.Run(db);
 await DomainCoverageTests.Run(db);
 await OutboundHttpTests.Run();
 await SamlMetadataTests.Run();
+ExternalKeyStrengthTests.Run();
 await ServiceTransportTests.Run();
 NumericArithmeticTests.Run();
 VersionBoundaryTests.Run();

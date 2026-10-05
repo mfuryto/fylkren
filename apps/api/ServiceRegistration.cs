@@ -156,6 +156,8 @@ internal static class ServiceRegistration
                 options.TokenValidationParameters.NameClaimType = "name";
                 options.TokenValidationParameters.ValidAlgorithms = [SecurityAlgorithms.RsaSha256];
                 options.TokenValidationParameters.ValidTypes = ["JWT"];
+                options.TokenValidationParameters.IssuerSigningKeyValidator =
+                    (key, _, _) => ExternalKeyStrength.MeetsMinimum(key);
                 options.Events.OnRedirectToIdentityProvider = context =>
                 {
                     context.ProtocolMessage.Prompt = "login";

@@ -1911,3 +1911,18 @@ pnpm check:docs
 ```
 
 The API build passed with zero warnings and errors. The focused control reports a five-minute OIDC maximum, one-minute skew, verified authentication time and forced SAML authentication. The isolated live lab passed valid Keycloak authorization-code and signed SAML flows, required the OIDC request parameters, rejected a correctly signed ID token with an hour-old `auth_time`, and retained all existing signature, algorithm, token-type, nonce, audience, replay, XML and metadata-boundary negatives. The Keycloak fixture explicitly uses its standard `basic` scope so the signed ID token includes `auth_time`; this is now part of the provider-compatibility contract. Production was not changed.
+
+## Minimum cryptographic strength closure — 2026-10-05
+
+Closes SV-102 and passes ASVS 11.2.3. One shared boundary now requires RSA-3072 or stronger for OIDC issuer signing keys, prepared SAML metadata signing keys and RSA WebAuthn public keys. WebAuthn applies the check both when a credential is registered and before a stored credential verifies an assertion; approved EC/EdDSA credential types remain supported. The upgrade guide requires provider-key rotation before upgrade and replacement of older RSA-2048 passkeys while another factor remains available.
+
+Scoped commands:
+
+```sh
+dotnet run --project tests/foundations/Fylkren.FoundationTests.csproj -- --external-key-strength-only
+node tools/test-cryptographic-strength-assessment.mjs
+node tools/run-identity-sso-lab.mjs
+pnpm check:docs
+```
+
+The focused boundary test rejects RSA-2048 and accepts RSA-3072 for OIDC/WebAuthn, preserves an approved non-RSA WebAuthn type, rejects malformed credential keys, rejects SAML metadata containing an RSA-2048 signing certificate and accepts RSA-3072 metadata. The maintained Keycloak OIDC/SAML fixture uses RSA-4096 for its valid issuer, while the controlled negative OIDC fixture uses RSA-3072; both meet the minimum and retain the established signature, issuer, token, replay and metadata negative cases. Production was not changed.

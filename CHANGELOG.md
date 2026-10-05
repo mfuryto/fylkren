@@ -5,6 +5,7 @@ This file records durable, user-visible release changes. Detailed implementation
 ## Unreleased
 
 - Require multi-factor authentication by default: password, directory and SSO first factors receive only a restricted TOTP enrollment/completion session, while user-verifying passkeys satisfy the boundary directly.
+- Enforce a 128-bit classical minimum for external public keys by rejecting RSA keys below 3072 bits in OIDC, SAML metadata and WebAuthn registration/assertion, with an upgrade path for existing provider and passkey keys.
 - Let users review active browser sessions in Profile and, after recent authentication, terminate one selected session or all sessions; validate every cookie against the authoritative session registry and audit revocation.
 - Require fresh upstream authentication for every new OIDC or SAML session: OIDC now requests explicit login and verifies signed authentication time, while SAML requests forced authentication.
 - Generate CycloneDX SBOMs for immutable API/web release images and source npm/NuGet dependencies, with a manifest binding component inventories and hashes to the source commit and image IDs.

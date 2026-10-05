@@ -47,6 +47,9 @@ internal sealed class SamlMetadataCache(IHttpClientFactory clients, IOptionsMoni
             idp.ReadMetadata(metadata);
             if (idp.SingleSignOnServiceUrl is null)
                 throw new HttpRequestException("SAML metadata has no supported sign-in destination.");
+            var signingKeys = idp.SigningKeys.ToArray();
+            if (signingKeys.Length == 0 || signingKeys.Any(key => !ExternalKeyStrength.MeetsMinimum(key)))
+                throw new HttpRequestException("SAML metadata contains an unsupported or insufficient signing key.");
             destinations.ValidateIdentityDestination(idp.SingleSignOnServiceUrl, configuration.MetadataUrl);
             var expiry = idp.MetadataValidUntil ?? time.GetUtcNow().UtcDateTime.AddMinutes(15);
             if (expiry <= time.GetUtcNow().UtcDateTime) throw new HttpRequestException("SAML metadata has expired.");
