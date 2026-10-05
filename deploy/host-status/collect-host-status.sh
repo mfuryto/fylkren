@@ -35,7 +35,26 @@ time_source=unavailable
 time_offset_milliseconds=null
 time_maximum_offset_milliseconds=1000
 time_detail="Host time synchronization could not be verified."
-if command -v timedatectl >/dev/null 2>&1; then
+if command -v chronyc >/dev/null 2>&1; then
+    chrony_tracking=$(LC_ALL=C chronyc tracking -n 2>/dev/null || true)
+    chrony_leap=$(printf '%s\n' "$chrony_tracking" | awk -F: '/^Leap status/ { sub(/^[[:space:]]+/, "", $2); print $2; exit }')
+    if [ "$chrony_leap" = Normal ]; then
+        time_synchronized=true
+        time_source=$(printf '%s\n' "$chrony_tracking" | awk -F: '/^Reference ID/ { sub(/^[[:space:]]+/, "", $2); print $2; exit }' | tr -cd 'A-Za-z0-9._:-' | cut -c1-100)
+        [ -n "$time_source" ] || time_source=chrony
+        chrony_offset=$(printf '%s\n' "$chrony_tracking" | awk -F: '/^Last offset/ { sub(/^[[:space:]]+/, "", $2); print $2; exit }' | awk '{ print $1 }')
+        case "$chrony_offset" in
+            ''|*[!0-9.+-]*) ;;
+            *) time_offset_milliseconds=$(printf '%s\n' "$chrony_offset" | awk '{ printf "%.6f", $1 * 1000 }') ;;
+        esac
+        time_status=degraded
+    elif [ -n "$chrony_leap" ]; then
+        time_status=down
+        time_source=chrony
+        time_detail="Host clock is not synchronized."
+    fi
+fi
+if [ "$time_status" = unknown ] && command -v timedatectl >/dev/null 2>&1; then
     synchronized=$(LC_ALL=C timedatectl show --property=NTPSynchronized --value 2>/dev/null || true)
     if [ "$synchronized" = yes ]; then
         time_synchronized=true
@@ -48,21 +67,24 @@ if command -v timedatectl >/dev/null 2>&1; then
             *us) time_offset_milliseconds=$(printf '%s\n' "${raw_offset%us}" | awk '{ printf "%.6f", $1 / 1000 }') ;;
             *s) time_offset_milliseconds=$(printf '%s\n' "${raw_offset%s}" | awk '{ printf "%.6f", $1 * 1000 }') ;;
         esac
-        if [ "$time_offset_milliseconds" != null ]; then
-            if awk -v value="$time_offset_milliseconds" -v maximum="$time_maximum_offset_milliseconds" 'BEGIN { if (value < 0) value = -value; exit !(value <= maximum) }'; then
-                time_status=healthy
-                time_detail="Host clock is synchronized and within the configured offset boundary."
-            else
-                time_status=down
-                time_detail="Host clock offset exceeds the configured boundary."
-            fi
-        else
-            time_detail="Host reports synchronization, but the current offset is unavailable."
-        fi
     elif [ "$synchronized" = no ]; then
         time_status=down
         time_source=systemd
         time_detail="Host clock is not synchronized."
+    fi
+fi
+if [ "$time_synchronized" = true ]; then
+    if [ "$time_offset_milliseconds" != null ]; then
+        if awk -v value="$time_offset_milliseconds" -v maximum="$time_maximum_offset_milliseconds" 'BEGIN { if (value < 0) value = -value; exit !(value <= maximum) }'; then
+            time_status=healthy
+            time_detail="Host clock is synchronized and within the configured offset boundary."
+        else
+            time_status=down
+            time_detail="Host clock offset exceeds the configured boundary."
+        fi
+    else
+        time_status=degraded
+        time_detail="Host reports synchronization, but the current offset is unavailable."
     fi
 fi
 
