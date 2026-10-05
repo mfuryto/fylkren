@@ -37,7 +37,15 @@ public static class PlatformOperationsEndpoints
                 new("api", "API", "healthy", "The application is responding.", null),
                 new("database", "Database", databaseHealthy ? "healthy" : "down",
                     databaseHealthy ? "The connection is healthy." : $"The connection failed{(databaseError is null ? "." : $" ({databaseError}).")}", null),
-                new("authentication", "Authentication", "healthy", "Session and access control are active.", null)
+                new("authentication", "Authentication", "healthy", "Session and access control are active.", null),
+                new("mfa-policy", "Multi-factor authentication",
+                    options.Authentication.MfaRequired ? "healthy" : "degraded",
+                    options.Authentication.MfaRequired
+                        ? "Multi-factor authentication is required for interactive access."
+                        : options.Authentication.MfaEnabled
+                            ? "A documented deployment exception is active. Multi-factor authentication is available but optional."
+                            : "A documented deployment exception is active. Multi-factor authentication is unavailable.",
+                    null)
             };
             if (snapshot is not null)
             {

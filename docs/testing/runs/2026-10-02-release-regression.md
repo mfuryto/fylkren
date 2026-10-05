@@ -1937,6 +1937,18 @@ trivy image --quiet --scanners vuln --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL 
 
 The result remains nine Medium and five Low package occurrences, covering the same seven distinct Medium and three distinct Low CVEs recorded above. Every result still has an empty `FixedVersion`; no Critical or High vulnerability was reported. The retest therefore supplies current evidence but does not remediate or accept SV-055. Production was not changed.
 
+## MFA exception policy — 2026-10-05
+
+The secure product default and SV-094 runtime enforcement remain unchanged. A deployment can deliberately set `FYLKREN_MFA_REQUIRED=false`, with `FYLKREN_MFA_ENABLED=true` retaining voluntary TOTP/passkeys or both values false disabling the capability. The exception is not silent: Platform Manager reports reduced security. The customer-facing policy requires accountable ownership, scope and reason, credential-compromise and insider-risk assessment, compensating controls, approval/review dates and a restoration plan. It states that air-gap alone is not a second factor and that unvalidated OIDC/SAML assurance cannot inherit the default ASVS 6.3.3 result.
+
+```sh
+dotnet build apps/api/Fylkren.Api.csproj --no-restore
+node tools/test-authentication-pathway-documentation.mjs
+pnpm check:docs
+```
+
+The focused documentation/source control verifies all six authentication pathways, the explicit exception requirements and the persistent Platform Manager warning. The ordinary edition harness runs with the optional profile and checks that the warning is reduced rather than healthy; the mandatory-MFA runtime remains the separate positive enforcement case. Production was not changed.
+
 ## Time synchronization health foundation — 2026-10-05
 
 The maintained root-owned host-status collector now asks systemd for the host NTP synchronization state, source and current offset. It emits only bounded sanitized status data, marks an unavailable measurement unknown, an unsynchronized or over-boundary clock down, and a synchronized clock without a numeric offset degraded. Platform Manager displays the result beside container, disk and backup status; stale snapshots make it unknown. The explicit offset boundary is 1,000 milliseconds.

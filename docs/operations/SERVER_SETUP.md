@@ -99,7 +99,7 @@ not yet contain regional settings; they are not the ongoing source of truth.
 
 Local login is controlled in **Platform Manager → Identity**. An existing `FYLKREN_LOCAL_AUTH_ENABLED` value is imported only when the database setting is first created.
 
-`FYLKREN_MFA_REQUIRED=true` is the supported default. Setting `FYLKREN_MFA_ENABLED=false` also requires `FYLKREN_MFA_REQUIRED=false`; this explicit exception hides and disables TOTP, passkeys, security keys, and WebAuthn endpoints without deleting existing credentials. Use it only after a documented risk assessment; an internal network alone is not an authentication control.
+`FYLKREN_MFA_REQUIRED=true` is the secure default. A customer-approved exception sets `FYLKREN_MFA_REQUIRED=false`; keep `FYLKREN_MFA_ENABLED=true` for optional TOTP/passkeys, or set both false to disable the capability without deleting credentials. Record owner, scope, rationale, credential-compromise risk, compensating controls and review date. An internal or air-gapped network alone is not a second factor. Platform Manager shows the exception as reduced security. `MFA_ENABLED=false` with `MFA_REQUIRED=true` is invalid and fails startup.
 
 ## Reverse proxy
 

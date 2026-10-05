@@ -46,6 +46,8 @@ HTTP destination/DNS/redirect/download boundaries and bounded runtime SAML metad
 
 The host-status integration now exposes NTP synchronization and a 1,000 ms offset boundary. SV-107 stays open until the deployment owner installs it and records production-equivalent synchronized status, alert handling and cross-system timestamp correlation.
 
+Mandatory MFA remains the secure default. Optional or disabled MFA is a supported customer-owned exception with explicit risk documentation and a persistent reduced-security signal in Platform Manager; an excepted deployment must qualify its own compensating controls and cannot silently inherit the default ASVS 6.3.3 result.
+
 Relevant Level 3 controls, WSTG techniques and API Security Top 10 coverage support this same workflow. An external penetration test is optional if requested, not a prerequisite for completing the authorized testing.
 
 ## Final release-candidate qualification

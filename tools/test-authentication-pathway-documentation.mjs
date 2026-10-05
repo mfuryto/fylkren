@@ -10,6 +10,7 @@ const saml = readFileSync('apps/api/Identity/SamlEndpoints.cs', 'utf8');
 const publicConfiguration = readFileSync('apps/api/Platform/PublicConfigurationEndpoints.cs', 'utf8');
 const serviceRegistration = readFileSync('apps/api/ServiceRegistration.cs', 'utf8');
 const machineAuthentication = readFileSync('apps/api/Platform/ApiMachineAuthentication.cs', 'utf8');
+const operations = readFileSync('apps/api/Platform/PlatformOperationsEndpoints.cs', 'utf8');
 
 for (const pathway of ['Local password |', 'Local password plus TOTP |', 'WebAuthn/passkey |',
   'Active Directory or LDAP |', 'OIDC authorization code |', 'SAML 2.0 SP-initiated SSO |'])
@@ -18,6 +19,11 @@ for (const limitation of ['minimum single-factor strength', 'does not require a 
   'does not enforce an authentication-context class', 'does not bypass its password, MFA, rate, lockout or session controls',
   'complete inventory of interactive human sign-in pathways', 'cannot create a human browser session'])
   assert.ok(documentation.includes(limitation), `Authentication strength/fallback statement is missing: ${limitation}`);
+for (const exceptionControl of ['customer may approve a documented exception', 'accountable customer owner',
+  'Air-gap or an internal network', 'must not claim conformance with ASVS 6.3.3'])
+  assert.ok(documentation.includes(exceptionControl), `MFA exception control is undocumented: ${exceptionControl}`);
+assert.match(operations, /"mfa-policy"[\s\S]*"degraded"[\s\S]*documented deployment exception/,
+  'Platform Manager must visibly report an MFA exception');
 
 assert.match(identityEndpoints, /MapPost\("\/session", SignIn\).*RequireRateLimiting\("authentication"\)/);
 assert.match(directoryEndpoints, /MapPost\("\/api\/session\/directory", SignIn\).*RequireRateLimiting\("authentication"\)/);
@@ -49,4 +55,5 @@ process.stdout.write(`${JSON.stringify({ authenticationPathwayDocumentation: 'pa
   providerStrengthFallbacksDocumented: 2, publicPathwayFlags: 8,
   reviewedBrowserSessionWriterFiles: actualSessionWriters.size,
   reviewedBrowserSessionWriterCalls: [...actualSessionWriters.values()].reduce((sum, value) => sum + value, 0),
-  machineAuthenticationSeparated: true })}\n`);
+  machineAuthenticationSeparated: true, documentedMfaException: true,
+  mfaExceptionVisibleToPlatformManager: true })}\n`);
