@@ -12,11 +12,12 @@ assert.match(access, /permits multiple concurrent browser sessions/);
 assert.match(access, /applies no numeric count limit/);
 assert.match(access, /never evicts an older session merely because another browser signs in/);
 assert.match(access, /invalidates every earlier session at its next request/);
-assert.match(access, /no per-session list, selective termination or oldest-session eviction/);
+assert.match(access, /authoritative server-side registry/);
+assert.match(access, /terminate one selected session or all active sessions/);
 assert.match(identity, /SecurityVersion/);
-assert.doesNotMatch(context, /DbSet<[^>]*(?:BrowserSession|UserSession|LoginSession)/i);
+assert.match(context, /DbSet<BrowserSession> BrowserSessions/);
 
 process.stdout.write(`${JSON.stringify({ concurrentSessionPolicyDocumentation: 'passed',
   numericMaximum: null, concurrentSessionsAllowed: true, loginEviction: false,
-  perSessionRegistry: false, globalRevocationMechanism: 'security-version',
-  selectiveTermination: false })}\n`);
+  perSessionRegistry: true, globalRevocationMechanism: 'security-version',
+  selectiveTermination: true })}\n`);

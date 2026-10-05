@@ -109,6 +109,21 @@ internal static class OrganizationIdentityModelConfiguration
         identity.HasIndex(value => value.NormalizedUsername).IsUnique();
         identity.HasOne(value => value.Person).WithMany(value => value.LoginIdentities).HasForeignKey(value => value.PersonId).OnDelete(DeleteBehavior.Restrict);
 
+        var browserSession = modelBuilder.Entity<BrowserSession>();
+        browserSession.ToTable("browser_sessions");
+        browserSession.HasKey(value => value.Id);
+        browserSession.Property(value => value.Id).HasColumnName("id");
+        browserSession.Property(value => value.LoginIdentityId).HasColumnName("login_identity_id");
+        browserSession.Property(value => value.SecurityVersion).HasColumnName("security_version");
+        browserSession.Property(value => value.AuthenticationMethod).HasColumnName("authentication_method").HasMaxLength(40).IsRequired();
+        browserSession.Property(value => value.UserAgent).HasColumnName("user_agent").HasMaxLength(300).IsRequired();
+        browserSession.Property(value => value.CreatedAt).HasColumnName("created_at");
+        browserSession.Property(value => value.LastSeenAt).HasColumnName("last_seen_at");
+        browserSession.Property(value => value.ExpiresAt).HasColumnName("expires_at");
+        browserSession.Property(value => value.RevokedAt).HasColumnName("revoked_at");
+        browserSession.HasIndex(value => new { value.LoginIdentityId, value.RevokedAt, value.ExpiresAt });
+        browserSession.HasOne(value => value.LoginIdentity).WithMany().HasForeignKey(value => value.LoginIdentityId).OnDelete(DeleteBehavior.Restrict);
+
         var passwordResetGrant = modelBuilder.Entity<PasswordResetGrant>();
         passwordResetGrant.ToTable("password_reset_grants");
         passwordResetGrant.HasKey(value => value.Id);

@@ -35,12 +35,13 @@ public static partial class IdentityEndpoints
         identity.Person.UpdateWithEmail(displayName, identity.Person.IsActive, email);
         if (emailChanged) identity.AdvanceSecurityVersion();
         database.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), null, identity.PersonId, "profile.updated", "person", identity.PersonId, DateTimeOffset.UtcNow));
+        var browserSession = emailChanged ? StartBrowserSession(identity, database, context, "profile-reauthentication") : null;
         await database.SaveChangesAsync(cancellationToken);
         // A display-name-only edit is not re-authentication and must not restart the
         // absolute session lifetime. Email changes require the current password and
         // advance the security version, so that path deliberately renews this session.
         if (emailChanged)
-            await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, CreatePrincipal(identity));
+            await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, CreatePrincipal(identity, browserSession!.Id));
         return Results.Ok(new { identity.Username, identity.Person.DisplayName, identity.MustChangePassword, hasProfileImage = identity.Person.ProfileImage is not null });
     }
 
@@ -55,9 +56,10 @@ public static partial class IdentityEndpoints
         if (passwordPolicy.Validate(request.NewPassword, identity.Username, identity.Person.DisplayName, identity.Person.Email) is { } passwordError)
             return Results.ValidationProblem(new Dictionary<string, string[]> { ["newPassword"] = [passwordError] });
         identity.SetPasswordHash(passwordHasher.HashPassword(identity, request.NewPassword));
+        var browserSession = StartBrowserSession(identity, database, context, "password-change");
         database.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), null, identity.PersonId, "password.changed", "login-identity", identity.Id, DateTimeOffset.UtcNow));
         await database.SaveChangesAsync(cancellationToken);
-        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, CreatePrincipal(identity));
+        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, CreatePrincipal(identity, browserSession.Id));
         return Results.NoContent();
     }
 

@@ -194,6 +194,8 @@ For `20261002220000_WorkActivityArchiveGuards`, stop every old API/worker instan
 
 For `20261004085939_AutomaticWorkLifecycle`, the new writer automatically locks eligible terminal WorkItems and archives them after operational follow-up and required delivery are resolved. Existing terminal records are reconciled in bounded batches after startup; they are retained, not deleted. Previously explicitly reopened active records remain paused for editing. Learning treatment can continue against locked/archived WorkItems while original observations and whole-Site boundaries remain protected. Existing delivery failures can keep a task locked but unarchived until resolved. No new customer retention period is introduced.
 
+Migration `20261005220000_AddBrowserSessionRegistry` adds the authoritative browser-session registry. Cookies issued by an older version do not contain a registry identifier and are rejected after upgrade, so every user must sign in once after deployment. This does not remove accounts or operational data. Verify Profile lists the new current session and that terminating a separate test session rejects only that browser.
+
 Once automatic facts or editing pauses exist, downgrade is blocked: use a forward fix or matched database/key/configuration/image restore. Keep all old replicas stopped throughout the upgrade. See [automatic lifecycle scope](../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md#automatic-workitem-lifecycle--2026-10-04).
 
 ## Failure and rollback

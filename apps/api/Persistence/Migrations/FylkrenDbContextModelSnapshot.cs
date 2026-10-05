@@ -1317,6 +1317,56 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.ToTable("instance_identity", (string)null);
                 });
 
+            modelBuilder.Entity("Fylkren.Api.Identity.BrowserSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AuthenticationMethod")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("authentication_method");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<DateTimeOffset>("LastSeenAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_seen_at");
+
+                    b.Property<Guid>("LoginIdentityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("login_identity_id");
+
+                    b.Property<DateTimeOffset?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("revoked_at");
+
+                    b.Property<long>("SecurityVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("security_version");
+
+                    b.Property<string>("UserAgent")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("user_agent");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LoginIdentityId", "RevokedAt", "ExpiresAt");
+
+                    b.ToTable("browser_sessions", (string)null);
+                });
+
             modelBuilder.Entity("Fylkren.Api.Identity.ExternalIdentityLink", b =>
                 {
                     b.Property<Guid>("Id")
@@ -4881,6 +4931,17 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasForeignKey("PeerInstanceId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Identity.BrowserSession", b =>
+                {
+                    b.HasOne("Fylkren.Api.Identity.LoginIdentity", "LoginIdentity")
+                        .WithMany()
+                        .HasForeignKey("LoginIdentityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("LoginIdentity");
                 });
 
             modelBuilder.Entity("Fylkren.Api.Identity.ExternalIdentityLink", b =>

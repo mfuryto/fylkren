@@ -47,10 +47,11 @@ public static partial class IdentityEndpoints
         var secret = setup.Secret;
         if (!totp.Verify(secret, request.Code)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["code"] = ["The code could not be verified."] });
         var recoveryCodes = totp.CreateRecoveryCodes(); identity.EnableTotp(totp.ProtectSecret(secret), recoveryCodes.Select(totp.HashRecoveryCode));
+        var browserSession = StartBrowserSession(identity, database, context, "totp-enrollment");
         database.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), null, identity.PersonId, "totp.enabled", "login-identity", identity.Id, DateTimeOffset.UtcNow));
         await database.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
-        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, CreatePrincipal(identity));
+        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, CreatePrincipal(identity, browserSession.Id));
         return Results.Ok(new { recoveryCodes });
     }
 
@@ -62,9 +63,11 @@ public static partial class IdentityEndpoints
         if (string.IsNullOrEmpty(request.Password) || request.Password.Length > 128)
             return Results.Problem(statusCode: 400, title: "The password is incorrect.");
         if (passwordHasher.VerifyHashedPassword(identity, identity.PasswordHash, request.Password) == PasswordVerificationResult.Failed) return Results.Problem(statusCode: 400, title: "The password is incorrect.");
-        identity.DisableTotp(); database.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), null, identity.PersonId, "totp.disabled", "login-identity", identity.Id, DateTimeOffset.UtcNow));
+        identity.DisableTotp();
+        var browserSession = StartBrowserSession(identity, database, context, "totp-removal");
+        database.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), null, identity.PersonId, "totp.disabled", "login-identity", identity.Id, DateTimeOffset.UtcNow));
         await database.SaveChangesAsync(cancellationToken);
-        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, CreatePrincipal(identity));
+        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, CreatePrincipal(identity, browserSession.Id));
         return Results.NoContent();
     }
 }

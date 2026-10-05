@@ -73,4 +73,10 @@ export const profilePtPT = {
   totpSetupApiFailed: "Não foi possível iniciar a configuração de dois fatores.",
   totpConfirmApiFailed: "O código não pôde ser verificado.",
   totpDisableApiFailed: "A autenticação de dois fatores não pôde ser desabilitada.",
+  browserSessions: "Sessões ativas",
+  browserSessionsIntro: "Reveja os navegadores com sessão iniciada na sua conta e termine as sessões que não reconhece.",
+  currentBrowserSession: "Este navegador",
+  browserSession: "Sessão do navegador",
+  unknownBrowser: "Navegador desconhecido",
+  sessionReauthenticationHelp: "Introduza a palavra-passe se o início de sessão tiver mais de cinco minutos. O início de sessão externo deve ser repetido antes de gerir sessões anteriores.",
 } satisfies Partial<Record<MessageKey, string>>;

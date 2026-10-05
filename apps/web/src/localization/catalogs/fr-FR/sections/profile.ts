@@ -73,4 +73,10 @@ export const profileFrFR = {
   totpSetupApiFailed: "La configuration à deux facteurs n'a pas pu être démarrée.",
   totpConfirmApiFailed: "Le code n'a pas pu être vérifié.",
   totpDisableApiFailed: "L'authentification à deux facteurs ne peut être désactivée.",
+  browserSessions: "Sessions actives",
+  browserSessionsIntro: "Vérifiez les navigateurs connectés à votre compte et fermez les sessions que vous ne reconnaissez pas.",
+  currentBrowserSession: "Ce navigateur",
+  browserSession: "Session de navigateur",
+  unknownBrowser: "Navigateur inconnu",
+  sessionReauthenticationHelp: "Saisissez votre mot de passe si la connexion date de plus de cinq minutes. La connexion externe doit être répétée avant de gérer les anciennes sessions.",
 } satisfies Partial<Record<MessageKey, string>>;

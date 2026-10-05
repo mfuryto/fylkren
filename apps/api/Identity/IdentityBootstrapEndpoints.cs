@@ -50,15 +50,16 @@ public static partial class IdentityEndpoints
         try
         {
             identity.RecordSignIn(now);
+            var browserSession = StartBrowserSession(identity, database, context, "bootstrap", now);
             await database.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
+            await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, CreatePrincipal(identity, browserSession.Id, now));
         }
         catch (DbUpdateException)
         {
             await transaction.RollbackAsync(cancellationToken);
             return Results.Conflict(new { error = "Initial setup has already been completed or was completed concurrently." });
         }
-        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, CreatePrincipal(identity));
         return Results.Created("/api/session", new { identity.Username, person.DisplayName });
     }
 }

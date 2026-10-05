@@ -73,4 +73,10 @@ export const profileLtLT = {
   totpSetupApiFailed: "Nepavyko paleisti dviejų faktorių nustatymų.",
   totpConfirmApiFailed: "Kodo nebuvo galima patikrinti.",
   totpDisableApiFailed: "Dviejų faktorių autentiškumo patvirtinimo nepavyko išjungti.",
+  browserSessions: "Aktyvūs seansai",
+  browserSessionsIntro: "Peržiūrėkite prie paskyros prisijungusias naršykles ir nutraukite neatpažįstamus seansus.",
+  currentBrowserSession: "Ši naršyklė",
+  browserSession: "Naršyklės seansas",
+  unknownBrowser: "Nežinoma naršyklė",
+  sessionReauthenticationHelp: "Įveskite slaptažodį, jei prisijungta prieš daugiau nei penkias minutes. Prieš tvarkant senesnius seansus išorinį prisijungimą reikia pakartoti.",
 } satisfies Partial<Record<MessageKey, string>>;

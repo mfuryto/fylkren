@@ -73,4 +73,10 @@ export const profileSvSE = {
   totpSetupApiFailed: "Tvåfaktorsuppställningen kunde inte startas.",
   totpConfirmApiFailed: "Koden kunde inte verifieras.",
   totpDisableApiFailed: "Tvåfaktorsautentisering kunde inte inaktiveras.",
+  browserSessions: "Aktiva sessioner",
+  browserSessionsIntro: "Granska webbläsare som är inloggade på kontot och avsluta sessioner som du inte känner igen.",
+  currentBrowserSession: "Den här webbläsaren",
+  browserSession: "Webbläsarsession",
+  unknownBrowser: "Okänd webbläsare",
+  sessionReauthenticationHelp: "Ange lösenordet om inloggningen är äldre än fem minuter. Extern inloggning måste göras om innan äldre sessioner kan hanteras.",
 } satisfies Partial<Record<MessageKey, string>>;

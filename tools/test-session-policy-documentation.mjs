@@ -9,7 +9,7 @@ const security = readFileSync('docs/security/SECURITY_AND_RETENTION.md', 'utf8')
 assert.match(registration, /ExpireTimeSpan = TimeSpan\.FromHours\(1\)/);
 assert.match(registration, /SlidingExpiration = true/);
 assert.match(registration, /now - sessionStartedAt >= TimeSpan\.FromHours\(12\)/);
-assert.match(registration, /CreatePrincipal\(\s*sessionIdentity, sessionStartedAt/);
+assert.match(registration, /CreatePrincipal\(\s*sessionIdentity, browserSession\.Id, sessionStartedAt/);
 assert.match(support, /"fylkren:session_started_at"/);
 assert.match(access, /one-hour sliding inactivity limit and a twelve-hour absolute limit/);
 assert.match(access, /NIST SP 800-63B-4 AAL2 reauthentication limits/);

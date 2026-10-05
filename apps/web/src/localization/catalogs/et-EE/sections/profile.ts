@@ -73,4 +73,10 @@ export const profileEtEE = {
   totpSetupApiFailed: "Kaheastmelist seadistamist ei saanud alustada.",
   totpConfirmApiFailed: "Koodi kontrollimine nurjus.",
   totpDisableApiFailed: "Kaheastmelist autentimist ei saa keelata.",
+  browserSessions: "Aktiivsed seansid",
+  browserSessionsIntro: "Vaadake üle kontole sisse loginud brauserid ja lõpetage seansid, mida te ei tunne.",
+  currentBrowserSession: "See brauser",
+  browserSession: "Brauseriseanss",
+  unknownBrowser: "Tundmatu brauser",
+  sessionReauthenticationHelp: "Sisestage parool, kui sisselogimisest on möödas üle viie minuti. Vanemate seansside haldamiseks tuleb väline sisselogimine uuesti teha.",
 } satisfies Partial<Record<MessageKey, string>>;

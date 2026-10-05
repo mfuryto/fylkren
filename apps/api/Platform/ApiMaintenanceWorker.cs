@@ -9,6 +9,7 @@ internal sealed class ApiMaintenanceWorker(
     ILogger<ApiMaintenanceWorker> logger) : BackgroundService
 {
     internal static readonly TimeSpan IdempotencyRetention = TimeSpan.FromDays(7);
+    internal static readonly TimeSpan InactiveBrowserSessionRetention = TimeSpan.FromDays(1);
     internal const int FederationRetentionBatchSize = 10_000;
     private static readonly TimeSpan Interval = TimeSpan.FromHours(24);
 
@@ -34,6 +35,15 @@ internal sealed class ApiMaintenanceWorker(
                     logger.LogInformation(
                         "Removed {RemovedCount} expired WebAuthn flow grants",
                         removedWebAuthnFlows);
+                var inactiveSessionCutoff = DateTimeOffset.UtcNow - InactiveBrowserSessionRetention;
+                var removedBrowserSessions = await database.BrowserSessions
+                    .Where(session => session.ExpiresAt < inactiveSessionCutoff ||
+                        session.RevokedAt != null && session.RevokedAt < inactiveSessionCutoff)
+                    .ExecuteDeleteAsync(stoppingToken);
+                if (removedBrowserSessions > 0)
+                    logger.LogInformation(
+                        "Removed {RemovedCount} inactive browser-session records",
+                        removedBrowserSessions);
                 var removedProbeNonces = await database.FederationProbeNonces
                     .Where(probe => probe.ReceivedAt < DateTimeOffset.UtcNow - TimeSpan.FromDays(7))
                     .ExecuteDeleteAsync(stoppingToken);

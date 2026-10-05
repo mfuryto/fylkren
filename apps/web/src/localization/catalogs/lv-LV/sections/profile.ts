@@ -73,4 +73,10 @@ export const profileLvLV = {
   totpSetupApiFailed: "Nevarēja sākt divu faktoru uzstādīšanu.",
   totpConfirmApiFailed: "Kodu neizdevās pārbaudīt.",
   totpDisableApiFailed: "Nevarēja atslēgt divu faktoru autentifikāciju.",
+  browserSessions: "Aktīvās sesijas",
+  browserSessionsIntro: "Pārskatiet pārlūkprogrammas, kas pieteikušās jūsu kontā, un pārtrauciet neatpazītās sesijas.",
+  currentBrowserSession: "Šī pārlūkprogramma",
+  browserSession: "Pārlūka sesija",
+  unknownBrowser: "Nezināma pārlūkprogramma",
+  sessionReauthenticationHelp: "Ievadiet paroli, ja pieteikšanās notikusi pirms vairāk nekā piecām minūtēm. Pirms vecāku sesiju pārvaldības ārējā pieteikšanās jāatkārto.",
 } satisfies Partial<Record<MessageKey, string>>;

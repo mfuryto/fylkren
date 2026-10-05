@@ -73,4 +73,10 @@ export const profileItIT = {
   totpSetupApiFailed: "Non poteva essere avviato un setup a due fattori.",
   totpConfirmApiFailed: "Il codice non poteva essere verificato.",
   totpDisableApiFailed: "L'autenticazione a due fattori non potrebbe essere disattivata.",
+  browserSessions: "Sessioni attive",
+  browserSessionsIntro: "Controlla i browser connessi al tuo account e termina le sessioni che non riconosci.",
+  currentBrowserSession: "Questo browser",
+  browserSession: "Sessione del browser",
+  unknownBrowser: "Browser sconosciuto",
+  sessionReauthenticationHelp: "Inserisci la password se l’accesso risale a più di cinque minuti fa. L’accesso esterno deve essere ripetuto prima di gestire le sessioni precedenti.",
 } satisfies Partial<Record<MessageKey, string>>;

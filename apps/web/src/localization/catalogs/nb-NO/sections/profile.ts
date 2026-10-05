@@ -71,4 +71,10 @@ export const profileNbNO = {
   totpSetupApiFailed: "Tofaktoroppsettet kunne ikke startes.",
   totpConfirmApiFailed: "Koden kunne ikke bekreftes.",
   totpDisableApiFailed: "Tofaktor kunne ikke deaktiveres.",
+  browserSessions: "Aktive økter",
+  browserSessionsIntro: "Se nettleserne som er logget inn på kontoen, og avslutt økter du ikke kjenner igjen.",
+  currentBrowserSession: "Denne nettleseren",
+  browserSession: "Nettleserøkt",
+  unknownBrowser: "Ukjent nettleser",
+  sessionReauthenticationHelp: "Oppgi passordet hvis innloggingen er eldre enn fem minutter. Ekstern innlogging må gjentas før eldre økter kan behandles.",
 } as const;

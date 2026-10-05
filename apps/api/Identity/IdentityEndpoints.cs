@@ -27,6 +27,9 @@ public static partial class IdentityEndpoints
             })
             .RequireAuthorization();
         group.MapGet("/profile", GetProfile).RequireAuthorization();
+        group.MapGet("/profile/sessions", ListBrowserSessions).RequireAuthorization();
+        group.MapDelete("/profile/sessions/{id:guid}", RevokeBrowserSession).RequireAuthorization().RequireRateLimiting("authentication");
+        group.MapDelete("/profile/sessions", RevokeAllBrowserSessions).RequireAuthorization().RequireRateLimiting("authentication");
         group.MapPost("/profile/2fa/setup", BeginTotpSetup).RequireAuthorization().RequireRateLimiting("authentication");
         group.MapPost("/profile/2fa/confirm", ConfirmTotpSetup).RequireAuthorization().RequireRateLimiting("authentication");
         group.MapDelete("/profile/2fa", DisableTotp).RequireAuthorization().RequireRateLimiting("authentication");

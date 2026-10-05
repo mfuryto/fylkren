@@ -73,4 +73,10 @@ export const profileCsCZ = {
   totpSetupApiFailed: "Nelze spustit nastavení faktoru T2.",
   totpConfirmApiFailed: "Kód nemohl být ověřen.",
   totpDisableApiFailed: "Autentizace Two- faktoru nemohla být zakázána.",
+  browserSessions: "Aktivní relace",
+  browserSessionsIntro: "Zkontrolujte prohlížeče přihlášené k vašemu účtu a ukončete relace, které nepoznáváte.",
+  currentBrowserSession: "Tento prohlížeč",
+  browserSession: "Relace prohlížeče",
+  unknownBrowser: "Neznámý prohlížeč",
+  sessionReauthenticationHelp: "Pokud je přihlášení starší než pět minut, zadejte heslo. U externího přihlášení je nutné se před správou starších relací přihlásit znovu.",
 } satisfies Partial<Record<MessageKey, string>>;

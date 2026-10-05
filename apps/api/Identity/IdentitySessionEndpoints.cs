@@ -96,8 +96,9 @@ public static partial class IdentityEndpoints
             return Results.Accepted(value: new { requiresTwoFactor = true, challengeToken = totp.CreateChallenge(identity.Id, identity.SecurityVersion, TimeSpan.FromMinutes(5)) });
         }
         identity.RecordSignIn(now);
+        var browserSession = StartBrowserSession(identity, database, context, "local-password", now);
         await database.SaveChangesAsync(cancellationToken);
-        var principal = CreatePrincipal(identity);
+        var principal = CreatePrincipal(identity, browserSession.Id, now);
         await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
         return Results.NoContent();
     }
@@ -143,9 +144,10 @@ public static partial class IdentityEndpoints
         }
         identity.ClearAuthenticationFailures();
         identity.RecordSignIn(now);
+        var browserSession = StartBrowserSession(identity, database, context, "local-password-totp", now);
         await database.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
-        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, CreatePrincipal(identity));
+        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, CreatePrincipal(identity, browserSession.Id, now));
         return Results.NoContent();
     }
 }

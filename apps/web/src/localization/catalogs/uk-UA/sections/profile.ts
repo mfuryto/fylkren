@@ -73,4 +73,10 @@ export const profileUkUA = {
   totpSetupApiFailed: "Не можна розпочати роботу два фактори.",
   totpConfirmApiFailed: "Код не може бути перевірений.",
   totpDisableApiFailed: "Не можна відключати автентифікацію двофактора.",
+  browserSessions: "Активні сеанси",
+  browserSessionsIntro: "Перегляньте браузери, у яких виконано вхід до вашого облікового запису, і завершіть невідомі сеанси.",
+  currentBrowserSession: "Цей браузер",
+  browserSession: "Сеанс браузера",
+  unknownBrowser: "Невідомий браузер",
+  sessionReauthenticationHelp: "Введіть пароль, якщо після входу минуло понад п’ять хвилин. Перед керуванням старішими сеансами зовнішній вхід потрібно повторити.",
 } satisfies Partial<Record<MessageKey, string>>;

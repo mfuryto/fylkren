@@ -7,6 +7,7 @@ import { beginTotpSetup, changeProfilePassword, confirmTotpSetup, deleteProfileI
 import type { Session } from "../work/WorkContextModels";
 import { PasskeysPanel } from "./PasskeysPanel";
 import { PersonalNotificationsPanel } from "./PersonalNotificationsPanel";
+import { BrowserSessionsPanel } from "./BrowserSessionsPanel";
 import { useTranslation } from "../localization/LocalizationProvider";
 
 export function ProfilePage({
@@ -359,6 +360,7 @@ export function ProfilePage({
         </div>
       </div>
       <PersonalNotificationsPanel disabled={busy||Boolean(session.mustChangePassword)}/>
+      <BrowserSessionsPanel disabled={busy || Boolean(session.mustChangePassword)} onCurrentSessionRevoked={() => window.location.reload()} />
       <div className="profile-authentication-grid">
       {!session.isDirectoryManaged && configuration.authentication.mfaEnabled !== false && (
         <section className="panel stacked-form two-factor-panel">

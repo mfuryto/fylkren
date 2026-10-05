@@ -73,4 +73,10 @@ export const profileDaDK = {
   totpSetupApiFailed: "Tvillingefaktoropsætning kunne ikke startes.",
   totpConfirmApiFailed: "Koden kunne ikke verificeres.",
   totpDisableApiFailed: "Tvildfaktorgodkendelse kunne ikke deaktiveres.",
+  browserSessions: "Aktive sessioner",
+  browserSessionsIntro: "Gennemgå browsere, der er logget ind på din konto, og afslut sessioner, du ikke genkender.",
+  currentBrowserSession: "Denne browser",
+  browserSession: "Browsersession",
+  unknownBrowser: "Ukendt browser",
+  sessionReauthenticationHelp: "Angiv din adgangskode, hvis login er ældre end fem minutter. Eksternt login skal gentages, før ældre sessioner kan administreres.",
 } satisfies Partial<Record<MessageKey, string>>;

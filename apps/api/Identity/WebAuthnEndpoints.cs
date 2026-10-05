@@ -191,6 +191,7 @@ public static class WebAuthnEndpoints
             state.name ?? "Passkey",
             now));
         login.AdvanceSecurityVersion();
+        var browserSession = IdentityEndpoints.StartBrowserSession(login, db, context, "passkey-enrollment", now);
         db.AuditEvents.Add(new AuditEvent(
             Guid.NewGuid(), null, personId,
             "webauthn.registered", "person", personId, now));
@@ -198,7 +199,7 @@ public static class WebAuthnEndpoints
         await transaction.CommitAsync(ct);
         await context.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
-            IdentityEndpoints.CreatePrincipal(login));
+            IdentityEndpoints.CreatePrincipal(login, browserSession.Id, now));
         return Results.NoContent();
     }
 
@@ -314,11 +315,12 @@ public static class WebAuthnEndpoints
         credential.Used(result.SignCount, now);
         login.ClearAuthenticationFailures();
         login.RecordSignIn(now);
+        var browserSession = IdentityEndpoints.StartBrowserSession(login, db, context, "passkey", now);
         await db.SaveChangesAsync(ct);
         await transaction.CommitAsync(ct);
         await context.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
-            IdentityEndpoints.CreatePrincipal(login));
+            IdentityEndpoints.CreatePrincipal(login, browserSession.Id, now));
         return Results.NoContent();
     }
 
@@ -363,6 +365,7 @@ public static class WebAuthnEndpoints
 
         credential.Deactivate();
         login.AdvanceSecurityVersion();
+        var browserSession = IdentityEndpoints.StartBrowserSession(login, db, context, "passkey-removal");
         db.AuditEvents.Add(new AuditEvent(
             Guid.NewGuid(), null, personId,
             "webauthn.removed", "person", personId, DateTimeOffset.UtcNow));
@@ -370,7 +373,7 @@ public static class WebAuthnEndpoints
         await transaction.CommitAsync(ct);
         await context.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
-            IdentityEndpoints.CreatePrincipal(login));
+            IdentityEndpoints.CreatePrincipal(login, browserSession.Id));
         return Results.NoContent();
     }
 

@@ -73,4 +73,10 @@ export const profileRoRO = {
   totpSetupApiFailed: "Nu s-a putut începe o înscenare a doi factori.",
   totpConfirmApiFailed: "Codul nu a putut fi verificat.",
   totpDisableApiFailed: "Autentificarea a doi factori nu a putut fi dezactivată.",
+  browserSessions: "Sesiuni active",
+  browserSessionsIntro: "Verificați browserele conectate la cont și încheiați sesiunile pe care nu le recunoașteți.",
+  currentBrowserSession: "Acest browser",
+  browserSession: "Sesiune de browser",
+  unknownBrowser: "Browser necunoscut",
+  sessionReauthenticationHelp: "Introduceți parola dacă autentificarea are mai mult de cinci minute. Autentificarea externă trebuie repetată înainte de gestionarea sesiunilor mai vechi.",
 } satisfies Partial<Record<MessageKey, string>>;

@@ -73,4 +73,10 @@ export const profileFiFI = {
   totpSetupApiFailed: "Kaksitekijän järjestelyä ei voitu käynnistää.",
   totpConfirmApiFailed: "Koodia ei voitu varmentaa.",
   totpDisableApiFailed: "Kaksitekijän tunnistautumista ei voitu poistaa käytöstä.",
+  browserSessions: "Aktiiviset istunnot",
+  browserSessionsIntro: "Tarkista tilillesi kirjautuneet selaimet ja päätä istunnot, joita et tunnista.",
+  currentBrowserSession: "Tämä selain",
+  browserSession: "Selainistunto",
+  unknownBrowser: "Tuntematon selain",
+  sessionReauthenticationHelp: "Anna salasanasi, jos kirjautumisesta on yli viisi minuuttia. Ulkoinen kirjautuminen on tehtävä uudelleen ennen vanhempien istuntojen hallintaa.",
 } satisfies Partial<Record<MessageKey, string>>;

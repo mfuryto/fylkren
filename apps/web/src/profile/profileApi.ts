@@ -3,6 +3,7 @@ import { translateActive } from "../localization";
 import type { Session } from "../work/WorkContextModels";
 
 export type TotpSetup = { secret: string; setupToken: string; provisioningUri: string };
+export type BrowserSession = { id: string; current: boolean; authenticationMethod: string; userAgent: string; createdAt: string; lastSeenAt: string; expiresAt: string };
 
 export const loadSession = () => apiGet<Session>("/api/session", translateActive("sessionRefreshFailed"));
 export const saveProfile = (displayName: string, email: string, currentPassword: string) => apiMutate("/api/profile", "PUT", { displayName, email, currentPassword }, translateActive("profileSaveApiFailed"));
@@ -12,3 +13,6 @@ export const deleteProfileImage = () => apiMutate("/api/profile/image", "DELETE"
 export const beginTotpSetup = (currentPassword: string) => apiMutate<TotpSetup>("/api/profile/2fa/setup", "POST", { currentPassword }, translateActive("totpSetupApiFailed"));
 export const confirmTotpSetup = (setupToken: string, code: string) => apiMutate<{ recoveryCodes: string[] }>("/api/profile/2fa/confirm", "POST", { setupToken, code }, translateActive("totpConfirmApiFailed"));
 export const disableTotp = (password: string) => apiMutate("/api/profile/2fa", "DELETE", { password }, translateActive("totpDisableApiFailed"));
+export const loadBrowserSessions = () => apiGet<BrowserSession[]>("/api/profile/sessions", translateActive("sessionLoadFailed"));
+export const revokeBrowserSession = (id: string, currentPassword: string) => apiMutate(`/api/profile/sessions/${id}`, "DELETE", { currentPassword }, translateActive("terminateSessionsFailed"));
+export const revokeAllBrowserSessions = (currentPassword: string) => apiMutate("/api/profile/sessions", "DELETE", { currentPassword }, translateActive("terminateSessionsFailed"));

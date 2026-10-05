@@ -15,8 +15,18 @@ namespace Fylkren.Api.Identity;
 
 public static partial class IdentityEndpoints
 {
-    internal static ClaimsPrincipal CreatePrincipal(LoginIdentity identity, DateTimeOffset? sessionStartedAt = null,
-        bool directoryManaged = false)
+    internal static BrowserSession StartBrowserSession(LoginIdentity identity, FylkrenDbContext database,
+        HttpContext context, string authenticationMethod, DateTimeOffset? sessionStartedAt = null)
+    {
+        var startedAt = sessionStartedAt ?? DateTimeOffset.UtcNow;
+        var session = new BrowserSession(Guid.NewGuid(), identity.Id, identity.SecurityVersion,
+            authenticationMethod, context.Request.Headers.UserAgent.ToString(), startedAt, startedAt.AddHours(12));
+        database.BrowserSessions.Add(session);
+        return session;
+    }
+
+    internal static ClaimsPrincipal CreatePrincipal(LoginIdentity identity, Guid sessionId,
+        DateTimeOffset? sessionStartedAt = null, bool directoryManaged = false)
     {
         var now = DateTimeOffset.UtcNow;
         var claims = new List<Claim>
@@ -27,6 +37,7 @@ public static partial class IdentityEndpoints
             new("fylkren:display_name", identity.Person.DisplayName),
             new("fylkren:must_change_password", identity.MustChangePassword ? "true" : "false"),
             new("fylkren:security_version", identity.SecurityVersion.ToString()),
+            new("fylkren:session_id", sessionId.ToString()),
             new("fylkren:validated_at", now.ToUnixTimeSeconds().ToString()),
             new("fylkren:session_started_at", (sessionStartedAt ?? now).ToUnixTimeSeconds().ToString())
         };
@@ -70,6 +81,10 @@ public static partial class IdentityEndpoints
                 // ASP.NET authentication cookies are protected but self-contained. Advancing the
                 // version ensures that a copied cookie cannot be replayed after explicit sign-out.
                 identity.AdvanceSecurityVersion();
+                var now = DateTimeOffset.UtcNow;
+                await database.BrowserSessions
+                    .Where(value => value.LoginIdentityId == identityId && value.RevokedAt == null)
+                    .ExecuteUpdateAsync(update => update.SetProperty(value => value.RevokedAt, (DateTimeOffset?)now), cancellationToken);
                 await database.SaveChangesAsync(cancellationToken);
             }
         }

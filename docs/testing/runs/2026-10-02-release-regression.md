@@ -1460,6 +1460,24 @@ node tools/test-user-session-management-assessment.mjs
 
 The capability inventory reports `{"userSessionManagementAssessment":"finding","finding":"SV-096","selfContainedCookies":true,"serverSessionRegistry":false,"userCanViewActiveSessions":false,"selectiveTermination":false,"explicitSignOutTerminatesAccountSessions":true,"requiredRemediation":"reauthenticated-server-session-registry"}`. The remediation boundary is one authoritative registry with opaque session IDs, bounded metadata, backend validation/cleanup and reauthenticated profile controls. It must reconcile local and external sign-in, expiry and the new administrator termination operations before this requirement can pass. Production is untouched.
 
+## User session management closure — 2026-10-05
+
+Completes ASVS 7.5.2 and closes SV-096. Every successful local, directory, OIDC, SAML, TOTP and passkey session now creates one opaque record in the authoritative browser-session registry. Every authenticated request requires that exact unrevoked, unexpired record and the existing account security version. Profile lists only the signed-in account's active sessions with current-session, last-activity and bounded browser information. Current-password verification or a session created within the previous five minutes authorizes one-session or all-session termination; an older externally authenticated user repeats provider sign-in first. Revocation records an independent security audit event, and maintenance removes inactive registry rows after one day.
+
+Scoped commands:
+
+```sh
+dotnet build apps/api/Fylkren.Api.csproj --no-restore
+pnpm --filter @fylkren/web build
+node tools/test-user-session-management-assessment.mjs
+node tools/test-session-policy-documentation.mjs
+node tools/test-concurrent-session-policy-documentation.mjs
+node tools/run-e2e-editions.mjs --asvs-user-session-management-only
+pnpm check:docs
+```
+
+The clean-database current-candidate run reports `{"userSessionManagementRuntime":"passed","visibleSessions":3,"currentSessionIdentified":true,"selectedSessionRevoked":true,"unrelatedSessionPreserved":true,"crossAccountAccessRejected":true,"allOwnSessionsRevoked":true,"reauthentication":"current-password-or-five-minute-fresh-session","auditEventsRecorded":true}`. It creates three sessions for one person, identifies the acting browser, revokes one selected session while preserving another, rejects access to another account's session identifier, then revokes all remaining own sessions. The source/capability control additionally locks all session creation paths, per-request validation, profile controls and cleanup. The first clean install exposed and corrected missing migration registration before this successful rerun. No unrelated product suite was run. Production is untouched.
+
 ## Federated reauthentication assessment — 2026-10-04
 
 Assesses ASVS 7.6.1 as Finding SV-097. Fylkren enforces its one-hour inactivity and twelve-hour absolute cookie limits, while OIDC and SAML providers independently own their upstream sessions. The documented boundary accurately says that local sign-out/expiry does not terminate the provider session. Source review confirms that Fylkren sends no OIDC `max_age`, verifies no `auth_time`, requests no forced SAML reauthentication and implements no coordinated provider logout. A still-active upstream session can consequently create a new Fylkren session without another visible credential prompt.

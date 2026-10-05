@@ -4,6 +4,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Let users review active browser sessions in Profile and, after recent authentication, terminate one selected session or all sessions; validate every cookie against the authoritative session registry and audit revocation.
 - Require fresh upstream authentication for every new OIDC or SAML session: OIDC now requests explicit login and verifies signed authentication time, while SAML requests forced authentication.
 - Generate CycloneDX SBOMs for immutable API/web release images and source npm/NuGet dependencies, with a manifest binding component inventories and hashes to the source commit and image IDs.
 

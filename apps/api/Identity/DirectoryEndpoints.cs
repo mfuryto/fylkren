@@ -60,10 +60,12 @@ public static class DirectoryEndpoints
             return Results.Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Invalid username or password");
         identity.Person.UpdateDirectoryProfile(displayName, email);
         link.UpdateUsername(directoryUser.Username);
-        identity.RecordSignIn(DateTimeOffset.UtcNow);
+        var now = DateTimeOffset.UtcNow;
+        identity.RecordSignIn(now);
+        var browserSession = IdentityEndpoints.StartBrowserSession(identity, database, context, $"directory-{provider}", now);
         await database.SaveChangesAsync(cancellationToken);
         await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-            IdentityEndpoints.CreatePrincipal(identity, directoryManaged: true));
+            IdentityEndpoints.CreatePrincipal(identity, browserSession.Id, now, directoryManaged: true));
         return Results.NoContent();
     }
 

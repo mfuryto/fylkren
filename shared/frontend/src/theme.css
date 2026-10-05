@@ -426,6 +426,12 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--brand); }
 .notification-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 18px; }
 .profile-authentication-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
 .profile-authentication-grid .two-factor-panel { height: 100%; }
+.browser-sessions-panel { margin-top: 18px; }
+.browser-sessions-panel .compact-list { display: grid; }
+.browser-sessions-panel .compact-list-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.browser-sessions-panel .compact-list-row > div { display: grid; gap: 2px; min-width: 0; }
+.browser-sessions-panel .compact-list-row span { overflow-wrap: anywhere; }
+.browser-sessions-panel > .danger-button { justify-self: start; }
 .two-factor-panel > button { justify-self: start; }
 .totp-secret, .totp-uri { display: block; overflow-wrap: anywhere; padding: 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface-subtle); }
 .totp-qr-code { width: 240px; max-width: 100%; height: auto; padding: 8px; border: 1px solid var(--border); border-radius: 6px; background: white; }

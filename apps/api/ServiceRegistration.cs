@@ -232,8 +232,10 @@ internal static class ServiceRegistration
                         !await IdentityEndpoints.HasActiveAccess(identity.PersonId, database, context.HttpContext.RequestAborted))
                     { context.Fail("Linked Fylkren identity is inactive or has no active access."); return; }
                     identity.RecordSignIn(DateTimeOffset.UtcNow);
+                    var browserSession = IdentityEndpoints.StartBrowserSession(
+                        identity, database, context.HttpContext, "oidc");
                     await database.SaveChangesAsync();
-                    context.Principal = IdentityEndpoints.CreatePrincipal(identity);
+                    context.Principal = IdentityEndpoints.CreatePrincipal(identity, browserSession.Id);
                 };
             });
         authentication.AddSaml2(Saml2Defaults.Scheme, options =>
@@ -427,24 +429,38 @@ internal static class ServiceRegistration
             }
 
             var sessionDatabase = context.HttpContext.RequestServices.GetRequiredService<FylkrenDbContext>();
+            if (!Guid.TryParse(context.Principal.FindFirst("fylkren:session_id")?.Value, out var sessionId))
+            {
+                context.RejectPrincipal();
+                await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return;
+            }
             var sessionIdentity = await sessionDatabase.LoginIdentities.Include(value => value.Person)
                 .SingleOrDefaultAsync(value => value.Id == identityId && value.IsActive && value.Person.IsActive);
+            var browserSession = await sessionDatabase.BrowserSessions
+                .SingleOrDefaultAsync(value => value.Id == sessionId && value.LoginIdentityId == identityId);
             var securityVersionValue = context.Principal.FindFirst("fylkren:security_version")?.Value;
             var securityVersionMatches = long.TryParse(securityVersionValue, out var securityVersion) &&
                 sessionIdentity?.SecurityVersion == securityVersion;
             var hasAccess = sessionIdentity is not null &&
                 securityVersionMatches &&
+                browserSession is not null && browserSession.IsActive(now, securityVersion) &&
                 (sessionIdentity.IsPlatformManager ||
                  await IdentityEndpoints.HasActiveAccess(sessionIdentity.PersonId, sessionDatabase, context.HttpContext.RequestAborted));
-            if (!hasAccess || sessionIdentity is null)
+            if (!hasAccess || sessionIdentity is null || browserSession is null)
             {
                 context.RejectPrincipal();
                 await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 return;
             }
 
+            if (now - browserSession.LastSeenAt >= TimeSpan.FromMinutes(2))
+            {
+                browserSession.Seen(now);
+                await sessionDatabase.SaveChangesAsync(context.HttpContext.RequestAborted);
+            }
             context.ReplacePrincipal(IdentityEndpoints.CreatePrincipal(
-                sessionIdentity, sessionStartedAt, directoryManaged));
+                sessionIdentity, browserSession.Id, sessionStartedAt, directoryManaged));
             context.ShouldRenew = true;
             return;
         }
@@ -483,7 +499,6 @@ internal static class ServiceRegistration
         }
 
         identity.RecordSignIn(DateTimeOffset.UtcNow);
-        await database.SaveChangesAsync();
         var externalSessionStartedAt = context.Properties.IssuedUtc ?? DateTimeOffset.UtcNow;
         if (DateTimeOffset.UtcNow - externalSessionStartedAt >= TimeSpan.FromHours(12))
         {
@@ -492,7 +507,10 @@ internal static class ServiceRegistration
             return;
         }
 
-        context.ReplacePrincipal(IdentityEndpoints.CreatePrincipal(identity, externalSessionStartedAt));
+        var samlBrowserSession = IdentityEndpoints.StartBrowserSession(
+            identity, database, context.HttpContext, "saml", externalSessionStartedAt);
+        await database.SaveChangesAsync();
+        context.ReplacePrincipal(IdentityEndpoints.CreatePrincipal(identity, samlBrowserSession.Id, externalSessionStartedAt));
         context.ShouldRenew = true;
     }
 }

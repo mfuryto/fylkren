@@ -73,4 +73,10 @@ export const profileNlNL = {
   totpSetupApiFailed: "Er kon niet met twee factoren worden begonnen.",
   totpConfirmApiFailed: "De code kon niet worden geverifieerd.",
   totpDisableApiFailed: "Twee-factor authenticatie kon niet worden uitgeschakeld.",
+  browserSessions: "Actieve sessies",
+  browserSessionsIntro: "Controleer de browsers die bij uw account zijn aangemeld en beëindig sessies die u niet herkent.",
+  currentBrowserSession: "Deze browser",
+  browserSession: "Browsersessie",
+  unknownBrowser: "Onbekende browser",
+  sessionReauthenticationHelp: "Voer uw wachtwoord in als de aanmelding langer dan vijf minuten geleden is. Extern aanmelden moet worden herhaald voordat oudere sessies kunnen worden beheerd.",
 } satisfies Partial<Record<MessageKey, string>>;

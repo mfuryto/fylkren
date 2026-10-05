@@ -73,4 +73,10 @@ export const profileDeDE = {
   totpSetupApiFailed: "Zwei-Faktor-Setup konnte nicht gestartet werden.",
   totpConfirmApiFailed: "Der Code konnte nicht verifiziert werden.",
   totpDisableApiFailed: "Die Zwei-Faktor-Authentifizierung konnte nicht deaktiviert werden.",
+  browserSessions: "Aktive Sitzungen",
+  browserSessionsIntro: "Prüfen Sie die Browser, die bei Ihrem Konto angemeldet sind, und beenden Sie unbekannte Sitzungen.",
+  currentBrowserSession: "Dieser Browser",
+  browserSession: "Browsersitzung",
+  unknownBrowser: "Unbekannter Browser",
+  sessionReauthenticationHelp: "Geben Sie Ihr Passwort ein, wenn die Anmeldung länger als fünf Minuten zurückliegt. Eine externe Anmeldung muss wiederholt werden, bevor ältere Sitzungen verwaltet werden können.",
 } satisfies Partial<Record<MessageKey, string>>;

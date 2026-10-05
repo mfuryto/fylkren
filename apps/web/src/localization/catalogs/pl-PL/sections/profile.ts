@@ -73,4 +73,10 @@ export const profilePlPL = {
   totpSetupApiFailed: "Nie można uruchomić konfiguracji dwóch czynników.",
   totpConfirmApiFailed: "Kod nie mógł zostać zweryfikowany.",
   totpDisableApiFailed: "Nie można wyłączyć uwierzytelniania pod kątem czynników dwufazowych.",
+  browserSessions: "Aktywne sesje",
+  browserSessionsIntro: "Sprawdź przeglądarki zalogowane na Twoje konto i zakończ sesje, których nie rozpoznajesz.",
+  currentBrowserSession: "Ta przeglądarka",
+  browserSession: "Sesja przeglądarki",
+  unknownBrowser: "Nieznana przeglądarka",
+  sessionReauthenticationHelp: "Podaj hasło, jeśli logowanie nastąpiło ponad pięć minut temu. Przed zarządzaniem starszymi sesjami należy powtórzyć logowanie zewnętrzne.",
 } satisfies Partial<Record<MessageKey, string>>;

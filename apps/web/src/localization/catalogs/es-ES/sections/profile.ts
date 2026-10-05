@@ -73,4 +73,10 @@ export const profileEsES = {
   totpSetupApiFailed: "No se podría iniciar la configuración de dos factores.",
   totpConfirmApiFailed: "El código no se puede verificar.",
   totpDisableApiFailed: "La autenticación de dos factores no puede ser deshabilitada.",
+  browserSessions: "Sesiones activas",
+  browserSessionsIntro: "Revise los navegadores conectados a su cuenta y cierre las sesiones que no reconozca.",
+  currentBrowserSession: "Este navegador",
+  browserSession: "Sesión del navegador",
+  unknownBrowser: "Navegador desconocido",
+  sessionReauthenticationHelp: "Introduzca su contraseña si inició sesión hace más de cinco minutos. El inicio de sesión externo debe repetirse antes de administrar sesiones anteriores.",
 } satisfies Partial<Record<MessageKey, string>>;

@@ -41,6 +41,7 @@ public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options,
     public DbSet<RoleAssignment> RoleAssignments => Set<RoleAssignment>();
     public DbSet<Person> People => Set<Person>();
     public DbSet<LoginIdentity> LoginIdentities => Set<LoginIdentity>();
+    public DbSet<BrowserSession> BrowserSessions => Set<BrowserSession>();
     public DbSet<PasswordResetGrant> PasswordResetGrants => Set<PasswordResetGrant>();
     public DbSet<ExternalIdentityLink> ExternalIdentityLinks => Set<ExternalIdentityLink>();
     public DbSet<WebAuthnCredential> WebAuthnCredentials => Set<WebAuthnCredential>();
