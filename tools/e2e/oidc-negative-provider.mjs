@@ -160,7 +160,7 @@ createServer({
   if (url.pathname === '/token-key-probes') return json(response, 200, { tokenHeaderKeyRequests });
   if (url.pathname === '/mode' && request.method === 'POST') {
     const requested = new URLSearchParams(await body(request)).get('value');
-    if (!['nonce', 'audience', 'signature', 'algorithm', 'header-key'].includes(requested)) return json(response, 400, { error: 'invalid_mode' });
+    if (!['nonce', 'audience', 'signature', 'algorithm', 'header-key', 'expired', 'not-yet-valid'].includes(requested)) return json(response, 400, { error: 'invalid_mode' });
     mode = requested;
     return json(response, 200, { mode });
   }
@@ -186,7 +186,8 @@ createServer({
       aud: mode === 'audience' ? 'wrong-audience' : clientId,
       sub: subject,
       iat: now,
-      exp: now + 300,
+      exp: mode === 'expired' ? now - 600 : now + 300,
+      ...(mode === 'not-yet-valid' && { nbf: now + 600 }),
       nonce: mode === 'nonce' ? 'wrong-nonce' : record.nonce,
       name: 'Negative OIDC Fixture',
       email: 'negative-oidc@example.invalid',

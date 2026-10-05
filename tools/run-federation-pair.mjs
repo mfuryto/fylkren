@@ -1063,6 +1063,12 @@ async function assertSignedWorkReceive(receiver, syntheticPeer) {
   await expectStatus(receiver.api.post('/api/federation/v1/work', tampered),
     401, 'tampered signed work rejected');
   await expectStatus(receiver.api.post('/api/federation/v1/work', work({
+    messageId: randomUUID(), originResourceId: randomUUID(), timestamp: Math.floor(Date.now() / 1000) - 301,
+  })), 400, 'expired signed work rejected');
+  await expectStatus(receiver.api.post('/api/federation/v1/work', work({
+    messageId: randomUUID(), originResourceId: randomUUID(), timestamp: Math.floor(Date.now() / 1000) + 301,
+  })), 400, 'not-yet-valid signed work rejected');
+  await expectStatus(receiver.api.post('/api/federation/v1/work', work({
     messageId: randomUUID(), originResourceId: randomUUID(), recipientInstanceId: randomUUID(),
   })), 400, 'wrong receiver identity rejected');
   const wrongSourceSite = randomUUID();

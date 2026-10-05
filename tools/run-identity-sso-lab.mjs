@@ -540,7 +540,7 @@ try {
     username: anchorUsername, subjectId: negativeSubject,
   });
   assert.equal(negativeLink.status, 201, JSON.stringify(negativeLink.body));
-  for (const [mode, label] of [['signature', 'signature mismatch'], ['algorithm', 'non-allowlisted algorithm'], ['header-key', 'untrusted header key'], ['nonce', 'nonce mismatch'], ['audience', 'audience mismatch']]) {
+  for (const [mode, label] of [['signature', 'signature mismatch'], ['algorithm', 'non-allowlisted algorithm'], ['header-key', 'untrusted header key'], ['expired', 'expired token'], ['not-yet-valid', 'not-yet-valid token'], ['nonce', 'nonce mismatch'], ['audience', 'audience mismatch']]) {
     compose(['exec', '-T', 'api', 'curl', '--fail', '--silent', '--show-error',
       '--cacert', '/run/fylkren-identity-lab/ca.crt', '-X', 'POST', '-d', `value=${mode}`,
       `${negativeAuthority}/mode`]);
@@ -947,6 +947,7 @@ try {
     oidcSignatureMismatchRejection: 'passed',
     oidcNonAllowlistedAlgorithmRejection: 'passed',
     oidcTokenHeaderKeyRejection: 'passed',
+    oidcExpiredAndNotYetValidRejection: 'passed',
     oidcNonceMismatchRejection: 'passed',
     oidcAudienceMismatchRejection: 'passed',
     exactIssuerAndSubjectLink: 'passed',

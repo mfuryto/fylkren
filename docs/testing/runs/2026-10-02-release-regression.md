@@ -1622,3 +1622,18 @@ pnpm check:docs
 ```
 
 The inventory reports `{"selfContainedTokenKeySources":"passed","contexts":7,"tokenControlledJkuFetched":false,"tokenEmbeddedJwkTrusted":false,"configuredOrPinnedSourcesOnly":true}`. The live OIDC fixture issued an issuer/audience/nonce-valid RS256 ID token signed with a separate attacker key and supplied that key through both embedded `jwk` and `jku`. The callback returned 400 with no local session. The `jku` endpoint recorded zero requests, proving the token header did not become a network/key source. The same run retained exact issuer, foreign-JWKS metadata, valid configured-key sign-in and SAML signature checks. Existing WebAuthn, license and federation negative evidence remains linked through the inventory. Continue at 9.2.1. Production is untouched.
+
+## Self-contained token validity periods — 2026-10-05
+
+Completes ASVS 9.2.1. The seven-context inventory binds application-session inactivity/absolute expiry, protected TOTP/WebAuthn expiry, standard OIDC/SAML lifetime conditions, license NotBefore/ExpiresAt and the signed federation ±300-second acceptance window to implementation and maintained runtime evidence.
+
+Scoped commands:
+
+```sh
+node tools/test-self-contained-token-validity.mjs
+node tools/run-identity-sso-lab.mjs
+node tools/run-federation-pair.mjs --operational-only
+pnpm check:docs
+```
+
+The inventory reports `{"selfContainedTokenValidity":"passed","contexts":7,"expiredRejected":true,"notYetValidRejected":true,"validityCheckedAtAcceptance":true}`. The identity lab rejects correctly signed tokens whose `exp` is ten minutes past or `nbf` is ten minutes future, returning 400 with no session while ordinary OIDC/SAML remains green. An exploratory one-minute-expired OIDC case fell within the handler's expected five-minute clock tolerance; the final ten-minute cases distinguish supported clock skew from absent validation. The operational federation pair rejects correctly signed work at 301 seconds stale and 301 seconds future, then passes receipt/retry, progress, answer, privacy, request and cancellation flows. Existing focused session evidence rejects tickets immediately past one-hour inactivity and twelve-hour absolute boundaries; existing license evidence rejects an expired signed license. Continue at 9.2.2. Production is untouched.
