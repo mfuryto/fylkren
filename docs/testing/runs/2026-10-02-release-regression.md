@@ -1561,3 +1561,15 @@ node tools/test-trusted-service-authorization.mjs
 ```
 
 The control reports `{"trustedServiceAuthorization":"passed","serverPolicyLayers":5,"globalAuthenticatedFallback":true,"directHttpNegativeEvidence":true,"clientUiDependency":false}`. Production is untouched.
+
+## Cross-Site isolation completion — 2026-10-05
+
+Completes ASVS 8.4.1 by reconciling the complete authorization/resource inventory with maintained multi-Site behavior. Direct HTTP cases reject unrelated-Site administration, task lists/details, reports, workload, planning, execution, workflows and templates, plus both Site/object GUID substitution directions. Specialized suites retain the same boundary for comments, decisions, risks, learning, activity/lifecycle, portability and intentionally bounded cross-Site requests.
+
+Scoped command:
+
+```sh
+node tools/test-cross-site-isolation-inventory.mjs
+```
+
+The control reports `{"crossSiteIsolationInventory":"passed","resourceClasses":10,"directHttpBoundaries":14,"specializedSuites":6,"concurrentSnapshotIsolation":true,"concurrentCountIsolation":true}`. Existing PostgreSQL evidence proves that a concurrent independent-Site writer cannot enter another Site's repeatable-read export, and concurrent navigation counts cannot broaden authorization. This criterion-specific reconciliation reused the recorded dynamic executions and did not rerun unrelated workflows. Production is untouched.
