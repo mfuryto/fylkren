@@ -77,6 +77,20 @@ Fylkren does not implement block ciphers, public-key arithmetic, signature primi
 
 Fylkren protocol code builds bounded canonical messages and calls these providers to sign, verify, protect, hash or compare them. Encoding, Base32 conversion, purpose separation and message canonicalisation are application protocol logic; they must not implement or replace a cryptographic primitive. Package/runtime versions are centrally pinned and remain subject to dependency scanning and supported-version updates.
 
+## Crypto-agility assessment
+
+| Area | Current replacement capability | Remaining migration boundary |
+|---|---|---|
+| Data Protection | Framework key-ring rotation and per-key algorithm descriptors preserve old decryptors while new keys become active | No application operation inventories and re-protects every persistent SMTP, identity-provider, TOTP, webhook and federation-private-key value under a new policy before retiring old keys |
+| Local passwords | ASP.NET Identity's versioned verifier returns `SuccessRehashNeeded`; successful login writes a new hash. Password change/reset replaces the verifier | Work factor/format changes require an application release, which is acceptable because online opportunistic rehash exists |
+| Machine API credentials | A new random credential can be issued and the old client deactivated | Stored verifier has no algorithm/version parameters; changing PBKDF2 algorithm, rounds or output requires coordinated client recreation or a schema/code migration |
+| Federation signing | Two-phase key rotation and lost-key recovery replace P-256 keys without copying private material | Protocol v1 has no signed algorithm identifier or dual-algorithm negotiation; changing from P-256 requires a coordinated protocol and peer migration |
+| License verification | Multiple trusted public keys permit issuer-key overlap | Payload/signature format has no algorithm identifier; a new signature family requires a versioned license format and code release |
+| OIDC, SAML and WebAuthn | Maintained providers and explicit allowlists can be updated by release; external keys/certificates rotate through metadata or credential registration | Changing accepted algorithm families requires compatibility testing and a release; provider metadata cannot widen the allowlist by itself |
+| Webhook, TOTP, reset and recovery secrets | New webhook/TOTP/recovery/reset material can replace old values through supported workflows | Algorithm changes are source-controlled; webhook receivers require an overlap/migration procedure and TOTP depends on authenticator compatibility |
+
+SV-101 tracks the missing algorithm-version and persistent re-protection foundation. Until it is closed, algorithm changes must be treated as a coordinated migration with backup, compatibility, rollback and dependent-party steps rather than an ordinary configuration change.
+
 ## Review, incident and evidence
 
 Review this policy and inventory for every new cryptographic use, algorithm or storage location, and during each release security review. A code change that introduces cryptography must update the inventory, identify its owner and lifecycle, and add a requirement-linked test. The security owner records detected compromise, revocation, replacement and recovery in the security finding and operational incident records without copying secret material.

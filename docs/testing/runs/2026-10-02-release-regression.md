@@ -1717,3 +1717,16 @@ pnpm check:docs
 ```
 
 The control reports `{"cryptographicImplementations":"passed","maintainedProviders":6,"customCryptographicPrimitives":0,"centrallyPinnedIdentityLibraries":4}`. It verifies centrally pinned identity packages and current platform calls for Data Protection, Identity password hashing, PBKDF2, CSPRNG, ECDSA, HMAC and fixed-time comparison. It scans all production C# source and rejects custom cipher/hash/MAC classes, public-key modular arithmetic or encryption block/round implementations. This focused source verification did not rerun unchanged product flows. Continue at 11.2.2. Production is untouched.
+
+## Cryptographic agility assessment — 2026-10-05
+
+Assesses ASVS 11.2.2 and opens SV-101. Fylkren can rotate Data Protection and federation keys, recover a lost federation key, overlap license public keys, opportunistically rehash versioned local passwords and replace user/client/integration credentials. The assessment does not treat those separate capabilities as complete crypto agility: machine verifiers lack algorithm/version parameters, federation/license protocols lack signature-algorithm negotiation, and persistent Data Protection ciphertext has no bounded inventory and re-protection operation.
+
+Scoped commands:
+
+```sh
+node tools/test-cryptographic-agility-assessment.mjs
+pnpm check:docs
+```
+
+The assessment reports `{"cryptographicAgilityAssessment":"finding","finding":"SV-101","replacementCapabilities":7,"versionedMachineVerifier":false,"versionedFederationSignature":false,"persistentReprotectionOperation":false}`. Source assertions preserve both the implemented replacement capabilities and the exact missing foundations so later remediation forces reassessment. No current algorithm break or bypass was demonstrated. Continue at 11.2.3 independently of this open finding. Production is untouched.
