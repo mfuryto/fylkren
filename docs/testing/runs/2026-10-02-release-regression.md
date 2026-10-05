@@ -1704,3 +1704,16 @@ pnpm check:docs
 ```
 
 The inventory reports `{"cryptographicInventory":"passed","productionSourceFiles":53,"keyAndSecretClasses":12,"primitiveAndCertificateClasses":12,"newCryptographicUsageFailsClosed":true}`. Focused source assertions also bind the documented password and machine work factors, machine PBKDF2 algorithm/output, TOTP and webhook MAC algorithms, license P-256 restriction and WebAuthn asymmetric allowlist to current code. This requirement reconciles the inventory and does not rerun unchanged product flows. Continue at 11.2.1. Production is untouched.
+
+## Cryptographic implementation providers — 2026-10-05
+
+Completes ASVS 11.2.1. The provider inventory maps every primitive to .NET `System.Security.Cryptography`, ASP.NET Core Data Protection/Identity/OIDC, Sustainsys SAML2, Fido2/Fido2.AspNet or the deployment TLS stack. Fylkren protocol code constructs purpose-bound canonical data and delegates key generation, encryption, hashing, MAC, signing and verification to these maintained implementations.
+
+Scoped commands:
+
+```sh
+node tools/test-cryptographic-implementations.mjs
+pnpm check:docs
+```
+
+The control reports `{"cryptographicImplementations":"passed","maintainedProviders":6,"customCryptographicPrimitives":0,"centrallyPinnedIdentityLibraries":4}`. It verifies centrally pinned identity packages and current platform calls for Data Protection, Identity password hashing, PBKDF2, CSPRNG, ECDSA, HMAC and fixed-time comparison. It scans all production C# source and rejects custom cipher/hash/MAC classes, public-key modular arithmetic or encryption block/round implementations. This focused source verification did not rerun unchanged product flows. Continue at 11.2.2. Production is untouched.

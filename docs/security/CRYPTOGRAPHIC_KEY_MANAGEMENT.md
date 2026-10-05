@@ -62,6 +62,21 @@ Hashes used only for file/package integrity, approval snapshots, public-key fing
 
 The source inventory test maintains an exact list of production files that directly invoke cryptographic primitives, Data Protection, password hashing or authentication/signature frameworks. Any added or removed cryptographic call fails that test until this policy, its purpose boundary and the traceability evidence are reviewed together.
 
+## Implementation providers
+
+Fylkren does not implement block ciphers, public-key arithmetic, signature primitives, MACs, password KDFs or random generators. Production uses these maintained providers:
+
+| Provider | Operations delegated to it |
+|---|---|
+| .NET `System.Security.Cryptography` on the supported .NET runtime | CSPRNG, SHA-256, HMAC-SHA-1/SHA-256, PBKDF2-HMAC-SHA-256, fixed-time comparison, P-256 ECDSA key generation/import/sign/verify and secure zeroing |
+| ASP.NET Core Data Protection and Identity | Authenticated encryption/key-ring management, cookie/antiforgery protection and versioned local-password hashing |
+| Microsoft ASP.NET Core OpenID Connect handler | Authorization-code state/correlation and OIDC ID-token parsing, signature, issuer, audience, type, nonce and lifetime validation |
+| Sustainsys SAML2 | SAML metadata, response/assertion parsing and XML signature/conditions validation |
+| Fido2 and Fido2.AspNet | WebAuthn challenge, attestation and assertion verification using the application algorithm allowlist |
+| Deployment TLS stack | TLS record protection, certificate-chain and hostname validation at the gateway and maintained HTTP clients |
+
+Fylkren protocol code builds bounded canonical messages and calls these providers to sign, verify, protect, hash or compare them. Encoding, Base32 conversion, purpose separation and message canonicalisation are application protocol logic; they must not implement or replace a cryptographic primitive. Package/runtime versions are centrally pinned and remain subject to dependency scanning and supported-version updates.
+
 ## Review, incident and evidence
 
 Review this policy and inventory for every new cryptographic use, algorithm or storage location, and during each release security review. A code change that introduces cryptography must update the inventory, identify its owner and lifecycle, and add a requirement-linked test. The security owner records detected compromise, revocation, replacement and recovery in the security finding and operational incident records without copying secret material.
