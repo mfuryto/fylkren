@@ -24,9 +24,10 @@ assert.match(federationIdentity, /StageRotation\(/, 'federation key rotation');
 assert.match(federationIdentity, /identity\.Recover\(/, 'federation lost-key recovery');
 assert.match(license, /IReadOnlyList<byte\[]> publicKeys/, 'overlapping license verification keys');
 
-assert.doesNotMatch(machineIdentity, /(?:Algorithm|HashVersion|Iterations)/,
-  'Machine verifier schema now carries migration parameters; reassess SV-101');
-assert.match(machineAuth, /const int Iterations = 210_000/, 'fixed machine verifier work factor');
+assert.match(machineIdentity, /SecretAlgorithm[\s\S]*SecretHashVersion[\s\S]*SecretIterations/,
+  'versioned machine verifier metadata');
+assert.match(machineAuth, /LegacyAlgorithm[\s\S]*CurrentAlgorithm[\s\S]*NeedsUpgrade[\s\S]*Upgrade/,
+  'dual-read/new-write machine verifier migration');
 assert.doesNotMatch(federationProtocol.split('internal sealed record FederationWorkEnvelope')[1].split(';')[0],
   /Algorithm|SignatureVersion/, 'Federation envelope now negotiates a signature algorithm; reassess SV-101');
 assert.doesNotMatch(protectedStores, /ReprotectAll|ReencryptAll|ReProtectAll|ReEncryptAll/,
@@ -35,8 +36,8 @@ assert.doesNotMatch(protectedStores, /ReprotectAll|ReencryptAll|ReProtectAll|ReE
 console.log(JSON.stringify({
   cryptographicAgilityAssessment: 'finding',
   finding: 'SV-101',
-  replacementCapabilities: 7,
-  versionedMachineVerifier: false,
+  replacementCapabilities: 8,
+  versionedMachineVerifier: true,
   versionedFederationSignature: false,
   persistentReprotectionOperation: false,
 }));

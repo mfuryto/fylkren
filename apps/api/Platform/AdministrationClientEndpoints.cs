@@ -57,7 +57,8 @@ internal static class AdministrationClientEndpoints
             if (request.ExpiresAt is null || request.ExpiresAt <= now || request.ExpiresAt > now.AddDays(366))
                 return Validation("expiresAt", "An expiry date is required and can be at most one year in the future.");
             var generated = ApiMachineSecrets.Create();
-            var value = new ApiMachineIdentity(Guid.NewGuid(), name, generated.KeyId, generated.Salt, generated.Hash, string.Join(' ', scopes), request.ExpiresAt, now);
+            var value = new ApiMachineIdentity(Guid.NewGuid(), name, generated.KeyId, generated.Salt, generated.Hash,
+                generated.Algorithm, generated.Version, generated.Iterations, string.Join(' ', scopes), request.ExpiresAt, now);
             db.ApiMachineIdentities.Add(value);
             db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), null, actor, "api-machine.created", "api-machine", value.Id, now));
             await db.SaveChangesAsync(ct);

@@ -36,6 +36,11 @@ if (args.Contains("--service-transports-only"))
     await ServiceTransportTests.Run();
     return;
 }
+if (args.Contains("--machine-secret-agility-only"))
+{
+    MachineSecretAgilityTests.Run();
+    return;
+}
 if (args.Contains("--outbound-http-only"))
 {
     await OutboundHttpTests.Run();
@@ -98,6 +103,12 @@ var connection = Environment.GetEnvironmentVariable("FYLKREN_FOUNDATION_TEST_DAT
 if (connection is null) throw new Exception("Run with the disposable database harness; integration coverage is mandatory.");
 if (!connection.Contains("Database=fylkren_foundation_test", StringComparison.Ordinal)) throw new Exception("Only the synthetic foundation database is allowed.");
 await using var db = new FylkrenDbContext(new DbContextOptionsBuilder<FylkrenDbContext>().UseNpgsql(connection).Options);
+if (args.Contains("--machine-secret-agility-integration-only"))
+{
+    MachineSecretAgilityTests.Run();
+    await MachineSecretAgilityTests.RunDatabase(db);
+    return;
+}
 if (args.Contains("--version-integration-only"))
 {
     VersionBoundaryTests.Run();
@@ -176,6 +187,7 @@ await OutboundHttpTests.Run();
 await SamlMetadataTests.Run();
 ExternalKeyStrengthTests.Run();
 await ServiceTransportTests.Run();
+MachineSecretAgilityTests.Run();
 NumericArithmeticTests.Run();
 VersionBoundaryTests.Run();
 await ZipLengthBoundaryTests.Run();

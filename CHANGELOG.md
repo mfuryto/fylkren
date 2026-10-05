@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Store machine-API verifier algorithm, format version and work factor, preserve existing credentials during upgrade, and rehash them into the current format after successful authentication.
+
 - Correct the Identity guidance to reflect direct AD/LDAP personnel creation, and record configurable OIDC/SAML first-sign-in provisioning without duplicate AD/LDAP people, with a restricted unassigned-access state, as required work before release qualification.
 
 - Bind SMTP STARTTLS delivery and AD/LDAP connections to approved DNS results while retaining certificate hostname validation; verify changed-DNS rejection and preserve LDAPS, StartTLS and Samba AD behavior.

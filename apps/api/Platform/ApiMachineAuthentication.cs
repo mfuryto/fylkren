@@ -9,10 +9,52 @@ namespace Fylkren.Api.Platform;
 
 public static class ApiMachineSecrets
 {
-    public const int Iterations = 210_000;
-    public static (string Token, string KeyId, byte[] Salt, byte[] Hash) Create() { var keyId = Convert.ToHexString(RandomNumberGenerator.GetBytes(8)).ToLowerInvariant(); var secret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)).TrimEnd('=').Replace('+', '-').Replace('/', '_'); var salt = RandomNumberGenerator.GetBytes(16); return ($"api_{keyId}.{secret}", keyId, salt, Hash(secret, salt)); }
-    public static byte[] Hash(string secret, byte[] salt) => Rfc2898DeriveBytes.Pbkdf2(Encoding.UTF8.GetBytes(secret), salt, Iterations, HashAlgorithmName.SHA256, 32);
+    public const string LegacyAlgorithm = "pbkdf2-sha256";
+    public const int LegacyVersion = 1;
+    public const int LegacyIterations = 210_000;
+    public const string CurrentAlgorithm = "pbkdf2-sha512";
+    public const int CurrentVersion = 2;
+    public const int CurrentIterations = 220_000;
+
+    public static GeneratedMachineSecret Create()
+    {
+        var keyId = Convert.ToHexString(RandomNumberGenerator.GetBytes(8)).ToLowerInvariant();
+        var secret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+        var salt = RandomNumberGenerator.GetBytes(16);
+        return new($"api_{keyId}.{secret}", keyId, salt,
+            Hash(secret, salt, CurrentAlgorithm, CurrentIterations), CurrentAlgorithm, CurrentVersion, CurrentIterations);
+    }
+
+    public static bool Verify(string secret, ApiMachineIdentity identity)
+    {
+        if (!Supported(identity.SecretAlgorithm, identity.SecretHashVersion, identity.SecretIterations)) return false;
+        var candidate = Hash(secret, identity.Salt, identity.SecretAlgorithm, identity.SecretIterations);
+        return candidate.Length == identity.SecretHash.Length &&
+            CryptographicOperations.FixedTimeEquals(candidate, identity.SecretHash);
+    }
+
+    public static bool NeedsUpgrade(ApiMachineIdentity identity) =>
+        identity.SecretAlgorithm != CurrentAlgorithm || identity.SecretHashVersion != CurrentVersion ||
+        identity.SecretIterations != CurrentIterations;
+
+    public static void Upgrade(string secret, ApiMachineIdentity identity)
+    {
+        var salt = RandomNumberGenerator.GetBytes(16);
+        identity.UpgradeSecret(salt, Hash(secret, salt, CurrentAlgorithm, CurrentIterations),
+            CurrentAlgorithm, CurrentVersion, CurrentIterations);
+    }
+
+    internal static byte[] Hash(string secret, byte[] salt, string algorithm, int iterations) =>
+        Rfc2898DeriveBytes.Pbkdf2(Encoding.UTF8.GetBytes(secret), salt, iterations,
+            algorithm == CurrentAlgorithm ? HashAlgorithmName.SHA512 : HashAlgorithmName.SHA256, 32);
+
+    private static bool Supported(string algorithm, int version, int iterations) =>
+        (algorithm, version, iterations) is (LegacyAlgorithm, LegacyVersion, >= 100_000 and <= 1_000_000) or
+            (CurrentAlgorithm, CurrentVersion, >= 100_000 and <= 1_000_000);
 }
+
+public sealed record GeneratedMachineSecret(string Token, string KeyId, byte[] Salt, byte[] Hash,
+    string Algorithm, int Version, int Iterations);
 
 public sealed class ApiMachineAuthenticationMiddleware(RequestDelegate next)
 {
@@ -44,12 +86,15 @@ public sealed class ApiMachineAuthenticationMiddleware(RequestDelegate next)
         {
             identity = await database.ApiMachineIdentities.SingleOrDefaultAsync(x => x.KeyId == keyId && x.IsActive);
             if (identity is not null && (identity.ExpiresAt is null || identity.ExpiresAt > DateTimeOffset.UtcNow))
-                secretMatches = CryptographicOperations.FixedTimeEquals(
-                    ApiMachineSecrets.Hash(secret, identity.Salt), identity.SecretHash);
+                secretMatches = ApiMachineSecrets.Verify(secret, identity);
         }
         if (!secretMatches || identity is null) { await next(context); return; }
         var claims = new List<Claim> { new("fylkren:machine_id", identity.Id.ToString()), new(ClaimTypes.Name, identity.Name) }; claims.AddRange(identity.Scopes.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(scope => new Claim("scope", scope))); context.User = new ClaimsPrincipal(new ClaimsIdentity(claims, "FylkrenMachine"));
-        var now = DateTimeOffset.UtcNow; if (identity.LastUsedAt is null || identity.LastUsedAt < now.AddMinutes(-5)) { identity.MarkUsed(now); await database.SaveChangesAsync(); }
+        var now = DateTimeOffset.UtcNow;
+        var mustSave = false;
+        if (ApiMachineSecrets.NeedsUpgrade(identity)) { ApiMachineSecrets.Upgrade(secret, identity); mustSave = true; }
+        if (identity.LastUsedAt is null || identity.LastUsedAt < now.AddMinutes(-5)) { identity.MarkUsed(now); mustSave = true; }
+        if (mustSave) await database.SaveChangesAsync();
         await next(context);
     }
 }

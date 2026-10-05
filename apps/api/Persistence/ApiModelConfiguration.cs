@@ -8,13 +8,18 @@ internal static class ApiModelConfiguration
     internal static void ConfigureApi(this ModelBuilder modelBuilder)
     {
         var apiMachine = modelBuilder.Entity<ApiMachineIdentity>();
-        apiMachine.ToTable("api_machine_identities");
+        apiMachine.ToTable("api_machine_identities", table => table.HasCheckConstraint(
+            "ck_api_machine_secret_parameters",
+            "secret_iterations BETWEEN 100000 AND 1000000 AND ((secret_algorithm = 'pbkdf2-sha256' AND secret_hash_version = 1) OR (secret_algorithm = 'pbkdf2-sha512' AND secret_hash_version = 2))"));
         apiMachine.HasKey(x => x.Id);
         apiMachine.Property(x => x.Id).HasColumnName("id");
         apiMachine.Property(x => x.Name).HasColumnName("name").HasMaxLength(120);
         apiMachine.Property(x => x.KeyId).HasColumnName("key_id").HasMaxLength(16);
         apiMachine.Property(x => x.Salt).HasColumnName("salt");
         apiMachine.Property(x => x.SecretHash).HasColumnName("secret_hash");
+        apiMachine.Property(x => x.SecretAlgorithm).HasColumnName("secret_algorithm").HasMaxLength(40);
+        apiMachine.Property(x => x.SecretHashVersion).HasColumnName("secret_hash_version");
+        apiMachine.Property(x => x.SecretIterations).HasColumnName("secret_iterations");
         apiMachine.Property(x => x.Scopes).HasColumnName("scopes").HasMaxLength(300);
         apiMachine.Property(x => x.ExpiresAt).HasColumnName("expires_at");
         apiMachine.Property(x => x.CreatedAt).HasColumnName("created_at");

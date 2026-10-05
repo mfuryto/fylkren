@@ -2933,12 +2933,29 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("secret_hash");
 
+                    b.Property<string>("SecretAlgorithm")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("secret_algorithm");
+
+                    b.Property<int>("SecretHashVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("secret_hash_version");
+
+                    b.Property<int>("SecretIterations")
+                        .HasColumnType("integer")
+                        .HasColumnName("secret_iterations");
+
                     b.HasKey("Id");
 
                     b.HasIndex("KeyId")
                         .IsUnique();
 
-                    b.ToTable("api_machine_identities", (string)null);
+                    b.ToTable("api_machine_identities", t =>
+                        {
+                            t.HasCheckConstraint("ck_api_machine_secret_parameters", "secret_iterations BETWEEN 100000 AND 1000000 AND ((secret_algorithm = 'pbkdf2-sha256' AND secret_hash_version = 1) OR (secret_algorithm = 'pbkdf2-sha512' AND secret_hash_version = 2))");
+                        });
                 });
 
             modelBuilder.Entity("Fylkren.Api.Platform.ApiReportGrant", b =>
