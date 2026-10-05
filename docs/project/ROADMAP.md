@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 2026-10-05 after completing ASVS chapter 12 communication assessment and recording SV-103; the open security findings and next incomplete requirement 13.1.1 remain explicit.
+Updated 2026-10-05 after completing requirement-level assessment of all 253 ASVS 5.0.0 Level 1/2 rows. Open findings and final release-candidate qualification remain explicit.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -12,8 +12,8 @@ The additive event/activity foundation and coherent WorkItem slice are delivered
 
 ## Next delivery order
 
-1. Continue in requirement order at ASVS 13.1.1 using the completed communication inventory. Chapter 12 is fully assessed; SV-103 records plaintext internal service links. SV-101 records missing crypto agility and SV-102 records the external RSA minimum-strength gap. Continue independent matrix cases while remediation is designed. User-visible per-session inventory remains SV-096 and coordinated IdP recentness/termination remains SV-097. Mandatory MFA remains SV-094, and ASVS 1.3.6 remains SV-068 pending verified deployment egress restrictions for native DNS rebinding.
-2. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing at this gate.
+1. Triage and remediate, or obtain explicit responsible-owner acceptance for, the 17 open ASVS findings. Prioritize mandatory MFA, session/provider lifecycle, internal transport, service identity/secrets custody, dependency/SBOM, clock synchronization and separate log collection. Retest each affected row against the exact candidate when its control changes.
+2. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing, identity providers, authenticators, backup/key custody, time synchronization and remote logging at this gate.
 
 No irreversible disposition is authorized by this order. Establish and verify its prerequisites before proposing activation; do not choose arbitrary retention periods.
 
@@ -38,11 +38,11 @@ Earlier HTTP p95 readings varied from subsecond values to multiple seconds and w
 
 ## Security verification
 
-The [ASVS 5.0 Level 2 matrix](../security/ASVS_5.0.0_L2_MATRIX.md) is the single security-testing work list and status authority. At this update it contains 139 Passed, 38 In progress, 13 Not assessed, 55 Not applicable and eight Findings. Counts are a dated baseline, not a separate maintained matrix or security certification.
+The [ASVS 5.0 Level 2 matrix](../security/ASVS_5.0.0_L2_MATRIX.md) is the single security-testing work list and status authority. At this update all 253 rows are assessed: 181 Passed, 55 Not applicable and 17 Findings. There are no `In progress` or `Not assessed` rows. Complete assessment means every requirement has a supported disposition; it is not a security certification or acceptance of open risk.
 
 Use the [security test plan](../security/SECURITY_TEST_PLAN.md) and [threat model](../security/SECURITY_THREAT_MODEL.md). Record findings and remediation in the [finding register](../security/SECURITY_VERIFICATION.md); record completed requirement-specific tests in the ASVS matrix with links to maintained execution evidence. Partial coverage remains partial. Retest affected controls after every change.
 
-HTTP destination/DNS/redirect/download boundaries and bounded runtime SAML metadata are delivered and tested. Current production TLS/proxy qualification passes; plaintext internal service links remain SV-103. Native DNS rebinding remains SV-068 pending deployment egress qualification; mandatory MFA remains SV-094; user session inventory/selective revocation remains SV-096; coordinated external-provider recentness/termination remains SV-097; crypto agility remains SV-101; external RSA minimum strength remains SV-102. Arithmetic and chapters 2–12 are assessed for the current scope; continue at 13.1.1. Do not rerun unrelated full-product chains for scoped corrections. Deployment-sensitive controls require customer identity-provider behavior, authenticator compatibility, host SSH/backup transport and coordinated database/Data Protection key recovery with real backup custody. Disposable restore tests already exist; operational custody qualification remains separate.
+HTTP destination/DNS/redirect/download boundaries and bounded runtime SAML metadata are delivered and tested. Current public TLS/proxy qualification passes. The finding register retains every unmet criterion, including native DNS rebinding/egress, mandatory MFA, session and provider lifecycle, crypto agility/strength, internal transport, service credentials, secret custody, SBOM production, host clock synchronization and separate log collection. Do not rerun unrelated full-product chains for scoped corrections. Deployment-sensitive controls require customer identity-provider behavior, authenticator compatibility, host SSH/backup transport, coordinated database/Data Protection key recovery, production time synchronization and remote log custody. Disposable restore tests already exist; operational custody qualification remains separate.
 
 Relevant Level 3 controls, WSTG techniques and API Security Top 10 coverage support this same workflow. An external penetration test is optional if requested, not a prerequisite for completing the authorized testing.
 

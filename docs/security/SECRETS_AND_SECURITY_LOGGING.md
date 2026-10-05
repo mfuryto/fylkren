@@ -19,9 +19,21 @@ This document is the canonical inventory for authentication secrets, cryptograph
 
 ## Security-event logging
 
+| Layer | Events and metadata | Destination and access |
+| --- | --- | --- |
+| Gateway/container | HTTP/service startup, proxy and runtime failures with container/host time | Container stdout/stderr; deployment operators only |
+| API technical | Structured authentication outcome, authorization denial, machine-auth rejection, worker/integration failure and unexpected exception; event ID, category, UTC time, route/method/status, actor where known and trace ID as applicable | Structured console provider and the bounded Platform Manager warning view |
+| Security audit | Administrative and significant operational commands with event ID, UTC timestamp, actor, Site, object/type and correlation/request identifiers | Append-only PostgreSQL records; authorized Site/Platform Manager read projections |
+| Domain activity | Significant domain facts and source/origin/correlation metadata | PostgreSQL activity store; object/Site authorization applies |
+| External delivery | Notification, webhook and federation delivery state, attempts and bounded error/status data | PostgreSQL delivery records plus sanitized worker logs |
+
+Application log destinations are the standard structured console provider, the explicitly bounded in-process Platform Manager view and the documented PostgreSQL audit/activity/delivery stores. The application does not write arbitrary log files or transmit logs to an undocumented collector.
+
 The API emits structured events for successful authentication and for every API response ending in HTTP 401 or 403. Rejected events include only the HTTP method, matched route template, status, an internal person identifier when an authenticated actor exists, and the request trace identifier. They do not include request or response bodies, query strings, usernames, email addresses, passwords, reset codes, TOTP values, cookies, or tokens.
 
 The in-process Platform Manager log is deliberately bounded to 300 warning-or-higher entries and 2,000 characters per entry. A central sanitizer removes authorization and cookie headers, bearer tokens, URI credentials, named passwords, client secrets, API keys, TOTP secrets, reset/activation/recovery codes, sensitive query values, and control characters that could forge log lines. Production retention and forwarding beyond this bounded operational view belong to the deployment's logging platform.
+
+All application timestamps use UTC and containers share the host clock. SV-107 records that the supported deployment does not configure or verify host time synchronization and alerting. SV-108 records that production logs are not yet required to be transmitted to a logically separate analysis/detection system; container logs can otherwise remain on the application host.
 
 Successful authentication is emitted at `Information`; rejected authentication and authorization are emitted at `Warning`. Unexpected exceptions remain handled by the platform exception handler and are recorded without returning implementation details to the client.
 

@@ -1798,3 +1798,50 @@ pnpm check:docs
 ```
 
 The current public run passes 6/6 TLS protocol/certificate checks and 28/28 anonymous public-surface checks. TLS 1.3 prefers `TLS_AES_256_GCM_SHA384`; TLS 1.2 prefers `ECDHE-ECDSA-AES256-GCM-SHA384`; four weak CBC/non-forward-secret suites are rejected. The certificate for `fylkren.hostima.no` chains to Let's Encrypt YE1 and is valid from 2026-09-10 through 2026-12-09. The inventory reports `{"communicationSecurityInventory":"assessed","documentedPaths":10,"publicTls":true,"outboundCertificateValidation":true,"plaintextInternalServicePaths":2,"finding":"SV-103"}`. Public production received read-only probes only. Gateway→API and API→PostgreSQL remain plaintext on isolated Docker networks and are not misrepresented by the public TLS result. Continue at 13.1.1.
+
+## Production configuration qualification — 2026-10-05
+
+Completes the reviewed scope for ASVS chapter 13. The configuration inventory covers six backend identity classes, generated credentials, container privileges, secret custody and the runtime exposure boundary. Current read-only public probes confirmed that Git and Swagger paths return only the SPA shell, the static asset directory returns 403, TRACE returns 405 and host status returns 401 anonymously.
+
+Scoped commands:
+
+```sh
+node tools/test-production-configuration-inventory.mjs
+bash tools/security/verify-public-surface.sh https://fylkren.hostima.no
+pnpm check:docs
+```
+
+The local inventory reports `{"productionConfigurationInventory":"assessed","backendIdentities":6,"randomDatabaseCredential":true,"releaseBuilds":true,"sourceMetadataInRuntimeImages":false,"findings":["SV-104","SV-105"]}`. SV-104 records long-lived PostgreSQL and machine credentials; SV-105 records local `.env`/Data Protection key custody. SV-068 also keeps the server-level egress rows open. No production state was changed. Continue at 14.1.1 independently of these findings.
+
+## Data-protection inventory qualification — 2026-10-05
+
+Completes ASVS chapter 14 for the reviewed application scope. The new canonical inventory classifies critical secrets, personal/security data, operational content, configuration and public data, and states the inherited treatment of encoded values, exports, backups, logs, notifications, webhooks and federation copies. A focused source control verifies API-wide no-store, restrictive CSP, in-memory API caching, logout state clearing and the absence of sensitive browser storage. Existing privacy/authorization, session and public-surface runs remain the dynamic evidence.
+
+```sh
+node tools/test-data-protection-inventory.mjs
+pnpm check:docs
+```
+
+Result: `{"dataProtectionInventory":"passed","protectionLevels":5,"apiNoStore":true,"thirdPartyOriginsAllowedByCsp":0,"sensitiveBrowserStorageUses":0}`. No production state was changed.
+
+## Secure-development and dependency assessment — 2026-10-05
+
+Completes ASVS chapter 15 assessment. The policy now defines risk-based dependency remediation targets and inventories eight resource-demand families. Focused source controls cover trusted forwarded-header configuration, outbound redirect/size boundaries, environment-gated test endpoints, runtime-image exclusions, explicit typed boundaries and absence of unsafe generic JavaScript object merging. Existing load, upload, parser, authorization and outbound-integration runs remain linked.
+
+```sh
+node tools/test-secure-development-inventory.mjs
+pnpm check:docs
+```
+
+Result: `{"secureDevelopmentInventory":"assessed","remediationTargets":4,"resourceDemandFamilies":8,"automaticRedirectBoundary":true,"unsafeObjectMergeUses":0,"finding":"SV-106"}`. SV-055 keeps dependency freshness at Finding because current Medium image vulnerabilities have no vendor fixes; SV-106 records the missing release SBOM. No new dependency scan or production change was performed.
+
+## Security logging and error-handling assessment — 2026-10-05
+
+Completes ASVS chapter 16 assessment. The canonical logging inventory now covers gateway/container, API technical, security audit, domain activity and external-delivery layers with metadata, destinations and access. Focused source controls verify structured authentication/access-denial events, trace metadata, exception handling, central sanitization and absence of an undocumented application file sink. Existing identity, authorization, integration-failure, audit and generic-error runs remain linked.
+
+```sh
+node tools/test-security-logging-inventory.mjs
+pnpm check:docs
+```
+
+Result: `{"securityLoggingInventory":"assessed","documentedLayers":5,"structuredAccessDenials":true,"centralSanitizer":true,"findings":["SV-107","SV-108"]}`. SV-107 records missing deployment time-synchronization qualification; SV-108 records missing logically separate log forwarding/detection. All 253 Level 1/2 rows are now assessed; open findings and final candidate qualification remain release work. No production state was changed.
