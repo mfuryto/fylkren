@@ -79,4 +79,7 @@ export const profileCsCZ = {
   browserSession: "Relace prohlížeče",
   unknownBrowser: "Neznámý prohlížeč",
   sessionReauthenticationHelp: "Pokud je přihlášení starší než pět minut, zadejte heslo. U externího přihlášení je nutné se před správou starších relací přihlásit znovu.",
+  mfaRequiredNotice: "Před pokračováním dokončete dvoufaktorové ověření.",
+  completeSignIn: "Dokončit přihlášení",
+  usePasskeyNotice: "Odhlaste se a dokončete přihlášení registrovaným přístupovým klíčem.",
 } satisfies Partial<Record<MessageKey, string>>;

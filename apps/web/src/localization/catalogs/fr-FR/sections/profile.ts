@@ -79,4 +79,7 @@ export const profileFrFR = {
   browserSession: "Session de navigateur",
   unknownBrowser: "Navigateur inconnu",
   sessionReauthenticationHelp: "Saisissez votre mot de passe si la connexion date de plus de cinq minutes. La connexion externe doit être répétée avant de gérer les anciennes sessions.",
+  mfaRequiredNotice: "Terminez l’authentification à deux facteurs avant de continuer.",
+  completeSignIn: "Terminer la connexion",
+  usePasskeyNotice: "Déconnectez-vous et utilisez votre clé d’accès enregistrée pour terminer la connexion.",
 } satisfies Partial<Record<MessageKey, string>>;

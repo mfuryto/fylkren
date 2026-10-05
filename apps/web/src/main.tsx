@@ -80,6 +80,7 @@ function App() {
           authentication: {
             localEnabled: true,
             mfaEnabled: true,
+            mfaRequired: true,
             oidcConfigurationEnabled: false,
             samlConfigurationEnabled: false,
             activeDirectoryConfigurationEnabled: false,
@@ -152,7 +153,7 @@ function App() {
               .catch(() => setConfigurationError(true));
             warmAuthenticatedExperience(nextSession);
             setSession(nextSession);
-            if (nextSession.mustChangePassword) resetNavigation("Profile");
+            if (nextSession.mustChangePassword || nextSession.mfaRequired) resetNavigation("Profile");
             else {
               const requested = currentAppLocation();
               navigationHistory.current = [requested.page];

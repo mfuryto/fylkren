@@ -15,6 +15,9 @@ namespace Fylkren.Api.Identity;
 
 public static partial class IdentityEndpoints
 {
+    internal static bool MfaSatisfied(ClaimsPrincipal user) =>
+        user.FindFirst("fylkren:mfa_satisfied")?.Value == "true";
+
     internal static BrowserSession StartBrowserSession(LoginIdentity identity, FylkrenDbContext database,
         HttpContext context, string authenticationMethod, DateTimeOffset? sessionStartedAt = null)
     {
@@ -26,7 +29,7 @@ public static partial class IdentityEndpoints
     }
 
     internal static ClaimsPrincipal CreatePrincipal(LoginIdentity identity, Guid sessionId,
-        DateTimeOffset? sessionStartedAt = null, bool directoryManaged = false)
+        DateTimeOffset? sessionStartedAt = null, bool directoryManaged = false, bool mfaSatisfied = false)
     {
         var now = DateTimeOffset.UtcNow;
         var claims = new List<Claim>
@@ -38,6 +41,7 @@ public static partial class IdentityEndpoints
             new("fylkren:must_change_password", identity.MustChangePassword ? "true" : "false"),
             new("fylkren:security_version", identity.SecurityVersion.ToString()),
             new("fylkren:session_id", sessionId.ToString()),
+            new("fylkren:mfa_satisfied", mfaSatisfied ? "true" : "false"),
             new("fylkren:validated_at", now.ToUnixTimeSeconds().ToString()),
             new("fylkren:session_started_at", (sessionStartedAt ?? now).ToUnixTimeSeconds().ToString())
         };

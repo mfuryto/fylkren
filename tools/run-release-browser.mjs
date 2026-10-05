@@ -10,7 +10,7 @@ const browser = `${project}-chromium`;
 const temporary = mkdtempSync(join(tmpdir(), 'fylkren-release-browser-'));
 const fixture = JSON.parse(readFileSync('tools/e2e/license-fixture.json', 'utf8'));
 const env = { ...process.env, FYLKREN_DB_PASSWORD: 'synthetic-release-browser-only',
-  FYLKREN_HTTP_PORT: '127.0.0.1:18082', FYLKREN_PUBLIC_URL: 'http://localhost:18082', FYLKREN_MFA_ENABLED: 'false',
+  FYLKREN_HTTP_PORT: '127.0.0.1:18082', FYLKREN_PUBLIC_URL: 'http://localhost:18082', FYLKREN_MFA_ENABLED: 'false', FYLKREN_MFA_REQUIRED: 'false',
   FYLKREN_LICENSE_PUBLIC_KEY_SPKI: fixture.publicKeySpki, FYLKREN_BROWSER_TARGET_URL: 'http://localhost:18082/',
   FYLKREN_BROWSER_CDP_URL: 'http://127.0.0.1:19224', FYLKREN_BROWSER_REPORT_PDF: 'output/pdf/release-classified-report.pdf', FYLKREN_BROWSER_LICENSE_PATH: '/work/tools/e2e/license-upload-fixture.json',
 };

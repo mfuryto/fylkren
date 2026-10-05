@@ -79,4 +79,7 @@ export const profileRoRO = {
   browserSession: "Sesiune de browser",
   unknownBrowser: "Browser necunoscut",
   sessionReauthenticationHelp: "Introduceți parola dacă autentificarea are mai mult de cinci minute. Autentificarea externă trebuie repetată înainte de gestionarea sesiunilor mai vechi.",
+  mfaRequiredNotice: "Finalizați autentificarea cu doi factori înainte de a continua.",
+  completeSignIn: "Finalizați autentificarea",
+  usePasskeyNotice: "Deconectați-vă și utilizați cheia de acces înregistrată pentru a finaliza autentificarea.",
 } satisfies Partial<Record<MessageKey, string>>;

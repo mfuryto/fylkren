@@ -13,6 +13,7 @@ const env = {
   FYLKREN_HTTP_PORT: '127.0.0.1:18087',
   FYLKREN_PUBLIC_URL: base,
   FYLKREN_MFA_ENABLED: 'false',
+  FYLKREN_MFA_REQUIRED: 'false',
   FYLKREN_LICENSE_PUBLIC_KEY_SPKI: publicKeySpki,
 };
 

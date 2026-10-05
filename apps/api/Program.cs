@@ -83,6 +83,22 @@ app.Use(async (context, next) =>
         await context.Response.WriteAsJsonAsync(new { error = "password_change_required" });
         return;
     }
+    var mfaRequired = fylkrenOptions.Authentication.MfaRequired &&
+        context.User.FindFirst("fylkren:person_id") is not null &&
+        context.User.FindFirst("fylkren:mfa_satisfied")?.Value != "true";
+    var allowedWhileCompletingMfa = context.Request.Path.StartsWithSegments("/api/session") ||
+        context.Request.Path.StartsWithSegments("/api/security/antiforgery") ||
+        context.Request.Path == "/api/configuration" && context.Request.Method == HttpMethods.Get ||
+        context.Request.Path == "/api/configuration/public" && context.Request.Method == HttpMethods.Get ||
+        context.Request.Path == "/api/profile" && context.Request.Method == HttpMethods.Get ||
+        context.Request.Path == "/api/profile/password" && context.Request.Method == HttpMethods.Put ||
+        context.Request.Path.StartsWithSegments("/api/profile/2fa");
+    if (mfaRequired && context.Request.Path.StartsWithSegments("/api") && !allowedWhileCompletingMfa)
+    {
+        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+        await context.Response.WriteAsJsonAsync(new { error = "mfa_required" });
+        return;
+    }
     await next();
 });
 app.UseAuthorization();

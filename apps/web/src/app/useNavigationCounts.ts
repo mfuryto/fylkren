@@ -11,7 +11,7 @@ export function navigationCountLabel(label: string, item: string, counts: Naviga
 
 export function useNavigationCounts(session: Session | null, activeItem: string) {
   const [result, setResult] = useState<{ personId: string; counts: NavigationCounts } | null>(null);
-  const personId = session?.authenticated && !session.isPlatformManager && !session.mustChangePassword &&
+  const personId = session?.authenticated && !session.isPlatformManager && !session.mustChangePassword && !session.mfaRequired &&
     (session.hasOperationalRole || session.canPlan || session.canExecute) ? session.personId : undefined;
   useEffect(() => {
     if (!personId) return;

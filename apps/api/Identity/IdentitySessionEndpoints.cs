@@ -35,7 +35,10 @@ public static partial class IdentityEndpoints
              site.OrganizationUnits.Any(unit => unit.IsActive && unit.WorksAtParentLevel && unit.Parent != null && (unit.Parent.IsSiteLeadership || unit.Parent.IsSiteRoot) && unit.Roles.Any(role => role.IsLeader && role.IsActive && role.Assignments.Any(value => value.PersonId == identity.PersonId && value.CanLeadParentLevel && value.IsActive && value.ValidFrom <= now && (value.ValidTo == null || value.ValidTo > now))))), cancellationToken);
         var isDirectoryManaged = await IsDirectoryManaged(identity.PersonId, database, cancellationToken);
         var hasArchiveAccess = await Fylkren.Api.InformationLifecycle.ArchiveAccess.Current(database, identity.PersonId).AnyAsync(cancellationToken);
-        return Results.Ok(new { authenticated = true, username = identity.Username, email = identity.Person.Email, personId = identity.PersonId.ToString(), displayName = identity.Person.DisplayName, isPlatformManager = identity.IsPlatformManager, hasArchiveAccess, managesSites, administersSite, hasOperationalRole, canExecute, mustChangePassword = identity.MustChangePassword, hasProfileImage = identity.Person.ProfileImage is not null, isDirectoryManaged, twoFactorEnabled = options.Authentication.MfaEnabled && identity.TotpEnabled, canPlan, canApproveWork, isTopLevelLeader });
+        var mfaRequired = options.Authentication.MfaRequired && user.FindFirst("fylkren:mfa_satisfied")?.Value != "true";
+        var hasPasskey = options.Authentication.WebAuthn.Enabled && await database.WebAuthnCredentials
+            .AnyAsync(value => value.PersonId == identity.PersonId && value.IsActive, cancellationToken);
+        return Results.Ok(new { authenticated = true, username = identity.Username, email = identity.Person.Email, personId = identity.PersonId.ToString(), displayName = identity.Person.DisplayName, isPlatformManager = identity.IsPlatformManager, hasArchiveAccess, managesSites, administersSite, hasOperationalRole, canExecute, mustChangePassword = identity.MustChangePassword, hasProfileImage = identity.Person.ProfileImage is not null, isDirectoryManaged, twoFactorEnabled = options.Authentication.MfaEnabled && identity.TotpEnabled, mfaRequired, mfaEnrollmentRequired = mfaRequired && !identity.TotpEnabled && !hasPasskey, mfaPasskeyRequired = mfaRequired && !identity.TotpEnabled && hasPasskey, canPlan, canApproveWork, isTopLevelLeader });
     }
 
     private static async Task<IResult> SignIn(
@@ -147,7 +150,7 @@ public static partial class IdentityEndpoints
         var browserSession = StartBrowserSession(identity, database, context, "local-password-totp", now);
         await database.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
-        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, CreatePrincipal(identity, browserSession.Id, now));
+        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, CreatePrincipal(identity, browserSession.Id, now, mfaSatisfied: true));
         return Results.NoContent();
     }
 }

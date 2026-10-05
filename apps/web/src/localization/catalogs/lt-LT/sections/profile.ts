@@ -79,4 +79,7 @@ export const profileLtLT = {
   browserSession: "Naršyklės seansas",
   unknownBrowser: "Nežinoma naršyklė",
   sessionReauthenticationHelp: "Įveskite slaptažodį, jei prisijungta prieš daugiau nei penkias minutes. Prieš tvarkant senesnius seansus išorinį prisijungimą reikia pakartoti.",
+  mfaRequiredNotice: "Prieš tęsdami užbaikite dviejų veiksnių autentifikavimą.",
+  completeSignIn: "Užbaigti prisijungimą",
+  usePasskeyNotice: "Atsijunkite ir užbaikite prisijungimą registruotu prieigos raktu.",
 } satisfies Partial<Record<MessageKey, string>>;

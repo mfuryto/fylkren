@@ -3,7 +3,7 @@ import type React from "react";
 import { userInitials } from "@fylkren/ui";
 import QRCode from "qrcode";
 import type { PublicConfiguration } from "../app/models";
-import { beginTotpSetup, changeProfilePassword, confirmTotpSetup, deleteProfileImage, disableTotp as disableTotpAuthentication, loadSession, saveProfile as persistProfile, uploadProfileImage, type TotpSetup } from "./profileApi";
+import { beginTotpSetup, changeProfilePassword, completeMfaChallenge, confirmTotpSetup, deleteProfileImage, disableTotp as disableTotpAuthentication, loadSession, saveProfile as persistProfile, uploadProfileImage, type TotpSetup } from "./profileApi";
 import type { Session } from "../work/WorkContextModels";
 import { PasskeysPanel } from "./PasskeysPanel";
 import { PersonalNotificationsPanel } from "./PersonalNotificationsPanel";
@@ -36,6 +36,7 @@ export function ProfilePage({
   const [totpSetup, setTotpSetup] = useState<TotpSetup | null>(null);
   const [totpQrCode, setTotpQrCode] = useState("");
   const [totpCode, setTotpCode] = useState("");
+  const [mfaCode, setMfaCode] = useState("");
   const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
   const [disablePassword, setDisablePassword] = useState("");
   const [profilePassword, setProfilePassword] = useState("");
@@ -158,6 +159,43 @@ export function ProfilePage({
     }
     setBusy(false);
   }
+
+  async function completeRequiredMfa(event: React.FormEvent) {
+    event.preventDefault();
+    setBusy(true); setError("");
+    try {
+      await completeMfaChallenge(mfaCode);
+      setMfaCode("");
+      await refreshSession();
+    } catch (problem) {
+      setError(problem instanceof Error ? problem.message : t("twoFactorCodeFailed"));
+    }
+    setBusy(false);
+  }
+
+  if (session.mfaRequired && !session.mustChangePassword) return (
+    <div className="page profile-page">
+      <header className="page-header"><div><h1>{t("twoFactorAuthentication")}</h1><p className="muted">{t("mfaRequiredNotice")}</p></div><button className="secondary-button" type="button" onClick={onSignOut}>{t("signOut")}</button></header>
+      {error && <p className="status-message error-message" role="alert">{error}</p>}
+      <section className="panel stacked-form two-factor-panel">
+        {session.mfaPasskeyRequired ? <p>{t("usePasskeyNotice")}</p> : session.mfaEnrollmentRequired ? totpSetup ? (
+          <form className="stacked-form" onSubmit={confirmTotp}>
+            <p>{t("scanQrCode")}</p>
+            {totpQrCode && <img className="totp-qr-code" src={totpQrCode} alt={t("qrCodeAlt")} />}
+            <details><summary>{t("manualKeyHelp")}</summary><code className="totp-secret">{totpSetup.secret}</code><code className="totp-uri">{totpSetup.provisioningUri}</code></details>
+            <div className="field"><label htmlFor="required-totp-setup-code">{t("sixDigitCode")}</label><input id="required-totp-setup-code" inputMode="numeric" autoComplete="one-time-code" required value={totpCode} onChange={(event) => setTotpCode(event.target.value)} /></div>
+            <button className="primary-button" disabled={busy}>{t("confirmAndEnable")}</button>
+          </form>
+        ) : <><p>{t("totpIntro")}</p><button className="primary-button" type="button" disabled={busy} onClick={beginTotp}>{t("setupAuthenticator")}</button></> : (
+          <form className="stacked-form" onSubmit={completeRequiredMfa}>
+            <div className="field"><label htmlFor="required-mfa-code">{t("sixDigitCode")}</label><input id="required-mfa-code" inputMode="numeric" autoComplete="one-time-code" required value={mfaCode} onChange={(event) => setMfaCode(event.target.value)} /></div>
+            <button className="primary-button" disabled={busy}>{t("completeSignIn")}</button>
+          </form>
+        )}
+        {recoveryCodes.length > 0 && <div className="recovery-codes" role="status"><strong>{t("recoveryCodesTitle")}</strong><p>{t("recoveryCodesHelp")}</p><code>{recoveryCodes.join("\n")}</code></div>}
+      </section>
+    </div>
+  );
 
   return (
     <div className="page profile-page">
@@ -362,13 +400,14 @@ export function ProfilePage({
       <PersonalNotificationsPanel disabled={busy||Boolean(session.mustChangePassword)}/>
       <BrowserSessionsPanel disabled={busy || Boolean(session.mustChangePassword)} onCurrentSessionRevoked={() => window.location.reload()} />
       <div className="profile-authentication-grid">
-      {!session.isDirectoryManaged && configuration.authentication.mfaEnabled !== false && (
+      {configuration.authentication.mfaEnabled !== false && (
         <section className="panel stacked-form two-factor-panel">
           <h2>{t("twoFactorAuthentication")}</h2>
           {session.twoFactorEnabled ? (
             <>
               <p>{t("authenticatorActive")}</p>
               <form className="stacked-form" onSubmit={disableTotp}>
+                {!session.isDirectoryManaged && (
                 <div className="field">
                   <label htmlFor="disable-2fa-password">
                     {t("passwordToDisable")}
@@ -382,6 +421,7 @@ export function ProfilePage({
                     onChange={(e) => setDisablePassword(e.target.value)}
                   />
                 </div>
+                )}
                 <button className="danger-button" disabled={busy}>
                   {t("disableTwoFactor")}
                 </button>
@@ -420,7 +460,7 @@ export function ProfilePage({
           ) : (
             <>
               <p>{t("totpIntro")}</p>
-              <div className="field">
+              {!session.isDirectoryManaged && <div className="field">
                 <label htmlFor="setup-2fa-password">{t("currentPassword")}</label>
                 <input
                   id="setup-2fa-password"
@@ -431,11 +471,11 @@ export function ProfilePage({
                   value={totpSetupPassword}
                   onChange={(event) => setTotpSetupPassword(event.target.value)}
                 />
-              </div>
+              </div>}
               <button
                 className="secondary-button"
                 type="button"
-                disabled={busy || session.mustChangePassword || totpSetupPassword.length === 0}
+                disabled={busy || session.mustChangePassword || !session.isDirectoryManaged && totpSetupPassword.length === 0}
                 onClick={beginTotp}
               >
                 {t("setupAuthenticator")}

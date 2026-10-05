@@ -24,13 +24,13 @@ assert.match(directoryEndpoints, /MapPost\("\/api\/session\/directory", SignIn\)
 assert.match(webauthn, /UserVerification = UserVerificationRequirement\.Required/);
 assert.match(oidc, /Results\.Challenge[\s\S]*OpenIdConnectDefaults\.AuthenticationScheme/);
 assert.match(saml, /Results\.Challenge[\s\S]*Saml2Defaults\.Scheme/);
-for (const flag of ['localEnabled', 'mfaEnabled', 'oidcConfigurationEnabled', 'samlConfigurationEnabled',
+for (const flag of ['localEnabled', 'mfaEnabled', 'mfaRequired', 'oidcConfigurationEnabled', 'samlConfigurationEnabled',
   'activeDirectoryConfigurationEnabled', 'ldapConfigurationEnabled', 'webAuthnEnabled'])
   assert.ok(publicConfiguration.includes(flag), `Public pathway configuration omitted ${flag}`);
 
 const expectedSessionWriters = new Map([
   ['DirectoryEndpoints.cs', 1], ['IdentityBootstrapEndpoints.cs', 1], ['IdentityProfileEndpoints.cs', 2],
-  ['IdentitySessionEndpoints.cs', 2], ['IdentityTotpEndpoints.cs', 2], ['WebAuthnEndpoints.cs', 3],
+  ['IdentitySessionEndpoints.cs', 2], ['IdentityTotpEndpoints.cs', 3], ['WebAuthnEndpoints.cs', 3],
 ]);
 const actualSessionWriters = new Map();
 for (const name of readdirSync('apps/api/Identity').filter(value => value.endsWith('.cs'))) {
@@ -39,14 +39,14 @@ for (const name of readdirSync('apps/api/Identity').filter(value => value.endsWi
 }
 assert.deepEqual(actualSessionWriters, expectedSessionWriters,
   'A browser-session writer was added, removed or moved without authentication-pathway review');
-assert.match(serviceRegistration, /OnTokenValidated[\s\S]*?context\.Principal = IdentityEndpoints\.CreatePrincipal\(identity\)/);
+assert.match(serviceRegistration, /OnTokenValidated[\s\S]*?context\.Principal = IdentityEndpoints\.CreatePrincipal\(identity, browserSession\.Id\)/);
 assert.match(serviceRegistration, /Saml2Defaults\.Scheme[\s\S]*?context\.ReplacePrincipal\(IdentityEndpoints\.CreatePrincipal\(identity/);
 assert.match(machineAuthentication, /new ClaimsIdentity\(claims, "FylkrenMachine"\)/);
 assert.doesNotMatch(machineAuthentication, /SignInAsync\(|CreatePrincipal\(/);
 
 process.stdout.write(`${JSON.stringify({ authenticationPathwayDocumentation: 'passed',
   documentedPathways: 6, sharedLocalRateBoundary: true, webauthnUserVerificationRequired: true,
-  providerStrengthFallbacksDocumented: 2, publicPathwayFlags: 7,
+  providerStrengthFallbacksDocumented: 2, publicPathwayFlags: 8,
   reviewedBrowserSessionWriterFiles: actualSessionWriters.size,
   reviewedBrowserSessionWriterCalls: [...actualSessionWriters.values()].reduce((sum, value) => sum + value, 0),
   machineAuthenticationSeparated: true })}\n`);

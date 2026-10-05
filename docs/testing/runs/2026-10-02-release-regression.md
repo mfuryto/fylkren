@@ -1184,6 +1184,22 @@ The disposable run explicitly enables the deployment MFA feature, creates an une
 
 Remediation requires a product policy for mandatory strength across local and external pathways, a restricted enrollment state that cannot grant operational access, recovery/bootstrap and break-glass behavior, migration of existing accounts and provider-claim verification wherever external MFA is claimed. No speculative enforcement was added because an incomplete rule could lock out administrators or silently weaken another authentication path. Production is untouched.
 
+## Mandatory MFA closure — 2026-10-05
+
+Completes ASVS 6.3.3 and closes SV-094. `FYLKREN_MFA_REQUIRED=true` is now the supported default and cannot be combined with a disabled MFA capability. Local password, AD/LDAP, OIDC and SAML establish only a restricted first-factor session. The trusted middleware permits only session/configuration reads, required password change and TOTP enrollment/completion; unrelated operational and administrative APIs return `403`. Unenrolled users are directed to a compact TOTP setup after their valid first factor, including first-run Platform Manager setup and existing linked external accounts. TOTP/recovery completion upgrades the session, while a user-verifying WebAuthn sign-in is explicitly marked satisfied. The final TOTP or passkey cannot be removed while the requirement is active.
+
+Scoped commands:
+
+```sh
+dotnet build apps/api/Fylkren.Api.csproj --no-restore
+pnpm --filter @fylkren/web build
+node tools/run-e2e-editions.mjs --asvs-mfa-enforcement-only
+pnpm --filter @fylkren/web test -- src/app/navigationPolicy.test.ts src/localization/localization.test.ts
+pnpm check:docs
+```
+
+The clean-database current-candidate run reports `{"mfaEnforcementAssessment":"passed","findingClosed":"SV-094","deploymentMfaRequired":true,"unenrolledSessionRestrictedToEnrollment":true,"operationalAccessBeforeSecondFactor":false,"totpEnrollmentCompleted":true,"subsequentPasswordSignInRequiresSecondFactor":true,"operationalAccessAfterSecondFactor":true}`. It creates an unenrolled Platform Manager, proves Site access is rejected before MFA, enrolls TOTP through the restricted session, proves the session is upgraded, signs out, and proves the next correct-password sign-in yields only a TOTP challenge before Site access succeeds. Source assertions bind directory, OIDC and SAML session creation to the same unsatisfied state and bind user-verifying WebAuthn to explicit satisfaction. Existing provider and authenticator laboratories remain the underlying first-factor/signature/replay evidence; this scoped run does not repeat them. Production is untouched.
+
 ## Authentication-pathway inventory and consistency — 2026-10-04
 
 Completes ASVS 6.3.4 for the documented current strength of each pathway. The access manual places local password, password plus TOTP/recovery, user-verifying WebAuthn, AD/LDAP, OIDC and SAML in one table with proof, application controls, provider responsibility and fallback. It now explicitly scopes that table to interactive human sign-in and distinguishes one-time bootstrap, credential recovery, authenticated session renewal, machine API authentication and signed federation traffic.

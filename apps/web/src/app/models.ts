@@ -30,6 +30,7 @@ export type PublicConfiguration = RegionalSettings & {
   authentication: {
     localEnabled: boolean;
     mfaEnabled?: boolean;
+    mfaRequired?: boolean;
     oidcConfigurationEnabled: boolean;
     samlConfigurationEnabled: boolean;
     activeDirectoryConfigurationEnabled: boolean;

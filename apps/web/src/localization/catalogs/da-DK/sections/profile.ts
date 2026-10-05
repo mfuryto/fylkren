@@ -79,4 +79,7 @@ export const profileDaDK = {
   browserSession: "Browsersession",
   unknownBrowser: "Ukendt browser",
   sessionReauthenticationHelp: "Angiv din adgangskode, hvis login er ældre end fem minutter. Eksternt login skal gentages, før ældre sessioner kan administreres.",
+  mfaRequiredNotice: "Fuldfør tofaktorgodkendelse, før du fortsætter.",
+  completeSignIn: "Fuldfør login",
+  usePasskeyNotice: "Log ud, og brug din registrerede passkey til at fuldføre login.",
 } satisfies Partial<Record<MessageKey, string>>;

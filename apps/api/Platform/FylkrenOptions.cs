@@ -35,6 +35,8 @@ public sealed class FylkrenOptions
             throw new InvalidOperationException("Directory lifecycle interval must be between 1 and 1440 minutes.");
         if (Authentication.DirectoryLifecycle.MissingConfirmationCount is < 1 or > 10)
             throw new InvalidOperationException("Directory lifecycle missing confirmation count must be between 1 and 10.");
+        if (Authentication.MfaRequired && !Authentication.MfaEnabled)
+            throw new InvalidOperationException("Mandatory MFA requires the MFA capability to be enabled.");
         if (!Authentication.LocalEnabled && !Authentication.Oidc.Enabled && !Authentication.Saml.Enabled && !Authentication.ActiveDirectory.Enabled && !Authentication.Ldap.Enabled)
             throw new InvalidOperationException("At least one operational authentication method must be enabled.");
         if (Federation.RetentionDays is < 365 or > 3650)
@@ -143,6 +145,7 @@ public sealed class AuthenticationOptions
     public bool LocalEnabled { get; set; } = true;
     public string? SsoAutoRedirectProvider { get; set; }
     public bool MfaEnabled { get; set; } = true;
+    public bool MfaRequired { get; set; } = true;
     public OidcOptions Oidc { get; set; } = new();
     public SamlOptions Saml { get; set; } = new();
     public ActiveDirectoryOptions ActiveDirectory { get; set; } = new();

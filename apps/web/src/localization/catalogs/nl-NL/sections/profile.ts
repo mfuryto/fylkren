@@ -79,4 +79,7 @@ export const profileNlNL = {
   browserSession: "Browsersessie",
   unknownBrowser: "Onbekende browser",
   sessionReauthenticationHelp: "Voer uw wachtwoord in als de aanmelding langer dan vijf minuten geleden is. Extern aanmelden moet worden herhaald voordat oudere sessies kunnen worden beheerd.",
+  mfaRequiredNotice: "Voltooi tweefactorauthenticatie voordat u doorgaat.",
+  completeSignIn: "Aanmelding voltooien",
+  usePasskeyNotice: "Meld u af en gebruik uw geregistreerde passkey om de aanmelding te voltooien.",
 } satisfies Partial<Record<MessageKey, string>>;

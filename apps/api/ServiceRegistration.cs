@@ -421,6 +421,7 @@ internal static class ServiceRegistration
             }
 
             var directoryManaged = context.Principal.FindFirst("fylkren:directory_managed")?.Value == "true";
+            var mfaSatisfied = context.Principal.FindFirst("fylkren:mfa_satisfied")?.Value == "true";
             if (!Guid.TryParse(context.Principal.FindFirstValue(ClaimTypes.NameIdentifier), out var identityId))
             {
                 context.RejectPrincipal();
@@ -460,7 +461,7 @@ internal static class ServiceRegistration
                 await sessionDatabase.SaveChangesAsync(context.HttpContext.RequestAborted);
             }
             context.ReplacePrincipal(IdentityEndpoints.CreatePrincipal(
-                sessionIdentity, browserSession.Id, sessionStartedAt, directoryManaged));
+                sessionIdentity, browserSession.Id, sessionStartedAt, directoryManaged, mfaSatisfied));
             context.ShouldRenew = true;
             return;
         }

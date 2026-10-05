@@ -199,7 +199,7 @@ public static class WebAuthnEndpoints
         await transaction.CommitAsync(ct);
         await context.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
-            IdentityEndpoints.CreatePrincipal(login, browserSession.Id, now));
+            IdentityEndpoints.CreatePrincipal(login, browserSession.Id, now, mfaSatisfied: true));
         return Results.NoContent();
     }
 
@@ -320,7 +320,7 @@ public static class WebAuthnEndpoints
         await transaction.CommitAsync(ct);
         await context.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
-            IdentityEndpoints.CreatePrincipal(login, browserSession.Id, now));
+            IdentityEndpoints.CreatePrincipal(login, browserSession.Id, now, mfaSatisfied: true));
         return Results.NoContent();
     }
 
@@ -342,6 +342,7 @@ public static class WebAuthnEndpoints
         IAntiforgery antiforgery,
         HttpContext context,
         FylkrenDbContext db,
+        FylkrenOptions options,
         IPasswordHasher<LoginIdentity> passwordHasher,
         CancellationToken ct)
     {
@@ -362,6 +363,9 @@ public static class WebAuthnEndpoints
             ct);
         if (credential is null)
             return Results.NotFound();
+        if (options.Authentication.MfaRequired && !login.TotpEnabled &&
+            await db.WebAuthnCredentials.CountAsync(value => value.PersonId == personId && value.IsActive, ct) <= 1)
+            return Results.Conflict(new { error = "At least one multi-factor sign-in method must remain active." });
 
         credential.Deactivate();
         login.AdvanceSecurityVersion();
@@ -373,7 +377,7 @@ public static class WebAuthnEndpoints
         await transaction.CommitAsync(ct);
         await context.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
-            IdentityEndpoints.CreatePrincipal(login, browserSession.Id));
+            IdentityEndpoints.CreatePrincipal(login, browserSession.Id, mfaSatisfied: true));
         return Results.NoContent();
     }
 

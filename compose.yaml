@@ -44,6 +44,7 @@ services:
       Fylkren__License__PublicKeySpki: ${FYLKREN_LICENSE_PUBLIC_KEY_SPKI:-}
       Fylkren__Authentication__LocalEnabled: ${FYLKREN_LOCAL_AUTH_ENABLED:-true}
       Fylkren__Authentication__MfaEnabled: ${FYLKREN_MFA_ENABLED:-true}
+      Fylkren__Authentication__MfaRequired: ${FYLKREN_MFA_REQUIRED:-true}
       Fylkren__Authentication__Oidc__Enabled: ${FYLKREN_OIDC_ENABLED:-false}
       Fylkren__Authentication__Oidc__Authority: ${FYLKREN_OIDC_AUTHORITY:-}
       Fylkren__Authentication__Oidc__ClientId: ${FYLKREN_OIDC_CLIENT_ID:-}

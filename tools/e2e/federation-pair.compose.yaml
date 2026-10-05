@@ -4,6 +4,7 @@ x-api-environment: &api-environment
   Fylkren__Http__RequireHttps: "true"
   Fylkren__Federation__RetentionDays: "2555"
   Fylkren__Authentication__MfaEnabled: "false"
+  Fylkren__Authentication__MfaRequired: "false"
   Fylkren__License__PublicKeySpki: ${FYLKREN_PAIR_ISSUER_PUBLIC_KEY:?}
   Fylkren__Outbound__PrivateOrigins: https://tls:443;https://tls:444;https://tls:446;https://tls:447;https://tls:449
   SSL_CERT_FILE: /test-ca/ca.pem

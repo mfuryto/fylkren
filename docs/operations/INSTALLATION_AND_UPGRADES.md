@@ -196,6 +196,8 @@ For `20261004085939_AutomaticWorkLifecycle`, the new writer automatically locks 
 
 Migration `20261005220000_AddBrowserSessionRegistry` adds the authoritative browser-session registry. Cookies issued by an older version do not contain a registry identifier and are rejected after upgrade, so every user must sign in once after deployment. This does not remove accounts or operational data. Verify Profile lists the new current session and that terminating a separate test session rejects only that browser.
 
+Mandatory MFA is enabled by default through `FYLKREN_MFA_REQUIRED=true`. Existing unenrolled users are not locked out: their next valid first factor opens only the TOTP enrollment screen, and operational/administrative access remains blocked until enrollment succeeds. Directory and SSO users use the same supplemental Fylkren TOTP flow. Before deployment, confirm staff have authenticator applications and a recovery-code custody process. A deployment that has explicitly accepted single-factor risk must set both `FYLKREN_MFA_REQUIRED=false` and its intended `FYLKREN_MFA_ENABLED` value; disabling the capability while leaving the requirement enabled fails startup.
+
 Once automatic facts or editing pauses exist, downgrade is blocked: use a forward fix or matched database/key/configuration/image restore. Keep all old replicas stopped throughout the upgrade. See [automatic lifecycle scope](../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md#automatic-workitem-lifecycle--2026-10-04).
 
 ## Failure and rollback

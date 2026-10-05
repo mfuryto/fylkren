@@ -41,7 +41,7 @@ public static partial class IdentityEndpoints
         // absolute session lifetime. Email changes require the current password and
         // advance the security version, so that path deliberately renews this session.
         if (emailChanged)
-            await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, CreatePrincipal(identity, browserSession!.Id));
+            await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, CreatePrincipal(identity, browserSession!.Id, mfaSatisfied: MfaSatisfied(user)));
         return Results.Ok(new { identity.Username, identity.Person.DisplayName, identity.MustChangePassword, hasProfileImage = identity.Person.ProfileImage is not null });
     }
 
@@ -59,7 +59,7 @@ public static partial class IdentityEndpoints
         var browserSession = StartBrowserSession(identity, database, context, "password-change");
         database.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), null, identity.PersonId, "password.changed", "login-identity", identity.Id, DateTimeOffset.UtcNow));
         await database.SaveChangesAsync(cancellationToken);
-        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, CreatePrincipal(identity, browserSession.Id));
+        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, CreatePrincipal(identity, browserSession.Id, mfaSatisfied: MfaSatisfied(user)));
         return Results.NoContent();
     }
 

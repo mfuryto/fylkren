@@ -79,4 +79,7 @@ export const profileUkUA = {
   browserSession: "Сеанс браузера",
   unknownBrowser: "Невідомий браузер",
   sessionReauthenticationHelp: "Введіть пароль, якщо після входу минуло понад п’ять хвилин. Перед керуванням старішими сеансами зовнішній вхід потрібно повторити.",
+  mfaRequiredNotice: "Завершіть двофакторну автентифікацію, перш ніж продовжити.",
+  completeSignIn: "Завершити вхід",
+  usePasskeyNotice: "Вийдіть і скористайтеся зареєстрованим ключем доступу, щоб завершити вхід.",
 } satisfies Partial<Record<MessageKey, string>>;

@@ -79,4 +79,7 @@ export const profilePtPT = {
   browserSession: "Sessão do navegador",
   unknownBrowser: "Navegador desconhecido",
   sessionReauthenticationHelp: "Introduza a palavra-passe se o início de sessão tiver mais de cinco minutos. O início de sessão externo deve ser repetido antes de gerir sessões anteriores.",
+  mfaRequiredNotice: "Conclua a autenticação de dois fatores antes de continuar.",
+  completeSignIn: "Concluir início de sessão",
+  usePasskeyNotice: "Termine a sessão e use a chave de acesso registada para concluir o início de sessão.",
 } satisfies Partial<Record<MessageKey, string>>;

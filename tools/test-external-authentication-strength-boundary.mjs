@@ -7,13 +7,13 @@ const ssoLab = readFileSync('tools/run-identity-sso-lab.mjs', 'utf8');
 
 assert.match(access, /OIDC authorization code[\s\S]*minimum single-factor strength[\s\S]*`acr` or `amr`/);
 assert.match(access, /SAML 2\.0 SP-initiated SSO[\s\S]*minimum single-factor strength[\s\S]*does not enforce an authentication-context class/);
-assert.match(access, /Do not use this pathway as application-enforced step-up authentication/g);
+assert.match(access, /Produces only restricted access until Fylkren TOTP\/recovery succeeds/g);
 assert.doesNotMatch(registration, /FindFirst\("(?:acr|amr)"\)|RequireClaim\("(?:acr|amr)"\)|AuthnContextClassRef|RequestedAuthnContext/);
-assert.match(registration, /context\.Principal = IdentityEndpoints\.CreatePrincipal\(identity\)/);
+assert.match(registration, /context\.Principal = IdentityEndpoints\.CreatePrincipal\(identity, browserSession\.Id\)/);
 assert.match(registration, /external-authentication-rejected/);
 assert.match(ssoLab, /OIDC/); assert.match(ssoLab, /SAML/);
 
 process.stdout.write(`${JSON.stringify({ externalAuthenticationStrengthBoundary: 'passed',
   providers: ['oidc', 'saml'], specificStrengthExpected: false,
-  documentedFallback: 'minimum-single-factor', stepUpAuthorization: false,
+  documentedFallback: 'minimum-single-factor-plus-local-totp', stepUpAuthorization: false,
   strengthClaimsUsedForElevation: [], providerFailureFailsClosed: true })}\n`);

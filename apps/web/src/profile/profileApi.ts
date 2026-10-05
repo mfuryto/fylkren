@@ -12,6 +12,7 @@ export const uploadProfileImage = (image: File) => { const form = new FormData()
 export const deleteProfileImage = () => apiMutate("/api/profile/image", "DELETE", undefined, translateActive("profileImageDeleteApiFailed"));
 export const beginTotpSetup = (currentPassword: string) => apiMutate<TotpSetup>("/api/profile/2fa/setup", "POST", { currentPassword }, translateActive("totpSetupApiFailed"));
 export const confirmTotpSetup = (setupToken: string, code: string) => apiMutate<{ recoveryCodes: string[] }>("/api/profile/2fa/confirm", "POST", { setupToken, code }, translateActive("totpConfirmApiFailed"));
+export const completeMfaChallenge = (code: string) => apiMutate("/api/profile/2fa/challenge", "POST", { code }, translateActive("totpConfirmApiFailed"));
 export const disableTotp = (password: string) => apiMutate("/api/profile/2fa", "DELETE", { password }, translateActive("totpDisableApiFailed"));
 export const loadBrowserSessions = () => apiGet<BrowserSession[]>("/api/profile/sessions", translateActive("sessionLoadFailed"));
 export const revokeBrowserSession = (id: string, currentPassword: string) => apiMutate(`/api/profile/sessions/${id}`, "DELETE", { currentPassword }, translateActive("terminateSessionsFailed"));

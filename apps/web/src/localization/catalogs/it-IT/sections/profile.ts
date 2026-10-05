@@ -79,4 +79,7 @@ export const profileItIT = {
   browserSession: "Sessione del browser",
   unknownBrowser: "Browser sconosciuto",
   sessionReauthenticationHelp: "Inserisci la password se l’accesso risale a più di cinque minuti fa. L’accesso esterno deve essere ripetuto prima di gestire le sessioni precedenti.",
+  mfaRequiredNotice: "Completa l’autenticazione a due fattori prima di continuare.",
+  completeSignIn: "Completa l’accesso",
+  usePasskeyNotice: "Esci e usa la passkey registrata per completare l’accesso.",
 } satisfies Partial<Record<MessageKey, string>>;

@@ -79,4 +79,7 @@ export const profileLvLV = {
   browserSession: "Pārlūka sesija",
   unknownBrowser: "Nezināma pārlūkprogramma",
   sessionReauthenticationHelp: "Ievadiet paroli, ja pieteikšanās notikusi pirms vairāk nekā piecām minūtēm. Pirms vecāku sesiju pārvaldības ārējā pieteikšanās jāatkārto.",
+  mfaRequiredNotice: "Pirms turpināt, pabeidziet divfaktoru autentifikāciju.",
+  completeSignIn: "Pabeigt pierakstīšanos",
+  usePasskeyNotice: "Izrakstieties un izmantojiet reģistrēto piekļuves atslēgu, lai pabeigtu pierakstīšanos.",
 } satisfies Partial<Record<MessageKey, string>>;

@@ -30,7 +30,7 @@ export function buildNavigation(session: Session, activeItem: AppPage) {
     session.administersSite || session.canApproveWork
       ? siteAdministrationNavigation
       : [];
-  const effectiveItem = session.mustChangePassword
+  const effectiveItem = session.mustChangePassword || session.mfaRequired
     ? "Profile"
     : session.isPlatformManager
       ? activeItem === "Profile" || platformNavigation.includes(activeItem) || activeItem === "Archives" && session.hasArchiveAccess
@@ -71,7 +71,7 @@ export function buildNavigation(session: Session, activeItem: AppPage) {
   return {
     effectiveItem,
     administrationNavigation,
-    navigationItems: session.mustChangePassword
+    navigationItems: session.mustChangePassword || session.mfaRequired
       ? []
       : [...primaryNavigation, ...administrationNavigation],
   };

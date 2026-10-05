@@ -88,6 +88,7 @@ Base installation setting:
 
 ```dotenv
 FYLKREN_MFA_ENABLED=true
+FYLKREN_MFA_REQUIRED=true
 ```
 
 Language, IANA time zone, 12/24-hour clock and measurement system are stored in
@@ -98,7 +99,7 @@ not yet contain regional settings; they are not the ongoing source of truth.
 
 Local login is controlled in **Platform Manager → Identity**. An existing `FYLKREN_LOCAL_AUTH_ENABLED` value is imported only when the database setting is first created.
 
-`FYLKREN_MFA_ENABLED=false` hides and disables TOTP, passkeys, security keys, and WebAuthn endpoints without deleting existing credentials. Use it only after a documented risk assessment; an internal network alone is not an authentication control.
+`FYLKREN_MFA_REQUIRED=true` is the supported default. Setting `FYLKREN_MFA_ENABLED=false` also requires `FYLKREN_MFA_REQUIRED=false`; this explicit exception hides and disables TOTP, passkeys, security keys, and WebAuthn endpoints without deleting existing credentials. Use it only after a documented risk assessment; an internal network alone is not an authentication control.
 
 ## Reverse proxy
 

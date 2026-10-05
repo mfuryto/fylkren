@@ -79,4 +79,7 @@ export const profilePlPL = {
   browserSession: "Sesja przeglądarki",
   unknownBrowser: "Nieznana przeglądarka",
   sessionReauthenticationHelp: "Podaj hasło, jeśli logowanie nastąpiło ponad pięć minut temu. Przed zarządzaniem starszymi sesjami należy powtórzyć logowanie zewnętrzne.",
+  mfaRequiredNotice: "Przed kontynuowaniem ukończ uwierzytelnianie dwuskładnikowe.",
+  completeSignIn: "Dokończ logowanie",
+  usePasskeyNotice: "Wyloguj się i użyj zarejestrowanego klucza dostępu, aby dokończyć logowanie.",
 } satisfies Partial<Record<MessageKey, string>>;

@@ -79,4 +79,7 @@ export const profileEsES = {
   browserSession: "Sesión del navegador",
   unknownBrowser: "Navegador desconocido",
   sessionReauthenticationHelp: "Introduzca su contraseña si inició sesión hace más de cinco minutos. El inicio de sesión externo debe repetirse antes de administrar sesiones anteriores.",
+  mfaRequiredNotice: "Complete la autenticación de dos factores antes de continuar.",
+  completeSignIn: "Completar inicio de sesión",
+  usePasskeyNotice: "Cierre la sesión y use su clave de acceso registrada para completar el inicio de sesión.",
 } satisfies Partial<Record<MessageKey, string>>;

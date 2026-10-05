@@ -79,4 +79,7 @@ export const profileSvSE = {
   browserSession: "Webbläsarsession",
   unknownBrowser: "Okänd webbläsare",
   sessionReauthenticationHelp: "Ange lösenordet om inloggningen är äldre än fem minuter. Extern inloggning måste göras om innan äldre sessioner kan hanteras.",
+  mfaRequiredNotice: "Slutför tvåfaktorsautentisering innan du fortsätter.",
+  completeSignIn: "Slutför inloggningen",
+  usePasskeyNotice: "Logga ut och använd din registrerade passkey för att slutföra inloggningen.",
 } satisfies Partial<Record<MessageKey, string>>;

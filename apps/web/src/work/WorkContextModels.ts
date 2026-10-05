@@ -14,6 +14,9 @@ export type Session = {
   hasProfileImage?: boolean;
   isDirectoryManaged?: boolean;
   twoFactorEnabled?: boolean;
+  mfaRequired?: boolean;
+  mfaEnrollmentRequired?: boolean;
+  mfaPasskeyRequired?: boolean;
   canPlan?: boolean;
   canApproveWork?: boolean;
   isTopLevelLeader?: boolean;

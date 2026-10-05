@@ -73,6 +73,7 @@ internal static class PublicConfigurationEndpoints
     {
         localEnabled = options.Authentication.LocalEnabled,
         mfaEnabled = options.Authentication.MfaEnabled,
+        mfaRequired = options.Authentication.MfaRequired,
         oidcConfigurationEnabled = options.Authentication.Oidc.Enabled,
         samlConfigurationEnabled = options.Authentication.Saml.Enabled,
         activeDirectoryConfigurationEnabled = options.Authentication.ActiveDirectory.Enabled,

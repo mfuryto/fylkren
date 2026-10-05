@@ -32,6 +32,7 @@ public static partial class IdentityEndpoints
         group.MapDelete("/profile/sessions", RevokeAllBrowserSessions).RequireAuthorization().RequireRateLimiting("authentication");
         group.MapPost("/profile/2fa/setup", BeginTotpSetup).RequireAuthorization().RequireRateLimiting("authentication");
         group.MapPost("/profile/2fa/confirm", ConfirmTotpSetup).RequireAuthorization().RequireRateLimiting("authentication");
+        group.MapPost("/profile/2fa/challenge", CompleteProfileMfaChallenge).RequireAuthorization().RequireRateLimiting("authentication");
         group.MapDelete("/profile/2fa", DisableTotp).RequireAuthorization().RequireRateLimiting("authentication");
         group.MapPut("/profile", UpdateProfile).RequireAuthorization().RequireRateLimiting("authentication");
         group.MapPut("/profile/password", ChangePassword).RequireAuthorization().RequireRateLimiting("authentication");
@@ -47,6 +48,7 @@ public static partial class IdentityEndpoints
     private sealed record SignInRequest(string? Username, string? Password);
     private sealed record TwoFactorSignInRequest(string? ChallengeToken, string? Code);
     private sealed record TotpSetupRequest(string? SetupToken, string? Code);
+    private sealed record TotpChallengeRequest(string? Code);
     private sealed record DisableTotpRequest(string? Password);
     private sealed record ReauthenticationRequest(string? CurrentPassword);
     private sealed record BootstrapRequest(string Username, string DisplayName, string Email, string Password);

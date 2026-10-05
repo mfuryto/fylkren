@@ -72,4 +72,13 @@ describe("navigation policy", () => {
     expect(result.effectiveItem).toBe("Profile");
     expect(result.navigationItems).toEqual([]);
   });
+
+  it("restricts pending multi-factor enrollment to the profile", () => {
+    const result = buildNavigation(
+      session({ mfaRequired: true, isPlatformManager: true }),
+      "Platform",
+    );
+    expect(result.effectiveItem).toBe("Profile");
+    expect(result.navigationItems).toEqual([]);
+  });
 });

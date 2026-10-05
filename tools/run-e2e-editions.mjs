@@ -11,6 +11,7 @@ const env = {
   FYLKREN_HTTP_PORT: '127.0.0.1:18081',
   FYLKREN_PUBLIC_URL: 'http://localhost:18081',
   FYLKREN_MFA_ENABLED: 'false',
+  FYLKREN_MFA_REQUIRED: 'false',
   FYLKREN_LICENSE_PUBLIC_KEY_SPKI: fixture.publicKeySpki,
   FYLKREN_E2E_BASE_URL: 'http://localhost:18081',
   FYLKREN_COMPOSE_PROJECT: project,
@@ -22,6 +23,7 @@ if (process.argv.includes('--asvs-cookie-only') || process.argv.includes('--asvs
   env.FYLKREN_TRUST_FORWARDED_HEADERS = 'true';
 }
 if (process.argv.includes('--asvs-mfa-enforcement-only') || process.argv.includes('--asvs-reset-mfa-only') || process.argv.includes('--asvs-lost-mfa-only')) env.FYLKREN_MFA_ENABLED = 'true';
+if (process.argv.includes('--asvs-mfa-enforcement-only')) env.FYLKREN_MFA_REQUIRED = 'true';
 const backupRoot = mkdtempSync(join(tmpdir(), 'fylkren-backup-e2e-'));
 const environmentPath = '.env';
 const savedEnvironment = existsSync(environmentPath) ? readFileSync(environmentPath) : null;

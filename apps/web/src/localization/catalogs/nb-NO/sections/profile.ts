@@ -77,4 +77,7 @@ export const profileNbNO = {
   browserSession: "Nettleserøkt",
   unknownBrowser: "Ukjent nettleser",
   sessionReauthenticationHelp: "Oppgi passordet hvis innloggingen er eldre enn fem minutter. Ekstern innlogging må gjentas før eldre økter kan behandles.",
+  mfaRequiredNotice: "Fullfør tofaktorautentisering før du fortsetter.",
+  completeSignIn: "Fullfør innlogging",
+  usePasskeyNotice: "Logg ut og bruk den registrerte passkeyen for å fullføre innloggingen.",
 } as const;

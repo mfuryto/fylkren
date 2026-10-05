@@ -33,11 +33,11 @@ The complete enforcement matrix is in [Access matrix](ACCESS_MATRIX.md).
 
 ## 3. Login and Profile
 
-Available login methods depend on installation configuration: local username/email and password, OIDC, SAML 2.0, Active Directory or LDAP. WebAuthn/passkeys and TOTP are optional for eligible local accounts.
+Available first-factor methods depend on installation configuration: local username/email and password, OIDC, SAML 2.0, Active Directory or LDAP. Fylkren then requires TOTP or a one-time recovery code before opening the application. On first use, Profile guides the user directly through authenticator enrollment. A user-verifying WebAuthn passkey can complete multi-factor sign-in directly.
 
 After normal login, the application opens Overview. Profile opens automatically only when a local account must complete its first password change. The profile menu in the top bar contains **Profile** and **Log out**.
 
-Profile supports display name, profile image, personal notification mutes, password changes and available MFA/passkey controls. Directory-managed name/email/password fields are read-only; the profile image remains editable.
+Profile supports display name, profile image, personal notification mutes, password changes and MFA/passkey controls. Before mandatory MFA is complete, Profile shows only the required password-change or authenticator enrollment/completion flow. Directory-managed name/email/password fields are read-only; Fylkren TOTP and the profile image remain available.
 
 Administrators issue a one-time reset code rather than choosing a permanent password. Enter the code on the login page and choose the new password before the code expires.
 

@@ -79,4 +79,7 @@ export const profileFiFI = {
   browserSession: "Selainistunto",
   unknownBrowser: "Tuntematon selain",
   sessionReauthenticationHelp: "Anna salasanasi, jos kirjautumisesta on yli viisi minuuttia. Ulkoinen kirjautuminen on tehtävä uudelleen ennen vanhempien istuntojen hallintaa.",
+  mfaRequiredNotice: "Viimeistele kaksivaiheinen tunnistautuminen ennen jatkamista.",
+  completeSignIn: "Viimeistele kirjautuminen",
+  usePasskeyNotice: "Kirjaudu ulos ja viimeistele kirjautuminen rekisteröidyllä todentamisavaimella.",
 } satisfies Partial<Record<MessageKey, string>>;

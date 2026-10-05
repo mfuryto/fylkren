@@ -79,4 +79,7 @@ export const profileEtEE = {
   browserSession: "Brauseriseanss",
   unknownBrowser: "Tundmatu brauser",
   sessionReauthenticationHelp: "Sisestage parool, kui sisselogimisest on möödas üle viie minuti. Vanemate seansside haldamiseks tuleb väline sisselogimine uuesti teha.",
+  mfaRequiredNotice: "Enne jätkamist lõpeta kaheastmeline autentimine.",
+  completeSignIn: "Lõpeta sisselogimine",
+  usePasskeyNotice: "Logi välja ja kasuta sisselogimise lõpetamiseks registreeritud pääsuvõtit.",
 } satisfies Partial<Record<MessageKey, string>>;

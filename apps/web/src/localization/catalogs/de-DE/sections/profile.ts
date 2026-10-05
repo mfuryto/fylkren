@@ -79,4 +79,7 @@ export const profileDeDE = {
   browserSession: "Browsersitzung",
   unknownBrowser: "Unbekannter Browser",
   sessionReauthenticationHelp: "Geben Sie Ihr Passwort ein, wenn die Anmeldung länger als fünf Minuten zurückliegt. Eine externe Anmeldung muss wiederholt werden, bevor ältere Sitzungen verwaltet werden können.",
+  mfaRequiredNotice: "Schließen Sie die Zwei-Faktor-Authentifizierung ab, bevor Sie fortfahren.",
+  completeSignIn: "Anmeldung abschließen",
+  usePasskeyNotice: "Melden Sie sich ab und verwenden Sie Ihren registrierten Passkey, um die Anmeldung abzuschließen.",
 } satisfies Partial<Record<MessageKey, string>>;
