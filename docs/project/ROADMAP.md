@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 2026-10-05 after completing requirement-level assessment of all 253 ASVS 5.0.0 Level 1/2 rows. Open findings and final release-candidate qualification remain explicit.
+Updated 2026-10-05 after completing requirement-level assessment of all 253 ASVS 5.0.0 Level 1/2 rows and defining the remaining identity-provider provisioning capability. Open findings, identity provisioning and final release-candidate qualification remain explicit.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -13,9 +13,20 @@ The additive event/activity foundation and coherent WorkItem slice are delivered
 ## Next delivery order
 
 1. Triage and remediate, or obtain explicit responsible-owner acceptance for, the 6 open finding records that affect 9 ASVS rows. Internal service transport, dependency vulnerabilities, the release-candidate SBOM, federated reauthentication, user session-management, mandatory-MFA and minimum cryptographic-strength gaps are closed. Prioritize service identity/secrets custody, native-transport destination enforcement, crypto agility, clock synchronization and separate log collection. Retest each affected row against the exact candidate when its control changes.
-2. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing, identity providers, authenticators, backup/key custody, time synchronization and remote logging at this gate.
+2. Deliver configurable identity-provider provisioning and the restricted unassigned-user state described below. Preserve the current explicit-link path and direct AD/LDAP personnel lookup.
+3. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing, identity providers, authenticators, backup/key custody, time synchronization and remote logging at this gate.
 
 No irreversible disposition is authorized by this order. Establish and verify its prerequisites before proposing activation; do not choose arbitrary retention periods.
+
+## Identity-provider provisioning — required before release qualification
+
+Platform Manager must be able to enable or disable automatic person creation for each external identity provider. When enabled, a successfully verified but previously unknown AD, LDAP, OIDC or SAML identity creates one internal person and one provider-namespaced external identity link. This is just-in-time provisioning, not automatic directory import. Direct search and addition of selected AD/LDAP users from Site Manager's Personnel page remains supported, as does the existing controlled link to an internal person.
+
+Provider-owned identity and sign-in fields are read-only in Fylkren. This includes the stable external identifier and the provider's username, name and email attributes. Fylkren remains authoritative for Site membership, organizational placement, roles, permissions and local access state. Email, username or display-name similarity must never merge identities or grant access.
+
+A newly provisioned external person without local access assignments authenticates into a restricted information page explaining that Site, role and permissions have not yet been assigned. The person cannot access operational, Site or administrative data. The global user directory exposes these pending people to an authorized Platform Manager, who can assign a Site; the receiving Site Manager can then assign organizational placement, roles and permissions through the ordinary controls.
+
+Implementation must be race-safe and auditable and must preserve namespaced immutable provider identifiers. Tests must cover provisioning disabled, one-time creation when enabled, concurrent first sign-ins, issuer/entity collisions, immutable provider-owned fields, the restricted pending session, denial of all unrelated APIs, assignment followed by ordinary access and suspension/unlink behavior. Current explicit-link and AD/LDAP direct-add behavior must remain compatible.
 
 ## Deferred irreversible lifecycle capabilities
 

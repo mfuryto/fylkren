@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Correct the Identity guidance to reflect direct AD/LDAP personnel addition, and record configurable external-user provisioning with a restricted unassigned-access state as required work before release qualification.
+
 - Bind SMTP STARTTLS delivery to the approved DNS result while retaining certificate hostname validation; extend the live relay fixture and keep the remaining native LDAP DNS limitation explicit.
 
 - Replace the API runtime with a qualified Alpine/musl image, retain full ICU localization and remove the previously reported Medium/Low runtime-package vulnerability set.
