@@ -1730,3 +1730,16 @@ pnpm check:docs
 ```
 
 The assessment reports `{"cryptographicAgilityAssessment":"finding","finding":"SV-101","replacementCapabilities":7,"versionedMachineVerifier":false,"versionedFederationSignature":false,"persistentReprotectionOperation":false}`. Source assertions preserve both the implemented replacement capabilities and the exact missing foundations so later remediation forces reassessment. No current algorithm break or bypass was demonstrated. Continue at 11.2.3 independently of this open finding. Production is untouched.
+
+## Minimum cryptographic strength assessment — 2026-10-05
+
+Assesses ASVS 11.2.3 and opens SV-102. The inventory confirms at least a 128-bit classical target for local AES-256/HMAC-SHA-256, SHA-256 collision resistance, P-256 signatures, random secret sizes and the non-RSA WebAuthn options. It also identifies an exact exception: OIDC, SAML and RSA-based WebAuthn acceptance have no application-enforced RSA-3072 minimum. The maintained OIDC provider fixture generates RSA-2048, which is below the criterion's stated strength target.
+
+Scoped commands:
+
+```sh
+node tools/test-cryptographic-strength-assessment.mjs
+pnpm check:docs
+```
+
+The assessment reports `{"cryptographicStrengthAssessment":"finding","finding":"SV-102","localSymmetricAndEcMinimumBits":128,"externalRsaMinimumBitsEnforced":false,"acceptedRsa2048ClassicalStrengthBits":112}`. It locks the strong local configuration and fails if RSA minimum enforcement is later introduced without reassessing the finding. No signature forgery or authentication bypass was attempted or demonstrated. Continue at 11.3.1 independently of SV-102. Production is untouched.

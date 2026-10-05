@@ -91,6 +91,12 @@ Fylkren protocol code builds bounded canonical messages and calls these provider
 
 SV-101 tracks the missing algorithm-version and persistent re-protection foundation. Until it is closed, algorithm changes must be treated as a coordinated migration with backup, compatibility, rollback and dependent-party steps rather than an ordinary configuration change.
 
+## Minimum security-strength assessment
+
+AES-256/HMAC-SHA-256, SHA-256 collision resistance, P-256 ECDSA, 256-bit webhook and machine secrets, 160-bit TOTP secrets, 128-bit reset/recovery codes and the non-RSA WebAuthn algorithms meet at least a 128-bit classical security target for their intended use. Password and machine-secret resistance additionally depends on their documented PBKDF2 work factors and input entropy.
+
+SV-102 records the unresolved RSA boundary. OIDC accepts a configured provider's valid RS256 key without requiring RSA-3072; SAML enforces the signature algorithm but not a 3072-bit signing-key minimum; the WebAuthn allowlist includes RSA algorithms without an application key-size rule. RSA-2048 is therefore accepted and provides roughly 112-bit classical strength. Deployment guidance may require stronger provider keys, but that does not replace application enforcement for ASVS 11.2.3.
+
 ## Review, incident and evidence
 
 Review this policy and inventory for every new cryptographic use, algorithm or storage location, and during each release security review. A code change that introduces cryptography must update the inventory, identify its owner and lifecycle, and add a requirement-linked test. The security owner records detected compromise, revocation, replacement and recovery in the security finding and operational incident records without copying secret material.
