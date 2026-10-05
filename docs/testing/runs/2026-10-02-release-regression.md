@@ -1652,3 +1652,16 @@ pnpm check:docs
 ```
 
 The API build passed with zero warnings/errors. The inventory reports `{"selfContainedTokenPurpose":"passed","contexts":7,"crossPurposeAcceptance":false,"oidcAccessTokenTypeRejectedAsIdToken":true,"purposeBoundProtectorsAndSignatures":true}`. The live provider's ordinary `typ: JWT` ID-token flow succeeds. An otherwise valid RS256 token with the same trusted key, issuer, audience, nonce and lifetime but `typ: at+jwt` returns 400 and leaves the browser unauthenticated. Existing OIDC/SAML integrity, source, lifetime and replay cases remain green. Continue at 9.2.3. Production is untouched.
+
+## Self-contained token audience binding — 2026-10-05
+
+Completes ASVS 9.2.3 by reconciling all accepted contexts with their intended service or installation. Data Protection uses the fixed Fylkren application discriminator and purpose chain; OIDC uses configured client ID; SAML uses configured SP Entity ID; WebAuthn uses configured RP ID and origins; license and federation use the local Instance ID.
+
+Scoped commands:
+
+```sh
+node tools/test-self-contained-token-audience.mjs
+pnpm check:docs
+```
+
+The inventory reports `{"selfContainedTokenAudience":"passed","contexts":7,"oidcWrongAudienceRejected":true,"webAuthnWrongRpAndOriginRejected":true,"wrongInstanceLicenseAndFederationRejected":true}`. It binds to the current same-stage identity lab's trusted-key wrong-audience 400/no-session result, the current CTAP2 wrong-RP/origin results, the maintained wrong-instance signed-license rejection and the current operational federation pair's wrong-recipient rejection. This criterion-specific reconciliation did not rerun those unchanged dynamic cases again. Continue at 9.2.4. Production is untouched.
