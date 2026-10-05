@@ -151,6 +151,7 @@ internal static class ServiceRegistration
                 options.Scope.Clear(); options.Scope.Add("openid"); options.Scope.Add("profile"); options.Scope.Add("email");
                 options.TokenValidationParameters.NameClaimType = "name";
                 options.TokenValidationParameters.ValidAlgorithms = [SecurityAlgorithms.RsaSha256];
+                options.TokenValidationParameters.ValidTypes = ["JWT"];
                 options.Events.OnRemoteFailure = async context =>
                 {
                     var logger = context.HttpContext.RequestServices

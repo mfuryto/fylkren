@@ -160,7 +160,7 @@ createServer({
   if (url.pathname === '/token-key-probes') return json(response, 200, { tokenHeaderKeyRequests });
   if (url.pathname === '/mode' && request.method === 'POST') {
     const requested = new URLSearchParams(await body(request)).get('value');
-    if (!['nonce', 'audience', 'signature', 'algorithm', 'header-key', 'expired', 'not-yet-valid'].includes(requested)) return json(response, 400, { error: 'invalid_mode' });
+    if (!['nonce', 'audience', 'signature', 'algorithm', 'header-key', 'expired', 'not-yet-valid', 'wrong-type'].includes(requested)) return json(response, 400, { error: 'invalid_mode' });
     mode = requested;
     return json(response, 200, { mode });
   }
@@ -196,7 +196,7 @@ createServer({
       kid: 'attacker-header-key',
       jku: `${issuer}/header-jwks`,
       jwk: { ...attackerPublicJwk, kid: 'attacker-header-key', use: 'sig', alg: 'RS256' },
-    } : {});
+    } : mode === 'wrong-type' ? { typ: 'at+jwt' } : {});
     return json(response, 200, {
       token_type: 'Bearer', expires_in: 300, access_token: randomBytes(24).toString('base64url'),
       id_token: mode === 'signature' ? corruptSignature(idToken) : idToken,

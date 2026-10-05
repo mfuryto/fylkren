@@ -1637,3 +1637,18 @@ pnpm check:docs
 ```
 
 The inventory reports `{"selfContainedTokenValidity":"passed","contexts":7,"expiredRejected":true,"notYetValidRejected":true,"validityCheckedAtAcceptance":true}`. The identity lab rejects correctly signed tokens whose `exp` is ten minutes past or `nbf` is ten minutes future, returning 400 with no session while ordinary OIDC/SAML remains green. An exploratory one-minute-expired OIDC case fell within the handler's expected five-minute clock tolerance; the final ten-minute cases distinguish supported clock skew from absent validation. The operational federation pair rejects correctly signed work at 301 seconds stale and 301 seconds future, then passes receipt/retry, progress, answer, privacy, request and cancellation flows. Existing focused session evidence rejects tickets immediately past one-hour inactivity and twelve-hour absolute boundaries; existing license evidence rejects an expired signed license. Continue at 9.2.2. Production is untouched.
+
+## Self-contained token type and purpose — 2026-10-05
+
+Completes ASVS 9.2.2 and closes SV-100. The context inventory binds session cookies, TOTP secret/setup/challenge, WebAuthn registration/login, OIDC ID tokens, SAML responses/assertions, license schema and each federation protocol message to separate handlers, protector purposes, database grant purposes or signed canonical prefixes. Source review found that OIDC had no explicit JWT `typ` restriction; it now accepts only `JWT` for the ID token returned by the authorization-code flow.
+
+Scoped commands:
+
+```sh
+dotnet build apps/api/Fylkren.Api.csproj --no-restore
+node tools/test-self-contained-token-purpose.mjs
+node tools/run-identity-sso-lab.mjs
+pnpm check:docs
+```
+
+The API build passed with zero warnings/errors. The inventory reports `{"selfContainedTokenPurpose":"passed","contexts":7,"crossPurposeAcceptance":false,"oidcAccessTokenTypeRejectedAsIdToken":true,"purposeBoundProtectorsAndSignatures":true}`. The live provider's ordinary `typ: JWT` ID-token flow succeeds. An otherwise valid RS256 token with the same trusted key, issuer, audience, nonce and lifetime but `typ: at+jwt` returns 400 and leaves the browser unauthenticated. Existing OIDC/SAML integrity, source, lifetime and replay cases remain green. Continue at 9.2.3. Production is untouched.
