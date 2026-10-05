@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Replace the API runtime with a qualified Alpine/musl image, retain full ICU localization and remove the previously reported Medium/Low runtime-package vulnerability set.
+- Authenticate API-to-PostgreSQL connections with an installation-issued client certificate instead of a database password, and remove the conflicting ASP.NET port setting that produced a harmless Platform Manager warning.
 - Encrypt gateway-to-API and API-to-PostgreSQL traffic with installation-specific, hostname-verified TLS; isolate service/CA private keys, reject plaintext database connections and require STARTTLS for SMTP.
 - Show automatically locked or archived work as performed by **System** in activity and audit views, while retaining **Unknown user** for a genuinely unresolved person reference.
 - Display the system-created leader role with the active language, including **Leder** in Norwegian, instead of exposing its stored internal English name.

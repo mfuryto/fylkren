@@ -1937,6 +1937,47 @@ trivy image --quiet --scanners vuln --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL 
 
 The result remains nine Medium and five Low package occurrences, covering the same seven distinct Medium and three distinct Low CVEs recorded above. Every result still has an empty `FixedVersion`; no Critical or High vulnerability was reported. The retest therefore supplies current evidence but does not remediate or accept SV-055. Production was not changed.
 
+## Database service identity continuation — 2026-10-05
+
+Narrows SV-104 and SV-105 without marking either complete. The supported Compose topology no longer creates, stores or transmits a PostgreSQL password. The networkless initializer issues a client-only P-256 certificate with subject `fylkren-api` into a dedicated fifth TLS volume. API mounts that identity; PostgreSQL verifies the installation CA and maps only that subject to the dedicated `fylkren` role. Gateway and PostgreSQL cannot read the client private key, API cannot read the PostgreSQL private key and no runtime service can read the CA key.
+
+```sh
+FYLKREN_HTTP_PORT=18083 FYLKREN_MFA_REQUIRED=false FYLKREN_MFA_ENABLED=false \
+  docker compose -p fylkren-sv104 up -d --build --wait
+FYLKREN_INTERNAL_TLS_PROJECT=fylkren-sv104 \
+FYLKREN_INTERNAL_TLS_BASE_URL=http://127.0.0.1:18083 \
+  node tools/test-internal-transport-runtime.mjs
+FYLKREN_COMPOSE_PROJECT=fylkren-sv104 \
+  ./deploy/compose/backup.sh /tmp/fylkren-sv104-cert-backups
+FYLKREN_COMPOSE_PROJECT=fylkren-sv104 FYLKREN_HTTP_PORT=18083 \
+FYLKREN_MFA_REQUIRED=false FYLKREN_MFA_ENABLED=false \
+  ./deploy/compose/restore.sh /tmp/fylkren-sv104-cert-backups/fylkren-20261005T210010Z \
+  --confirm-destructive-restore
+```
+
+Before and after matched database/configuration/Data Protection-key restore, the runtime reports `{"internalTransportTls":"passed","gatewayToApi":"verified-hostname","apiToPostgres":"TLSv1.3|TLS_AES_256_GCM_SHA384|/CN=fylkren-api","plaintextFallbacksAccepted":0,"wrongHostnameAccepted":0,"unauthenticatedDatabaseClientsAccepted":0,"caPrivateKeyMountedInRuntimeServices":false}`. The first restore invocation completed the data/key replacement but its final web startup used occupied default port 8080 because the synthetic port override was omitted; resuming with the reserved port made every service healthy and the repeated identity negatives passed. This was a test invocation boundary rather than a credential or restore failure.
+
+The same change removes the conflicting inherited `HTTP_PORTS=8080`/explicit `URLS` configuration. The current API log contains only `Now listening on: https://[::]:8443` and no `Overriding HTTP_PORTS` warning. SV-104 remains open only for the documented v1 machine bearer contract; SV-105 remains open for Data Protection root-key and protected integration-secret custody. Production was not changed.
+
+## API runtime image vulnerability closure — 2026-10-05
+
+Closes SV-055 and passes ASVS 15.2.1 for the current candidate. The API build stage remains on the maintained .NET SDK, while the runtime stage moves from the larger Ubuntu-family image to the maintained .NET Alpine image. Publishing now targets `linux-musl-x64` or `linux-musl-arm64`; the runtime explicitly installs only curl, full ICU data/libraries, Kerberos libraries, LDAP libraries and time-zone data needed by supported functions.
+
+The first fresh candidate run found a real compatibility regression: Alpine's inherited invariant-globalization mode caused localized lookup sorting to return 500. The runtime now sets `DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false`. The repeated focused run passes localized lookup handling and accepts/rejects the maintained PNG, JPEG, WebP and portable-package content cases. This failure is not counted as passing evidence; only the corrected repeat is.
+
+```sh
+node tools/test-api-runtime-image-boundary.mjs
+FYLKREN_E2E_API_IMAGE=fylkren-sv104-api:latest \
+FYLKREN_E2E_WEB_IMAGE=fylkren-sv104-web:latest \
+FYLKREN_E2E_TLS_INIT_IMAGE=fylkren-sv104-tls-init:latest \
+FYLKREN_E2E_POSTGRES_IMAGE=fylkren-postgres:latest \
+  node tools/run-e2e-editions.mjs --asvs-file-content-only --no-build
+trivy image --scanners vuln --severity LOW,MEDIUM,HIGH,CRITICAL \
+  --format json fylkren-sv104-api:latest
+```
+
+The focused runtime result is `{"portableFileContent":"passed","outerPackageTypeRejections":2,"rejectedInternalTypeCases":4,"unsafeArchivePathsRejected":3,"decodedAttachmentTypes":["png","jpeg","webp"]}`. Trivy 0.75.0, using vulnerability database version 2 updated `2026-10-05T13:07:51Z`, identifies Alpine 3.24.2 with 38 OS packages and reports zero vulnerability results across Low, Medium, High and Critical severities. The scanned image ID is `sha256:db8001ab97415e257373efca5d293b2abbb4b3065298fd20207d7a0df70cfdbf`, size 86,797,477 bytes. Production was not changed.
+
 ## MFA exception policy — 2026-10-05
 
 The secure product default and SV-094 runtime enforcement remain unchanged. A deployment can deliberately set `FYLKREN_MFA_REQUIRED=false`, with `FYLKREN_MFA_ENABLED=true` retaining voluntary TOTP/passkeys or both values false disabling the capability. The exception is not silent: Platform Manager reports reduced security. The customer-facing policy requires accountable ownership, scope and reason, credential-compromise and insider-risk assessment, compensating controls, approval/review dates and a restoration plan. It states that air-gap alone is not a second factor and that unvalidated OIDC/SAML assurance cannot inherit the default ASVS 6.3.3 result.
@@ -1968,16 +2009,15 @@ Shell validation, a real local snapshot with explicit unavailable synchronizatio
 
 ## Internal service transport TLS closure — 2026-10-05
 
-Closes SV-103 and passes ASVS 12.3.1, 12.3.3 and newly applicable 12.3.4 for the supported single-host Compose topology. A networkless initializer creates one installation-specific P-256 CA and separate `api` and `postgres` leaf keys in four isolated volumes. Nginx verifies the CA and exact `api` name over TLS; Npgsql uses `VerifyFull` for `postgres`; PostgreSQL explicitly rejects `hostnossl`; SMTP now accepts only STARTTLS. Runtime services never mount the CA private key or the peer service's private key.
+Closes SV-103 and passes ASVS 12.3.1, 12.3.3 and newly applicable 12.3.4 for the supported single-host Compose topology. A networkless initializer creates one installation-specific P-256 CA and separate `api` and `postgres` leaf keys in isolated volumes. Nginx verifies the CA and exact `api` name over TLS; Npgsql uses `VerifyFull` for `postgres`; PostgreSQL explicitly rejects `hostnossl`; SMTP now accepts only STARTTLS. Runtime services never mount the CA private key or the peer service's private key. The later [database service identity continuation](#database-service-identity-continuation--2026-10-05) adds the distinct API client certificate without weakening this transport result.
 
 Scoped current-image checks:
 
 ```sh
-FYLKREN_DB_PASSWORD=sv103-synthetic-only FYLKREN_HTTP_PORT=18081 FYLKREN_MFA_REQUIRED=false \
+FYLKREN_HTTP_PORT=18081 FYLKREN_MFA_REQUIRED=false \
   docker compose -p fylkren-sv103 up -d --build --wait
 node tools/test-communication-security-inventory.mjs
 FYLKREN_INTERNAL_TLS_PROJECT=fylkren-sv103 \
-FYLKREN_INTERNAL_TLS_DB_PASSWORD=sv103-synthetic-only \
 FYLKREN_INTERNAL_TLS_BASE_URL=http://127.0.0.1:18081 \
   node tools/test-internal-transport-runtime.mjs
 FYLKREN_COMPOSE_PROJECT=fylkren-sv103 ./deploy/compose/backup.sh /tmp/fylkren-sv103-backups

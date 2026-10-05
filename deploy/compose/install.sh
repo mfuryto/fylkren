@@ -13,15 +13,8 @@ if [ -e "$env_file" ]; then
   exit 0
 fi
 
-if ! command -v openssl >/dev/null 2>&1; then
-  echo "OpenSSL is required to generate FYLKREN_DB_PASSWORD." >&2
-  exit 1
-fi
-
-db_password=$(openssl rand -hex 32)
 cp "$template_file" "$env_file"
-sed -i "s/^FYLKREN_DB_PASSWORD=.*/FYLKREN_DB_PASSWORD=$db_password/" "$env_file"
 chmod 600 "$env_file"
 
-echo "Created .env with a random database password. Review installation settings before starting Fylkren."
+echo "Created .env. Review installation settings before starting Fylkren."
 echo "After Docker is installed, run sudo ./deploy/host-status/install.sh to enable host status collection."

@@ -21,7 +21,7 @@ pnpm build
 pnpm run check:structure
 pnpm run check:docs
 git diff --check
-FYLKREN_DB_PASSWORD=validation-only docker compose config --quiet
+docker compose config --quiet
 bash tools/security/verify-repository-safety.sh
 trivy fs --ignorefile .trivyignore.yaml --scanners vuln,secret,misconfig --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL .
 ```

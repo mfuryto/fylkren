@@ -109,8 +109,9 @@ assert.match(webAuthn, /COSE\.Algorithm\.(EdDSA|ES256)/, 'WebAuthn asymmetric al
 assert.match(internalTls, /ecparam -name prime256v1/, 'internal TLS P-256 key generation');
 assert.match(internalTls, /CA:TRUE,pathlen:0/, 'internal TLS constrained CA');
 assert.match(internalTls, /extendedKeyUsage=serverAuth/, 'internal TLS server-only leaf purpose');
+assert.match(internalTls, /extendedKeyUsage=clientAuth/, 'internal TLS database-client leaf purpose');
 assert.match(internalTls, /subjectAltName=DNS:\$name/, 'internal TLS exact service DNS identity');
-assert.match(internalTls, /ca_private=\/var\/lib\/fylkren-tls\/ca-private[\s\S]*api_private=\/var\/lib\/fylkren-tls\/api[\s\S]*postgres_private=\/var\/lib\/fylkren-tls\/postgres/, 'internal TLS private-key separation');
+assert.match(internalTls, /ca_private=\/var\/lib\/fylkren-tls\/ca-private[\s\S]*api_private=\/var\/lib\/fylkren-tls\/api[\s\S]*postgres_private=\/var\/lib\/fylkren-tls\/postgres[\s\S]*database_client_private=\/var\/lib\/fylkren-tls\/database-client/, 'internal TLS private-key separation');
 assert.match(internalTls, /checkend 2592000/, 'internal TLS leaf renewal boundary');
 
 console.log(JSON.stringify({

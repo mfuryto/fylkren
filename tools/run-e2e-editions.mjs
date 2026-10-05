@@ -48,11 +48,15 @@ function run(command, args, options = {}) {
 }
 try {
   if (process.argv.includes('--no-build')) {
-    if (!env.FYLKREN_E2E_API_IMAGE || !env.FYLKREN_E2E_WEB_IMAGE) throw new Error('Set candidate API and web image IDs for --no-build.');
+    if (!env.FYLKREN_E2E_API_IMAGE || !env.FYLKREN_E2E_WEB_IMAGE ||
+        !env.FYLKREN_E2E_TLS_INIT_IMAGE || !env.FYLKREN_E2E_POSTGRES_IMAGE)
+      throw new Error('Set candidate API, web, TLS initializer and PostgreSQL image IDs for --no-build.');
     // The restore script deliberately uses the base compose file. Keep its
     // default project tags bound to the same candidate as the initial startup.
     run('docker', ['tag', env.FYLKREN_E2E_API_IMAGE, `${project}-api`]);
     run('docker', ['tag', env.FYLKREN_E2E_WEB_IMAGE, `${project}-web`]);
+    run('docker', ['tag', env.FYLKREN_E2E_TLS_INIT_IMAGE, `${project}-tls-init`]);
+    run('docker', ['tag', env.FYLKREN_E2E_POSTGRES_IMAGE, 'fylkren-postgres']);
     env.COMPOSE_FILE = 'compose.yaml:tools/e2e/reuse-images.compose.yaml';
   }
   run('docker', ['compose', '-p', project, 'up', '-d', process.argv.includes('--no-build') ? '--no-build' : '--build', '--wait']);

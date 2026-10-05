@@ -20,6 +20,7 @@ services:
       - fylkren-tls-trust:/var/lib/fylkren-tls/trust
       - fylkren-tls-api:/var/lib/fylkren-tls/api
       - fylkren-tls-postgres:/var/lib/fylkren-tls/postgres
+      - fylkren-tls-database-client:/var/lib/fylkren-tls/database-client
 
   web:
     build:
@@ -51,8 +52,9 @@ services:
       context: .
       dockerfile: apps/api/Dockerfile
     environment:
-      ConnectionStrings__Fylkren: Host=postgres;Port=5432;Database=fylkren;Username=fylkren;Password=${FYLKREN_DB_PASSWORD:?Run ./deploy/compose/install.sh before starting Fylkren};SSL Mode=VerifyFull;Root Certificate=/run/fylkren-trust/ca.crt
-      ASPNETCORE_URLS: https://+:8443
+      ConnectionStrings__Fylkren: Host=postgres;Port=5432;Database=fylkren;Username=fylkren;SSL Mode=VerifyFull;Root Certificate=/run/fylkren-trust/ca.crt;SSL Certificate=/run/fylkren-database-client/fylkren-api.crt;SSL Key=/run/fylkren-database-client/fylkren-api.key
+      ASPNETCORE_HTTP_PORTS: ""
+      ASPNETCORE_HTTPS_PORTS: "8443"
       ASPNETCORE_Kestrel__Certificates__Default__Path: /run/fylkren-tls/api.crt
       ASPNETCORE_Kestrel__Certificates__Default__KeyPath: /run/fylkren-tls/api.key
       Fylkren__DataProtection__KeyPath: /var/lib/fylkren/keys
@@ -137,6 +139,7 @@ services:
       - fylkren-keys:/var/lib/fylkren/keys
       - ./runtime:/run/fylkren-host-status:ro
       - fylkren-tls-api:/run/fylkren-tls:ro
+      - fylkren-tls-database-client:/run/fylkren-database-client:ro
       - fylkren-tls-trust:/run/fylkren-trust:ro
     depends_on:
       postgres:
@@ -159,7 +162,7 @@ services:
     environment:
       POSTGRES_DB: fylkren
       POSTGRES_USER: fylkren
-      POSTGRES_PASSWORD: ${FYLKREN_DB_PASSWORD:?Run ./deploy/compose/install.sh before starting Fylkren}
+      POSTGRES_HOST_AUTH_METHOD: trust
     command:
       - postgres
       - -c
@@ -174,6 +177,8 @@ services:
       - ssl_min_protocol_version=TLSv1.2
       - -c
       - hba_file=/etc/postgresql/pg_hba.fylkren.conf
+      - -c
+      - ident_file=/etc/postgresql/pg_ident.fylkren.conf
     volumes:
       - fylkren-postgres:/var/lib/postgresql
       - fylkren-tls-postgres:/run/fylkren-tls:ro
@@ -196,6 +201,7 @@ volumes:
   fylkren-tls-trust:
   fylkren-tls-api:
   fylkren-tls-postgres:
+  fylkren-tls-database-client:
 
 networks:
   frontend:

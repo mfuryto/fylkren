@@ -186,8 +186,8 @@ sudo ./deploy/host-status/install.sh
 docker compose ps
 ```
 
-The installer creates a local `.env` with a random database password. Before
-exposing an installation, configure its public URL, TLS reverse proxy,
+The installer creates a local `.env`; API-to-PostgreSQL authentication uses an
+installation-specific client certificate. Before exposing an installation, configure its public URL, TLS reverse proxy,
 authentication, backups and persistent Data Protection keys. Complete the
 one-time Platform Manager setup and verify `/health`.
 

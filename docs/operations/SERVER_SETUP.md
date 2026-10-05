@@ -60,7 +60,7 @@ docker compose build
 docker compose up -d
 ```
 
-The install script creates `.env` only when it does not exist, generates a random 64-character database password with OpenSSL, and sets file mode `600`. It never replaces an existing `.env` or database password.
+The install script creates `.env` only when it does not exist and sets file mode `600`. It never replaces existing configuration. The internal TLS initializer creates a client-only API certificate and PostgreSQL maps that exact identity to the dedicated database role; the supported Compose path has no database password. After a successful upgrade and matched restore rehearsal, an obsolete `FYLKREN_DB_PASSWORD` line may be removed from `.env`.
 
 Do not rerun first-install logic as an upgrade shortcut. Follow [Installation and upgrades](INSTALLATION_AND_UPGRADES.md), including backup and post-deployment verification.
 

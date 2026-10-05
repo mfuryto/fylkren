@@ -1,4 +1,8 @@
 services:
+  tls-init:
+    image: ${FYLKREN_E2E_TLS_INIT_IMAGE:?Set the already-built candidate TLS initializer image ID}
+  postgres:
+    image: ${FYLKREN_E2E_POSTGRES_IMAGE:?Set the already-built candidate PostgreSQL image ID}
   api:
     image: ${FYLKREN_E2E_API_IMAGE:?Set the already-built candidate API image ID}
   web:

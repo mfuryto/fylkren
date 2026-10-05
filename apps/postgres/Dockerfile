@@ -9,6 +9,7 @@ RUN apk upgrade --no-cache \
     && rm -f /usr/local/bin/gosu
 
 COPY --chown=postgres:postgres apps/postgres/pg_hba.fylkren.conf /etc/postgresql/pg_hba.fylkren.conf
+COPY --chown=postgres:postgres apps/postgres/pg_ident.fylkren.conf /etc/postgresql/pg_ident.fylkren.conf
 
 USER postgres
 

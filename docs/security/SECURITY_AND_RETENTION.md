@@ -35,7 +35,7 @@ Sessions are revalidated on every request against their opaque server-side regis
 
 All browser mutations, including sign-out, require an antiforgery token. The API and gateway set content-type, framing, referrer, permissions, Content Security Policy, cache, and HSTS protections as applicable. An external TLS terminator must reject weak protocols and cipher configurations.
 
-The first Platform Manager is created through a token-free setup flow available only while none exists. A database transaction lock and repeated in-transaction check prevent parallel creation. After success, the setup endpoint behaves like an unknown resource. The database password is generated locally before first startup, stored only in the protected `.env`, and never replaced during upgrade.
+The first Platform Manager is created through a token-free setup flow available only while none exists. A database transaction lock and repeated in-transaction check prevent parallel creation. After success, the setup endpoint behaves like an unknown resource. The supported Compose path authenticates API to PostgreSQL with an installation-issued client-only certificate and stores no database password.
 
 ## Rich text and references
 

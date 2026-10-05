@@ -6,20 +6,20 @@ This inventory complements the communication and cryptographic inventories. It d
 
 | Consumer | Service | Identity and privilege | Lifetime and replacement |
 |---|---|---|---|
-| API | PostgreSQL | Exact `postgres` server identity verified against the installation CA; dedicated randomly passworded `fylkren` database owner on the internal backend network | Server certificate is renewed by the fenced TLS initializer; the long-lived client secret remains in owner-only `.env` and requires a coordinated database/configuration change |
+| API | PostgreSQL | Exact `postgres` server identity and exact `fylkren-api` client identity verified against the installation CA; the client certificate maps only to the dedicated `fylkren` database owner | Separate server/client certificates are renewed by the fenced TLS initializer; no database password exists in the supported Compose path |
 | Gateway | API | Exact `api` server identity verified against the installation CA. End-user/session or machine authorization is enforced by the API | Server certificate is renewed by the fenced TLS initializer; no separate gateway client credential |
 | Machine integration | Administration/report API | Individually named client, explicit scope allowlist, expiry of at most 366 days, hashed secret and revocation | Long-lived random bearer secret; create replacement and deactivate old client |
 | API | OIDC token endpoint | Per-installation client ID/secret protected in PostgreSQL | Replace through Platform Manager/provider |
 | API | SMTP or AD/LDAP | Dedicated configured integration credential protected in PostgreSQL | Replace through Platform Manager/service owner |
 | Federation peer | Federation API | Pinned per-installation signing key plus exact grants | Two-phase key rotation or explicit lost-key recovery |
 
-SV-104 tracks that PostgreSQL client access and machine integrations use long-lived bearer/password credentials rather than short-term tokens or certificate-bound client identities. Internal server certificates now authenticate the PostgreSQL and API endpoints, but do not replace those client credentials. Their randomness, scoping, isolation, expiry/revocation and hashing reduce exposure but do not meet ASVS 13.2.1's stated credential model.
+SV-104 is now limited to external machine integrations, whose bearer credentials can remain valid for up to 366 days. PostgreSQL uses a separately scoped client certificate, exact CA verification and an explicit certificate-to-role map. Moving the machine API to short-lived or certificate-bound proof requires a versioned authentication transition because the current bearer format is part of the documented v1 contract.
 
 ## Secret custody
 
 Application-held recoverable secrets use purpose-specific ASP.NET Data Protection. The key ring is mounted only into the API. OIDC, SMTP and directory credentials are never returned after storage; federation private keys, TOTP secrets and webhook secrets have their separately documented boundaries. Machine secrets and passwords have only salted verifiers.
 
-The installation database password remains in a mode-0600 `.env`, and the Data Protection key ring remains in a mode-0700 Docker volume with mode-0600 backup archives. SV-105 tracks that this is local file/volume custody rather than a unified secret-management service with centrally enforced creation, access, rotation and destruction. The repository and built images contain no production private key or credential.
+The supported Compose path has no database password. Its Data Protection key ring remains in a mode-0700 Docker volume with mode-0600 matched backup archives; internal certificate private keys use separate least-privilege volumes. SV-105 now tracks the remaining local Data Protection and integration-secret custody rather than a unified secrets service with independently enforced access and destruction. The repository and built images contain no production private key or credential.
 
 ## Production runtime surface
 

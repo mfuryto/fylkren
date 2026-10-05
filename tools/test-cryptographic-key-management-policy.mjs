@@ -38,10 +38,11 @@ requireText(federation, /ECDsa\.Create\(ECCurve\.NamedCurves\.nistP256\)/, 'fede
 requireText(federation, /federation_key_still_usable_use_rotation/, 'lost-key recovery guard');
 requireText(machine, /RandomNumberGenerator\.GetBytes\(32\)/, 'machine credential entropy');
 requireText(webhooks, /RandomNumberGenerator\.GetBytes\(32\)/, 'webhook secret entropy');
-requireText(policy, /runtime services receive only their own key and the public CA/, 'internal TLS key separation policy');
+requireText(policy, /runtime services receive only the keys required for their role and the public CA/, 'internal TLS key separation policy');
 requireText(policy, /a CA replacement requires a coordinated restart/, 'internal TLS CA rotation procedure');
 requireText(compose, /tls-init:[\s\S]*network_mode: none/, 'networkless internal TLS initialization boundary');
 requireText(internalTls, /issue_leaf api[\s\S]*issue_leaf postgres/, 'separate internal TLS service identities');
+requireText(internalTls, /issue_client fylkren-api/, 'separate database client identity');
 
 console.log(JSON.stringify({
   cryptographicKeyManagementPolicy: 'passed',
