@@ -61,6 +61,10 @@ public static class PlatformOperationsEndpoints
                 services.Add(new("host-backup", "Backup",
                     stale ? "unknown" : backupDegraded ? "degraded" : "healthy",
                     backupDetail, null));
+                if (snapshot.Time is not null)
+                    services.Add(new("host-time", "Time synchronization",
+                        stale ? "unknown" : snapshot.Time.Status,
+                        stale ? "The host measurement is too old." : snapshot.Time.Detail, null));
             }
             return Results.Ok(new
             {
@@ -82,6 +86,7 @@ public static class PlatformOperationsEndpoints
                     snapshot?.Hostname,
                     disk = snapshot?.Disk,
                     backup = snapshot?.Backup,
+                    time = snapshot?.Time,
                     backupWarningHours = options.Operations.BackupWarningHours
                 }
             });

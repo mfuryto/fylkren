@@ -157,6 +157,8 @@ assert.equal(platformOperations.body.hostIntegration.stale, false, 'Fresh host s
 assert.ok(platformOperations.body.hostIntegration.disk.availableBytes > 0, 'Host disk capacity must be reported');
 assert.ok(!Number.isNaN(Date.parse(platformOperations.body.hostIntegration.backup.lastCompletedAt)), 'Completed backup time must be reported');
 assert.equal(platformOperations.body.hostIntegration.backupWarningHours, 36, 'Backup warning threshold must be explicit');
+assert.equal(platformOperations.body.hostIntegration.time.maximumAllowedOffsetMilliseconds, 1000, 'Time offset threshold must be explicit');
+assert.ok(platformOperations.body.services.some(value => value.key === 'host-time'), 'Host time status must be visible');
 const backupService = platformOperations.body.services.find(value => value.key === 'host-backup');
 assert.equal(backupService.status, 'healthy', JSON.stringify(backupService));
 assert.match(backupService.detail, /36 hours.*does not monitor off-host copying/i, 'Backup status scope must be explicit');

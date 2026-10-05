@@ -49,7 +49,12 @@ public sealed class HostStatusReader(FylkrenOptions options, ILogger<HostStatusR
             Safe(service.Key, 40) && Safe(service.Name, 100) && Safe(service.Detail, 300) &&
             AllowedStatuses.Contains(service.Status) && service.RestartCount is >= 0 and <= 1_000_000) &&
         (value.Backup is null || value.Backup.LastCompletedAt is null ||
-            value.Backup.LastCompletedAt > DateTimeOffset.UnixEpoch && value.Backup.LastCompletedAt <= now.AddMinutes(5));
+            value.Backup.LastCompletedAt > DateTimeOffset.UnixEpoch && value.Backup.LastCompletedAt <= now.AddMinutes(5)) &&
+        (value.Time is null ||
+            AllowedStatuses.Contains(value.Time.Status) && Safe(value.Time.Source, 100) && Safe(value.Time.Detail, 300) &&
+            value.Time.MaximumAllowedOffsetMilliseconds is >= 1 and <= 60_000 &&
+            (value.Time.OffsetMilliseconds is null ||
+                double.IsFinite(value.Time.OffsetMilliseconds.Value) && Math.Abs(value.Time.OffsetMilliseconds.Value) <= 86_400_000));
 
     private static bool Safe(string? value, int maximum) =>
         !string.IsNullOrWhiteSpace(value) && value.Length <= maximum && !value.Any(char.IsControl);
@@ -57,7 +62,9 @@ public sealed class HostStatusReader(FylkrenOptions options, ILogger<HostStatusR
 
 public sealed record HostStatusReadResult(bool Configured, HostStatusSnapshot? Snapshot, string? Problem);
 public sealed record HostStatusSnapshot(int SchemaVersion, DateTimeOffset CollectedAt, string Platform,
-    string Hostname, HostDiskStatus? Disk, HostBackupStatus? Backup, List<HostServiceStatus> Services);
+    string Hostname, HostDiskStatus? Disk, HostBackupStatus? Backup, HostTimeStatus? Time, List<HostServiceStatus> Services);
 public sealed record HostDiskStatus(string Name, long TotalBytes, long AvailableBytes);
 public sealed record HostBackupStatus(DateTimeOffset? LastCompletedAt);
+public sealed record HostTimeStatus(bool Synchronized, string Status, string Source,
+    double? OffsetMilliseconds, double MaximumAllowedOffsetMilliseconds, string Detail);
 public sealed record HostServiceStatus(string Key, string Name, string Status, string Detail, int RestartCount);

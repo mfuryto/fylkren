@@ -44,6 +44,8 @@ Use the [security test plan](../security/SECURITY_TEST_PLAN.md) and [threat mode
 
 HTTP destination/DNS/redirect/download boundaries and bounded runtime SAML metadata are delivered and tested. Current public TLS/proxy qualification passes, immutable image/source CycloneDX SBOM generation is part of the release gate, users can inspect and selectively revoke their active browser sessions, interactive access requires MFA by default, and external RSA keys require at least 3072 bits. The finding register retains every unmet criterion, including native DNS rebinding/egress, crypto agility, internal transport, service credentials, secret custody, dependency vulnerabilities, host clock synchronization and separate log collection. Do not rerun unrelated full-product chains for scoped corrections. Deployment-sensitive controls require customer identity-provider behavior, authenticator compatibility, host SSH/backup transport, coordinated database/Data Protection key recovery, production time synchronization and remote log custody. Disposable restore tests already exist; operational custody qualification remains separate.
 
+The host-status integration now exposes NTP synchronization and a 1,000 ms offset boundary. SV-107 stays open until the deployment owner installs it and records production-equivalent synchronized status, alert handling and cross-system timestamp correlation.
+
 Relevant Level 3 controls, WSTG techniques and API Security Top 10 coverage support this same workflow. An external penetration test is optional if requested, not a prerequisite for completing the authorized testing.
 
 ## Final release-candidate qualification

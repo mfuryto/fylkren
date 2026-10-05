@@ -7,6 +7,7 @@ snapshot supplies:
 - free and total capacity for the filesystem containing the Fylkren installation;
 - the latest explicitly recorded complete backup set;
 - Docker state, health and restart count for web, API and PostgreSQL;
+- host NTP synchronization state, current reported offset and a 1,000 ms alert boundary;
 - collection time, runtime platform and hostname.
 
 In the Windows Server topology, the runtime host is the dedicated Hyper-V Linux
@@ -78,6 +79,14 @@ Restart counts come from Docker and reset if the container is deleted and
 recreated. They identify repeated restarts within the current container
 lifetime; they are not a durable incident history.
 
+Time synchronization is healthy only when `timedatectl` reports an NTP-synchronized
+host and `timedatectl timesync-status` supplies an absolute offset no greater than
+1,000 milliseconds. A synchronized host without an available offset is reduced;
+an unsynchronized host or excessive offset is down. The signal is shown in
+**Platform → System status** and becomes unknown with a stale snapshot. Configure
+and monitor the host's approved NTP source separately; containers share this host
+clock and must not run their own time service.
+
 ## Record a complete backup set
 
 From the Fylkren repository, create and register the entire set in the
@@ -123,6 +132,8 @@ systemctl list-timers fylkren-host-status.timer
 systemctl status fylkren-host-status.service
 journalctl -u fylkren-host-status.service --since today
 sudo /usr/local/lib/fylkren/collect-host-status.sh /data/docker/fylkren
+timedatectl show --property=NTPSynchronized --value
+timedatectl timesync-status --no-pager
 ```
 
 Confirm that `runtime/host-status.json` exists, is readable and is mounted in the

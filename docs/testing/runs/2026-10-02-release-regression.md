@@ -1926,3 +1926,30 @@ pnpm check:docs
 ```
 
 The focused boundary test rejects RSA-2048 and accepts RSA-3072 for OIDC/WebAuthn, preserves an approved non-RSA WebAuthn type, rejects malformed credential keys, rejects SAML metadata containing an RSA-2048 signing certificate and accepts RSA-3072 metadata. The maintained Keycloak OIDC/SAML fixture uses RSA-4096 for its valid issuer, while the controlled negative OIDC fixture uses RSA-3072; both meet the minimum and retain the established signature, issuer, token, replay and metadata negative cases. Production was not changed.
+
+## API image vulnerability retest — 2026-10-05
+
+SV-055 was retested against the API image built from the current candidate using Trivy 0.75.0 and vulnerability database version 2 updated `2026-10-05T13:07:51Z`.
+
+```sh
+trivy image --quiet --scanners vuln --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL --format json fylkren-identity-sso-lab-api:latest
+```
+
+The result remains nine Medium and five Low package occurrences, covering the same seven distinct Medium and three distinct Low CVEs recorded above. Every result still has an empty `FixedVersion`; no Critical or High vulnerability was reported. The retest therefore supplies current evidence but does not remediate or accept SV-055. Production was not changed.
+
+## Time synchronization health foundation — 2026-10-05
+
+The maintained root-owned host-status collector now asks systemd for the host NTP synchronization state, source and current offset. It emits only bounded sanitized status data, marks an unavailable measurement unknown, an unsynchronized or over-boundary clock down, and a synchronized clock without a numeric offset degraded. Platform Manager displays the result beside container, disk and backup status; stale snapshots make it unknown. The explicit offset boundary is 1,000 milliseconds.
+
+Scoped checks:
+
+```sh
+sh -n deploy/host-status/collect-host-status.sh
+deploy/host-status/collect-host-status.sh /home/codex/fylkren
+node tools/test-host-time-status.mjs
+dotnet build apps/api/Fylkren.Api.csproj --no-restore
+node tools/test-security-logging-inventory.mjs
+pnpm check:docs
+```
+
+Shell validation, a real local snapshot with explicit unavailable synchronization state, API compilation and logging-inventory/document controls pass. SV-107 remains open because the deployment owner must install the updated collector and supply production-equivalent evidence of an approved synchronized NTP source, alert handling and correlated timestamps across every participating system. Production was not changed.

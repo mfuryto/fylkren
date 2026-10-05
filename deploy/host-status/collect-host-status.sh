@@ -29,6 +29,43 @@ if [ -f "$runtime_dir/last-backup.timestamp" ]; then
     esac
 fi
 
+time_synchronized=false
+time_status=unknown
+time_source=unavailable
+time_offset_milliseconds=null
+time_maximum_offset_milliseconds=1000
+time_detail="Host time synchronization could not be verified."
+if command -v timedatectl >/dev/null 2>&1; then
+    synchronized=$(LC_ALL=C timedatectl show --property=NTPSynchronized --value 2>/dev/null || true)
+    if [ "$synchronized" = yes ]; then
+        time_synchronized=true
+        time_status=degraded
+        time_source=$(LC_ALL=C timedatectl show-timesync --property=ServerName --value 2>/dev/null | tr -cd 'A-Za-z0-9._:-' | cut -c1-100 || true)
+        [ -n "$time_source" ] || time_source=systemd-timesyncd
+        raw_offset=$(LC_ALL=C timedatectl timesync-status --no-pager 2>/dev/null | awk '$1 == "Offset:" { print $2; exit }' || true)
+        case "$raw_offset" in
+            *ms) time_offset_milliseconds=$(printf '%s\n' "${raw_offset%ms}" | awk '{ printf "%.6f", $1 }') ;;
+            *us) time_offset_milliseconds=$(printf '%s\n' "${raw_offset%us}" | awk '{ printf "%.6f", $1 / 1000 }') ;;
+            *s) time_offset_milliseconds=$(printf '%s\n' "${raw_offset%s}" | awk '{ printf "%.6f", $1 * 1000 }') ;;
+        esac
+        if [ "$time_offset_milliseconds" != null ]; then
+            if awk -v value="$time_offset_milliseconds" -v maximum="$time_maximum_offset_milliseconds" 'BEGIN { if (value < 0) value = -value; exit !(value <= maximum) }'; then
+                time_status=healthy
+                time_detail="Host clock is synchronized and within the configured offset boundary."
+            else
+                time_status=down
+                time_detail="Host clock offset exceeds the configured boundary."
+            fi
+        else
+            time_detail="Host reports synchronization, but the current offset is unavailable."
+        fi
+    elif [ "$synchronized" = no ]; then
+        time_status=down
+        time_source=systemd
+        time_detail="Host clock is not synchronized."
+    fi
+fi
+
 service_json=""
 compose_ps_id() {
     if [ -n "$compose_project" ]; then
@@ -75,7 +112,7 @@ else
 fi
 
 cat >"$temporary_file" <<EOF
-{"schemaVersion":1,"collectedAt":"$collected_at","platform":"$platform_value","hostname":"$hostname_value","disk":{"name":"Fylkren-disk","totalBytes":$disk_total,"availableBytes":$disk_available},"backup":{"lastCompletedAt":$last_backup},"services":[$service_json]}
+{"schemaVersion":1,"collectedAt":"$collected_at","platform":"$platform_value","hostname":"$hostname_value","disk":{"name":"Fylkren-disk","totalBytes":$disk_total,"availableBytes":$disk_available},"backup":{"lastCompletedAt":$last_backup},"time":{"synchronized":$time_synchronized,"status":"$time_status","source":"$time_source","offsetMilliseconds":$time_offset_milliseconds,"maximumAllowedOffsetMilliseconds":$time_maximum_offset_milliseconds,"detail":"$time_detail"},"services":[$service_json]}
 EOF
 chmod 0644 "$temporary_file"
 mv -f "$temporary_file" "$status_file"
