@@ -1782,3 +1782,19 @@ pnpm check:docs
 ```
 
 The control reports `{"hashKdfRandomPublicKeyBoundaries":"passed","collisionDependentMinimum":"SHA-256","passwordKdf":"PBKDF2-HMAC-SHA-512/220000","minimumUnpredictableBits":128,"uuidSecrets":0,"localSigningKeyGeneration":"P-256/CSPRNG"}`. All application-created secrets use the OS CSPRNG with at least 128 bits; UUIDs have only identifier or signed replay-uniqueness roles. Fylkren-generated signing keys are P-256 from the platform provider. Existing authentication and token-algorithm runtime evidence remains linked and was not rerun. Continue at 12.1.2. Production is untouched.
+
+## Current public and service communication qualification — 2026-10-05
+
+Completes ASVS 12.1.2, 12.2.1, 12.2.2 and 12.3.2; assesses 12.3.1/12.3.3 as SV-103 and 12.3.4 as not applicable until internal TLS exists. The authoritative communication inventory records ten public, internal, outbound, management and backup paths with authentication, transport/trust and destination controls.
+
+Scoped commands:
+
+```sh
+bash tools/security/verify-tls.sh fylkren.hostima.no
+bash tools/security/verify-tls-ciphers.sh fylkren.hostima.no
+bash tools/security/verify-public-surface.sh https://fylkren.hostima.no
+node tools/test-communication-security-inventory.mjs
+pnpm check:docs
+```
+
+The current public run passes 6/6 TLS protocol/certificate checks and 28/28 anonymous public-surface checks. TLS 1.3 prefers `TLS_AES_256_GCM_SHA384`; TLS 1.2 prefers `ECDHE-ECDSA-AES256-GCM-SHA384`; four weak CBC/non-forward-secret suites are rejected. The certificate for `fylkren.hostima.no` chains to Let's Encrypt YE1 and is valid from 2026-09-10 through 2026-12-09. The inventory reports `{"communicationSecurityInventory":"assessed","documentedPaths":10,"publicTls":true,"outboundCertificateValidation":true,"plaintextInternalServicePaths":2,"finding":"SV-103"}`. Public production received read-only probes only. Gateway→API and API→PostgreSQL remain plaintext on isolated Docker networks and are not misrepresented by the public TLS result. Continue at 13.1.1.
