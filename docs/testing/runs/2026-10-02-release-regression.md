@@ -1756,3 +1756,16 @@ pnpm check:docs
 ```
 
 The control reports `{"encryptionModeBoundary":"passed","productionSourceFiles":308,"ecbUses":0,"weakRsaEncryptionPaddingUses":0,"authenticatedCbcContexts":1}`. RS256 and SAML RSA references are signature verification and are not misclassified as RSA encryption padding. This source-boundary verification did not rerun unchanged product flows. Continue at 11.3.2. Production is untouched.
+
+## Approved authenticated encryption — 2026-10-05
+
+Completes ASVS 11.3.2 and 11.3.3. The cryptographic/source inventories identify one application-selected encryption context: ASP.NET Data Protection uses AES-256-CBC only through its authenticated encryptor with HMAC-SHA-256. No standalone CBC, unapproved cipher or alternate application encryption context exists. Purpose strings keep protected data families separate.
+
+Scoped commands:
+
+```sh
+node tools/test-authenticated-encryption-boundary.mjs
+pnpm check:docs
+```
+
+The control reports `{"authenticatedEncryptionBoundary":"passed","approvedCipherContexts":1,"cipher":"AES-256-CBC","authentication":"HMAC-SHA-256","modifiedCiphertextRejected":true}`. It binds the explicit production configuration to the maintained focused session runtime, which issues distinct protected cookies and rejects a one-character modification without authenticating the browser. The unchanged runtime was not rerun in this criterion-only reconciliation. Continue at 11.4.1. Production is untouched.
