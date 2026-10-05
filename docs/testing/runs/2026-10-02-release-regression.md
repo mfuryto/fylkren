@@ -1678,3 +1678,29 @@ pnpm check:docs
 ```
 
 The inventory reports `{"selfContainedTokenUniqueAudiences":"passed","applicableContexts":5,"sameOidcIssuerKeyWrongAudienceRejected":true,"signedInstallationAndFederationAudienceBound":true,"dynamicallySelectedTokenAudienceAccepted":false}`. It binds to the current same-stage OIDC run and maintained license/federation dynamic cases, so those unchanged product flows were not rerun. WebAuthn is credential/RP scoped and does not use an issuer key to mint tokens for multiple audiences. Continue at 11.1.1; chapter 10 was already fully assessed. Production is untouched.
+
+## Cryptographic key-management policy — 2026-10-05
+
+Completes ASVS 11.1.1. The new mandatory policy assigns security-owner, host-administrator and backup-custodian responsibilities and defines seven lifecycle phases aligned with NIST SP 800-57 Part 1 concepts. A private key is restricted to one installation or external issuer; a shared secret is restricted to its two endpoints; production/test material is separated. Rotation, compromise recovery, matched backup, retention with dependent data and authorized destruction are defined without enabling application data deletion.
+
+Scoped commands:
+
+```sh
+node tools/test-cryptographic-key-management-policy.mjs
+pnpm check:docs
+```
+
+The control reports `{"cryptographicKeyManagementPolicy":"passed","lifecyclePhases":7,"privateKeyOwnersMaximum":1,"sharedSecretEndpointsMaximum":2,"productionKeyVolumeConsumers":1,"matchedBackupAndRestoreRequired":true}`. It verifies the policy against the current owner-only API key volume, key-directory and backup permissions, matched restore contract, CSPRNG secret generation and federation rotation/recovery guards. Existing disposable restore and federation tests remain linked behavioral evidence; unchanged product flows were not rerun. Production custodian assignment and off-host custody remain release-operation qualification. Continue at 11.1.2. Production is untouched.
+
+## Cryptographic inventory reconciliation — 2026-10-05
+
+Completes ASVS 11.1.2. The policy now records 12 key/secret classes and 12 algorithm/certificate classes, each with its owner, storage, purpose, accepted data, prohibited uses and lifecycle. The source reconciliation enumerates every production C# file that directly invokes a cryptographic primitive, Data Protection, password hashing or an identity/signature framework. A new or removed source use fails the test until the inventory and traceability are reviewed.
+
+Scoped commands:
+
+```sh
+node tools/test-cryptographic-inventory.mjs
+pnpm check:docs
+```
+
+The inventory reports `{"cryptographicInventory":"passed","productionSourceFiles":53,"keyAndSecretClasses":12,"primitiveAndCertificateClasses":12,"newCryptographicUsageFailsClosed":true}`. Focused source assertions also bind the documented password and machine work factors, machine PBKDF2 algorithm/output, TOTP and webhook MAC algorithms, license P-256 restriction and WebAuthn asymmetric allowlist to current code. This requirement reconciles the inventory and does not rerun unchanged product flows. Continue at 11.2.1. Production is untouched.
