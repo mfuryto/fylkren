@@ -145,6 +145,7 @@ app.MapOidcEndpoints();
 app.MapSamlEndpoints();
 app.MapDirectoryEndpoints();
 app.MapPlatformOperationsEndpoints();
+app.MapCryptoReprotectionEndpoints();
 app.MapSmtpEndpoints();
 app.MapSiteAuditEndpoints();
 app.MapPlatformAuditEndpoints();

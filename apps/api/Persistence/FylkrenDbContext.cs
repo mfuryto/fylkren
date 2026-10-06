@@ -89,6 +89,8 @@ public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options,
     public DbSet<ApiMachineAuditEvent> ApiMachineAuditEvents => Set<ApiMachineAuditEvent>();
     public DbSet<ApiIdempotencyRecord> ApiIdempotencyRecords => Set<ApiIdempotencyRecord>();
     public DbSet<ApiReportGrant> ApiReportGrants => Set<ApiReportGrant>();
+    public DbSet<CryptoReprotectionOperation> CryptoReprotectionOperations => Set<CryptoReprotectionOperation>();
+    public DbSet<CryptoReprotectionItem> CryptoReprotectionItems => Set<CryptoReprotectionItem>();
     public DbSet<WorkflowDefinition> WorkflowDefinitions => Set<WorkflowDefinition>();
     public DbSet<WorkflowStep> WorkflowSteps => Set<WorkflowStep>();
     public DbSet<WorkflowRun> WorkflowRuns => Set<WorkflowRun>();

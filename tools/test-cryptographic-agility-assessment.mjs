@@ -9,13 +9,8 @@ const machineAuth = read('apps/api/Platform/ApiMachineAuthentication.cs');
 const federationIdentity = read('apps/api/Federation/FederationIdentityEndpoints.cs');
 const federationProtocol = read('apps/api/Federation/FederationWorkProtocol.cs');
 const license = read('apps/api/Licensing/LicenseService.cs');
-const protectedStores = [
-  read('apps/api/Platform/IdentityProviderConfigurationService.cs'),
-  read('apps/api/Platform/SmtpEndpoints.cs'),
-  read('apps/api/Identity/TotpService.cs'),
-  read('apps/api/DomainEvents/WebhookManagementEndpoints.cs'),
-  read('apps/api/Federation/FederationIdentityEndpoints.cs'),
-].join('\n');
+const reprotection = read('apps/api/Platform/CryptoReprotectionService.cs');
+const reprotectionEndpoints = read('apps/api/Platform/CryptoReprotectionEndpoints.cs');
 
 assert.match(policy, /Crypto-agility assessment/, 'documented crypto-agility assessment');
 assert.match(policy, /SV-101/, 'tracked agility finding');
@@ -30,14 +25,22 @@ assert.match(machineAuth, /LegacyAlgorithm[\s\S]*CurrentAlgorithm[\s\S]*NeedsUpg
   'dual-read/new-write machine verifier migration');
 assert.doesNotMatch(federationProtocol.split('internal sealed record FederationWorkEnvelope')[1].split(';')[0],
   /Algorithm|SignatureVersion/, 'Federation envelope now negotiates a signature algorithm; reassess SV-101');
-assert.doesNotMatch(protectedStores, /ReprotectAll|ReencryptAll|ReProtectAll|ReEncryptAll/,
-  'Persistent protected-data migration now exists; reassess SV-101');
+for (const store of ['smtp', 'identity-provider', 'totp', 'webhook', 'federation'])
+  assert.match(reprotection, new RegExp(`"${store}"`), `${store} protected-value inventory`);
+assert.match(reprotection, /MaximumBatchSize = 100[\s\S]*FOR UPDATE[\s\S]*RecordBatch/,
+  'bounded serialized re-protection batches');
+assert.match(reprotection, /CryptographicException[\s\S]*RecordFailure[\s\S]*crypto-reprotection\.failed/,
+  'resumable unavailable-key failure');
+assert.match(reprotectionEndpoints, /RequireAuthorization[\s\S]*RequireRateLimiting/,
+  'authorized and rate-limited re-protection operation');
+assert.match(reprotectionEndpoints, /BackupReference[\s\S]*RollbackReference/,
+  'backup and rollback references');
 
 console.log(JSON.stringify({
   cryptographicAgilityAssessment: 'finding',
   finding: 'SV-101',
-  replacementCapabilities: 8,
+  replacementCapabilities: 9,
   versionedMachineVerifier: true,
   versionedFederationSignature: false,
-  persistentReprotectionOperation: false,
+  persistentReprotectionOperation: true,
 }));

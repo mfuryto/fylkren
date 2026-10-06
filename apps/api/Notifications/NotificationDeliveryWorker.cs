@@ -49,7 +49,7 @@ public sealed class NotificationDeliveryWorker(
             .Take(20)
             .ToListAsync(ct);
         var protector = scope.ServiceProvider.GetRequiredService<IDataProtectionProvider>()
-            .CreateProtector("Fylkren.SmtpPassword.v1");
+            .CreateProtector(ProtectedValuePurposes.SmtpPassword);
 
         foreach (var message in messages)
         {

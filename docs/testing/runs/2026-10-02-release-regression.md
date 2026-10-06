@@ -2060,4 +2060,18 @@ node tools/run-foundation-tests.mjs --machine-secret-agility-integration-only
 node tools/test-cryptographic-agility-assessment.mjs
 ```
 
-The isolated checks pass versioned new writes, legacy verification, incorrect-secret rejection, opportunistic upgrade and unknown-algorithm rejection. The disposable PostgreSQL check passes a populated pre-migration credential through the schema upgrade, persists its verifier upgrade, rejects an iteration count outside the allowed boundary and completes down/up schema migration without losing the credential. SV-101 remains open for signed-protocol algorithm negotiation and persistent Data Protection inventory/re-protection. Production was not changed.
+The isolated checks pass versioned new writes, legacy verification, incorrect-secret rejection, opportunistic upgrade and unknown-algorithm rejection. The disposable PostgreSQL check passes a populated pre-migration credential through the schema upgrade, persists its verifier upgrade, rejects an iteration count outside the allowed boundary and completes down/up schema migration without losing the credential. At this checkpoint SV-101 still included signed-protocol negotiation and persistent re-protection; the continuation below closes the latter. Production was not changed.
+
+### Persistent protected-value re-protection — 2026-10-06
+
+This closes the persistent-ciphertext portion of SV-101 without marking ASVS 11.2.2 complete. A single Platform Manager operation takes an explicit matched-backup reference and rollback plan, snapshots the complete persistent Data Protection inventory and processes at most 100 entries per serialized transaction. Durable item progress makes interruption resumable. Every replacement is opened again before commit; an unavailable old key rolls the entire batch back, records a bounded failure code and audit event, and leaves the operation resumable after the key ring is restored. A second operation cannot start until the current operation completes. No plaintext or ciphertext is copied into progress or audit records.
+
+```sh
+dotnet build apps/api/Fylkren.Api.csproj --no-restore
+dotnet build tests/foundations/Fylkren.FoundationTests.csproj --no-restore
+node tools/run-foundation-tests.mjs --crypto-reprotection-only
+node tools/test-cryptographic-agility-assessment.mjs
+pnpm check:docs
+```
+
+The disposable PostgreSQL test inventories six configured slots across SMTP, OIDC configuration, TOTP, webhook and active/pending federation private keys. Multiple two-item batches preserve every plaintext while replacing every ciphertext. The test rejects a concurrent operation, injects ciphertext that cannot be opened by the available key ring, observes zero committed items and a failed audit event, restores availability by removing the synthetic invalid record, resumes the same operation and records completion. API and foundation builds pass with zero warnings. Cryptographic inventory reconciliation now covers 56 production source files. Authorization reconciliation covers 295 operations in 95 endpoint files: 106 GET, 117 POST, 45 PUT and 27 DELETE, with the unchanged set of 24 reviewed anonymous declarations; the four new re-protection routes belong to Platform governance. SV-101 remains open only for versioned federation/license signature identification, negotiation and retirement. Production was not changed.

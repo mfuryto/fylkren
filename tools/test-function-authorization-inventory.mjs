@@ -15,7 +15,7 @@ const sources = files('apps/api').map(path => ({
 const methods = ['Get', 'Post', 'Put', 'Patch', 'Delete'];
 const operationCount = sources.reduce((total, file) => total + methods.reduce((count, method) =>
   count + [...file.source.matchAll(new RegExp(`\\.Map${method}\\(`, 'g'))].length, 0), 0);
-assert.equal(operationCount, 287, 'Route inventory changed; reconcile function authorization before accepting it');
+assert.equal(operationCount, 295, 'Route inventory changed; reconcile function authorization before accepting it');
 
 const anonymousByFile = Object.fromEntries(sources.map(file => [file.path,
   [...file.source.matchAll(/\.AllowAnonymous\(/g)].length]).filter(([, count]) => count > 0));
@@ -57,6 +57,9 @@ assert.match(sources.find(file => file.path.endsWith('FederationIdentityDiscover
 
 const platform = readFileSync('apps/api/Platform/PlatformOperationsEndpoints.cs', 'utf8');
 assert.match(platform, /RequireRole\("PlatformManager"\)/);
+const cryptographicMaintenance = readFileSync('apps/api/Platform/CryptoReprotectionEndpoints.cs', 'utf8');
+assert.match(cryptographicMaintenance, /RequireRole\("PlatformManager"\)/);
+assert.match(cryptographicMaintenance, /IsRequestValidAsync[\s\S]*RequireRateLimiting\("costly-operation"\)/);
 const site = readFileSync('apps/api/Organization/AccessAuthorization.cs', 'utf8') +
   readFileSync('apps/api/Organization/OrganizationAuthorization.cs', 'utf8');
 assert.match(site, /CanAdministerSite/);

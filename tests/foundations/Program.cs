@@ -109,6 +109,11 @@ if (args.Contains("--machine-secret-agility-integration-only"))
     await MachineSecretAgilityTests.RunDatabase(db);
     return;
 }
+if (args.Contains("--crypto-reprotection-only"))
+{
+    await CryptoReprotectionTests.Run(db);
+    return;
+}
 if (args.Contains("--version-integration-only"))
 {
     VersionBoundaryTests.Run();

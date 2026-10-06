@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 2026-10-05 after completing requirement-level assessment of all 253 ASVS 5.0.0 Level 1/2 rows and defining the remaining identity-provider provisioning capability. Open findings, identity provisioning and final release-candidate qualification remain explicit.
+Updated 2026-10-06 after completing the machine-verifier and persistent protected-value portions of crypto-agility remediation. Open findings, signed-protocol agility, identity provisioning and final release-candidate qualification remain explicit.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -12,7 +12,7 @@ The additive event/activity foundation and coherent WorkItem slice are delivered
 
 ## Next delivery order
 
-1. Triage and remediate, or obtain explicit responsible-owner acceptance for, the 5 open finding records that affect 6 ASVS rows. Internal service transport, outbound destination enforcement, dependency vulnerabilities, the release-candidate SBOM, federated reauthentication, user session-management, mandatory-MFA and minimum cryptographic-strength gaps are closed. Prioritize service identity/secrets custody, crypto agility, clock synchronization and separate log collection. Retest each affected row against the exact candidate when its control changes.
+1. Triage and remediate, or obtain explicit responsible-owner acceptance for, the 5 open finding records that affect 6 ASVS rows. Internal service transport, outbound destination enforcement, dependency vulnerabilities, the release-candidate SBOM, federated reauthentication, user session-management, mandatory-MFA and minimum cryptographic-strength gaps are closed. Crypto agility now has versioned machine verifiers and complete persistent protected-value re-protection; signed federation/license formats remain. Prioritize that signed-protocol gap, machine service identity, secret custody, clock synchronization and separate log collection. Retest each affected row against the exact candidate when its control changes.
 2. Deliver configurable OIDC/SAML provisioning and the restricted unassigned-user state described below. Preserve the current explicit-link path and direct AD/LDAP personnel addition.
 3. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing, identity providers, authenticators, backup/key custody, time synchronization and remote logging at this gate.
 

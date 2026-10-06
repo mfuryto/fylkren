@@ -2,12 +2,13 @@ using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.DataProtection;
+using Fylkren.Api.Platform;
 
 namespace Fylkren.Api.Identity;
 
 public sealed class TotpService(IDataProtectionProvider dataProtectionProvider)
 {
-    private readonly IDataProtector secretProtector = dataProtectionProvider.CreateProtector("Fylkren.TotpSecret.v1");
+    private readonly IDataProtector secretProtector = dataProtectionProvider.CreateProtector(ProtectedValuePurposes.TotpSecret);
     private readonly IDataProtector challengeProtector = dataProtectionProvider.CreateProtector("Fylkren.TotpChallenge.v2");
     private readonly IDataProtector setupProtector = dataProtectionProvider.CreateProtector("Fylkren.TotpSetup.v2");
 

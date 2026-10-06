@@ -62,6 +62,7 @@ const expectedFiles = [
   'apps/api/Platform/AdministrationUserQueryEndpoints.cs',
   'apps/api/Platform/AdministrationUserSupport.cs',
   'apps/api/Platform/ApiMachineAuthentication.cs',
+  'apps/api/Platform/CryptoReprotectionService.cs',
   'apps/api/Platform/IdentityProviderConfigurationService.cs',
   'apps/api/Platform/SmtpEndpoints.cs',
   'apps/api/Portability/PortableExportPackage.cs',

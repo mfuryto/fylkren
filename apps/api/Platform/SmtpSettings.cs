@@ -17,5 +17,6 @@ public sealed class SmtpSettings
     public bool? LastTestSucceeded { get; private set; }
     public string? LastTestError { get; private set; }
     public void Update(bool enabled, string host, int port, string security, string? username, string? protectedPassword, string fromAddress, string fromName) { Enabled = enabled; Host = host; Port = port; Security = security; Username = string.IsNullOrWhiteSpace(username) ? null : username; ProtectedPassword = protectedPassword; FromAddress = fromAddress; FromName = fromName; }
+    internal void ReprotectPassword(string protectedPassword) => ProtectedPassword = protectedPassword;
     public void RecordTest(bool succeeded, string? error) { LastTestedAt = DateTimeOffset.UtcNow; LastTestSucceeded = succeeded; LastTestError = error; }
 }

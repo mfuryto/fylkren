@@ -62,6 +62,17 @@ internal sealed class FederationSigningIdentity
         RotationActivatedAt = null;
     }
 
+    internal void ReprotectPrivateKey(string protectedPrivateKey) =>
+        ProtectedPrivateKey = string.IsNullOrWhiteSpace(protectedPrivateKey)
+            ? throw new ArgumentException("A protected federation key is required.") : protectedPrivateKey;
+
+    internal void ReprotectPendingPrivateKey(string protectedPrivateKey)
+    {
+        if (PendingProtectedPrivateKey is null || string.IsNullOrWhiteSpace(protectedPrivateKey))
+            throw new InvalidOperationException("No pending federation key is available for re-protection.");
+        PendingProtectedPrivateKey = protectedPrivateKey;
+    }
+
     internal void Recover(string publicKeySpki, string protectedPrivateKey,
         DateTimeOffset recoveredAt)
     {

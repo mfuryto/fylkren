@@ -2882,6 +2882,119 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.ToTable("api_machine_audit_events", (string)null);
                 });
 
+            modelBuilder.Entity("Fylkren.Api.Platform.CryptoReprotectionItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("completed_at");
+
+                    b.Property<Guid>("OperationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("operation_id");
+
+                    b.Property<string>("RecordKey")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("record_key");
+
+                    b.Property<string>("Slot")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("slot");
+
+                    b.Property<string>("Store")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("store");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OperationId", "CompletedAt", "Id");
+
+                    b.HasIndex("OperationId", "Store", "RecordKey", "Slot")
+                        .IsUnique();
+
+                    b.ToTable("crypto_reprotection_items", (string)null);
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Platform.CryptoReprotectionOperation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("BackupReference")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("backup_reference");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("completed_at");
+
+                    b.Property<int>("CompletedItems")
+                        .HasColumnType("integer")
+                        .HasColumnName("completed_items");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CreatedByPersonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_person_id");
+
+                    b.Property<DateTimeOffset?>("FailedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("failed_at");
+
+                    b.Property<string>("FailureCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("failure_code");
+
+                    b.Property<string>("RollbackReference")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("rollback_reference");
+
+                    b.Property<DateTimeOffset?>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<int>("TotalItems")
+                        .HasColumnType("integer")
+                        .HasColumnName("total_items");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Status", "CreatedAt");
+
+                    b.ToTable("crypto_reprotection_operations", t =>
+                        {
+                            t.HasCheckConstraint("ck_crypto_reprotection_progress", "total_items >= 0 AND completed_items >= 0 AND completed_items <= total_items");
+
+                            t.HasCheckConstraint("ck_crypto_reprotection_status", "status IN ('pending','completed','failed')");
+                        });
+                });
+
             modelBuilder.Entity("Fylkren.Api.Platform.ApiMachineIdentity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -5278,6 +5391,17 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.Navigation("MachineIdentity");
 
                     b.Navigation("Site");
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Platform.CryptoReprotectionItem", b =>
+                {
+                    b.HasOne("Fylkren.Api.Platform.CryptoReprotectionOperation", "Operation")
+                        .WithMany()
+                        .HasForeignKey("OperationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Operation");
                 });
 
             modelBuilder.Entity("Fylkren.Api.Platform.ApiReportGrant", b =>

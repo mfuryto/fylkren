@@ -16,6 +16,7 @@ public sealed class WebhookSubscription
     public DateTimeOffset UpdatedAt { get; private set; }
     public bool IsActive { get; private set; }
     public void Deactivate(DateTimeOffset now) { IsActive = false; UpdatedAt = now; }
+    internal void ReprotectSecret(string protectedSecret) => ProtectedSecret = protectedSecret;
     public IReadOnlySet<string> SelectedEventTypes() => EventTypes.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToHashSet(StringComparer.Ordinal);
 }
 

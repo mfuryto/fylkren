@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Add one bounded and resumable operation that inventories and re-protects all persistent Data Protection values under the current key, with backup/rollback references, atomic failure, recovery and security-audit records.
+
 - Keep expected anonymous read denials in structured security logging without presenting expired-session Platform Manager refreshes as operational warnings.
 
 - Store machine-API verifier algorithm, format version and work factor, preserve existing credentials during upgrade, and rehash them into the current format after successful authentication.

@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.DataProtection;
+using Fylkren.Api.Platform;
 
 namespace Fylkren.Api.Federation;
 
@@ -7,7 +8,7 @@ internal static class FederationSigningKeys
 {
     internal static ECDsa Load(FederationSigningIdentity identity, IDataProtectionProvider protection)
     {
-        var encoded = protection.CreateProtector("Fylkren.Federation.SigningKey.v1")
+        var encoded = protection.CreateProtector(ProtectedValuePurposes.FederationSigningKey)
             .Unprotect(identity.ProtectedPrivateKey);
         byte[] der;
         try { der = Convert.FromBase64String(encoded); }

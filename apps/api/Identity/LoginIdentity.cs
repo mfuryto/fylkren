@@ -94,6 +94,12 @@ public sealed class LoginIdentity
         SecurityVersion = nextVersion;
     }
 
+    internal void ReprotectTotpSecret(string protectedSecret)
+    {
+        if (TotpSecret is null) throw new InvalidOperationException("No TOTP secret is configured.");
+        TotpSecret = protectedSecret;
+    }
+
     public void AdvanceSecurityVersion() => SecurityVersion = NumericBounds.NextVersion(SecurityVersion);
 
     public void RecordSignIn(DateTimeOffset now) => LastSignedInAt = now;

@@ -5,6 +5,7 @@ using Fylkren.Api.Licensing;
 using Fylkren.Api.Persistence;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.DataProtection;
+using Fylkren.Api.Platform;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fylkren.Api.Federation;
@@ -46,7 +47,7 @@ internal static class FederationIdentityEndpoints
             string protectedPrivateKey;
             try
             {
-                protectedPrivateKey = protection.CreateProtector("Fylkren.Federation.SigningKey.v1")
+                protectedPrivateKey = protection.CreateProtector(ProtectedValuePurposes.FederationSigningKey)
                     .Protect(Convert.ToBase64String(privateKey));
             }
             finally { CryptographicOperations.ZeroMemory(privateKey); }
@@ -80,7 +81,7 @@ internal static class FederationIdentityEndpoints
             string protectedPendingPrivate;
             try
             {
-                protectedPendingPrivate = protection.CreateProtector("Fylkren.Federation.SigningKey.v1")
+                protectedPendingPrivate = protection.CreateProtector(ProtectedValuePurposes.FederationSigningKey)
                     .Protect(Convert.ToBase64String(pendingPrivate));
             }
             finally { CryptographicOperations.ZeroMemory(pendingPrivate); }
@@ -116,7 +117,7 @@ internal static class FederationIdentityEndpoints
             string protectedPrivateKey;
             try
             {
-                protectedPrivateKey = protection.CreateProtector("Fylkren.Federation.SigningKey.v1")
+                protectedPrivateKey = protection.CreateProtector(ProtectedValuePurposes.FederationSigningKey)
                     .Protect(Convert.ToBase64String(privateKey));
             }
             finally { CryptographicOperations.ZeroMemory(privateKey); }

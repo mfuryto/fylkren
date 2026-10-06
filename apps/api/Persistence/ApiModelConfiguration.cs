@@ -67,5 +67,39 @@ internal static class ApiModelConfiguration
         reportGrant.Property(x => x.CreatedAt).HasColumnName("created_at");
         reportGrant.HasOne(x => x.MachineIdentity).WithMany().HasForeignKey(x => x.MachineIdentityId).OnDelete(DeleteBehavior.Restrict);
         reportGrant.HasIndex(x => new { x.MachineIdentityId, x.SiteId, x.OrganizationUnitId }).IsUnique();
+
+        var cryptoOperation = modelBuilder.Entity<CryptoReprotectionOperation>();
+        cryptoOperation.ToTable("crypto_reprotection_operations", table =>
+        {
+            table.HasCheckConstraint("ck_crypto_reprotection_status", "status IN ('pending','completed','failed')");
+            table.HasCheckConstraint("ck_crypto_reprotection_progress", "total_items >= 0 AND completed_items >= 0 AND completed_items <= total_items");
+        });
+        cryptoOperation.HasKey(x => x.Id);
+        cryptoOperation.Property(x => x.Id).HasColumnName("id");
+        cryptoOperation.Property(x => x.CreatedByPersonId).HasColumnName("created_by_person_id");
+        cryptoOperation.Property(x => x.BackupReference).HasColumnName("backup_reference").HasMaxLength(200);
+        cryptoOperation.Property(x => x.RollbackReference).HasColumnName("rollback_reference").HasMaxLength(500);
+        cryptoOperation.Property(x => x.Status).HasColumnName("status").HasMaxLength(20);
+        cryptoOperation.Property(x => x.TotalItems).HasColumnName("total_items");
+        cryptoOperation.Property(x => x.CompletedItems).HasColumnName("completed_items");
+        cryptoOperation.Property(x => x.CreatedAt).HasColumnName("created_at");
+        cryptoOperation.Property(x => x.StartedAt).HasColumnName("started_at");
+        cryptoOperation.Property(x => x.CompletedAt).HasColumnName("completed_at");
+        cryptoOperation.Property(x => x.FailedAt).HasColumnName("failed_at");
+        cryptoOperation.Property(x => x.FailureCode).HasColumnName("failure_code").HasMaxLength(100);
+        cryptoOperation.HasIndex(x => new { x.Status, x.CreatedAt });
+
+        var cryptoItem = modelBuilder.Entity<CryptoReprotectionItem>();
+        cryptoItem.ToTable("crypto_reprotection_items");
+        cryptoItem.HasKey(x => x.Id);
+        cryptoItem.Property(x => x.Id).HasColumnName("id");
+        cryptoItem.Property(x => x.OperationId).HasColumnName("operation_id");
+        cryptoItem.Property(x => x.Store).HasColumnName("store").HasMaxLength(40);
+        cryptoItem.Property(x => x.RecordKey).HasColumnName("record_key").HasMaxLength(100);
+        cryptoItem.Property(x => x.Slot).HasColumnName("slot").HasMaxLength(40);
+        cryptoItem.Property(x => x.CompletedAt).HasColumnName("completed_at");
+        cryptoItem.HasOne(x => x.Operation).WithMany().HasForeignKey(x => x.OperationId).OnDelete(DeleteBehavior.Cascade);
+        cryptoItem.HasIndex(x => new { x.OperationId, x.CompletedAt, x.Id });
+        cryptoItem.HasIndex(x => new { x.OperationId, x.Store, x.RecordKey, x.Slot }).IsUnique();
     }
 }

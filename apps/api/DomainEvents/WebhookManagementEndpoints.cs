@@ -5,6 +5,7 @@ using Fylkren.Api.Licensing;
 using Fylkren.Api.Persistence;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.DataProtection;
+using Fylkren.Api.Platform;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fylkren.Api.DomainEvents;
@@ -34,7 +35,7 @@ internal static class WebhookManagementEndpoints
         var selected = request.EventTypes.Distinct(StringComparer.Ordinal).ToArray();
         if (selected.Length == 0 || selected.Any(x => !DomainEventTypes.ExternallySupported.Contains(x))) return Results.ValidationProblem(new Dictionary<string, string[]> { ["eventTypes"] = ["Select at least one supported event type."] });
         var secret = Convert.ToHexString(RandomNumberGenerator.GetBytes(32)).ToLowerInvariant(); var now = DateTimeOffset.UtcNow;
-        var subscription = new WebhookSubscription(Guid.NewGuid(), siteId, name, uri.ToString(), protection.CreateProtector("Fylkren.Webhooks.v1").Protect(secret), string.Join(' ', selected), personId, now);
+        var subscription = new WebhookSubscription(Guid.NewGuid(), siteId, name, uri.ToString(), protection.CreateProtector(ProtectedValuePurposes.WebhookSecret).Protect(secret), string.Join(' ', selected), personId, now);
         db.WebhookSubscriptions.Add(subscription); db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, personId, "webhook.created", "webhook-subscription", subscription.Id, now)); await db.SaveChangesAsync(ct);
         return Results.Created($"/api/platform/webhooks/sites/{siteId}/{subscription.Id}", new { subscription.Id, subscription.Name, subscription.EndpointUrl, eventTypes = selected, secret });
     }

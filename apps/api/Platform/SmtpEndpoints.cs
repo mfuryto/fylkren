@@ -203,7 +203,7 @@ public static class SmtpEndpoints
         if (request.ClearPassword)
             protectedPassword = null;
         else if (!string.IsNullOrEmpty(request.Password))
-            protectedPassword = dataProtection.CreateProtector("Fylkren.SmtpPassword.v1")
+            protectedPassword = dataProtection.CreateProtector(ProtectedValuePurposes.SmtpPassword)
                 .Protect(request.Password);
         value.Update(request.Enabled, host, request.Port, request.Security, username,
             protectedPassword, fromAddress, fromName);
@@ -236,7 +236,7 @@ public static class SmtpEndpoints
             };
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             timeout.CancelAfter(TimeSpan.FromSeconds(10));
-            try { await SmtpTransport.SendAsync(value, dataProtection.CreateProtector("Fylkren.SmtpPassword.v1"), destinations, message, timeout.Token); }
+            try { await SmtpTransport.SendAsync(value, dataProtection.CreateProtector(ProtectedValuePurposes.SmtpPassword), destinations, message, timeout.Token); }
             catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
             { throw new SmtpException("SMTP test delivery timed out."); }
             value.RecordTest(true, null);

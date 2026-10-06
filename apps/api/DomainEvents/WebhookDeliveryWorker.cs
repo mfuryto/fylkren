@@ -5,6 +5,7 @@ using System.Text.Json;
 using Fylkren.Api.Persistence;
 using Fylkren.Api.Licensing;
 using Microsoft.AspNetCore.DataProtection;
+using Fylkren.Api.Platform;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fylkren.Api.DomainEvents;
@@ -64,7 +65,7 @@ internal sealed class WebhookDeliveryWorker(IServiceScopeFactory scopes, IHttpCl
         {
             var e = delivery.DomainEvent; var timestamp = e.OccurredAt.ToUnixTimeSeconds().ToString();
             var body = JsonSerializer.Serialize(new { id = e.Id, type = e.EventType, schemaVersion = e.SchemaVersion, timestamp = e.OccurredAt, siteId = e.SiteId, actorId = e.ActorPersonId, resource = new { type = e.ResourceType, id = e.ResourceId }, data = JsonSerializer.Deserialize<JsonElement>(e.PayloadJson) });
-            var secret = protection.CreateProtector("Fylkren.Webhooks.v1").Unprotect(delivery.Subscription.ProtectedSecret); var signature = Convert.ToHexString(HMACSHA256.HashData(Encoding.UTF8.GetBytes(secret), Encoding.UTF8.GetBytes($"{timestamp}.{body}"))).ToLowerInvariant();
+            var secret = protection.CreateProtector(ProtectedValuePurposes.WebhookSecret).Unprotect(delivery.Subscription.ProtectedSecret); var signature = Convert.ToHexString(HMACSHA256.HashData(Encoding.UTF8.GetBytes(secret), Encoding.UTF8.GetBytes($"{timestamp}.{body}"))).ToLowerInvariant();
             using var request = new HttpRequestMessage(HttpMethod.Post, delivery.Subscription.EndpointUrl) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
             request.Headers.Add("X-Fylkren-Event-Id", e.Id.ToString()); request.Headers.Add("X-Fylkren-Event-Type", e.EventType); request.Headers.Add("X-Fylkren-Timestamp", timestamp); request.Headers.Add("X-Fylkren-Signature", $"v1={signature}");
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct); timeout.CancelAfter(TimeSpan.FromSeconds(10)); using var response = await clients.CreateClient("webhooks").SendAsync(request, HttpCompletionOption.ResponseHeadersRead, timeout.Token); status = (int)response.StatusCode;

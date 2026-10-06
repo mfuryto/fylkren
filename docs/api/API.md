@@ -27,7 +27,7 @@ Platform Manager creates machine clients on the **API** page. A client represent
 api_<key-id>.<secret>
 ```
 
-Only a salted PBKDF2-SHA256 hash is stored. A new client must expire within one year; the interface proposes 90 days. Send the key as a Bearer token:
+Only a salted, versioned PBKDF2 verifier is stored. Existing SHA-256 verifiers upgrade to the current SHA-512 verifier after successful authentication; plaintext machine secrets are never retained. A new client must expire within one year; the interface proposes 90 days. Send the key as a Bearer token:
 
 ```http
 Authorization: Bearer api_<key-id>.<secret>

@@ -16,7 +16,7 @@ public sealed class IdentityProviderConfigurationService(
 {
     public static readonly string[] ExternalProviders = ["ad", "ldap", "oidc", "saml"];
     public static readonly string[] Providers = ["local", .. ExternalProviders];
-    private readonly IDataProtector protector = protection.CreateProtector("Fylkren.IdentityProviderConfiguration.v1");
+    private readonly IDataProtector protector = protection.CreateProtector(ProtectedValuePurposes.IdentityProviderConfiguration);
 
     public async Task InitializeAsync(FylkrenDbContext database, CancellationToken cancellationToken = default)
     {

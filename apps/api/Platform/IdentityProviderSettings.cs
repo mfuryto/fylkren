@@ -16,6 +16,7 @@ public sealed class IdentityProviderSettings
     { Enabled = enabled; ProtectedConfiguration = protectedConfiguration; UpdatedAt = now; LastTestSucceeded = null; LastTestError = null; }
     public void SetEnabled(bool enabled, DateTimeOffset now)
     { Enabled = enabled; UpdatedAt = now; }
+    internal void ReprotectConfiguration(string protectedConfiguration) => ProtectedConfiguration = protectedConfiguration;
     public void RecordTest(bool succeeded, string? error, DateTimeOffset now)
     { LastTestedAt = now; LastTestSucceeded = succeeded; LastTestError = error; }
 }
