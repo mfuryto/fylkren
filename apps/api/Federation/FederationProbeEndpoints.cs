@@ -42,9 +42,11 @@ internal static class FederationProbeEndpoints
         var peer = await db.FederationPeers.AsNoTracking().SingleOrDefaultAsync(
             value => value.InstanceId == request.SenderInstanceId && value.IsActive, ct);
         if (peer?.PinnedPublicKeySpki is null ||
+            !FederationSignatureProtocol.Accepts(peer.SignatureAlgorithm, request.SignatureAlgorithm) ||
             !FederationPublicKey.TryParse(peer.PinnedPublicKeySpki, out var peerKey, out _) ||
             !FederationProbeProtocol.Verify(peerKey,
-                FederationProbeProtocol.RequestBytes(request.SenderInstanceId, localId, request.Timestamp, request.Nonce),
+                FederationProbeProtocol.RequestBytes(request.SenderInstanceId, localId, request.Timestamp,
+                    request.Nonce, request.SignatureAlgorithm),
                 request.Signature))
             return Results.Unauthorized();
 
@@ -56,7 +58,8 @@ internal static class FederationProbeEndpoints
         {
             using var signingKey = FederationSigningKeys.Load(localKey, protection);
             signature = FederationProbeProtocol.Sign(signingKey,
-                FederationProbeProtocol.ResponseBytes(localId, request.SenderInstanceId, responseTimestamp, request.Nonce));
+                FederationProbeProtocol.ResponseBytes(localId, request.SenderInstanceId,
+                    responseTimestamp, request.Nonce, request.SignatureAlgorithm));
         }
         catch (CryptographicException)
         {
@@ -68,7 +71,8 @@ internal static class FederationProbeEndpoints
         {
             return Results.Conflict(new { error = "replayed_probe" });
         }
-        return Results.Ok(new FederationProbeResponse(localId, request.SenderInstanceId, responseTimestamp, request.Nonce, signature));
+        return Results.Ok(new FederationProbeResponse(localId, request.SenderInstanceId,
+            responseTimestamp, request.Nonce, signature, request.SignatureAlgorithm));
     }
 
     private static async Task<IResult> Send(Guid instanceId, ClaimsPrincipal user, IAntiforgery antiforgery,
@@ -87,12 +91,14 @@ internal static class FederationProbeEndpoints
             .Select(row => row.InstanceId).SingleAsync(ct);
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         var nonce = Guid.NewGuid();
+        var signatureAlgorithm = peer.SignatureAlgorithm;
         string signature;
         try
         {
             using var key = FederationSigningKeys.Load(localKey, protection);
             signature = FederationProbeProtocol.Sign(key,
-                FederationProbeProtocol.RequestBytes(localId, instanceId, timestamp, nonce));
+                FederationProbeProtocol.RequestBytes(localId, instanceId, timestamp, nonce,
+                    signatureAlgorithm));
         }
         catch (CryptographicException)
         {
@@ -105,7 +111,8 @@ internal static class FederationProbeEndpoints
         {
             using var request = new HttpRequestMessage(HttpMethod.Post, target)
             {
-                Content = JsonContent.Create(new FederationProbeRequest(localId, instanceId, timestamp, nonce, signature))
+                Content = JsonContent.Create(new FederationProbeRequest(localId, instanceId,
+                    timestamp, nonce, signature, signatureAlgorithm))
             };
             using var response = await clients.CreateClient("federation-probe").SendAsync(
                 request, HttpCompletionOption.ResponseHeadersRead, ct);
@@ -116,10 +123,12 @@ internal static class FederationProbeEndpoints
             var now = DateTimeOffset.UtcNow;
             if (received is null || received.SenderInstanceId != instanceId ||
                 received.RecipientInstanceId != localId || received.Nonce != nonce ||
+                received.SignatureAlgorithm != signatureAlgorithm ||
                 received.Timestamp < now.ToUnixTimeSeconds() - 300 ||
                 received.Timestamp > now.ToUnixTimeSeconds() + 300 ||
                 !FederationProbeProtocol.Verify(peerKey,
-                    FederationProbeProtocol.ResponseBytes(instanceId, localId, received.Timestamp, nonce),
+                    FederationProbeProtocol.ResponseBytes(instanceId, localId, received.Timestamp,
+                        nonce, signatureAlgorithm),
                     received.Signature))
                 return Results.Problem(statusCode: 502, title: "The peer signature could not be verified.");
             peer.RecordProof(now);

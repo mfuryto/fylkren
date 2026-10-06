@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Negotiate and persist a signed federation protocol v2 with an explicit allowlisted signature algorithm across discovery, probes, catalogs, grants, key rotation, work and receipts; retain controlled v1 compatibility and reject silent downgrade after v2.
+
 - Add a versioned Enterprise-license signature format that binds the allowed algorithm inside the signed payload and envelope while preserving existing schema 1 licenses.
 
 - Add one bounded and resumable operation that inventories and re-protects all persistent Data Protection values under the current key, with backup/rollback references, atomic failure, recovery and security-audit records.

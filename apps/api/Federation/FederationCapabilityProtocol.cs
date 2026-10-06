@@ -6,15 +6,17 @@ namespace Fylkren.Api.Federation;
 internal sealed record FederationCapabilityRequest(Guid SenderInstanceId,
     Guid RecipientInstanceId, int MinimumProtocolVersion, int MaximumProtocolVersion,
     int[] WorkSchemaVersions, string[] WorkMessageTypes, long Timestamp, Guid Nonce,
-    string? Signature);
+    string? Signature, string? SignatureAlgorithm = null);
 
 internal sealed record FederationCapabilityResponse(Guid SenderInstanceId,
     Guid RecipientInstanceId, int ProtocolVersion, int WorkSchemaVersion,
-    string[] WorkMessageTypes, long Timestamp, Guid Nonce, string Signature);
+    string[] WorkMessageTypes, long Timestamp, Guid Nonce, string Signature,
+    string? SignatureAlgorithm = null);
 
 internal static class FederationCapabilityProtocol
 {
-    internal const int ProtocolVersion = 1;
+    internal const int LegacyProtocolVersion = 1;
+    internal const int ProtocolVersion = 2;
     internal static readonly int[] WorkSchemaVersions = [FederationWorkProtocol.SchemaVersion];
     internal static readonly string[] WorkMessageTypes =
     [
@@ -28,21 +30,26 @@ internal static class FederationCapabilityProtocol
         "fylkren-federation-capability-request-v1", value.SenderInstanceId,
         value.RecipientInstanceId, value.MinimumProtocolVersion,
         value.MaximumProtocolVersion, value.WorkSchemaVersions,
-        value.WorkMessageTypes, value.Timestamp, value.Nonce);
+        value.WorkMessageTypes, value.Timestamp, value.Nonce, value.SignatureAlgorithm);
 
     internal static byte[] ResponseBytes(FederationCapabilityResponse value) => Canonical(
         "fylkren-federation-capability-response-v1", value.SenderInstanceId,
         value.RecipientInstanceId, value.ProtocolVersion, value.ProtocolVersion,
-        [value.WorkSchemaVersion], value.WorkMessageTypes, value.Timestamp, value.Nonce);
+        [value.WorkSchemaVersion], value.WorkMessageTypes, value.Timestamp, value.Nonce,
+        value.SignatureAlgorithm);
 
     internal static bool ValidOffer(FederationCapabilityRequest value) =>
-        value.MinimumProtocolVersion >= 1 &&
+        value.MinimumProtocolVersion >= 1 && value.MaximumProtocolVersion <= ProtocolVersion &&
         value.MaximumProtocolVersion >= value.MinimumProtocolVersion &&
+        ((value.SignatureAlgorithm is null && value.MaximumProtocolVersion == LegacyProtocolVersion) ||
+         (value.SignatureAlgorithm == FederationSignatureProtocol.CurrentAlgorithm &&
+          value.MinimumProtocolVersion == ProtocolVersion)) &&
         ValidSchemas(value.WorkSchemaVersions) && ValidTypes(value.WorkMessageTypes);
 
     internal static bool ValidSelection(FederationCapabilityResponse value,
         FederationCapabilityRequest offer) => value.ProtocolVersion >= offer.MinimumProtocolVersion &&
         value.ProtocolVersion <= offer.MaximumProtocolVersion &&
+        value.SignatureAlgorithm == offer.SignatureAlgorithm &&
         offer.WorkSchemaVersions.Contains(value.WorkSchemaVersion) &&
         ValidTypes(value.WorkMessageTypes) &&
         value.WorkMessageTypes.All(offer.WorkMessageTypes.Contains);
@@ -57,11 +64,12 @@ internal static class FederationCapabilityProtocol
 
     private static byte[] Canonical(string purpose, Guid sender, Guid recipient,
         int minimumProtocol, int maximumProtocol, int[] schemas, string[] messageTypes,
-        long timestamp, Guid nonce) => Encoding.ASCII.GetBytes(string.Join('\n', purpose,
+        long timestamp, Guid nonce, string? signatureAlgorithm) => Encoding.ASCII.GetBytes(string.Join('\n',
+            new[] { FederationSignatureProtocol.Purpose(purpose, signatureAlgorithm),
             sender.ToString("N"), recipient.ToString("N"),
             minimumProtocol.ToString(CultureInfo.InvariantCulture),
             maximumProtocol.ToString(CultureInfo.InvariantCulture),
             string.Join(',', schemas.Select(value => value.ToString(CultureInfo.InvariantCulture))),
             string.Join(',', messageTypes), timestamp.ToString(CultureInfo.InvariantCulture),
-            nonce.ToString("N")));
+            nonce.ToString("N") }.Concat(FederationSignatureProtocol.Bind(signatureAlgorithm))));
 }

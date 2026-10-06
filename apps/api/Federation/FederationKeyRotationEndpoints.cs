@@ -38,6 +38,8 @@ internal static class FederationKeyRotationEndpoints
             row.InstanceId == request.SenderInstanceId && row.IsActive, ct);
         if (peer?.PinnedPublicKeySpki is null)
             return Results.Unauthorized();
+        if (!FederationSignatureProtocol.Accepts(peer.SignatureAlgorithm, request.SignatureAlgorithm))
+            return Results.Unauthorized();
 
         if (!FederationPublicKey.TryParse(request.CurrentPublicKeySpki, out var currentKey, out var currentFingerprint) ||
             !FederationPublicKey.TryParse(request.NewPublicKeySpki, out var newKey, out var newFingerprint))
@@ -56,7 +58,7 @@ internal static class FederationKeyRotationEndpoints
             return Results.Conflict(new { error = "federation_key_already_pinned" });
         var canonical = FederationKeyRotationProtocol.StageBytes(request.SenderInstanceId,
             localId, request.RotationId, request.Timestamp, request.Nonce,
-            currentFingerprint, newFingerprint);
+            currentFingerprint, newFingerprint, request.SignatureAlgorithm);
         if (!FederationKeyRotationProtocol.Verify(currentKey, canonical, request.CurrentSignature) ||
             !FederationKeyRotationProtocol.Verify(newKey, canonical, request.NewSignature))
             return Results.Unauthorized();
@@ -69,7 +71,7 @@ internal static class FederationKeyRotationEndpoints
                 "federation-peer.key-rotation-staged", "federation-peer", peer.InstanceId, now));
         }
         var receipt = await SignedReceipt(localId, peer.InstanceId, request.RotationId,
-            "staged", protection, db, ct);
+            "staged", request.SignatureAlgorithm, protection, db, ct);
         try { await db.SaveChangesAsync(ct); }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException
             { SqlState: PostgresErrorCodes.UniqueViolation })
@@ -100,6 +102,8 @@ internal static class FederationKeyRotationEndpoints
         var peer = await db.FederationPeers.SingleOrDefaultAsync(row =>
             row.InstanceId == request.SenderInstanceId && row.IsActive, ct);
         if (peer is null) return Results.Unauthorized();
+        if (!FederationSignatureProtocol.Accepts(peer.SignatureAlgorithm, request.SignatureAlgorithm))
+            return Results.Unauthorized();
         var replay = peer.PendingKeyRotationId is null &&
             peer.LastCompletedKeyRotationId == request.RotationId;
         var encoded = replay ? peer.PinnedPublicKeySpki : peer.PendingPinnedPublicKeySpki;
@@ -107,7 +111,8 @@ internal static class FederationKeyRotationEndpoints
             FederationPublicKey.TryParse(encoded, out var key, out _) &&
             FederationKeyRotationProtocol.Verify(key,
                 FederationKeyRotationProtocol.CompleteBytes(request.SenderInstanceId,
-                    localId, request.RotationId, request.Timestamp, request.Nonce),
+                    localId, request.RotationId, request.Timestamp, request.Nonce,
+                    request.SignatureAlgorithm),
                 request.Signature))
         {
             db.FederationProbeNonces.Add(new FederationProbeNonce(peer.InstanceId, request.Nonce, now));
@@ -118,7 +123,7 @@ internal static class FederationKeyRotationEndpoints
                     "federation-peer.key-rotation-completed", "federation-peer", peer.InstanceId, now));
             }
             var receipt = await SignedReceipt(localId, peer.InstanceId, request.RotationId,
-                "completed", protection, db, ct);
+                "completed", request.SignatureAlgorithm, protection, db, ct);
             try { await db.SaveChangesAsync(ct); }
             catch (DbUpdateException ex) when (ex.InnerException is PostgresException
                 { SqlState: PostgresErrorCodes.UniqueViolation })
@@ -135,7 +140,8 @@ internal static class FederationKeyRotationEndpoints
     }
 
     private static async Task<FederationKeyRotationReceipt> SignedReceipt(Guid sender,
-        Guid recipient, Guid rotationId, string phase, IDataProtectionProvider protection,
+        Guid recipient, Guid rotationId, string phase, string? signatureAlgorithm,
+        IDataProtectionProvider protection,
         FylkrenDbContext db, CancellationToken ct)
     {
         var identity = await db.FederationSigningIdentities.AsNoTracking()
@@ -145,9 +151,9 @@ internal static class FederationKeyRotationEndpoints
         using var key = FederationSigningKeys.Load(identity, protection);
         var signature = FederationKeyRotationProtocol.Sign(key,
             FederationKeyRotationProtocol.ReceiptBytes(sender, recipient, rotationId,
-                phase, timestamp, nonce));
+                phase, timestamp, nonce, signatureAlgorithm));
         return new FederationKeyRotationReceipt(sender, recipient, rotationId,
-            phase, timestamp, nonce, signature);
+            phase, timestamp, nonce, signature, signatureAlgorithm);
     }
 
     private static bool Fresh(long timestamp, DateTimeOffset now) =>

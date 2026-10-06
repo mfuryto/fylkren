@@ -32,6 +32,8 @@ export type FederationPeer = {
   keyRotationPending: boolean;
   pendingKeyRotationId: string | null;
   keyRotationStagedAt: string | null;
+  negotiatedProtocolVersion: number;
+  signatureAlgorithm: string | null;
   routable: false;
 };
 

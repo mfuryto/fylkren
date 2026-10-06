@@ -8,6 +8,9 @@ const machineIdentity = read('apps/api/Platform/ApiMachineIdentity.cs');
 const machineAuth = read('apps/api/Platform/ApiMachineAuthentication.cs');
 const federationIdentity = read('apps/api/Federation/FederationIdentityEndpoints.cs');
 const federationProtocol = read('apps/api/Federation/FederationWorkProtocol.cs');
+const federationSignature = read('apps/api/Federation/FederationSignatureProtocol.cs');
+const federationCapability = read('apps/api/Federation/FederationCapabilityProtocol.cs');
+const federationPeer = read('apps/api/Federation/FederationPeer.cs');
 const license = read('apps/api/Licensing/LicenseService.cs');
 const licenseEndpoints = read('apps/api/Licensing/LicenseEndpoints.cs');
 const installedLicense = read('apps/api/Licensing/InstalledLicense.cs');
@@ -30,8 +33,14 @@ assert.match(machineIdentity, /SecretAlgorithm[\s\S]*SecretHashVersion[\s\S]*Sec
   'versioned machine verifier metadata');
 assert.match(machineAuth, /LegacyAlgorithm[\s\S]*CurrentAlgorithm[\s\S]*NeedsUpgrade[\s\S]*Upgrade/,
   'dual-read/new-write machine verifier migration');
-assert.doesNotMatch(federationProtocol.split('internal sealed record FederationWorkEnvelope')[1].split(';')[0],
-  /Algorithm|SignatureVersion/, 'Federation envelope now negotiates a signature algorithm; reassess SV-101');
+assert.match(federationSignature, /CurrentAlgorithm = "ecdsa-p256-sha256-p1363"[\s\S]*Accepts/,
+  'federation signature allowlist and downgrade check');
+assert.match(federationCapability, /LegacyProtocolVersion = 1[\s\S]*ProtocolVersion = 2[\s\S]*SignatureAlgorithm/,
+  'dual-version federation capability negotiation');
+assert.match(federationPeer, /NegotiatedProtocolVersion[\s\S]*RecordProtocol[\s\S]*NegotiatedProtocolVersion < 2/,
+  'persistent no-downgrade peer state');
+assert.match(federationProtocol.split('internal sealed record FederationWorkEnvelope')[1].split(';')[0],
+  /SignatureAlgorithm/, 'versioned federation work envelope');
 for (const store of ['smtp', 'identity-provider', 'totp', 'webhook', 'federation'])
   assert.match(reprotection, new RegExp(`"${store}"`), `${store} protected-value inventory`);
 assert.match(reprotection, /MaximumBatchSize = 100[\s\S]*FOR UPDATE[\s\S]*RecordBatch/,
@@ -44,11 +53,11 @@ assert.match(reprotectionEndpoints, /BackupReference[\s\S]*RollbackReference/,
   'backup and rollback references');
 
 console.log(JSON.stringify({
-  cryptographicAgilityAssessment: 'finding',
-  finding: 'SV-101',
-  replacementCapabilities: 10,
+  cryptographicAgilityAssessment: 'passed',
+  closedFinding: 'SV-101',
+  replacementCapabilities: 11,
   versionedMachineVerifier: true,
   versionedLicenseSignature: true,
-  versionedFederationSignature: false,
+  versionedFederationSignature: true,
   persistentReprotectionOperation: true,
 }));

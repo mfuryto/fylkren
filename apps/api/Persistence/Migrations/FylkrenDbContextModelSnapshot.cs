@@ -963,12 +963,24 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("character varying(512)")
                         .HasColumnName("pinned_public_key_spki");
 
+                    b.Property<int>("NegotiatedProtocolVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("negotiated_protocol_version");
+
+                    b.Property<string>("SignatureAlgorithm")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("signature_algorithm");
+
                     b.HasKey("InstanceId");
 
                     b.HasIndex("PinnedPublicKeySpki")
                         .IsUnique();
 
-                    b.ToTable("federation_peers", (string)null);
+                    b.ToTable("federation_peers", t =>
+                        {
+                            t.HasCheckConstraint("CK_federation_peers_signature_protocol", "(negotiated_protocol_version = 1 AND signature_algorithm IS NULL) OR (negotiated_protocol_version = 2 AND signature_algorithm = 'ecdsa-p256-sha256-p1363')");
+                        });
                 });
 
             modelBuilder.Entity("Fylkren.Api.Federation.FederationProbeNonce", b =>

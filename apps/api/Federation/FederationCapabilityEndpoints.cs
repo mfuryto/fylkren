@@ -32,7 +32,7 @@ internal static class FederationCapabilityEndpoints
             .Select(row => row.InstanceId).SingleAsync(ct);
         if (request.RecipientInstanceId != localId || request.SenderInstanceId == localId)
             return Results.BadRequest(new { error = "invalid_recipient" });
-        var peer = await db.FederationPeers.AsNoTracking().SingleOrDefaultAsync(row =>
+        var peer = await db.FederationPeers.SingleOrDefaultAsync(row =>
             row.InstanceId == request.SenderInstanceId && row.IsActive &&
             row.LastProofAt != null, ct);
         if (peer?.PinnedPublicKeySpki is null ||
@@ -40,8 +40,11 @@ internal static class FederationCapabilityEndpoints
             !FederationProbeProtocol.Verify(peerKey,
                 FederationCapabilityProtocol.RequestBytes(request), request.Signature))
             return Results.Unauthorized();
-        if (request.MinimumProtocolVersion > FederationCapabilityProtocol.ProtocolVersion ||
-            request.MaximumProtocolVersion < FederationCapabilityProtocol.ProtocolVersion ||
+        var selectedProtocol = request.SignatureAlgorithm is null
+            ? FederationCapabilityProtocol.LegacyProtocolVersion
+            : FederationCapabilityProtocol.ProtocolVersion;
+        if (request.MinimumProtocolVersion > selectedProtocol ||
+            request.MaximumProtocolVersion < selectedProtocol ||
             !request.WorkSchemaVersions.Contains(FederationWorkProtocol.SchemaVersion))
             return Results.Conflict(new { error = "federation_protocol_incompatible" });
         var messageTypes = FederationCapabilityProtocol.WorkMessageTypes
@@ -55,12 +58,13 @@ internal static class FederationCapabilityEndpoints
             return Results.Problem(statusCode: 503, title: "The federation key is missing.");
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         var unsigned = new FederationCapabilityResponse(localId, peer.InstanceId,
-            FederationCapabilityProtocol.ProtocolVersion, FederationWorkProtocol.SchemaVersion,
-            messageTypes, timestamp, request.Nonce, string.Empty);
+            selectedProtocol, FederationWorkProtocol.SchemaVersion,
+            messageTypes, timestamp, request.Nonce, string.Empty, request.SignatureAlgorithm);
         using var key = FederationSigningKeys.Load(identity, protection);
         var response = unsigned with { Signature = FederationProbeProtocol.Sign(key,
             FederationCapabilityProtocol.ResponseBytes(unsigned)) };
         db.FederationProbeNonces.Add(new FederationProbeNonce(peer.InstanceId, request.Nonce, now));
+        peer.RecordProtocol(selectedProtocol, request.SignatureAlgorithm);
         try { await db.SaveChangesAsync(ct); }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException
             { SqlState: PostgresErrorCodes.UniqueViolation })

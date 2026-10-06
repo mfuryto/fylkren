@@ -22,7 +22,11 @@ internal static class PlatformModelConfiguration
         instance.HasIndex(value => value.InstanceId).IsUnique();
 
         var peer = modelBuilder.Entity<FederationPeer>();
-        peer.ToTable("federation_peers"); peer.HasKey(value => value.InstanceId);
+        peer.ToTable("federation_peers", table => table.HasCheckConstraint(
+            "CK_federation_peers_signature_protocol",
+            "(negotiated_protocol_version = 1 AND signature_algorithm IS NULL) OR " +
+            "(negotiated_protocol_version = 2 AND signature_algorithm = 'ecdsa-p256-sha256-p1363')"));
+        peer.HasKey(value => value.InstanceId);
         peer.Property(value => value.InstanceId).HasColumnName("instance_id").ValueGeneratedNever();
         peer.Property(value => value.Name).HasColumnName("name").HasMaxLength(120).IsRequired();
         peer.Property(value => value.BaseUrl).HasColumnName("base_url").HasMaxLength(2048).IsRequired();
@@ -34,6 +38,8 @@ internal static class PlatformModelConfiguration
         peer.Property(value => value.KeyRotationStagedAt).HasColumnName("key_rotation_staged_at");
         peer.Property(value => value.LastCompletedKeyRotationId).HasColumnName("last_completed_key_rotation_id");
         peer.Property(value => value.LastProofAt).HasColumnName("last_proof_at");
+        peer.Property(value => value.NegotiatedProtocolVersion).HasColumnName("negotiated_protocol_version").IsRequired();
+        peer.Property(value => value.SignatureAlgorithm).HasColumnName("signature_algorithm").HasMaxLength(80);
         peer.HasIndex(value => value.PinnedPublicKeySpki).IsUnique();
 
         var signing = modelBuilder.Entity<FederationSigningIdentity>();

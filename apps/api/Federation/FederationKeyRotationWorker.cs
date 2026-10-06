@@ -65,12 +65,13 @@ internal sealed class FederationKeyRotationWorker(IServiceScopeFactory scopes,
             var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             var nonce = Guid.NewGuid();
             var bytes = FederationKeyRotationProtocol.StageBytes(localId, peer.InstanceId,
-                rotationId, timestamp, nonce, currentFingerprint, newFingerprint);
+                rotationId, timestamp, nonce, currentFingerprint, newFingerprint,
+                peer.SignatureAlgorithm);
             var request = new FederationKeyRotationStageRequest(localId, peer.InstanceId,
                 rotationId, timestamp, nonce, identity.PublicKeySpki,
                 identity.PendingPublicKeySpki,
                 FederationKeyRotationProtocol.Sign(currentKey, bytes),
-                FederationKeyRotationProtocol.Sign(pendingKey, bytes));
+                FederationKeyRotationProtocol.Sign(pendingKey, bytes), peer.SignatureAlgorithm);
             if (!await SendAndVerify(peer, localId, rotationId, "staged",
                     "api/federation/v1/key-rotation/stage", request, ct)) return;
         }
@@ -104,7 +105,8 @@ internal sealed class FederationKeyRotationWorker(IServiceScopeFactory scopes,
             var request = new FederationKeyRotationCompleteRequest(localId, peer.InstanceId,
                 rotationId, timestamp, nonce, FederationKeyRotationProtocol.Sign(key,
                     FederationKeyRotationProtocol.CompleteBytes(localId, peer.InstanceId,
-                        rotationId, timestamp, nonce)));
+                        rotationId, timestamp, nonce, peer.SignatureAlgorithm)),
+                peer.SignatureAlgorithm);
             if (!await SendAndVerify(peer, localId, rotationId, "completed",
                     "api/federation/v1/key-rotation/complete", request, ct)) return;
         }
@@ -150,10 +152,12 @@ internal sealed class FederationKeyRotationWorker(IServiceScopeFactory scopes,
             if (receipt is null || receipt.SenderInstanceId != peer.InstanceId ||
                 receipt.RecipientInstanceId != localId || receipt.RotationId != rotationId ||
                 receipt.Phase != phase || receipt.Nonce == Guid.Empty ||
+                receipt.SignatureAlgorithm != peer.SignatureAlgorithm ||
                 receipt.Timestamp < now - 300 || receipt.Timestamp > now + 300 ||
                 !FederationKeyRotationProtocol.Verify(peerKey,
                     FederationKeyRotationProtocol.ReceiptBytes(peer.InstanceId, localId,
-                        rotationId, phase, receipt.Timestamp, receipt.Nonce), receipt.Signature))
+                        rotationId, phase, receipt.Timestamp, receipt.Nonce,
+                        peer.SignatureAlgorithm), receipt.Signature))
             {
                 logger.LogWarning("Federation key rotation {RotationId} received an invalid receipt from {PeerId}.",
                     rotationId, peer.InstanceId);
@@ -190,8 +194,9 @@ internal sealed class FederationKeyRotationWorker(IServiceScopeFactory scopes,
         db.FederationPeers.AsNoTracking().Where(row => row.IsActive)
             .OrderBy(row => row.InstanceId)
             .Select(row => new PeerTarget(row.InstanceId, row.BaseUrl,
-                row.PinnedPublicKeySpki, row.LastProofAt)).ToListAsync(ct);
+                row.PinnedPublicKeySpki, row.LastProofAt, row.SignatureAlgorithm)).ToListAsync(ct);
 
     private sealed record PeerTarget(Guid InstanceId, string BaseUrl,
-        string? PinnedPublicKeySpki, DateTimeOffset? LastProofAt);
+        string? PinnedPublicKeySpki, DateTimeOffset? LastProofAt,
+        string? SignatureAlgorithm);
 }

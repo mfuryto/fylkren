@@ -41,10 +41,12 @@ internal static class FederationGrantCheckEndpoints
         var peer = await db.FederationPeers.AsNoTracking().SingleOrDefaultAsync(value =>
             value.InstanceId == request.SenderInstanceId && value.IsActive, ct);
         if (peer?.PinnedPublicKeySpki is null || peer.LastProofAt is null ||
+            !FederationSignatureProtocol.Accepts(peer.SignatureAlgorithm, request.SignatureAlgorithm) ||
             !FederationPublicKey.TryParse(peer.PinnedPublicKeySpki, out var peerKey, out _) ||
             !FederationProbeProtocol.Verify(peerKey,
                 FederationGrantCheckProtocol.RequestBytes(request.SenderInstanceId, localId, request.Timestamp,
-                    request.Nonce, request.SourceSiteId, request.DestinationSiteId), request.Signature))
+                    request.Nonce, request.SourceSiteId, request.DestinationSiteId,
+                    request.SignatureAlgorithm), request.Signature))
             return Results.Unauthorized();
         var localKey = await db.FederationSigningIdentities.AsNoTracking()
             .SingleOrDefaultAsync(row => row.Key == 1, ct);
@@ -60,7 +62,8 @@ internal static class FederationGrantCheckEndpoints
             using var key = FederationSigningKeys.Load(localKey, protection);
             signature = FederationProbeProtocol.Sign(key,
                 FederationGrantCheckProtocol.ResponseBytes(localId, peer.InstanceId, responseTimestamp,
-                    request.Nonce, request.SourceSiteId, request.DestinationSiteId, allowed, grantRevision));
+                    request.Nonce, request.SourceSiteId, request.DestinationSiteId, allowed,
+                    grantRevision, request.SignatureAlgorithm));
         }
         catch (CryptographicException)
         {
@@ -74,7 +77,8 @@ internal static class FederationGrantCheckEndpoints
         }
         return Results.Ok(new FederationGrantCheckResponse(FederationGrantCheckProtocol.SchemaVersion,
             localId, peer.InstanceId, responseTimestamp, request.Nonce, request.SourceSiteId,
-            request.DestinationSiteId, allowed, grantRevision, signature));
+            request.DestinationSiteId, allowed, grantRevision, signature,
+            request.SignatureAlgorithm));
     }
 
     private static async Task<IResult> Verify(Guid instanceId, Guid sourceSiteId, Guid destinationSiteId,
@@ -105,13 +109,14 @@ internal static class FederationGrantCheckEndpoints
             .Select(row => row.InstanceId).SingleAsync(ct);
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         var nonce = Guid.NewGuid();
+        var signatureAlgorithm = peer.SignatureAlgorithm;
         string signature;
         try
         {
             using var key = FederationSigningKeys.Load(identity, protection);
             signature = FederationProbeProtocol.Sign(key,
                 FederationGrantCheckProtocol.RequestBytes(localId, instanceId, timestamp, nonce,
-                    sourceSiteId, destinationSiteId));
+                    sourceSiteId, destinationSiteId, signatureAlgorithm));
         }
         catch (CryptographicException)
         {
@@ -123,7 +128,8 @@ internal static class FederationGrantCheckEndpoints
             using var outgoing = new HttpRequestMessage(HttpMethod.Post, target)
             {
                 Content = JsonContent.Create(new FederationGrantCheckRequest(FederationGrantCheckProtocol.SchemaVersion,
-                    localId, instanceId, timestamp, nonce, sourceSiteId, destinationSiteId, signature))
+                    localId, instanceId, timestamp, nonce, sourceSiteId, destinationSiteId,
+                    signature, signatureAlgorithm))
             };
             using var response = await clients.CreateClient("federation-probe")
                 .SendAsync(outgoing, HttpCompletionOption.ResponseHeadersRead, ct);
@@ -136,10 +142,11 @@ internal static class FederationGrantCheckEndpoints
                 received.SenderInstanceId != instanceId || received.RecipientInstanceId != localId ||
                 received.Nonce != nonce || received.SourceSiteId != sourceSiteId ||
                 received.DestinationSiteId != destinationSiteId || !Fresh(received.Timestamp, now) ||
+                received.SignatureAlgorithm != signatureAlgorithm ||
                 !FederationGrantCheckProtocol.ValidDecision(received.Allowed, received.GrantRevision) ||
                 !FederationProbeProtocol.Verify(peerKey, FederationGrantCheckProtocol.ResponseBytes(instanceId,
                     localId, received.Timestamp, nonce, sourceSiteId, destinationSiteId,
-                    received.Allowed, received.GrantRevision), received.Signature))
+                    received.Allowed, received.GrantRevision, signatureAlgorithm), received.Signature))
                 return Results.Problem(statusCode: 502, title: "The peer's site grant could not be verified.");
             var audit = new AuditEvent(Guid.NewGuid(), null, actor, "federation-site-grant.verified",
                 "federation-site-grant", localGrant.Id, now);

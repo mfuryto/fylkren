@@ -50,9 +50,11 @@ internal static class FederationCatalogEndpoints
         var peer = await db.FederationPeers.AsNoTracking().SingleOrDefaultAsync(value =>
             value.InstanceId == request.SenderInstanceId && value.IsActive, ct);
         if (peer?.PinnedPublicKeySpki is null ||
+            !FederationSignatureProtocol.Accepts(peer.SignatureAlgorithm, request.SignatureAlgorithm) ||
             !FederationPublicKey.TryParse(peer.PinnedPublicKeySpki, out var peerKey, out _) ||
             !FederationProbeProtocol.Verify(peerKey,
-                FederationCatalogProtocol.RequestBytes(request.SenderInstanceId, localId, request.Timestamp, request.Nonce),
+                FederationCatalogProtocol.RequestBytes(request.SenderInstanceId, localId,
+                    request.Timestamp, request.Nonce, request.SignatureAlgorithm),
                 request.Signature)) return Results.Unauthorized();
         var localKey = await db.FederationSigningIdentities.AsNoTracking().SingleOrDefaultAsync(row => row.Key == 1, ct);
         if (localKey is null) return Results.Problem(statusCode: 503, title: "The federation key is missing.");
@@ -71,7 +73,8 @@ internal static class FederationCatalogEndpoints
         {
             using var key = FederationSigningKeys.Load(localKey, protection);
             signature = FederationProbeProtocol.Sign(key,
-                FederationCatalogProtocol.ResponseBytes(localId, peer.InstanceId, timestamp, request.Nonce, sites));
+                FederationCatalogProtocol.ResponseBytes(localId, peer.InstanceId, timestamp,
+                    request.Nonce, sites, request.SignatureAlgorithm));
         }
         catch (CryptographicException)
         {
@@ -84,7 +87,8 @@ internal static class FederationCatalogEndpoints
             return Results.Conflict(new { error = "replayed_catalog_request" });
         }
         return Results.Ok(new FederationCatalogResponse(FederationCatalogProtocol.SchemaVersion,
-            localId, peer.InstanceId, timestamp, request.Nonce, sites, signature));
+            localId, peer.InstanceId, timestamp, request.Nonce, sites, signature,
+            request.SignatureAlgorithm));
     }
 
     private static async Task<IResult> Sync(Guid instanceId, ClaimsPrincipal user, IAntiforgery antiforgery,
@@ -104,12 +108,14 @@ internal static class FederationCatalogEndpoints
             .Select(row => row.InstanceId).SingleAsync(ct);
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         var nonce = Guid.NewGuid();
+        var signatureAlgorithm = peer.SignatureAlgorithm;
         string signature;
         try
         {
             using var key = FederationSigningKeys.Load(identity, protection);
             signature = FederationProbeProtocol.Sign(key,
-                FederationCatalogProtocol.RequestBytes(localId, instanceId, timestamp, nonce));
+                FederationCatalogProtocol.RequestBytes(localId, instanceId, timestamp, nonce,
+                    signatureAlgorithm));
         }
         catch (CryptographicException)
         {
@@ -121,7 +127,7 @@ internal static class FederationCatalogEndpoints
             using var outgoing = new HttpRequestMessage(HttpMethod.Post, target)
             {
                 Content = JsonContent.Create(new FederationCatalogRequest(FederationCatalogProtocol.SchemaVersion,
-                    localId, instanceId, timestamp, nonce, signature))
+                    localId, instanceId, timestamp, nonce, signature, signatureAlgorithm))
             };
             using var response = await clients.CreateClient("federation-probe")
                 .SendAsync(outgoing, HttpCompletionOption.ResponseHeadersRead, ct);
@@ -133,9 +139,11 @@ internal static class FederationCatalogEndpoints
             if (catalog is null || catalog.SchemaVersion != FederationCatalogProtocol.SchemaVersion ||
                 catalog.SenderInstanceId != instanceId || catalog.RecipientInstanceId != localId ||
                 catalog.Nonce != nonce || !Fresh(catalog.Timestamp, now) ||
+                catalog.SignatureAlgorithm != signatureAlgorithm ||
                 !FederationCatalogProtocol.ValidSites(catalog.Sites) ||
                 !FederationProbeProtocol.Verify(peerKey, FederationCatalogProtocol.ResponseBytes(instanceId,
-                    localId, catalog.Timestamp, nonce, catalog.Sites), catalog.Signature))
+                    localId, catalog.Timestamp, nonce, catalog.Sites, signatureAlgorithm),
+                    catalog.Signature))
                 return Results.Problem(statusCode: 502, title: "The site catalogue signature or contents could not be verified.");
             var known = await db.FederationRemoteSites.Where(site => site.InstanceId == instanceId)
                 .ToDictionaryAsync(site => site.SiteId, ct);

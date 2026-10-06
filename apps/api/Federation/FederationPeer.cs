@@ -28,11 +28,14 @@ internal sealed class FederationPeer
     public DateTimeOffset? KeyRotationStagedAt { get; private set; }
     public Guid? LastCompletedKeyRotationId { get; private set; }
     public DateTimeOffset? LastProofAt { get; private set; }
+    public int NegotiatedProtocolVersion { get; private set; } = 1;
+    public string? SignatureAlgorithm { get; private set; }
 
     internal void Update(string name, string baseUrl)
     {
         ValidateDetails(name, baseUrl);
-        if (BaseUrl != baseUrl) LastProofAt = null;
+        if (BaseUrl != baseUrl)
+            LastProofAt = null;
         Name = name;
         BaseUrl = baseUrl;
     }
@@ -47,6 +50,19 @@ internal sealed class FederationPeer
     }
 
     internal void RecordProof(DateTimeOffset at) => LastProofAt = at;
+
+    internal void RecordProtocol(int version, string? signatureAlgorithm)
+    {
+        if (version == 1 && signatureAlgorithm is null)
+        {
+            if (NegotiatedProtocolVersion < 2) NegotiatedProtocolVersion = 1;
+            return;
+        }
+        if (version != 2 || signatureAlgorithm != FederationSignatureProtocol.CurrentAlgorithm)
+            throw new InvalidOperationException("The federation signature protocol is unsupported.");
+        NegotiatedProtocolVersion = version;
+        SignatureAlgorithm = signatureAlgorithm;
+    }
 
     internal void StageKeyRotation(Guid rotationId, string currentPublicKeySpki,
         string newPublicKeySpki, DateTimeOffset at)

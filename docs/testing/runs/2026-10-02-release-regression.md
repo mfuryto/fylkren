@@ -2089,3 +2089,20 @@ pnpm check:docs
 ```
 
 The focused signature test passes legacy read, current versioned format, signed algorithm binding and downgrade/unknown-algorithm rejection. The disposable PostgreSQL test upgrades a populated legacy license without changing its payload, signature, actor or time and passes a down/up migration cycle. API and foundation builds complete with zero warnings. SV-101 remains open only for federation signature identification, negotiation and retirement. Production was not changed.
+
+### Federation signature agility closure — 2026-10-06
+
+This closes the final federation portion of SV-101 and passes ASVS 11.2.2. A peer begins in the legacy-compatible v1 state. A signed capability exchange then selects protocol v2 with `ecdsa-p256-sha256-p1363`; both peers persist the selection. Every signed federation family binds the algorithm in its v2 canonical bytes: identity discovery, probe, capability, catalog, reciprocal grant check, key-rotation stage/completion/receipt, work envelope and work receipt. Once v2 is recorded, a v1 message cannot silently downgrade that peer. A deliberate binary rollback must use the matching schema rollback or controlled peer-state reset to reopen v1 before starting the old binary.
+
+```sh
+dotnet build apps/api/Fylkren.Api.csproj --no-restore
+dotnet build tests/foundations/Fylkren.FoundationTests.csproj --no-restore
+dotnet run --project tools/federation-protocol-check/FederationProtocolCheck.csproj --no-build
+node tools/run-foundation-tests.mjs --federation-agility-integration-only
+node tools/run-foundation-tests.mjs --model-diff-only
+node tools/run-federation-pair.mjs
+node tools/test-cryptographic-agility-assessment.mjs
+pnpm check:docs
+```
+
+The protocol test passes 127 canonical-message assertions, including signed v1/v2 offers, algorithm binding, downgrade rejection and unknown-algorithm rejection. The focused domain test proves legacy start, durable v2 selection, no silent fallback and preservation across peer metadata changes. The disposable PostgreSQL test preserves a populated v1 peer, enforces consistent protocol/algorithm pairs and completes down/up rollback in the safe v1 state. EF reports no pending model changes. The current-image two-instance Production flow delivers ordinary federated work and return activity; both databases record protocol 2 with the exact allowlisted algorithm. All disposable data, keys, containers, volumes and networks were removed. Production was not changed.

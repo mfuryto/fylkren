@@ -10,7 +10,8 @@ namespace Fylkren.Api.Federation;
 internal sealed record FederationWorkEnvelope(int SchemaVersion, Guid MessageId, string MessageType,
     Guid SenderInstanceId, Guid RecipientInstanceId, Guid SourceSiteId, Guid DestinationSiteId,
     Guid OriginInstanceId, Guid OriginSiteId, Guid OriginResourceId, Guid? CounterpartWorkItemId,
-    Guid? CorrelationId, Guid? CausationId, long Timestamp, Guid Nonce, string PayloadJson, string? Signature);
+    Guid? CorrelationId, Guid? CausationId, long Timestamp, Guid Nonce, string PayloadJson,
+    string? Signature, string? SignatureAlgorithm = null);
 
 internal static class FederationWorkProtocol
 {
@@ -27,14 +28,16 @@ internal static class FederationWorkProtocol
         !string.IsNullOrWhiteSpace(value.MessageType) && value.MessageType.Length <= 80 &&
         value.MessageType.All(ch => ch is >= 'a' and <= 'z' or >= '0' and <= '9' or '.') &&
         value.PayloadJson is { Length: > 0 } &&
+        FederationSignatureProtocol.IsSupported(value.SignatureAlgorithm) &&
         Encoding.UTF8.GetByteCount(value.PayloadJson) <= MaxPayloadBytes;
 
     internal static byte[] SignedBytes(FederationWorkEnvelope value)
     {
         if (!ValidEnvelope(value)) throw new ArgumentException("Invalid federation work envelope.", nameof(value));
         var payloadHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(value.PayloadJson)));
-        return Encoding.ASCII.GetBytes(string.Join('\n',
-            "fylkren-federation-work-envelope-v1",
+        return Encoding.ASCII.GetBytes(string.Join('\n', new[]
+        {
+            FederationSignatureProtocol.Purpose("fylkren-federation-work-envelope-v1", value.SignatureAlgorithm),
             value.SchemaVersion.ToString(CultureInfo.InvariantCulture),
             value.MessageId.ToString("N"), value.MessageType,
             value.SenderInstanceId.ToString("N"), value.RecipientInstanceId.ToString("N"),
@@ -43,6 +46,7 @@ internal static class FederationWorkProtocol
             value.OriginResourceId.ToString("N"), value.CounterpartWorkItemId?.ToString("N") ?? string.Empty,
             value.CorrelationId?.ToString("N") ?? string.Empty,
             value.CausationId?.ToString("N") ?? string.Empty,
-            value.Timestamp.ToString(CultureInfo.InvariantCulture), value.Nonce.ToString("N"), payloadHash));
+            value.Timestamp.ToString(CultureInfo.InvariantCulture), value.Nonce.ToString("N"), payloadHash
+        }.Concat(FederationSignatureProtocol.Bind(value.SignatureAlgorithm))));
     }
 }

@@ -10,6 +10,7 @@ const composeFile = 'tools/e2e/federation-pair.compose.yaml';
 const currentImage = 'fylkren-federation-pair-test-api:local';
 const oldCommit = '152d0f2';
 const oldImage = `fylkren-federation-pair-test-api:mixed-${oldCommit}`;
+const FederationSignatureAlgorithm = 'ecdsa-p256-sha256-p1363';
 const outboundOnly = process.argv.includes('--outbound-only');
 const operationalOnly = process.argv.includes('--operational-only');
 const loadOnly = process.argv.includes('--load-only');
@@ -17,7 +18,8 @@ const restoreOnly = process.argv.includes('--restore-only');
 const retentionOnly = process.argv.includes('--retention-only');
 const productionBoundaryOnly = process.argv.includes('--production-boundary-only');
 const messageBoundaryOnly = process.argv.includes('--message-boundary-only');
-if ([loadOnly, restoreOnly, retentionOnly, productionBoundaryOnly, operationalOnly, outboundOnly, messageBoundaryOnly].filter(Boolean).length > 1)
+if ([loadOnly, restoreOnly, retentionOnly, productionBoundaryOnly, operationalOnly, outboundOnly,
+  messageBoundaryOnly].filter(Boolean).length > 1)
   throw new Error('Federation pair modes are mutually exclusive');
 const project = `fylkren-pair-${randomBytes(4).toString('hex')}`;
 const temporary = mkdtempSync(join(tmpdir(), 'fylkren-federation-pair-'));
@@ -29,7 +31,8 @@ const env = {
   FYLKREN_PAIR_ISSUER_PUBLIC_KEY: publicKey.export({ type: 'spki', format: 'der' }).toString('base64'),
   FYLKREN_PAIR_API_B_IMAGE: currentImage,
 };
-const productionBoundary = productionBoundaryOnly || messageBoundaryOnly || (!loadOnly && !restoreOnly && !retentionOnly && !operationalOnly && !outboundOnly);
+const productionBoundary = productionBoundaryOnly || messageBoundaryOnly || (!loadOnly && !restoreOnly &&
+  !retentionOnly && !operationalOnly && !outboundOnly);
 if (productionBoundary) env.FYLKREN_PAIR_ASPNETCORE_ENVIRONMENT = 'Production';
 
 function command(executable, args, options = {}) {
@@ -800,6 +803,15 @@ async function runProductionBoundaryPair() {
   assert.equal(enabledB.enabled, true);
   const delivered = await assertQueuedOutboundDelivery(a, b, leaderA);
   assert.ok(delivered.originWorkItemId);
+  const expectedSignatureProtocol = `2:${FederationSignatureAlgorithm}`;
+  assert.equal(sqlValue('postgres-a', `SELECT negotiated_protocol_version || ':' ||
+    COALESCE(signature_algorithm, '') FROM federation_peers
+    WHERE instance_id = '${b.instanceId}'`), expectedSignatureProtocol,
+  'Sender did not persist the versioned federation signature protocol');
+  assert.equal(sqlValue('postgres-b', `SELECT negotiated_protocol_version || ':' ||
+    COALESCE(signature_algorithm, '') FROM federation_peers
+    WHERE instance_id = '${a.instanceId}'`), expectedSignatureProtocol,
+  'Receiver did not persist the versioned federation signature protocol');
   const leaderB = await makeSiteLeader(b, 'https://localhost:18444');
   await assertOperationalReturnPath(a, b, delivered, leaderA, leaderB);
   assert.equal(sqlValue('postgres-a', `SELECT COUNT(*) FROM audit_events
@@ -818,7 +830,8 @@ async function runProductionBoundaryPair() {
   process.stdout.write(`${JSON.stringify({ federationProductionBoundary: 'passed',
     environment: 'Production', administrativeFoundationAvailable: true,
     routingDisabledByDefault: true, activatedThroughPlatformApi: true,
-    productionWorkDelivered: true, ordinaryReportReturned: true, privateLearningExcludedFromFederation: true, deactivationVerified: true,
+    productionWorkDelivered: true, versionedSignatureProtocol: true,
+    ordinaryReportReturned: true, privateLearningExcludedFromFederation: true, deactivationVerified: true,
     peerWorkRoutesGatedWhileDisabled: peerWorkRoutes.length,
     syntheticRoutesAbsent: syntheticRoutes.length,
     remoteRecipientSelectionAbsentBeforeActivation: true,
@@ -959,7 +972,7 @@ async function assertProbeReplayRejected(receiver) {
   const capabilityCanonical = [
     'fylkren-federation-capability-request-v1',
     senderInstanceId.replaceAll('-', ''), receiver.instanceId.replaceAll('-', ''),
-    '2', '2', '1', capabilityTypes.join(','), String(capabilityTimestamp),
+    '1', '1', '2', capabilityTypes.join(','), String(capabilityTimestamp),
     capabilityNonce.replaceAll('-', ''),
   ].join('\n');
   const capabilitySignature = sign('sha256', Buffer.from(capabilityCanonical, 'ascii'), {
@@ -967,8 +980,8 @@ async function assertProbeReplayRejected(receiver) {
   }).toString('base64');
   const incompatible = await expectStatus(receiver.api.post('/api/federation/v1/capabilities', {
     senderInstanceId, recipientInstanceId: receiver.instanceId,
-    minimumProtocolVersion: 2, maximumProtocolVersion: 2,
-    workSchemaVersions: [1], workMessageTypes: capabilityTypes,
+    minimumProtocolVersion: 1, maximumProtocolVersion: 1,
+    workSchemaVersions: [2], workMessageTypes: capabilityTypes,
     timestamp: capabilityTimestamp, nonce: capabilityNonce, signature: capabilitySignature,
   }), 409, 'reject incompatible signed capability offer');
   assert.equal(incompatible.error, 'federation_protocol_incompatible');
@@ -1267,6 +1280,12 @@ async function assertMixedVersionUpgradeDowngrade(a, b, aPeer, bPeer) {
   await expectStatus(b.api.put(bOutbound, { isActive: true }), 200,
     'activate current B outbound grant for mixed-version delivery');
 
+  // A binary rollback must deliberately reopen the v1 compatibility window.
+  // A negotiated v2 peer otherwise rejects an unannounced protocol downgrade.
+  sql('postgres-a', `UPDATE federation_peers SET negotiated_protocol_version = 1,
+    signature_algorithm = NULL WHERE instance_id = '${b.instanceId}'`);
+  sql('postgres-b', `UPDATE federation_peers SET negotiated_protocol_version = 1,
+    signature_algorithm = NULL WHERE instance_id = '${a.instanceId}'`);
   switchReceiverImage(oldImage);
   await assertVersionedDelivery(a, b, 'postgres-a', 'postgres-b',
     `current-to-${oldCommit}`);

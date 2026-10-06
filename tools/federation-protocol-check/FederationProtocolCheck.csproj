@@ -7,6 +7,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../apps/api/Federation/FederationProbeProtocol.cs" Link="FederationProbeProtocol.cs" />
+    <Compile Include="../../apps/api/Federation/FederationSignatureProtocol.cs" Link="FederationSignatureProtocol.cs" />
+    <Compile Include="../../apps/api/NumericBounds.cs" Link="NumericBounds.cs" />
     <Compile Include="../../apps/api/Federation/FederationPublicKey.cs" Link="FederationPublicKey.cs" />
     <Compile Include="../../apps/api/Federation/FederationProbeContracts.cs" Link="FederationProbeContracts.cs" />
     <Compile Include="../../apps/api/Federation/FederationKeyRotationProtocol.cs" Link="FederationKeyRotationProtocol.cs" />

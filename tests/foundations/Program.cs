@@ -5,6 +5,7 @@ using Fylkren.Api.Organization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
 
 if (args.Contains("--input-validation-only"))
 {
@@ -44,6 +45,11 @@ if (args.Contains("--machine-secret-agility-only"))
 if (args.Contains("--license-agility-only"))
 {
     LicenseAgilityTests.Run();
+    return;
+}
+if (args.Contains("--federation-agility-only"))
+{
+    FederationAgilityTests.Run();
     return;
 }
 if (args.Contains("--outbound-http-only"))
@@ -108,6 +114,20 @@ var connection = Environment.GetEnvironmentVariable("FYLKREN_FOUNDATION_TEST_DAT
 if (connection is null) throw new Exception("Run with the disposable database harness; integration coverage is mandatory.");
 if (!connection.Contains("Database=fylkren_foundation_test", StringComparison.Ordinal)) throw new Exception("Only the synthetic foundation database is allowed.");
 await using var db = new FylkrenDbContext(new DbContextOptionsBuilder<FylkrenDbContext>().UseNpgsql(connection).Options);
+if (args.Contains("--model-diff-only"))
+{
+    var differ = db.GetService<IMigrationsModelDiffer>();
+    var snapshot = db.GetService<IMigrationsAssembly>().ModelSnapshot?.Model
+        ?? throw new Exception("The migration snapshot is missing.");
+    snapshot = db.GetService<IModelRuntimeInitializer>().Initialize(snapshot, true, null);
+    var design = db.GetService<Microsoft.EntityFrameworkCore.Metadata.IDesignTimeModel>().Model;
+    var differences = differ.GetDifferences(snapshot.GetRelationalModel(), design.GetRelationalModel());
+    foreach (var difference in differences)
+        Console.WriteLine($"{difference.GetType().Name}: {Describe(difference)}");
+    if (differences.Count != 0) throw new Exception("The EF migration snapshot has pending changes.");
+    Console.WriteLine("EF migration snapshot matches the current model.");
+    return;
+}
 if (args.Contains("--machine-secret-agility-integration-only"))
 {
     MachineSecretAgilityTests.Run();
@@ -118,6 +138,12 @@ if (args.Contains("--license-agility-integration-only"))
 {
     LicenseAgilityTests.Run();
     await LicenseAgilityTests.RunDatabase(db);
+    return;
+}
+if (args.Contains("--federation-agility-integration-only"))
+{
+    FederationAgilityTests.Run();
+    await FederationAgilityTests.RunDatabase(db);
     return;
 }
 if (args.Contains("--crypto-reprotection-only"))
@@ -205,6 +231,7 @@ ExternalKeyStrengthTests.Run();
 await ServiceTransportTests.Run();
 MachineSecretAgilityTests.Run();
 LicenseAgilityTests.Run();
+FederationAgilityTests.Run();
 NumericArithmeticTests.Run();
 VersionBoundaryTests.Run();
 await ZipLengthBoundaryTests.Run();
@@ -220,3 +247,12 @@ await LegacyHoldUpgradeTests.Run(db);
 await ConsumerReconciliationTests.Run(db);
 
 await AutomaticLifecycleTests.Run(db);
+
+static string Describe(MigrationOperation operation) => operation switch
+{
+    AddColumnOperation value => $"add {value.Table}.{value.Name} {value.ColumnType} default={value.DefaultValue}",
+    DropColumnOperation value => $"drop {value.Table}.{value.Name}",
+    AlterColumnOperation value => $"alter {value.Table}.{value.Name} {value.ColumnType} default={value.DefaultValue}",
+    AddCheckConstraintOperation value => $"check {value.Table}.{value.Name}: {value.Sql}",
+    _ => operation.ToString() ?? operation.GetType().Name
+};

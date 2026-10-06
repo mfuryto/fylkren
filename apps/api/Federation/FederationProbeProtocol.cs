@@ -6,11 +6,13 @@ namespace Fylkren.Api.Federation;
 
 internal static class FederationProbeProtocol
 {
-    internal static byte[] RequestBytes(Guid sender, Guid recipient, long timestamp, Guid nonce) =>
-        Canonical("fylkren-federation-probe-request-v1", sender, recipient, timestamp, nonce);
+    internal static byte[] RequestBytes(Guid sender, Guid recipient, long timestamp, Guid nonce,
+        string? signatureAlgorithm = null) => Canonical("fylkren-federation-probe-request-v1",
+            sender, recipient, timestamp, nonce, signatureAlgorithm);
 
-    internal static byte[] ResponseBytes(Guid sender, Guid recipient, long timestamp, Guid nonce) =>
-        Canonical("fylkren-federation-probe-response-v1", sender, recipient, timestamp, nonce);
+    internal static byte[] ResponseBytes(Guid sender, Guid recipient, long timestamp, Guid nonce,
+        string? signatureAlgorithm = null) => Canonical("fylkren-federation-probe-response-v1",
+            sender, recipient, timestamp, nonce, signatureAlgorithm);
 
     internal static string Sign(ECDsa key, byte[] data) => Convert.ToBase64String(key.SignData(
         data, HashAlgorithmName.SHA256, DSASignatureFormat.IeeeP1363FixedFieldConcatenation));
@@ -33,7 +35,9 @@ internal static class FederationProbeProtocol
         }
     }
 
-    private static byte[] Canonical(string purpose, Guid sender, Guid recipient, long timestamp, Guid nonce) =>
-        Encoding.ASCII.GetBytes(string.Join('\n', purpose, sender.ToString("N"), recipient.ToString("N"),
-            timestamp.ToString(CultureInfo.InvariantCulture), nonce.ToString("N")));
+    private static byte[] Canonical(string purpose, Guid sender, Guid recipient, long timestamp,
+        Guid nonce, string? signatureAlgorithm) => Encoding.ASCII.GetBytes(string.Join('\n',
+            new[] { FederationSignatureProtocol.Purpose(purpose, signatureAlgorithm), sender.ToString("N"),
+                recipient.ToString("N"), timestamp.ToString(CultureInfo.InvariantCulture),
+                nonce.ToString("N") }.Concat(FederationSignatureProtocol.Bind(signatureAlgorithm))));
 }

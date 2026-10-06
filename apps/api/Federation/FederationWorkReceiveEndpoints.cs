@@ -41,6 +41,7 @@ internal static class FederationWorkReceiveEndpoints
         var peer = await db.FederationPeers.AsNoTracking().SingleOrDefaultAsync(value =>
             value.InstanceId == request.SenderInstanceId && value.IsActive, ct);
         if (peer?.PinnedPublicKeySpki is null || peer.LastProofAt is null ||
+            !FederationSignatureProtocol.Accepts(peer.SignatureAlgorithm, request.SignatureAlgorithm) ||
             !FederationPublicKey.TryParse(peer.PinnedPublicKeySpki, out var peerKey, out _) ||
             !FederationProbeProtocol.Verify(peerKey, FederationWorkProtocol.SignedBytes(request), request.Signature))
             return Results.Unauthorized();
@@ -138,7 +139,7 @@ internal static class FederationWorkReceiveEndpoints
             var receipt = new FederationWorkReceipt(FederationWorkProtocol.SchemaVersion,
                 localId, peer.InstanceId, request.MessageId, request.Nonce, request.SourceSiteId,
                 request.DestinationSiteId, localWorkId, payloadHash, 1,
-                duplicate, DateTimeOffset.UtcNow.ToUnixTimeSeconds(), string.Empty);
+                duplicate, DateTimeOffset.UtcNow.ToUnixTimeSeconds(), string.Empty, request.SignatureAlgorithm);
             receipt = receipt with
             {
                 Signature = FederationProbeProtocol.Sign(localKey, FederationWorkReceiptProtocol.SignedBytes(receipt))

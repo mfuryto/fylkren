@@ -5,28 +5,37 @@ using System.Text;
 namespace Fylkren.Api.Federation;
 
 internal sealed record FederationCatalogRequest(int SchemaVersion, Guid SenderInstanceId,
-    Guid RecipientInstanceId, long Timestamp, Guid Nonce, string? Signature);
+    Guid RecipientInstanceId, long Timestamp, Guid Nonce, string? Signature,
+    string? SignatureAlgorithm = null);
 
 internal sealed record FederationCatalogSite(Guid SiteId, string Name, long Revision, bool IsActive);
 
 internal sealed record FederationCatalogResponse(int SchemaVersion, Guid SenderInstanceId,
-    Guid RecipientInstanceId, long Timestamp, Guid Nonce, FederationCatalogSite[] Sites, string Signature);
+    Guid RecipientInstanceId, long Timestamp, Guid Nonce, FederationCatalogSite[] Sites,
+    string Signature, string? SignatureAlgorithm = null);
 
 internal static class FederationCatalogProtocol
 {
     internal const int SchemaVersion = 1;
 
-    internal static byte[] RequestBytes(Guid sender, Guid recipient, long timestamp, Guid nonce) =>
-        Encoding.ASCII.GetBytes(string.Join('\n', "fylkren-federation-catalog-request-v1",
-            sender.ToString("N"), recipient.ToString("N"), timestamp.ToString(CultureInfo.InvariantCulture), nonce.ToString("N")));
+    internal static byte[] RequestBytes(Guid sender, Guid recipient, long timestamp, Guid nonce,
+        string? signatureAlgorithm = null) => Encoding.ASCII.GetBytes(string.Join('\n', new[]
+        {
+            FederationSignatureProtocol.Purpose("fylkren-federation-catalog-request-v1", signatureAlgorithm),
+            sender.ToString("N"), recipient.ToString("N"), timestamp.ToString(CultureInfo.InvariantCulture),
+            nonce.ToString("N")
+        }.Concat(FederationSignatureProtocol.Bind(signatureAlgorithm))));
 
     internal static byte[] ResponseBytes(Guid sender, Guid recipient, long timestamp, Guid nonce,
-        IReadOnlyCollection<FederationCatalogSite> sites)
+        IReadOnlyCollection<FederationCatalogSite> sites, string? signatureAlgorithm = null)
     {
         var hash = Convert.ToHexString(SHA256.HashData(SiteBytes(sites))).ToLowerInvariant();
-        return Encoding.ASCII.GetBytes(string.Join('\n', "fylkren-federation-catalog-response-v1",
+        return Encoding.ASCII.GetBytes(string.Join('\n', new[]
+        {
+            FederationSignatureProtocol.Purpose("fylkren-federation-catalog-response-v1", signatureAlgorithm),
             sender.ToString("N"), recipient.ToString("N"), timestamp.ToString(CultureInfo.InvariantCulture),
-            nonce.ToString("N"), hash));
+            nonce.ToString("N"), hash
+        }.Concat(FederationSignatureProtocol.Bind(signatureAlgorithm))));
     }
 
     internal static bool ValidSites(IReadOnlyCollection<FederationCatalogSite>? sites)

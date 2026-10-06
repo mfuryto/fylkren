@@ -20,7 +20,8 @@ internal static class FederationPeerEndpoints
             var peers = await db.FederationPeers.AsNoTracking()
                 .OrderBy(peer => peer.Name)
                 .Select(peer => new { peer.InstanceId, peer.Name, peer.BaseUrl, peer.CreatedAt, peer.IsActive, peer.LastProofAt,
-                    peer.PinnedPublicKeySpki, peer.PendingKeyRotationId, peer.KeyRotationStagedAt })
+                    peer.PinnedPublicKeySpki, peer.PendingKeyRotationId, peer.KeyRotationStagedAt,
+                    peer.NegotiatedProtocolVersion, peer.SignatureAlgorithm })
                 .ToListAsync(ct);
             return Results.Ok(peers.Select(peer =>
             {
@@ -29,6 +30,7 @@ internal static class FederationPeerEndpoints
                     peer.LastProofAt, peer.PinnedPublicKeySpki, fingerprint = valid ? fingerprint : null,
                     keyRotationPending = peer.PendingKeyRotationId is not null,
                     peer.PendingKeyRotationId, peer.KeyRotationStagedAt,
+                    peer.NegotiatedProtocolVersion, peer.SignatureAlgorithm,
                     trusted = peer.IsActive && valid && peer.LastProofAt is not null,
                     routable = false };
             }));

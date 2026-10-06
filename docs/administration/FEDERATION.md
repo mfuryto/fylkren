@@ -16,6 +16,8 @@ The signed assignment includes the sender's display reference. The receiver allo
 
 Platform Manager performs all application setup on **Federation**. Site Managers do not configure federation. The menu and complete page remain visible without Enterprise, but a single **Requires an Enterprise license** notice disables mutations.
 
+Approved peers start with the compatible protocol v1 and negotiate protocol v2 during signed capability exchange. Protocol v2 binds the allowlisted signature algorithm to discovery responses, probes, catalogs, reciprocal-grant checks, key rotation, work messages and receipts. Fylkren stores the negotiated protocol per peer and rejects an unannounced fallback after v2. A planned binary rollback must first reset both peer records to the v1 compatibility state through the matching database migration/rollback procedure; upgrade both sides again before retiring v1.
+
 Before activation, both installations need:
 
 - a valid Enterprise license; older valid Enterprise licenses also include federation;

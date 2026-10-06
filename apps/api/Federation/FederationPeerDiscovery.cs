@@ -19,7 +19,7 @@ internal static class FederationPeerDiscovery
         {
             using var request = new HttpRequestMessage(HttpMethod.Post, target)
             {
-                Content = JsonContent.Create(new FederationIdentityDiscoveryRequest(localId, nonce))
+                Content = JsonContent.Create(new FederationIdentityDiscoveryRequest(localId, nonce, 2))
             };
             using var response = await clients.CreateClient("federation-probe")
                 .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
@@ -35,9 +35,11 @@ internal static class FederationPeerDiscovery
                 discovered.Timestamp > nowSeconds + 300 ||
                 !FederationPublicKey.TryParse(discovered.PublicKeySpki, out var key,
                     out var fingerprint) ||
+                !FederationSignatureProtocol.IsSupported(discovered.SignatureAlgorithm) ||
                 !FederationProbeProtocol.Verify(key,
                     FederationIdentityDiscoveryProtocol.ResponseBytes(discovered.InstanceId,
-                        localId, discovered.Timestamp, nonce, fingerprint),
+                        localId, discovered.Timestamp, nonce, fingerprint,
+                        discovered.SignatureAlgorithm),
                     discovered.Signature)) return null;
             return new DiscoveredFederationPeer(discovered.InstanceId,
                 Convert.ToBase64String(key), fingerprint, now);

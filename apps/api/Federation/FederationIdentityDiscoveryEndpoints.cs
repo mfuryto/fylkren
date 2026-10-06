@@ -33,12 +33,15 @@ internal static class FederationIdentityDiscoveryEndpoints
         if (!FederationPublicKey.TryParse(identity.PublicKeySpki, out _, out var fingerprint))
             return Results.Problem(statusCode: 503, title: "The federation key is invalid.");
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        var signatureAlgorithm = request.MaximumProtocolVersion >= 2
+            ? FederationSignatureProtocol.CurrentAlgorithm : null;
         using var key = FederationSigningKeys.Load(identity, protection);
         var signature = FederationProbeProtocol.Sign(key,
             FederationIdentityDiscoveryProtocol.ResponseBytes(localId,
-                request.RequesterInstanceId, timestamp, request.Nonce, fingerprint));
+                request.RequesterInstanceId, timestamp, request.Nonce, fingerprint,
+                signatureAlgorithm));
         return Results.Ok(new FederationIdentityDiscoveryResponse(localId,
             request.RequesterInstanceId, timestamp, request.Nonce,
-            identity.PublicKeySpki, signature));
+            identity.PublicKeySpki, signature, signatureAlgorithm));
     }
 }

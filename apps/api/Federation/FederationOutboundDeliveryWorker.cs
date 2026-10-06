@@ -99,7 +99,7 @@ internal sealed class FederationOutboundDeliveryWorker(
                 error = "outbound_not_authorized";
             else
             {
-                var peer = await db.FederationPeers.AsNoTracking().SingleAsync(row =>
+                var peer = await db.FederationPeers.SingleAsync(row =>
                     row.InstanceId == message.PeerInstanceId, ct);
                 var identity = await db.FederationSigningIdentities.AsNoTracking()
                     .SingleOrDefaultAsync(row => row.Key == 1, ct);
@@ -109,8 +109,9 @@ internal sealed class FederationOutboundDeliveryWorker(
                 else
                 {
                     using var localKey = FederationSigningKeys.Load(identity, protection);
-                    error = await FederationCapabilityClient.Negotiate(localId, peer,
+                    var capability = await FederationCapabilityClient.Negotiate(localId, peer,
                         localKey, peerKey, message.MessageType, clients, ct);
+                    error = capability.Error;
                     if (error is null)
                     {
                         var nonce = Guid.NewGuid();
@@ -121,7 +122,7 @@ internal sealed class FederationOutboundDeliveryWorker(
                             message.OriginInstanceId, message.OriginSiteId, message.OriginResourceId,
                             answerLink?.LocalWorkItemId ?? cancellationLink?.RemoteWorkItemId,
                             message.CorrelationId, message.CausationId, timestamp, nonce,
-                            message.PayloadJson, null);
+                            message.PayloadJson, null, capability.SignatureAlgorithm);
                         var validPayload = message.MessageType switch
                         {
                             "assignment.answered" => FederationOfficialAnswerContract.TryDecode(envelope, out _),
@@ -175,6 +176,7 @@ internal sealed class FederationOutboundDeliveryWorker(
                                         : receipt.GrantRevision < 1) ||
                                     receipt.Timestamp < current - 300 ||
                                     receipt.Timestamp > current + 300 ||
+                                    receipt.SignatureAlgorithm != capability.SignatureAlgorithm ||
                                     !FederationProbeProtocol.Verify(peerKey,
                                         FederationWorkReceiptProtocol.SignedBytes(receipt), receipt.Signature))
                                 {

@@ -103,6 +103,31 @@ Check(FederationCapabilityProtocol.ValidSelection(capabilitySelection, capabilit
 Check(FederationProbeProtocol.Verify(otherKey.ExportSubjectPublicKeyInfo(),
     FederationCapabilityProtocol.ResponseBytes(capabilitySelection),
     capabilitySelection.Signature), "capability selection signature accepted");
+var algorithm = FederationSignatureProtocol.CurrentAlgorithm;
+var versionedOffer = capabilityOffer with
+{
+    MinimumProtocolVersion = 2, MaximumProtocolVersion = 2,
+    SignatureAlgorithm = algorithm, Nonce = Guid.NewGuid()
+};
+var versionedOfferBytes = FederationCapabilityProtocol.RequestBytes(versionedOffer);
+var versionedOfferSignature = FederationProbeProtocol.Sign(signingKey, versionedOfferBytes);
+Check(FederationCapabilityProtocol.ValidOffer(versionedOffer),
+    "versioned capability offer accepted");
+Check(FederationProbeProtocol.Verify(publicKey, versionedOfferBytes, versionedOfferSignature),
+    "versioned capability signature accepted");
+Check(!FederationProbeProtocol.Verify(publicKey,
+    FederationCapabilityProtocol.RequestBytes(versionedOffer with { SignatureAlgorithm = null }),
+    versionedOfferSignature), "capability algorithm downgrade rejected");
+Check(!FederationCapabilityProtocol.ValidOffer(versionedOffer with { SignatureAlgorithm = "unknown" }),
+    "unknown capability algorithm rejected");
+var versionedSelection = new FederationCapabilityResponse(recipient, sender, 2, 1,
+    ["assignment.created"], timestamp, versionedOffer.Nonce, string.Empty, algorithm);
+versionedSelection = versionedSelection with { Signature = FederationProbeProtocol.Sign(otherKey,
+    FederationCapabilityProtocol.ResponseBytes(versionedSelection)) };
+Check(FederationCapabilityProtocol.ValidSelection(versionedSelection, versionedOffer),
+    "versioned capability selection accepted");
+Check(!FederationCapabilityProtocol.ValidSelection(versionedSelection with
+    { SignatureAlgorithm = null }, versionedOffer), "selection algorithm downgrade rejected");
 var rotationId = Guid.NewGuid();
 var newPublicKey = otherKey.ExportSubjectPublicKeyInfo();
 var newFingerprint = Convert.ToHexString(SHA256.HashData(newPublicKey)).ToLowerInvariant();
@@ -233,6 +258,15 @@ Check(!FederationProbeProtocol.Verify(publicKey, FederationWorkProtocol.SignedBy
     { CorrelationId = Guid.NewGuid() }), workSignature), "changed correlation rejected");
 Check(!FederationProbeProtocol.Verify(publicKey, FederationProbeProtocol.RequestBytes(sender,
     recipient, timestamp, work.Nonce), workSignature), "work signature cannot sign probe");
+var versionedWork = work with { SignatureAlgorithm = algorithm };
+var versionedWorkBytes = FederationWorkProtocol.SignedBytes(versionedWork);
+var versionedWorkSignature = FederationProbeProtocol.Sign(signingKey, versionedWorkBytes);
+Check(FederationProbeProtocol.Verify(publicKey, versionedWorkBytes, versionedWorkSignature),
+    "versioned work signature accepted");
+Check(!FederationProbeProtocol.Verify(publicKey, FederationWorkProtocol.SignedBytes(work),
+    versionedWorkSignature), "versioned work signature cannot be downgraded to legacy");
+Check(!FederationWorkProtocol.ValidEnvelope(versionedWork with { SignatureAlgorithm = "unknown" }),
+    "unknown work algorithm rejected");
 Check(!FederationWorkProtocol.ValidEnvelope(work with { SenderInstanceId = recipient }), "self-addressed work rejected");
 Check(!FederationWorkProtocol.ValidEnvelope(work with { MessageType = "Assignment.Created" }), "invalid message type rejected");
 Check(!FederationWorkProtocol.ValidEnvelope(work with { PayloadJson = new string('x', 256_001) }),
