@@ -2123,3 +2123,9 @@ pnpm check:docs
 ```
 
 The pure vectors accept the generated key and reject changes to every canonical component plus malformed signatures. The disposable PostgreSQL test preserves and labels a populated v1 client, persists v2 public-key state and nonce uniqueness, authenticates a valid request with its scope, rejects replay, a timestamp outside the window and a deactivated client, and completes down/up migration. EF reports no pending model changes. API, foundation and web builds pass. No production state was changed.
+
+### Source-map build dependency closure — 2026-10-06
+
+The GitHub post-push warning was reproduced by a complete `pnpm audit` as GHSA-68fv-2mgg-jv7q in transitive `source-map-js` 1.2.1 through PostCSS. It affects frontend build/test tooling and can cause event-loop denial of service while processing crafted indexed source-map offsets. The production-only npm audit and the complete direct/transitive NuGet audit had no findings.
+
+The workspace now overrides this transitive package to patched 1.2.2 and the lock file records that exact version. The repeated complete audit reports `No known vulnerabilities found`; the lock-file supply-chain policy passes 181 entries; shared frontend type compilation plus demo and production web builds pass. SV-109 was opened and closed in the same bounded remediation, and ASVS 15.2.1 remains Passed with current evidence. No production installation was changed.

@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Pin the corrected `source-map-js` 1.2.2 across frontend build/test tooling, removing the reported indexed-source-map denial-of-service vulnerability.
+
 - Issue new machine API clients with P-256 request-signing keys, five-minute timestamp and database-backed replay protection; preserve existing Bearer clients only through a fixed, displayed migration cutoff.
 
 - Negotiate and persist a signed federation protocol v2 with an explicit allowlisted signature algorithm across discovery, probes, catalogs, grants, key rotation, work and receipts; retain controlled v1 compatibility and reject silent downgrade after v2.

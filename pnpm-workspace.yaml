@@ -3,6 +3,9 @@ packages:
   - apps/demo
   - shared/frontend
 
+overrides:
+  source-map-js: 1.2.2
+
 onlyBuiltDependencies:
   - esbuild
 allowBuilds:
