@@ -194,6 +194,7 @@ internal static class PlatformModelConfiguration
         license.Property(value => value.Key).HasColumnName("key").ValueGeneratedNever();
         license.Property(value => value.Payload).HasColumnName("payload").HasMaxLength(24_000).IsRequired();
         license.Property(value => value.Signature).HasColumnName("signature").HasMaxLength(256).IsRequired();
+        license.Property(value => value.SignatureAlgorithm).HasColumnName("signature_algorithm").HasMaxLength(80);
         license.Property(value => value.ImportedBy).HasColumnName("imported_by").IsRequired();
         license.Property(value => value.ImportedAt).HasColumnName("imported_at").IsRequired();
 

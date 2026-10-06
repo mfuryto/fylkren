@@ -2075,3 +2075,17 @@ pnpm check:docs
 ```
 
 The disposable PostgreSQL test inventories six configured slots across SMTP, OIDC configuration, TOTP, webhook and active/pending federation private keys. Multiple two-item batches preserve every plaintext while replacing every ciphertext. The test rejects a concurrent operation, injects ciphertext that cannot be opened by the available key ring, observes zero committed items and a failed audit event, restores availability by removing the synthetic invalid record, resumes the same operation and records completion. API and foundation builds pass with zero warnings. Cryptographic inventory reconciliation now covers 56 production source files. Authorization reconciliation covers 295 operations in 95 endpoint files: 106 GET, 117 POST, 45 PUT and 27 DELETE, with the unchanged set of 24 reviewed anonymous declarations; the four new re-protection routes belong to Platform governance. SV-101 remains open only for versioned federation/license signature identification, negotiation and retirement. Production was not changed.
+
+### Versioned license signatures — 2026-10-06
+
+This closes the license-format portion of SV-101 without marking ASVS 11.2.2 complete. Existing schema 1 licenses retain their fixed implicit P-256/SHA-256 P1363 interpretation. New schema 2 licenses bind the identifier `ecdsa-p256-sha256-p1363` inside the signed payload and require the envelope to repeat it. Missing, conflicting, unknown and unsupported schema/algorithm combinations fail closed. The installed record retains the verified identifier; a nullable additive migration preserves populated schema 1 installations.
+
+```sh
+dotnet build tests/foundations/Fylkren.FoundationTests.csproj --no-restore
+dotnet run --project tests/foundations/Fylkren.FoundationTests.csproj --no-build -- --license-agility-only
+node tools/run-foundation-tests.mjs --license-agility-integration-only
+node tools/test-cryptographic-agility-assessment.mjs
+pnpm check:docs
+```
+
+The focused signature test passes legacy read, current versioned format, signed algorithm binding and downgrade/unknown-algorithm rejection. The disposable PostgreSQL test upgrades a populated legacy license without changing its payload, signature, actor or time and passes a down/up migration cycle. API and foundation builds complete with zero warnings. SV-101 remains open only for federation signature identification, negotiation and retirement. Production was not changed.

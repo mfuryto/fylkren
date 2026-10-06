@@ -19,6 +19,7 @@ internal sealed record LicenseStatus(
 
 internal sealed class LicenseService
 {
+    internal const string CurrentSignatureAlgorithm = "ecdsa-p256-sha256-p1363";
     private readonly IReadOnlyList<byte[]> publicKeys;
     internal bool HasTrustedIssuer => publicKeys.Count > 0;
 
@@ -55,10 +56,12 @@ internal sealed class LicenseService
     {
         var instanceId = await db.InstanceIdentities.AsNoTracking().Where(x => x.Key == 1).Select(x => x.InstanceId).SingleAsync(ct);
         var installed = await db.InstalledLicenses.AsNoTracking().SingleOrDefaultAsync(x => x.Key == 1, ct);
-        return Evaluate(installed?.Payload, installed?.Signature, instanceId, DateTimeOffset.UtcNow);
+        return Evaluate(installed?.Payload, installed?.Signature, instanceId, DateTimeOffset.UtcNow,
+            installed?.SignatureAlgorithm);
     }
 
-    internal LicenseStatus Evaluate(string? encodedPayload, string? encodedSignature, Guid instanceId, DateTimeOffset now)
+    internal LicenseStatus Evaluate(string? encodedPayload, string? encodedSignature, Guid instanceId,
+        DateTimeOffset now, string? signatureAlgorithm = null)
     {
         var community = new LicenseStatus("community", encodedPayload is null ? "none" : "invalid", instanceId, null, null, null, new HashSet<string>());
         if (encodedPayload is null || encodedSignature is null) return community;
@@ -66,11 +69,11 @@ internal sealed class LicenseService
         {
             var payload = Convert.FromBase64String(encodedPayload);
             var signature = Convert.FromBase64String(encodedSignature);
-            if (payload.Length is < 20 or > 16_384 || signature.Length != 64) return community;
-            if (!publicKeys.Any(key => VerifySignature(key, payload, signature)))
-                return community;
             var license = JsonSerializer.Deserialize<LicensePayload>(payload, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            if (license is null || license.SchemaVersion != 1 || license.LicenseId == Guid.Empty || license.InstanceId != instanceId ||
+            if (license is null || !ValidAlgorithm(license, signatureAlgorithm) ||
+                payload.Length is < 20 or > 16_384 || signature.Length != 64 ||
+                !publicKeys.Any(key => VerifySignature(key, payload, signature)) ||
+                license.LicenseId == Guid.Empty || license.InstanceId != instanceId ||
                 string.IsNullOrWhiteSpace(license.Customer) || license.Customer.Length > 200 ||
                 license.Entitlements is null || license.Entitlements.Length > FeatureCatalog.Enterprise.Count ||
                 license.Entitlements.Any(x => !FeatureCatalog.IsKnown(x)) ||
@@ -103,6 +106,17 @@ internal sealed class LicenseService
             DSASignatureFormat.IeeeP1363FixedFieldConcatenation);
     }
 
+    private static bool ValidAlgorithm(LicensePayload license, string? envelopeAlgorithm) =>
+        license.SchemaVersion switch
+        {
+            1 => license.SignatureAlgorithm is null &&
+                (envelopeAlgorithm is null || envelopeAlgorithm == CurrentSignatureAlgorithm),
+            2 => license.SignatureAlgorithm == CurrentSignatureAlgorithm &&
+                envelopeAlgorithm == CurrentSignatureAlgorithm,
+            _ => false,
+        };
+
     private sealed record LicensePayload(int SchemaVersion, Guid LicenseId, Guid InstanceId, string Customer,
-        DateTimeOffset NotBefore, DateTimeOffset ExpiresAt, string[] Entitlements);
+        DateTimeOffset NotBefore, DateTimeOffset ExpiresAt, string[] Entitlements,
+        string? SignatureAlgorithm = null);
 }

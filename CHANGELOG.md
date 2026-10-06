@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Add a versioned Enterprise-license signature format that binds the allowed algorithm inside the signed payload and envelope while preserving existing schema 1 licenses.
+
 - Add one bounded and resumable operation that inventories and re-protects all persistent Data Protection values under the current key, with backup/rollback references, atomic failure, recovery and security-audit records.
 
 - Keep expected anonymous read denials in structured security logging without presenting expired-session Platform Manager refreshes as operational warnings.

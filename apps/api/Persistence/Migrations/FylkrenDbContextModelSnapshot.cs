@@ -2189,6 +2189,11 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("character varying(256)")
                         .HasColumnName("signature");
 
+                    b.Property<string>("SignatureAlgorithm")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("signature_algorithm");
+
                     b.HasKey("Key");
 
                     b.ToTable("installed_license", (string)null);

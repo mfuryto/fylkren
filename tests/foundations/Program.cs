@@ -41,6 +41,11 @@ if (args.Contains("--machine-secret-agility-only"))
     MachineSecretAgilityTests.Run();
     return;
 }
+if (args.Contains("--license-agility-only"))
+{
+    LicenseAgilityTests.Run();
+    return;
+}
 if (args.Contains("--outbound-http-only"))
 {
     await OutboundHttpTests.Run();
@@ -107,6 +112,12 @@ if (args.Contains("--machine-secret-agility-integration-only"))
 {
     MachineSecretAgilityTests.Run();
     await MachineSecretAgilityTests.RunDatabase(db);
+    return;
+}
+if (args.Contains("--license-agility-integration-only"))
+{
+    LicenseAgilityTests.Run();
+    await LicenseAgilityTests.RunDatabase(db);
     return;
 }
 if (args.Contains("--crypto-reprotection-only"))
@@ -193,6 +204,7 @@ await SamlMetadataTests.Run();
 ExternalKeyStrengthTests.Run();
 await ServiceTransportTests.Run();
 MachineSecretAgilityTests.Run();
+LicenseAgilityTests.Run();
 NumericArithmeticTests.Run();
 VersionBoundaryTests.Run();
 await ZipLengthBoundaryTests.Run();

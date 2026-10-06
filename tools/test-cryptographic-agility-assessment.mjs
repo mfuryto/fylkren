@@ -9,6 +9,8 @@ const machineAuth = read('apps/api/Platform/ApiMachineAuthentication.cs');
 const federationIdentity = read('apps/api/Federation/FederationIdentityEndpoints.cs');
 const federationProtocol = read('apps/api/Federation/FederationWorkProtocol.cs');
 const license = read('apps/api/Licensing/LicenseService.cs');
+const licenseEndpoints = read('apps/api/Licensing/LicenseEndpoints.cs');
+const installedLicense = read('apps/api/Licensing/InstalledLicense.cs');
 const reprotection = read('apps/api/Platform/CryptoReprotectionService.cs');
 const reprotectionEndpoints = read('apps/api/Platform/CryptoReprotectionEndpoints.cs');
 
@@ -18,6 +20,11 @@ assert.match(login, /PasswordVerificationResult\.SuccessRehashNeeded[\s\S]*HashP
 assert.match(federationIdentity, /StageRotation\(/, 'federation key rotation');
 assert.match(federationIdentity, /identity\.Recover\(/, 'federation lost-key recovery');
 assert.match(license, /IReadOnlyList<byte\[]> publicKeys/, 'overlapping license verification keys');
+assert.match(license, /CurrentSignatureAlgorithm = "ecdsa-p256-sha256-p1363"/, 'explicit license signature algorithm');
+assert.match(license, /SchemaVersion switch[\s\S]*1 =>[\s\S]*2 =>/, 'dual-read license format transition');
+assert.match(licenseEndpoints, /SignatureAlgorithm[\s\S]*Evaluate\([\s\S]*request\.SignatureAlgorithm/,
+  'license envelope algorithm verification');
+assert.match(installedLicense, /SignatureAlgorithm/, 'persisted installed-license algorithm');
 
 assert.match(machineIdentity, /SecretAlgorithm[\s\S]*SecretHashVersion[\s\S]*SecretIterations/,
   'versioned machine verifier metadata');
@@ -39,8 +46,9 @@ assert.match(reprotectionEndpoints, /BackupReference[\s\S]*RollbackReference/,
 console.log(JSON.stringify({
   cryptographicAgilityAssessment: 'finding',
   finding: 'SV-101',
-  replacementCapabilities: 9,
+  replacementCapabilities: 10,
   versionedMachineVerifier: true,
+  versionedLicenseSignature: true,
   versionedFederationSignature: false,
   persistentReprotectionOperation: true,
 }));
