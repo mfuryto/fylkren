@@ -2157,3 +2157,9 @@ docker compose build data-protection-init api
 ```
 
 The focused custody test proves plaintext absence, matching-key recovery, modified-tag rejection, atomic legacy migration and idempotence. Both changed production images build. Shell syntax, Compose expansion and the observability policy controls pass. The focused isolated backup/restore fixture also passed: it created and verified the database, protected environment, Data Protection key-ring and custody archives, restored them as one matched set, and returned a healthy public API. No production data or credentials were read or changed.
+
+### ASVS evidence-completeness audit — 2026-10-06
+
+The matrix was reconciled after the final finding closures. It contains all 253 unique ASVS 5.0.0 Level 1/2 requirement IDs: 199 are `Passed`, 54 are `Not applicable`, and none are `Finding`, `In progress` or `Not assessed`. Every passed row links an identifiable maintained test and an execution record; every non-applicable row contains a requirement-specific rationale. The documentation-link check resolves every local test, finding and evidence target. The finding register contains no open residual security finding.
+
+The audit also removed superseded incomplete-scope wording from five passed rows and strengthened the automated traceability check so declared totals, row totals, non-applicability rationales and completed-row wording cannot silently diverge. This verifies completeness and internal consistency of the maintained ASVS assessment. It does not replace execution of the final release-candidate and deployment gates: production-equivalent identity providers, authenticators, public/internal TLS, backup/key-custody recovery, synchronized time, remote log acknowledgement, vulnerability scans, SBOM generation and responsible security approval must still be bound to the exact release candidate before production approval.
