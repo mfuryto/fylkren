@@ -21,6 +21,7 @@ Before public publication, run `bash tools/security/verify-repository-safety.sh 
 - [Event/activity and information lifecycle review and proposal](architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md)
 - [Independent-instance federation foundation](architecture/INSTANCE_FEDERATION.md)
 - [Community and Enterprise entitlements](architecture/EDITION_ENTITLEMENTS.md)
+- [Identity-provider provisioning](architecture/IDENTITY_PROVIDER_PROVISIONING.md)
 - [Platform license API](api/PLATFORM_LICENSE_API.md)
 - [Regional settings API](api/REGIONAL_SETTINGS_API.md)
 - [Versioning and formal approvals](architecture/FORMAL_APPROVALS.md)

@@ -2031,7 +2031,7 @@ The cryptographic inventory was reconciled in the same change and now reports 13
 
 Trivy 0.75.0 scanned the newly built API, web, TLS initializer and PostgreSQL images for High/Critical vulnerabilities and reported zero in all four images. This scoped severity check does not replace SV-055's separately recorded Medium/Low API-image inventory.
 
-The same scoped change corrects two presentation ambiguities. System-created leader roles use the active locale, so Norwegian displays **Leder** rather than the stored internal `Manager` name. Automatic lock/archive events retain their typed system actor and now display **System** in activity, Site audit and Platform audit; a genuinely unresolved person remains **Unknown user**. API/web builds and `test-system-actor-presentation.mjs` pass.
+The same scoped change corrects two presentation ambiguities. System-created leader roles use the correct active-locale translation rather than the stored internal `Manager` name. Automatic lock/archive events retain their typed system actor and now display **System** in activity, Site audit and Platform audit; a genuinely unresolved person remains **Unknown user**. API/web builds and `test-system-actor-presentation.mjs` pass.
 
 ### SMTP checked-address continuation — 2026-10-05
 
@@ -2163,3 +2163,21 @@ The focused custody test proves plaintext absence, matching-key recovery, modifi
 The matrix was reconciled after the final finding closures. It contains all 253 unique ASVS 5.0.0 Level 1/2 requirement IDs: 199 are `Passed`, 54 are `Not applicable`, and none are `Finding`, `In progress` or `Not assessed`. Every passed row links an identifiable maintained test and an execution record; every non-applicable row contains a requirement-specific rationale. The documentation-link check resolves every local test, finding and evidence target. The finding register contains no open residual security finding.
 
 The audit also removed superseded incomplete-scope wording from five passed rows and strengthened the automated traceability check so declared totals, row totals, non-applicability rationales and completed-row wording cannot silently diverge. This verifies completeness and internal consistency of the maintained ASVS assessment. It does not replace execution of the final release-candidate and deployment gates: production-equivalent identity providers, authenticators, public/internal TLS, backup/key-custody recovery, synchronized time, remote log acknowledgement, vulnerability scans, SBOM generation and responsible security approval must still be bound to the exact release candidate before production approval.
+
+### Identity-provider first-sign-in provisioning — 2026-10-06
+
+Configurable OIDC/SAML first-sign-in provisioning and the restricted unassigned-person state were delivered after ASVS matrix completion. The additive migration gives automatically created links explicit provenance and keeps provider-claim conflicts in one Platform Manager review list. Existing domain objects, explicit links, AD/LDAP direct addition, browser-session registry and security audit remain authoritative; no event store, broker, local matching rule or alternate access model was added.
+
+```sh
+dotnet build tests/foundations/Fylkren.FoundationTests.csproj --no-restore
+pnpm --filter @fylkren/web typecheck
+node tools/run-foundation-tests.mjs --model-diff-only
+node tools/run-foundation-tests.mjs --external-identity-provisioning-only
+node tools/run-identity-sso-lab.mjs
+```
+
+The EF snapshot matched the model. Focused PostgreSQL tests passed disabled/enabled OIDC and SAML, explicit LDAP-plus-SAML ownership, provider-managed updates, claim conflict review, different-issuer separation, inactive-link rejection and two concurrent first sign-ins producing one person/link. Direct authorization-policy evaluation denied a pending principal under the default policy, admitted it only under the named authentication-only policy and admitted an assigned principal normally.
+
+The maintained signed-provider laboratory retained every previous OIDC/SAML metadata, key, token, replay, redirect and session result. Its new live OIDC case created an unknown person, returned `accessPending=true`, rejected the ordinary profile API with `403`, exposed the person to Platform Manager, granted ordinary access after Site assignment, rejected a local provider-owned profile rewrite with `409`, rejected sign-in after unlink, exposed the inactive link for review and removed the review item after explicit relinking. The first complete run passed this new path and then stopped because a later legacy assertion expected exactly one OIDC link; the assertion was corrected to select its intended stable link, and the complete clean rerun passed. All disposable credentials, certificates, databases, containers, networks and volumes were removed by the harness.
+
+This is focused feature acceptance. Final candidate-wide functional, security, performance and deployment qualification remains the next roadmap gate.

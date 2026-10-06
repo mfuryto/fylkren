@@ -138,6 +138,11 @@ if (args.Contains("--model-diff-only"))
     Console.WriteLine("EF migration snapshot matches the current model.");
     return;
 }
+if (args.Contains("--external-identity-provisioning-only"))
+{
+    await ExternalIdentityProvisioningTests.Run(db);
+    return;
+}
 if (args.Contains("--machine-secret-agility-integration-only"))
 {
     MachineSecretAgilityTests.Run();

@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const registration = readFileSync('apps/api/ServiceRegistration.cs', 'utf8');
-assert.match(registration, /FallbackPolicy = new AuthorizationPolicyBuilder\(\)\s*\.RequireAuthenticatedUser\(\)/);
+const identityAuthorization = readFileSync('apps/api/Identity/IdentityAuthorization.cs', 'utf8');
+assert.match(identityAuthorization, /DefaultPolicy = new AuthorizationPolicyBuilder\(\)[\s\S]*RequireAuthenticatedUser\(\)[\s\S]*RequireClaim\("fylkren:access_granted", "true"\)/);
+assert.match(identityAuthorization, /FallbackPolicy = options\.DefaultPolicy/);
 
 const serverPolicies = [
   ['apps/api/Organization/AccessAuthorization.cs', 'CanAdministerSite'],
@@ -23,5 +24,5 @@ assert.doesNotMatch(directHttp, /page\.|locator\(|click\(/,
 
 process.stdout.write(`${JSON.stringify({
   trustedServiceAuthorization: 'passed', serverPolicyLayers: serverPolicies.length,
-  globalAuthenticatedFallback: true, directHttpNegativeEvidence: true, clientUiDependency: false,
+  globalGrantedAccessFallback: true, directHttpNegativeEvidence: true, clientUiDependency: false,
 })}\n`);

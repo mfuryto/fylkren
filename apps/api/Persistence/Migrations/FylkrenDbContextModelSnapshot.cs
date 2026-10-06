@@ -1430,6 +1430,10 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("person_id");
 
+                    b.Property<DateTimeOffset?>("ProvisionedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("provisioned_at");
+
                     b.Property<string>("Provider")
                         .IsRequired()
                         .HasMaxLength(30)
@@ -1463,6 +1467,25 @@ namespace Fylkren.Api.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("external_identity_links", (string)null);
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Identity.ExternalIdentityProvisioningIssue", b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid").HasColumnName("id");
+                    b.Property<string>("DisplayName").HasMaxLength(200).HasColumnType("character varying(200)").HasColumnName("display_name");
+                    b.Property<string>("Email").HasMaxLength(320).HasColumnType("character varying(320)").HasColumnName("email");
+                    b.Property<DateTimeOffset>("FirstSeenAt").HasColumnType("timestamp with time zone").HasColumnName("first_seen_at");
+                    b.Property<DateTimeOffset>("LastSeenAt").HasColumnType("timestamp with time zone").HasColumnName("last_seen_at");
+                    b.Property<string>("Provider").IsRequired().HasMaxLength(30).HasColumnType("character varying(30)").HasColumnName("provider");
+                    b.Property<string>("ProviderInstanceId").IsRequired().HasMaxLength(1000).HasColumnType("character varying(1000)").HasColumnName("provider_instance_id");
+                    b.Property<string>("Reason").IsRequired().HasMaxLength(50).HasColumnType("character varying(50)").HasColumnName("reason");
+                    b.Property<DateTimeOffset?>("ResolvedAt").HasColumnType("timestamp with time zone").HasColumnName("resolved_at");
+                    b.Property<string>("SubjectId").IsRequired().HasMaxLength(256).HasColumnType("character varying(256)").HasColumnName("subject_id");
+                    b.Property<string>("Username").HasMaxLength(256).HasColumnType("character varying(256)").HasColumnName("username");
+                    b.HasKey("Id");
+                    b.HasIndex("Provider", "ProviderInstanceId", "SubjectId").IsUnique();
+                    b.HasIndex("ResolvedAt", "LastSeenAt");
+                    b.ToTable("external_identity_provisioning_issues", (string)null);
                 });
 
             modelBuilder.Entity("Fylkren.Api.Identity.LoginIdentity", b =>

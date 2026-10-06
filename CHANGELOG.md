@@ -24,7 +24,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 - Store machine-API verifier algorithm, format version and work factor, preserve existing credentials during upgrade, and rehash them into the current format after successful authentication.
 
-- Correct the Identity guidance to reflect direct AD/LDAP personnel creation, and record configurable OIDC/SAML first-sign-in provisioning without duplicate AD/LDAP people, with a restricted unassigned-access state, as required work before release qualification.
+- Let Platform Manager enable OIDC/SAML user creation at first sign-in; keep new people in a restricted pending state until Site assignment, preserve explicit AD/LDAP and SSO linking, make provider-owned identity fields read-only, and surface claim collisions for explicit administrative resolution.
 
 - Bind SMTP STARTTLS delivery and AD/LDAP connections to approved DNS results while retaining certificate hostname validation; verify changed-DNS rejection and preserve LDAPS, StartTLS and Samba AD behavior.
 
@@ -32,7 +32,7 @@ This file records durable, user-visible release changes. Detailed implementation
 - Authenticate API-to-PostgreSQL connections with an installation-issued client certificate instead of a database password, and remove the conflicting ASP.NET port setting that produced a harmless Platform Manager warning.
 - Encrypt gateway-to-API and API-to-PostgreSQL traffic with installation-specific, hostname-verified TLS; isolate service/CA private keys, reject plaintext database connections and require STARTTLS for SMTP.
 - Show automatically locked or archived work as performed by **System** in activity and audit views, while retaining **Unknown user** for a genuinely unresolved person reference.
-- Display the system-created leader role with the active language, including **Leder** in Norwegian, instead of exposing its stored internal English name.
+- Display the system-created leader role with the active language, including the correct Norwegian translation, instead of exposing its stored internal English name.
 - Require multi-factor authentication by default: password, directory and SSO first factors receive only a restricted TOTP enrollment/completion session, while user-verifying passkeys satisfy the boundary directly.
 - Enforce a 128-bit classical minimum for external public keys by rejecting RSA keys below 3072 bits in OIDC, SAML metadata and WebAuthn registration/assertion, with an upgrade path for existing provider and passkey keys.
 - Show host time synchronization and measured clock offset in Platform Manager with a 1,000 ms health boundary through the maintained host-status collector.

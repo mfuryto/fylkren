@@ -154,8 +154,8 @@ public sealed class AuthenticationOptions
     public WebAuthnOptions WebAuthn { get; set; } = new();
 }
 
-public sealed class OidcOptions { public bool Enabled { get; set; } public string? Authority { get; set; } public string? ClientId { get; set; } public string? ClientSecret { get; set; } public string CallbackPath { get; set; } = "/signin-oidc"; }
-public sealed class SamlOptions { public bool Enabled { get; set; } public string? MetadataUrl { get; set; } public string? EntityId { get; set; } public string? IdentityProviderEntityId { get; set; } public string ModulePath { get; set; } = "/api/auth/saml2"; }
+public sealed class OidcOptions { public bool Enabled { get; set; } public bool AutomaticProvisioning { get; set; } public string? Authority { get; set; } public string? ClientId { get; set; } public string? ClientSecret { get; set; } public string CallbackPath { get; set; } = "/signin-oidc"; }
+public sealed class SamlOptions { public bool Enabled { get; set; } public bool AutomaticProvisioning { get; set; } public string? MetadataUrl { get; set; } public string? EntityId { get; set; } public string? IdentityProviderEntityId { get; set; } public string ModulePath { get; set; } = "/api/auth/saml2"; }
 public abstract class DirectoryOptionsBase
 {
     public bool Enabled { get; set; }

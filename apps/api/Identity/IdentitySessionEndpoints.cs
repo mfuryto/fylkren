@@ -20,7 +20,19 @@ public static partial class IdentityEndpoints
         if (user.Identity?.IsAuthenticated != true || !Guid.TryParse(user.FindFirstValue(ClaimTypes.NameIdentifier), out var identityId))
             return Results.Ok(new { authenticated = false, username = (string?)null, personId = (string?)null, displayName = (string?)null, isPlatformManager = false, mustChangePassword = false, hasProfileImage = false, isDirectoryManaged = false, canPlan = false, canApproveWork = false });
         var identity = await database.LoginIdentities.Include(value => value.Person).SingleOrDefaultAsync(value => value.Id == identityId, cancellationToken);
-        if (identity is null || !identity.IsActive || !identity.Person.IsActive || (!identity.IsPlatformManager && !await HasActiveAccess(identity.PersonId, database, cancellationToken))) return Results.Ok(new { authenticated = false, username = (string?)null, personId = (string?)null, displayName = (string?)null, isPlatformManager = false, mustChangePassword = false, hasProfileImage = false, isDirectoryManaged = false, canPlan = false, canApproveWork = false });
+        if (identity is null || !identity.IsActive || !identity.Person.IsActive) return Results.Ok(new { authenticated = false, username = (string?)null, personId = (string?)null, displayName = (string?)null, isPlatformManager = false, mustChangePassword = false, hasProfileImage = false, isDirectoryManaged = false, canPlan = false, canApproveWork = false });
+        var hasActiveAccess = identity.IsPlatformManager || await HasActiveAccess(identity.PersonId, database, cancellationToken);
+        var isProvisioned = await database.ExternalIdentityLinks.AsNoTracking().AnyAsync(value =>
+            value.PersonId == identity.PersonId && value.IsActive && value.ProvisionedAt != null, cancellationToken);
+        if (!hasActiveAccess && !isProvisioned) return Results.Ok(new { authenticated = false, username = (string?)null, personId = (string?)null, displayName = (string?)null, isPlatformManager = false, mustChangePassword = false, hasProfileImage = false, isDirectoryManaged = false, canPlan = false, canApproveWork = false });
+        if (!hasActiveAccess)
+            return Results.Ok(new { authenticated = true, accessPending = true, username = identity.Username,
+                email = identity.Person.Email, personId = identity.PersonId.ToString(), displayName = identity.Person.DisplayName,
+                isPlatformManager = false, hasArchiveAccess = false, managesSites = false, administersSite = false,
+                hasOperationalRole = false, canExecute = false, mustChangePassword = false,
+                hasProfileImage = false, isDirectoryManaged = true, twoFactorEnabled = false, mfaRequired = false,
+                mfaEnrollmentRequired = false, mfaPasskeyRequired = false, canPlan = false,
+                canApproveWork = false, isTopLevelLeader = false });
         var now = DateTimeOffset.UtcNow; var canPlan = await database.RoleAssignments.AnyAsync(x => x.PersonId == identity.PersonId && x.IsActive && x.ValidFrom <= now && (x.ValidTo == null || x.ValidTo > now) && x.Role.IsActive && x.Role.OrganizationUnit.IsActive && x.Role.OrganizationUnit.Site.IsActive && (x.Role.CanPlan || x.Role.IsLeader || x.Role.HasLeaderAccess), cancellationToken);
         var hasOperationalRole = await database.RoleAssignments.AnyAsync(x => x.PersonId == identity.PersonId && x.IsActive && x.ValidFrom <= now && (x.ValidTo == null || x.ValidTo > now) && x.Role.IsActive && x.Role.OrganizationUnit.IsActive && x.Role.OrganizationUnit.Site.IsActive, cancellationToken)
             || await database.OrganizationUnitMemberships.AnyAsync(x => x.PersonId == identity.PersonId && x.OrganizationUnit.IsActive && x.Site.IsActive && x.Site.Memberships.Any(membership => membership.PersonId == identity.PersonId && membership.IsActive), cancellationToken);
@@ -38,7 +50,7 @@ public static partial class IdentityEndpoints
         var mfaRequired = options.Authentication.MfaRequired && user.FindFirst("fylkren:mfa_satisfied")?.Value != "true";
         var hasPasskey = options.Authentication.WebAuthn.Enabled && await database.WebAuthnCredentials
             .AnyAsync(value => value.PersonId == identity.PersonId && value.IsActive, cancellationToken);
-        return Results.Ok(new { authenticated = true, username = identity.Username, email = identity.Person.Email, personId = identity.PersonId.ToString(), displayName = identity.Person.DisplayName, isPlatformManager = identity.IsPlatformManager, hasArchiveAccess, managesSites, administersSite, hasOperationalRole, canExecute, mustChangePassword = identity.MustChangePassword, hasProfileImage = identity.Person.ProfileImage is not null, isDirectoryManaged, twoFactorEnabled = options.Authentication.MfaEnabled && identity.TotpEnabled, mfaRequired, mfaEnrollmentRequired = mfaRequired && !identity.TotpEnabled && !hasPasskey, mfaPasskeyRequired = mfaRequired && !identity.TotpEnabled && hasPasskey, canPlan, canApproveWork, isTopLevelLeader });
+        return Results.Ok(new { authenticated = true, accessPending = false, username = identity.Username, email = identity.Person.Email, personId = identity.PersonId.ToString(), displayName = identity.Person.DisplayName, isPlatformManager = identity.IsPlatformManager, hasArchiveAccess, managesSites, administersSite, hasOperationalRole, canExecute, mustChangePassword = identity.MustChangePassword, hasProfileImage = identity.Person.ProfileImage is not null, isDirectoryManaged, twoFactorEnabled = options.Authentication.MfaEnabled && identity.TotpEnabled, mfaRequired, mfaEnrollmentRequired = mfaRequired && !identity.TotpEnabled && !hasPasskey, mfaPasskeyRequired = mfaRequired && !identity.TotpEnabled && hasPasskey, canPlan, canApproveWork, isTopLevelLeader });
     }
 
     private static async Task<IResult> SignIn(

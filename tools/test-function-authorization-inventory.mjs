@@ -15,7 +15,7 @@ const sources = files('apps/api').map(path => ({
 const methods = ['Get', 'Post', 'Put', 'Patch', 'Delete'];
 const operationCount = sources.reduce((total, file) => total + methods.reduce((count, method) =>
   count + [...file.source.matchAll(new RegExp(`\\.Map${method}\\(`, 'g'))].length, 0), 0);
-assert.equal(operationCount, 295, 'Route inventory changed; reconcile function authorization before accepting it');
+assert.equal(operationCount, 296, 'Route inventory changed; reconcile function authorization before accepting it');
 
 const anonymousByFile = Object.fromEntries(sources.map(file => [file.path,
   [...file.source.matchAll(/\.AllowAnonymous\(/g)].length]).filter(([, count]) => count > 0));
@@ -41,8 +41,11 @@ assert.deepEqual(anonymousByFile, {
 }, 'Anonymous route set changed; every exception requires an explicit security review');
 
 const registration = readFileSync('apps/api/ServiceRegistration.cs', 'utf8');
-assert.match(registration, /FallbackPolicy = new AuthorizationPolicyBuilder\(\)\s*\.RequireAuthenticatedUser\(\)/);
-assert.match(registration, /AddPolicy\("MachineApi", policy => policy\.RequireAuthenticatedUser\(\)\.RequireClaim\("fylkren:machine_id"\)\)/);
+const identityAuthorization = readFileSync('apps/api/Identity/IdentityAuthorization.cs', 'utf8');
+assert.match(identityAuthorization, /DefaultPolicy = new AuthorizationPolicyBuilder\(\)[\s\S]*RequireAuthenticatedUser\(\)[\s\S]*RequireClaim\("fylkren:access_granted", "true"\)/);
+assert.match(identityAuthorization, /FallbackPolicy = options\.DefaultPolicy/);
+assert.match(identityAuthorization, /AddPolicy\(AuthenticatedIncludingPending, policy => policy\.RequireAuthenticatedUser\(\)\)/);
+assert.match(identityAuthorization, /AddPolicy\("MachineApi", policy => policy\.RequireAuthenticatedUser\(\)\.RequireClaim\("fylkren:machine_id"\)\)/);
 
 const anonymousFederationFiles = Object.keys(anonymousByFile).filter(path => path.includes('/Federation/'));
 for (const path of anonymousFederationFiles) {
@@ -82,7 +85,7 @@ for (const boundary of ['Platform work overview', 'Site Manager task creation', 
 
 process.stdout.write(`${JSON.stringify({
   functionAuthorizationInventory: 'passed', operationCount, anonymousDeclarations: 24,
-  globalAuthenticatedFallback: true,
+  globalGrantedAccessFallback: true,
   policyFamilies: ['platform-role', 'site-manager-assignment', 'operational-role-level', 'machine-scope', 'signed-federation'],
   maintainedNegativeRoleBoundaries: 6,
 })}\n`);

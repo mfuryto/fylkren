@@ -17,6 +17,7 @@ const keycloakUserPassword = `U7!${randomBytes(18).toString('base64url')}#u`;
 const oidcClientSecret = `O6!${randomBytes(24).toString('base64url')}#o`;
 const negativeClientSecret = `N8!${randomBytes(24).toString('base64url')}#n`;
 const externalSubject = '11111111-1111-4111-8111-111111111111';
+const automaticSubject = '55555555-5555-4555-8555-555555555555';
 const managerExternalSubject = '22222222-2222-4222-8222-222222222222';
 const secondIssuerSubject = '33333333-3333-4333-8333-333333333333';
 const authority = 'https://keycloak.test:18443/realms/fylkren-lab';
@@ -160,6 +161,15 @@ function createRealm() {
       firstName: 'Live',
       lastName: 'SSO Person',
       attributes: { [`saml.persistent.name.id.for.${browserBase}/api/auth/saml2`]: [externalSubject] },
+      credentials: [{ type: 'password', value: keycloakUserPassword, temporary: false }],
+    }, {
+      id: automaticSubject,
+      username: 'automatic-sso',
+      enabled: true,
+      emailVerified: true,
+      email: 'automatic-sso@example.invalid',
+      firstName: 'Automatic',
+      lastName: 'SSO Person',
       credentials: [{ type: 'password', value: keycloakUserPassword, temporary: false }],
     }],
     clients: [{
@@ -423,6 +433,7 @@ try {
     lifecycleActiveFilter: '(objectClass=*)', authority, clientId: 'fylkren-oidc',
     callbackPath: '/signin-oidc', metadataUrl: null, entityId: null,
     identityProviderEntityId: null, modulePath: '/api/auth/saml2', ssoAutoRedirectProvider: null,
+    automaticProvisioning: false,
   };
   const mismatchedIssuerConfiguration = {
     ...oidcConfiguration,
@@ -533,6 +544,65 @@ try {
   assert.equal(replaySession.authenticated, false, 'A replayed OIDC callback must not establish a session');
   await browser.close();
 
+  process.stdout.write('Checking automatic OIDC provisioning and restricted pending access...\n');
+  const automaticDisabled = { ...oidcConfiguration, automaticProvisioning: true };
+  assert.equal((await manager.put('/api/platform/identity/providers/oidc', {
+    enabled: false, clearSecret: false, configuration: automaticDisabled,
+  })).status, 204);
+  assert.equal((await manager.post('/api/platform/identity/providers/oidc/test', {})).status, 204);
+  const automaticStored = await manager.request('/api/platform/identity/providers/oidc');
+  assert.equal((await manager.put('/api/platform/identity/providers/oidc', {
+    enabled: true, clearSecret: false, configuration: automaticStored.body.configuration,
+  })).status, 204);
+  const automaticBrowser = await createCdpSession('about:blank');
+  await automaticBrowser.clearCookies(browserBase);
+  await automaticBrowser.navigate(`${browserBase}/api/auth/oidc/login`);
+  await automaticBrowser.waitFor('document.querySelector("#username") !== null', 'Keycloak automatic-provisioning form');
+  await automaticBrowser.evaluate(`document.querySelector('#username').value = 'automatic-sso'; document.querySelector('#password').value = ${JSON.stringify(keycloakUserPassword)}; document.querySelector('#kc-login').click();`);
+  await automaticBrowser.waitFor(`location.origin === ${JSON.stringify(browserBase)} && location.pathname === '/'`, 'automatic OIDC callback');
+  const pendingSession = await automaticBrowser.evaluate(`fetch('/api/session').then(value => value.json())`);
+  assert.equal(pendingSession.authenticated, true, JSON.stringify(pendingSession));
+  assert.equal(pendingSession.accessPending, true, JSON.stringify(pendingSession));
+  assert.equal(await automaticBrowser.evaluate(`fetch('/api/profile').then(value => value.status)`), 403,
+    'Pending external identity reached an operational API');
+  const pendingDirectory = await manager.request('/api/platform/identity/users?q=automatic-sso&page=1&pageSize=25');
+  const pendingPerson = pendingDirectory.body.items.find(value => value.accessPending);
+  assert.ok(pendingPerson, JSON.stringify(pendingDirectory.body));
+  assert.equal((await manager.post('/api/platform/identity/users/assign', {
+    personIds: [pendingPerson.id], siteId: site.body.id,
+  })).status, 200);
+  const assignedSession = await automaticBrowser.evaluate(`fetch('/api/session').then(value => value.json())`);
+  assert.equal(assignedSession.accessPending, false, JSON.stringify(assignedSession));
+  assert.equal(await automaticBrowser.evaluate(`fetch('/api/profile').then(value => value.status)`), 200,
+    'Assigned external identity did not gain ordinary authenticated access');
+  const managedProfileResult = await automaticBrowser.evaluate(`(async () => {
+    const token = await fetch('/api/security/antiforgery').then(value => value.json());
+    return fetch('/api/profile', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Fylkren-CSRF': token.token }, body: JSON.stringify({ displayName: 'Local rewrite', email: 'local-rewrite@example.invalid', currentPassword: null }) }).then(value => value.status);
+  })()`);
+  assert.equal(managedProfileResult, 409, 'Provider-owned profile fields were locally editable');
+  const automaticLinks = await manager.request('/api/platform/identity/oidc-links');
+  const automaticLink = automaticLinks.body.find(value => value.subjectId === automaticSubject);
+  assert.ok(automaticLink, JSON.stringify(automaticLinks.body));
+  assert.equal((await manager.delete(`/api/platform/identity/oidc-links/${automaticLink.id}`)).status, 204);
+  await automaticBrowser.clearCookies(browserBase);
+  await automaticBrowser.navigate(`${browserBase}/api/auth/oidc/login`);
+  await automaticBrowser.waitFor('document.querySelector("#username") !== null', 'Keycloak unlinked automatic identity form');
+  const rejectedStart = automaticBrowser.networkResponses.length;
+  await automaticBrowser.evaluate(`document.querySelector('#username').value = 'automatic-sso'; document.querySelector('#password').value = ${JSON.stringify(keycloakUserPassword)}; document.querySelector('#kc-login').click();`);
+  const rejectedAutomatic = await automaticBrowser.waitForResponse(
+    response => response.url.includes('/signin-oidc') && response.status >= 400,
+    'unlinked automatic identity rejection', rejectedStart);
+  assert.equal(rejectedAutomatic.status, 400);
+  const reviewIssues = await manager.request('/api/platform/identity/provisioning-issues');
+  assert.ok(reviewIssues.body.some(value => value.subjectId === automaticSubject && value.reason === 'inactive-link'),
+    JSON.stringify(reviewIssues.body));
+  assert.equal((await manager.post('/api/platform/identity/oidc-links', {
+    username: 'automatic-sso', subjectId: automaticSubject,
+  })).status, 201);
+  assert.equal((await manager.request('/api/platform/identity/provisioning-issues')).body.some(value => value.subjectId === automaticSubject), false,
+    'Explicit relinking did not close the provisioning review item');
+  await automaticBrowser.close();
+
   const negativeConfiguration = {
     ...oidcConfiguration,
     authority: negativeAuthority,
@@ -583,8 +653,7 @@ try {
 
   const oidcLinks = await manager.request('/api/platform/identity/oidc-links');
   assert.equal(oidcLinks.status, 200);
-  assert.equal(oidcLinks.body.length, 1);
-  assert.equal(oidcLinks.body[0].providerInstanceId, authority,
+  assert.equal(oidcLinks.body.find(value => value.id === linked.body.id)?.providerInstanceId, authority,
     'OIDC links must retain their exact canonical issuer');
 
   const secondIssuerConfiguration = { ...oidcConfiguration, authority: secondAuthority };
@@ -968,6 +1037,9 @@ try {
     oidcUnlinkAndRelink: 'passed',
     directSsoAndLocalLockoutGuards: 'passed',
     serverSideSessionWithoutBrowserTokens: 'passed',
+    automaticProvisioningAndPendingAuthorization: 'passed',
+    providerOwnedProfileFields: 'passed',
+    automaticProvisioningUnlinkAndReview: 'passed',
     liveSamlSignedAssertion: 'passed',
     samlForcedAuthenticationRequest: 'passed',
     samlTamperedUnsignedAndReplayRejection: 'passed',

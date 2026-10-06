@@ -21,6 +21,7 @@ public sealed class ExternalIdentityLink
     public string? Username { get; private set; }
     public bool IsActive { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
+    public DateTimeOffset? ProvisionedAt { get; private set; }
     public bool DirectoryAccessEnabled { get; private set; } = true;
     public string DirectoryLifecycleStatus { get; private set; } = "pending";
     public int DirectoryMissingCount { get; private set; }
@@ -29,6 +30,11 @@ public sealed class ExternalIdentityLink
     public DateTimeOffset? DirectorySuspendedAt { get; private set; }
     public Person Person { get; private set; } = null!;
     public void UpdateUsername(string? username) => Username = string.IsNullOrWhiteSpace(username) ? null : username.Trim();
+    public void MarkProvisioned(DateTimeOffset now)
+    {
+        if (Provider is not ("oidc" or "saml")) throw new InvalidOperationException("Only OIDC and SAML links can be automatically provisioned.");
+        ProvisionedAt ??= now;
+    }
     public void BindLegacyProviderInstance(string providerInstanceId)
     {
         if (Provider is not ("oidc" or "saml") || ProviderInstanceId.Length > 0)

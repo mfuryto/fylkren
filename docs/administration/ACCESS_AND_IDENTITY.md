@@ -68,7 +68,9 @@ External authentication establishes the same local browser session after resolvi
 
 The OIDC provider must sign ID tokens with RS256 using RSA-3072 or stronger. Incoming SAML signatures must use RSA-SHA256 or a stronger recognized signing algorithm and every metadata signing key must be RSA-3072 or stronger. Verify algorithm and key size at the identity provider before activation; weaker keys are rejected.
 
-Unknown stable identifiers are rejected. Username is never the permanent link key. Directory search and linking are explicit; AD/LDAP never populate site personnel automatically.
+Unknown stable identifiers are rejected by default. Platform Manager may enable **Create new users at first sign-in** separately for OIDC and SAML. A verified unknown identity then creates one provider-managed person without Site, role or permissions and opens only an information page until Platform Manager assigns a Site. AD/LDAP users are still searched and added explicitly from Personnel; Fylkren never imports an entire directory automatically.
+
+Automatic provisioning never matches an existing person by name, username or email. If one of those values collides with an existing person, sign-in fails safely and **Identity** shows a review item. Platform Manager selects **Prepare link**, enters the existing local username and saves the explicit stable-identifier link. Provider-created name, username, email and stable identifier are read-only in Fylkren; Site membership, placement, roles and permissions remain locally managed.
 
 Internal provider destinations and providers with separate OIDC backchannel hosts may require deployment-owned outbound approvals before connection testing. See [outbound integration configuration](../operations/INSTALLATION_AND_UPGRADES.md#outbound-integration-configuration). Invalid or unavailable runtime metadata rejects external sign-in without blocking local administration.
 

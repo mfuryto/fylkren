@@ -69,11 +69,13 @@ public sealed class IdentityProviderConfigurationService(
             case "oidc":
                 runtime.Authentication.Oidc.Enabled = enabled; runtime.Authentication.Oidc.Authority = Clean(value.Authority);
                 runtime.Authentication.Oidc.ClientId = Clean(value.ClientId); runtime.Authentication.Oidc.ClientSecret = value.Secret;
-                runtime.Authentication.Oidc.CallbackPath = value.CallbackPath; oidcCache.TryRemove(OpenIdConnectDefaults.AuthenticationScheme); break;
+                runtime.Authentication.Oidc.CallbackPath = value.CallbackPath; runtime.Authentication.Oidc.AutomaticProvisioning = value.AutomaticProvisioning;
+                oidcCache.TryRemove(OpenIdConnectDefaults.AuthenticationScheme); break;
             case "saml":
                 runtime.Authentication.Saml.Enabled = enabled; runtime.Authentication.Saml.MetadataUrl = Clean(value.MetadataUrl);
                 runtime.Authentication.Saml.EntityId = Clean(value.EntityId); runtime.Authentication.Saml.IdentityProviderEntityId = Clean(value.IdentityProviderEntityId);
-                runtime.Authentication.Saml.ModulePath = value.ModulePath; samlCache.TryRemove(Saml2Defaults.Scheme); break;
+                runtime.Authentication.Saml.ModulePath = value.ModulePath; runtime.Authentication.Saml.AutomaticProvisioning = value.AutomaticProvisioning;
+                samlCache.TryRemove(Saml2Defaults.Scheme); break;
             default: throw new ArgumentOutOfRangeException(nameof(provider));
         }
     }
@@ -84,9 +86,11 @@ public sealed class IdentityProviderConfigurationService(
         "ad" => (runtime.Authentication.ActiveDirectory.Enabled, FromDirectory(runtime.Authentication.ActiveDirectory, runtime.Authentication.ActiveDirectory.Domain)),
         "ldap" => (runtime.Authentication.Ldap.Enabled, FromDirectory(runtime.Authentication.Ldap, null)),
         "oidc" => (runtime.Authentication.Oidc.Enabled, new(Authority: runtime.Authentication.Oidc.Authority, ClientId: runtime.Authentication.Oidc.ClientId,
-            Secret: runtime.Authentication.Oidc.ClientSecret, CallbackPath: runtime.Authentication.Oidc.CallbackPath)),
+            Secret: runtime.Authentication.Oidc.ClientSecret, CallbackPath: runtime.Authentication.Oidc.CallbackPath,
+            AutomaticProvisioning: runtime.Authentication.Oidc.AutomaticProvisioning)),
         "saml" => (runtime.Authentication.Saml.Enabled, new(MetadataUrl: runtime.Authentication.Saml.MetadataUrl, EntityId: runtime.Authentication.Saml.EntityId,
-            IdentityProviderEntityId: runtime.Authentication.Saml.IdentityProviderEntityId, ModulePath: runtime.Authentication.Saml.ModulePath)),
+            IdentityProviderEntityId: runtime.Authentication.Saml.IdentityProviderEntityId, ModulePath: runtime.Authentication.Saml.ModulePath,
+            AutomaticProvisioning: runtime.Authentication.Saml.AutomaticProvisioning)),
         _ => throw new ArgumentOutOfRangeException(nameof(provider))
     };
 

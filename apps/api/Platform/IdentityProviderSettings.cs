@@ -29,4 +29,5 @@ public sealed record IdentityProviderConfiguration(
     string LifecycleActiveFilter = "(objectClass=*)", string? Authority = null,
     string? ClientId = null, string CallbackPath = "/signin-oidc", string? MetadataUrl = null,
     string? EntityId = null, string? IdentityProviderEntityId = null,
-    string ModulePath = "/api/auth/saml2", string? SsoAutoRedirectProvider = null);
+    string ModulePath = "/api/auth/saml2", string? SsoAutoRedirectProvider = null,
+    bool AutomaticProvisioning = false);

@@ -245,19 +245,24 @@ internal static class ServiceRegistration
                     if (string.IsNullOrWhiteSpace(providerInstanceId)) { context.Fail("OIDC provider identity is missing."); return; }
                     await using var scope = context.HttpContext.RequestServices.CreateAsyncScope();
                     var database = scope.ServiceProvider.GetRequiredService<FylkrenDbContext>();
-                    var link = await database.ExternalIdentityLinks.AsNoTracking().SingleOrDefaultAsync(value =>
-                        value.Provider == "oidc" && value.ProviderInstanceId == providerInstanceId &&
-                        value.SubjectId == subject && value.IsActive);
-                    if (link is null) { context.Fail("OIDC identity is not linked to a Fylkren person."); return; }
-                    var identity = await database.LoginIdentities.Include(value => value.Person).SingleOrDefaultAsync(value => value.PersonId == link.PersonId && value.IsActive && value.Person.IsActive);
-                    if (identity is null || !identity.IsPlatformManager &&
-                        !await IdentityEndpoints.HasActiveAccess(identity.PersonId, database, context.HttpContext.RequestAborted))
+                    var provisioning = scope.ServiceProvider.GetRequiredService<ExternalIdentityProvisioningService>();
+                    var resolution = await provisioning.ResolveAsync(database, "oidc", providerInstanceId, subject,
+                        context.Principal?.FindFirst("preferred_username")?.Value ?? context.Principal?.FindFirst(ClaimTypes.Email)?.Value,
+                        context.Principal?.FindFirst("name")?.Value ?? context.Principal?.Identity?.Name,
+                        context.Principal?.FindFirst(ClaimTypes.Email)?.Value ?? context.Principal?.FindFirst("email")?.Value,
+                        fylkrenOptions.Authentication.Oidc.AutomaticProvisioning,
+                        context.HttpContext.RequestAborted);
+                    if (resolution is null) { context.Fail("OIDC identity is not linked or eligible for provisioning."); return; }
+                    var identity = resolution.Identity;
+                    var hasAccess = identity.IsPlatformManager ||
+                        await IdentityEndpoints.HasActiveAccess(identity.PersonId, database, context.HttpContext.RequestAborted);
+                    if (!hasAccess && !resolution.ProviderManaged)
                     { context.Fail("Linked Fylkren identity is inactive or has no active access."); return; }
                     identity.RecordSignIn(DateTimeOffset.UtcNow);
                     var browserSession = IdentityEndpoints.StartBrowserSession(
                         identity, database, context.HttpContext, "oidc");
                     await database.SaveChangesAsync();
-                    context.Principal = IdentityEndpoints.CreatePrincipal(identity, browserSession.Id);
+                    context.Principal = IdentityEndpoints.CreatePrincipal(identity, browserSession.Id, accessGranted: hasAccess);
                 };
             });
         authentication.AddSaml2(Saml2Defaults.Scheme, options =>
@@ -300,13 +305,7 @@ internal static class ServiceRegistration
         });
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<IAuthenticationSchemeProvider, SamlRequestSchemeProvider>();
-        builder.Services.AddAuthorization(options =>
-        {
-            options.FallbackPolicy = new AuthorizationPolicyBuilder()
-                .RequireAuthenticatedUser()
-                .Build();
-            options.AddPolicy("MachineApi", policy => policy.RequireAuthenticatedUser().RequireClaim("fylkren:machine_id"));
-        });
+        builder.Services.AddAuthorization(IdentityAuthorization.Configure);
         builder.Services.AddAntiforgery(options =>
         {
             options.HeaderName = "X-Fylkren-CSRF";
@@ -323,6 +322,7 @@ internal static class ServiceRegistration
         builder.Services.AddSingleton<WebAuthnFlowService>();
         builder.Services.AddSingleton<DirectoryAuthenticationService>();
         builder.Services.AddSingleton<DirectoryLifecycleSynchronizer>();
+        builder.Services.AddSingleton<ExternalIdentityProvisioningService>();
         builder.Services.AddSingleton<IdentityProviderConfigurationService>();
         builder.Services.AddSingleton<HostStatusReader>();
         builder.Services.AddScoped<CryptoReprotectionService>();
@@ -466,11 +466,18 @@ internal static class ServiceRegistration
             var securityVersionValue = context.Principal.FindFirst("fylkren:security_version")?.Value;
             var securityVersionMatches = long.TryParse(securityVersionValue, out var securityVersion) &&
                 sessionIdentity?.SecurityVersion == securityVersion;
+            var sessionHasOperationalAccess = sessionIdentity is not null &&
+                (sessionIdentity.IsPlatformManager ||
+                 await IdentityEndpoints.HasActiveAccess(sessionIdentity.PersonId, sessionDatabase, context.HttpContext.RequestAborted));
+            var pendingProvisionedAccess = sessionIdentity is not null && browserSession is not null &&
+                browserSession.AuthenticationMethod is "oidc" or "saml" &&
+                await sessionDatabase.ExternalIdentityLinks.AsNoTracking().AnyAsync(value =>
+                    value.PersonId == sessionIdentity.PersonId && value.Provider == browserSession.AuthenticationMethod &&
+                    value.IsActive && value.ProvisionedAt != null, context.HttpContext.RequestAborted);
             var hasAccess = sessionIdentity is not null &&
                 securityVersionMatches &&
                 browserSession is not null && browserSession.IsActive(now, securityVersion) &&
-                (sessionIdentity.IsPlatformManager ||
-                 await IdentityEndpoints.HasActiveAccess(sessionIdentity.PersonId, sessionDatabase, context.HttpContext.RequestAborted));
+                (sessionHasOperationalAccess || pendingProvisionedAccess);
             if (!hasAccess || sessionIdentity is null || browserSession is null)
             {
                 context.RejectPrincipal();
@@ -484,7 +491,8 @@ internal static class ServiceRegistration
                 await sessionDatabase.SaveChangesAsync(context.HttpContext.RequestAborted);
             }
             context.ReplacePrincipal(IdentityEndpoints.CreatePrincipal(
-                sessionIdentity, browserSession.Id, sessionStartedAt, directoryManaged, mfaSatisfied));
+                sessionIdentity, browserSession.Id, sessionStartedAt, directoryManaged, mfaSatisfied,
+                sessionHasOperationalAccess));
             context.ShouldRenew = true;
             return;
         }
@@ -504,23 +512,22 @@ internal static class ServiceRegistration
             context.RejectPrincipal();
             return;
         }
-        var link = await database.ExternalIdentityLinks.AsNoTracking()
-            .SingleOrDefaultAsync(value => value.Provider == "saml" && value.ProviderInstanceId == providerInstanceId &&
-                value.SubjectId == subject && value.IsActive);
-        if (link is null)
+        var provisioning = context.HttpContext.RequestServices.GetRequiredService<ExternalIdentityProvisioningService>();
+        var resolution = await provisioning.ResolveAsync(database, "saml", providerInstanceId, subject,
+            context.Principal?.FindFirst(ClaimTypes.Upn)?.Value ?? context.Principal?.FindFirst(ClaimTypes.Email)?.Value,
+            context.Principal?.FindFirst(ClaimTypes.Name)?.Value ?? context.Principal?.Identity?.Name,
+            context.Principal?.FindFirst(ClaimTypes.Email)?.Value ?? context.Principal?.FindFirst("email")?.Value,
+            runtimeOptions.Authentication.Saml.AutomaticProvisioning,
+            context.HttpContext.RequestAborted);
+        if (resolution is null)
         {
             context.RejectPrincipal();
             return;
         }
-
-        var identity = await database.LoginIdentities.Include(value => value.Person)
-            .SingleOrDefaultAsync(value => value.PersonId == link.PersonId && value.IsActive && value.Person.IsActive);
-        if (identity is null || !identity.IsPlatformManager &&
-            !await IdentityEndpoints.HasActiveAccess(identity.PersonId, database, context.HttpContext.RequestAborted))
-        {
-            context.RejectPrincipal();
-            return;
-        }
+        var identity = resolution.Identity;
+        var hasOperationalAccess = identity.IsPlatformManager ||
+            await IdentityEndpoints.HasActiveAccess(identity.PersonId, database, context.HttpContext.RequestAborted);
+        if (!hasOperationalAccess && !resolution.ProviderManaged) { context.RejectPrincipal(); return; }
 
         identity.RecordSignIn(DateTimeOffset.UtcNow);
         var externalSessionStartedAt = context.Properties.IssuedUtc ?? DateTimeOffset.UtcNow;
@@ -534,7 +541,8 @@ internal static class ServiceRegistration
         var samlBrowserSession = IdentityEndpoints.StartBrowserSession(
             identity, database, context.HttpContext, "saml", externalSessionStartedAt);
         await database.SaveChangesAsync();
-        context.ReplacePrincipal(IdentityEndpoints.CreatePrincipal(identity, samlBrowserSession.Id, externalSessionStartedAt));
+        context.ReplacePrincipal(IdentityEndpoints.CreatePrincipal(identity, samlBrowserSession.Id,
+            externalSessionStartedAt, accessGranted: hasOperationalAccess));
         context.ShouldRenew = true;
     }
 }

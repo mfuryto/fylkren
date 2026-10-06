@@ -40,23 +40,24 @@ for (const absolutePath of sourceFiles('apps/api')) {
   familyCounts[family.id] += count;
 }
 
-assert.deepEqual(methodCounts, { GET: 106, POST: 117, PUT: 45, PATCH: 0, DELETE: 27 },
+assert.deepEqual(methodCounts, { GET: 107, POST: 117, PUT: 45, PATCH: 0, DELETE: 27 },
   'Endpoint inventory changed; reconcile the new or removed routes with ACCESS_MATRIX.md before accepting the count');
-assert.equal(Object.values(familyCounts).reduce((sum, count) => sum + count, 0), 295);
+assert.equal(Object.values(familyCounts).reduce((sum, count) => sum + count, 0), 296);
 
 const documentation = readFileSync('docs/administration/ACCESS_MATRIX.md', 'utf8');
 for (const family of families) {
   assert.ok(documentation.includes(`| \`${family.id}\` |`),
     `ACCESS_MATRIX.md does not define authorization family ${family.id}`);
 }
-assert.match(documentation, /295 registered HTTP operations across 95 endpoint source files/);
+assert.match(documentation, /296 registered HTTP operations across 95 endpoint source files/);
+assert.match(documentation, /pending users?[\s\S]*ordinary authenticated fallback denies/i);
 assert.match(documentation, /consumer permission.*resource attributes/i);
 assert.match(documentation, /field and response boundary/i);
 
 process.stdout.write(`${JSON.stringify({
   authorizationDocumentationInventory: 'passed',
   endpointFiles: endpointFiles.length,
-  endpointOperations: 295,
+  endpointOperations: 296,
   methodCounts,
   familyCounts,
 })}\n`);

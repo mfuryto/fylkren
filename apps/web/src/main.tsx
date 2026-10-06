@@ -16,7 +16,7 @@ import { LocalizationProvider } from "./localization/LocalizationProvider";
 import { regionalDisplayLocale, translate } from "./localization";
 
 function warmAuthenticatedExperience(session: Session, location = currentAppLocation()) {
-  if (!session.authenticated) return;
+  if (!session.authenticated || session.accessPending) return;
   preloadOperationalPages();
   if (!session.personId || location.page !== "Overview") return;
   void getTaskContext(session.personId).then((context) => {
@@ -93,7 +93,7 @@ function App() {
       .then((value) => {
         warmAuthenticatedExperience(value);
         setSession(value);
-        if (value.authenticated)
+        if (value.authenticated && !value.accessPending)
           void apiGet<PublicConfiguration>("/api/configuration", "Configuration could not be loaded.")
             .then(setConfiguration)
             .catch(() => setConfigurationError(true));
@@ -111,13 +111,13 @@ function App() {
 
   useEffect(() => {
     const refresh = window.setInterval(() => {
-      if (session?.authenticated)
+      if (session?.authenticated && !session.accessPending)
         void apiGet<PublicConfiguration>("/api/configuration", translate(baseLanguage, "licenseRefreshFailed"))
           .then(setConfiguration)
           .catch(() => undefined);
     }, 60_000);
     return () => window.clearInterval(refresh);
-  }, [session?.authenticated]);
+  }, [session?.authenticated, session?.accessPending]);
 
   const activeRegionalSettings = configuration ?? loginConfiguration;
   const displayTimeZone = activeRegionalSettings?.timeZone ?? "UTC";
@@ -148,9 +148,10 @@ function App() {
         {branding.customCss && <style id="customer-css-overrides">{branding.customCss}</style>}
         <LoginPage
           onSignedIn={(nextSession) => {
-            void apiGet<PublicConfiguration>("/api/configuration", translate(baseLanguage, "configurationLoadFailed"))
-              .then(setConfiguration)
-              .catch(() => setConfigurationError(true));
+            if (!nextSession.accessPending)
+              void apiGet<PublicConfiguration>("/api/configuration", translate(baseLanguage, "configurationLoadFailed"))
+                .then(setConfiguration)
+                .catch(() => setConfigurationError(true));
             warmAuthenticatedExperience(nextSession);
             setSession(nextSession);
             if (nextSession.mustChangePassword || nextSession.mfaRequired) resetNavigation("Profile");
@@ -166,6 +167,20 @@ function App() {
         />
       </div></LocalizationProvider>
     );
+
+  if (session.accessPending)
+    return <LocalizationProvider language={displayLanguage}><div className={themeClass} style={brandedStyle}>
+      {branding.customCss && <style id="customer-css-overrides">{branding.customCss}</style>}
+      <main className="login-page"><section className="login-panel stacked-form">
+        <h1>{translate(baseLanguage, "accessPendingTitle")}</h1>
+        <p>{translate(baseLanguage, "accessPendingMessage")}</p>
+        <p className="muted">{session.displayName}{session.email ? ` · ${session.email}` : ""}</p>
+        <div className="modal-actions">
+          <button className="secondary-button" type="button" onClick={() => window.location.reload()}>{translate(baseLanguage, "checkAccessAgain")}</button>
+          <button className="primary-button" type="button" onClick={() => void signOut()}>{translate(baseLanguage, "signOut")}</button>
+        </div>
+      </section></main>
+    </div></LocalizationProvider>;
 
   async function signOut() {
     await endSession();

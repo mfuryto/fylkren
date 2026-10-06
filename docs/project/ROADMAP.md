@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 2026-10-06 after closing the final four ASVS finding rows. Identity provisioning and final release-candidate/deployment qualification remain explicit.
+Updated 2026-10-06 after delivering identity-provider provisioning. Final release-candidate and deployment qualification is next.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -14,12 +14,11 @@ API-first and AI-ready are continuing architecture requirements. New capabilitie
 
 ## Next delivery order
 
-1. Deliver configurable OIDC/SAML provisioning and the restricted unassigned-user state described below. Preserve the current explicit-link path and direct AD/LDAP personnel addition.
-2. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing, identity providers, authenticators, backup/key custody, time synchronization and remote logging at this gate.
+1. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing, identity providers, authenticators, backup/key custody, time synchronization and remote logging at this gate.
 
 No irreversible disposition is authorized by this order. Establish and verify its prerequisites before proposing activation; do not choose arbitrary retention periods.
 
-## Identity-provider provisioning — required before release qualification
+## Identity-provider provisioning — delivered
 
 Platform Manager must be able to enable or disable automatic person creation at first sign-in for OIDC and SAML. AD/LDAP users are instead searched and added directly from Site Manager's Personnel page; that action creates the internal person and directory identity link. Fylkren must not import an entire directory automatically. The existing controlled link to an internal person remains supported for every provider.
 
@@ -29,7 +28,7 @@ Provider-owned identity and sign-in fields are read-only in Fylkren. This includ
 
 A newly provisioned external person without local access assignments authenticates into a restricted information page explaining that Site, role and permissions have not yet been assigned. The person cannot access operational, Site or administrative data. The global user directory exposes these pending people to an authorized Platform Manager, who can assign a Site; the receiving Site Manager can then assign organizational placement, roles and permissions through the ordinary controls.
 
-Implementation must be race-safe and auditable and must preserve namespaced immutable provider identifiers. Tests must cover OIDC/SAML provisioning disabled, one-time creation when enabled, concurrent first sign-ins, an existing AD/LDAP person receiving an additional SSO link without duplication, ambiguous matches, issuer/entity collisions, immutable provider-owned fields, the restricted pending session, denial of all unrelated APIs, assignment followed by ordinary access and suspension/unlink behavior. Current explicit-link and AD/LDAP direct-add behavior must remain compatible.
+The implementation is delivered with the existing explicit-link and AD/LDAP direct-add behavior preserved. Provider-created identity fields are read-only, collisions become visible review items, and pending people are isolated by the default API authorization policy until Site assignment. The canonical requirements, data model, security analysis and test mapping are in [Identity-provider provisioning](../architecture/IDENTITY_PROVIDER_PROVISIONING.md). Focused PostgreSQL tests and the maintained live OIDC/SAML laboratory cover disabled/enabled provisioning, concurrency, explicit AD/LDAP-plus-SSO linking, namespace collisions, pending API denial, assignment, provider-owned fields, unlink/review and relink. Candidate-wide reruns remain the release-qualification step rather than unfinished feature implementation.
 
 ## Deferred irreversible lifecycle capabilities
 

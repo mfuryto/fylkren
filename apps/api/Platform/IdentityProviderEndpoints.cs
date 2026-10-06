@@ -44,6 +44,7 @@ public static class IdentityProviderEndpoints
         group.MapDelete("/saml-links/{id:guid}", (Guid id, IAntiforgery antiforgery,
             HttpContext context, FylkrenDbContext database, FylkrenOptions options, CancellationToken cancellationToken) =>
             DeleteLink(id, "saml", antiforgery, context, database, options, cancellationToken));
+        group.MapGet("/provisioning-issues", GetProvisioningIssues);
         return endpoints;
     }
 
@@ -341,10 +342,22 @@ public static class IdentityProviderEndpoints
             providerInstanceId, subject, identity.Username, now);
         if (existingLink is null) database.Add(link);
         else link.Reactivate(identity.PersonId, identity.Username, now);
+        var issue = await database.ExternalIdentityProvisioningIssues.SingleOrDefaultAsync(value =>
+            value.Provider == provider && value.ProviderInstanceId == providerInstanceId &&
+            value.SubjectId == subject && value.ResolvedAt == null, cancellationToken);
+        issue?.Resolve(now);
         Record(database, context, $"identity.{provider}.linked", link.Id);
         await database.SaveChangesAsync(cancellationToken);
         return Results.Created($"/api/platform/identity/{provider}-links/{link.Id}", new { link.Id });
     }
+
+    private static async Task<IResult> GetProvisioningIssues(FylkrenDbContext database,
+        CancellationToken cancellationToken) => Results.Ok(await database.ExternalIdentityProvisioningIssues
+        .AsNoTracking().Where(value => value.ResolvedAt == null)
+        .OrderByDescending(value => value.LastSeenAt)
+        .Select(value => new { value.Id, value.Provider, value.ProviderInstanceId, value.SubjectId,
+            value.Username, value.DisplayName, value.Email, value.Reason, value.FirstSeenAt, value.LastSeenAt })
+        .ToListAsync(cancellationToken));
 
     private static async Task<IResult> DeleteLink(Guid id, string provider, IAntiforgery antiforgery,
         HttpContext context, FylkrenDbContext database, FylkrenOptions options, CancellationToken cancellationToken)

@@ -22,7 +22,7 @@ public static partial class IdentityEndpoints
     {
         await antiforgery.ValidateRequestAsync(context);
         var identity = await CurrentIdentity(user, database, cancellationToken); if (identity is null) return Results.Unauthorized();
-        if (await IsDirectoryManaged(identity.PersonId, database, cancellationToken)) return Results.Conflict(new { error = "Profile information is managed by the directory service." });
+        if (await IsDirectoryManaged(identity.PersonId, database, cancellationToken)) return Results.Conflict(new { error = "Profile information is managed by the external identity provider." });
         var displayName = (request.DisplayName ?? "").Trim(); var email = (request.Email ?? "").Trim();
         if (displayName.Length is < 2 or > 200 || !MailAddress.TryCreate(email, out _)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["profile"] = ["The name or email address is invalid."] });
         var emailChanged = !string.Equals(identity.Person.Email, email, StringComparison.OrdinalIgnoreCase);
@@ -49,7 +49,7 @@ public static partial class IdentityEndpoints
     {
         await antiforgery.ValidateRequestAsync(context);
         var identity = await CurrentIdentity(user, database, cancellationToken); if (identity is null) return Results.Unauthorized();
-        if (await IsDirectoryManaged(identity.PersonId, database, cancellationToken)) return Results.Conflict(new { error = "The password is managed by the directory service." });
+        if (await IsDirectoryManaged(identity.PersonId, database, cancellationToken)) return Results.Conflict(new { error = "Sign-in information is managed by the external identity provider." });
         if (string.IsNullOrEmpty(request.CurrentPassword) || string.IsNullOrEmpty(request.NewPassword)) return Results.ValidationProblem(new Dictionary<string, string[]> { ["password"] = ["Enter both the current and new password."] });
         if (passwordHasher.VerifyHashedPassword(identity, identity.PasswordHash, request.CurrentPassword) == PasswordVerificationResult.Failed) return Results.Problem(statusCode: 400, title: "The current password is incorrect.");
         if (request.CurrentPassword == request.NewPassword) return Results.ValidationProblem(new Dictionary<string, string[]> { ["newPassword"] = ["The new password must be different from the current password."] });

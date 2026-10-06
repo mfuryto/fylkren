@@ -75,7 +75,7 @@ public static partial class PlatformUserEndpoints
             .ToListAsync(cancellationToken);
         var externalIdentities = await database.ExternalIdentityLinks.AsNoTracking()
             .Where(link => personIds.Contains(link.PersonId))
-            .Select(link => new { link.PersonId, link.Provider, link.Username, link.IsActive })
+            .Select(link => new { link.PersonId, link.Provider, link.Username, link.IsActive, link.ProvisionedAt })
             .ToListAsync(cancellationToken);
         var memberships = await database.SiteMemberships.AsNoTracking()
             .Where(membership => personIds.Contains(membership.PersonId))
@@ -96,6 +96,9 @@ public static partial class PlatformUserEndpoints
             person.IsActive,
             person.CreatedAt,
             isCurrentUser = person.Id == currentPersonId,
+            accessPending = !logins.Any(identity => identity.PersonId == person.Id && identity.IsPlatformManager) &&
+                !memberships.Any(membership => membership.PersonId == person.Id && membership.IsActive) &&
+                externalIdentities.Any(link => link.PersonId == person.Id && link.IsActive && link.ProvisionedAt != null),
             loginIdentities = logins.Where(identity => identity.PersonId == person.Id).Select(identity => new
             {
                 identity.Username,
@@ -107,7 +110,8 @@ public static partial class PlatformUserEndpoints
             {
                 identity.Provider,
                 identity.Username,
-                identity.IsActive
+                identity.IsActive,
+                providerManaged = identity.ProvisionedAt != null
             }),
             siteMemberships = memberships.Where(membership => membership.PersonId == person.Id).Select(membership => new
             {

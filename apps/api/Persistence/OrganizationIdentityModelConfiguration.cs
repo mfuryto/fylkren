@@ -150,6 +150,7 @@ internal static class OrganizationIdentityModelConfiguration
         externalIdentity.Property(value => value.Username).HasColumnName("username").HasMaxLength(256);
         externalIdentity.Property(value => value.IsActive).HasColumnName("is_active");
         externalIdentity.Property(value => value.CreatedAt).HasColumnName("created_at");
+        externalIdentity.Property(value => value.ProvisionedAt).HasColumnName("provisioned_at");
         externalIdentity.Property(value => value.DirectoryAccessEnabled).HasColumnName("directory_access_enabled").HasDefaultValue(true);
         externalIdentity.Property(value => value.DirectoryLifecycleStatus).HasColumnName("directory_lifecycle_status").HasMaxLength(30).HasDefaultValue("pending").IsRequired();
         externalIdentity.Property(value => value.DirectoryMissingCount).HasColumnName("directory_missing_count").HasDefaultValue(0);
@@ -158,6 +159,23 @@ internal static class OrganizationIdentityModelConfiguration
         externalIdentity.Property(value => value.DirectorySuspendedAt).HasColumnName("directory_suspended_at");
         externalIdentity.HasIndex(value => new { value.Provider, value.ProviderInstanceId, value.SubjectId }).IsUnique();
         externalIdentity.HasOne(value => value.Person).WithMany(value => value.ExternalIdentityLinks).HasForeignKey(value => value.PersonId).OnDelete(DeleteBehavior.Restrict);
+
+        var provisioningIssue = modelBuilder.Entity<ExternalIdentityProvisioningIssue>();
+        provisioningIssue.ToTable("external_identity_provisioning_issues");
+        provisioningIssue.HasKey(value => value.Id);
+        provisioningIssue.Property(value => value.Id).HasColumnName("id");
+        provisioningIssue.Property(value => value.Provider).HasColumnName("provider").HasMaxLength(30).IsRequired();
+        provisioningIssue.Property(value => value.ProviderInstanceId).HasColumnName("provider_instance_id").HasMaxLength(1000).IsRequired();
+        provisioningIssue.Property(value => value.SubjectId).HasColumnName("subject_id").HasMaxLength(256).IsRequired();
+        provisioningIssue.Property(value => value.Username).HasColumnName("username").HasMaxLength(256);
+        provisioningIssue.Property(value => value.DisplayName).HasColumnName("display_name").HasMaxLength(200);
+        provisioningIssue.Property(value => value.Email).HasColumnName("email").HasMaxLength(320);
+        provisioningIssue.Property(value => value.Reason).HasColumnName("reason").HasMaxLength(50).IsRequired();
+        provisioningIssue.Property(value => value.FirstSeenAt).HasColumnName("first_seen_at");
+        provisioningIssue.Property(value => value.LastSeenAt).HasColumnName("last_seen_at");
+        provisioningIssue.Property(value => value.ResolvedAt).HasColumnName("resolved_at");
+        provisioningIssue.HasIndex(value => new { value.Provider, value.ProviderInstanceId, value.SubjectId }).IsUnique();
+        provisioningIssue.HasIndex(value => new { value.ResolvedAt, value.LastSeenAt });
 
         var webAuthn = modelBuilder.Entity<WebAuthnCredential>();
         webAuthn.ToTable("webauthn_credentials");

@@ -14,7 +14,7 @@ public static partial class IdentityEndpoints
 
         group.MapGet("/security/antiforgery", (IAntiforgery antiforgery, HttpContext context) =>
             Results.Ok(new { token = antiforgery.GetAndStoreTokens(context).RequestToken }))
-            .RequireAuthorization();
+            .RequireAuthorization(IdentityAuthorization.AuthenticatedIncludingPending);
 
         group.MapPost("/session", SignIn).AllowAnonymous().RequireRateLimiting("authentication");
         group.MapPost("/password-reset/complete", CompletePasswordReset).AllowAnonymous().RequireRateLimiting("authentication");
@@ -25,7 +25,7 @@ public static partial class IdentityEndpoints
                 await antiforgery.ValidateRequestAsync(context);
                 return await SignOut(user, context, database, cancellationToken);
             })
-            .RequireAuthorization();
+            .RequireAuthorization(IdentityAuthorization.AuthenticatedIncludingPending);
         group.MapGet("/profile", GetProfile).RequireAuthorization();
         group.MapGet("/profile/sessions", ListBrowserSessions).RequireAuthorization();
         group.MapDelete("/profile/sessions/{id:guid}", RevokeBrowserSession).RequireAuthorization().RequireRateLimiting("authentication");

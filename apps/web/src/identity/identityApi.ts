@@ -1,12 +1,13 @@
 import { apiGet, apiMutate } from "../api/client";
 import { translateActive } from "../localization";
-import type { DirectoryIdentityLink, DirectoryLifecycleSummary, FederatedIdentityLink, GlobalUserPage, IdentityConfiguration, IdentityProviderConfiguration, IdentityProviderSettings } from "./models";
+import type { DirectoryIdentityLink, DirectoryLifecycleSummary, ExternalIdentityProvisioningIssue, FederatedIdentityLink, GlobalUserPage, IdentityConfiguration, IdentityProviderConfiguration, IdentityProviderSettings } from "./models";
 
 const root = "/api/platform/identity";
 export const loadIdentityConfiguration = () => apiGet<IdentityConfiguration>(root, translateActive("identityConfigurationLoadFailed"));
 export const loadOidcLinks = () => apiGet<FederatedIdentityLink[]>(`${root}/oidc-links`, translateActive("oidcLinksLoadFailed"));
 export const loadSamlLinks = () => apiGet<FederatedIdentityLink[]>(`${root}/saml-links`, translateActive("samlLinksLoadFailed"));
 export const loadDirectoryLinks = () => apiGet<DirectoryIdentityLink[]>(`${root}/directory-links`, translateActive("directoryLinksLoadFailed"));
+export const loadProvisioningIssues = () => apiGet<ExternalIdentityProvisioningIssue[]>(`${root}/provisioning-issues`, translateActive("provisioningIssuesLoadFailed"));
 export const loadGlobalUsers = (page: number, pageSize: number, query: string, siteId: string, sort: string) => {
   const parameters = new URLSearchParams({ page: String(page), pageSize: String(pageSize), sort });
   if (query.trim()) parameters.set("q", query.trim());

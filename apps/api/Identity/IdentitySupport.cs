@@ -29,7 +29,8 @@ public static partial class IdentityEndpoints
     }
 
     internal static ClaimsPrincipal CreatePrincipal(LoginIdentity identity, Guid sessionId,
-        DateTimeOffset? sessionStartedAt = null, bool directoryManaged = false, bool mfaSatisfied = false)
+        DateTimeOffset? sessionStartedAt = null, bool directoryManaged = false, bool mfaSatisfied = false,
+        bool accessGranted = true)
     {
         var now = DateTimeOffset.UtcNow;
         var claims = new List<Claim>
@@ -42,6 +43,7 @@ public static partial class IdentityEndpoints
             new("fylkren:security_version", identity.SecurityVersion.ToString()),
             new("fylkren:session_id", sessionId.ToString()),
             new("fylkren:mfa_satisfied", mfaSatisfied ? "true" : "false"),
+            new("fylkren:access_granted", accessGranted ? "true" : "false"),
             new("fylkren:validated_at", now.ToUnixTimeSeconds().ToString()),
             new("fylkren:session_started_at", (sessionStartedAt ?? now).ToUnixTimeSeconds().ToString())
         };
@@ -60,7 +62,7 @@ public static partial class IdentityEndpoints
 
     private static Task<bool> IsDirectoryManaged(Guid personId, FylkrenDbContext database, CancellationToken cancellationToken) =>
         database.ExternalIdentityLinks.AnyAsync(value => value.PersonId == personId && value.IsActive &&
-            (value.Provider == "ad" || value.Provider == "ldap"), cancellationToken);
+            (value.Provider == "ad" || value.Provider == "ldap" || value.ProvisionedAt != null), cancellationToken);
 
     internal static bool VerifyCurrentPassword(
         LoginIdentity identity,
