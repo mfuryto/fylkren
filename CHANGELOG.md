@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Issue new machine API clients with P-256 request-signing keys, five-minute timestamp and database-backed replay protection; preserve existing Bearer clients only through a fixed, displayed migration cutoff.
+
 - Negotiate and persist a signed federation protocol v2 with an explicit allowlisted signature algorithm across discovery, probes, catalogs, grants, key rotation, work and receipts; retain controlled v1 compatibility and reject silent downgrade after v2.
 
 - Add a versioned Enterprise-license signature format that binds the allowed algorithm inside the signed payload and envelope while preserving existing schema 1 licenses.

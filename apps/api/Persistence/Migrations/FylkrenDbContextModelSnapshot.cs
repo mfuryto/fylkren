@@ -3014,6 +3014,12 @@ namespace Fylkren.Api.Persistence.Migrations
 
             modelBuilder.Entity("Fylkren.Api.Platform.ApiMachineIdentity", b =>
                 {
+                    b.Property<string>("AuthenticationMode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("authentication_mode");
+
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
@@ -3041,11 +3047,19 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_used_at");
 
+                    b.Property<DateTimeOffset?>("LegacyBearerAcceptedUntil")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("legacy_bearer_accepted_until");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(120)
                         .HasColumnType("character varying(120)")
                         .HasColumnName("name");
+
+                    b.Property<byte[]>("PublicKey")
+                        .HasColumnType("bytea")
+                        .HasColumnName("public_key");
 
                     b.Property<byte[]>("Salt")
                         .IsRequired()
@@ -3077,6 +3091,11 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("secret_iterations");
 
+                    b.Property<string>("SignatureAlgorithm")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("signature_algorithm");
+
                     b.HasKey("Id");
 
                     b.HasIndex("KeyId")
@@ -3084,8 +3103,36 @@ namespace Fylkren.Api.Persistence.Migrations
 
                     b.ToTable("api_machine_identities", t =>
                         {
+                            t.HasCheckConstraint("ck_api_machine_authentication_mode", "(authentication_mode = 'bearer-v1' AND octet_length(secret_hash) > 0 AND public_key IS NULL AND signature_algorithm IS NULL AND legacy_bearer_accepted_until IS NOT NULL) OR (authentication_mode = 'signed-v2' AND octet_length(public_key) > 0 AND signature_algorithm = 'ecdsa-p256-sha256-p1363' AND legacy_bearer_accepted_until IS NULL)");
+
                             t.HasCheckConstraint("ck_api_machine_secret_parameters", "secret_iterations BETWEEN 100000 AND 1000000 AND ((secret_algorithm = 'pbkdf2-sha256' AND secret_hash_version = 1) OR (secret_algorithm = 'pbkdf2-sha512' AND secret_hash_version = 2))");
                         });
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Platform.ApiMachineRequestNonce", b =>
+                {
+                    b.Property<Guid>("MachineIdentityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("machine_identity_id");
+
+                    b.Property<string>("Nonce")
+                        .HasMaxLength(96)
+                        .HasColumnType("character varying(96)")
+                        .HasColumnName("nonce");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.HasKey("MachineIdentityId", "Nonce");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.ToTable("api_machine_request_nonces");
                 });
 
             modelBuilder.Entity("Fylkren.Api.Platform.ApiReportGrant", b =>
@@ -5408,6 +5455,17 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.Navigation("MachineIdentity");
 
                     b.Navigation("Site");
+                });
+
+            modelBuilder.Entity("Fylkren.Api.Platform.ApiMachineRequestNonce", b =>
+                {
+                    b.HasOne("Fylkren.Api.Platform.ApiMachineIdentity", "MachineIdentity")
+                        .WithMany()
+                        .HasForeignKey("MachineIdentityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MachineIdentity");
                 });
 
             modelBuilder.Entity("Fylkren.Api.Platform.CryptoReprotectionItem", b =>

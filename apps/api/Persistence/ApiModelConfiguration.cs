@@ -8,9 +8,14 @@ internal static class ApiModelConfiguration
     internal static void ConfigureApi(this ModelBuilder modelBuilder)
     {
         var apiMachine = modelBuilder.Entity<ApiMachineIdentity>();
-        apiMachine.ToTable("api_machine_identities", table => table.HasCheckConstraint(
-            "ck_api_machine_secret_parameters",
-            "secret_iterations BETWEEN 100000 AND 1000000 AND ((secret_algorithm = 'pbkdf2-sha256' AND secret_hash_version = 1) OR (secret_algorithm = 'pbkdf2-sha512' AND secret_hash_version = 2))"));
+        apiMachine.ToTable("api_machine_identities", table =>
+        {
+            table.HasCheckConstraint("ck_api_machine_secret_parameters",
+                "secret_iterations BETWEEN 100000 AND 1000000 AND ((secret_algorithm = 'pbkdf2-sha256' AND secret_hash_version = 1) OR (secret_algorithm = 'pbkdf2-sha512' AND secret_hash_version = 2))");
+            table.HasCheckConstraint("ck_api_machine_authentication_mode",
+                "(authentication_mode = 'bearer-v1' AND octet_length(secret_hash) > 0 AND public_key IS NULL AND signature_algorithm IS NULL AND legacy_bearer_accepted_until IS NOT NULL) OR " +
+                "(authentication_mode = 'signed-v2' AND octet_length(public_key) > 0 AND signature_algorithm = 'ecdsa-p256-sha256-p1363' AND legacy_bearer_accepted_until IS NULL)");
+        });
         apiMachine.HasKey(x => x.Id);
         apiMachine.Property(x => x.Id).HasColumnName("id");
         apiMachine.Property(x => x.Name).HasColumnName("name").HasMaxLength(120);
@@ -20,12 +25,26 @@ internal static class ApiModelConfiguration
         apiMachine.Property(x => x.SecretAlgorithm).HasColumnName("secret_algorithm").HasMaxLength(40);
         apiMachine.Property(x => x.SecretHashVersion).HasColumnName("secret_hash_version");
         apiMachine.Property(x => x.SecretIterations).HasColumnName("secret_iterations");
+        apiMachine.Property(x => x.AuthenticationMode).HasColumnName("authentication_mode").HasMaxLength(20);
+        apiMachine.Property(x => x.PublicKey).HasColumnName("public_key");
+        apiMachine.Property(x => x.SignatureAlgorithm).HasColumnName("signature_algorithm").HasMaxLength(60);
+        apiMachine.Property(x => x.LegacyBearerAcceptedUntil).HasColumnName("legacy_bearer_accepted_until");
         apiMachine.Property(x => x.Scopes).HasColumnName("scopes").HasMaxLength(300);
         apiMachine.Property(x => x.ExpiresAt).HasColumnName("expires_at");
         apiMachine.Property(x => x.CreatedAt).HasColumnName("created_at");
         apiMachine.Property(x => x.LastUsedAt).HasColumnName("last_used_at");
         apiMachine.Property(x => x.IsActive).HasColumnName("is_active");
         apiMachine.HasIndex(x => x.KeyId).IsUnique();
+
+        var apiNonce = modelBuilder.Entity<ApiMachineRequestNonce>();
+        apiNonce.ToTable("api_machine_request_nonces");
+        apiNonce.HasKey(x => new { x.MachineIdentityId, x.Nonce });
+        apiNonce.Property(x => x.MachineIdentityId).HasColumnName("machine_identity_id");
+        apiNonce.Property(x => x.Nonce).HasColumnName("nonce").HasMaxLength(96);
+        apiNonce.Property(x => x.CreatedAt).HasColumnName("created_at");
+        apiNonce.Property(x => x.ExpiresAt).HasColumnName("expires_at");
+        apiNonce.HasOne(x => x.MachineIdentity).WithMany().HasForeignKey(x => x.MachineIdentityId).OnDelete(DeleteBehavior.Cascade);
+        apiNonce.HasIndex(x => x.ExpiresAt);
 
         var apiAudit = modelBuilder.Entity<ApiMachineAuditEvent>();
         apiAudit.ToTable("api_machine_audit_events");

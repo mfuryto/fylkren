@@ -1,14 +1,12 @@
 import assert from 'node:assert/strict';
+import { machineCredential, signedMachineRequest } from './machine-auth.mjs';
 
 const base = process.env.FYLKREN_E2E_BASE_URL ?? 'http://localhost:18080';
 
-async function machineRequest(token, path, { method = 'GET', body, headers = {} } = {}) {
-  const requestHeaders = { ...headers };
-  if (token) requestHeaders.Authorization = `Bearer ${token}`;
-  if (body !== undefined) requestHeaders['Content-Type'] = 'application/json';
-  const response = await fetch(`${base}${path}`, {
-    method, headers: requestHeaders, body: body === undefined ? undefined : JSON.stringify(body), redirect: 'manual',
-  });
+async function machineRequest(credential, path, options = {}) {
+  const response = credential
+    ? await signedMachineRequest(base, credential, path, options)
+    : await fetch(`${base}${path}`, { ...options, body: options.body === undefined ? undefined : JSON.stringify(options.body), redirect: 'manual' });
   const raw = await response.text();
   let parsed;
   try { parsed = JSON.parse(raw); } catch { parsed = raw; }
@@ -20,8 +18,8 @@ export async function testAdministrationReportApis({ platform, leader, siteId, c
   async function createClient(name, scopes) {
     const result = await platform.post('/api/platform/api-clients/', { name, scopes, expiresAt });
     assert.equal(result.status, 201, `${name} client creation failed`);
-    assert.ok(result.body.id && result.body.token, `${name} client has no ID or one-time token`);
-    return { id: result.body.id, token: result.body.token };
+    assert.ok(result.body.id && result.body.privateKey && result.body.keyId, `${name} client has no ID or one-time signing key`);
+    return { id: result.body.id, token: machineCredential(result.body) };
   }
   const full = await createClient(`Synthetic API ${suffix}`, [
     'sites:read', 'sites:write', 'sites:move', 'sites:deactivate',
@@ -275,7 +273,7 @@ export async function testAdministrationReportApis({ platform, leader, siteId, c
   });
   assert.equal(expiring.status, 201);
   await new Promise(resolve => setTimeout(resolve, 3000));
-  assert.equal((await machineRequest(expiring.body.token, `${admin}/sites`)).status, 401,
+  assert.equal((await machineRequest(machineCredential(expiring.body), `${admin}/sites`)).status, 401,
     'Expired machine credential remained valid');
 
   const disabled = await platform.request(`/api/platform/api-clients/${full.id}`, { method: 'DELETE' });

@@ -25,7 +25,8 @@ assert.match(tlsInitializer, /extendedKeyUsage=clientAuth/, 'database client-onl
 assert.match(compose, /cap_drop:\n\s+- ALL/, 'container capability drop');
 assert.match(machine, /AllowedScopes/, 'machine least-privilege scope allowlist');
 assert.match(machine, /request\.ExpiresAt > now\.AddDays\(366\)/, 'machine credential lifetime ceiling');
-assert.match(inventory, /SV-104/, 'backend credential finding');
+assert.match(machine, /ApiMachineSignatures\.Create\(\)/, 'request-bound machine signing identity issuance');
+assert.match(inventory, /SV-104 is closed/, 'backend credential finding closure');
 assert.match(inventory, /SV-105/, 'secret custody finding');
 
 assert.match(apiDockerfile, /dotnet publish[^\n]*-c Release/, 'Release API build');
@@ -41,5 +42,5 @@ console.log(JSON.stringify({
   databaseAuthentication: 'certificate',
   releaseBuilds: true,
   sourceMetadataInRuntimeImages: false,
-  findings: ['SV-104', 'SV-105'],
+  findings: ['SV-105'],
 }));

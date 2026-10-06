@@ -56,6 +56,8 @@ export type ApiClient = {
   id: string;
   name: string;
   keyId: string;
+  authenticationMode: "bearer-v1" | "signed-v2";
+  legacyBearerAcceptedUntil: string | null;
   scopes: string[];
   expiresAt: string | null;
   createdAt: string;

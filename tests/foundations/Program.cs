@@ -42,6 +42,11 @@ if (args.Contains("--machine-secret-agility-only"))
     MachineSecretAgilityTests.Run();
     return;
 }
+if (args.Contains("--machine-signatures-only"))
+{
+    MachineSignatureTests.Run();
+    return;
+}
 if (args.Contains("--license-agility-only"))
 {
     LicenseAgilityTests.Run();
@@ -132,6 +137,12 @@ if (args.Contains("--machine-secret-agility-integration-only"))
 {
     MachineSecretAgilityTests.Run();
     await MachineSecretAgilityTests.RunDatabase(db);
+    return;
+}
+if (args.Contains("--machine-signatures-integration-only"))
+{
+    MachineSignatureTests.Run();
+    await MachineSignatureTests.RunDatabase(db);
     return;
 }
 if (args.Contains("--license-agility-integration-only"))

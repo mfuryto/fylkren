@@ -7,7 +7,7 @@ export function loadApiClients() {
 }
 
 export function createApiClient(input: { name: string; scopes: string[]; expiresAt: string }) {
-  return apiMutate<{ name: string; token: string }>(
+  return apiMutate<{ name: string; privateKey: string }>(
     "/api/platform/api-clients/",
     "POST",
     input,

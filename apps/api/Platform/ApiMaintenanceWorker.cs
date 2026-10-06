@@ -28,6 +28,11 @@ internal sealed class ApiMaintenanceWorker(
                     logger.LogInformation(
                         "Removed {RemovedCount} expired API idempotency records",
                         removed);
+                var removedMachineNonces = await database.ApiMachineRequestNonces
+                    .Where(record => record.ExpiresAt < DateTimeOffset.UtcNow)
+                    .ExecuteDeleteAsync(stoppingToken);
+                if (removedMachineNonces > 0)
+                    logger.LogInformation("Removed {RemovedCount} expired machine-request nonces", removedMachineNonces);
                 var removedWebAuthnFlows = await database.WebAuthnFlowGrants
                     .Where(grant => grant.ExpiresAt < DateTimeOffset.UtcNow - TimeSpan.FromDays(1))
                     .ExecuteDeleteAsync(stoppingToken);

@@ -113,7 +113,7 @@ The maintained [object authorization inventory test](../../tools/test-object-aut
 ## Enforcement requirements
 
 - Authentication is required by the global fallback policy except for explicitly documented public setup/login/configuration/health routes.
-- Authenticated browser mutations under `/api` require centralized antiforgery validation. Machine APIs use Bearer credentials, scopes and separate limits.
+- Authenticated browser mutations under `/api` require centralized antiforgery validation. Machine APIs use request-bound signed credentials, scopes, replay protection and separate limits.
 - Object IDs in URLs or bodies are never authorization evidence; the endpoint loads and validates actual ownership.
 - A Site Manager assignment alone does not enter operational task or execution queues. An active organizational placement or operational role is required independently.
 - Read endpoints filter at the query; clients do not receive hidden content.

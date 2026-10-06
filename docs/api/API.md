@@ -21,24 +21,34 @@ All responses below `/api` use `Cache-Control: no-store`. Static, content-hashed
 
 ## Machine authentication
 
-Platform Manager creates machine clients on the **API** page. A client represents one integration in one environment, never a person. Its secret is displayed once in this form:
-
-```text
-api_<key-id>.<secret>
-```
-
-Only a salted, versioned PBKDF2 verifier is stored. Existing SHA-256 verifiers upgrade to the current SHA-512 verifier after successful authentication; plaintext machine secrets are never retained. A new client must expire within one year; the interface proposes 90 days. Send the key as a Bearer token:
+Platform Manager creates machine clients on the **API** page. A client represents one integration in one environment, never a person. New clients use `signed-v2`. Fylkren displays a client-specific P-256 private key once and stores only its public key. Every request is independently signed; there is no reusable Bearer secret.
 
 ```http
-Authorization: Bearer api_<key-id>.<secret>
-Accept: application/json
+Authorization: Fylkren-Signature <key-id>
+X-Fylkren-Timestamp: <Unix seconds>
+X-Fylkren-Nonce: <at least 128 random bits, base64url>
+X-Fylkren-Content-SHA256: <lowercase SHA-256 hex of the exact body bytes>
+X-Fylkren-Signature: <base64url P-256 IEEE-P1363 signature>
 ```
 
-Store keys in the consuming system's secret store. Never put them in source code, logs, issues, or documentation. Interactive cookies, user passwords, bootstrap values, and CSRF tokens are not machine credentials.
+The signature covers this exact UTF-8 string, including the newlines. The request target is the path and query string exactly as transmitted. An empty body has the SHA-256 hash of zero bytes.
 
-Rotate a key by creating a replacement client, switching the integration, verifying it, and then disabling the old client. Secrets cannot be retrieved after creation.
+```text
+FYLKREN-MACHINE-V2
+<UPPERCASE METHOD>
+<PATH AND QUERY>
+<X-Fylkren-Timestamp>
+<X-Fylkren-Nonce>
+<X-Fylkren-Content-SHA256>
+```
 
-Browser mutations made with an authenticated session require `X-Fylkren-CSRF`. Bearer-authenticated machine APIs do not use browser sessions and do not require this header.
+Sign the bytes with ECDSA P-256/SHA-256 and the fixed-field IEEE-P1363 format (`r || s`, 64 bytes). Fylkren accepts at most five minutes of clock difference and stores each nonce until the replay window has passed. The database uniqueness boundary rejects concurrent replay across API replicas. The client also has an expiry date, scopes and immediate revocation state.
+
+Store the private key in the consuming system's secret store. Never put it in source code, logs, issues, or documentation. Rotate a key by creating a replacement client, switching the integration, verifying it, and then disabling the old client. Private keys cannot be retrieved after creation.
+
+Existing `bearer-v1` clients remain readable during a bounded migration overlap. The migration records the earlier of the client's existing expiry and **2027-01-04 23:59:59 UTC**; authentication stops at that value, clients without an earlier expiry cannot bypass it, and no new `bearer-v1` client can be issued. Replace each listed `bearer-v1` client with `signed-v2` before its displayed cutoff.
+
+Browser mutations made with an authenticated session require `X-Fylkren-CSRF`. Signed machine APIs do not use browser sessions and do not require this header.
 
 ## Least privilege
 
@@ -83,7 +93,7 @@ Validation failures also contain an `errors` object keyed by field. Internal exc
 
 Limits apply per authenticated machine identity, with stricter limits for mutations. Before expensive secret hashing, Fylkren permits at most 120 authentication attempts per minute and two concurrent verifications for the same key ID and client address. The normal endpoint limits apply after successful authentication.
 
-Clients should record their own correlation ID, timestamp, method, path, result, and retry state. They must not log Bearer tokens, classified content, report bodies, or unnecessary personal data.
+Clients should record their own correlation ID, timestamp, method, path, result, and retry state. They must not log private keys, signatures, classified content, report bodies, or unnecessary personal data.
 
 ## Versioning
 

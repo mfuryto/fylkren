@@ -8,12 +8,12 @@ This inventory complements the communication and cryptographic inventories. It d
 |---|---|---|---|
 | API | PostgreSQL | Exact `postgres` server identity and exact `fylkren-api` client identity verified against the installation CA; the client certificate maps only to the dedicated `fylkren` database owner | Separate server/client certificates are renewed by the fenced TLS initializer; no database password exists in the supported Compose path |
 | Gateway | API | Exact `api` server identity verified against the installation CA. End-user/session or machine authorization is enforced by the API | Server certificate is renewed by the fenced TLS initializer; no separate gateway client credential |
-| Machine integration | Administration/report API | Individually named client, explicit scope allowlist, expiry of at most 366 days, hashed secret and revocation | Long-lived random bearer secret; create replacement and deactivate old client |
+| Machine integration | Administration/report API | Individually named client, explicit scope allowlist, expiry of at most 366 days, request-bound P-256 proof, five-minute replay window and revocation | Private signing key held by the integration; create replacement and deactivate old client |
 | API | OIDC token endpoint | Per-installation client ID/secret protected in PostgreSQL | Replace through Platform Manager/provider |
 | API | SMTP or AD/LDAP | Dedicated configured integration credential protected in PostgreSQL | Replace through Platform Manager/service owner |
 | Federation peer | Federation API | Pinned per-installation signing key plus exact grants | Two-phase key rotation or explicit lost-key recovery |
 
-SV-104 is now limited to external machine integrations, whose bearer credentials can remain valid for up to 366 days. PostgreSQL uses a separately scoped client certificate, exact CA verification and an explicit certificate-to-role map. Moving the machine API to short-lived or certificate-bound proof requires a versioned authentication transition because the current bearer format is part of the documented v1 contract.
+External machine integrations now use request-bound `signed-v2` proof with a client-specific P-256 key, five-minute timestamp window and database-backed nonce uniqueness. New Bearer credentials cannot be issued. Existing `bearer-v1` clients retain a bounded compatibility overlap only until the earlier of their existing expiry and 2027-01-04 23:59:59 UTC. PostgreSQL uses a separately scoped client certificate, exact CA verification and an explicit certificate-to-role map. SV-104 is closed with issuance, expiry, revocation, replay, scope and retirement evidence.
 
 ## Secret custody
 

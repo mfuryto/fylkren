@@ -32,6 +32,8 @@ internal static class AdministrationClientEndpoints
                 value.Id,
                 value.Name,
                 value.KeyId,
+                value.AuthenticationMode,
+                value.LegacyBearerAcceptedUntil,
                 scopes = value.Scopes.Split(' ', StringSplitOptions.RemoveEmptyEntries),
                 value.ExpiresAt,
                 value.CreatedAt,
@@ -56,13 +58,17 @@ internal static class AdministrationClientEndpoints
                 return Validation("client", "Check the name and scopes.");
             if (request.ExpiresAt is null || request.ExpiresAt <= now || request.ExpiresAt > now.AddDays(366))
                 return Validation("expiresAt", "An expiry date is required and can be at most one year in the future.");
-            var generated = ApiMachineSecrets.Create();
-            var value = new ApiMachineIdentity(Guid.NewGuid(), name, generated.KeyId, generated.Salt, generated.Hash,
-                generated.Algorithm, generated.Version, generated.Iterations, string.Join(' ', scopes), request.ExpiresAt, now);
+            var generated = ApiMachineSignatures.Create();
+            var value = new ApiMachineIdentity(Guid.NewGuid(), name, generated.KeyId, generated.PublicKey,
+                generated.Algorithm, string.Join(' ', scopes), request.ExpiresAt.Value, now);
             db.ApiMachineIdentities.Add(value);
             db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), null, actor, "api-machine.created", "api-machine", value.Id, now));
             await db.SaveChangesAsync(ct);
-            return Results.Created($"/api/platform/api-clients/{value.Id}", new { value.Id, value.Name, value.KeyId, scopes, value.ExpiresAt, token = generated.Token });
+            return Results.Created($"/api/platform/api-clients/{value.Id}", new
+            {
+                value.Id, value.Name, value.KeyId, scopes, value.ExpiresAt,
+                value.AuthenticationMode, value.SignatureAlgorithm, privateKey = generated.PrivateKeyPem,
+            });
         }).RequireFeature(FeatureCatalog.MachineApi);
 
         platform.MapDelete("/{id:guid}", async (Guid id, ClaimsPrincipal user, IAntiforgery antiforgery, HttpContext context, FylkrenDbContext db, CancellationToken ct) =>

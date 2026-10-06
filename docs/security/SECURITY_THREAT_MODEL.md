@@ -32,7 +32,7 @@ Security objectives are to:
 3. API → PostgreSQL over the internal backend network.
 4. API → SMTP, OIDC, SAML, AD, or LDAP integration boundary.
 5. Browser session → site and work-level authorization for every object and action.
-6. Bearer token → machine identity → scope → exact site/report grant.
+6. Signed request → machine identity → timestamp/nonce replay boundary → scope → exact site/report grant.
 7. Parent/child site or request → explicit work relationship, immutable snapshots, and filtered return data.
 
 ## Outbound HTTP integration boundary

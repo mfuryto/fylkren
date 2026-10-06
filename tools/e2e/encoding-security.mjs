@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
+import { machineCredential, signedMachineRequest } from './machine-auth.mjs';
 
 export async function testCustomCssEncoding({ platform }) {
   const initial = await platform.request('/api/branding');
@@ -196,10 +197,7 @@ export async function testHeaderFileInputValidation({ platform, siteManager, sit
   });
   assert.equal(machine.status, 201, JSON.stringify(machine.body));
   const machineRequest = async (path, options = {}) => {
-    const response = await fetch(`${base}${path}`, {
-      ...options,
-      headers: { Authorization: `Bearer ${machine.body.token}`, ...(options.headers ?? {}) },
-    });
+    const response = await signedMachineRequest(base, machineCredential(machine.body), path, options);
     return { status: response.status, body: await response.text() };
   };
   const packageForm = new FormData();
@@ -336,17 +334,10 @@ export async function testBusinessLogicLimits({ platform, base }) {
       name: label, scopes, expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
     });
     assert.equal(response.status, 201, JSON.stringify(response.body));
-    return response.body.token;
+    return machineCredential(response.body);
   }
   async function machineRequest(token, path, options = {}) {
-    const response = await fetch(`${base}${path}`, {
-      ...options,
-      headers: { Authorization: `Bearer ${token}`,
-        ...(options.body === undefined ? {} : { 'Content-Type': 'application/json' }),
-        ...(options.headers ?? {}) },
-      body: options.body === undefined ? undefined : JSON.stringify(options.body),
-    });
-    return response;
+    return signedMachineRequest(base, token, path, options);
   }
 
   const missingSite = randomUUID();
@@ -613,10 +604,11 @@ export async function testDerivedArithmeticBoundaries({ platform, siteManager, l
   const machine = await platform.post('/api/platform/api-clients/', { name: 'Synthetic arithmetic machine',
     scopes: ['sites:write'], expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString() });
   assert.equal(machine.status, 201);
-  const created = await fetch(`${process.env.FYLKREN_E2E_BASE_URL ?? 'http://localhost:18080'}/api/v1/administration/sites`, {
-    method: 'POST', headers: { Authorization: `Bearer ${machine.body.token}`, 'Content-Type': 'application/json',
-      'Idempotency-Key': 'synthetic-arithmetic-site' }, body: JSON.stringify({ name: 'Synthetic arithmetic machine Site', overviewDesign: 'classic' }),
-  });
+  const created = await signedMachineRequest(process.env.FYLKREN_E2E_BASE_URL ?? 'http://localhost:18080',
+    machineCredential(machine.body), '/api/v1/administration/sites', {
+      method: 'POST', headers: { 'Idempotency-Key': 'synthetic-arithmetic-site' },
+      body: { name: 'Synthetic arithmetic machine Site', overviewDesign: 'classic' },
+    });
   assert.equal(created.status, 201);
   const audit = await platform.request('/api/platform-audit?eventType=site.created');
   assert.equal(audit.status, 200);

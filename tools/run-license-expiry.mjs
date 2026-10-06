@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { generateKeyPairSync, randomBytes, randomUUID, sign } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
+import { machineCredential, signedMachineRequest } from './e2e/machine-auth.mjs';
 
 const project = 'fylkren-license-expiry-e2e';
 const base = 'http://localhost:18087';
@@ -135,7 +136,7 @@ try {
     expiresAt: new Date(Date.now() + 86_400_000).toISOString(),
   });
   assert.equal(machine.status, 201, JSON.stringify(machine.body));
-  const machineToken = machine.body.token;
+  const machineToken = machineCredential(machine.body);
 
   const webhook = await client.post(`/api/platform/webhooks/sites/${sites[0]}`, {
     name: 'Live expiry webhook',
@@ -161,9 +162,7 @@ try {
   const federationIdentity = await client.post('/api/platform/federation/identity', {});
   assert.equal(federationIdentity.status, 200, JSON.stringify(federationIdentity.body));
 
-  const machineBeforeExpiry = await fetch(`${base}/api/v1/administration/sites`, {
-    headers: { Authorization: `Bearer ${machineToken}` },
-  });
+  const machineBeforeExpiry = await signedMachineRequest(base, machineToken, '/api/v1/administration/sites');
   assert.equal(machineBeforeExpiry.status, 200);
 
   process.stdout.write(`Enterprise active until ${expiresAt.toISOString()}; waiting for the real clock transition...\n`);
@@ -176,9 +175,7 @@ try {
   assert.equal(expiredStatus.body.status.state, 'expired');
   assert.equal(expiredStatus.body.status.licenseId, firstLicenseId);
 
-  const machineAfterExpiry = await fetch(`${base}/api/v1/administration/sites`, {
-    headers: { Authorization: `Bearer ${machineToken}` },
-  });
+  const machineAfterExpiry = await signedMachineRequest(base, machineToken, '/api/v1/administration/sites');
   assert.equal(machineAfterExpiry.status, 403, 'Existing machine token must lose Enterprise API access immediately');
 
   const blockedMachine = await client.post('/api/platform/api-clients/', {
@@ -234,9 +231,7 @@ try {
   assert.equal(renewal.body.status.edition, 'enterprise');
   assert.equal(renewal.body.status.state, 'valid');
 
-  const machineAfterRenewal = await fetch(`${base}/api/v1/administration/sites`, {
-    headers: { Authorization: `Bearer ${machineToken}` },
-  });
+  const machineAfterRenewal = await signedMachineRequest(base, machineToken, '/api/v1/administration/sites');
   assert.equal(machineAfterRenewal.status, 200, 'Retained machine client must resume under a renewed entitlement');
 
   let projected = 'NULL';

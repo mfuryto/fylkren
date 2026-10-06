@@ -2106,3 +2106,20 @@ pnpm check:docs
 ```
 
 The protocol test passes 127 canonical-message assertions, including signed v1/v2 offers, algorithm binding, downgrade rejection and unknown-algorithm rejection. The focused domain test proves legacy start, durable v2 selection, no silent fallback and preservation across peer metadata changes. The disposable PostgreSQL test preserves a populated v1 peer, enforces consistent protocol/algorithm pairs and completes down/up rollback in the safe v1 state. EF reports no pending model changes. The current-image two-instance Production flow delivers ordinary federated work and return activity; both databases record protocol 2 with the exact allowlisted algorithm. All disposable data, keys, containers, volumes and networks were removed. Production was not changed.
+
+### Signed machine authentication — 2026-10-06
+
+This closes SV-104 and passes ASVS 13.2.1. New machine clients receive one client-specific P-256 private key once; Fylkren persists only its SPKI public key and algorithm. Each request signs the method, exact path/query, Unix timestamp, random nonce and SHA-256 body hash. The accepted time window is five minutes and the `(machine identity, nonce)` database key rejects replay across replicas. Existing scopes, exact report grants, rate limits, audit identity, client expiry and immediate deactivation remain authoritative.
+
+Existing `bearer-v1` rows are labelled during the populated migration and remain readable only through the earlier of their existing expiry and 2027-01-04 23:59:59 UTC. Clients without a prior expiry receive that same cutoff. The creation endpoint issues only `signed-v2`, so the overlap cannot create new bearer debt. Platform Manager lists each client's authentication mode, and the maintained E2E callers now use the documented signed contract.
+
+```sh
+dotnet build tests/foundations/Fylkren.FoundationTests.csproj --no-restore
+dotnet run --project tests/foundations/Fylkren.FoundationTests.csproj --no-build -- --machine-signatures-only
+node tools/run-foundation-tests.mjs --machine-signatures-integration-only
+node tools/run-foundation-tests.mjs --model-diff-only
+npm run build --prefix apps/web
+pnpm check:docs
+```
+
+The pure vectors accept the generated key and reject changes to every canonical component plus malformed signatures. The disposable PostgreSQL test preserves and labels a populated v1 client, persists v2 public-key state and nonce uniqueness, authenticates a valid request with its scope, rejects replay, a timestamp outside the window and a deactivated client, and completes down/up migration. EF reports no pending model changes. API, foundation and web builds pass. No production state was changed.

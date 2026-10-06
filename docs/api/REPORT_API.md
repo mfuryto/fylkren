@@ -127,7 +127,7 @@ The detail endpoint intentionally returns the same `404` for missing and inacces
 
 ## Audit and personal data
 
-Creating, changing, or removing a report grant creates a platform audit event for the affected site. These technical events are excluded from Site Manager audit. List and detail requests create machine audit records containing the client, site, grant or report ID, correlation ID, and timestamp. The Bearer token, search text, and report body are not logged.
+Creating, changing, or removing a report grant creates a platform audit event for the affected site. These technical events are excluded from Site Manager audit. List and detail requests create machine audit records containing the client, site, grant or report ID, correlation ID, and timestamp. Private keys, request signatures, search text and report bodies are not logged.
 
 Responses can contain the names of report authors and approvers. The consuming system must protect, retain, and delete these data according to the same policy as the report. Disabling a site immediately prevents further report access.
 

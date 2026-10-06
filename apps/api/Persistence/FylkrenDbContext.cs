@@ -86,6 +86,7 @@ public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options,
     public DbSet<NotificationProjectionCursor> NotificationProjectionCursors => Set<NotificationProjectionCursor>();
     public DbSet<PersonalNotificationSettings> PersonalNotificationSettings => Set<PersonalNotificationSettings>();
     public DbSet<ApiMachineIdentity> ApiMachineIdentities => Set<ApiMachineIdentity>();
+    public DbSet<ApiMachineRequestNonce> ApiMachineRequestNonces => Set<ApiMachineRequestNonce>();
     public DbSet<ApiMachineAuditEvent> ApiMachineAuditEvents => Set<ApiMachineAuditEvent>();
     public DbSet<ApiIdempotencyRecord> ApiIdempotencyRecords => Set<ApiIdempotencyRecord>();
     public DbSet<ApiReportGrant> ApiReportGrants => Set<ApiReportGrant>();

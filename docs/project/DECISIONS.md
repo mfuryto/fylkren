@@ -144,7 +144,7 @@ Tasks and reports are normally retained as read-only history. The operating orga
 
 ### ADR-028 — Browser and machine APIs have different trust models
 
-Browser APIs use authenticated sessions and central CSRF protection. Versioned machine APIs use expiring one-time Bearer credentials, least-privilege scopes, rate limits, audit, and resource-specific grants. Internal browser endpoints are not public integration contracts.
+Browser APIs use authenticated sessions and central CSRF protection. Versioned machine APIs use expiring client-specific signing keys, request-bound proof, replay protection, least-privilege scopes, rate limits, audit and resource-specific grants. Internal browser endpoints are not public integration contracts.
 
 ### ADR-029 — Administration and reports are separate public contracts
 
