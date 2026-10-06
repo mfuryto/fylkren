@@ -9,7 +9,7 @@ const registration = read('apps/api/ServiceRegistration.cs');
 const program = read('apps/api/Program.cs');
 
 for (const layer of ['Gateway/container', 'API technical', 'Security audit', 'Domain activity', 'External delivery']) assert.match(inventory, new RegExp(`\\| ${layer.replace('/', '\\/')} \\|`));
-for (const finding of ['SV-107', 'SV-108']) assert.match(inventory, new RegExp(finding));
+for (const closure of ['SV-107 is closed', 'SV-108 is closed']) assert.match(inventory, new RegExp(closure));
 assert.match(middleware, /EventId\(4101, "AccessRejected"\)/);
 assert.match(middleware, /Method.*Route.*StatusCode.*ActorPersonId.*TraceId/s);
 assert.match(middleware, /statusCode == StatusCodes\.Status401Unauthorized[\s\S]*actorPersonId == "anonymous"[\s\S]*HttpMethods\.IsGet[\s\S]*HttpMethods\.IsHead/,
@@ -31,5 +31,5 @@ console.log(JSON.stringify({
   documentedLayers: 5,
   structuredAccessDenials: true,
   centralSanitizer: true,
-  findings: ['SV-107', 'SV-108'],
+  findings: [],
 }));

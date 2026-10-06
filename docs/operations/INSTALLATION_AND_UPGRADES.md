@@ -132,7 +132,7 @@ sudo ./deploy/compose/restore.sh \
 ```
 
 The confirmation is deliberately verbose because the command permanently stops
-the current stack, replaces its PostgreSQL and Data Protection volumes and
+the current stack, replaces its PostgreSQL, Data Protection key-ring and custody volumes and
 overwrites `.env`. Before changing anything, it requires a `COMPLETE` set,
 verifies every SHA-256 checksum, validates the database dump and rejects unsafe
 key-archive paths. It restores the database and matching keys before starting
@@ -149,7 +149,11 @@ rehearsal environment securely when testing is complete. Before a restored
 replacement receives traffic, prove that the original installation is stopped
 or fenced.
 
-If the database is restored without its matching key ring, protected federation, SMTP and TOTP material may remain present but unusable. Stop and correct the restore; do not invoke federation lost-key recovery merely to compensate for an available but omitted key-volume backup. Use the controlled recovery flow only after the original key is confirmed lost. Production failover additionally requires fencing the original host, changing DNS/routing as approved and verifying there is exactly one live installation identity.
+If the database is restored without its matching key ring and key-encryption custody, protected federation, SMTP and TOTP material may remain present but unusable. Stop and correct the restore; do not invoke federation lost-key recovery merely to compensate for an available but omitted key-volume backup. Use the controlled recovery flow only after the original key is confirmed lost. Production failover additionally requires fencing the original host, changing DNS/routing as approved and verifying there is exactly one live installation identity.
+
+Provider secrets are no longer read from the production Compose environment. Before upgrading an installation that has never started a GUI-managed identity-provider release, first upgrade to a prior compatible release once so its one-time import writes protected provider settings, then remove `FYLKREN_OIDC_CLIENT_SECRET`, `FYLKREN_AD_BIND_PASSWORD` and `FYLKREN_LDAP_BIND_PASSWORD` from `.env`. Current installations manage these values only under **Platform Manager → Identity**.
+
+Before production qualification, install and verify the separate HTTPS/mTLS log collector path described in [Remote security-log forwarding](LOG_FORWARDING.md). The supported Compose services use `journald`; an installation without an active, acknowledged remote uploader is operationally incomplete.
 
 ## Test-environment upgrade
 

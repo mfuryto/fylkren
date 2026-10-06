@@ -40,7 +40,7 @@ function sourceFiles(directory) {
     return statSync(path).isDirectory() ? sourceFiles(path) : path.endsWith('.cs') ? [path] : [];
   });
 }
-const productionSources = sourceFiles('apps/api').map(read).join('\n');
+const productionSources = [...sourceFiles('apps/api'), ...sourceFiles('apps/data-protection-custody-core')].map(read).join('\n');
 assert.doesNotMatch(productionSources,
   /class\s+(?:AES|RSA|ECDSA|SHA\d*|HMAC\w*)\b|BigInteger\s*\.\s*ModPow|(?:Encrypt|Decrypt)(?:Block|Round)\s*\(/,
   'Custom cryptographic primitive implementation detected');

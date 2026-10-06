@@ -4,6 +4,12 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Encrypt every ASP.NET Data Protection root-key XML value with a separate installation RSA-3072/AES-256-GCM custody envelope, migrate existing plaintext key rings before API startup, and back up/restore database, key ring and custody as one recovery point.
+
+- Route gateway, API and PostgreSQL logs through journald and add guarded HTTPS/mTLS forwarding and acknowledgement verification for a logically separate collector; add repeatable host/container/database UTC correlation checks.
+
+- Remove OIDC, AD and LDAP secret values from the steady-state production Compose environment; manage provider credentials only through protected Platform Manager settings.
+
 - Pin the corrected `source-map-js` 1.2.2 across frontend build/test tooling, removing the reported indexed-source-map denial-of-service vulnerability.
 
 - Issue new machine API clients with P-256 request-signing keys, five-minute timestamp and database-backed replay protection; preserve existing Bearer clients only through a fixed, displayed migration cutoff.

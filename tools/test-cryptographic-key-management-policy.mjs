@@ -15,6 +15,7 @@ const federation = read('apps/api/Federation/FederationIdentityEndpoints.cs');
 const machine = read('apps/api/Platform/ApiMachineAuthentication.cs');
 const webhooks = read('apps/api/DomainEvents/WebhookManagementEndpoints.cs');
 const internalTls = read('apps/tls-init/initialize-internal-tls.sh');
+const custody = read('apps/data-protection-custody-core/DataProtectionKeyCustody.cs');
 
 for (const phase of ['Create and register', 'Distribute and activate', 'Operate and store',
   'Rotate and replace', 'Revoke and recover', 'Back up and archive', 'Destroy'])
@@ -26,14 +27,19 @@ requireText(policy, /Production, test and development key material must be disti
 requireText(policy, /Cryptographic key and secret inventory/, 'cryptographic inventory');
 
 requireText(registration, /PersistKeysToFileSystem/, 'persistent Data Protection key ring');
+requireText(registration, /options\.XmlEncryptor = new DataProtectionKeyEncryptor/, 'Data Protection key-encryption custody');
+requireText(custody, /RSAEncryptionPadding\.OaepSHA256/, 'RSA-OAEP-SHA-256 key wrapping');
+requireText(custody, /new AesGcm\(contentKey/, 'AES-256-GCM custody envelope');
 requireText(registration, /EncryptionAlgorithm = EncryptionAlgorithm\.AES_256_CBC/, 'Data Protection encryption algorithm');
 requireText(registration, /ValidationAlgorithm = ValidationAlgorithm\.HMACSHA256/, 'Data Protection authentication algorithm');
 requireText(compose, /fylkren-keys:\/var\/lib\/fylkren\/keys/, 'dedicated API key volume');
-assert.equal((compose.match(/fylkren-keys:\/var\/lib\/fylkren\/keys/g) ?? []).length, 1,
-  'The production key volume must be mounted only once');
+assert.equal((compose.match(/fylkren-keys:\/var\/lib\/fylkren\/keys/g) ?? []).length, 2,
+  'The key ring must be mounted only by the one-shot migration and API services');
+requireText(compose, /fylkren-data-protection-custody:\/run\/fylkren-data-protection:ro/, 'read-only API custody mount');
 requireText(dockerfile, /chmod 700 \/var\/lib\/fylkren\/keys/, 'owner-only key directory');
 requireText(backup, /chmod 0600 "\$target\/data-protection-keys\.tar\.gz"/, 'owner-only key backup');
-requireText(restore, /database, configuration and Data Protection keys/, 'matched destructive restore boundary');
+requireText(backup, /data-protection-custody\.tar\.gz/, 'matched custody backup');
+requireText(restore, /Data Protection keys and matching key-encryption custody/, 'matched destructive restore boundary');
 requireText(federation, /ECDsa\.Create\(ECCurve\.NamedCurves\.nistP256\)/, 'federation key generation');
 requireText(federation, /federation_key_still_usable_use_rotation/, 'lost-key recovery guard');
 requireText(machine, /RandomNumberGenerator\.GetBytes\(32\)/, 'machine credential entropy');
@@ -50,5 +56,6 @@ console.log(JSON.stringify({
   privateKeyOwnersMaximum: 1,
   sharedSecretEndpointsMaximum: 2,
   productionKeyVolumeConsumers: 1,
+  oneShotMigrationConsumers: 1,
   matchedBackupAndRestoreRequired: true,
 }));

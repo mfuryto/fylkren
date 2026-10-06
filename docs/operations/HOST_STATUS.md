@@ -120,7 +120,7 @@ that remains isolated until the original is fenced, as described in
 [Installation and upgrades](INSTALLATION_AND_UPGRADES.md#restore-and-isolated-rehearsal).
 
 `deploy/host-status/record-backup.sh` is retained only for backup sets created by
-an approved external backup system. Pass that command the three existing,
+an approved external backup system. Pass that command the four existing,
 nonempty artifact paths; do not use placeholder filenames.
 
 ## Troubleshooting

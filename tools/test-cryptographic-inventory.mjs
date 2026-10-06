@@ -68,6 +68,7 @@ const expectedFiles = [
   'apps/api/Portability/PortableExportPackage.cs',
   'apps/api/Portability/PortableImportValidator.cs',
   'apps/api/ServiceRegistration.cs',
+  'apps/data-protection-custody-core/DataProtectionKeyCustody.cs',
 ].sort();
 
 const directCrypto = /System\.Security\.Cryptography|SHA256|HMACSHA|ECDsa|RandomNumberGenerator|Rfc2898DeriveBytes|CryptographicOperations|IDataProtection|CreateProtector|IPasswordHasher|AddDataProtection|AddFido2|AddOpenIdConnect|AddSaml2/;
@@ -78,13 +79,13 @@ function sourceFiles(directory) {
     return statSync(path).isDirectory() ? sourceFiles(path) : path.endsWith('.cs') ? [path] : [];
   });
 }
-const actualFiles = sourceFiles('apps/api')
+const actualFiles = [...sourceFiles('apps/api'), ...sourceFiles('apps/data-protection-custody-core')]
   .filter(path => directCrypto.test(readFileSync(path, 'utf8')))
   .sort();
 assert.deepEqual(actualFiles, expectedFiles,
   'Production cryptographic source usage changed; review and update the maintained inventory');
 
-for (const label of ['ASP.NET Data Protection key ring', 'Federation signing identity',
+for (const label of ['ASP.NET Data Protection key ring', 'Data Protection key-encryption custody', 'Federation signing identity',
   'Pinned federation peer keys', 'Enterprise license issuer keys', 'TLS private keys and certificates',
   'Internal transport CA and service certificates',
   'OIDC/SAML trust material and client secret', 'WebAuthn credential keys',
@@ -92,7 +93,7 @@ for (const label of ['ASP.NET Data Protection key ring', 'Federation signing ide
   'Webhook signing secrets', 'Password-reset grants'])
   assert.match(policy, new RegExp(`\\| ${label.replaceAll('/', '\\/')} \\|`), `Missing key inventory entry: ${label}`);
 
-for (const primitive of ['AES-256-CBC plus HMAC-SHA-256', 'PBKDF2 through ASP.NET Identity v3',
+for (const primitive of ['AES-256-CBC plus HMAC-SHA-256', 'AES-256-GCM plus RSA-OAEP-SHA-256', 'PBKDF2 through ASP.NET Identity v3',
   'PBKDF2-HMAC-SHA-256', 'ECDSA NIST P-256 with SHA-256', 'HMAC-SHA-256', 'HMAC-SHA-1',
   'SHA-256', 'OIDC RS256', 'SAML RSA-SHA256', 'WebAuthn COSE', 'TLS 1.2 and 1.3',
   'Internal P-256 TLS CA and service certificates',
@@ -118,7 +119,7 @@ assert.match(internalTls, /checkend 2592000/, 'internal TLS leaf renewal boundar
 console.log(JSON.stringify({
   cryptographicInventory: 'passed',
   productionSourceFiles: actualFiles.length,
-  keyAndSecretClasses: 13,
-  primitiveAndCertificateClasses: 13,
+  keyAndSecretClasses: 14,
+  primitiveAndCertificateClasses: 14,
   newCryptographicUsageFailsClosed: true,
 }));

@@ -1,8 +1,8 @@
 #!/bin/sh
 set -eu
 
-if [ "$#" -ne 3 ]; then
-    echo "Usage: $0 DATABASE_DUMP ENV_BACKUP DATA_PROTECTION_KEY_ARCHIVE" >&2
+if [ "$#" -ne 4 ]; then
+    echo "Usage: $0 DATABASE_DUMP ENV_BACKUP DATA_PROTECTION_KEY_ARCHIVE DATA_PROTECTION_CUSTODY_ARCHIVE" >&2
     exit 2
 fi
 
@@ -27,9 +27,10 @@ trap 'rm -f "$temporary_timestamp" "$temporary_record"' EXIT HUP INT TERM
 database_hash=$(sha256sum "$1" | awk '{print $1}')
 environment_hash=$(sha256sum "$2" | awk '{print $1}')
 keys_hash=$(sha256sum "$3" | awk '{print $1}')
+custody_hash=$(sha256sum "$4" | awk '{print $1}')
 printf '%s\n' "$completed_at" >"$temporary_timestamp"
-printf '{"schemaVersion":1,"completedAt":"%s","databaseSha256":"%s","environmentSha256":"%s","dataProtectionKeysSha256":"%s","restoreTested":false}\n' \
-    "$completed_at" "$database_hash" "$environment_hash" "$keys_hash" >"$temporary_record"
+printf '{"schemaVersion":2,"completedAt":"%s","databaseSha256":"%s","environmentSha256":"%s","dataProtectionKeysSha256":"%s","dataProtectionCustodySha256":"%s","restoreTested":false}\n' \
+    "$completed_at" "$database_hash" "$environment_hash" "$keys_hash" "$custody_hash" >"$temporary_record"
 chmod 0644 "$temporary_timestamp"
 chmod 0600 "$temporary_record"
 mv -f "$temporary_timestamp" "$runtime_dir/last-backup.timestamp"

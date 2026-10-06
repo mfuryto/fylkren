@@ -2129,3 +2129,31 @@ The pure vectors accept the generated key and reject changes to every canonical 
 The GitHub post-push warning was reproduced by a complete `pnpm audit` as GHSA-68fv-2mgg-jv7q in transitive `source-map-js` 1.2.1 through PostCSS. It affects frontend build/test tooling and can cause event-loop denial of service while processing crafted indexed source-map offsets. The production-only npm audit and the complete direct/transitive NuGet audit had no findings.
 
 The workspace now overrides this transitive package to patched 1.2.2 and the lock file records that exact version. The repeated complete audit reports `No known vulnerabilities found`; the lock-file supply-chain policy passes 181 entries; shared frontend type compilation plus demo and production web builds pass. SV-109 was opened and closed in the same bounded remediation, and ASVS 15.2.1 remains Passed with current evidence. No production installation was changed.
+
+### Secret custody and production observability closure — 2026-10-06
+
+This closes SV-105, SV-107 and SV-108 and completes the final four Finding rows: ASVS 13.3.1, 13.3.2, 16.2.2 and 16.4.3. The matrix now contains 199 Passed and 54 Not-applicable rows, with no Finding, In-progress or Not-assessed row.
+
+Data Protection root-key XML is now encrypted before volume storage with a dedicated installation RSA-3072 custody key. Each envelope uses a fresh 256-bit AES key, AES-256-GCM with authenticated algorithm/certificate metadata and RSA-OAEP-SHA-256 wrapping. A networkless capability-dropped startup service migrates older plaintext key XML atomically and idempotently before API startup. Only the API retains steady-state read-only custody access. Production Compose no longer accepts OIDC, AD or LDAP provider secrets through `.env`; these are entered through Platform Manager and purpose-protected in PostgreSQL. Backup schema 2 binds the database, protected environment, key ring and custody archive by SHA-256, and restore replaces all matching volumes together.
+
+Gateway, API and PostgreSQL now use Docker's journald driver. The supported deployment installer configures persistent sealed journals and `systemd-journal-upload` to a logically separate HTTPS endpoint with a dedicated client certificate, mode-0600 key and exact trusted CA. Its verifier requires the service to be enabled and active, every long-running container to use journald and the durable upload cursor to advance after a unique canary. This is a per-deployment qualification gate because the repository cannot invent a customer's separate collector or its credentials.
+
+The existing host collector still fails health when NTP is absent or exceeds its 1,000 ms offset boundary. The added verifier correlates host, gateway, API and PostgreSQL UTC clocks within two seconds. Galileo's production-equivalent evidence reported chrony `Normal`, source `time.cloudflare.com`, last offset `+0.000126048` seconds and application status `healthy` with `offsetMilliseconds: 0.126048`.
+
+```sh
+dotnet build apps/api/Fylkren.Api.csproj --no-restore
+dotnet build tools/data-protection-custody/Fylkren.DataProtectionCustody.csproj --no-restore
+dotnet build tests/foundations/Fylkren.FoundationTests.csproj --no-restore
+dotnet run --project tests/foundations/Fylkren.FoundationTests.csproj --no-build -- --data-protection-custody-only
+node tools/test-cryptographic-key-management-policy.mjs
+node tools/test-production-configuration-inventory.mjs
+node tools/test-encryption-mode-boundary.mjs
+node tools/test-authenticated-encryption-boundary.mjs
+node tools/test-host-time-status.mjs
+node tools/test-production-observability-controls.mjs
+node tools/test-security-logging-inventory.mjs
+docker compose config --quiet
+docker compose build data-protection-init api
+```
+
+The focused custody test proves plaintext absence, matching-key recovery, modified-tag rejection, atomic legacy migration and idempotence. Both changed production images build. Shell syntax, Compose expansion and the observability policy controls pass. The focused isolated backup/restore fixture also passed: it created and verified the database, protected environment, Data Protection key-ring and custody archives, restored them as one matched set, and returned a healthy public API. No production data or credentials were read or changed.

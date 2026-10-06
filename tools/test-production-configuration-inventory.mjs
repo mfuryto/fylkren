@@ -27,7 +27,11 @@ assert.match(machine, /AllowedScopes/, 'machine least-privilege scope allowlist'
 assert.match(machine, /request\.ExpiresAt > now\.AddDays\(366\)/, 'machine credential lifetime ceiling');
 assert.match(machine, /ApiMachineSignatures\.Create\(\)/, 'request-bound machine signing identity issuance');
 assert.match(inventory, /SV-104 is closed/, 'backend credential finding closure');
-assert.match(inventory, /SV-105/, 'secret custody finding');
+assert.match(inventory, /SV-105 is closed/, 'secret custody finding closure');
+assert.doesNotMatch(compose, /OIDC_CLIENT_SECRET|AD_BIND_PASSWORD|LDAP_BIND_PASSWORD/,
+  'steady-state production secret environment values');
+assert.match(compose, /fylkren-data-protection-custody:\/run\/fylkren-data-protection:ro/,
+  'read-only API root-key custody');
 
 assert.match(apiDockerfile, /dotnet publish[^\n]*-c Release/, 'Release API build');
 assert.match(webDockerfile, /pnpm --filter @fylkren\/web build/, 'production web build');
@@ -42,5 +46,5 @@ console.log(JSON.stringify({
   databaseAuthentication: 'certificate',
   releaseBuilds: true,
   sourceMetadataInRuntimeImages: false,
-  findings: ['SV-105'],
+  findings: [],
 }));

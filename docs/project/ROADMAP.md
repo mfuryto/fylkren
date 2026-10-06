@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 2026-10-06 after completing cryptographic agility and signed machine authentication. Open deployment findings, identity provisioning and final release-candidate qualification remain explicit.
+Updated 2026-10-06 after closing the final four ASVS finding rows. Identity provisioning and final release-candidate/deployment qualification remain explicit.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -14,9 +14,8 @@ API-first and AI-ready are continuing architecture requirements. New capabilitie
 
 ## Next delivery order
 
-1. Triage and remediate, or obtain explicit responsible-owner acceptance for, the 3 open deployment finding records that affect 4 ASVS rows. Internal service transport, machine service identity, outbound destination enforcement, dependency vulnerabilities, the release-candidate SBOM, federated reauthentication, user session-management, mandatory-MFA, minimum cryptographic strength and crypto agility are closed. Prioritize secret custody, clock synchronization and separate log collection. Retest each affected row against the exact candidate when its control changes.
-2. Deliver configurable OIDC/SAML provisioning and the restricted unassigned-user state described below. Preserve the current explicit-link path and direct AD/LDAP personnel addition.
-3. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing, identity providers, authenticators, backup/key custody, time synchronization and remote logging at this gate.
+1. Deliver configurable OIDC/SAML provisioning and the restricted unassigned-user state described below. Preserve the current explicit-link path and direct AD/LDAP personnel addition.
+2. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing, identity providers, authenticators, backup/key custody, time synchronization and remote logging at this gate.
 
 No irreversible disposition is authorized by this order. Establish and verify its prerequisites before proposing activation; do not choose arbitrary retention periods.
 
@@ -53,13 +52,13 @@ Earlier HTTP p95 readings varied from subsecond values to multiple seconds and w
 
 ## Security verification
 
-The [ASVS 5.0 Level 2 matrix](../security/ASVS_5.0.0_L2_MATRIX.md) is the single security-testing work list and status authority. At this update all 253 rows are assessed: 195 Passed, 54 Not applicable and 4 rows with Findings, represented by 3 open records in the finding register. There are no `In progress` or `Not assessed` rows. Complete assessment means every requirement has a supported disposition; it is not a security certification or acceptance of open risk.
+The [ASVS 5.0 Level 2 matrix](../security/ASVS_5.0.0_L2_MATRIX.md) is the single security-testing work list and status authority. At this update all 253 rows are assessed: 199 Passed and 54 Not applicable. No row remains `Finding`, `In progress` or `Not assessed`. Complete assessment means every requirement has a supported disposition; it is not by itself a production approval.
 
 Use the [security test plan](../security/SECURITY_TEST_PLAN.md) and [threat model](../security/SECURITY_THREAT_MODEL.md). Record findings and remediation in the [finding register](../security/SECURITY_VERIFICATION.md); record completed requirement-specific tests in the ASVS matrix with links to maintained execution evidence. Partial coverage remains partial. Retest affected controls after every change.
 
-HTTP and non-HTTP destination/DNS boundaries, redirect/download controls and bounded runtime SAML metadata are delivered and tested. Current public and internal TLS/proxy qualification passes, machine integrations use request-bound signed identities, the Alpine API candidate has zero current Trivy vulnerability results, immutable image/source CycloneDX SBOM generation is part of the release gate, users can inspect and selectively revoke their active browser sessions, interactive access requires MFA by default, and external RSA keys require at least 3072 bits. The finding register retains every unmet criterion: secret custody, host clock synchronization and separate log collection. Do not rerun unrelated full-product chains for scoped corrections. Deployment-sensitive controls require customer identity-provider behavior, authenticator compatibility, host SSH/backup transport, coordinated database/Data Protection key recovery, production time synchronization and remote log custody. Disposable restore tests already exist; operational custody qualification remains separate.
+HTTP and non-HTTP destination/DNS boundaries, redirect/download controls and bounded runtime SAML metadata are delivered and tested. Current public and internal TLS/proxy qualification passes, machine integrations use request-bound signed identities, the Alpine API candidate has zero current Trivy vulnerability results, immutable image/source CycloneDX SBOM generation is part of the release gate, users can inspect and selectively revoke their active browser sessions, interactive access requires MFA by default, and external RSA keys require at least 3072 bits. Data Protection root keys now use separate OAEP/GCM custody with matched backup/restore, host time has a production-evidenced NTP boundary and correlation verifier, and long-running container logs use a mandatory journald-to-remote HTTPS/mTLS path with acknowledgement verification. Do not rerun unrelated full-product chains for scoped corrections. Deployment-sensitive controls still require customer identity-provider behavior, authenticator compatibility, host SSH/backup transport, coordinated database/Data Protection key/custody recovery, production time verification and a customer-owned separate collector.
 
-The host-status integration now exposes NTP synchronization and a 1,000 ms offset boundary. SV-107 stays open until the deployment owner installs it and records production-equivalent synchronized status, alert handling and cross-system timestamp correlation.
+The host-status integration exposes NTP synchronization and a 1,000 ms offset boundary. The maintained verifier correlates host, gateway, API and database time; production qualification must rerun it and the remote-journal acknowledgement check on the target deployment.
 
 Mandatory MFA remains the secure default. Optional or disabled MFA is a supported customer-owned exception with explicit risk documentation and a persistent reduced-security signal in Platform Manager; an excepted deployment must qualify its own compensating controls and cannot silently inherit the default ASVS 6.3.3 result.
 
@@ -73,7 +72,7 @@ Repeat the maintained AD/LDAP, OIDC/SAML, SMTP and federation laboratories for a
 
 Qualify production issuer/private-key custody and offline key management separately from the synthetic edition fixtures. Preserve one common API/web build and customer-data access across entitlement transitions. See [edition architecture](../architecture/EDITION_ENTITLEMENTS.md).
 
-Resolve or explicitly accept documented residual security findings. Do not describe the product as security-qualified until the required verification and deployment gates are complete.
+Do not describe the product as production-qualified until the required candidate verification and deployment gates are complete, even though the maintained ASVS rows have supported Passed or Not-applicable dispositions.
 
 ## Publication and distribution
 

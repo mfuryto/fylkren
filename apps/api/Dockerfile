@@ -3,10 +3,12 @@ ARG TARGETARCH
 WORKDIR /src
 COPY Directory.Build.props Directory.Packages.props global.json ./
 COPY apps/api/Fylkren.Api.csproj apps/api/
+COPY apps/data-protection-custody-core/Fylkren.DataProtectionCustody.Core.csproj apps/data-protection-custody-core/
 RUN case "$TARGETARCH" in amd64) rid=linux-musl-x64 ;; arm64) rid=linux-musl-arm64 ;; *) echo "Unsupported architecture: $TARGETARCH" >&2; exit 1 ;; esac \
     && dotnet restore apps/api/Fylkren.Api.csproj -r "$rid"
 COPY assets/branding/fylkren-logo-web-256.png assets/branding/fylkren-logo-web-256.png
 COPY apps/api/ apps/api/
+COPY apps/data-protection-custody-core/ apps/data-protection-custody-core/
 RUN case "$TARGETARCH" in amd64) rid=linux-musl-x64 ;; arm64) rid=linux-musl-arm64 ;; *) echo "Unsupported architecture: $TARGETARCH" >&2; exit 1 ;; esac \
     && dotnet publish apps/api/Fylkren.Api.csproj -c Release -r "$rid" --self-contained false -o /app --no-restore
 

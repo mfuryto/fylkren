@@ -1,6 +1,8 @@
 using Fylkren.Api.Networking;
 using System.Globalization;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.RateLimiting;
 using Fido2NetLib;
 using Fylkren.Api.Identity;
@@ -17,6 +19,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
 using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Http.Features;
@@ -91,7 +94,7 @@ internal static class ServiceRegistration
         builder.Services.AddHealthChecks();
         if (requireHttps)
             builder.Services.AddHttpsRedirection(options => options.HttpsPort = 443);
-        builder.Services.AddDataProtection()
+        var dataProtection = builder.Services.AddDataProtection()
             .PersistKeysToFileSystem(new DirectoryInfo(
                 builder.Configuration["Fylkren:DataProtection:KeyPath"] ?? "/var/lib/fylkren/keys"))
             .SetApplicationName("Fylkren")
@@ -100,6 +103,23 @@ internal static class ServiceRegistration
                 EncryptionAlgorithm = EncryptionAlgorithm.AES_256_CBC,
                 ValidationAlgorithm = ValidationAlgorithm.HMACSHA256
             });
+        var dataProtectionCertificatePath = builder.Configuration["Fylkren:DataProtection:CertificatePath"];
+        var dataProtectionPrivateKeyPath = builder.Configuration["Fylkren:DataProtection:PrivateKeyPath"];
+        if (string.IsNullOrWhiteSpace(dataProtectionCertificatePath) != string.IsNullOrWhiteSpace(dataProtectionPrivateKeyPath))
+            throw new InvalidOperationException("Both Data Protection certificate and private-key paths are required.");
+        if (!string.IsNullOrWhiteSpace(dataProtectionCertificatePath))
+        {
+            var certificate = X509Certificate2.CreateFromPemFile(dataProtectionCertificatePath, dataProtectionPrivateKeyPath);
+            if (!certificate.HasPrivateKey || certificate.NotAfter <= DateTime.UtcNow.AddDays(30) ||
+                certificate.GetRSAPublicKey()?.KeySize is not >= 3072)
+            {
+                certificate.Dispose();
+                throw new InvalidOperationException("The Data Protection key-encryption certificate must contain an RSA-3072 or stronger private key and remain valid for at least 30 days.");
+            }
+            builder.Services.AddSingleton(certificate);
+            builder.Services.Configure<KeyManagementOptions>(options =>
+                options.XmlEncryptor = new DataProtectionKeyEncryptor(certificate));
+        }
         var authentication = builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
             {

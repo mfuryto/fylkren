@@ -9,7 +9,7 @@ function sourceFiles(directory) {
     return statSync(path).isDirectory() ? sourceFiles(path) : path.endsWith('.cs') ? [path] : [];
   });
 }
-const files = sourceFiles('apps/api');
+const files = [...sourceFiles('apps/api'), ...sourceFiles('apps/data-protection-custody-core')];
 const sources = files.map(path => `${path}\n${readFileSync(path, 'utf8')}`).join('\n');
 const registration = readFileSync('apps/api/ServiceRegistration.cs', 'utf8');
 
@@ -30,4 +30,5 @@ console.log(JSON.stringify({
   ecbUses: 0,
   weakRsaEncryptionPaddingUses: 0,
   authenticatedCbcContexts: 1,
+  authenticatedGcmCustodyContexts: 1,
 }));

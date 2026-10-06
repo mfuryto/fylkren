@@ -69,6 +69,11 @@ if (args.Contains("--external-key-strength-only"))
     await SamlMetadataTests.Run();
     return;
 }
+if (args.Contains("--data-protection-custody-only"))
+{
+    DataProtectionKeyCustodyTests.Run();
+    return;
+}
 var now = DateTimeOffset.UtcNow;
 var site = Guid.NewGuid(); var origin = Guid.NewGuid(); var actor = Guid.NewGuid(); var resource = Guid.NewGuid();
 var operation = Guid.NewGuid();

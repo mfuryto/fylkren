@@ -4,7 +4,7 @@ set -eu
 confirmation=--confirm-destructive-restore
 if [ "$#" -ne 2 ] || [ "$2" != "$confirmation" ]; then
     echo "Usage: sudo $0 /absolute/path/to/fylkren-TIMESTAMP $confirmation" >&2
-    echo "This permanently replaces the current database, configuration and Data Protection keys." >&2
+    echo "This permanently replaces the current database, configuration, Data Protection keys and matching key-encryption custody." >&2
     exit 2
 fi
 
@@ -14,7 +14,7 @@ case "$backup_set" in
     *) echo "Backup set path must be absolute." >&2; exit 2 ;;
 esac
 
-for artifact in fylkren.dump env.backup data-protection-keys.tar.gz manifest.json SHA256SUMS COMPLETE; do
+for artifact in fylkren.dump env.backup data-protection-keys.tar.gz data-protection-custody.tar.gz manifest.json SHA256SUMS COMPLETE; do
     if [ ! -f "$backup_set/$artifact" ] || [ ! -s "$backup_set/$artifact" ]; then
         echo "Required backup artifact is missing or empty: $backup_set/$artifact" >&2
         exit 1
@@ -33,6 +33,16 @@ tar -tzf "$backup_set/data-protection-keys.tar.gz" | grep -Eq '^\./[A-Za-z0-9._-
     echo "The Data Protection key archive contains no key files." >&2
     exit 1
 }
+if tar -tzf "$backup_set/data-protection-custody.tar.gz" | grep -Ev '^(\./|\./data-protection\.(crt|key))$' | grep -q .; then
+    echo "The Data Protection custody archive contains an unsafe path." >&2
+    exit 1
+fi
+for custody_file in ./data-protection.crt ./data-protection.key; do
+    tar -tzf "$backup_set/data-protection-custody.tar.gz" | grep -Fxq "$custody_file" || {
+        echo "The Data Protection custody archive is incomplete: $custody_file" >&2
+        exit 1
+    }
+done
 
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 project_dir=$(CDPATH= cd -- "$script_dir/../.." && pwd)
@@ -71,15 +81,16 @@ postgres_container=$(compose ps -q -a postgres)
 api_container=$(compose ps -q -a api)
 database_volume=$(docker inspect --format '{{range .Mounts}}{{if eq .Destination "/var/lib/postgresql"}}{{.Name}}{{end}}{{end}}' "$postgres_container")
 key_volume=$(docker inspect --format '{{range .Mounts}}{{if eq .Destination "/var/lib/fylkren/keys"}}{{.Name}}{{end}}{{end}}' "$api_container")
-case "$database_volume:$key_volume" in
-    *[!A-Za-z0-9_.:-]*|:*|*:) echo "Restore volumes could not be identified safely." >&2; exit 1 ;;
+custody_volume=$(docker inspect --format '{{range .Mounts}}{{if eq .Destination "/run/fylkren-data-protection"}}{{.Name}}{{end}}{{end}}' "$api_container")
+case "$database_volume:$key_volume:$custody_volume" in
+    *[!A-Za-z0-9_.:-]*|:*|*:|*::*) echo "Restore volumes could not be identified safely." >&2; exit 1 ;;
 esac
-if [ "$database_volume" = "$key_volume" ]; then
-    echo "Database and key volumes unexpectedly resolve to the same volume." >&2
+if [ "$database_volume" = "$key_volume" ] || [ "$database_volume" = "$custody_volume" ] || [ "$key_volume" = "$custody_volume" ]; then
+    echo "Database, key-ring and custody volumes must be separate." >&2
     exit 1
 fi
 compose down
-docker volume rm "$database_volume" "$key_volume" >/dev/null
+docker volume rm "$database_volume" "$key_volume" "$custody_volume" >/dev/null
 
 compose up -d --wait postgres
 compose exec -T postgres pg_restore -U fylkren -d fylkren --exit-on-error --no-owner <"$backup_set/fylkren.dump"
@@ -87,11 +98,16 @@ compose exec -T postgres pg_restore -U fylkren -d fylkren --exit-on-error --no-o
 compose create api >/dev/null
 api_container=$(compose ps -q -a api)
 key_volume=$(docker inspect --format '{{range .Mounts}}{{if eq .Destination "/var/lib/fylkren/keys"}}{{.Name}}{{end}}{{end}}' "$api_container")
-case "$key_volume" in ''|*[!A-Za-z0-9_.-]*) echo "Restored key volume is invalid." >&2; exit 1 ;; esac
+custody_volume=$(docker inspect --format '{{range .Mounts}}{{if eq .Destination "/run/fylkren-data-protection"}}{{.Name}}{{end}}{{end}}' "$api_container")
+case "$key_volume:$custody_volume" in *[!A-Za-z0-9_.:-]*|:*|*:) echo "Restored key or custody volume is invalid." >&2; exit 1 ;; esac
 docker run --rm -i --network none --read-only --cap-drop ALL \
     --security-opt no-new-privileges:true --user "$api_user" \
     --entrypoint tar --mount "type=volume,src=$key_volume,dst=/restore" \
     "$web_image" -xzf - -C /restore <"$backup_set/data-protection-keys.tar.gz"
+docker run --rm -i --network none --read-only --cap-drop ALL \
+    --security-opt no-new-privileges:true --user "$api_user" \
+    --entrypoint tar --mount "type=volume,src=$custody_volume,dst=/restore" \
+    "$web_image" -xzf - -C /restore <"$backup_set/data-protection-custody.tar.gz"
 
 compose up -d --wait
 "$project_dir/deploy/host-status/collect-host-status.sh" \

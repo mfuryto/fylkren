@@ -10,6 +10,7 @@ services:
       - ALL
     cap_add:
       - CHOWN
+      - DAC_OVERRIDE
       - FOWNER
     security_opt:
       - no-new-privileges:true
@@ -21,12 +22,17 @@ services:
       - fylkren-tls-api:/var/lib/fylkren-tls/api
       - fylkren-tls-postgres:/var/lib/fylkren-tls/postgres
       - fylkren-tls-database-client:/var/lib/fylkren-tls/database-client
+      - fylkren-data-protection-custody:/var/lib/fylkren-data-protection
 
   web:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
     restart: unless-stopped
+    logging:
+      driver: journald
+      options:
+        tag: "fylkren/{{.Name}}"
     read_only: true
     cap_drop:
       - ALL
@@ -47,6 +53,24 @@ services:
     networks:
       - frontend
 
+  data-protection-init:
+    build:
+      context: .
+      dockerfile: apps/data-protection-custody/Dockerfile
+    restart: "no"
+    read_only: true
+    network_mode: none
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - fylkren-keys:/var/lib/fylkren/keys
+      - fylkren-data-protection-custody:/run/fylkren-data-protection:ro
+    depends_on:
+      tls-init:
+        condition: service_completed_successfully
+
   api:
     build:
       context: .
@@ -58,6 +82,8 @@ services:
       ASPNETCORE_Kestrel__Certificates__Default__Path: /run/fylkren-tls/api.crt
       ASPNETCORE_Kestrel__Certificates__Default__KeyPath: /run/fylkren-tls/api.key
       Fylkren__DataProtection__KeyPath: /var/lib/fylkren/keys
+      Fylkren__DataProtection__CertificatePath: /run/fylkren-data-protection/data-protection.crt
+      Fylkren__DataProtection__PrivateKeyPath: /run/fylkren-data-protection/data-protection.key
       Fylkren__PublicUrl: ${FYLKREN_PUBLIC_URL:-http://localhost:8080}
       Fylkren__Http__TrustForwardedHeaders: ${FYLKREN_TRUST_FORWARDED_HEADERS:-false}
       Fylkren__Http__ForwardedHeaderLimit: ${FYLKREN_FORWARDED_HEADER_LIMIT:-1}
@@ -79,7 +105,6 @@ services:
       Fylkren__Authentication__Oidc__Enabled: ${FYLKREN_OIDC_ENABLED:-false}
       Fylkren__Authentication__Oidc__Authority: ${FYLKREN_OIDC_AUTHORITY:-}
       Fylkren__Authentication__Oidc__ClientId: ${FYLKREN_OIDC_CLIENT_ID:-}
-      Fylkren__Authentication__Oidc__ClientSecret: ${FYLKREN_OIDC_CLIENT_SECRET:-}
       Fylkren__Authentication__Oidc__CallbackPath: ${FYLKREN_OIDC_CALLBACK_PATH:-/signin-oidc}
       Fylkren__Authentication__Saml__Enabled: ${FYLKREN_SAML_ENABLED:-false}
       Fylkren__Authentication__Saml__MetadataUrl: ${FYLKREN_SAML_METADATA_URL:-}
@@ -95,7 +120,6 @@ services:
       Fylkren__Authentication__ActiveDirectory__UseSsl: ${FYLKREN_AD_USE_SSL:-true}
       Fylkren__Authentication__ActiveDirectory__UseStartTls: ${FYLKREN_AD_USE_STARTTLS:-false}
       Fylkren__Authentication__ActiveDirectory__BindDn: ${FYLKREN_AD_BIND_DN:-}
-      Fylkren__Authentication__ActiveDirectory__BindPassword: ${FYLKREN_AD_BIND_PASSWORD:-}
       Fylkren__Authentication__ActiveDirectory__UsernameAttribute: ${FYLKREN_AD_USERNAME_ATTRIBUTE:-sAMAccountName}
       Fylkren__Authentication__ActiveDirectory__LifecycleActiveFilter: ${FYLKREN_AD_LIFECYCLE_ACTIVE_FILTER:-(!(userAccountControl:1.2.840.113556.1.4.803:=2))}
       Fylkren__Authentication__Ldap__Enabled: ${FYLKREN_LDAP_ENABLED:-false}
@@ -106,7 +130,6 @@ services:
       Fylkren__Authentication__Ldap__UseSsl: ${FYLKREN_LDAP_USE_SSL:-true}
       Fylkren__Authentication__Ldap__UseStartTls: ${FYLKREN_LDAP_USE_STARTTLS:-false}
       Fylkren__Authentication__Ldap__BindDn: ${FYLKREN_LDAP_BIND_DN:-}
-      Fylkren__Authentication__Ldap__BindPassword: ${FYLKREN_LDAP_BIND_PASSWORD:-}
       Fylkren__Authentication__Ldap__UsernameAttribute: ${FYLKREN_LDAP_USERNAME_ATTRIBUTE:-uid}
       Fylkren__Authentication__Ldap__DisplayNameAttribute: ${FYLKREN_LDAP_DISPLAY_NAME_ATTRIBUTE:-displayName}
       Fylkren__Authentication__Ldap__EmailAttribute: ${FYLKREN_LDAP_EMAIL_ATTRIBUTE:-mail}
@@ -120,6 +143,10 @@ services:
       Fylkren__Authentication__WebAuthn__DisplayName: ${FYLKREN_WEBAUTHN_DISPLAY_NAME:-Local installation}
       Fylkren__Authentication__WebAuthn__Origins__0: ${FYLKREN_WEBAUTHN_ORIGIN:-http://localhost:8080}
     restart: unless-stopped
+    logging:
+      driver: journald
+      options:
+        tag: "fylkren/{{.Name}}"
     read_only: true
     cap_drop:
       - ALL
@@ -141,10 +168,13 @@ services:
       - fylkren-tls-api:/run/fylkren-tls:ro
       - fylkren-tls-database-client:/run/fylkren-database-client:ro
       - fylkren-tls-trust:/run/fylkren-trust:ro
+      - fylkren-data-protection-custody:/run/fylkren-data-protection:ro
     depends_on:
       postgres:
         condition: service_healthy
       tls-init:
+        condition: service_completed_successfully
+      data-protection-init:
         condition: service_completed_successfully
     networks:
       - frontend
@@ -155,6 +185,10 @@ services:
       context: .
       dockerfile: apps/postgres/Dockerfile
     restart: unless-stopped
+    logging:
+      driver: journald
+      options:
+        tag: "fylkren/{{.Name}}"
     cap_drop:
       - ALL
     security_opt:
@@ -202,6 +236,7 @@ volumes:
   fylkren-tls-api:
   fylkren-tls-postgres:
   fylkren-tls-database-client:
+  fylkren-data-protection-custody:
 
 networks:
   frontend:

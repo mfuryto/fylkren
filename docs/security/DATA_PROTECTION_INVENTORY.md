@@ -17,7 +17,7 @@ Encoded values remain at the protection level of their decoded content. IDs, has
 - Sensitive inputs use request bodies or protected headers. Route and query values are limited to identifiers, pagination, filters and explicit non-secret presentation state.
 - Every API response is `no-store`; authenticated state is held in an HttpOnly cookie. The web client stores only a non-sensitive overview layout preference in `localStorage` and keeps API data in memory. Sign-out clears the application GET cache and rerenders the unauthenticated shell.
 - The Content Security Policy allows no third-party script, frame, image or connection origin. Fylkren has no analytics or advertising tracker.
-- Database/backups and the Data Protection key ring require deployment access control. Transport and secret-custody exceptions remain separately recorded as SV-103 and SV-105.
+- Database/backups and the Data Protection key ring require deployment access control. Transport and secret-custody controls are implemented and remain traceable through closed findings SV-103 and SV-105.
 - Operational and personal fields are returned through explicit response projections and authorization checks. Security audit, technical logging and activity have distinct purposes and retention categories.
 - Retention periods remain customer-configurable; irreversible deletion/anonymisation is disabled. Export packages are customer data and must use approved storage/transfer controls.
 

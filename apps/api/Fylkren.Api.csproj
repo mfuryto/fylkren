@@ -4,6 +4,7 @@
     <RootNamespace>Fylkren.Api</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../data-protection-custody-core/Fylkren.DataProtectionCustody.Core.csproj" />
     <EmbeddedResource Include="../../assets/branding/fylkren-logo-web-256.png" LogicalName="Fylkren.Api.Assets.fylkren-logo-web-256.png" />
     <EmbeddedResource Include="Identity/common-passwords.sha256" LogicalName="Fylkren.Api.Security.common-passwords.sha256" />
     <EmbeddedResource Include="Identity/breached-passwords.sha256" LogicalName="Fylkren.Api.Security.breached-passwords.sha256" />

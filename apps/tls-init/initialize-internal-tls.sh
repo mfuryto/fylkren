@@ -7,8 +7,9 @@ trust=/var/lib/fylkren-tls/trust
 api_private=/var/lib/fylkren-tls/api
 postgres_private=/var/lib/fylkren-tls/postgres
 database_client_private=/var/lib/fylkren-tls/database-client
+data_protection_private=/var/lib/fylkren-data-protection
 
-mkdir -p "$ca_private" "$trust" "$api_private" "$postgres_private" "$database_client_private"
+mkdir -p "$ca_private" "$trust" "$api_private" "$postgres_private" "$database_client_private" "$data_protection_private"
 
 new_ca=false
 if [ ! -s "$ca_private/ca.key" ] || [ ! -s "$trust/ca.crt" ] || \
@@ -108,9 +109,43 @@ EOF
 issue_leaf api 1654:1654 "$api_private"
 issue_leaf postgres 70:70 "$postgres_private"
 issue_client fylkren-api 1654:1654 "$database_client_private"
+
+if [ ! -e "$data_protection_private/data-protection.key" ] && \
+   [ ! -e "$data_protection_private/data-protection.crt" ]; then
+    rm -f "$data_protection_private/data-protection.key" "$data_protection_private/data-protection.crt"
+    openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:3072 \
+        -out "$data_protection_private/data-protection.key"
+    openssl req -x509 -new -sha256 -days 3650 \
+        -key "$data_protection_private/data-protection.key" \
+        -out "$data_protection_private/data-protection.crt" \
+        -subj "/CN=Fylkren Data Protection key encryption" \
+        -addext "basicConstraints=critical,CA:FALSE" \
+        -addext "keyUsage=critical,keyEncipherment,dataEncipherment" \
+        -addext "subjectKeyIdentifier=hash"
+elif [ ! -s "$data_protection_private/data-protection.key" ] || \
+     [ ! -s "$data_protection_private/data-protection.crt" ]; then
+    echo "Data Protection custody is incomplete; restore the matching certificate and private key." >&2
+    exit 1
+fi
+openssl x509 -in "$data_protection_private/data-protection.crt" -checkend 2592000 -noout || {
+    echo "Data Protection custody expires within 30 days; complete a controlled key-ring rotation before restart." >&2
+    exit 1
+}
+certificate_public=$(openssl x509 -in "$data_protection_private/data-protection.crt" -pubkey -noout | openssl pkey -pubin -outform DER | sha256sum | awk '{print $1}')
+private_public=$(openssl pkey -in "$data_protection_private/data-protection.key" -pubout -outform DER | sha256sum | awk '{print $1}')
+[ "$certificate_public" = "$private_public" ] || {
+    echo "Data Protection certificate and private key do not match." >&2
+    exit 1
+}
+chmod 0600 "$data_protection_private/data-protection.key"
+chmod 0644 "$data_protection_private/data-protection.crt"
+chown 1654:1654 "$data_protection_private/data-protection.key" "$data_protection_private/data-protection.crt"
+chmod 0700 "$data_protection_private"
+chown 1654:1654 "$data_protection_private"
 chmod 0600 "$ca_private/ca.key"
 chmod 0644 "$trust/ca.crt"
 
 openssl verify -CAfile "$trust/ca.crt" -verify_hostname api "$api_private/api.crt"
 openssl verify -CAfile "$trust/ca.crt" -verify_hostname postgres "$postgres_private/postgres.crt"
 openssl verify -CAfile "$trust/ca.crt" -purpose sslclient "$database_client_private/fylkren-api.crt"
+openssl x509 -in "$data_protection_private/data-protection.crt" -noout -subject -fingerprint -sha256
