@@ -17,9 +17,14 @@ public sealed class SecurityEventMiddleware(RequestDelegate next, ILogger<Securi
 
         if (statusCode is StatusCodes.Status401Unauthorized or StatusCodes.Status403Forbidden)
         {
-            var routineExpiredConfigurationRefresh = statusCode == StatusCodes.Status401Unauthorized &&
-                actorPersonId == "anonymous" && route == "/api/configuration";
-            var level = routineExpiredConfigurationRefresh ? LogLevel.Information : LogLevel.Warning;
+            // A restored browser tab or an expired session routinely performs protected reads
+            // before the client can redirect to sign-in. Keep the denial structured, but do not
+            // present an expected anonymous read as an operational warning. Authenticated denials
+            // and every anonymous state-changing attempt remain warnings.
+            var routineAnonymousRead = statusCode == StatusCodes.Status401Unauthorized &&
+                actorPersonId == "anonymous" &&
+                (HttpMethods.IsGet(context.Request.Method) || HttpMethods.IsHead(context.Request.Method));
+            var level = routineAnonymousRead ? LogLevel.Information : LogLevel.Warning;
             logger.Log(
                 level,
                 new EventId(4101, "AccessRejected"),
