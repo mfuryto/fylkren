@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 2026-10-06 after delivering identity-provider provisioning. Final release-candidate and deployment qualification is next.
+Updated 2026-10-06 after delivering the versioned operational API foundation and coherent WorkItem command slice.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -11,6 +11,8 @@ Repository/documentation consolidation, the common Community/Enterprise entitlem
 The additive event/activity foundation and coherent WorkItem slice are delivered, including shared notification/webhook integration, authorized object/Site timelines and guarded closure, archive and restoration. Work-owned decisions, risks, measures, comments, learning and remaining planning/follow-up edits now use this same activity path, with exact-level learning privacy. Site/global-user archive custody, preservation controls, consistent exports and compatibility consumer reconciliation are also delivered and verified. WorkItem locking/archive now follow final operational decisions and resolved delivery, with explicit editing pauses, independent learning treatment and an Archived task view. Pending navigation counts now use a verified database aggregate; same-fixture role/hierarchy tests and before/after query plans are recorded in the [navigation continuation](../testing/runs/2026-10-02-release-regression.md#navigation-count-query-performance--2026-10-04). Permanent deletion, anonymisation and retention-policy execution remain disabled. See the [architecture and requirement/test traceability](../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md) and [staged execution evidence](../testing/runs/2026-10-02-release-regression.md#work-owned-domain-activity-coverage--2026-10-03). Successful regression runs do not mean ASVS is complete.
 
 API-first and AI-ready are continuing architecture requirements. New capabilities must expose stable, versioned and machine-readable contracts with explicit schemas, bounded inputs, structured errors, correlation, idempotency where needed and least-privilege machine identities. Automation and future AI capabilities must use the same authorized, audited domain APIs as other clients; UI scraping, hidden privileged bypasses and separate business-rule implementations are not supported foundations.
+
+The operational API foundation is delivered under `/api/v1/work`: signed-v2 clients receive exact Site/work-level grants, separate read/write/transition/activity scopes, bounded reads across the current operational context, an OpenAPI 3.1 contract, and a coherent work-item create/update/comment/transition slice. Machine actions retain machine authorship in both common activity and the existing machine audit. Human approvals and private learning remain outside this contract. See [Operational API foundation](../architecture/OPERATIONAL_API.md) and [Work API](../api/WORK_API.md).
 
 ## Next delivery order
 

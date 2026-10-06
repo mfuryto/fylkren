@@ -66,6 +66,8 @@ export const platformApiEtEE = {
   scopeClassificationsRead: "Klassifikatsioonide lugemine",
   scopeClassificationsWrite: "Klassifikaatorite ja aktiveerimise haldamine",
   scopeReportsRead: "Loe heakskiidetud aruandeid pärast eraldi saidi ja taseme toetust",
+  scopeWorkRead: "Loe operatiivtööd pärast eraldi Site ja taseme õiguse andmist", scopeWorkWrite: "Loo ja muuda operatiivset sisu", scopeWorkTransition: "Tee kontrollitud olekumuudatusi", scopeActivityRead: "Loe operatiivset tegevusajalugu",
+  workApiAccessBySite: "Operatiivse API juurdepääs Site’i kaupa", workApiAccessIntro: "Seo operatiivsete õigustega kliendid kindlate Sites ja töötasemetega.", newWorkApiAccess: "Uus operatiivse API juurdepääs", workApiAccessExactLevel: "Õigus kehtib ainult valitud Site’ile ja täpsele töötasemele.", noWorkApiClients: "Ühelgi aktiivsel API-kliendil pole operatiivset õigust.", assignedWorkApiAccess: "Määratud operatiivse API juurdepääs", assignedWorkApiAccessIntro: "Olemasolevaid operatiivseid õigusi saab siin vaadata ja eemaldada.", noWorkApiAccess: "Sellele Site’ile pole operatiivse API juurdepääsu määratud.", workApiAccessLoadFailed: "Operatiivse API juurdepääsu laadimine ebaõnnestus.", workApiAccessSaveFailed: "Operatiivse API juurdepääsu salvestamine ebaõnnestus.", workApiAccessSaved: "Operatiivse API juurdepääs salvestati.", workApiAccessRemoveFailed: "Operatiivse API juurdepääsu eemaldamine ebaõnnestus.", workApiAccessRemoved: "Operatiivse API juurdepääs eemaldati.",
   sitesLoadFailed: "Saidid ei saa laadida.",
   reportAccessLoadFailed: "Juurdepääsutoetuste andmine ei olnud võimalik.",
   reportAccessSaveFailed: "Aruandele juurdepääsu toetust ei suudetud päästa.",

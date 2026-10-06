@@ -12,7 +12,7 @@ function sourceFiles(directory) {
 const families = [
   { id: 'public-bootstrap', matches: path => path === 'apps/api/Program.cs' || /Platform\/(PublicConfiguration|Branding)Endpoints\.cs$/.test(path) },
   { id: 'identity-session', matches: path => path.includes('/Identity/') },
-  { id: 'machine-api', matches: path => /Platform\/(Administration|ReportApi)/.test(path) },
+  { id: 'machine-api', matches: path => /Platform\/(Administration|ReportApi|OperationalApi|ApiDescription|WorkApiManagement)/.test(path) },
   { id: 'federation', matches: path => path.includes('/Federation/') },
   { id: 'archive-portability', matches: path => /InformationLifecycle\/ArchiveReaderEndpoints\.cs$/.test(path) || path.includes('/Portability/') },
   { id: 'platform-governance', matches: path => path.includes('/Platform/') || path.includes('/Licensing/') || path.includes('/DomainEvents/Webhook') || path.includes('/ActivityAudit/Platform') || /InformationLifecycle\/(Governance|Preservation)/.test(path) },
@@ -40,16 +40,16 @@ for (const absolutePath of sourceFiles('apps/api')) {
   familyCounts[family.id] += count;
 }
 
-assert.deepEqual(methodCounts, { GET: 107, POST: 117, PUT: 45, PATCH: 0, DELETE: 27 },
+assert.deepEqual(methodCounts, { GET: 119, POST: 120, PUT: 47, PATCH: 0, DELETE: 28 },
   'Endpoint inventory changed; reconcile the new or removed routes with ACCESS_MATRIX.md before accepting the count');
-assert.equal(Object.values(familyCounts).reduce((sum, count) => sum + count, 0), 296);
+assert.equal(Object.values(familyCounts).reduce((sum, count) => sum + count, 0), 314);
 
 const documentation = readFileSync('docs/administration/ACCESS_MATRIX.md', 'utf8');
 for (const family of families) {
   assert.ok(documentation.includes(`| \`${family.id}\` |`),
     `ACCESS_MATRIX.md does not define authorization family ${family.id}`);
 }
-assert.match(documentation, /296 registered HTTP operations across 95 endpoint source files/);
+assert.match(documentation, /314 registered HTTP operations across 99 endpoint source files/);
 assert.match(documentation, /pending users?[\s\S]*ordinary authenticated fallback denies/i);
 assert.match(documentation, /consumer permission.*resource attributes/i);
 assert.match(documentation, /field and response boundary/i);
@@ -57,7 +57,7 @@ assert.match(documentation, /field and response boundary/i);
 process.stdout.write(`${JSON.stringify({
   authorizationDocumentationInventory: 'passed',
   endpointFiles: endpointFiles.length,
-  endpointOperations: 296,
+  endpointOperations: 314,
   methodCounts,
   familyCounts,
 })}\n`);

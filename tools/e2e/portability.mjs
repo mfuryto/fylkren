@@ -134,9 +134,13 @@ export async function testPortability({ platform, siteManager, leader, siteId, o
   assert.ok(learning.some(value => value.work_item_id === taskId), 'Full Site export lacks internal learning');
   assert.ok(learningEntries.length > 0, 'Learning treatment history missing from export');
   const people = new Set(entries.get('data/people.jsonl').toString('utf8').split('\n').filter(Boolean).map(line => JSON.parse(line).id));
+  const machines = new Set(entries.get('data/api-machine-references.jsonl').toString('utf8').split('\n').filter(Boolean).map(line => JSON.parse(line).id));
   for (const lesson of learning) { assert.ok(people.has(lesson.author_person_id)); if (lesson.owner_person_id) assert.ok(people.has(lesson.owner_person_id)); }
   for (const entry of learningEntries) assert.ok(people.has(entry.author_person_id));
-  for (const comment of comments) assert.ok(people.has(comment.author_person_id), 'Comment author missing from export');
+  for (const comment of comments) assert.ok(
+    (comment.author_person_id && people.has(comment.author_person_id)) ||
+    (comment.author_machine_id && machines.has(comment.author_machine_id)),
+    'Comment author missing from export');
   assert.ok(![...entries.keys()].some(value => /password|reset-grant|session|secret/i.test(value)),
     'Authentication secrets included as package entries');
 

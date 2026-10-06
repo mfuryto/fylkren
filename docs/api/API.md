@@ -10,6 +10,8 @@ Fylkren is closed by default. Anonymous access is limited to health checks, publ
 | --- | --- | --- |
 | Administration | `/api/v1/administration` | Manage sites, users, and classifications |
 | Reports | `/api/v1/reports` | Read approved final reports within explicit grants |
+| Work | `/api/v1/work` | Read operational work within exact Site/work-level grants |
+| OpenAPI | `/api/v1/openapi.json` | Machine-readable description of supported versioned operations |
 
 Routes under paths such as `/api/platform` are internal browser endpoints. They are not supported integration contracts and may change without API-version guarantees.
 
@@ -57,6 +59,7 @@ Browser mutations made with an authenticated session require `X-Fylkren-CSRF`. S
 - Set the shortest practical expiry date.
 - Disable clients immediately when an integration ends or a key may be exposed.
 - Treat scope and resource grants as separate controls. For example, `reports:read` does not grant access to any report until Platform Manager assigns an exact site and work level.
+- Operational scopes likewise require an exact Work API grant. Grants never inherit to parent, child, or sibling levels.
 - A machine client cannot extend its own scopes or create other machine clients through these APIs.
 
 ## Data and HTTP rules

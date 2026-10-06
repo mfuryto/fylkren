@@ -152,6 +152,8 @@ app.MapPlatformAuditEndpoints();
 app.MapSiteNotificationEndpoints();
 app.MapAdministrationApiEndpoints();
 app.MapReportApiEndpoints();
+app.MapOperationalApiEndpoints();
+app.MapApiDescriptionEndpoints();
 app.MapWebhookManagementEndpoints();
 app.MapActivityQueryEndpoints();
 Fylkren.Api.InformationLifecycle.WorkLifecycleEndpoints.MapWorkLifecycleEndpoints(app);

@@ -33,7 +33,7 @@ internal static class WorkItemModelConfiguration
 
         var workItem = modelBuilder.Entity<WorkItem>();
         workItem.ToTable("work_items", table => table.HasCheckConstraint("CK_work_items_external_creator",
-            "created_by_person_id IS NOT NULL OR NULLIF(BTRIM(sender_site_name), '') IS NOT NULL"));
+            "created_by_person_id IS NOT NULL OR created_by_machine_id IS NOT NULL OR NULLIF(BTRIM(sender_site_name), '') IS NOT NULL"));
         workItem.HasKey(value => value.Id);
         workItem.Property(value => value.Id).HasColumnName("id");
         workItem.Property(value => value.SiteId).HasColumnName("site_id");
@@ -54,6 +54,7 @@ internal static class WorkItemModelConfiguration
         workItem.Property(value => value.RequestBasisSnapshot).HasColumnName("request_basis_snapshot").HasMaxLength(100000);
         workItem.Property(value => value.AssignedUnitId).HasColumnName("assigned_unit_id");
         workItem.Property(value => value.CreatedByPersonId).HasColumnName("created_by_person_id");
+        workItem.Property(value => value.CreatedByMachineId).HasColumnName("created_by_machine_id");
         workItem.Property(value => value.Title).HasColumnName("title").HasMaxLength(200).IsRequired();
         workItem.Property(value => value.Description).HasColumnName("description").HasMaxLength(10000).IsRequired();
         workItem.Property(value => value.Recommendation).HasColumnName("recommendation").HasMaxLength(4000);
@@ -127,6 +128,7 @@ internal static class WorkItemModelConfiguration
         workHistory.HasOne<Site>().WithMany().HasForeignKey(value => value.SiteId).OnDelete(DeleteBehavior.Restrict);
         workHistory.HasOne<OrganizationUnit>().WithMany().HasForeignKey(value => value.AssignedUnitId).OnDelete(DeleteBehavior.Restrict);
         workItem.HasOne(value => value.CreatedByPerson).WithMany().HasForeignKey(value => value.CreatedByPersonId).OnDelete(DeleteBehavior.Restrict);
+        workItem.HasOne(value => value.CreatedByMachine).WithMany().HasForeignKey(value => value.CreatedByMachineId).OnDelete(DeleteBehavior.Restrict);
         workItem.HasOne(value => value.FinalReportWrittenByPerson).WithMany().HasForeignKey(value => value.FinalReportWrittenByPersonId).OnDelete(DeleteBehavior.Restrict);
         workItem.HasOne(value => value.FinalReportApprovedByPerson).WithMany().HasForeignKey(value => value.FinalReportApprovedByPersonId).OnDelete(DeleteBehavior.Restrict);
 

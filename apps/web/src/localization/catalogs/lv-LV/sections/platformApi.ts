@@ -66,6 +66,8 @@ export const platformApiLvLV = {
   scopeClassificationsRead: "Lasīšanas klasifikācija",
   scopeClassificationsWrite: "Pārvaldīt klasifikācijas un aktivizāciju",
   scopeReportsRead: "Lasīt apstiprinātus ziņojumus pēc atsevišķas vietas un līmeņa dotācijas",
+  scopeWorkRead: "Lasīt operatīvo darbu pēc atsevišķas Site un līmeņa piešķiršanas", scopeWorkWrite: "Izveidot un rediģēt operatīvo saturu", scopeWorkTransition: "Veikt kontrolētas statusa pārejas", scopeActivityRead: "Lasīt operatīvo darbību vēsturi",
+  workApiAccessBySite: "Operatīvās API piekļuve pēc Site", workApiAccessIntro: "Piesaistiet klientus ar operatīvajām tiesībām konkrētām Sites un darba līmeņiem.", newWorkApiAccess: "Jauna operatīvās API piekļuve", workApiAccessExactLevel: "Tiesības attiecas tikai uz izvēlēto Site un precīzo darba līmeni.", noWorkApiClients: "Nevienam aktīvam API klientam nav operatīvo tiesību.", assignedWorkApiAccess: "Piešķirtā operatīvās API piekļuve", assignedWorkApiAccessIntro: "Šeit var skatīt un noņemt esošās operatīvās tiesības.", noWorkApiAccess: "Šai Site nav piešķirta operatīvās API piekļuve.", workApiAccessLoadFailed: "Neizdevās ielādēt operatīvās API piekļuvi.", workApiAccessSaveFailed: "Neizdevās saglabāt operatīvās API piekļuvi.", workApiAccessSaved: "Operatīvās API piekļuve tika saglabāta.", workApiAccessRemoveFailed: "Neizdevās noņemt operatīvās API piekļuvi.", workApiAccessRemoved: "Operatīvās API piekļuve tika noņemta.",
   sitesLoadFailed: "Vietas neizdevās ielādēt.",
   reportAccessLoadFailed: "Nevar ielādēt piekļuves piešķīrumus.",
   reportAccessSaveFailed: "Ziņojuma piekļuves dotāciju neizdevās saglabāt.",

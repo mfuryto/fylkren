@@ -18,7 +18,7 @@ for (const path of sourceFiles('apps/api')) {
   for (const method of Object.keys(routeCounts))
     routeCounts[method] += [...source.matchAll(new RegExp(`\\.Map${method[0]}${method.slice(1).toLowerCase()}\\(`, 'g'))].length;
 }
-assert.deepEqual(routeCounts, { GET: 103, POST: 112, PUT: 45, PATCH: 0, DELETE: 25 },
+assert.deepEqual(routeCounts, { GET: 119, POST: 120, PUT: 47, PATCH: 0, DELETE: 28 },
   'Endpoint-method inventory changed; review safe methods and CSRF scope before updating the expected inventory');
 
 const username = `csrf-${randomBytes(6).toString('hex')}`;

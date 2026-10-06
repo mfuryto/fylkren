@@ -1,16 +1,17 @@
 using Fylkren.Api.Identity;
 using Fylkren.Api.Organization;
+using Fylkren.Api.Platform;
 
 namespace Fylkren.Api.WorkManagement;
 
 public sealed class WorkItem
 {
     private WorkItem() { }
-    public WorkItem(Guid id, Guid siteId, Guid? createdByPersonId, string title, string description, string? referenceUrl, string priority, DateTimeOffset? dueAt, DateTimeOffset createdAt, Guid? parentWorkItemId = null, Guid? workItemTypeId = null, Guid? sourceTypeId = null, Guid? senderId = null, string? recommendation = null, string? senderSiteName = null, string? senderPersonName = null, string? sourceTypeNameSnapshot = null, string? workItemTypeNameSnapshot = null, string? senderNameSnapshot = null, Guid? upstreamPlanWorkItemId = null, string? requestBasisSnapshot = null, string? originReference = null, Guid? originReferenceInstanceId = null)
+    public WorkItem(Guid id, Guid siteId, Guid? createdByPersonId, string title, string description, string? referenceUrl, string priority, DateTimeOffset? dueAt, DateTimeOffset createdAt, Guid? parentWorkItemId = null, Guid? workItemTypeId = null, Guid? sourceTypeId = null, Guid? senderId = null, string? recommendation = null, string? senderSiteName = null, string? senderPersonName = null, string? sourceTypeNameSnapshot = null, string? workItemTypeNameSnapshot = null, string? senderNameSnapshot = null, Guid? upstreamPlanWorkItemId = null, string? requestBasisSnapshot = null, string? originReference = null, Guid? originReferenceInstanceId = null, Guid? createdByMachineId = null)
     {
-        if (createdByPersonId is null && string.IsNullOrWhiteSpace(senderSiteName))
-            throw new ArgumentException("An externally created work item requires a sender-site snapshot.");
-        Id = id; SiteId = siteId; ParentWorkItemId = parentWorkItemId; WorkItemTypeId = workItemTypeId; SourceTypeId = sourceTypeId; SenderId = senderId; SenderSiteName = senderSiteName; SenderPersonName = senderPersonName; SourceTypeNameSnapshot = sourceTypeNameSnapshot; WorkItemTypeNameSnapshot = workItemTypeNameSnapshot; SenderNameSnapshot = senderNameSnapshot; UpstreamPlanWorkItemId = upstreamPlanWorkItemId; RequestBasisSnapshot = string.IsNullOrWhiteSpace(requestBasisSnapshot) ? null : requestBasisSnapshot.Trim(); OriginReference = string.IsNullOrWhiteSpace(originReference) ? null : originReference.Trim().ToUpperInvariant(); OriginReferenceInstanceId = originReferenceInstanceId; CreatedByPersonId = createdByPersonId; Title = title.Trim(); Description = description.Trim(); Recommendation = string.IsNullOrWhiteSpace(recommendation) ? null : recommendation.Trim(); ReferenceUrl = string.IsNullOrWhiteSpace(referenceUrl) ? null : referenceUrl.Trim(); Priority = priority; DueAt = dueAt; Status = "registered"; CreatedAt = createdAt; UpdatedAt = createdAt;
+        if (createdByPersonId is null && createdByMachineId is null && string.IsNullOrWhiteSpace(senderSiteName))
+            throw new ArgumentException("A work item requires a person, machine, or external sender.");
+        Id = id; SiteId = siteId; ParentWorkItemId = parentWorkItemId; WorkItemTypeId = workItemTypeId; SourceTypeId = sourceTypeId; SenderId = senderId; SenderSiteName = senderSiteName; SenderPersonName = senderPersonName; SourceTypeNameSnapshot = sourceTypeNameSnapshot; WorkItemTypeNameSnapshot = workItemTypeNameSnapshot; SenderNameSnapshot = senderNameSnapshot; UpstreamPlanWorkItemId = upstreamPlanWorkItemId; RequestBasisSnapshot = string.IsNullOrWhiteSpace(requestBasisSnapshot) ? null : requestBasisSnapshot.Trim(); OriginReference = string.IsNullOrWhiteSpace(originReference) ? null : originReference.Trim().ToUpperInvariant(); OriginReferenceInstanceId = originReferenceInstanceId; CreatedByPersonId = createdByPersonId; CreatedByMachineId = createdByMachineId; Title = title.Trim(); Description = description.Trim(); Recommendation = string.IsNullOrWhiteSpace(recommendation) ? null : recommendation.Trim(); ReferenceUrl = string.IsNullOrWhiteSpace(referenceUrl) ? null : referenceUrl.Trim(); Priority = priority; DueAt = dueAt; Status = "registered"; CreatedAt = createdAt; UpdatedAt = createdAt;
     }
     public Guid Id { get; private set; }
     public Guid SiteId { get; private set; }
@@ -31,6 +32,7 @@ public sealed class WorkItem
     public string? RequestBasisSnapshot { get; private set; }
     public Guid? AssignedUnitId { get; private set; }
     public Guid? CreatedByPersonId { get; private set; }
+    public Guid? CreatedByMachineId { get; private set; }
     public string Title { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
     public string? Recommendation { get; private set; }
@@ -58,6 +60,7 @@ public sealed class WorkItem
     public WorkItemLookup? Sender { get; private set; }
     public OrganizationUnit? AssignedUnit { get; private set; }
     public Person? CreatedByPerson { get; private set; }
+    public ApiMachineIdentity? CreatedByMachine { get; private set; }
     public Person? FinalReportWrittenByPerson { get; private set; }
     public Person? FinalReportApprovedByPerson { get; private set; }
     internal void AssignReference(string referenceCode, long referenceNumber)
@@ -86,6 +89,14 @@ public sealed class WorkItem
         return received;
     }
     public void TransitionWithinLevel(string status, string? decisionNote, DateTimeOffset updatedAt) { Status = status; DecisionNote = string.IsNullOrWhiteSpace(decisionNote) ? null : decisionNote.Trim(); UpdatedAt = updatedAt; }
+    public void UpdateOperationalContent(string title, string description, string? recommendation,
+        string? referenceUrl, string priority, DateTimeOffset? dueAt, DateTimeOffset updatedAt)
+    {
+        Title = title.Trim(); Description = description.Trim();
+        Recommendation = string.IsNullOrWhiteSpace(recommendation) ? null : recommendation.Trim();
+        ReferenceUrl = string.IsNullOrWhiteSpace(referenceUrl) ? null : referenceUrl.Trim();
+        Priority = priority; DueAt = dueAt; UpdatedAt = updatedAt;
+    }
     public void SetPriority(string priority, DateTimeOffset updatedAt) { Priority = priority; UpdatedAt = updatedAt; }
     public void RegisterAtUnit(Guid assignedUnitId, DateTimeOffset updatedAt) { AssignedUnitId = assignedUnitId; UpdatedAt = updatedAt; }
     public void AssignToUnit(Guid assignedUnitId, string? decisionNote, DateTimeOffset updatedAt) { AssignedUnitId = assignedUnitId; Status = "assigned"; DecisionNote = string.IsNullOrWhiteSpace(decisionNote) ? null : decisionNote.Trim(); UpdatedAt = updatedAt; }

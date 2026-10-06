@@ -15,6 +15,7 @@ internal static class AdministrationClientEndpoints
         "sites:read", "sites:write", "sites:move", "sites:deactivate",
         "users:read", "users:assign", "users:move", "users:deactivate",
         "classifications:read", "classifications:write", "reports:read",
+        "work:read", "work:write", "work:transition", "activity:read",
     ];
 
     internal static void Map(IEndpointRouteBuilder endpoints)

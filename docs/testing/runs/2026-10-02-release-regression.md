@@ -2181,3 +2181,22 @@ The EF snapshot matched the model. Focused PostgreSQL tests passed disabled/enab
 The maintained signed-provider laboratory retained every previous OIDC/SAML metadata, key, token, replay, redirect and session result. Its new live OIDC case created an unknown person, returned `accessPending=true`, rejected the ordinary profile API with `403`, exposed the person to Platform Manager, granted ordinary access after Site assignment, rejected a local provider-owned profile rewrite with `409`, rejected sign-in after unlink, exposed the inactive link for review and removed the review item after explicit relinking. The first complete run passed this new path and then stopped because a later legacy assertion expected exactly one OIDC link; the assertion was corrected to select its intended stable link, and the complete clean rerun passed. All disposable credentials, certificates, databases, containers, networks and volumes were removed by the harness.
 
 This is focused feature acceptance. Final candidate-wide functional, security, performance and deployment qualification remains the next roadmap gate.
+
+### Versioned operational Work API — 2026-10-06
+
+The additive API foundation exposes one signed `/api/v1/work` surface and one authenticated OpenAPI 3.1 document. Exact Site/work-level grants and separate `work:read`, `work:write`, `work:transition` and `activity:read` scopes protect the authoritative work model. The coherent command slice covers idempotent task creation and comments, optimistic content updates and guarded non-approval transitions. Machine authorship is retained in work, comments, common activity, webhook payloads and the existing machine security audit. Existing browser, administration, report and federation contracts remain in place.
+
+```sh
+dotnet build apps/api/Fylkren.Api.csproj --no-restore
+dotnet build tests/foundations/Fylkren.FoundationTests.csproj --no-restore
+dotnet run --project tests/foundations/Fylkren.FoundationTests.csproj --no-build -- --operational-api-contract-only
+node tools/run-foundation-tests.mjs --model-diff-only
+node tools/test-authorization-documentation-inventory.mjs
+node tools/test-function-authorization-inventory.mjs
+pnpm --filter @fylkren/web typecheck
+pnpm --filter @fylkren/web test
+pnpm check:language
+pnpm check:docs
+```
+
+Both .NET builds passed with zero warnings. The focused contract, EF model/migration equality, 314-operation authorization inventories, type check, 164 frontend tests in 42 files, language boundary and documentation/ASVS traceability checks passed. The maintained Community/Enterprise candidate run passed scope and grant isolation, OpenAPI discovery, create/replay, missing and stale `If-Match`, update, machine comment attribution, transition/activity attribution, immediate grant removal and portable export of safe machine-actor references. The same clean run passed the complete operational, hierarchy, authorization, lifecycle, backup/restore, webhook, portability and federation-candidate sequence plus 1,000-task workload checks at concurrency 1, 10 and 25. The test client now follows one server-provided `Retry-After` outside dedicated ASVS boundary modes; rate-limit tests still observe and assert `429` directly. Deployment-specific identity, TLS/proxy, key custody, remote logging and customer-environment gates remain in the final roadmap stage.

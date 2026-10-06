@@ -12,6 +12,11 @@ if (args.Contains("--input-validation-only"))
     InputValidationTests.Run();
     return;
 }
+if (args.Contains("--operational-api-contract-only"))
+{
+    OperationalApiContractTests.Run();
+    return;
+}
 if (args.Contains("--zip-length-only"))
 {
     await ZipLengthBoundaryTests.Run();
@@ -275,5 +280,7 @@ static string Describe(MigrationOperation operation) => operation switch
     DropColumnOperation value => $"drop {value.Table}.{value.Name}",
     AlterColumnOperation value => $"alter {value.Table}.{value.Name} {value.ColumnType} default={value.DefaultValue}",
     AddCheckConstraintOperation value => $"check {value.Table}.{value.Name}: {value.Sql}",
+    CreateIndexOperation value => $"create {value.Table}.{value.Name} ({string.Join(',', value.Columns)}) annotations={string.Join(',', value.GetAnnotations().Select(x => $"{x.Name}={x.Value}"))}",
+    DropIndexOperation value => $"drop {value.Table}.{value.Name}",
     _ => operation.ToString() ?? operation.GetType().Name
 };

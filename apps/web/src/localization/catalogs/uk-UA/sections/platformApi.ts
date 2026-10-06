@@ -66,6 +66,8 @@ export const platformApiUkUA = {
   scopeClassificationsRead: "Читання класифікації",
   scopeClassificationsWrite: "Управління класифікації та активація",
   scopeReportsRead: "Читання затверджених звітів після надання окремого сайту та рівня",
+  scopeWorkRead: "Читати оперативні завдання після окремого призначення Site і рівня", scopeWorkWrite: "Створювати та редагувати оперативний вміст", scopeWorkTransition: "Виконувати контрольовані зміни стану", scopeActivityRead: "Читати історію оперативної активності",
+  workApiAccessBySite: "Доступ до операційного API за Site", workApiAccessIntro: "Пов’яжіть клієнтів з операційними правами з конкретними Sites та рівнями роботи.", newWorkApiAccess: "Новий доступ до операційного API", workApiAccessExactLevel: "Дозвіл діє лише для вибраного Site й точного рівня роботи.", noWorkApiClients: "Жоден активний клієнт API не має операційного права.", assignedWorkApiAccess: "Наданий доступ до операційного API", assignedWorkApiAccessIntro: "Тут можна переглядати й вилучати наявні операційні дозволи.", noWorkApiAccess: "Для цього Site не надано доступу до операційного API.", workApiAccessLoadFailed: "Не вдалося завантажити доступ до операційного API.", workApiAccessSaveFailed: "Не вдалося зберегти доступ до операційного API.", workApiAccessSaved: "Доступ до операційного API збережено.", workApiAccessRemoveFailed: "Не вдалося вилучити доступ до операційного API.", workApiAccessRemoved: "Доступ до операційного API вилучено.",
   sitesLoadFailed: "Не можна навантажувати сайти.",
   reportAccessLoadFailed: "Повідомити про те, що не можна завантажити.",
   reportAccessSaveFailed: "Подати заявку на отримання інформації не можна.",

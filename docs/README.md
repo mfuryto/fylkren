@@ -7,7 +7,7 @@ This is the canonical documentation index. Each subject should have one maintain
 - **End users and leaders:** [Complete user manual](administration/USER_MANUAL.md), followed by [tasks and operational flow](administration/WORKFLOW_AND_TASKS.md) and [risk and mitigation management](administration/RISK_MANAGEMENT.md).
 - **Site Managers:** user manual, [access and identity](administration/ACCESS_AND_IDENTITY.md), [workflows and templates](administration/WORKFLOWS_AND_TEMPLATES.md) and [notifications](operations/NOTIFICATIONS.md).
 - **Platform Managers and operators:** [installation and upgrades](operations/INSTALLATION_AND_UPGRADES.md), [Windows Server installation](operations/WINDOWS_SERVER_INSTALLATION.md), [server setup](operations/SERVER_SETUP.md), [federation administration](administration/FEDERATION.md), [deployment/offline operation](operations/DEPLOYMENT_AND_OFFLINE.md) and [security and retention](security/SECURITY_AND_RETENTION.md).
-- **Integrators:** [API conventions](api/API.md), then the [Administration API](api/ADMINISTRATION_API.md) or [Report API](api/REPORT_API.md).
+- **Integrators:** [API conventions](api/API.md), then the [Administration API](api/ADMINISTRATION_API.md), [Report API](api/REPORT_API.md), or [Work API](api/WORK_API.md).
 - **Developers and reviewers:** [technical architecture](architecture/TECHNICAL_ARCHITECTURE.md), [repository structure](architecture/REPOSITORY_STRUCTURE.md), test evidence, [security verification](security/SECURITY_VERIFICATION.md) and the [independent federation review brief](security/FEDERATION_SECURITY_REVIEW_BRIEF.md).
 
 Before public publication, run `bash tools/security/verify-repository-safety.sh --history`. The gate checks current content and reachable history for tracked local/generated artifacts, large files, workstation paths and secrets.
@@ -22,6 +22,7 @@ Before public publication, run `bash tools/security/verify-repository-safety.sh 
 - [Independent-instance federation foundation](architecture/INSTANCE_FEDERATION.md)
 - [Community and Enterprise entitlements](architecture/EDITION_ENTITLEMENTS.md)
 - [Identity-provider provisioning](architecture/IDENTITY_PROVIDER_PROVISIONING.md)
+- [Operational API foundation](architecture/OPERATIONAL_API.md)
 - [Platform license API](api/PLATFORM_LICENSE_API.md)
 - [Regional settings API](api/REGIONAL_SETTINGS_API.md)
 - [Versioning and formal approvals](architecture/FORMAL_APPROVALS.md)
@@ -61,6 +62,7 @@ Before public publication, run `bash tools/security/verify-repository-safety.sh 
 ## APIs and integrations
 
 - [API conventions](api/API.md)
+- [Work API](api/WORK_API.md)
 - [Administration API](api/ADMINISTRATION_API.md)
 - [Report API](api/REPORT_API.md)
 - [Portable export format and customer exit](api/PORTABLE_EXPORT_FORMAT.md)

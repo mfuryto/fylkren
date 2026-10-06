@@ -66,6 +66,8 @@ export const platformApiFiFI = {
   scopeClassificationsRead: "Lue luokitukset",
   scopeClassificationsWrite: "Hallitse luokituksia ja aktivointia",
   scopeReportsRead: "Lue hyväksytyt raportit erillisen paikan ja tasotuen jälkeen",
+  scopeWorkRead: "Lue operatiivisia töitä erillisen Site- ja tasomäärityksen jälkeen", scopeWorkWrite: "Luo ja muokkaa operatiivista sisältöä", scopeWorkTransition: "Suorita hallittuja tilasiirtymiä", scopeActivityRead: "Lue operatiivinen tapahtumahistoria",
+  workApiAccessBySite: "Operatiivisen API:n käyttöoikeus Site-kohtaisesti", workApiAccessIntro: "Liitä operatiivisia oikeuksia käyttävät asiakkaat tiettyihin Sites ja työtasoihin.", newWorkApiAccess: "Uusi operatiivisen API:n käyttöoikeus", workApiAccessExactLevel: "Oikeus koskee vain valittua Site-kohdetta ja täsmällistä työtasoa.", noWorkApiClients: "Yhdelläkään aktiivisella API-asiakkaalla ei ole operatiivista oikeutta.", assignedWorkApiAccess: "Myönnetty operatiivisen API:n käyttöoikeus", assignedWorkApiAccessIntro: "Nykyisiä operatiivisia oikeuksia voi tarkastella ja poistaa tässä.", noWorkApiAccess: "Tälle Site-kohteelle ei ole myönnetty operatiivisen API:n käyttöoikeutta.", workApiAccessLoadFailed: "Operatiivisen API:n käyttöoikeutta ei voitu ladata.", workApiAccessSaveFailed: "Operatiivisen API:n käyttöoikeutta ei voitu tallentaa.", workApiAccessSaved: "Operatiivisen API:n käyttöoikeus tallennettiin.", workApiAccessRemoveFailed: "Operatiivisen API:n käyttöoikeutta ei voitu poistaa.", workApiAccessRemoved: "Operatiivisen API:n käyttöoikeus poistettiin.",
   sitesLoadFailed: "Niitä ei voitu ladata.",
   reportAccessLoadFailed: "Raporttien käyttöapurahoja ei voitu ladata.",
   reportAccessSaveFailed: "Raportin käyttöapurahaa ei voitu tallentaa.",

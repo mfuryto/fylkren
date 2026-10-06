@@ -64,7 +64,9 @@ internal sealed class WebhookDeliveryWorker(IServiceScopeFactory scopes, IHttpCl
         try
         {
             var e = delivery.DomainEvent; var timestamp = e.OccurredAt.ToUnixTimeSeconds().ToString();
-            var body = JsonSerializer.Serialize(new { id = e.Id, type = e.EventType, schemaVersion = e.SchemaVersion, timestamp = e.OccurredAt, siteId = e.SiteId, actorId = e.ActorPersonId, resource = new { type = e.ResourceType, id = e.ResourceId }, data = JsonSerializer.Deserialize<JsonElement>(e.PayloadJson) });
+            var body = JsonSerializer.Serialize(new { id = e.Id, type = e.EventType, schemaVersion = e.SchemaVersion, timestamp = e.OccurredAt, siteId = e.SiteId,
+                actorId = e.ActorPersonId, actor = new { kind = e.ActorKind, personId = e.ActorPersonId, machineId = e.ActorMachineId },
+                resource = new { type = e.ResourceType, id = e.ResourceId }, data = JsonSerializer.Deserialize<JsonElement>(e.PayloadJson) });
             var secret = protection.CreateProtector(ProtectedValuePurposes.WebhookSecret).Unprotect(delivery.Subscription.ProtectedSecret); var signature = Convert.ToHexString(HMACSHA256.HashData(Encoding.UTF8.GetBytes(secret), Encoding.UTF8.GetBytes($"{timestamp}.{body}"))).ToLowerInvariant();
             using var request = new HttpRequestMessage(HttpMethod.Post, delivery.Subscription.EndpointUrl) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
             request.Headers.Add("X-Fylkren-Event-Id", e.Id.ToString()); request.Headers.Add("X-Fylkren-Event-Type", e.EventType); request.Headers.Add("X-Fylkren-Timestamp", timestamp); request.Headers.Add("X-Fylkren-Signature", $"v1={signature}");

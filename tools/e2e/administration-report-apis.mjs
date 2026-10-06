@@ -25,14 +25,21 @@ export async function testAdministrationReportApis({ platform, leader, siteId, c
     'sites:read', 'sites:write', 'sites:move', 'sites:deactivate',
     'users:read', 'users:assign', 'users:move', 'users:deactivate',
     'classifications:read', 'classifications:write', 'reports:read',
+    'work:read', 'work:write', 'work:transition', 'activity:read',
   ]);
   const limited = await createClient(`Synthetic limited API ${suffix}`, ['sites:read']);
   const admin = '/api/v1/administration';
   const reports = '/api/v1/reports';
+  const work = '/api/v1/work';
   assert.equal((await machineRequest(null, `${admin}/sites`)).status, 401, 'Unauthenticated administration read succeeded');
   assert.equal((await machineRequest(limited.token, `${admin}/sites`)).status, 200, 'sites:read client denied');
   assert.equal((await machineRequest(limited.token, `${reports}?siteId=${siteId}`)).status, 403, 'Missing reports:read scope accepted');
   assert.equal((await machineRequest(full.token, `${reports}?siteId=${siteId}`)).status, 403, 'Report access without a grant succeeded');
+  assert.equal((await machineRequest(full.token, `${work}/items?siteId=${siteId}`)).status, 403, 'Work access without a grant succeeded');
+  const openapi = await machineRequest(full.token, '/api/v1/openapi.json');
+  assert.equal(openapi.status, 200, `OpenAPI document: ${JSON.stringify(openapi.body)}`);
+  assert.equal(openapi.body.openapi, '3.1.0');
+  assert.ok(openapi.body.paths['/api/v1/work/items/{itemId}'], 'OpenAPI omitted the work-item contract');
 
   const siteName = `Synthetic API-managed ${suffix}`;
   const key = `site-create-${suffix}`;
@@ -233,6 +240,84 @@ export async function testAdministrationReportApis({ platform, leader, siteId, c
   assert.deepEqual(sectionReports.body.items.find(value => value.id === sectionReportId).organizationPath, ['Section 1']);
   assert.equal((await machineRequest(full.token, `${reports}?siteId=${siteId}&unitId=${teamId}`)).status, 403,
     'Section 1 grant inherited to Team Alpha');
+
+  const workGrant = await platform.put(`/api/work-api/sites/${siteId}/grants`, {
+    machineIdentityId: full.id, organizationUnitId: null,
+  });
+  assert.equal(workGrant.status, 200, `Top work grant: ${JSON.stringify(workGrant.body)}`);
+  const catalog = await machineRequest(full.token, `${work}/catalog?siteId=${siteId}`);
+  assert.equal(catalog.status, 200, `Work catalog: ${JSON.stringify(catalog.body)}`);
+  assert.equal(catalog.body.siteId, siteId);
+  const workList = await machineRequest(full.token, `${work}/items?siteId=${siteId}&page=1&pageSize=100`);
+  assert.equal(workList.status, 200, `Work list: ${JSON.stringify(workList.body)}`);
+  assert.ok(workList.body.items.some(value => value.id === topReportId), 'Granted top-level work item absent');
+  const workDetail = await machineRequest(full.token, `${work}/items/${topReportId}`);
+  assert.equal(workDetail.status, 200, `Work detail: ${JSON.stringify(workDetail.body)}`);
+  assert.equal(workDetail.body.id, topReportId);
+  assert.ok(workDetail.body.version > 0, 'Work detail omitted its concurrency version');
+  assert.equal((await machineRequest(full.token, `${work}/items/${sectionReportId}`)).status, 404,
+    'Top-level work grant exposed a Section work item');
+  assert.equal((await machineRequest(full.token, `${work}/items?siteId=${siteId}&unitId=${sectionId}`)).status, 403,
+    'Top-level work grant inherited to Section 1');
+  assert.equal((await machineRequest(full.token, `${work}/items/${topReportId}/decisions`)).status, 200);
+  assert.equal((await machineRequest(full.token, `${work}/items/${topReportId}/risks`)).status, 200);
+  assert.equal((await machineRequest(full.token, `${work}/items/${topReportId}/activity`)).status, 200);
+  const apiWorkBody = {
+    siteId, organizationUnitId: null, workItemTypeId: null, sourceTypeId: null, senderId: null,
+    title: `Synthetic API work ${suffix}`, description: 'Created through the versioned Work API.',
+    recommendation: 'Verify the operational API.', referenceUrl: null, priority: 'normal', dueAt: null,
+  };
+  const workKey = `work-create-${suffix}`;
+  const apiWork = await machineRequest(full.token, `${work}/items`, {
+    method: 'POST', body: apiWorkBody, headers: { 'Idempotency-Key': workKey },
+  });
+  assert.equal(apiWork.status, 201, `API work create: ${JSON.stringify(apiWork.body)}`);
+  assert.ok(apiWork.body.id && apiWork.body.referenceCode && apiWork.etag, 'Created API work lacks identity, reference, or ETag');
+  const workReplay = await machineRequest(full.token, `${work}/items`, {
+    method: 'POST', body: apiWorkBody, headers: { 'Idempotency-Key': workKey },
+  });
+  assert.equal(workReplay.status, 200);
+  assert.equal(workReplay.body.id, apiWork.body.id, 'Work creation replay changed the resource');
+  assert.equal(workReplay.body.replayed, true);
+  const apiWorkRead = await machineRequest(full.token, `${work}/items/${apiWork.body.id}`);
+  assert.equal(apiWorkRead.status, 200);
+  assert.equal(apiWorkRead.etag, apiWork.etag);
+  const updatedWorkBody = { title: `${apiWorkBody.title} updated`, description: apiWorkBody.description,
+    recommendation: apiWorkBody.recommendation, referenceUrl: null, priority: 'high', dueAt: null };
+  assert.equal((await machineRequest(full.token, `${work}/items/${apiWork.body.id}`, {
+    method: 'PUT', body: updatedWorkBody,
+  })).status, 428, 'Work update without If-Match was accepted');
+  assert.equal((await machineRequest(full.token, `${work}/items/${apiWork.body.id}`, {
+    method: 'PUT', body: updatedWorkBody, headers: { 'If-Match': '"0"' },
+  })).status, 409, 'Stale work update was accepted');
+  const updatedWork = await machineRequest(full.token, `${work}/items/${apiWork.body.id}`, {
+    method: 'PUT', body: updatedWorkBody, headers: { 'If-Match': apiWorkRead.etag },
+  });
+  assert.equal(updatedWork.status, 200, `API work update: ${JSON.stringify(updatedWork.body)}`);
+  assert.notEqual(updatedWork.etag, apiWorkRead.etag, 'Work ETag did not change');
+  const commentKey = `work-comment-${suffix}`;
+  const comment = await machineRequest(full.token, `${work}/items/${apiWork.body.id}/comments`, {
+    method: 'POST', body: { text: 'Synthetic machine comment.' }, headers: { 'Idempotency-Key': commentKey },
+  });
+  assert.equal(comment.status, 201, `API comment: ${JSON.stringify(comment.body)}`);
+  const comments = await machineRequest(full.token, `${work}/items/${apiWork.body.id}/comments`);
+  assert.equal(comments.status, 200);
+  assert.ok(comments.body.items.some(value => value.id === comment.body.id && value.authorMachineId === full.id),
+    'Machine comment lost its actor identity');
+  const accepted = await machineRequest(full.token, `${work}/items/${apiWork.body.id}/transitions`, {
+    method: 'POST', body: { status: 'under_review', decisionNote: null, priority: 'high' },
+    headers: { 'If-Match': updatedWork.etag, 'Idempotency-Key': `work-transition-${suffix}` },
+  });
+  assert.equal(accepted.status, 200, `API transition: ${JSON.stringify(accepted.body)}`);
+  assert.equal(accepted.body.status, 'under_review');
+  const apiActivity = await machineRequest(full.token, `${work}/items/${apiWork.body.id}/activity`);
+  assert.equal(apiActivity.status, 200);
+  assert.ok(apiActivity.body.items.some(value => value.eventType === 'assignment.accepted' && value.actorMachineId === full.id),
+    'Machine transition lost common activity attribution');
+  const removedWorkGrant = await platform.request(`/api/work-api/sites/${siteId}/grants/${workGrant.body.id}`, { method: 'DELETE' });
+  assert.equal(removedWorkGrant.status, 204);
+  assert.equal((await machineRequest(full.token, `${work}/items/${topReportId}`)).status, 404,
+    'Work detail remained visible after grant removal');
 
   const classifiedGrant = await platform.put(`/api/report-api/sites/${siteId}/grants`, {
     machineIdentityId: full.id, organizationUnitId: null, includeClassified: true,

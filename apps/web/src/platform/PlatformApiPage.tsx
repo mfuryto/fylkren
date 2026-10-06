@@ -8,6 +8,7 @@ import { useTranslation } from "../localization/LocalizationProvider";
 import { createApiClient, deactivateApiClient, loadApiClients } from "./platformApi";
 import { apiClientExpiryDate, apiClientScopes, filterApiClients, formatPlatformDateTime, type ApiClient, type ApiClientStatusFilter } from "./platformModels";
 import { ReportApiAccessPage } from "./ReportApiAccessPage";
+import { WorkApiAccessPage } from "./WorkApiAccessPage";
 import { WebhookSettings } from "./WebhookSettings";
 import { ListSortControl, sortList, type ListSort } from "../components/ListSortControl";
 
@@ -49,6 +50,7 @@ export function PlatformApiPage({ language: displayLanguage, timeZone: displayTi
       { title: t("apiHelpDeactivateTitle"), text: t("apiHelpDeactivateText") },
     ]} note={t("apiHelpNote")} onClose={() => setHelpOpen(false)} />}
     <ReportApiAccessPage embedded canManage={machineApiEnabled} />
+    <WorkApiAccessPage canManage={machineApiEnabled} />
     <WebhookSettings canManage={webhooksEnabled} />
   </div>;
 }

@@ -87,6 +87,22 @@ internal static class ApiModelConfiguration
         reportGrant.HasOne(x => x.MachineIdentity).WithMany().HasForeignKey(x => x.MachineIdentityId).OnDelete(DeleteBehavior.Restrict);
         reportGrant.HasIndex(x => new { x.MachineIdentityId, x.SiteId, x.OrganizationUnitId }).IsUnique();
 
+        var workGrant = modelBuilder.Entity<ApiWorkGrant>();
+        workGrant.ToTable("api_work_grants");
+        workGrant.HasKey(x => x.Id);
+        workGrant.Property(x => x.Id).HasColumnName("id");
+        workGrant.Property(x => x.MachineIdentityId).HasColumnName("machine_identity_id");
+        workGrant.Property(x => x.SiteId).HasColumnName("site_id");
+        workGrant.Property(x => x.OrganizationUnitId).HasColumnName("organization_unit_id");
+        workGrant.Property(x => x.CreatedAt).HasColumnName("created_at");
+        workGrant.HasOne(x => x.MachineIdentity).WithMany().HasForeignKey(x => x.MachineIdentityId).OnDelete(DeleteBehavior.Restrict);
+        workGrant.HasOne<Organization.Site>().WithMany().HasForeignKey(x => x.SiteId).OnDelete(DeleteBehavior.Restrict);
+        workGrant.HasOne<Organization.OrganizationUnit>().WithMany().HasForeignKey(x => x.OrganizationUnitId).OnDelete(DeleteBehavior.Restrict);
+        // PostgreSQL normally treats NULL values as distinct in unique indexes. Top-level grants use a
+        // null organization unit, so NULLS NOT DISTINCT is required to keep that grant unique as well.
+        workGrant.HasIndex(x => new { x.MachineIdentityId, x.SiteId, x.OrganizationUnitId })
+            .IsUnique().AreNullsDistinct(false);
+
         var cryptoOperation = modelBuilder.Entity<CryptoReprotectionOperation>();
         cryptoOperation.ToTable("crypto_reprotection_operations", table =>
         {

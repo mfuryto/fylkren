@@ -66,6 +66,8 @@ export const platformApiSvSE = {
   scopeClassificationsRead: "Läs klassificeringar",
   scopeClassificationsWrite: "Hantera klassificeringar och aktivering",
   scopeReportsRead: "Läs godkända rapporter efter en separat plats och nivåbidrag",
+  scopeWorkRead: "Läs operativt arbete efter en separat Site- och nivåtilldelning", scopeWorkWrite: "Skapa och redigera operativt innehåll", scopeWorkTransition: "Utför kontrollerade statusövergångar", scopeActivityRead: "Läs operativ aktivitetshistorik",
+  workApiAccessBySite: "Operativ API-åtkomst per Site", workApiAccessIntro: "Koppla klienter med operativa behörigheter till bestämda Sites och arbetsnivåer.", newWorkApiAccess: "Ny operativ API-åtkomst", workApiAccessExactLevel: "Tilldelningen gäller endast vald Site och exakt arbetsnivå.", noWorkApiClients: "Ingen aktiv API-klient har en operativ behörighet.", assignedWorkApiAccess: "Tilldelad operativ API-åtkomst", assignedWorkApiAccessIntro: "Befintliga operativa tilldelningar kan visas och tas bort här.", noWorkApiAccess: "Ingen operativ API-åtkomst har tilldelats för denna Site.", workApiAccessLoadFailed: "Den operativa API-åtkomsten kunde inte läsas in.", workApiAccessSaveFailed: "Den operativa API-åtkomsten kunde inte sparas.", workApiAccessSaved: "Den operativa API-åtkomsten sparades.", workApiAccessRemoveFailed: "Den operativa API-åtkomsten kunde inte tas bort.", workApiAccessRemoved: "Den operativa API-åtkomsten togs bort.",
   sitesLoadFailed: "Webbplatserna kunde inte laddas.",
   reportAccessLoadFailed: "Rapporttillträdesbidrag kunde inte laddas.",
   reportAccessSaveFailed: "Rapporttillträdesbidraget kunde inte sparas.",

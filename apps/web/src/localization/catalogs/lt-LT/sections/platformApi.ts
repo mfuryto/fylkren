@@ -66,6 +66,8 @@ export const platformApiLtLT = {
   scopeClassificationsRead: "Skaitymo klasifikatoriai",
   scopeClassificationsWrite: "Tvarkyti klasifikacijas ir aktyvavimą",
   scopeReportsRead: "Skaitykite patvirtintas ataskaitas po atskiros vietos ir lygio dotacijos",
+  scopeWorkRead: "Skaityti operacinį darbą po atskiro Site ir lygio suteikimo", scopeWorkWrite: "Kurti ir redaguoti operacinį turinį", scopeWorkTransition: "Vykdyti kontroliuojamus būsenos pakeitimus", scopeActivityRead: "Skaityti operacinės veiklos istoriją",
+  workApiAccessBySite: "Operacinės API prieiga pagal Site", workApiAccessIntro: "Susiekite operacines teises turinčius klientus su konkrečiomis Sites ir darbo lygiais.", newWorkApiAccess: "Nauja operacinės API prieiga", workApiAccessExactLevel: "Teisė taikoma tik pasirinktai Site ir tiksliam darbo lygiui.", noWorkApiClients: "Nė vienas aktyvus API klientas neturi operacinių teisių.", assignedWorkApiAccess: "Suteikta operacinės API prieiga", assignedWorkApiAccessIntro: "Čia galima peržiūrėti ir pašalinti esamas operacines teises.", noWorkApiAccess: "Šiai Site operacinės API prieiga nesuteikta.", workApiAccessLoadFailed: "Nepavyko įkelti operacinės API prieigos.", workApiAccessSaveFailed: "Nepavyko išsaugoti operacinės API prieigos.", workApiAccessSaved: "Operacinės API prieiga išsaugota.", workApiAccessRemoveFailed: "Nepavyko pašalinti operacinės API prieigos.", workApiAccessRemoved: "Operacinės API prieiga pašalinta.",
   sitesLoadFailed: "Nepavyko įkelti Sites.",
   reportAccessLoadFailed: "Rengti prieigos dotacijų nebuvo galima.",
   reportAccessSaveFailed: "Nelegalūs duomenys apie prieigą",

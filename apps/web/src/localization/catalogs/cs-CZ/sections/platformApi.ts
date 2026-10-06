@@ -66,6 +66,8 @@ export const platformApiCsCZ = {
   scopeClassificationsRead: "Klasifikace pro čtení",
   scopeClassificationsWrite: "Spravování a aktivace klasifikací a aktivací",
   scopeReportsRead: "Přečíst schválené zprávy po samostatné stránce a úrovni grantu",
+  scopeWorkRead: "Číst operativní práci po samostatném přidělení Site a úrovně", scopeWorkWrite: "Vytvářet a upravovat operativní obsah", scopeWorkTransition: "Provádět řízené změny stavu", scopeActivityRead: "Číst historii operativních aktivit",
+  workApiAccessBySite: "Přístup k provoznímu API podle Site", workApiAccessIntro: "Propojte klienty s provozními oprávněními s konkrétními Sites a úrovněmi práce.", newWorkApiAccess: "Nový přístup k provoznímu API", workApiAccessExactLevel: "Oprávnění platí jen pro vybranou Site a přesnou úroveň práce.", noWorkApiClients: "Žádný aktivní klient API nemá provozní oprávnění.", assignedWorkApiAccess: "Přidělený přístup k provoznímu API", assignedWorkApiAccessIntro: "Zde můžete zobrazit a odebrat existující provozní oprávnění.", noWorkApiAccess: "Pro tuto Site nebyl přidělen přístup k provoznímu API.", workApiAccessLoadFailed: "Přístup k provoznímu API se nepodařilo načíst.", workApiAccessSaveFailed: "Přístup k provoznímu API se nepodařilo uložit.", workApiAccessSaved: "Přístup k provoznímu API byl uložen.", workApiAccessRemoveFailed: "Přístup k provoznímu API se nepodařilo odebrat.", workApiAccessRemoved: "Přístup k provoznímu API byl odebrán.",
   sitesLoadFailed: "Místa nemohla být načtena.",
   reportAccessLoadFailed: "Nelze načíst granty na přístup do zprávy.",
   reportAccessSaveFailed: "Přístupový grant pro zprávy nemohl být uložen.",

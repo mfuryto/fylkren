@@ -15,7 +15,7 @@ const sources = files('apps/api').map(path => ({
 const methods = ['Get', 'Post', 'Put', 'Patch', 'Delete'];
 const operationCount = sources.reduce((total, file) => total + methods.reduce((count, method) =>
   count + [...file.source.matchAll(new RegExp(`\\.Map${method}\\(`, 'g'))].length, 0), 0);
-assert.equal(operationCount, 296, 'Route inventory changed; reconcile function authorization before accepting it');
+assert.equal(operationCount, 314, 'Route inventory changed; reconcile function authorization before accepting it');
 
 const anonymousByFile = Object.fromEntries(sources.map(file => [file.path,
   [...file.source.matchAll(/\.AllowAnonymous\(/g)].length]).filter(([, count]) => count > 0));
@@ -73,10 +73,14 @@ for (const policy of ['CanManageItem', 'CanReadReportsAtLevel', 'CanReadWorkTree
 const machine = readFileSync('apps/api/Platform/AdministrationApiEndpoints.cs', 'utf8') +
   readFileSync('apps/api/Platform/AdministrationUserEndpoints.cs', 'utf8') +
   readFileSync('apps/api/Platform/AdministrationClassificationEndpoints.cs', 'utf8') +
-  readFileSync('apps/api/Platform/ReportApiEndpoints.cs', 'utf8');
+  readFileSync('apps/api/Platform/ReportApiEndpoints.cs', 'utf8') +
+  readFileSync('apps/api/Platform/OperationalApiEndpoints.cs', 'utf8') +
+  readFileSync('apps/api/Platform/OperationalApiCommandEndpoints.cs', 'utf8');
 for (const scope of ['sites:read', 'sites:write', 'sites:move', 'sites:deactivate', 'users:read',
-  'users:assign', 'users:move', 'users:deactivate', 'classifications:read', 'classifications:write', 'reports:read'])
-  assert.ok(machine.includes(`RequireClaim("scope", "${scope}")`), `Missing machine scope enforcement: ${scope}`);
+  'users:assign', 'users:move', 'users:deactivate', 'classifications:read', 'classifications:write', 'reports:read',
+  'work:read', 'work:write', 'work:transition', 'activity:read'])
+  assert.ok(machine.includes(`RequireClaim("scope", "${scope}")`) || machine.includes(`RequireScope("${scope}")`),
+    `Missing machine scope enforcement: ${scope}`);
 
 const dynamic = readFileSync('tools/e2e/authorization-boundaries.mjs', 'utf8');
 for (const boundary of ['Platform work overview', 'Site Manager task creation', 'Sibling section details',

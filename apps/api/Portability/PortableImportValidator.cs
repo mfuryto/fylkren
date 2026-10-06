@@ -211,6 +211,7 @@ internal static class PortableImportValidator
         Reference(values, errors, "work-items", "sender_id", "work-item-lookups");
         Reference(values, errors, "work-items", "assigned_unit_id", "organization-units");
         Reference(values, errors, "work-items", "created_by_person_id", "people");
+        Reference(values, errors, "work-items", "created_by_machine_id", "api-machine-references");
         Reference(values, errors, "work-item-dependencies", "predecessor_work_item_id", "work-items");
         Reference(values, errors, "work-item-dependencies", "dependent_work_item_id", "work-items");
         Reference(values, errors, "work-item-comments", "work_item_id", "work-items");
@@ -221,6 +222,9 @@ internal static class PortableImportValidator
         Reference(values, errors, "learning-entries", "lesson_id", "learning-lessons");
         Reference(values, errors, "learning-entries", "author_person_id", "people");
         Reference(values, errors, "work-item-comments", "author_person_id", "people");
+        Reference(values, errors, "work-item-comments", "author_machine_id", "api-machine-references");
+        Reference(values, errors, "machine-audit-events", "machine_identity_id", "api-machine-references");
+        Reference(values, errors, "domain-events", "actor_machine_id", "api-machine-references");
         Reference(values, errors, "work-item-history", "work_item_id", "work-items");
         Reference(values, errors, "workflow-steps", "definition_id", "workflow-definitions");
         Reference(values, errors, "workflow-steps", "template_id", "workflow-step-templates");

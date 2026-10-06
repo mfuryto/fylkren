@@ -80,6 +80,14 @@ internal static class PortableExportPackage
         var lessons = await db.LearningLessons.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken);
         var learningEntries = await db.LearningEntries.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken);
         var comments = await db.WorkItemComments.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken);
+        var machineAudit = await db.ApiMachineAuditEvents.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken);
+        var domainEvents = await db.DomainEvents.AsNoTracking().Where(value => value.SiteId == siteId)
+            .OrderBy(value => value.OccurredAt).ToListAsync(cancellationToken);
+        var machineIds = workItems.Where(value => value.CreatedByMachineId != null).Select(value => value.CreatedByMachineId!.Value)
+            .Concat(comments.Where(value => value.AuthorMachineId != null).Select(value => value.AuthorMachineId!.Value))
+            .Concat(machineAudit.Select(value => value.MachineIdentityId))
+            .Concat(domainEvents.Where(value => value.ActorMachineId != null).Select(value => value.ActorMachineId!.Value))
+            .Distinct().ToArray();
         var personIds = webhookSubscriptions.Select(s => s.CreatedByPersonId).ToHashSet(); personIds.Add(actorPersonId);
         var datasets = new List<(string Name, byte[] Content)>();
         void Entities<T>(string name, IEnumerable<T> rows) where T : class
@@ -137,8 +145,11 @@ internal static class PortableExportPackage
         exportAudit.SnapshotActorRole(await db.LoginIdentities.AsNoTracking().AnyAsync(i => i.PersonId == actorPersonId && i.IsPlatformManager, cancellationToken));
         audit.Add(exportAudit);
         Entities("audit-events", audit);
-        Entities("machine-audit-events", await db.ApiMachineAuditEvents.AsNoTracking().Where(a => a.SiteId == siteId).ToListAsync(cancellationToken));
-        Entities("domain-events", await db.DomainEvents.AsNoTracking().Where(value => value.SiteId == siteId).OrderBy(value => value.OccurredAt).ToListAsync(cancellationToken));
+        Entities("machine-audit-events", machineAudit);
+        Entities("domain-events", domainEvents);
+        AddRows(datasets, "api-machine-references", await db.ApiMachineIdentities.AsNoTracking()
+            .Where(value => machineIds.Contains(value.Id)).OrderBy(value => value.Name)
+            .Select(value => new { value.Id, value.Name, value.IsActive, value.CreatedAt }).ToListAsync(cancellationToken));
         AddRows(datasets, "webhook-subscriptions", webhookSubscriptions.Select(value => new
         {
             value.Id,

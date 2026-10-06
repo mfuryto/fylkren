@@ -121,7 +121,11 @@ public sealed class ApiMachineAuthenticationMiddleware(RequestDelegate next)
         ApiMachineAuthenticationLimiter limiter,
         ILogger<ApiMachineAuthenticationMiddleware> logger)
     {
-        if (!context.Request.Path.StartsWithSegments("/api/v1/administration") && !context.Request.Path.StartsWithSegments("/api/v1/reports")) { await next(context); return; }
+        if (!context.Request.Path.StartsWithSegments("/api/v1/administration") &&
+            !context.Request.Path.StartsWithSegments("/api/v1/reports") &&
+            !context.Request.Path.StartsWithSegments("/api/v1/work") &&
+            !context.Request.Path.StartsWithSegments("/api/v1/openapi.json"))
+        { await next(context); return; }
         var authorization = context.Request.Headers.Authorization.ToString();
         if (authorization.StartsWith($"{ApiMachineSignatures.Scheme} ", StringComparison.Ordinal))
         {

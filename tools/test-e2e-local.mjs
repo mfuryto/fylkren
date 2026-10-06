@@ -22,6 +22,7 @@ import { testIdentitySessionLifecycle } from './e2e/identity-session-lifecycle.m
 import { testCustomCssEncoding, testStoredEncoding, testNumericInputBoundaries, testDerivedArithmeticBoundaries, testVersionMutationBoundaries, testSqlAuthenticationCounter, testContextualInputRules, testQueryInputValidation, testBodyShapeValidation, testHeaderFileInputValidation, testBusinessFlowSequence, testBusinessLogicLimits, testCommunitySiteLimit, testLimitedResourceLocking, testAntiAutomation, testContentInterpretation, testFileStorageBoundary, testFileDownloadBoundary } from './e2e/encoding-security.mjs';
 
 const base = process.env.FYLKREN_E2E_BASE_URL ?? 'http://localhost:18080';
+const retryUnexpectedRateLimits = !process.argv.some(value => value.startsWith('--asvs-'));
 function client() {
   const cookies = new Map();
   let csrfToken;
@@ -30,7 +31,13 @@ function client() {
     const headers = { ...(options.headers ?? {}) };
     if (cookies.size) headers.Cookie = [...cookies].map(([name, value]) => `${name}=${value}`).join('; ');
     if (csrfToken && options.method && options.method !== 'GET') headers['X-Fylkren-CSRF'] = csrfToken;
-    const response = await fetch(`${base}${path}`, { ...fetchOptions, headers, redirect: 'manual' });
+    let response = await fetch(`${base}${path}`, { ...fetchOptions, headers, redirect: 'manual' });
+    if (retryUnexpectedRateLimits && response.status === 429 && /^\d+$/.test(response.headers.get('retry-after') ?? '')) {
+      const retryAfter = Number(response.headers.get('retry-after'));
+      await response.arrayBuffer();
+      await new Promise(resolve => setTimeout(resolve, (retryAfter + 1) * 1_000));
+      response = await fetch(`${base}${path}`, { ...fetchOptions, headers, redirect: 'manual' });
+    }
     for (const value of response.headers.getSetCookie()) {
       const [pair] = value.split(';');
       const separator = pair.indexOf('=');
@@ -159,7 +166,8 @@ assert.ok(!Number.isNaN(Date.parse(platformOperations.body.hostIntegration.backu
 assert.equal(platformOperations.body.hostIntegration.backupWarningHours, 36, 'Backup warning threshold must be explicit');
 const mfaPolicyService = platformOperations.body.services.find(value => value.key === 'mfa-policy');
 assert.equal(mfaPolicyService.status, 'degraded', JSON.stringify(mfaPolicyService));
-assert.match(mfaPolicyService.detail, /documented deployment exception.*optional/i, 'Optional MFA exception must be explicit');
+assert.match(mfaPolicyService.detail, /documented deployment exception.*(optional|unavailable)/i,
+  'The configured MFA exception must be explicit');
 assert.equal(platformOperations.body.hostIntegration.time.maximumAllowedOffsetMilliseconds, 1000, 'Time offset threshold must be explicit');
 assert.ok(platformOperations.body.services.some(value => value.key === 'host-time'), 'Host time status must be visible');
 const backupService = platformOperations.body.services.find(value => value.key === 'host-backup');

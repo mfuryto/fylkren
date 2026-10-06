@@ -64,5 +64,7 @@ public sealed class DomainEvent
 
 public static class DomainEventTypes
 {
-    public static readonly string[] ExternallySupported = ["task.created", "task.completed", "assignment.created", "plan.approved", "execution.started", "decision.recorded"];
+    public static readonly string[] ExternallySupported = ["task.created", "task.completed", "assignment.created",
+        "assignment.accepted", "assignment.updated", "assignment.reopened", "comment.created",
+        "plan.approved", "execution.started", "decision.recorded"];
 }
