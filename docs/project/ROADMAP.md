@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 2026-10-08 after establishing the first bounded Enterprise AI-assistance slice.
+Updated 2026-10-08 after establishing the first bounded Enterprise AI-assistance slice and defining its internal-document source follow-up.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -18,7 +18,8 @@ The first Enterprise AI-assistance slice is implemented as an optional, default-
 
 ## Next delivery order
 
-1. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing, identity providers, authenticators, backup/key custody, time synchronization and remote logging at this gate.
+1. Deliver the controlled internal-document AI source slice described in [Enterprise AI assistance](../architecture/AI_ASSISTANCE.md#planned-internal-document-sources). At task creation, a recognized internal primary document is selected as an AI source by default and can be cleared by the user. Do not expose the choice as functional until one configured connector can enforce document authorization, classification/disclosure policy, bounded passive extraction, version provenance and negative security tests. General URL retrieval and model browsing remain prohibited.
+2. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing, identity providers, authenticators, backup/key custody, time synchronization and remote logging at this gate.
 
 No irreversible disposition is authorized by this order. Establish and verify its prerequisites before proposing activation; do not choose arbitrary retention periods.
 

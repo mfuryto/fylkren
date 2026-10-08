@@ -27,6 +27,16 @@ Selecting an external provider is a customer data-processing decision. The custo
 
 AI output is advisory. It may be incomplete or wrong. A human remains responsible for every decision, risk score, measure, plan, report and lifecycle action. Fylkren must not use this capability for identity decisions, authorization, security classification, personnel scoring, final approval, deletion or autonomous cross-Site/federated routing.
 
+## Planned internal document sources
+
+The next AI slice may use the primary document reference entered when a task is created. For a document source recognized by an enabled internal connector, **Use the document as an AI source** is selected by default and the registering user may clear it before saving. The default does not turn an arbitrary URL into an AI source: an unrecognized, external, unavailable or unauthorized reference remains a reference only and the interface must state that it was not included.
+
+Fylkren, rather than the model, retrieves the document. The connector must reapply the caller's document access, the Site's AI enablement and the installation's provider/disclosure and classification policy. The first supported formats are bounded passive text extraction from PDF, DOCX and plain text; active content, macros, redirects, credentials in URLs, oversized documents and unsupported types are rejected. General web browsing, model-selected retrieval and direct `file` or `smb` access from the AI provider are outside this capability.
+
+Extracted content is a version-bound source snapshot identified by connector, document reference, version or digest, retrieval time and classification result. The assistant response lists the source documents it actually used. Prompt and extracted content remain excluded from ordinary logs and audit metadata. Source selection, retrieval success/failure and the resulting assistance request receive safe audit correlation without recording document content. A changed document requires a new snapshot; historical task and approval records must not silently acquire new source content.
+
+The implementation order is: source metadata and default-on task-creation choice; one explicitly configured internal connector with authorization and outbound boundaries; bounded extraction; AI context inclusion with source provenance; then negative authorization, classification, active-content, size, redirect, timeout and stale-version tests. No checkbox is exposed as operational until the configured connector can enforce this complete path.
+
 ## Administration
 
 Open **Platform Manager → AI**. Enter the full provider endpoint and model name, add the provider key when required, choose the allowed functions and Sites, then save and test the stored connection. The main switch immediately controls whether operational AI actions are available. Removing or losing the Enterprise entitlement blocks AI calls without deleting the stored setup.
