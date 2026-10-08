@@ -155,9 +155,9 @@ internal static class AiEndpoints
             try { providerStream = await provider.Stream(settings, systemPrompt, userPrompt, timeout.Token); }
             catch (AiProviderHttpException ex) when (ex.ProviderStatusCode == 400)
             {
-                var content = await provider.Complete(settings, systemPrompt, userPrompt, timeout.Token);
                 BeginStreamResponse(context);
                 await WriteStreamEvent(context, new { type = "start", sourceUpdatedAt }, timeout.Token);
+                var content = await CompleteWithHeartbeat(context, provider, settings, systemPrompt, userPrompt, timeout.Token);
                 await WriteStreamEvent(context, new { type = "delta", content }, timeout.Token);
                 await RecordAssistance(db, siteId, actor, itemId, feature, timeout.Token);
                 await WriteStreamEvent(context, new { type = "done", generatedAt = DateTimeOffset.UtcNow }, timeout.Token);
@@ -223,6 +223,19 @@ internal static class AiEndpoints
         await db.SaveChangesAsync(ct);
     }
 
+    private static async Task<string> CompleteWithHeartbeat(HttpContext context, AiProviderClient provider, AiSettings settings,
+        string systemPrompt, string userPrompt, CancellationToken ct)
+    {
+        var completion = provider.Complete(settings, systemPrompt, userPrompt, ct);
+        while (!completion.IsCompleted)
+        {
+            var next = await Task.WhenAny(completion, Task.Delay(TimeSpan.FromSeconds(15), ct));
+            if (next == completion) break;
+            await WriteStreamEvent(context, new { type = "heartbeat" }, ct);
+        }
+        return await completion;
+    }
+
     private static async Task StreamFailure(HttpContext context, string code, int statusCode, string title, CancellationToken ct, int? providerStatus = null)
     {
         if (!context.Response.HasStarted)
@@ -230,7 +243,7 @@ internal static class AiEndpoints
             await Results.Problem(statusCode: statusCode, title: title, extensions: new Dictionary<string, object?> { ["code"] = code, ["providerStatus"] = providerStatus }).ExecuteAsync(context);
             return;
         }
-        if (!ct.IsCancellationRequested) await WriteStreamEvent(context, new { type = "error", code }, ct);
+        if (!ct.IsCancellationRequested) await WriteStreamEvent(context, new { type = "error", code, providerStatus }, ct);
     }
 
     private static async Task WriteStreamEvent(HttpContext context, object value, CancellationToken ct)

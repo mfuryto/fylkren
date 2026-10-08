@@ -8,7 +8,7 @@ import type { WorkItem } from "../work/WorkItemModels";
 
 type Feature = "summary" | "drafts" | "learning" | "questions";
 type Result = { content: string; generatedAt: string; sourceUpdatedAt: string };
-type StreamEvent = { type: "start"; sourceUpdatedAt: string } | { type: "delta"; content: string } | { type: "done"; generatedAt: string } | { type: "error"; code: string };
+type StreamEvent = { type: "start"; sourceUpdatedAt: string } | { type: "heartbeat" } | { type: "delta"; content: string } | { type: "done"; generatedAt: string } | { type: "error"; code: string; providerStatus?: number };
 
 export function TaskAiAssistant({ siteId, item, features, onClose, language, timeZone }: { siteId: string; item: WorkItem; features: Feature[]; onClose: () => void; language: string; timeZone: string }) {
   const t = useTranslation();
@@ -38,7 +38,7 @@ export function TaskAiAssistant({ siteId, item, features, onClose, language, tim
         if (event.type === "start") setResult({ content: "", generatedAt: "", sourceUpdatedAt: event.sourceUpdatedAt });
         if (event.type === "delta") setResult(current => current ? { ...current, content: current.content + event.content } : current);
         if (event.type === "done") { completed = true; setResult(current => current ? { ...current, generatedAt: event.generatedAt } : current); }
-        if (event.type === "error") throw new Error(event.code === "ai_provider_timeout" ? t("aiProviderTimeout") : event.code === "ai_provider_rate_limited" ? t("aiProviderRateLimited") : t("aiProviderUnavailable"));
+        if (event.type === "error") throw new Error(event.code === "ai_provider_timeout" ? t("aiProviderTimeout") : event.code === "ai_provider_rate_limited" ? t("aiProviderRateLimited") : event.providerStatus ? t("aiProviderHttpStatus", { status: event.providerStatus }) : t("aiProviderUnavailable"));
       };
       while (true) {
         const { value, done } = await reader.read(); buffer += decoder.decode(value, { stream: !done });
