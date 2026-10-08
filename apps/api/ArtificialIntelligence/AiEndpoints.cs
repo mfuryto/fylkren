@@ -44,11 +44,11 @@ internal static class AiEndpoints
     }
 
     private static async Task<IResult> SaveSettings(UpdateRequest request, ClaimsPrincipal user, IAntiforgery antiforgery,
-        HttpContext context, AiProviderClient provider, FylkrenDbContext db, CancellationToken ct)
+        HttpContext context, AiProviderClient provider, OutboundHttpPolicy outbound, FylkrenDbContext db, CancellationToken ct)
     {
         if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest();
         if (!Guid.TryParse(user.FindFirstValue("fylkren:person_id"), out var actor)) return Results.Problem(statusCode: 403);
-        if (Validate(request) is { } invalid) return invalid;
+        if (Validate(request, outbound) is { } invalid) return invalid;
         var requestedSites = (request.SiteIds ?? []).Distinct().ToArray();
         if (requestedSites.Length > 500 || await db.Sites.CountAsync(x => requestedSites.Contains(x.Id) && x.IsActive, ct) != requestedSites.Length)
             return Validation("siteIds", "Choose active sites from this installation.");
@@ -273,9 +273,11 @@ internal static class AiEndpoints
         "learning" => "Analyze the learning points. Group themes, identify duplicates and propose priorities and concrete follow-up without closing or changing any point.",
         _ => $"Answer this question using only the supplied context: {question}"
     };
-    private static IResult? Validate(UpdateRequest request)
+    private static IResult? Validate(UpdateRequest request, OutboundHttpPolicy outbound)
     {
-        if (!Uri.TryCreate(request.EndpointUrl, UriKind.Absolute, out var uri) || !OutboundHttpPolicy.ValidUri(uri) || request.EndpointUrl!.Length > 2000) return Validation("endpointUrl", "Enter an absolute HTTPS provider endpoint.");
+        if (!Uri.TryCreate(request.EndpointUrl, UriKind.Absolute, out var uri) || request.EndpointUrl!.Length > 2000) return Validation("endpointUrl", "Enter an approved absolute HTTP(S) provider endpoint.");
+        try { outbound.ValidateAiDestination(uri); }
+        catch (HttpRequestException) { return Validation("endpointUrl", "HTTP endpoints must match an exact origin in FYLKREN_OUTBOUND_PRIVATE_ORIGINS; other provider endpoints require HTTPS."); }
         if (request.Model?.Trim().Length is < 1 or > 200) return Validation("model", "Enter a model name of at most 200 characters.");
         if (request.ApiKey?.Length > 4000) return Validation("apiKey", "The provider key is too long.");
         if (request.Enabled && !(request.SummaryEnabled || request.DraftsEnabled || request.LearningEnabled || request.QuestionsEnabled)) return Validation("functions", "Enable at least one AI function.");

@@ -6,8 +6,12 @@ internal sealed class BoundedResponseHandler(HttpMessageHandler inner, long? lim
 {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
     {
-        if (request.RequestUri is not { } uri || !OutboundHttpPolicy.ValidUri(uri)) throw new HttpRequestException("Invalid outbound URL.");
-        validate?.Invoke(uri);
+        if (request.RequestUri is not { } uri) throw new HttpRequestException("Invalid outbound URL.");
+        if (validate is null)
+        {
+            if (!OutboundHttpPolicy.ValidUri(uri)) throw new HttpRequestException("Invalid outbound URL.");
+        }
+        else validate(uri);
         var response = await base.SendAsync(request, ct);
         if (rejectRedirects && (int)response.StatusCode is >= 300 and <= 399)
         { response.Dispose(); throw new HttpRequestException("Identity-provider redirects are not permitted."); }

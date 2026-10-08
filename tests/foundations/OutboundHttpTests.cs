@@ -17,7 +17,7 @@ internal static class OutboundHttpTests
         foreach (var ip in rejected) Require(!OutboundHttpPolicy.AllowedAddress(IPAddress.Parse(ip), false), $"Address {ip} bypassed default restriction.");
         foreach (var ip in new[] { "169.254.169.254", "0.0.0.0", "ff02::1", "fe80::1", "100.64.0.1" }) Require(!OutboundHttpPolicy.AllowedAddress(IPAddress.Parse(ip), true), "Private exception authorized a reserved/metadata address.");
         foreach (var ip in new[] { "8.8.8.8", "1.1.1.1", "2606:4700:4700::1111" }) Require(OutboundHttpPolicy.AllowedAddress(IPAddress.Parse(ip), false), "Ordinary public address was blocked.");
-        foreach (var origin in new[] { "http://example.invalid", "https://user:password@example.invalid", "https://example.invalid/path", "https://example.invalid?secret=x", "https://example.invalid#fragment" })
+        foreach (var origin in new[] { "ftp://example.invalid", "http://example.invalid", "http://user:password@example.invalid", "https://user:password@example.invalid", "https://example.invalid/path", "https://example.invalid?secret=x", "https://example.invalid#fragment" })
         {
             try { OutboundHttpPolicy.ParseOrigins(origin); throw new Exception("Unsafe origin accepted."); } catch (ArgumentException) { }
         }
@@ -26,7 +26,11 @@ internal static class OutboundHttpTests
         var san = new SubjectAlternativeNameBuilder(); san.AddDnsName("receiver.test"); certificateRequest.CertificateExtensions.Add(san.Build());
         using var cert = certificateRequest.CreateSelfSigned(DateTimeOffset.UtcNow.AddMinutes(-1), DateTimeOffset.UtcNow.AddHours(1));
         var builder = WebApplication.CreateBuilder(); builder.Logging.ClearProviders();
-        builder.WebHost.ConfigureKestrel(k => k.Listen(IPAddress.Loopback, 0, l => l.UseHttps(cert)));
+        builder.WebHost.ConfigureKestrel(k =>
+        {
+            k.Listen(IPAddress.Loopback, 0);
+            k.Listen(IPAddress.Loopback, 0, l => l.UseHttps(cert));
+        });
         await using var app = builder.Build(); var requests = 0; var canary = 0;
         app.MapGet("/ok", () => { Interlocked.Increment(ref requests); return Results.Text("Valid bounded response"); });
         app.MapGet("/redirect", (HttpContext c) => { Interlocked.Increment(ref requests); c.Response.Redirect("/canary"); return Task.CompletedTask; });
@@ -36,14 +40,24 @@ internal static class OutboundHttpTests
         app.MapGet("/large-headers", (HttpContext c) => { c.Response.Headers["X-Synthetic"] = new string('x', 35_000); return c.Response.WriteAsync("ok"); });
         app.MapGet("/exact", () => Results.Text(new string('x', 4096)));
         await app.StartAsync();
-        var port = new Uri(app.Urls.Single()).Port;
+        var port = new Uri(app.Urls.Single(url => url.StartsWith("https://", StringComparison.Ordinal))).Port;
         var originValue = $"https://receiver.test:{port}"; var dnsCalls = 0;
+        var httpPort = new Uri(app.Urls.Single(url => url.StartsWith("http://", StringComparison.Ordinal))).Port;
+        var httpOriginValue = $"http://receiver.test:{httpPort}";
         Task<IPAddress[]> Resolve(string _, CancellationToken ct) { Interlocked.Increment(ref dnsCalls); return Task.FromResult(new[] { IPAddress.Loopback }); }
-        using var transport = new OutboundHttpPolicy(originValue, resolve: Resolve).CreateTransport();
+        var policy = new OutboundHttpPolicy($"{originValue};{httpOriginValue}", resolve: Resolve);
+        using var transport = policy.CreateTransport();
         transport.SslOptions.RemoteCertificateValidationCallback = (_, certificate, _, _) => certificate?.GetCertHashString() == cert.GetCertHashString();
         using var client = new HttpClient(new BoundedResponseHandler(transport, 4096)) { Timeout = TimeSpan.FromSeconds(2) };
         Require(await client.GetStringAsync(originValue + "/ok") == "Valid bounded response", "Explicit private origin failed trusted TLS.");
         Require(dnsCalls == 1, "Checked TLS connection performed more than one DNS lookup.");
+        using var privateHttp = new HttpClient(new BoundedResponseHandler(policy.CreateTransport(), 4096, policy.ValidateAiDestination));
+        Require(await privateHttp.GetStringAsync(httpOriginValue + "/ok") == "Valid bounded response", "Exact private AI HTTP origin was rejected.");
+        using var genericHttp = new HttpClient(new BoundedResponseHandler(policy.CreateTransport(), 4096));
+        await Reject(() => genericHttp.GetStringAsync(httpOriginValue + "/ok"));
+        var publicHttpPolicy = new OutboundHttpPolicy("http://public.test:8080", resolve: (_, _) => Task.FromResult(new[] { IPAddress.Parse("8.8.8.8") }));
+        using var publicHttp = new HttpClient(new BoundedResponseHandler(publicHttpPolicy.CreateTransport(), 4096, publicHttpPolicy.ValidateAiDestination));
+        await Reject(() => publicHttp.GetAsync("http://public.test:8080/ok"));
         using (var redirect = await client.GetAsync(originValue + "/redirect")) Require((int)redirect.StatusCode == 302 && canary == 0, "Redirect followed or canary fetched.");
         Require((await client.GetStringAsync(originValue + "/exact")).Length == 4096, "Exact byte limit rejected.");
         await Reject(() => client.GetStringAsync(originValue + "/large-length"));
@@ -66,7 +80,7 @@ internal static class OutboundHttpTests
         try { identity.ValidateIdentityDestination(new Uri("https://evil.example.invalid/token"), "https://idp.example.invalid/realm"); throw new Exception("Metadata selected an unapproved token origin."); } catch (HttpRequestException) { }
         Require(canary == 0 && dnsCalls > 0, "Network checks did not execute.");
         await app.StopAsync();
-        Console.WriteLine("Outbound HTTPS tests passed: IP/DNS/IPv4-mapped boundaries, exact private origins/ports, actual trusted TLS positive, rejected private and mixed DNS with no receiver request, pinned connection, no redirect canary, Content-Length/chunked/exact byte limits, oversized headers, invalid TLS rejection and OIDC origin isolation.");
+        Console.WriteLine("Outbound HTTP(S) tests passed: HTTPS remains the default, AI alone accepts an exact allowlisted private HTTP origin, public HTTP and generic HTTP are rejected, and IP/DNS/redirect/size/TLS/identity boundaries remain enforced.");
     }
     private static async Task Reject(Func<Task> action)
     {

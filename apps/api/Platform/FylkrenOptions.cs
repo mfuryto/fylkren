@@ -22,7 +22,7 @@ public sealed class FylkrenOptions
             !string.IsNullOrEmpty(publicUri.Fragment))
             throw new InvalidOperationException("Fylkren:PublicUrl must be an origin-only HTTP(S) URL without credentials, path, query or fragment.");
         PublicUrl = PublicUrl.TrimEnd('/');
-        Fylkren.Api.Networking.OutboundHttpPolicy.ParseOrigins(Outbound.PrivateOrigins);
+        Fylkren.Api.Networking.OutboundHttpPolicy.ParseOrigins(Outbound.PrivateOrigins, allowHttp: true);
         Fylkren.Api.Networking.OutboundHttpPolicy.ParseOrigins(Outbound.AdditionalIdentityOrigins);
         Authentication.SsoAutoRedirectProvider = Authentication.SsoAutoRedirectProvider?.Trim().ToLowerInvariant();
         if (Authentication.SsoAutoRedirectProvider is not (null or "" or "oidc" or "saml"))

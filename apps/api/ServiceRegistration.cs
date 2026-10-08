@@ -405,7 +405,8 @@ internal static class ServiceRegistration
         builder.Services.AddHttpClient("identity-provider-test", client => client.Timeout = TimeSpan.FromSeconds(10))
             .ConfigurePrimaryHttpMessageHandler(() => new BoundedResponseHandler(outbound.CreateTransport(), 2_000_000, rejectRedirects: true));
         builder.Services.AddHttpClient("ai-provider", client => client.Timeout = TimeSpan.FromSeconds(300))
-            .ConfigurePrimaryHttpMessageHandler(() => new BoundedResponseHandler(outbound.CreateTransport(), 2_000_000, rejectRedirects: true));
+            .ConfigurePrimaryHttpMessageHandler(() => new BoundedResponseHandler(outbound.CreateTransport(), 2_000_000,
+                outbound.ValidateAiDestination, rejectRedirects: true));
         builder.Services.AddHostedService<FederationKeyRotationWorker>();
         builder.Services.AddHostedService<FederationOutboundDeliveryWorker>();
         builder.Services.AddHostedService<WebhookDeliveryWorker>();

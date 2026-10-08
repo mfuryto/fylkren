@@ -7,7 +7,7 @@ export const aiEn = {
   aiProvider: "Provider",
   aiProviderHelp: "OpenAI cloud or local Llama through an OpenAI-compatible Ollama or vLLM endpoint.",
   aiEndpoint: "AI endpoint",
-  aiEndpointHelp: "Full HTTPS URL",
+  aiEndpointHelp: "Full HTTPS URL. A private HTTP endpoint requires an exact installation allowlist entry.",
   aiModel: "Model",
   aiApiKey: "Provider API key",
   aiStoredSecret: "Key stored",
@@ -55,7 +55,7 @@ const norwegian: AiMessages = {
   aiEnterpriseNotice: "AI-støtte krever Enterpriselisens. Konfigurasjonen er fortsatt synlig når tilgangen mangler.",
   aiMasterSwitch: "Aktiver AI-støtte", aiMasterHelp: "AI-funksjonene er skjult og utilgjengelige til denne bryteren aktiveres.",
   aiProvider: "Leverandør", aiProviderHelp: "Bruk OpenAI i skyen eller lokal Llama gjennom et OpenAI-kompatibelt endepunkt fra for eksempel Ollama eller vLLM.", aiEndpoint: "OpenAI-kompatibelt endepunkt",
-  aiEndpointHelp: "Bruk hele HTTPS-adressen til chat completions. Private endepunkter må tillates i installasjonens konfigurasjon for utgående forbindelser.",
+  aiEndpointHelp: "Bruk hele HTTPS-adressen. Et internt HTTP-endepunkt må tillates med eksakt adresse i installasjonens konfigurasjon for utgående forbindelser.",
   aiModel: "Modell", aiApiKey: "API-nøkkel hos leverandør", aiStoredSecret: "En nøkkel er lagret. La feltet stå tomt for å beholde den.",
   aiRemoveKey: "Fjern lagret nøkkel", aiFunctions: "Funksjoner", aiSummaryFunction: "Oppsummering og kvalitetskontroll",
   aiDraftsFunction: "Utkast til planlegging, risiko og beslutninger", aiPlanningDraft: "Planutkast", aiRiskDraft: "Risiko- og tiltaksutkast", aiDecisionDraft: "Utkast til beslutningsgrunnlag", aiLearningFunction: "Analyse av læring",
@@ -91,6 +91,25 @@ const providerHelp: Record<string, string> = {
   "ro-RO": "OpenAI în cloud sau Llama local printr-un endpoint compatibil Ollama ori vLLM.",
   "sv-SE": "OpenAI i molnet eller lokal Llama via en kompatibel Ollama- eller vLLM-slutpunkt.",
   "uk-UA": "OpenAI у хмарі або локальна Llama через сумісну кінцеву точку Ollama чи vLLM.",
+};
+
+const endpointHelp: Record<string, string> = {
+  "cs-CZ": "Úplná adresa HTTPS. Soukromý koncový bod HTTP vyžaduje přesnou výjimku v konfiguraci instalace.",
+  "da-DK": "Fuld HTTPS-adresse. Et privat HTTP-endepunkt kræver en nøjagtig undtagelse i installationens konfiguration.",
+  "de-DE": "Vollständige HTTPS-Adresse. Ein privater HTTP-Endpunkt erfordert eine exakte Freigabe in der Installationskonfiguration.",
+  "es-ES": "URL HTTPS completa. Un endpoint HTTP privado requiere una autorización exacta en la configuración de la instalación.",
+  "et-EE": "Täielik HTTPS-aadress. Privaatne HTTP-otspunkt vajab paigalduse seadistuses täpset lubatud aadressi.",
+  "fi-FI": "Täydellinen HTTPS-osoite. Yksityinen HTTP-päätepiste edellyttää tarkkaa sallintaa asennuksen asetuksissa.",
+  "fr-FR": "URL HTTPS complète. Un point HTTP privé exige une autorisation exacte dans la configuration de l’installation.",
+  "it-IT": "URL HTTPS completo. Un endpoint HTTP privato richiede un’autorizzazione esatta nella configurazione dell’installazione.",
+  "lt-LT": "Visas HTTPS adresas. Privačiam HTTP galiniam taškui reikia tikslaus leidimo diegimo konfigūracijoje.",
+  "lv-LV": "Pilna HTTPS adrese. Privātam HTTP galapunktam nepieciešama precīza atļauja instalācijas konfigurācijā.",
+  "nl-NL": "Volledige HTTPS-URL. Een privé-HTTP-eindpunt vereist een exacte toelating in de installatieconfiguratie.",
+  "pl-PL": "Pełny adres HTTPS. Prywatny punkt końcowy HTTP wymaga dokładnego wpisu na liście dozwolonych w konfiguracji instalacji.",
+  "pt-PT": "URL HTTPS completo. Um endpoint HTTP privado exige uma autorização exata na configuração da instalação.",
+  "ro-RO": "Adresă HTTPS completă. Un endpoint HTTP privat necesită o autorizare exactă în configurația instalării.",
+  "sv-SE": "Fullständig HTTPS-adress. En privat HTTP-slutpunkt kräver ett exakt undantag i installationens konfiguration.",
+  "uk-UA": "Повна HTTPS-адреса. Приватна HTTP-кінцева точка потребує точного дозволу в конфігурації інсталяції.",
 };
 
 const progressMessages: Record<string, Pick<AiMessages, "aiWaiting" | "aiReceiving" | "aiProviderHttpStatus">> = {
@@ -132,5 +151,5 @@ const draftLabels: Record<string, Pick<AiMessages, "aiPlanningDraft" | "aiRiskDr
 };
 
 export const aiTranslations: Record<string, AiMessages> = new Proxy({ "nb-NO": norwegian } as Record<string, AiMessages>, {
-  get: (target, language: string) => target[language] ?? { ...aiEn, aiProviderHelp: providerHelp[language] ?? aiEn.aiProviderHelp, ...progressMessages[language], ...draftLabels[language] },
+  get: (target, language: string) => target[language] ?? { ...aiEn, aiProviderHelp: providerHelp[language] ?? aiEn.aiProviderHelp, aiEndpointHelp: endpointHelp[language] ?? aiEn.aiEndpointHelp, ...progressMessages[language], ...draftLabels[language] },
 });
