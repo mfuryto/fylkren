@@ -74,7 +74,8 @@ internal static class AiEndpoints
         if (!Guid.TryParse(user.FindFirstValue("fylkren:person_id"), out var actor)) return Results.Problem(statusCode: 403);
         var value = await db.AiSettings.SingleAsync(x => x.Id == DatabaseDefaults.AiSettingsId, ct);
         if (string.IsNullOrWhiteSpace(value.Model)) return Validation("model", "Save a model before testing.");
-        try { _ = await provider.Complete(value, "Reply with the single word OK.", "Connection test", ct); value.RecordTest(true, null, DateTimeOffset.UtcNow); }
+        context.Response.Headers["X-Fylkren-Correlation-ID"] = context.TraceIdentifier;
+        try { _ = await provider.Complete(value, "Reply with the single word OK.", "Connection test", context.TraceIdentifier, ct); value.RecordTest(true, null, DateTimeOffset.UtcNow); }
         catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested)
         { value.RecordTest(false, ex.Message, DateTimeOffset.UtcNow); }
         db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), null, actor, "ai.connection-tested", "ai-settings", value.Id, DateTimeOffset.UtcNow));
@@ -86,6 +87,7 @@ internal static class AiEndpoints
         IAntiforgery antiforgery, HttpContext context, AiProviderClient provider, FylkrenDbContext db, CancellationToken ct)
     {
         if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest();
+        context.Response.Headers["X-Fylkren-Correlation-ID"] = context.TraceIdentifier;
         if (!WorkItemPolicy.PersonId(user, out var actor)) return Results.Problem(statusCode: 403);
         var settings = await db.AiSettings.SingleAsync(x => x.Id == DatabaseDefaults.AiSettingsId, ct);
         if (!settings.Enabled) return Results.Problem(statusCode: 409, title: "AI assistance is disabled.", extensions: new Dictionary<string, object?> { ["code"] = "ai_disabled" });
@@ -119,7 +121,7 @@ internal static class AiEndpoints
         string result;
         try
         {
-            result = await provider.Complete(settings, systemPrompt, userPrompt, ct);
+            result = await provider.Complete(settings, systemPrompt, userPrompt, context.TraceIdentifier, ct);
         }
         catch (AiProviderRateLimitException ex)
         {
@@ -128,15 +130,15 @@ internal static class AiEndpoints
         }
         catch (TaskCanceledException) when (!ct.IsCancellationRequested)
         {
-            return Results.Problem(statusCode: 504, title: "AI provider timed out.", extensions: new Dictionary<string, object?> { ["code"] = "ai_provider_timeout" });
+            return Results.Problem(statusCode: 504, title: "AI provider timed out.", extensions: new Dictionary<string, object?> { ["code"] = "ai_provider_timeout", ["correlationId"] = context.TraceIdentifier });
         }
         catch (AiProviderHttpException ex)
         {
-            return Results.Problem(statusCode: 502, title: "AI provider could not complete the request.", extensions: new Dictionary<string, object?> { ["code"] = "ai_provider_unavailable", ["providerStatus"] = ex.ProviderStatusCode });
+            return Results.Problem(statusCode: 502, title: "AI provider could not complete the request.", extensions: new Dictionary<string, object?> { ["code"] = "ai_provider_unavailable", ["providerStatus"] = ex.ProviderStatusCode, ["correlationId"] = context.TraceIdentifier });
         }
         catch (Exception ex) when (ex is HttpRequestException or JsonException or InvalidOperationException or KeyNotFoundException or IndexOutOfRangeException)
         {
-            return Results.Problem(statusCode: 502, title: "AI provider could not complete the request.", extensions: new Dictionary<string, object?> { ["code"] = "ai_provider_unavailable" });
+            return Results.Problem(statusCode: 502, title: "AI provider could not complete the request.", extensions: new Dictionary<string, object?> { ["code"] = "ai_provider_unavailable", ["correlationId"] = context.TraceIdentifier });
         }
         db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, actor, "ai.assistance-requested", "work-item", itemId, DateTimeOffset.UtcNow).WithReason(feature));
         await db.SaveChangesAsync(ct);
@@ -152,12 +154,12 @@ internal static class AiEndpoints
         try
         {
             AiProviderStream providerStream;
-            try { providerStream = await provider.Stream(settings, systemPrompt, userPrompt, timeout.Token); }
+            try { providerStream = await provider.Stream(settings, systemPrompt, userPrompt, context.TraceIdentifier, timeout.Token); }
             catch (AiProviderHttpException ex) when (ex.ProviderStatusCode == 400)
             {
                 BeginStreamResponse(context);
-                await WriteStreamEvent(context, new { type = "start", sourceUpdatedAt }, timeout.Token);
-                var content = await CompleteWithHeartbeat(context, provider, settings, systemPrompt, userPrompt, timeout.Token);
+                await WriteStreamEvent(context, new { type = "start", sourceUpdatedAt, correlationId = context.TraceIdentifier }, timeout.Token);
+                var content = await CompleteWithHeartbeat(context, provider, settings, systemPrompt, userPrompt, context.TraceIdentifier, timeout.Token);
                 await WriteStreamEvent(context, new { type = "delta", content }, timeout.Token);
                 await RecordAssistance(db, siteId, actor, itemId, feature, timeout.Token);
                 await WriteStreamEvent(context, new { type = "done", generatedAt = DateTimeOffset.UtcNow }, timeout.Token);
@@ -172,7 +174,7 @@ internal static class AiEndpoints
                     return;
                 }
                 BeginStreamResponse(context);
-                await WriteStreamEvent(context, new { type = "start", sourceUpdatedAt }, timeout.Token);
+                await WriteStreamEvent(context, new { type = "start", sourceUpdatedAt, correlationId = context.TraceIdentifier }, timeout.Token);
                 var length = 0;
                 do
                 {
@@ -224,9 +226,9 @@ internal static class AiEndpoints
     }
 
     private static async Task<string> CompleteWithHeartbeat(HttpContext context, AiProviderClient provider, AiSettings settings,
-        string systemPrompt, string userPrompt, CancellationToken ct)
+        string systemPrompt, string userPrompt, string correlationId, CancellationToken ct)
     {
-        var completion = provider.Complete(settings, systemPrompt, userPrompt, ct);
+        var completion = provider.Complete(settings, systemPrompt, userPrompt, correlationId, ct);
         while (!completion.IsCompleted)
         {
             var next = await Task.WhenAny(completion, Task.Delay(TimeSpan.FromSeconds(15), ct));
@@ -240,10 +242,10 @@ internal static class AiEndpoints
     {
         if (!context.Response.HasStarted)
         {
-            await Results.Problem(statusCode: statusCode, title: title, extensions: new Dictionary<string, object?> { ["code"] = code, ["providerStatus"] = providerStatus }).ExecuteAsync(context);
+            await Results.Problem(statusCode: statusCode, title: title, extensions: new Dictionary<string, object?> { ["code"] = code, ["providerStatus"] = providerStatus, ["correlationId"] = context.TraceIdentifier }).ExecuteAsync(context);
             return;
         }
-        if (!ct.IsCancellationRequested) await WriteStreamEvent(context, new { type = "error", code, providerStatus }, ct);
+        if (!ct.IsCancellationRequested) await WriteStreamEvent(context, new { type = "error", code, providerStatus, correlationId = context.TraceIdentifier }, ct);
     }
 
     private static async Task WriteStreamEvent(HttpContext context, object value, CancellationToken ct)

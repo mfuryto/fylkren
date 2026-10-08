@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Headers;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
@@ -7,15 +8,15 @@ using Microsoft.AspNetCore.DataProtection;
 
 namespace Fylkren.Api.ArtificialIntelligence;
 
-internal sealed class AiProviderClient(IHttpClientFactory clients, IDataProtectionProvider protection)
+internal sealed class AiProviderClient(IHttpClientFactory clients, IDataProtectionProvider protection, ILogger<AiProviderClient> logger)
 {
     private readonly IDataProtector protector = protection.CreateProtector(Platform.ProtectedValuePurposes.AiProviderApiKey);
     internal string? Protect(string? value) => string.IsNullOrWhiteSpace(value) ? null : protector.Protect(value.Trim());
     internal string? Unprotect(string? value) => value is null ? null : protector.Unprotect(value);
-    internal async Task<string> Complete(AiSettings settings, string systemPrompt, string userPrompt, CancellationToken ct)
+    internal async Task<string> Complete(AiSettings settings, string systemPrompt, string userPrompt, string correlationId, CancellationToken ct)
     {
-        using var request = CreateRequest(settings, systemPrompt, userPrompt, stream: false);
-        using var response = await clients.CreateClient("ai-provider").SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
+        using var request = CreateRequest(settings, systemPrompt, userPrompt, stream: false, correlationId);
+        using var response = await Send(request, correlationId, ct);
         if (response.StatusCode == HttpStatusCode.TooManyRequests)
             throw new AiProviderRateLimitException(RetryAfterSeconds(response.Headers.RetryAfter));
         if (!response.IsSuccessStatusCode) throw new AiProviderHttpException((int)response.StatusCode);
@@ -26,12 +27,12 @@ internal sealed class AiProviderClient(IHttpClientFactory clients, IDataProtecti
         return content.Length <= 20_000 ? content : content[..20_000];
     }
 
-    internal async Task<AiProviderStream> Stream(AiSettings settings, string systemPrompt, string userPrompt, CancellationToken ct)
+    internal async Task<AiProviderStream> Stream(AiSettings settings, string systemPrompt, string userPrompt, string correlationId, CancellationToken ct)
     {
-        var request = CreateRequest(settings, systemPrompt, userPrompt, stream: true);
+        var request = CreateRequest(settings, systemPrompt, userPrompt, stream: true, correlationId);
         try
         {
-            var response = await clients.CreateClient("ai-provider").SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
+            var response = await Send(request, correlationId, ct);
             if (response.StatusCode == HttpStatusCode.TooManyRequests)
             {
                 var retryAfter = RetryAfterSeconds(response.Headers.RetryAfter);
@@ -49,9 +50,43 @@ internal sealed class AiProviderClient(IHttpClientFactory clients, IDataProtecti
         finally { request.Dispose(); }
     }
 
-    private HttpRequestMessage CreateRequest(AiSettings settings, string systemPrompt, string userPrompt, bool stream)
+    private async Task<HttpResponseMessage> Send(HttpRequestMessage request, string correlationId, CancellationToken ct)
+    {
+        var startedAt = DateTimeOffset.UtcNow;
+        var watch = Stopwatch.StartNew();
+        try
+        {
+            var response = await clients.CreateClient("ai-provider").SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
+            LogOutcome(((int)response.StatusCode).ToString(), startedAt, watch.ElapsedMilliseconds, correlationId,
+                response.StatusCode >= HttpStatusCode.InternalServerError);
+            return response;
+        }
+        catch (OperationCanceledException)
+        {
+            LogOutcome("cancelled", startedAt, watch.ElapsedMilliseconds, correlationId, warning: true);
+            throw;
+        }
+        catch (HttpRequestException)
+        {
+            LogOutcome("transport-error", startedAt, watch.ElapsedMilliseconds, correlationId, warning: true);
+            throw;
+        }
+    }
+
+    private void LogOutcome(string status, DateTimeOffset timestamp, long durationMs, string correlationId, bool warning)
+    {
+        if (warning)
+            logger.LogWarning("status={Status}; timestamp={Timestamp}; durationMs={DurationMs}; correlationId={CorrelationId}",
+                status, timestamp, durationMs, correlationId);
+        else
+            logger.LogInformation("status={Status}; timestamp={Timestamp}; durationMs={DurationMs}; correlationId={CorrelationId}",
+                status, timestamp, durationMs, correlationId);
+    }
+
+    private HttpRequestMessage CreateRequest(AiSettings settings, string systemPrompt, string userPrompt, bool stream, string correlationId)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, settings.EndpointUrl);
+        request.Headers.Add("X-Request-ID", correlationId);
         var key = Unprotect(settings.ProtectedApiKey);
         if (key is not null) request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", key);
         request.Content = new StringContent(JsonSerializer.Serialize(new

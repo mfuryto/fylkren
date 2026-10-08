@@ -9,7 +9,7 @@ import type { WorkItem } from "../work/WorkItemModels";
 
 type Feature = "summary" | "planning" | "risks" | "decisions" | "learning" | "questions";
 type Result = { content: string; generatedAt: string; sourceUpdatedAt: string };
-type StreamEvent = { type: "start"; sourceUpdatedAt: string } | { type: "heartbeat" } | { type: "delta"; content: string } | { type: "done"; generatedAt: string } | { type: "error"; code: string; providerStatus?: number };
+type StreamEvent = { type: "start"; sourceUpdatedAt: string; correlationId?: string } | { type: "heartbeat" } | { type: "delta"; content: string } | { type: "done"; generatedAt: string } | { type: "error"; code: string; providerStatus?: number; correlationId?: string };
 
 export function TaskAiAssistant({ siteId, item, features, onClose, language, timeZone }: { siteId: string; item: WorkItem; features: Feature[]; onClose: () => void; language: string; timeZone: string }) {
   const t = useTranslation();
@@ -24,6 +24,7 @@ export function TaskAiAssistant({ siteId, item, features, onClose, language, tim
   }, [busy]);
   async function run() {
     setBusy(true); setMessage(""); setResult(null);
+    let correlationId = "";
     try {
       const token = await getAntiforgeryToken();
       const response = await apiRequest(`/api/ai/sites/${siteId}/work-items/${item.id}/assist`, t("aiAssistFailed"), {
@@ -31,15 +32,16 @@ export function TaskAiAssistant({ siteId, item, features, onClose, language, tim
         headers: { "X-Fylkren-CSRF": token, "Content-Type": "application/json", Accept: "application/x-ndjson" },
         body: JSON.stringify({ feature, question: feature === "questions" ? question : null, language: normalizeLanguage(language), stream: true }),
       });
+      correlationId = response.headers.get("X-Fylkren-Correlation-ID") ?? "";
       if (!response.body) throw new Error(t("aiAssistFailed"));
       const reader = response.body.getReader(), decoder = new TextDecoder(); let buffer = "", completed = false;
       const consume = (line: string) => {
         if (!line.trim()) return;
         const event = JSON.parse(line) as StreamEvent;
-        if (event.type === "start") setResult({ content: "", generatedAt: "", sourceUpdatedAt: event.sourceUpdatedAt });
+        if (event.type === "start") { correlationId = event.correlationId ?? correlationId; setResult({ content: "", generatedAt: "", sourceUpdatedAt: event.sourceUpdatedAt }); }
         if (event.type === "delta") setResult(current => current ? { ...current, content: current.content + event.content } : current);
         if (event.type === "done") { completed = true; setResult(current => current ? { ...current, generatedAt: event.generatedAt } : current); }
-        if (event.type === "error") throw new Error(event.code === "ai_provider_timeout" ? t("aiProviderTimeout") : event.code === "ai_provider_rate_limited" ? t("aiProviderRateLimited") : event.providerStatus ? t("aiProviderHttpStatus", { status: event.providerStatus }) : t("aiProviderUnavailable"));
+        if (event.type === "error") { correlationId = event.correlationId ?? correlationId; const text = event.code === "ai_provider_timeout" ? t("aiProviderTimeout") : event.code === "ai_provider_rate_limited" ? t("aiProviderRateLimited") : event.providerStatus ? t("aiProviderHttpStatus", { status: event.providerStatus }) : t("aiProviderUnavailable"); throw new Error(correlationId ? `${text} ${t("correlation", { id: correlationId })}.` : text); }
       };
       while (true) {
         const { value, done } = await reader.read(); buffer += decoder.decode(value, { stream: !done });
