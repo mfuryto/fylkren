@@ -151,34 +151,44 @@ internal static class AiEndpoints
         timeout.CancelAfter(TimeSpan.FromSeconds(300));
         try
         {
-            await using var providerStream = await provider.Stream(settings, systemPrompt, userPrompt, timeout.Token);
-            await using var chunks = providerStream.Read(timeout.Token).GetAsyncEnumerator(timeout.Token);
-            if (!await chunks.MoveNextAsync())
+            AiProviderStream providerStream;
+            try { providerStream = await provider.Stream(settings, systemPrompt, userPrompt, timeout.Token); }
+            catch (AiProviderHttpException ex) when (ex.ProviderStatusCode == 400)
             {
-                await Results.Problem(statusCode: 502, title: "AI provider returned no visible answer.", extensions: new Dictionary<string, object?> { ["code"] = "ai_provider_unavailable" }).ExecuteAsync(context);
+                var content = await provider.Complete(settings, systemPrompt, userPrompt, timeout.Token);
+                BeginStreamResponse(context);
+                await WriteStreamEvent(context, new { type = "start", sourceUpdatedAt }, timeout.Token);
+                await WriteStreamEvent(context, new { type = "delta", content }, timeout.Token);
+                await RecordAssistance(db, siteId, actor, itemId, feature, timeout.Token);
+                await WriteStreamEvent(context, new { type = "done", generatedAt = DateTimeOffset.UtcNow }, timeout.Token);
                 return;
             }
-            context.Response.StatusCode = StatusCodes.Status200OK;
-            context.Response.ContentType = "application/x-ndjson; charset=utf-8";
-            context.Response.Headers.CacheControl = "no-store";
-            context.Response.Headers.Append("X-Accel-Buffering", "no");
-            await WriteStreamEvent(context, new { type = "start", sourceUpdatedAt }, timeout.Token);
-            var length = 0;
-            do
+            await using (providerStream)
             {
-                var chunk = chunks.Current;
-                if (length + chunk.Length > 20_000) chunk = chunk[..Math.Max(0, 20_000 - length)];
-                if (chunk.Length > 0)
+                await using var chunks = providerStream.Read(timeout.Token).GetAsyncEnumerator(timeout.Token);
+                if (!await chunks.MoveNextAsync())
                 {
-                    length += chunk.Length;
-                    await WriteStreamEvent(context, new { type = "delta", content = chunk }, timeout.Token);
+                    await Results.Problem(statusCode: 502, title: "AI provider returned no visible answer.", extensions: new Dictionary<string, object?> { ["code"] = "ai_provider_unavailable" }).ExecuteAsync(context);
+                    return;
                 }
-                if (length >= 20_000) break;
-            } while (await chunks.MoveNextAsync());
-            if (!providerStream.Completed && length < 20_000) throw new HttpRequestException("AI provider ended the stream before completion.");
-            db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, actor, "ai.assistance-requested", "work-item", itemId, DateTimeOffset.UtcNow).WithReason(feature));
-            await db.SaveChangesAsync(timeout.Token);
-            await WriteStreamEvent(context, new { type = "done", generatedAt = DateTimeOffset.UtcNow }, timeout.Token);
+                BeginStreamResponse(context);
+                await WriteStreamEvent(context, new { type = "start", sourceUpdatedAt }, timeout.Token);
+                var length = 0;
+                do
+                {
+                    var chunk = chunks.Current;
+                    if (length + chunk.Length > 20_000) chunk = chunk[..Math.Max(0, 20_000 - length)];
+                    if (chunk.Length > 0)
+                    {
+                        length += chunk.Length;
+                        await WriteStreamEvent(context, new { type = "delta", content = chunk }, timeout.Token);
+                    }
+                    if (length >= 20_000) break;
+                } while (await chunks.MoveNextAsync());
+                if (!providerStream.Completed && length < 20_000) throw new HttpRequestException("AI provider ended the stream before completion.");
+                await RecordAssistance(db, siteId, actor, itemId, feature, timeout.Token);
+                await WriteStreamEvent(context, new { type = "done", generatedAt = DateTimeOffset.UtcNow }, timeout.Token);
+            }
         }
         catch (AiProviderRateLimitException ex) when (!context.Response.HasStarted)
         {
@@ -197,6 +207,20 @@ internal static class AiEndpoints
         {
             await StreamFailure(context, "ai_provider_unavailable", 502, "AI provider could not complete the request.", requestAborted);
         }
+    }
+
+    private static void BeginStreamResponse(HttpContext context)
+    {
+        context.Response.StatusCode = StatusCodes.Status200OK;
+        context.Response.ContentType = "application/x-ndjson; charset=utf-8";
+        context.Response.Headers.CacheControl = "no-store";
+        context.Response.Headers.Append("X-Accel-Buffering", "no");
+    }
+
+    private static async Task RecordAssistance(FylkrenDbContext db, Guid siteId, Guid actor, Guid itemId, string feature, CancellationToken ct)
+    {
+        db.AuditEvents.Add(new AuditEvent(Guid.NewGuid(), siteId, actor, "ai.assistance-requested", "work-item", itemId, DateTimeOffset.UtcNow).WithReason(feature));
+        await db.SaveChangesAsync(ct);
     }
 
     private static async Task StreamFailure(HttpContext context, string code, int statusCode, string title, CancellationToken ct, int? providerStatus = null)
