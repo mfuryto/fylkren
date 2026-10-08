@@ -34,6 +34,9 @@ export const aiEn = {
   aiResult: "AI suggestion",
   aiNoResult: "No suggestion yet",
   aiAssistFailed: "AI request failed",
+  aiProviderRateLimited: "AI busy",
+  aiProviderTimeout: "AI timed out",
+  aiProviderUnavailable: "AI unavailable",
   aiGeneratedFromVersion: "Source: {date}",
   entitlementAi: "AI assistance",
 } as const;
@@ -57,6 +60,8 @@ const norwegian: AiMessages = {
   aiAssistant: "AI-assistent", aiAssistantIntro: "Assistenten bruker opplysninger du allerede har lesetilgang til. Svaret er et forslag og lagres ikke automatisk.",
   aiRun: "Lag forslag", aiQuestion: "Spørsmål", aiQuestionPlaceholder: "Hva vil du vite om denne oppgaven?",
   aiResult: "AI-forslag", aiNoResult: "Velg en funksjon og lag et forslag.", aiAssistFailed: "AI-assistenten kunne ikke fullføre forespørselen.",
+  aiProviderRateLimited: "AI-leverandøren er opptatt. Vent før du prøver igjen.", aiProviderTimeout: "AI-leverandøren brukte for lang tid.",
+  aiProviderUnavailable: "AI-leverandøren kunne ikke fullføre forespørselen.",
   aiGeneratedFromVersion: "Laget fra oppgaven slik den sist ble oppdatert {date}. Kontroller kilden før teksten brukes.",
   entitlementAi: "AI-støtte",
 };

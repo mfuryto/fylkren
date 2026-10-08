@@ -14,7 +14,7 @@ assert.match(apiBlock, /^\s+expose:\n\s+- "8443"/m, 'The TLS API must remain pri
 const proxiedLocations = [...gateway.matchAll(/location\s+[^\{]+\{([\s\S]*?)\n\s*\}/g)]
   .map(match => match[1])
   .filter(body => body.includes('proxy_pass'));
-assert.equal(proxiedLocations.length, 4, 'Review every new gateway proxy location');
+assert.equal(proxiedLocations.length, 5, 'Review every new gateway proxy location');
 for (const body of proxiedLocations) {
   assert.match(body, /proxy_set_header Host \$http_host;/,
     'A proxied location did not replace the upstream Host value');
@@ -29,7 +29,7 @@ for (const body of proxiedLocations.filter(body => !body.includes('proxy_pass ht
 }
 const clientAddressLocations = proxiedLocations.filter(body =>
   body.includes('X-Fylkren-Gateway-Client-IP'));
-assert.equal(clientAddressLocations.length, 2,
+assert.equal(clientAddressLocations.length, 3,
   'Review the client-address replacement on every API proxy location');
 for (const body of clientAddressLocations) {
   assert.match(body, /proxy_set_header X-Fylkren-Gateway-Client-IP \$remote_addr;/,

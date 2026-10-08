@@ -118,6 +118,8 @@ A typical proxy definition uses:
 - public certificate for the configured domain;
 - HTTP-to-HTTPS redirect after certificate validation.
 
+Enterprise AI assistance can hold one non-streaming request open while a local model generates its response. Fylkren gives the provider 300 seconds and the built-in web gateway gives AI routes 330 seconds. If the deployment's outer reverse proxy defines a response-header, read or request timeout, set the AI route to at least 330 seconds or apply a larger installation-owned margin. Do not enable automatic proxy retries for AI POST requests. A provider `429` remains a `429`, and its bounded numeric `Retry-After` delay must reach the browser.
+
 Verify the proxy configuration with a request that supplies false `X-Forwarded-Proto`, `X-Forwarded-For`, `X-Forwarded-Host` and `X-Fylkren-Gateway-Client-IP` values. The proxy must replace them before forwarding. Recheck this after proxy upgrades or configuration imports.
 
 WebSocket support can remain enabled at the proxy but Fylkren does not currently depend on WebSockets.

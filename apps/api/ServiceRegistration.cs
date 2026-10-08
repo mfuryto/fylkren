@@ -404,7 +404,7 @@ internal static class ServiceRegistration
                 uri => outbound.ValidateIdentityDestination(uri, fylkrenOptions.Authentication.Oidc.Authority), rejectRedirects: true));
         builder.Services.AddHttpClient("identity-provider-test", client => client.Timeout = TimeSpan.FromSeconds(10))
             .ConfigurePrimaryHttpMessageHandler(() => new BoundedResponseHandler(outbound.CreateTransport(), 2_000_000, rejectRedirects: true));
-        builder.Services.AddHttpClient("ai-provider", client => client.Timeout = TimeSpan.FromSeconds(45))
+        builder.Services.AddHttpClient("ai-provider", client => client.Timeout = TimeSpan.FromSeconds(300))
             .ConfigurePrimaryHttpMessageHandler(() => new BoundedResponseHandler(outbound.CreateTransport(), 2_000_000, rejectRedirects: true));
         builder.Services.AddHostedService<FederationKeyRotationWorker>();
         builder.Services.AddHostedService<FederationOutboundDeliveryWorker>();

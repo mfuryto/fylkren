@@ -16,7 +16,7 @@ const upstreamVersions = [...gateway.matchAll(/proxy_http_version\s+([^;]+);/g)]
   .map(match => match[1]);
 assert.deepEqual([...new Set(upstreamVersions)], ['1.1'],
   'Explicit gateway upstream protocols must remain HTTP/1.1');
-assert.equal(upstreamVersions.length, 2,
+assert.equal(upstreamVersions.length, 3,
   'Review the protocol declaration when adding an explicit upstream version');
 
 process.stdout.write(`${JSON.stringify({ httpMessageProtocolInventory: 'passed',

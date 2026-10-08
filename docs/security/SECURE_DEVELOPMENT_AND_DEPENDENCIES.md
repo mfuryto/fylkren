@@ -16,7 +16,7 @@ JavaScript and .NET lock/central package files are authoritative inputs, and con
 | Export/report/PDF | Authorized scope, pagination/package limits and client-side print generation |
 | Search, lists, timelines and audit | Bounded page sizes, indexed queries and server-side filtering; navigation counts use database aggregates |
 | Outbound HTTP, federation and webhooks | Exact destinations, timeouts, response-size limits, redirect rejection where required, leases and bounded retries |
-| AI assistance | Enterprise and Site/function gates, six requests per minute through the costly-operation limiter, 45-second provider timeout, 2 MB response limit, 20,000-character returned suggestion and no autonomous retry or background queue |
+| AI assistance | Enterprise and Site/function gates, six requests per minute through the costly-operation limiter, 300-second provider timeout, 330-second inner-gateway margin, 2 MB response limit, 20,000-character returned suggestion, provider `Retry-After` propagation and no autonomous retry or background queue |
 | SMTP and directory | Explicit destinations, connection/DNS timeouts, bounded query/result sizes and background batch limits |
 | Background notifications, lifecycle and federation | Bounded batches, leases, terminal retry states and cancellation tokens |
 

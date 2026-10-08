@@ -14,7 +14,7 @@ const postgresIdent = read('apps/postgres/pg_ident.fylkren.conf');
 
 for (const path of ['Browser or machine client → public gateway', 'Gateway → API',
   'API → PostgreSQL', 'API → OIDC/SAML provider', 'API → webhook receiver',
-  'API ↔ federation peer', 'API → SMTP relay', 'API → AD/LDAP',
+  'API ↔ federation peer', 'API → configured AI provider', 'API → SMTP relay', 'API → AD/LDAP',
   'Administrator → host', 'Backup transfer'])
   assert.ok(inventory.includes(path), `Missing communication inventory path: ${path}`);
 
@@ -37,11 +37,11 @@ assert.match(outbound, /uri\.Scheme == Uri\.UriSchemeHttps/, 'outbound HTTP HTTP
 assert.doesNotMatch(serviceRegistration, /ServerCertificateCustomValidationCallback\s*=\s*\([^)]*\)\s*=>\s*true/,
   'global TLS certificate bypass');
 assert.match(smtp, /smtp\.Security != "starttls"/, 'SMTP plaintext rejection');
-assert.match(smtp, /EnableSsl = true/, 'SMTP STARTTLS enforcement');
+assert.match(smtp, /SecureSocketOptions\.StartTls/, 'SMTP STARTTLS enforcement');
 
 console.log(JSON.stringify({
   communicationSecurityInventory: 'passed',
-  documentedPaths: 10,
+  documentedPaths: 11,
   publicTls: true,
   outboundCertificateValidation: true,
   verifiedInternalTlsPaths: 2,

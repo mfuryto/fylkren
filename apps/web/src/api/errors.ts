@@ -13,6 +13,9 @@ export async function responseErrorMessage(response: Response, fallback: string)
     if (problem.code === "lifecycle_unfinished_relationships") return translateActive("lifecycleUnfinishedError");
     if (problem.code === "lifecycle_version_conflict") return translateActive("lifecycleVersionError");
     if (problem.code === "lifecycle_transition_conflict") return translateActive("lifecycleTransitionError");
+    if (problem.code === "ai_provider_rate_limited") return translateActive("aiProviderRateLimited");
+    if (problem.code === "ai_provider_timeout") return translateActive("aiProviderTimeout");
+    if (problem.code === "ai_provider_unavailable") return translateActive("aiProviderUnavailable");
     const validationMessage = Object.values(problem.errors ?? {}).flat().find(Boolean);
     return problem.error || validationMessage || problem.detail || problem.title || fallback;
   } catch {
