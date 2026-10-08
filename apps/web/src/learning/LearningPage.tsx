@@ -8,8 +8,10 @@ import { buildAppHash, type AppLocation } from "../navigation/permalinks";
 import { getLearning, type LearningPage as LearningResponse, type Lesson } from "./learningApi";
 import { LessonDetails } from "./LessonDetails";
 import { lessonPriorityKeys, lessonStatusKeys } from "./learningModels";
+import { TaskAiAssistant } from "../tasks/TaskAiAssistant";
+import { useAiCapabilities } from "../tasks/useAiCapabilities";
 
-export function LearningPage({ language, timeZone, permalink }: { language: string; timeZone: string; permalink: AppLocation }) {
+export function LearningPage({ language, timeZone, permalink, aiAvailable = false }: { language: string; timeZone: string; permalink: AppLocation; aiAvailable?: boolean }) {
   const t = useTranslation();
   const [data, setData] = useState<LearningResponse | null>(null);
   const [site, setSite] = useState(permalink.siteId ?? "");
@@ -24,7 +26,9 @@ export function LearningPage({ language, timeZone, permalink }: { language: stri
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<Lesson | null>(null);
+  const [aiLesson, setAiLesson] = useState<Lesson | null>(null);
   const [help, setHelp] = useState(false);
+  const aiCapabilities = useAiCapabilities(aiAvailable, selected?.siteId ?? "");
   const query = useMemo(() => {
     const params = new URLSearchParams({ view, sort, page: String(page) });
     if (site) params.set("siteId", site);
@@ -72,7 +76,8 @@ export function LearningPage({ language, timeZone, permalink }: { language: stri
       <td className={lesson.dueOn && lesson.dueOn < today && ["new", "in_progress"].includes(lesson.status) ? "learning-overdue" : ""}>{lesson.dueOn ? new Date(`${lesson.dueOn}T12:00:00`).toLocaleDateString(language) : "–"}</td>
     </tr>)}</tbody></table></div>}
     {data && <PaginationNav page={data.page} totalItems={data.total} onPageChange={setPage} label={t("navLearning")}/>}
-    {selected && <LessonDetails key={selected.id} lesson={selected} language={language} timeZone={timeZone} onClose={() => setSelected(null)} onReviewed={() => { setSelected(null); setRefresh(value => value + 1); }}/>}
+    {selected && <LessonDetails key={selected.id} lesson={selected} language={language} timeZone={timeZone} aiEnabled={aiCapabilities.learningEnabled} onAi={() => setAiLesson(selected)} onClose={() => setSelected(null)} onReviewed={() => { setSelected(null); setRefresh(value => value + 1); }}/>}
+    {aiLesson && <TaskAiAssistant siteId={aiLesson.siteId} item={{ id: aiLesson.workItemId, title: aiLesson.workTitle }} features={["learning"]} fixedFeature="learning" language={language} timeZone={timeZone} onClose={() => setAiLesson(null)}/>}
     {help && <SectionHelp title={t("learningHelpTitle")} intro={t("learningHelpText")} steps={[]} note={t("learningInternal")} onClose={() => setHelp(false)}/>}
   </div>;
 }

@@ -89,7 +89,7 @@ export function AppContent({
   if (effectiveItem === "Execution") return <ExecutionPage session={session} language={language} classificationMarkings={classificationMarkings} permalink={location} />;
   if (effectiveItem === "Reports")
     return <ReportsPage language={language} timeZone={timeZone} classificationMarkings={classificationMarkings} permalink={location} />;
-  if (effectiveItem === "Learning" && (session.hasOperationalRole || session.canExecute)) return <LearningPage language={language} timeZone={timeZone} permalink={location}/>;
+  if (effectiveItem === "Learning" && (session.hasOperationalRole || session.canExecute)) return <LearningPage language={language} timeZone={timeZone} permalink={location} aiAvailable={configuration.aiEnabled && configuration.entitlements.includes("ai-assistance")}/>;
   if (effectiveItem === "Workload") return <WorkloadHistoryPage personId={session.personId} language={language} timeZone={timeZone} />;
   if (effectiveItem === "Workflows" && session.managesSites) return <WorkflowsPage />;
   if (effectiveItem === "Templates" && session.managesSites) return <TemplatesPage />;

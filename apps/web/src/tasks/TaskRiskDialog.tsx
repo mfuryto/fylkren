@@ -8,8 +8,9 @@ import { emptyRisk, numberedRisks, type Assessment, type Mitigation, type Risk }
 import { RiskMatrix, type RiskPoint } from "./RiskMatrix";
 import { RiskRegister } from "./RiskRegister";
 import { RiskEditor } from "./RiskEditor";
+import { requestAiDrafts, type RiskAiDraft } from "./aiDraftApi";
 
-export function TaskRiskDialog({ siteId, item, personId, editable, busy, onClose, onError }: { siteId: string; item: WorkItem; personId?: string; editable: boolean; busy: boolean; onClose: () => void; onError: (message: string) => void }) {
+export function TaskRiskDialog({ siteId, item, personId, editable, busy, aiEnabled, language, onClose, onError }: { siteId: string; item: WorkItem; personId?: string; editable: boolean; busy: boolean; aiEnabled: boolean; language: string; onClose: () => void; onError: (message: string) => void }) {
   const t = useTranslation();
   const [risks, setRisks] = useState<Risk[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,7 +24,10 @@ export function TaskRiskDialog({ siteId, item, personId, editable, busy, onClose
   const [editingAction, setEditingAction] = useState<Mitigation | null>(null);
   const [actionRisk, setActionRisk] = useState<Risk | null>(null);
   const [action, setAction] = useState({ action: "", dueDate: "" });
-  const locked = busy || saving || loading;
+  const [aiDrafts, setAiDrafts] = useState<RiskAiDraft[]>([]);
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiAssessmentRequired, setAiAssessmentRequired] = useState(false);
+  const locked = busy || saving || loading || aiBusy;
   function reportError(problem: unknown, fallback: string) { const message = errorMessage(problem, fallback); setError(message); onError(message); }
   async function load() {
     setError(""); setLoading(true);
@@ -32,10 +36,10 @@ export function TaskRiskDialog({ siteId, item, personId, editable, busy, onClose
     finally { setLoading(false); }
   }
   useEffect(() => { void load(); }, [siteId, item.id]);
-  function cancelEdit() { setEditingRisk(null); setEditorOpen(false); setDraft(emptyRisk); }
+  function cancelEdit() { setEditingRisk(null); setEditorOpen(false); setDraft(emptyRisk); setAiAssessmentRequired(false); }
   function editRisk(risk: Risk) {
     if (editorOpen && editingRisk?.id === risk.id) return;
-    setSelectedId(risk.id); setEditingRisk(risk); setEditorOpen(true); setAssessment("before");
+    setSelectedId(risk.id); setEditingRisk(risk); setEditorOpen(true); setAssessment("before"); setAiAssessmentRequired(false);
     setDraft({ title: risk.current.title, description: risk.current.description, probability: risk.current.probability, impact: risk.current.impact, status: risk.current.status, dueDate: risk.current.dueDate ?? "", residualProbability: risk.current.residualProbability?.toString() ?? "", residualImpact: risk.current.residualImpact?.toString() ?? "", initialMitigation: "" });
   }
   function selectRisk(risk: Risk) { if (editable && personId && !locked) editRisk(risk); else setSelectedId(risk.id); }
@@ -69,6 +73,16 @@ export function TaskRiskDialog({ siteId, item, personId, editable, busy, onClose
     finally { setSaving(false); }
   }
   function openAction(risk: Risk) { setEditingAction(null); setActionRisk(risk); setAction({ action: "", dueDate: risk.current.dueDate ?? "" }); }
+  async function suggestRisks() {
+    setError(""); setAiBusy(true);
+    try { setAiDrafts((await requestAiDrafts<RiskAiDraft>(siteId, item.id, "risks", language)).drafts); }
+    catch (problem) { reportError(problem, t("aiAssistFailed")); }
+    finally { setAiBusy(false); }
+  }
+  function useRiskDraft(value: RiskAiDraft) {
+    setEditingRisk(null); setSelectedId("draft"); setAssessment("before"); setEditorOpen(true); setAiAssessmentRequired(true);
+    setDraft({ ...emptyRisk, title: value.title, description: `${t("aiRiskCause")}: ${value.cause}\n\n${t("aiRiskConsequence")}: ${value.consequence}`, dueDate: value.dueDate ?? "", initialMitigation: value.mitigation });
+  }
   const points: RiskPoint[] = risks.map((risk, index) => ({ id: risk.id, number: index + 1, title: risk.current.title, probability: risk.current.probability, impact: risk.current.impact, residualProbability: risk.current.residualProbability, residualImpact: risk.current.residualImpact }));
   if (editorOpen) {
     const preview = { id: editingRisk?.id ?? "draft", number: editingRisk ? risks.findIndex(risk => risk.id === editingRisk.id) + 1 : risks.length + 1, title: draft.title || t("registerRisk"), probability: draft.probability, impact: draft.impact, residualProbability: draft.residualProbability ? Number(draft.residualProbability) : null, residualImpact: draft.residualImpact ? Number(draft.residualImpact) : null };
@@ -76,11 +90,12 @@ export function TaskRiskDialog({ siteId, item, personId, editable, busy, onClose
     if (index >= 0) points[index] = preview; else points.push(preview);
   }
   return <Modal title={t("riskAndMitigations")} onClose={onClose}><div className="risk-workspace">
-    <div className="risk-workspace-heading"><strong>{item.title}</strong>{editable && personId && <button className="primary-button" disabled={locked} type="button" onClick={() => { setEditingRisk(null); setDraft(emptyRisk); setEditorOpen(true); setSelectedId("draft"); setAssessment("before"); }}>+ {t("registerRisk")}</button>}</div>
+    <div className="risk-workspace-heading"><strong>{item.title}</strong><div className="inline-actions">{aiEnabled && editable && personId && <button className="secondary-button" disabled={locked} type="button" onClick={() => void suggestRisks()}>✦ {aiBusy ? t("aiWorking") : t("aiRiskDraft")}</button>}{editable && personId && <button className="primary-button" disabled={locked} type="button" onClick={() => { setEditingRisk(null); setDraft(emptyRisk); setEditorOpen(true); setSelectedId("draft"); setAssessment("before"); setAiAssessmentRequired(false); }}>+ {t("registerRisk")}</button>}</div></div>
     {error && <p className="error-message" role="alert">{error}</p>}
+    {aiDrafts.length > 0 && <section className="site-detail-block"><h3>{t("aiRiskDraft")}</h3><div className="type-list">{aiDrafts.map((value, index) => <article className="type-row" key={`${value.title}-${index}`}><span><strong>{index + 1}. {value.title}</strong><small><b>{t("aiRiskCause")}:</b> {value.cause}</small><small><b>{t("aiRiskConsequence")}:</b> {value.consequence}</small><small><b>{t("mitigationAction")}:</b> {value.mitigation}</small></span><button className="secondary-button" type="button" disabled={locked} onClick={() => useRiskDraft(value)}>{t("aiUseDraft")}</button></article>)}</div></section>}
     {loading ? <p role="status">{t("loading")}</p> : risks.length === 0 ? <p className="empty-state-inline">{t("noRisks")}</p> : <RiskRegister risks={risks} selectedId={selectedId} editable={editable} busy={locked} onSelect={selectRisk} onEdit={editRisk} onAddMitigation={openAction} onEditMitigation={(risk, mitigation) => { setActionRisk(risk); setEditingAction(mitigation); setAction({ action: mitigation.action, dueDate: mitigation.dueDate ?? "" }); }} onComplete={value => { void complete(value); }} />}
-    <div className={`risk-workspace-body${editorOpen ? " editing" : ""}`}><RiskMatrix points={points} selectedId={selectedId} assessment={assessment} editable={editorOpen && editable && !locked} onSelect={id => { const risk = risks.find(value => value.id === id); if (risk) selectRisk(risk); }} onAssess={(phase, probability, impact) => { setAssessment(phase); setDraft(current => phase === "before" ? { ...current, probability, impact } : { ...current, residualProbability: String(probability), residualImpact: String(impact) }); }} />
-      {editorOpen && <RiskEditor draft={draft} risk={editingRisk} busy={locked} assessment={assessment} onAssessment={setAssessment} onChange={setDraft} onSubmit={saveRisk} onCancel={cancelEdit} onEditMitigation={id => { const mitigation = editingRisk?.mitigations.find(value => value.id === id); if (editingRisk && mitigation) { setActionRisk(editingRisk); setEditingAction(mitigation); setAction({ action: mitigation.action, dueDate: mitigation.dueDate ?? "" }); } }} onAddMitigation={() => { if (editingRisk) openAction(editingRisk); }} />}
+    <div className={`risk-workspace-body${editorOpen ? " editing" : ""}`}><RiskMatrix points={points} selectedId={selectedId} assessment={assessment} editable={editorOpen && editable && !locked} onSelect={id => { const risk = risks.find(value => value.id === id); if (risk) selectRisk(risk); }} onAssess={(phase, probability, impact) => { setAssessment(phase); if (phase === "before") setAiAssessmentRequired(false); setDraft(current => phase === "before" ? { ...current, probability, impact } : { ...current, residualProbability: String(probability), residualImpact: String(impact) }); }} />
+      {editorOpen && <div>{aiAssessmentRequired && <p className="status-message">{t("riskCalculationHelp")}</p>}<RiskEditor draft={draft} risk={editingRisk} busy={locked} saveDisabled={aiAssessmentRequired} assessment={assessment} onAssessment={setAssessment} onChange={value => { if (value.probability !== draft.probability || value.impact !== draft.impact) setAiAssessmentRequired(false); setDraft(value); }} onSubmit={saveRisk} onCancel={cancelEdit} onEditMitigation={id => { const mitigation = editingRisk?.mitigations.find(value => value.id === id); if (editingRisk && mitigation) { setActionRisk(editingRisk); setEditingAction(mitigation); setAction({ action: mitigation.action, dueDate: mitigation.dueDate ?? "" }); } }} onAddMitigation={() => { if (editingRisk) openAction(editingRisk); }} /></div>}
     </div>
   </div>
     {actionRisk && <Modal title={t("registerMitigation")} onClose={() => setActionRisk(null)}><form className="stacked-form" onSubmit={addAction}><strong>{actionRisk.current.title}</strong><div className="field"><label htmlFor="mitigation-action">{t("mitigationAction")}</label><textarea id="mitigation-action" required minLength={2} maxLength={4000} rows={3} value={action.action} onChange={event => setAction({ ...action, action: event.target.value })} /></div><div className="field"><label htmlFor="mitigation-due">{t("riskDueDate")}</label><input id="mitigation-due" type="date" value={action.dueDate} onChange={event => setAction({ ...action, dueDate: event.target.value })} /></div><p className="muted">{t(editingAction ? "riskEditVersionHelp" : "mitigationOwnerHelp")}</p><div className="modal-actions"><button className="secondary-button" type="button" onClick={() => setActionRisk(null)}>{t("cancel")}</button><button className="primary-button" disabled={locked}>{t("saveMitigation")}</button></div></form></Modal>}

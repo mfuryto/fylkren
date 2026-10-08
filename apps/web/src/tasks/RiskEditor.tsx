@@ -1,8 +1,8 @@
 import { useTranslation } from "../localization/LocalizationProvider";
 import type { Assessment, Risk, RiskDraft } from "./riskModels";
 
-export function RiskEditor({ draft, risk, busy, assessment, onAssessment, onChange, onSubmit, onCancel, onAddMitigation, onEditMitigation }: {
-  draft: RiskDraft; risk: Risk | null; busy: boolean; assessment: Assessment;
+export function RiskEditor({ draft, risk, busy, saveDisabled = false, assessment, onAssessment, onChange, onSubmit, onCancel, onAddMitigation, onEditMitigation }: {
+  draft: RiskDraft; risk: Risk | null; busy: boolean; saveDisabled?: boolean; assessment: Assessment;
   onAssessment: (value: Assessment) => void; onChange: (value: RiskDraft) => void;
   onSubmit: (event: React.FormEvent) => void; onCancel: () => void; onAddMitigation: () => void; onEditMitigation: (id: string) => void;
 }) {
@@ -24,6 +24,6 @@ export function RiskEditor({ draft, risk, busy, assessment, onAssessment, onChan
     </fieldset>
     <div className="field"><label htmlFor="risk-status">{t("riskStatus")}</label><select disabled={busy} id="risk-status" value={draft.status} onChange={event => onChange({ ...draft, status: event.target.value })}>{([ ["identified", "riskStatusIdentified"], ["active", "riskStatusActive"], ["mitigating", "riskStatusMitigating"], ["accepted", "riskStatusAccepted"], ["closed", "riskStatusClosed"] ] as const).map(([value, key]) => <option key={value} value={value}>{t(key)}</option>)}</select></div>
     <p className="muted">{t(risk ? "riskEditVersionHelp" : "riskOwnerHelp")}</p>
-    <div className="modal-actions"><button className="secondary-button" type="button" disabled={busy} onClick={onCancel}>{t("cancelEditing")}</button><button className="primary-button" disabled={busy || Boolean(draft.residualProbability) !== Boolean(draft.residualImpact)}>{t(risk ? "saveNewVersion" : "registerRisk")}</button></div>
+    <div className="modal-actions"><button className="secondary-button" type="button" disabled={busy} onClick={onCancel}>{t("cancelEditing")}</button><button className="primary-button" disabled={busy || saveDisabled || Boolean(draft.residualProbability) !== Boolean(draft.residualImpact)}>{t(risk ? "saveNewVersion" : "registerRisk")}</button></div>
   </form>;
 }

@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { Modal } from "../components/Modal";
 import type { DomainDecision, WorkItem } from "../work/WorkItemModels";
 import { getTaskDecisions } from "./taskApi";
+import { requestAiDrafts, type DecisionAiDraft } from "./aiDraftApi";
+import { errorMessage } from "../api/errors";
 
 const statusLabel = (status: string) => ({
   draft: translateActive("tasksTaskDomainDecisionDialogDraft"),
@@ -11,12 +13,13 @@ const statusLabel = (status: string) => ({
 } as Record<string, string>)[status] ?? status;
 type Draft = { title: string; decision: string; rationale: string; status: "draft" | "recorded" };
 
-export function TaskDomainDecisionDialog({ siteId, item, personId, editable, busy, language, timeZone, onClose, onRecord, onError }: {
+export function TaskDomainDecisionDialog({ siteId, item, personId, editable, busy, aiEnabled, language, timeZone, onClose, onRecord, onError }: {
   siteId: string;
   item: WorkItem;
   personId?: string;
   editable: boolean;
   busy: boolean;
+  aiEnabled: boolean;
   language: string;
   timeZone: string;
   onClose: () => void;
@@ -25,6 +28,8 @@ export function TaskDomainDecisionDialog({ siteId, item, personId, editable, bus
 }) {
   const [decisions, setDecisions] = useState<DomainDecision[]>([]);
   const [draft, setDraft] = useState<Draft>({ title: "", decision: "", rationale: "", status: "recorded" });
+  const [aiDrafts, setAiDrafts] = useState<DecisionAiDraft[]>([]);
+  const [aiBusy, setAiBusy] = useState(false);
   async function load() {
     try { setDecisions(await getTaskDecisions(siteId, item.id)); }
     catch (problem) { onError(problem instanceof Error ? problem.message : translateActive("tasksTaskDomainDecisionDialogDecisionsCouldNotBeLoaded")); }
@@ -34,8 +39,21 @@ export function TaskDomainDecisionDialog({ siteId, item, personId, editable, bus
     event.preventDefault();
     if (await onRecord(draft)) { setDraft({ title: "", decision: "", rationale: "", status: "recorded" }); await load(); }
   }
+  async function suggestDecisions() {
+    setAiBusy(true);
+    try { setAiDrafts((await requestAiDrafts<DecisionAiDraft>(siteId, item.id, "decisions", language)).drafts); }
+    catch (problem) { onError(errorMessage(problem, translateActive("aiAssistFailed"))); }
+    finally { setAiBusy(false); }
+  }
   return <Modal title={translateActive("tasksTaskCardPresentationDecisions")} onClose={onClose}>
     <p className="muted">{translateActive("tasksTaskDomainDecisionDialogFormalDecisionsLinkedTo")}{item.title}{translateActive("tasksTaskDomainDecisionDialogDecisionsAreHistoricalRecordsAndAre")}</p>
+    {aiEnabled && editable && <button className="secondary-button" type="button" disabled={busy || aiBusy} onClick={() => void suggestDecisions()}>✦ {aiBusy ? translateActive("aiWorking") : translateActive("aiDecisionDraft")}</button>}
+    {aiDrafts.length > 0 && <section className="site-detail-block"><h3>{translateActive("aiDecisionDraft")}</h3><div className="stacked-form">{aiDrafts.map((value, index) => <article className="panel" key={index}>
+      <div className="field"><label>{translateActive("approvalTitle")}</label><input maxLength={200} value={value.title} onChange={event => setAiDrafts(current => current.map((candidate, candidateIndex) => candidateIndex === index ? { ...candidate, title: event.target.value } : candidate))}/></div>
+      <div className="field"><label>{translateActive("approvalDecision")}</label><textarea maxLength={10000} value={value.decision} onChange={event => setAiDrafts(current => current.map((candidate, candidateIndex) => candidateIndex === index ? { ...candidate, decision: event.target.value } : candidate))}/></div>
+      <div className="field"><label>{translateActive("approvalRationale")}</label><textarea maxLength={10000} value={value.rationale} onChange={event => setAiDrafts(current => current.map((candidate, candidateIndex) => candidateIndex === index ? { ...candidate, rationale: event.target.value } : candidate))}/></div>
+      <button className="secondary-button" type="button" onClick={() => setDraft({ ...value, status: "draft" })}>{translateActive("aiUseDraft")}</button>
+    </article>)}</div></section>}
     {decisions.length === 0 ? <p className="empty-list-message">{translateActive("tasksTaskDomainDecisionDialogNoDecisionsAreRegistered")}</p> : <div className="domain-decision-list">{decisions.map(value => <details key={value.id} className="returned-report treatment-history-section">
       <summary><span>{value.current.title}</span><small>{statusLabel(value.current.status)} · {new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short", timeZone }).format(new Date(value.current.decidedAt))}</small></summary>
       <div className="domain-decision-content"><p><strong>{translateActive("approvalDecision")}</strong><br />{value.current.decision}</p><p><strong>{translateActive("approvalRationale")}</strong><br />{value.current.rationale}</p><p className="muted"><strong>{translateActive("tasksTaskDomainDecisionDialogDecisionMaker")}</strong> {value.current.decisionMakers.map(maker => maker.displayName).join(", ")}<br /><strong>{translateActive("tasksTaskDomainDecisionDialogStableID")}</strong> {value.id}</p>

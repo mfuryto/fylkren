@@ -63,7 +63,8 @@ export function TaskAiAssistant({ siteId, item, features, fixedFeature, contextI
     }
     catch (problem) { setMessage(errorMessage(problem, t("aiAssistFailed"))); } finally { setBusy(false); }
   }
-  return <Modal title={`${fixedFeature ? t(feature === "planning" ? "aiPlanningDraft" : "aiAssistant") : t("aiAssistant")}: ${item.title}`} onClose={onClose}><div className="stacked-form">
+  const fixedTitle = feature === "planning" ? "aiPlanningDraft" : feature === "learning" ? "aiLearningFunction" : "aiAssistant";
+  return <Modal title={`${fixedFeature ? t(fixedTitle) : t("aiAssistant")}: ${item.title}`} onClose={onClose}><div className="stacked-form">
     <p className="muted">{t("aiAssistantIntro")}</p>
     {!fixedFeature && <div className="field"><label htmlFor="ai-assistant-feature">{t("aiFunctions")}</label><select id="ai-assistant-feature" value={feature} onChange={event => setFeature(event.target.value as AiFeature)}>{features.includes("summary") && <option value="summary">{t("aiSummaryFunction")}</option>}{features.includes("planning") && <option value="planning">{t("aiPlanningDraft")}</option>}{features.includes("risks") && <option value="risks">{t("aiRiskDraft")}</option>}{features.includes("decisions") && <option value="decisions">{t("aiDecisionDraft")}</option>}{features.includes("learning") && <option value="learning">{t("aiLearningFunction")}</option>}{features.includes("questions") && <option value="questions">{t("aiQuestionsFunction")}</option>}</select></div>}
     {feature === "questions" && <div className="field"><label htmlFor="ai-assistant-question">{t("aiQuestion")}</label><textarea id="ai-assistant-question" rows={4} minLength={2} maxLength={1000} value={question} placeholder={t("aiQuestionPlaceholder")} onChange={event => setQuestion(event.target.value)}/></div>}

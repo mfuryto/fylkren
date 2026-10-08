@@ -17,8 +17,21 @@ internal static class AiAssistanceTests
         Require(AiEndpoints.Instruction("planning", null).Contains("authoritative template", StringComparison.Ordinal) &&
             AiEndpoints.Instruction("planning", null).Contains("current editor", StringComparison.Ordinal) &&
             AiEndpoints.Instruction("risks", null).Contains("five", StringComparison.Ordinal) &&
-            AiEndpoints.Instruction("decisions", null).Contains("three", StringComparison.Ordinal),
+            AiEndpoints.Instruction("risks", null).Contains("valid JSON", StringComparison.Ordinal) &&
+            AiEndpoints.Instruction("decisions", null).Contains("three", StringComparison.Ordinal) &&
+            AiEndpoints.Instruction("decisions", null).Contains("valid JSON", StringComparison.Ordinal),
             "The contextual planning template or bounded draft instructions were lost.");
+        var riskDrafts = System.Text.Json.JsonSerializer.Serialize(AiEndpoints.ParseDrafts("risks", "{\"risks\":[{\"title\":\"Loss of link\",\"cause\":\"Primary link fails\",\"consequence\":\"Coordination stops\",\"mitigation\":\"Prepare radio backup\",\"dueDate\":\"2026-11-15\"}]}"));
+        Require(riskDrafts.Contains("Loss of link", StringComparison.Ordinal) && !riskDrafts.Contains("probability", StringComparison.OrdinalIgnoreCase),
+            "Structured risk drafts lost their bounded fields or introduced AI scoring.");
+        var decisionDrafts = System.Text.Json.JsonSerializer.Serialize(AiEndpoints.ParseDrafts("decisions", "```json\n{\"decisions\":[{\"title\":\"Reserve channel\",\"decision\":\"Select channel B\",\"rationale\":\"Channel A lacks coverage\"}]}\n```"));
+        Require(decisionDrafts.Contains("Reserve channel", StringComparison.Ordinal), "Structured decision drafts were not parsed.");
+        try
+        {
+            _ = AiEndpoints.ParseDrafts("risks", "{\"risks\":[{\"title\":\"Unsafe\",\"cause\":\"x\",\"consequence\":\"y\",\"mitigation\":\"z\",\"dueDate\":null,\"probability\":5}]}");
+            throw new Exception("An AI-supplied risk score was accepted.");
+        }
+        catch (System.Text.Json.JsonException) { }
         var handler = new RecordingHandler();
         var protection = new EphemeralDataProtectionProvider();
         var providerLogger = new RecordingLogger<AiProviderClient>();

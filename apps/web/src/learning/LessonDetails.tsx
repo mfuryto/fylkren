@@ -6,7 +6,7 @@ import { errorMessage } from "../api/errors";
 import { commentLearning, getLearningEntries, reviewLearning, type EntryPage, type Lesson, type LessonPriority, type LessonReview, type LessonStatus } from "./learningApi";
 import { lessonPriorityKeys, lessonStatusKeys, validLessonReview } from "./learningModels";
 
-export function LessonDetails({ lesson, language, timeZone, onClose, onReviewed }: { lesson: Lesson; language: string; timeZone: string; onClose: () => void; onReviewed: () => void }) {
+export function LessonDetails({ lesson, language, timeZone, aiEnabled = false, onAi, onClose, onReviewed }: { lesson: Lesson; language: string; timeZone: string; aiEnabled?: boolean; onAi?: () => void; onClose: () => void; onReviewed: () => void }) {
   const t = useTranslation();
   const [entries, setEntries] = useState<EntryPage | null>(null);
   const [entryPage, setEntryPage] = useState(1);
@@ -42,7 +42,7 @@ export function LessonDetails({ lesson, language, timeZone, onClose, onReviewed 
   }
   return <Modal title={`${t("navLearning")} · ${lesson.workReference} · ${lesson.number}`} onClose={onClose} dismissible={!busy}>
     <div className="learning-detail">
-      <strong>{lesson.workTitle}</strong><p className="learning-text">{lesson.text}</p>
+      <div className="section-heading"><strong>{lesson.workTitle}</strong>{aiEnabled && onAi && <button className="secondary-button" type="button" onClick={onAi}>✦ {t("aiLearningFunction")}</button>}</div><p className="learning-text">{lesson.text}</p>
       <small className="muted">{lesson.authorName} · {date(lesson.createdAt)}</small>
       {lesson.ownerName && <p className="muted">{t("learningHandledBy")}: {lesson.ownerName}</p>}
       {error && <p className="status-message error-message" role="alert">{error}</p>}
