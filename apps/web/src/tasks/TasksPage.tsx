@@ -273,6 +273,9 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
   async function recordDomainDecision(item: WorkItem, draft: DomainDecisionDraft) {
     return executeTaskCommand({ path: `/api/decisions/sites/${selectedSiteId}/tasks/${item.id}`, method: "POST", body: { ...draft, decidedAt: new Date().toISOString(), decisionMakerIds: personId ? [personId] : [], references: [] }, fallback: translateActive("tasksTasksPageTheDecisionCouldNotBeRegistered"), refresh: () => loadItems(selectedSiteId) });
   }
+  async function reviseDomainDecision(decisionId: string, expectedRevision: number, draft: DomainDecisionDraft) {
+    return executeTaskCommand({ path: `/api/decisions/${decisionId}`, method: "PUT", body: { ...draft, expectedRevision, decidedAt: new Date().toISOString(), decisionMakerIds: personId ? [personId] : [], references: [] }, fallback: translateActive("tasksTasksPageTheDecisionCouldNotBeRegistered"), refresh: () => loadItems(selectedSiteId) });
+  }
   async function openFinalReport(item: WorkItem) {
     const savedReport = item.finalReport?.trim() ? item.finalReport : null;
     setReportEditor({ item, content: savedReport ?? "", classification: item.finalReportClassification ?? "", executionHistory: null, historyLoading: true, lessons: [], savedLessons: [], lessonsLoading: true, lessonsError: "" });
@@ -476,7 +479,7 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
         onAdd={predecessorWorkItemId => addDependency(dependencyItem, predecessorWorkItemId)}
         onRemove={dependencyId => removeDependency(dependencyItem, dependencyId)}
         onError={setError} />}
-      {domainDecisionItem && <TaskDomainDecisionDialog siteId={selectedSiteId} item={domainDecisionItem} personId={personId} editable={canManageItem(domainDecisionItem)} busy={busy} aiEnabled={aiCapabilities.draftsEnabled} language={displayLanguage} timeZone={displayTimeZone} onClose={() => setDomainDecisionItem(null)} onRecord={draft => recordDomainDecision(domainDecisionItem, draft)} onError={setError} />}
+      {domainDecisionItem && <TaskDomainDecisionDialog siteId={selectedSiteId} item={domainDecisionItem} personId={personId} editable={canManageItem(domainDecisionItem)} busy={busy} aiEnabled={aiCapabilities.draftsEnabled} language={displayLanguage} timeZone={displayTimeZone} onClose={() => setDomainDecisionItem(null)} onRecord={draft => recordDomainDecision(domainDecisionItem, draft)} onRevise={(decisionId, expectedRevision, draft) => reviseDomainDecision(decisionId, expectedRevision, draft)} onError={setError} />}
       {riskItem && <TaskRiskDialog siteId={selectedSiteId} item={riskItem} personId={personId} editable={canManageItem(riskItem)} busy={busy} aiEnabled={aiCapabilities.draftsEnabled} language={displayLanguage} onClose={() => setRiskItem(null)} onError={setError} />}
       {versionItem && <TaskVersionDialog siteId={selectedSiteId} item={versionItem} language={displayLanguage} timeZone={displayTimeZone} onClose={() => setVersionItem(null)} onError={setError} />}
       {aiItem && <TaskAiAssistant siteId={selectedSiteId} item={aiItem} language={displayLanguage} timeZone={displayTimeZone} features={([aiCapabilities.summaryEnabled && "summary", aiCapabilities.questionsEnabled && "questions"].filter(Boolean) as Array<"summary" | "questions">)} onClose={() => setAiItem(null)} />}

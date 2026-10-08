@@ -107,7 +107,7 @@ Leaders can open **Dependencies** on a task, search for another task in the same
 
 ### Decisions
 
-Choose **Decisions** on a task to read its decision record. An authorized leader can register a title, the decision itself, its rationale and whether it is a draft or recorded decision. The signed-in user is recorded as decision maker in the simple task interface; the API supports several decision makers and references to tasks, assignments, plans and executions.
+Choose **Decisions** on a task to read its decision record. An authorized leader starts with **New decision draft** or an AI suggestion, edits it in the same form, and then chooses **Save draft** or **Record decision**. A saved draft can be edited, recorded or deleted from active handling. A recorded decision can be changed through a new version or withdrawn. Deleted drafts, withdrawn decisions and earlier versions remain in collapsed history so later changes do not erase the decision trail. The signed-in user is recorded as decision maker in the simple task interface; the API supports several decision makers and references to tasks, assignments, plans and executions.
 
 Every decision receives a stable ID. Later corrections are stored as new numbered revisions, while all previous wording, rationale, makers, timestamps and references remain available. **Revision** also records creation and revision events, but that technical evidence does not replace the decision record. Recorded decisions create immutable formal versions; more complex approval policies remain future work.
 
