@@ -29,6 +29,8 @@ type Props = {
   onSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
   onReload: () => Promise<void>;
   onError: (message: string) => void;
+  aiEnabled: boolean;
+  onAi: () => void;
 };
 
 export function PlanningStepEditor({
@@ -52,6 +54,8 @@ export function PlanningStepEditor({
   onSubmit,
   onReload,
   onError,
+  aiEnabled,
+  onAi,
 }: Props) {
   const step = run.steps[run.currentStep];
   const timelineKey = `${run.id}-${step.id}`;
@@ -78,7 +82,7 @@ export function PlanningStepEditor({
         ))}
       </nav>
       <section className="workflow-step-editor">
-        <h3>{step.name}</h3>
+        <div className="section-heading"><h3>{step.name}</h3>{aiEnabled && <button className="secondary-button" type="button" onClick={onAi}>✦ {translateActive("aiPlanningDraft")}</button>}</div>
         {step.isOptional && <span className="muted">{translateActive("workflowsPlanningStepEditorOptionalStep")}</span>}
         <PlanningRfiLog runId={run.id} entries={run.rfi ?? []} onReload={onReload} onError={onError} />
         {step.hasTimeline && run.timelineStartedOn && (

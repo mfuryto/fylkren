@@ -14,10 +14,11 @@ internal static class AiAssistanceTests
             "A supported display locale with Unicode formatting extensions was rejected.");
         Require(AiEndpoints.NormalizeFeature("drafts") == "planning" && AiEndpoints.NormalizeFeature("risks") == "risks" && AiEndpoints.NormalizeFeature("decisions") == "decisions",
             "The broad draft function was not split into bounded compatible functions.");
-        Require(AiEndpoints.Instruction("planning", null).Contains("six", StringComparison.Ordinal) &&
+        Require(AiEndpoints.Instruction("planning", null).Contains("authoritative template", StringComparison.Ordinal) &&
+            AiEndpoints.Instruction("planning", null).Contains("current editor", StringComparison.Ordinal) &&
             AiEndpoints.Instruction("risks", null).Contains("five", StringComparison.Ordinal) &&
             AiEndpoints.Instruction("decisions", null).Contains("three", StringComparison.Ordinal),
-            "The bounded draft instructions lost their item limits.");
+            "The contextual planning template or bounded draft instructions were lost.");
         var handler = new RecordingHandler();
         var protection = new EphemeralDataProtectionProvider();
         var providerLogger = new RecordingLogger<AiProviderClient>();

@@ -7,13 +7,24 @@ import { normalizeLanguage } from "../localization";
 import { useTranslation } from "../localization/LocalizationProvider";
 import type { WorkItem } from "../work/WorkItemModels";
 
-type Feature = "summary" | "planning" | "risks" | "decisions" | "learning" | "questions";
+export type AiFeature = "summary" | "planning" | "risks" | "decisions" | "learning" | "questions";
 type Result = { content: string; generatedAt: string; sourceUpdatedAt: string };
 type StreamEvent = { type: "start"; sourceUpdatedAt: string; correlationId?: string } | { type: "heartbeat" } | { type: "delta"; content: string } | { type: "done"; generatedAt: string } | { type: "error"; code: string; providerStatus?: number; correlationId?: string };
 
-export function TaskAiAssistant({ siteId, item, features, onClose, language, timeZone }: { siteId: string; item: WorkItem; features: Feature[]; onClose: () => void; language: string; timeZone: string }) {
+export function TaskAiAssistant({ siteId, item, features, fixedFeature, contextId, targetId, onUseDraft, onClose, language, timeZone }: {
+  siteId: string;
+  item: Pick<WorkItem, "id" | "title">;
+  features: AiFeature[];
+  fixedFeature?: AiFeature;
+  contextId?: string;
+  targetId?: string;
+  onUseDraft?: (content: string) => void;
+  onClose: () => void;
+  language: string;
+  timeZone: string;
+}) {
   const t = useTranslation();
-  const [feature, setFeature] = useState<Feature>(features[0] ?? "summary"), [question, setQuestion] = useState("");
+  const [feature, setFeature] = useState<AiFeature>(fixedFeature ?? features[0] ?? "summary"), [question, setQuestion] = useState("");
   const [result, setResult] = useState<Result | null>(null), [busy, setBusy] = useState(false), [message, setMessage] = useState("");
   const [elapsed, setElapsed] = useState(0);
   useEffect(() => {
@@ -30,7 +41,7 @@ export function TaskAiAssistant({ siteId, item, features, onClose, language, tim
       const response = await apiRequest(`/api/ai/sites/${siteId}/work-items/${item.id}/assist`, t("aiAssistFailed"), {
         method: "POST",
         headers: { "X-Fylkren-CSRF": token, "Content-Type": "application/json", Accept: "application/x-ndjson" },
-        body: JSON.stringify({ feature, question: feature === "questions" ? question : null, language: normalizeLanguage(language), stream: true }),
+        body: JSON.stringify({ feature, question: feature === "questions" ? question : null, language: normalizeLanguage(language), stream: true, contextId, targetId }),
       });
       correlationId = response.headers.get("X-Fylkren-Correlation-ID") ?? "";
       if (!response.body) throw new Error(t("aiAssistFailed"));
@@ -52,13 +63,13 @@ export function TaskAiAssistant({ siteId, item, features, onClose, language, tim
     }
     catch (problem) { setMessage(errorMessage(problem, t("aiAssistFailed"))); } finally { setBusy(false); }
   }
-  return <Modal title={`${t("aiAssistant")}: ${item.title}`} onClose={onClose}><div className="stacked-form">
+  return <Modal title={`${fixedFeature ? t(feature === "planning" ? "aiPlanningDraft" : "aiAssistant") : t("aiAssistant")}: ${item.title}`} onClose={onClose}><div className="stacked-form">
     <p className="muted">{t("aiAssistantIntro")}</p>
-    <div className="field"><label htmlFor="ai-assistant-feature">{t("aiFunctions")}</label><select id="ai-assistant-feature" value={feature} onChange={event => setFeature(event.target.value as Feature)}>{features.includes("summary") && <option value="summary">{t("aiSummaryFunction")}</option>}{features.includes("planning") && <option value="planning">{t("aiPlanningDraft")}</option>}{features.includes("risks") && <option value="risks">{t("aiRiskDraft")}</option>}{features.includes("decisions") && <option value="decisions">{t("aiDecisionDraft")}</option>}{features.includes("learning") && <option value="learning">{t("aiLearningFunction")}</option>}{features.includes("questions") && <option value="questions">{t("aiQuestionsFunction")}</option>}</select></div>
+    {!fixedFeature && <div className="field"><label htmlFor="ai-assistant-feature">{t("aiFunctions")}</label><select id="ai-assistant-feature" value={feature} onChange={event => setFeature(event.target.value as AiFeature)}>{features.includes("summary") && <option value="summary">{t("aiSummaryFunction")}</option>}{features.includes("planning") && <option value="planning">{t("aiPlanningDraft")}</option>}{features.includes("risks") && <option value="risks">{t("aiRiskDraft")}</option>}{features.includes("decisions") && <option value="decisions">{t("aiDecisionDraft")}</option>}{features.includes("learning") && <option value="learning">{t("aiLearningFunction")}</option>}{features.includes("questions") && <option value="questions">{t("aiQuestionsFunction")}</option>}</select></div>}
     {feature === "questions" && <div className="field"><label htmlFor="ai-assistant-question">{t("aiQuestion")}</label><textarea id="ai-assistant-question" rows={4} minLength={2} maxLength={1000} value={question} placeholder={t("aiQuestionPlaceholder")} onChange={event => setQuestion(event.target.value)}/></div>}
     <button className="primary-button" type="button" disabled={busy || feature === "questions" && question.trim().length < 2} onClick={() => void run()}>{busy ? t("aiWorking") : t("aiRun")}</button>
     {busy && <p className="status-message" role="status">{t(result?.content ? "aiReceiving" : "aiWaiting", { seconds: elapsed })}</p>}
     {message && <p className="status-message error-message" role="alert">{message}</p>}
-    <section className="site-detail-block" aria-live="polite"><h3>{t("aiResult")}</h3>{result ? <><div className="ai-result"><RichTextContent value={result.content} /></div><p className="muted">{t("aiGeneratedFromVersion", { date: new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short", timeZone }).format(new Date(result.sourceUpdatedAt)) })}</p></> : <p className="muted">{t("aiNoResult")}</p>}</section>
+    <section className="site-detail-block" aria-live="polite"><h3>{t("aiResult")}</h3>{result ? <><div className="ai-result"><RichTextContent value={result.content} /></div><p className="muted">{t("aiGeneratedFromVersion", { date: new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short", timeZone }).format(new Date(result.sourceUpdatedAt)) })}</p>{onUseDraft && result.generatedAt && result.content.trim() && <button className="primary-button" type="button" onClick={() => onUseDraft(result.content)}>{t("aiUseDraft")}</button>}</> : <p className="muted">{t("aiNoResult")}</p>}</section>
   </div></Modal>;
 }

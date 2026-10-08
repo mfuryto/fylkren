@@ -19,6 +19,8 @@ import { useSerializedWorkflowSave } from "./useWorkflowAutosave";
 import { copyPermalink, navigateToLocation, type AppLocation } from "../navigation/permalinks";
 import { getTaskContext } from "../tasks/taskApi";
 import type { ListSort } from "../components/ListSortControl";
+import { TaskAiAssistant } from "../tasks/TaskAiAssistant";
+import { useAiCapabilities } from "../tasks/useAiCapabilities";
 
 export function PlanningPage({
   session,
@@ -26,12 +28,14 @@ export function PlanningPage({
   timeZone,
   classificationMarkings,
   permalink,
+  aiAvailable = false,
 }: {
   session: Session;
   language: string;
   timeZone: string;
   classificationMarkings: ClassificationMarking[];
   permalink: AppLocation;
+  aiAvailable?: boolean;
 }) {
   const [helpOpen, setHelpOpen] = useState(false);
   const [sites, setSites] = useState<TaskSite[]>([]);
@@ -54,6 +58,8 @@ export function PlanningPage({
   const [downwardAllocation, setDownwardAllocation] = useState<DownwardAllocationDraft | null>(null);
   const [error, setError] = useState("");
   const [linkMessage, setLinkMessage] = useState("");
+  const [aiDraft, setAiDraft] = useState<{ run: PlanningRun; stepId: string } | null>(null);
+  const aiCapabilities = useAiCapabilities(aiAvailable, siteId);
   useEffect(() => {
     getTaskContext(session.personId)
       .then((d: { sites: TaskSite[]; units: TaskUnit[] }) => {
@@ -251,6 +257,8 @@ export function PlanningPage({
                   onRemoveRequest={(requestId) => removePlannedRequest(run.id, requestId)}
                   onReload={load}
                   onError={setError}
+                  aiEnabled={aiCapabilities.draftsEnabled}
+                  onAi={() => setAiDraft({ run, stepId: run.steps[run.currentStep].id })}
                   onSubmit={async (event) => {
                     event.preventDefault();
                     try {
@@ -305,6 +313,21 @@ export function PlanningPage({
           }}
         />
       )}
+      {aiDraft && <TaskAiAssistant
+        siteId={siteId}
+        item={aiDraft.run.item}
+        features={["planning"]}
+        fixedFeature="planning"
+        contextId={aiDraft.run.id}
+        targetId={aiDraft.stepId}
+        language={language}
+        timeZone={timeZone}
+        onUseDraft={content => {
+          setStepDrafts(current => ({ ...current, [aiDraft.stepId]: content }));
+          setAiDraft(null);
+        }}
+        onClose={() => setAiDraft(null)}
+      />}
     </div>
   );
 }
