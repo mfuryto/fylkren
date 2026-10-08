@@ -3,6 +3,7 @@ using Fylkren.Api.Federation;
 using Fylkren.Api.Identity;
 using Fylkren.Api.Persistence;
 using Fylkren.Api.Platform;
+using Fylkren.Api.ArtificialIntelligence;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,6 +30,10 @@ internal static class CryptoReprotectionTests
         var webhook = new WebhookSubscription(Guid.NewGuid(), Guid.NewGuid(), "Synthetic webhook",
             "https://example.invalid/hook", Protect("synthetic-webhook", ProtectedValuePurposes.WebhookSecret),
             "task.created", actor.Id, now);
+        var ai = await db.AiSettings.SingleOrDefaultAsync(value => value.Id == DatabaseDefaults.AiSettingsId) ?? new AiSettings(DatabaseDefaults.AiSettingsId);
+        if (db.Entry(ai).State == EntityState.Detached) db.AiSettings.Add(ai);
+        ai.Update(true, "https://ai.example.invalid/v1/chat/completions", "synthetic-model",
+            Protect("synthetic-ai-key", ProtectedValuePurposes.AiProviderApiKey), true, true, true, true);
         var federation = new FederationSigningIdentity("synthetic-public-key",
             Protect("synthetic-active-private-key", ProtectedValuePurposes.FederationSigningKey), now);
         federation.StageRotation(Guid.NewGuid(), "synthetic-pending-public-key",
@@ -39,12 +44,12 @@ internal static class CryptoReprotectionTests
         await db.SaveChangesAsync();
 
         var before = new[] { identity.TotpSecret!, smtp.ProtectedPassword!, provider.ProtectedConfiguration,
-            webhook.ProtectedSecret, federation.ProtectedPrivateKey, federation.PendingProtectedPrivateKey! };
+            webhook.ProtectedSecret, ai.ProtectedApiKey!, federation.ProtectedPrivateKey, federation.PendingProtectedPrivateKey! };
         var service = new CryptoReprotectionService(protection);
         var operation = await service.Create(actor.Id, "backup-2026-10-06T20:30Z",
             "Restore the matching database and Data Protection key-ring snapshot.", db, default)
             ?? throw new Exception("Protected-value operation was not created.");
-        Require(operation.TotalItems == 6 && operation.Status == "pending",
+        Require(operation.TotalItems == 7 && operation.Status == "pending",
             "Protected-value inventory did not include every configured slot.");
         var firstBatch = await service.Continue(operation.Id, actor.Id, 2, db, default);
         Require(firstBatch?.CompletedItems == 2 && firstBatch.Status == "pending",
@@ -53,21 +58,23 @@ internal static class CryptoReprotectionTests
             "A second operation started while protected-value migration was incomplete.");
         while (operation.Status != "completed")
             operation = (await service.Continue(operation.Id, actor.Id, 2, db, default))!;
-        Require(operation.CompletedItems == 6, "Re-protection operation did not complete its inventory.");
+        Require(operation.CompletedItems == 7, "Re-protection operation did not complete its inventory.");
 
         db.ChangeTracker.Clear();
         identity = await db.LoginIdentities.SingleAsync(value => value.Id == identity.Id);
         smtp = await db.SmtpSettings.SingleAsync(value => value.Id == smtp.Id);
         provider = await db.IdentityProviderSettings.SingleAsync(value => value.Provider == provider.Provider);
         webhook = await db.WebhookSubscriptions.SingleAsync(value => value.Id == webhook.Id);
+        ai = await db.AiSettings.SingleAsync(value => value.Id == DatabaseDefaults.AiSettingsId);
         federation = await db.FederationSigningIdentities.SingleAsync(value => value.Key == 1);
         var after = new[] { identity.TotpSecret!, smtp.ProtectedPassword!, provider.ProtectedConfiguration,
-            webhook.ProtectedSecret, federation.ProtectedPrivateKey, federation.PendingProtectedPrivateKey! };
+            webhook.ProtectedSecret, ai.ProtectedApiKey!, federation.ProtectedPrivateKey, federation.PendingProtectedPrivateKey! };
         Require(before.Zip(after).All(pair => pair.First != pair.Second),
             "At least one inventoried ciphertext was not replaced.");
         Require(Open(identity.TotpSecret!, ProtectedValuePurposes.TotpSecret) == "synthetic-totp" &&
             Open(smtp.ProtectedPassword!, ProtectedValuePurposes.SmtpPassword) == "synthetic-smtp" &&
             Open(webhook.ProtectedSecret, ProtectedValuePurposes.WebhookSecret) == "synthetic-webhook" &&
+            Open(ai.ProtectedApiKey!, ProtectedValuePurposes.AiProviderApiKey) == "synthetic-ai-key" &&
             Open(federation.ProtectedPrivateKey, ProtectedValuePurposes.FederationSigningKey) == "synthetic-active-private-key" &&
             Open(federation.PendingProtectedPrivateKey!, ProtectedValuePurposes.FederationSigningKey) == "synthetic-pending-private-key",
             "Re-protection changed protected plaintext.");

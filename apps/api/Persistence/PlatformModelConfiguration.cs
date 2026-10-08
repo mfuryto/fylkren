@@ -6,6 +6,7 @@ using Fylkren.Api.Platform;
 using Fylkren.Api.WorkManagement;
 using Fylkren.Api.Federation;
 using Fylkren.Api.Licensing;
+using Fylkren.Api.ArtificialIntelligence;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fylkren.Api.Persistence;
@@ -224,6 +225,26 @@ internal static class PlatformModelConfiguration
         regional.Property(value => value.TimeZone).HasColumnName("time_zone").HasMaxLength(100).IsRequired();
         regional.Property(value => value.ClockFormat).HasColumnName("clock_format").HasMaxLength(16).IsRequired();
         regional.Property(value => value.MeasurementSystem).HasColumnName("measurement_system").HasMaxLength(16).IsRequired();
+
+        var ai = modelBuilder.Entity<AiSettings>();
+        ai.ToTable("ai_settings"); ai.HasKey(value => value.Id);
+        ai.Property(value => value.Id).HasColumnName("id");
+        ai.Property(value => value.Enabled).HasColumnName("enabled");
+        ai.Property(value => value.EndpointUrl).HasColumnName("endpoint_url").HasMaxLength(2000).IsRequired();
+        ai.Property(value => value.Model).HasColumnName("model").HasMaxLength(200).IsRequired();
+        ai.Property(value => value.ProtectedApiKey).HasColumnName("protected_api_key").HasMaxLength(8000);
+        ai.Property(value => value.SummaryEnabled).HasColumnName("summary_enabled");
+        ai.Property(value => value.DraftsEnabled).HasColumnName("drafts_enabled");
+        ai.Property(value => value.LearningEnabled).HasColumnName("learning_enabled");
+        ai.Property(value => value.QuestionsEnabled).HasColumnName("questions_enabled");
+        ai.Property(value => value.LastTestedAt).HasColumnName("last_tested_at");
+        ai.Property(value => value.LastTestSucceeded).HasColumnName("last_test_succeeded");
+        ai.Property(value => value.LastTestError).HasColumnName("last_test_error").HasMaxLength(300);
+        var aiSite = modelBuilder.Entity<AiSiteAccess>();
+        aiSite.ToTable("ai_site_access"); aiSite.HasKey(value => value.SiteId);
+        aiSite.Property(value => value.SiteId).HasColumnName("site_id").ValueGeneratedNever();
+        aiSite.Property(value => value.CreatedAt).HasColumnName("created_at");
+        aiSite.HasOne<Site>().WithMany().HasForeignKey(value => value.SiteId).OnDelete(DeleteBehavior.Cascade);
 
         var smtp = modelBuilder.Entity<SmtpSettings>();
         smtp.ToTable("smtp_settings"); smtp.HasKey(value => value.Id);

@@ -4,6 +4,7 @@ import type { MessageKey } from "../en-US";
 import type { ReferenceMessageKey } from "../supplements/references";
 import type { SortingMessageKey } from "../supplements/sorting";
 import type { IntakeMessageKey } from "../supplements/intake";
+import type { AiMessageKey } from "../supplements/ai";
 import { federationItIT } from "./sections/federation";
 import { identityItIT } from "./sections/identity";
 import { notificationsItIT } from "./sections/notifications";
@@ -21,7 +22,7 @@ import { workItIT } from "./sections/work";
 import { workTemplatesItIT } from "./sections/workTemplates";
 import { workflowsItIT } from "./sections/workflows";
 
-export const itIT: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
+export const itIT: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMessageKey | SortingMessageKey | IntakeMessageKey | AiMessageKey>, string> = {
   ...learning,
   ...federationItIT,
   ...identityItIT,

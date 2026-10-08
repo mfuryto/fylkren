@@ -1,7 +1,7 @@
 export const appPages = [
   "Overview", "Tasks", "Workload", "Learning", "Planning", "Execution", "Reports", "Profile",
   "Platform", "Sites", "Identity", "References", "Classifications", "API", "Federation", "License",
-  "Email", "Appearance", "Organization", "Personnel", "Sources", "Workflows", "Templates",
+  "Email", "Appearance", "AI", "Organization", "Personnel", "Sources", "Workflows", "Templates",
   "Notifications", "Audit", "Archives",
 ] as const;
 
@@ -11,7 +11,7 @@ const pagePaths: Record<AppPage, string> = {
   Overview: "overview", Tasks: "tasks", Workload: "workload", Learning: "learning", Planning: "planning",
   Execution: "execution", Reports: "reports", Profile: "profile", Platform: "platform",
   Sites: "sites", Identity: "identity", References: "references", Classifications: "classifications", API: "api",
-  Federation: "federation", License: "license", Email: "email", Appearance: "appearance",
+  Federation: "federation", License: "license", Email: "email", Appearance: "appearance", AI: "ai",
   Organization: "organization", Personnel: "personnel", Sources: "sources", Workflows: "workflows",
   Archives: "archives", Templates: "templates", Notifications: "notifications", Audit: "audit",
 };

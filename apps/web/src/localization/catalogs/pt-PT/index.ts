@@ -4,6 +4,7 @@ import type { MessageKey } from "../en-US";
 import type { ReferenceMessageKey } from "../supplements/references";
 import type { SortingMessageKey } from "../supplements/sorting";
 import type { IntakeMessageKey } from "../supplements/intake";
+import type { AiMessageKey } from "../supplements/ai";
 import { federationPtPT } from "./sections/federation";
 import { identityPtPT } from "./sections/identity";
 import { notificationsPtPT } from "./sections/notifications";
@@ -21,7 +22,7 @@ import { workPtPT } from "./sections/work";
 import { workTemplatesPtPT } from "./sections/workTemplates";
 import { workflowsPtPT } from "./sections/workflows";
 
-export const ptPT: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
+export const ptPT: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMessageKey | SortingMessageKey | IntakeMessageKey | AiMessageKey>, string> = {
   ...learning,
   ...federationPtPT,
   ...identityPtPT,

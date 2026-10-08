@@ -19,6 +19,7 @@ import { workflowsEn } from "./sections/workflows";
 import { referencesEn } from "../supplements/references";
 import { sortingEn } from "../supplements/sorting";
 import { intakeEn } from "../supplements/intake";
+import { aiEn } from "../supplements/ai";
 
 export const en = {
   ...activityEn,
@@ -26,6 +27,7 @@ export const en = {
   ...referencesEn,
   ...sortingEn,
   ...intakeEn,
+  ...aiEn,
   ...workflowsEn,
   ...tasksEn,
   ...workEn,

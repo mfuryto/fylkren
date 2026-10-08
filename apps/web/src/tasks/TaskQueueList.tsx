@@ -13,7 +13,7 @@ import type { TaskUnitWithDepth } from "./taskScope";
 
 type DecisionStatus = "assigned" | "on_hold" | "rejected" | "cancelled";
 
-export function TaskQueueList({ items, visibleItems, totalItems, page, openItemId, language, timeZone, busy, history, planDetails, canManage, childUnits, nextActions, canDelegate, canSendRequest, pendingChildren, canReassign, childActionCount, canCancel, onToggle, onCopyLink, onShowContext, onShowPlan, onDependencies, onDecisions, onRisks, onVersions, onLoadHistory, onOpenReport, onApproveReport, onPlanDecision, onApprovePlan, onDecision, onStatus, onReview, onDelegate, onSendRequest, onReleasePlan, onReassign, onCancel, onPageChange, reportDate }: {
+export function TaskQueueList({ items, visibleItems, totalItems, page, openItemId, language, timeZone, busy, aiEnabled, history, planDetails, canManage, childUnits, nextActions, canDelegate, canSendRequest, pendingChildren, canReassign, childActionCount, canCancel, onToggle, onCopyLink, onAi, onShowContext, onShowPlan, onDependencies, onDecisions, onRisks, onVersions, onLoadHistory, onOpenReport, onApproveReport, onPlanDecision, onApprovePlan, onDecision, onStatus, onReview, onDelegate, onSendRequest, onReleasePlan, onReassign, onCancel, onPageChange, reportDate }: {
   items: WorkItem[];
   visibleItems: WorkItem[];
   totalItems: number;
@@ -22,6 +22,7 @@ export function TaskQueueList({ items, visibleItems, totalItems, page, openItemI
   language: string;
   timeZone: string;
   busy: boolean;
+  aiEnabled: boolean;
   history: Record<string, ChildHistory>;
   planDetails: Record<string, WorkItemDetails | null>;
   canManage: (item: WorkItem) => boolean;
@@ -35,6 +36,7 @@ export function TaskQueueList({ items, visibleItems, totalItems, page, openItemI
   canCancel: (item: WorkItem) => boolean;
   onToggle: (itemId: string) => void;
   onCopyLink: (itemId: string) => void;
+  onAi: (item: WorkItem) => void;
   onShowContext: (item: WorkItem) => void;
   onShowPlan: (item: WorkItem) => void;
   onDependencies: (item: WorkItem) => void;
@@ -64,7 +66,7 @@ export function TaskQueueList({ items, visibleItems, totalItems, page, openItemI
       return <article className={taskCardClassName(item, openItemId === item.id)} key={item.id}>
         <TaskCardHeader item={item} open={openItemId === item.id} language={language} timeZone={timeZone} onToggle={() => onToggle(item.id)} onCopyLink={() => onCopyLink(item.id)} />
         <div id={`task-content-${item.id}`} className="task-card-content" hidden={openItemId !== item.id}>
-          <TaskBasis siteId={item.siteId} timeZone={timeZone} item={item} canManage={canManage(item)} onShowContext={() => onShowContext(item)} onShowPlan={() => onShowPlan(item)} onDependencies={() => onDependencies(item)} onDecisions={() => onDecisions(item)} onRisks={() => onRisks(item)} onVersions={() => onVersions(item)} />
+          <TaskBasis siteId={item.siteId} timeZone={timeZone} item={item} canManage={canManage(item)} aiEnabled={aiEnabled} onAi={() => onAi(item)} onShowContext={() => onShowContext(item)} onShowPlan={() => onShowPlan(item)} onDependencies={() => onDependencies(item)} onDecisions={() => onDecisions(item)} onRisks={() => onRisks(item)} onVersions={() => onVersions(item)} />
           {workflowProgress(item) && <p className="delegation-progress">{workflowProgress(item)}</p>}
           {item.decisionNote && <p className="task-decision-note"><strong>{item.status === "cancelled" ? translateActive("cancellationBasis") : item.status === "reassigned" ? translateActive("tasksTaskDelegationTreeReassigning") : translateActive("latestDecisionBasis")}</strong> {item.decisionNote}</p>}
           {item.finalReport && item.status !== "in_review" && <details className="returned-report treatment-history-section"><summary><span>{translateActive("tasksTaskQueueListFinalReportFromThisLevel")}</span><small>{translateActive("tasksTaskQueueListShowTheFinalReport")}</small></summary><div className="returned-report-content"><RichTextContent value={item.finalReport} /></div></details>}

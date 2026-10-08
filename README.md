@@ -87,7 +87,7 @@ internal processing.
 | **Continuous learning** | Internal numbered observations linked to assignments, priorities, discussion, action plans, deadlines, accountable treatment and searchable outcomes |
 | **Identity** | Local accounts, password policy, recovery, TOTP MFA, WebAuthn/passkeys, GUI-managed Enterprise AD/LDAP/OIDC/SAML, exact provider-bound links and automatic directory deprovisioning |
 | **Administration** | Platform and site administration, customer-defined classifications, appearance, notifications, audit, health and technical status |
-| **Integration** | Versioned administration/report APIs, signed webhooks, portable customer-data export and trusted Fylkren-to-Fylkren federation |
+| **Integration** | Versioned administration/report APIs, bounded Enterprise AI assistance, signed webhooks, portable customer-data export and trusted Fylkren-to-Fylkren federation |
 | **Deployment** | Docker Compose, PostgreSQL, persistent cryptographic keys, offline operation, backup/restore and documented upgrades |
 
 ### The workspace
@@ -136,6 +136,7 @@ use the name `Enterprise`; there is no separate “Pro” build.
 | Machine administration and report APIs | — | ◈ |
 | Signed webhook subscriptions and delivery | — | ◈ |
 | Trusted independent-instance federation | — | ◈ |
+| Centrally controlled AI assistance per Site | — | ◈ |
 
 ### Safe edition transitions
 

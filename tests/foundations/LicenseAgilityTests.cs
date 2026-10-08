@@ -29,8 +29,10 @@ internal static class LicenseAgilityTests
         }
 
         var legacy = Issue(1, null);
-        Require(service.Evaluate(legacy.Payload, legacy.Signature, instance, now).State == "valid",
+        var legacyStatus = service.Evaluate(legacy.Payload, legacy.Signature, instance, now);
+        Require(legacyStatus.State == "valid",
             "Legacy schema-1 licence was not accepted.");
+        Require(legacyStatus.Has(FeatureCatalog.AiAssistance), "Existing Enterprise licences did not receive the AI capability.");
         var current = Issue(2, LicenseService.CurrentSignatureAlgorithm);
         Require(service.Evaluate(current.Payload, current.Signature, instance, now,
             LicenseService.CurrentSignatureAlgorithm).State == "valid", "Versioned licence was not accepted.");

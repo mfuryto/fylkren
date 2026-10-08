@@ -1,5 +1,6 @@
 using Fylkren.Api.Notifications;
 using Fylkren.Api.Platform;
+using Fylkren.Api.ArtificialIntelligence;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fylkren.Api.Persistence;
@@ -12,6 +13,7 @@ internal static class DatabaseDefaults
     private static readonly Guid NotificationCursorId = Guid.Parse("00000000-0000-0000-0000-000000000003");
     private static readonly Guid ClassificationId = Guid.Parse("00000000-0000-0000-0000-000000000006");
     internal static readonly Guid RegionalSettingsId = Guid.Parse("00000000-0000-0000-0000-000000000007");
+    internal static readonly Guid AiSettingsId = Guid.Parse("00000000-0000-0000-0000-000000000008");
 
     public static async Task EnsureCreatedAsync(FylkrenDbContext database, FylkrenOptions options, CancellationToken cancellationToken = default)
     {
@@ -49,6 +51,9 @@ internal static class DatabaseDefaults
             var classificationSettings = new ClassificationSettings(ClassificationId);
             database.ClassificationSettings.Add(classificationSettings);
         }
+
+        if (!await database.AiSettings.AnyAsync(cancellationToken))
+            database.AiSettings.Add(new AiSettings(AiSettingsId));
 
         var existingTemplateKeys = await database.NotificationTemplates.AsNoTracking()
             .Select(value => value.Key)

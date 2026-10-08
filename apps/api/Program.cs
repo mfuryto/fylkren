@@ -13,6 +13,7 @@ using Fylkren.Api.Portability;
 using Fylkren.Api.Approvals;
 using Fylkren.Api.Licensing;
 using Fylkren.Api.Federation;
+using Fylkren.Api.ArtificialIntelligence;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 
@@ -164,6 +165,7 @@ app.MapRiskEndpoints();
 app.MapPortabilityEndpoints();
 app.MapFormalApprovalEndpoints();
 app.MapLicenseEndpoints();
+app.MapAiEndpoints();
 app.MapFederationPeerEndpoints();
 app.MapFederationIdentityEndpoints();
 app.MapFederationProbeEndpoints();

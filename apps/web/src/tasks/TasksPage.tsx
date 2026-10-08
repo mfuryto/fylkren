@@ -20,6 +20,7 @@ import { TaskHoldDependencySection } from "./TaskHoldDependencySection";
 import { TaskDomainDecisionDialog, type DomainDecisionDraft } from "./TaskDomainDecisionDialog";
 import { TaskRiskDialog } from "./TaskRiskDialog";
 import { TaskVersionDialog } from "./TaskVersionDialog";
+import { TaskAiAssistant } from "./TaskAiAssistant";
 import { addHoldDependencies, approvedPlanRunId, getExecutionHistory, getFinalReportTemplate, getTaskDetails, taskCreatePayload, taskMutation } from "./taskApi";
 import { buildReportUnitPath, buildWorkContextTree } from "./taskHierarchy";
 import { canSendSideRequestAtStatus, effectiveTaskStatus as effectiveStatus, getTaskNextActions, hasActiveDirectChildren as hasActiveChildren, rootWorkTitle, workflowProgress } from "./taskPolicy";
@@ -31,7 +32,8 @@ import { copyPermalink, navigateToLocation, type AppLocation } from "../navigati
 import { errorMessage } from "../api/errors";
 import type { ListSort } from "../components/ListSortControl";
 import { isResolvedTaskPermalinkQuery, isUnavailableTaskPermalink } from "./taskPermalink";
-export function TasksPage({ personId, language: displayLanguage, timeZone: displayTimeZone, classificationMarkings, permalink }: { personId?: string; language: string; timeZone: string; classificationMarkings: ClassificationMarking[]; permalink: AppLocation }) {
+import { useAiCapabilities } from "./useAiCapabilities";
+export function TasksPage({ personId, language: displayLanguage, timeZone: displayTimeZone, classificationMarkings, permalink, aiAvailable = false }: { personId?: string; language: string; timeZone: string; classificationMarkings: ClassificationMarking[]; permalink: AppLocation; aiAvailable?: boolean }) {
   function ClassificationControls({ value, onChange }: { value: string; onChange: (value: string) => void }) {
     return <ClassificationControlFields value={value} onChange={onChange} markings={classificationMarkings} />;
   }
@@ -56,6 +58,7 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
   const [domainDecisionItem, setDomainDecisionItem] = useState<WorkItem | null>(null);
   const [riskItem, setRiskItem] = useState<WorkItem | null>(null);
   const [versionItem, setVersionItem] = useState<WorkItem | null>(null);
+  const [aiItem, setAiItem] = useState<WorkItem | null>(null);
   const [childHistory, setChildHistory] = useState<Record<string, ChildHistory>>({});
   const [decision, setDecision] = useState<{
     item: WorkItem;
@@ -72,6 +75,7 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
   const [permalinkError, setPermalinkError] = useState("");
   const [linkMessage, setLinkMessage] = useState("");
   const { sites, taskUnits, items, itemTotal, itemPage, itemSummary, types, sourceTypes, senders, selectedSiteId, setSelectedSiteId, loadedQuery, loadItems } = useTaskData(setError, personId, permalink.siteId, { unitId: selectedUnitId, filter, search: appliedSearch, sort, page: queuePage, focusItemId: permalink.itemId });
+  const aiCapabilities = useAiCapabilities(aiAvailable, selectedSiteId);
   const { planDetails, clearPlanDetails } = useTaskPlanDetails(selectedSiteId, openItemId, items, setError);
   useEffect(() => { const timer = window.setTimeout(() => setAppliedSearch(search.trim()), 250); return () => window.clearTimeout(timer); }, [search]);
   useEffect(() => { if (itemPage !== queuePage) setQueuePage(itemPage); }, [itemPage, queuePage]);
@@ -379,7 +383,7 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
           <TaskQueueControls sites={sites} selectedSite={selectedSite} selectedSiteId={selectedSiteId} setSelectedSiteId={setSelectedSiteId} selectedUnitId={selectedUnitId} setSelectedUnitId={setSelectedUnitId} selectableUnits={selectableUnits} taskLevelCount={taskLevelCount} filter={filter} setFilter={setFilter} search={search} setSearch={setSearch} sort={sort} setSort={setSort} summary={itemSummary} />
           <TaskQueueList
             items={items} visibleItems={topLevelVisibleItems} totalItems={itemTotal} page={queuePage}
-            openItemId={openItemId} language={displayLanguage} timeZone={displayTimeZone} busy={busy} history={childHistory} planDetails={planDetails}
+            openItemId={openItemId} language={displayLanguage} timeZone={displayTimeZone} busy={busy} aiEnabled={aiCapabilities.enabled} history={childHistory} planDetails={planDetails}
             canManage={canManageItem} childUnits={childUnitsForItem} nextActions={nextActions} canDelegate={canDelegateItem}
             canSendRequest={canSendSideRequest} pendingChildren={pendingChildNames} canReassign={canReassignChild}
             childActionCount={childActionCount} canCancel={item => item.isOutgoingRequest ? isLeaderForItem(item) : !item.parentWorkItemId && Boolean(selectedSite?.canCancelWork)}
@@ -396,6 +400,7 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
               });
             }}
             onCopyLink={itemId => { void copyPermalink({ page: "Tasks", siteId: selectedSiteId, itemId }).then(() => setLinkMessage(translateActive("tasksTasksPageTheTaskLinkHasBeenCopied"))).catch(() => setError(translateActive("tasksTasksPageTheLinkCouldNotBeCopied"))); }}
+            onAi={setAiItem}
             onShowContext={setWorkContextItem} onShowPlan={item => { void showPlan(item); }}
             onDependencies={setDependencyItem}
             onDecisions={setDomainDecisionItem}
@@ -474,6 +479,7 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
       {domainDecisionItem && <TaskDomainDecisionDialog siteId={selectedSiteId} item={domainDecisionItem} personId={personId} editable={canManageItem(domainDecisionItem)} busy={busy} language={displayLanguage} timeZone={displayTimeZone} onClose={() => setDomainDecisionItem(null)} onRecord={draft => recordDomainDecision(domainDecisionItem, draft)} onError={setError} />}
       {riskItem && <TaskRiskDialog siteId={selectedSiteId} item={riskItem} personId={personId} editable={canManageItem(riskItem)} busy={busy} onClose={() => setRiskItem(null)} onError={setError} />}
       {versionItem && <TaskVersionDialog siteId={selectedSiteId} item={versionItem} language={displayLanguage} timeZone={displayTimeZone} onClose={() => setVersionItem(null)} onError={setError} />}
+      {aiItem && <TaskAiAssistant siteId={selectedSiteId} item={aiItem} language={displayLanguage} timeZone={displayTimeZone} features={([aiCapabilities.summaryEnabled && "summary", aiCapabilities.draftsEnabled && "drafts", aiCapabilities.learningEnabled && "learning", aiCapabilities.questionsEnabled && "questions"].filter(Boolean) as Array<"summary" | "drafts" | "learning" | "questions">)} onClose={() => setAiItem(null)} />}
       {decision && <TaskDecisionDialog decision={decision} unitId={decisionUnitId} setUnitId={setDecisionUnitId} note={decisionNote} setNote={setDecisionNote} units={childUnitsForItem(decision.item)} markings={classificationMarkings} busy={busy}
         dependencyReason={decisionDependencies.length > 0}
         dependencyPicker={decision.status === "on_hold" ? <TaskHoldDependencySection siteId={selectedSiteId} itemId={decision.item.id} busy={busy} selected={decisionDependencies} onToggle={toggleDecisionDependency} onError={setError} /> : undefined}

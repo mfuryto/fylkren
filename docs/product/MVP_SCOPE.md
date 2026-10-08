@@ -61,6 +61,7 @@ It is designed for organizations with an operational focus, including preparedne
 
 - versioned administration API for sites, global users, and classifications;
 - versioned read-only report API with exact site/work-level grants;
+- optional Enterprise AI assistance for task summaries, drafts, learning analysis and bounded questions, controlled centrally per Site;
 - SMTP notifications using durable queueing, retries, templates, site policy, and personal muting;
 - Docker Compose single-host deployment with web gateway, API, PostgreSQL, and persistent key storage;
 - air-gapped runtime and offline-capable password screening;
@@ -78,6 +79,7 @@ Fylkren does not currently provide:
 - native mobile or Windows applications;
 - a general BI/report designer or full Gantt project-management suite;
 - automatic translation of user content;
+- autonomous AI decisions, approvals, access changes or cross-site routing;
 - security accreditation or automatic clearance decisions;
 - supported multi-node high availability in the core Compose profile;
 - guaranteed exactly-once delivery across distributed nodes;

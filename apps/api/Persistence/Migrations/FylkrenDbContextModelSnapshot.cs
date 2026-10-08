@@ -224,6 +224,83 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.ToTable("formal_approval_signoffs", (string)null);
                 });
 
+            modelBuilder.Entity("Fylkren.Api.ArtificialIntelligence.AiSettings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("DraftsEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("drafts_enabled");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("enabled");
+
+                    b.Property<string>("EndpointUrl")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("endpoint_url");
+
+                    b.Property<string>("LastTestError")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("last_test_error");
+
+                    b.Property<bool?>("LastTestSucceeded")
+                        .HasColumnType("boolean")
+                        .HasColumnName("last_test_succeeded");
+
+                    b.Property<DateTimeOffset?>("LastTestedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_tested_at");
+
+                    b.Property<bool>("LearningEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("learning_enabled");
+
+                    b.Property<string>("Model")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("model");
+
+                    b.Property<string>("ProtectedApiKey")
+                        .HasMaxLength(8000)
+                        .HasColumnType("character varying(8000)")
+                        .HasColumnName("protected_api_key");
+
+                    b.Property<bool>("QuestionsEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("questions_enabled");
+
+                    b.Property<bool>("SummaryEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("summary_enabled");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ai_settings", (string)null);
+                });
+
+            modelBuilder.Entity("Fylkren.Api.ArtificialIntelligence.AiSiteAccess", b =>
+                {
+                    b.Property<Guid>("SiteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("site_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.HasKey("SiteId");
+
+                    b.ToTable("ai_site_access", (string)null);
+                });
+
             modelBuilder.Entity("Fylkren.Api.Decisions.Decision", b =>
                 {
                     b.Property<Guid>("Id")
@@ -5111,6 +5188,15 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.Navigation("ApproverPerson");
 
                     b.Navigation("Version");
+                });
+
+            modelBuilder.Entity("Fylkren.Api.ArtificialIntelligence.AiSiteAccess", b =>
+                {
+                    b.HasOne("Fylkren.Api.Organization.Site", null)
+                        .WithMany()
+                        .HasForeignKey("SiteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Fylkren.Api.Decisions.Decision", b =>

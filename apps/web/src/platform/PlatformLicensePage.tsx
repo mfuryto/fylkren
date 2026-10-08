@@ -24,6 +24,7 @@ const statusLabelKeys: Record<string, MessageKey> = {
 const entitlementLabelKeys: Record<string, MessageKey> = {
   "machine-api": "entitlementMachineApi", webhooks: "entitlementWebhooks",
   "external-identity": "entitlementExternalIdentity", "instance-federation": "entitlementFederation",
+  "ai-assistance": "entitlementAi",
 };
 
 function licenseDate(value: string | null, language: string, unlimited: string) {

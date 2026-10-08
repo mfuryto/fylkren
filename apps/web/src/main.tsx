@@ -231,7 +231,7 @@ function App() {
     Archives: "navArchives", Overview: "navOverview", Tasks: "navTasks", Workload: "navWorkload", Learning: "navLearning",
     Planning: "navPlanning", Execution: "navExecution", Reports: "navReports",
     Platform: "navPlatform", Sites: "navSites", Identity: "navIdentity", References: "navReferences",
-    Classifications: "navClassification", API: "navApi", Federation: "navFederation",
+    Classifications: "navClassification", API: "navApi", AI: "navAi", Federation: "navFederation",
     License: "navLicense", Email: "navEmail", Appearance: "navAppearance",
     Audit: "navAudit", Organization: "navOrganization", Personnel: "navPersonnel",
     Sources: "navIntakeSettings", Workflows: "navWorkflows", Templates: "navTemplates", Notifications: "navNotifications",

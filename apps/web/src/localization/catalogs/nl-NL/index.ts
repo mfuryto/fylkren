@@ -4,6 +4,7 @@ import type { MessageKey } from "../en-US";
 import type { ReferenceMessageKey } from "../supplements/references";
 import type { SortingMessageKey } from "../supplements/sorting";
 import type { IntakeMessageKey } from "../supplements/intake";
+import type { AiMessageKey } from "../supplements/ai";
 import { federationNlNL } from "./sections/federation";
 import { identityNlNL } from "./sections/identity";
 import { notificationsNlNL } from "./sections/notifications";
@@ -21,7 +22,7 @@ import { workNlNL } from "./sections/work";
 import { workTemplatesNlNL } from "./sections/workTemplates";
 import { workflowsNlNL } from "./sections/workflows";
 
-export const nlNL: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
+export const nlNL: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMessageKey | SortingMessageKey | IntakeMessageKey | AiMessageKey>, string> = {
   ...learning,
   ...federationNlNL,
   ...identityNlNL,

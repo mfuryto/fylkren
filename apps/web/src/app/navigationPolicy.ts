@@ -8,6 +8,7 @@ const platformNavigation: AppPage[] = [
   "References",
   "Classifications",
   "API",
+  "AI",
   "Federation",
   "License",
   "Email",

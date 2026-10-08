@@ -12,6 +12,11 @@ if (args.Contains("--input-validation-only"))
     InputValidationTests.Run();
     return;
 }
+if (args.Contains("--ai-assistance-only"))
+{
+    await AiAssistanceTests.Run();
+    return;
+}
 if (args.Contains("--operational-api-contract-only"))
 {
     OperationalApiContractTests.Run();

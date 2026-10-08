@@ -23,6 +23,7 @@ const WorkflowsPage = lazy(() => import("../workflows/WorkflowsPage").then((modu
 const PlatformPage = lazy(() => import("../platform/PlatformOperationsPage").then((module) => ({ default: module.PlatformPage })));
 const SmtpPage = lazy(() => import("../platform/SmtpPage").then((module) => ({ default: module.SmtpPage })));
 const PlatformApiPage = lazy(() => import("../platform/PlatformApiPage").then((module) => ({ default: module.PlatformApiPage })));
+const AiSettingsPage = lazy(() => import("../platform/AiSettingsPage").then((module) => ({ default: module.AiSettingsPage })));
 const FederationPage = lazy(() => import("../platform/FederationPage").then((module) => ({ default: module.FederationPage })));
 const PlatformLicensePage = lazy(() => import("../platform/PlatformLicensePage").then((module) => ({ default: module.PlatformLicensePage })));
 const PlatformAuditPage = lazy(() => import("../platform/PlatformAuditPage").then((module) => ({ default: module.PlatformAuditPage })));
@@ -99,6 +100,8 @@ export function AppContent({
   if (effectiveItem === "Sources" && session.managesSites) return <SourcesPage />;
   if (effectiveItem === "API" && session.isPlatformManager)
     return <PlatformApiPage language={language} timeZone={timeZone} entitlements={configuration.entitlements} />;
+  if (effectiveItem === "AI" && session.isPlatformManager)
+    return <AiSettingsPage canManage={configuration.entitlements.includes("ai-assistance")} />;
   if (effectiveItem === "Federation" && session.isPlatformManager)
     return <FederationPage canManage={configuration.entitlements.includes("instance-federation")} />;
   if (effectiveItem === "License" && session.isPlatformManager)
@@ -132,7 +135,7 @@ export function AppContent({
   if (effectiveItem === "Audit" && session.isPlatformManager)
     return <PlatformAuditPage language={language} timeZone={timeZone} />;
   if (effectiveItem === "Tasks")
-    return <TasksPage personId={session.personId} language={language} timeZone={timeZone} classificationMarkings={classificationMarkings} permalink={location} />;
+    return <TasksPage personId={session.personId} language={language} timeZone={timeZone} classificationMarkings={classificationMarkings} permalink={location} aiAvailable={configuration.aiEnabled && configuration.entitlements.includes("ai-assistance")} />;
   if (effectiveItem === "Sites" && session.isPlatformManager)
     return <SitesPage configuration={configuration} />;
   if (effectiveItem === "Organization") return <OrganizationPage session={session} />;

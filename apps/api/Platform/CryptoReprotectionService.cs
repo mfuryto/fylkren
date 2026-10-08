@@ -98,6 +98,8 @@ internal sealed class CryptoReprotectionService(IDataProtectionProvider protecti
             .Select(value => value.Id).ToListAsync(ct)).Select(id => ("totp", id.ToString("N"), "secret")));
         values.AddRange((await db.WebhookSubscriptions.AsNoTracking().Select(value => value.Id).ToListAsync(ct))
             .Select(id => ("webhook", id.ToString("N"), "secret")));
+        values.AddRange((await db.AiSettings.AsNoTracking().Where(value => value.ProtectedApiKey != null)
+            .Select(value => value.Id).ToListAsync(ct)).Select(id => ("ai-provider", id.ToString("N"), "api-key")));
         values.AddRange((await db.FederationSigningIdentities.AsNoTracking().Select(value => value.Key).ToListAsync(ct))
             .Select(key => ("federation", key.ToString(), "active")));
         values.AddRange((await db.FederationSigningIdentities.AsNoTracking()
@@ -139,6 +141,13 @@ internal sealed class CryptoReprotectionService(IDataProtectionProvider protecti
                 var value = await db.WebhookSubscriptions.SingleOrDefaultAsync(row => row.Id == Guid.ParseExact(item.RecordKey, "N"), ct);
                 if (value is not null)
                     value.ReprotectSecret(Reprotect(value.ProtectedSecret, ProtectedValuePurposes.WebhookSecret));
+                break;
+            }
+            case ("ai-provider", "api-key"):
+            {
+                var value = await db.AiSettings.SingleOrDefaultAsync(row => row.Id == Guid.ParseExact(item.RecordKey, "N"), ct);
+                if (value?.ProtectedApiKey is { } ciphertext)
+                    value.ReprotectApiKey(Reprotect(ciphertext, ProtectedValuePurposes.AiProviderApiKey));
                 break;
             }
             case ("federation", "active"):

@@ -27,6 +27,7 @@ export type PublicConfiguration = RegionalSettings & {
   setupRequired: boolean;
   classificationEnabled: boolean;
   classificationMarkings: ClassificationMarking[];
+  aiEnabled: boolean;
   authentication: {
     localEnabled: boolean;
     mfaEnabled?: boolean;

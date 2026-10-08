@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Add default-off Enterprise AI assistance with centrally protected OpenAI-compatible provider settings, explicit Site and function selection, connection testing, ordinary work and exact-level learning authorization, audited requests, and a read-only task assistant for summaries, quality checks, drafts, learning analysis and bounded questions.
+
 - Add a signed, versioned operational Work API with exact Site/work-level grants, least-privilege scopes, OpenAPI 3.1 discovery and bounded operational views. The API includes idempotent, concurrency-protected WorkItem commands, decision drafts, open risks and measures, and versioned documentation of active planning and execution runs. Machine actions retain machine authorship in domain revisions, common activity, portability data and the existing machine audit, while responsibility, approval and terminal decisions remain human-controlled.
 
 - Encrypt every ASP.NET Data Protection root-key XML value with a separate installation RSA-3072/AES-256-GCM custody envelope, migrate existing plaintext key rings before API startup, and back up/restore database, key ring and custody as one recovery point.

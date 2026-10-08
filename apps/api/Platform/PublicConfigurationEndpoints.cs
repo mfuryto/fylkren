@@ -47,6 +47,7 @@ internal static class PublicConfigurationEndpoints
                     .ToListAsync(cancellationToken)
                 : [];
             var licenseStatus = await license.Current(database, cancellationToken);
+            var aiEnabled = await database.AiSettings.AsNoTracking().Where(value => value.Id == DatabaseDefaults.AiSettingsId).Select(value => value.Enabled).SingleAsync(cancellationToken);
             var regional = await database.RegionalSettings.AsNoTracking()
                 .SingleAsync(value => value.Id == DatabaseDefaults.RegionalSettingsId, cancellationToken);
             return Results.Ok(new
@@ -61,6 +62,7 @@ internal static class PublicConfigurationEndpoints
                 regional.MeasurementSystem,
                 classificationEnabled,
                 classificationMarkings,
+                aiEnabled,
                 setupRequired = !await database.LoginIdentities.AnyAsync(
                     value => value.IsPlatformManager,
                     cancellationToken),

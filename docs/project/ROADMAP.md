@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 2026-10-08 after delivering the governed decision, risk, planning and execution API write slices.
+Updated 2026-10-08 after establishing the first bounded Enterprise AI-assistance slice.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -13,6 +13,8 @@ The additive event/activity foundation and coherent WorkItem slice are delivered
 API-first and AI-ready are continuing architecture requirements. New capabilities must expose stable, versioned and machine-readable contracts with explicit schemas, bounded inputs, structured errors, correlation, idempotency where needed and least-privilege machine identities. Automation and future AI capabilities must use the same authorized, audited domain APIs as other clients; UI scraping, hidden privileged bypasses and separate business-rule implementations are not supported foundations.
 
 The operational API foundation is delivered under `/api/v1/work`: signed-v2 clients receive exact Site/work-level grants, bounded operational reads, an OpenAPI 3.1 contract and separate least-privilege scopes. The API now covers the coherent work-item slice, decision drafts, open risk and measure revisions, and documentation in active planning and execution runs. Machine actions retain machine authorship in common activity, portability data and the existing machine audit. Human responsibility, formal approvals, terminal risk decisions, private learning and report mutations remain outside the contract. See [Operational API foundation](../architecture/OPERATIONAL_API.md) and [Work API](../api/WORK_API.md).
+
+The first Enterprise AI-assistance slice is implemented as an optional, default-off adapter to one OpenAI-compatible endpoint. Platform Manager controls the provider, protected key, Sites and four functions. The task assistant can summarize and quality-check, suggest planning/risk/decision drafts, analyze authorized learning points and answer bounded questions. Results remain uncommitted suggestions; ordinary work and exact-level learning authorization run before disclosure, and the model has no database, tool or domain-transition authority. Focused verification and the affected release/security rerun remain release qualification. See [Enterprise AI assistance](../architecture/AI_ASSISTANCE.md).
 
 ## Next delivery order
 

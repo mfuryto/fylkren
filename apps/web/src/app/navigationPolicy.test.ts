@@ -17,6 +17,7 @@ describe("navigation policy", () => {
     expect(result.effectiveItem).toBe("Platform");
     expect(result.navigationItems).toContain("Sites");
     expect(result.navigationItems).toContain("Federation");
+    expect(result.navigationItems).toContain("AI");
     expect(result.navigationItems).not.toContain("Tasks");
     expect(result.navigationItems).not.toContain("Learning");
   });

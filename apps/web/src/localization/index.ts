@@ -22,12 +22,13 @@ import { normalizeReservedTerms } from "./reservedTerms";
 import { referenceTranslations, type ReferenceMessageKey } from "./catalogs/supplements/references";
 import { sortingTranslations, type SortingMessageKey } from "./catalogs/supplements/sorting";
 import { intakeTranslations, type IntakeMessageKey } from "./catalogs/supplements/intake";
+import { aiTranslations, type AiMessageKey } from "./catalogs/supplements/ai";
 
 export type { MessageKey } from "./catalogs/en-US";
 
 export const supportedLanguages = ["en-US", "en-GB", "nb-NO", "sv-SE", "da-DK", "fi-FI", "de-DE", "fr-FR", "pl-PL", "es-ES", "it-IT", "uk-UA", "nl-NL", "pt-PT", "cs-CZ", "ro-RO", "et-EE", "lv-LV", "lt-LT"] as const;
 export type SupportedLanguage = (typeof supportedLanguages)[number];
-type AddedMessageKey = ActivityMessageKey | ReferenceMessageKey | SortingMessageKey | IntakeMessageKey;
+type AddedMessageKey = ActivityMessageKey | ReferenceMessageKey | SortingMessageKey | IntakeMessageKey | AiMessageKey;
 type BaseCatalog = Record<Exclude<MessageKey, AddedMessageKey>, string>;
 
 function withReferenceMessages(language: SupportedLanguage, catalog: BaseCatalog) {
@@ -37,6 +38,7 @@ function withReferenceMessages(language: SupportedLanguage, catalog: BaseCatalog
     ...referenceTranslations[language],
     ...sortingTranslations[language],
     ...intakeTranslations[language],
+    ...aiTranslations[language],
   } as Record<MessageKey, string>;
 }
 

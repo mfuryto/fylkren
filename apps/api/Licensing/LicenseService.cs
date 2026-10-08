@@ -87,6 +87,7 @@ internal sealed class LicenseService
             // Federation was added after the first Enterprise licenses were issued.
             // Keep those valid licenses forward-compatible without requiring reissue.
             entitlements.Add(FeatureCatalog.InstanceFederation);
+            entitlements.Add(FeatureCatalog.AiAssistance);
             return details with { Edition = "enterprise", State = "valid", Entitlements = entitlements };
         }
         catch (Exception ex) when (ex is FormatException or JsonException or CryptographicException)

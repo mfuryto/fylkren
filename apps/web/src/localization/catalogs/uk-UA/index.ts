@@ -4,6 +4,7 @@ import type { MessageKey } from "../en-US";
 import type { ReferenceMessageKey } from "../supplements/references";
 import type { SortingMessageKey } from "../supplements/sorting";
 import type { IntakeMessageKey } from "../supplements/intake";
+import type { AiMessageKey } from "../supplements/ai";
 import { federationUkUA } from "./sections/federation";
 import { identityUkUA } from "./sections/identity";
 import { notificationsUkUA } from "./sections/notifications";
@@ -21,7 +22,7 @@ import { workUkUA } from "./sections/work";
 import { workTemplatesUkUA } from "./sections/workTemplates";
 import { workflowsUkUA } from "./sections/workflows";
 
-export const ukUA: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
+export const ukUA: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMessageKey | SortingMessageKey | IntakeMessageKey | AiMessageKey>, string> = {
   ...learning,
   ...federationUkUA,
   ...identityUkUA,

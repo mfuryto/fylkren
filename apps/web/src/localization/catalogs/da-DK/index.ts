@@ -4,6 +4,7 @@ import type { MessageKey } from "../en-US";
 import type { ReferenceMessageKey } from "../supplements/references";
 import type { SortingMessageKey } from "../supplements/sorting";
 import type { IntakeMessageKey } from "../supplements/intake";
+import type { AiMessageKey } from "../supplements/ai";
 import { federationDaDK } from "./sections/federation";
 import { identityDaDK } from "./sections/identity";
 import { notificationsDaDK } from "./sections/notifications";
@@ -21,7 +22,7 @@ import { workDaDK } from "./sections/work";
 import { workTemplatesDaDK } from "./sections/workTemplates";
 import { workflowsDaDK } from "./sections/workflows";
 
-export const daDK: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMessageKey | SortingMessageKey | IntakeMessageKey>, string> = {
+export const daDK: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMessageKey | SortingMessageKey | IntakeMessageKey | AiMessageKey>, string> = {
   ...learning,
   ...federationDaDK,
   ...identityDaDK,

@@ -12,6 +12,7 @@ using Fylkren.Api.Persistence;
 using Fylkren.Api.Platform;
 using Fylkren.Api.Licensing;
 using Fylkren.Api.Federation;
+using Fylkren.Api.ArtificialIntelligence;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -51,6 +52,7 @@ internal static class ServiceRegistration
         var outbound = new OutboundHttpPolicy(fylkrenOptions.Outbound.PrivateOrigins, fylkrenOptions.Outbound.AdditionalIdentityOrigins);
         builder.Services.AddSingleton(outbound);
         builder.Services.AddSingleton<ServiceDestinationPolicy>();
+        builder.Services.AddScoped<AiProviderClient>();
         builder.Services.AddSingleton<SamlMetadataCache>();
         builder.Services.AddSingleton(new LicenseService(builder.Configuration["Fylkren:License:PublicKeySpki"]));
         var technicalLogBuffer = new TechnicalLogBuffer(300);
@@ -401,6 +403,8 @@ internal static class ServiceRegistration
             .ConfigurePrimaryHttpMessageHandler(() => new BoundedResponseHandler(outbound.CreateTransport(), 2_000_000,
                 uri => outbound.ValidateIdentityDestination(uri, fylkrenOptions.Authentication.Oidc.Authority), rejectRedirects: true));
         builder.Services.AddHttpClient("identity-provider-test", client => client.Timeout = TimeSpan.FromSeconds(10))
+            .ConfigurePrimaryHttpMessageHandler(() => new BoundedResponseHandler(outbound.CreateTransport(), 2_000_000, rejectRedirects: true));
+        builder.Services.AddHttpClient("ai-provider", client => client.Timeout = TimeSpan.FromSeconds(45))
             .ConfigurePrimaryHttpMessageHandler(() => new BoundedResponseHandler(outbound.CreateTransport(), 2_000_000, rejectRedirects: true));
         builder.Services.AddHostedService<FederationKeyRotationWorker>();
         builder.Services.AddHostedService<FederationOutboundDeliveryWorker>();

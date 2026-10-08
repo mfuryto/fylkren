@@ -13,7 +13,7 @@ describe("Platform license certificate", () => {
         licenseId: "22222222-2222-2222-2222-222222222222",
         customer: "Example Preparedness Ltd",
         expiresAt: "2027-09-28T00:00:00Z",
-        entitlements: ["external-identity", "instance-federation"],
+        entitlements: ["external-identity", "instance-federation", "ai-assistance"],
       },
     }} />);
 
@@ -23,6 +23,7 @@ describe("Platform license certificate", () => {
     expect(html).toContain("Signature and instance binding verified");
     expect(html).toContain("External identity");
     expect(html).toContain("Instance federation");
+    expect(html).toContain("AI assistance");
     expect(html).toContain("thunold-olsen-licensing-mark");
   });
 

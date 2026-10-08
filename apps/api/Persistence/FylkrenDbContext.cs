@@ -11,6 +11,7 @@ using Fylkren.Api.Risks;
 using Fylkren.Api.Approvals;
 using Fylkren.Api.Federation;
 using Fylkren.Api.Licensing;
+using Fylkren.Api.ArtificialIntelligence;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fylkren.Api.Persistence;
@@ -33,6 +34,8 @@ public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options,
     internal DbSet<FederationSiteGrant> FederationSiteGrants => Set<FederationSiteGrant>();
     internal DbSet<FederationRoutingSettings> FederationRoutingSettings => Set<FederationRoutingSettings>();
     internal DbSet<InstalledLicense> InstalledLicenses => Set<InstalledLicense>();
+    internal DbSet<AiSettings> AiSettings => Set<AiSettings>();
+    internal DbSet<AiSiteAccess> AiSiteAccess => Set<AiSiteAccess>();
     public DbSet<OrganizationUnit> OrganizationUnits => Set<OrganizationUnit>();
     public DbSet<SiteManagerAssignment> SiteManagerAssignments => Set<SiteManagerAssignment>();
     public DbSet<SiteMembership> SiteMemberships => Set<SiteMembership>();

@@ -23,6 +23,7 @@ Before public publication, run `bash tools/security/verify-repository-safety.sh 
 - [Community and Enterprise entitlements](architecture/EDITION_ENTITLEMENTS.md)
 - [Identity-provider provisioning](architecture/IDENTITY_PROVIDER_PROVISIONING.md)
 - [Operational API foundation](architecture/OPERATIONAL_API.md)
+- [Enterprise AI assistance](architecture/AI_ASSISTANCE.md)
 - [Platform license API](api/PLATFORM_LICENSE_API.md)
 - [Regional settings API](api/REGIONAL_SETTINGS_API.md)
 - [Versioning and formal approvals](architecture/FORMAL_APPROVALS.md)

@@ -8,10 +8,11 @@ internal static class FeatureCatalog
     internal const string Webhooks = "webhooks";
     internal const string ExternalIdentity = "external-identity";
     internal const string InstanceFederation = "instance-federation";
+    internal const string AiAssistance = "ai-assistance";
 
     internal static readonly IReadOnlySet<string> Enterprise = new HashSet<string>(StringComparer.Ordinal)
     {
-        MachineApi, Webhooks, ExternalIdentity, InstanceFederation
+        MachineApi, Webhooks, ExternalIdentity, InstanceFederation, AiAssistance
     };
 
     internal static bool IsKnown(string feature) => Enterprise.Contains(feature);
