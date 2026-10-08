@@ -17,6 +17,7 @@ export async function responseErrorMessage(response: Response, fallback: string)
     if (problem.code === "lifecycle_transition_conflict") return translateActive("lifecycleTransitionError");
     if (problem.code === "ai_provider_rate_limited") return translateActive("aiProviderRateLimited");
     const correlated = (message: string) => problem.correlationId ? `${message} ${translateActive("correlation", { id: problem.correlationId })}.` : message;
+    if (problem.code === "ai_provider_invalid_draft") return correlated(translateActive("aiProviderInvalidDraft"));
     if (problem.code === "ai_provider_timeout") return correlated(translateActive("aiProviderTimeout"));
     if (problem.code === "ai_provider_unavailable") return correlated(problem.providerStatus ? translateActive("aiProviderHttpStatus", { status: problem.providerStatus }) : translateActive("aiProviderUnavailable"));
     const validationMessage = Object.values(problem.errors ?? {}).flat().find(Boolean);

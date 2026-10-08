@@ -61,6 +61,7 @@ export const aiEn = {
   aiProviderRateLimited: "AI busy",
   aiProviderTimeout: "AI timed out",
   aiProviderUnavailable: "AI unavailable",
+  aiProviderInvalidDraft: "The AI response could not be distributed safely into the planning template. Try again.",
   aiProviderHttpStatus: "The AI provider ended the request with HTTP {status}.",
   aiGeneratedFromVersion: "Source: {date}",
   primaryDocumentImport: "Import primary document",
@@ -95,6 +96,7 @@ const norwegian: AiMessages = {
   decisionAiSuggestionIntro: "Velg et forslag for å åpne det i det ordinære beslutningsskjemaet. Ingenting lagres automatisk.", aiAssistFailed: "AI-assistenten kunne ikke fullføre forespørselen.",
   aiProviderRateLimited: "AI-leverandøren er opptatt. Vent før du prøver igjen.", aiProviderTimeout: "AI-leverandøren brukte for lang tid.",
   aiProviderUnavailable: "AI-leverandøren kunne ikke fullføre forespørselen.",
+  aiProviderInvalidDraft: "AI-svaret kunne ikke fordeles trygt i planmalen. Prøv å generere forslaget på nytt.",
   aiProviderHttpStatus: "AI-leverandøren avsluttet forespørselen med HTTP {status}.",
   aiGeneratedFromVersion: "Laget fra oppgaven slik den sist ble oppdatert {date}. Kontroller kilden før teksten brukes.",
   primaryDocumentImport: "Importer hoveddokument",
@@ -240,6 +242,26 @@ const documentImportMessages: Record<string, DocumentImportMessages> = {
   "uk-UA": { primaryDocumentImport: "Імпортувати основний документ", primaryDocumentImportHelp: "PDF, DOCX або текст UTF-8 до 8 МіБ. Fylkren зберігає структурований текстовий витяг, а не початковий файл.", primaryDocumentAiSource: "Використовувати імпортований документ як джерело для ШІ", primaryDocumentImportFailed: "Не вдалося імпортувати основний документ" },
 };
 
+type AiErrorMessages = Pick<AiMessages, "aiProviderInvalidDraft">;
+const aiErrorMessages: Record<string, AiErrorMessages> = {
+  "cs-CZ": { aiProviderInvalidDraft: "Odpověď AI nebylo možné bezpečně rozdělit do šablony plánu. Zkuste návrh vytvořit znovu." },
+  "da-DK": { aiProviderInvalidDraft: "AI-svaret kunne ikke fordeles sikkert i planskabelonen. Prøv at generere forslaget igen." },
+  "de-DE": { aiProviderInvalidDraft: "Die KI-Antwort konnte nicht sicher auf die Planvorlage verteilt werden. Erstellen Sie den Vorschlag erneut." },
+  "es-ES": { aiProviderInvalidDraft: "La respuesta de la IA no pudo distribuirse de forma segura en la plantilla del plan. Genere de nuevo la propuesta." },
+  "et-EE": { aiProviderInvalidDraft: "AI vastust ei saanud ohutult plaanimalli jaotada. Looge ettepanek uuesti." },
+  "fi-FI": { aiProviderInvalidDraft: "Tekoälyn vastausta ei voitu jakaa turvallisesti suunnitelmapohjaan. Luo ehdotus uudelleen." },
+  "fr-FR": { aiProviderInvalidDraft: "La réponse de l’IA n’a pas pu être répartie de manière sûre dans le modèle de plan. Générez à nouveau la proposition." },
+  "it-IT": { aiProviderInvalidDraft: "Non è stato possibile distribuire in modo sicuro la risposta dell’IA nel modello di piano. Generare nuovamente la proposta." },
+  "lt-LT": { aiProviderInvalidDraft: "DI atsakymo nepavyko saugiai paskirstyti plano šablone. Sugeneruokite pasiūlymą dar kartą." },
+  "lv-LV": { aiProviderInvalidDraft: "MI atbildi nevarēja droši sadalīt plāna veidnē. Ģenerējiet priekšlikumu vēlreiz." },
+  "nl-NL": { aiProviderInvalidDraft: "Het AI-antwoord kon niet veilig over de plansjabloon worden verdeeld. Genereer het voorstel opnieuw." },
+  "pl-PL": { aiProviderInvalidDraft: "Odpowiedzi AI nie można było bezpiecznie rozdzielić w szablonie planu. Wygeneruj propozycję ponownie." },
+  "pt-PT": { aiProviderInvalidDraft: "Não foi possível distribuir com segurança a resposta da IA pelo modelo do plano. Gere novamente a proposta." },
+  "ro-RO": { aiProviderInvalidDraft: "Răspunsul AI nu a putut fi distribuit în siguranță în șablonul planului. Generați din nou propunerea." },
+  "sv-SE": { aiProviderInvalidDraft: "AI-svaret kunde inte fördelas säkert i planmallen. Generera förslaget igen." },
+  "uk-UA": { aiProviderInvalidDraft: "Відповідь ШІ не вдалося безпечно розподілити в шаблоні плану. Створіть пропозицію ще раз." },
+};
+
 export const aiTranslations: Record<string, AiMessages> = new Proxy({ "nb-NO": norwegian } as Record<string, AiMessages>, {
-  get: (target, language: string) => target[language] ?? { ...aiEn, aiProviderHelp: providerHelp[language] ?? aiEn.aiProviderHelp, aiEndpointHelp: endpointHelp[language] ?? aiEn.aiEndpointHelp, ...progressMessages[language], ...draftLabels[language], ...decisionWorkflowMessages[language], ...aiActionMessages[language], ...documentImportMessages[language] },
+  get: (target, language: string) => target[language] ?? { ...aiEn, aiProviderHelp: providerHelp[language] ?? aiEn.aiProviderHelp, aiEndpointHelp: endpointHelp[language] ?? aiEn.aiEndpointHelp, ...progressMessages[language], ...draftLabels[language], ...decisionWorkflowMessages[language], ...aiActionMessages[language], ...documentImportMessages[language], ...aiErrorMessages[language] },
 });

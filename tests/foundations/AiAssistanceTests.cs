@@ -22,15 +22,22 @@ internal static class AiAssistanceTests
             AiEndpoints.Instruction("decisions", null).Contains("three", StringComparison.Ordinal) &&
             AiEndpoints.Instruction("decisions", null).Contains("valid JSON", StringComparison.Ordinal),
             "The contextual planning template or bounded draft instructions were lost.");
-        var planningDrafts = AiEndpoints.ParsePlanningDrafts("{\"steps\":[{\"stepNumber\":2,\"content\":\"# Task\\n- Allocate owner\"},{\"stepNumber\":1,\"content\":\"# Analysis\\nKnown facts\"}]}", ["# Analysis", "# Task"]);
+        var planningDrafts = AiEndpoints.ParsePlanningDrafts("{\"steps\":[{\"stepNumber\":2,\"content\":\"# Task\\n- Allocate owner\"},{\"stepNumber\":1,\"content\":\"# Analysis\\nKnown facts\"}]}", ["Analysis", "Task"], ["# Analysis", "# Task"]);
         Require(planningDrafts.Length == 2 && planningDrafts[0].StepNumber == 1 && planningDrafts[1].Content.Contains("Allocate owner", StringComparison.Ordinal),
             "Planning drafts were not distributed to the ordered template steps.");
         try
         {
-            _ = AiEndpoints.ParsePlanningDrafts("{\"steps\":[{\"stepNumber\":1,\"content\":\"A combined plan without template structure\"}]}", ["# Analysis", "# Task"]);
+            _ = AiEndpoints.ParsePlanningDrafts("{\"steps\":[{\"stepNumber\":1,\"content\":\"A combined plan without template structure\"}]}", ["Analysis", "Task"], ["# Analysis", "# Task"]);
             throw new Exception("A combined or structurally incompatible planning draft was accepted.");
         }
         catch (System.Text.Json.JsonException) { }
+        var tolerantDrafts = AiEndpoints.ParsePlanningDrafts("Plan suggestion:\n```json\n{\"planningSteps\":[{\"step_number\":\"1\",\"stepName\":\"Analysis\",\"content\":\"# ANALYSIS\\nKnown facts\",\"confidence\":\"medium\"},{\"stepName\":\"Task\",\"markdown\":\"# Task\\n- Allocate owner\"}]}\n```", ["Analysis", "Task"], ["# Analysis", "# Task"]);
+        Require(tolerantDrafts.Length == 2 && tolerantDrafts[1].StepNumber == 2, "Harmless local-model planning JSON variations were rejected.");
+        var keyedDrafts = AiEndpoints.ParsePlanningDrafts("{\"steps\":{\"Analysis\":\"# Analysis\\nKnown facts\",\"Task\":\"# Task\\n- Allocate owner\"}}", ["Analysis", "Task"], ["# Analysis", "# Task"]);
+        Require(keyedDrafts.Select(value => value.StepNumber).SequenceEqual([1, 2]), "Planning drafts keyed by dynamic template names were rejected.");
+        var orderedDrafts = AiEndpoints.ParsePlanningDrafts("[\"# Analysis\\nKnown facts\",\"# Task\\n- Allocate owner\",\"# Coordination\\nConfirm contacts\"]",
+            ["Analysis", "Task", "Coordination"], ["# Analysis", "# Task", "# Coordination"]);
+        Require(orderedDrafts.Length == 3 && orderedDrafts[2].Content.Contains("Confirm contacts", StringComparison.Ordinal), "Ordered drafts for a varying three-step template were rejected.");
         var riskDrafts = System.Text.Json.JsonSerializer.Serialize(AiEndpoints.ParseDrafts("risks", "{\"risks\":[{\"title\":\"Loss of link\",\"cause\":\"Primary link fails\",\"consequence\":\"Coordination stops\",\"mitigation\":\"Prepare radio backup\",\"dueDate\":\"2026-11-15\"}]}"));
         Require(riskDrafts.Contains("Loss of link", StringComparison.Ordinal) && !riskDrafts.Contains("probability", StringComparison.OrdinalIgnoreCase),
             "Structured risk drafts lost their bounded fields or introduced AI scoring.");
@@ -82,7 +89,7 @@ internal static class AiAssistanceTests
         catch (AiProviderHttpException error) { Require(error.ProviderStatusCode == 503, "Provider HTTP status was not safely preserved."); }
         Require(providerLogger.Messages.Any(message => SafeLog(message, "503", correlationId)),
             "Provider failure status was not safely correlated.");
-        Console.WriteLine("AI assistance tests passed: default-off settings, protected provider authentication, safe correlation propagation, fixed role separation, bounded streaming and non-streaming no-reasoning requests, secret non-disclosure, compatible response parsing and Retry-After preservation.");
+        Console.WriteLine("AI assistance tests passed: dynamic planning-template parsing, default-off settings, protected provider authentication, safe correlation propagation, fixed role separation, bounded streaming and non-streaming no-reasoning requests, secret non-disclosure, compatible response parsing and Retry-After preservation.");
     }
 
     private sealed class Factory(HttpClient client) : IHttpClientFactory

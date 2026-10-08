@@ -18,4 +18,11 @@ describe("API error meaning", () => {
     expect(await responseErrorMessage(conflict, "Failed")).toBe("Load the updated data and try the action again.");
     expect(await responseErrorMessage(Response.json({ errors: { reason: ["Explain the change."] } }), "Failed")).toBe("Explain the change.");
   });
+  it("explains an unusable AI plan response in the active language", async () => {
+    setActiveLanguage("nb-NO");
+    const response = Response.json({ code: "ai_provider_invalid_draft", correlationId: "plan-42" }, { status: 502 });
+    const message = await responseErrorMessage(response, "Failed");
+    expect(message).toContain("AI-svaret kunne ikke fordeles trygt i planmalen");
+    expect(message).toContain("plan-42");
+  });
 });
