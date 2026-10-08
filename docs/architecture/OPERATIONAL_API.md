@@ -8,7 +8,7 @@ Status: **initial coherent foundation delivered**. This document is the canonica
 | --- | --- |
 | OAPI-01 | Publish one machine-readable OpenAPI 3.1 document for every supported `/api/v1` operation. |
 | OAPI-02 | Reuse signed-v2 machine identities, expiry, revocation, rate limits, structured errors and machine audit. Do not add bearer credentials or a second authentication system. |
-| OAPI-03 | Separate scopes for operational read, content write, lifecycle transition and activity read. |
+| OAPI-03 | Separate scopes for operational read, work content, lifecycle transition, activity, decisions, risk, planning documentation and execution documentation. |
 | OAPI-04 | Require an explicit exact Site/work-level grant in addition to scope. A grant does not inherit to parents, children or siblings. |
 | OAPI-05 | Expose bounded reference/catalog, work-item, planning, execution, decision, risk/measure and activity reads without private learning or unrestricted report content. |
 | OAPI-06 | Mutations reuse authoritative domain rules, use idempotency and optimistic concurrency, and record the machine actor in common activity plus the existing machine audit. |
@@ -25,6 +25,8 @@ The operational API is rooted at `/api/v1/work`. Read projections query authorit
 
 The OpenAPI document is served at `/api/v1/openapi.json` to authenticated machine clients. Contract changes follow the existing `v1` compatibility rules. Breaking field semantics require a new major path.
 
+Decision, risk and measure revisions now retain either a person or machine recorder through mutually exclusive foreign keys. Decision-makers and risk/measure owners remain people. Planning and execution commands write only documentation in a human-owned active run and use the run's PostgreSQL concurrency version. They do not turn the operational API into an alternate approval or workflow engine.
+
 ## Delivery order and traceability
 
 | Stage | Requirements | Implementation | Tests |
@@ -32,5 +34,6 @@ The OpenAPI document is served at `/api/v1/openapi.json` to authenticated machin
 | 1. Access and read slice — delivered | OAPI-01–05, OAPI-09 | Exact work grants; signed catalog, item, comment, plan, execution, decision, risk/measure and activity reads; complete `/api/v1` OpenAPI document | Model migration/diff, exact-level positive/negative integration, scope/authentication, pagination and response-shape tests |
 | 2. Coherent WorkItem commands — delivered | OAPI-02–07, OAPI-09 | Idempotent create/comment, optimistic content update and guarded non-approval transitions; explicit machine authorship | Browser regression plus machine create/replay, stale-version, comment actor, transition, state and grant tests |
 | 3. Events and completion — delivered | OAPI-08–10 | Existing common activity, machine audit and webhook projection extended for the supported operations; API/access/security documentation reconciled | Webhook catalogue/actor contract, complete route and authorization inventory, documentation and candidate integration run |
+| 4. Governed domain write slices — delivered | OAPI-02–07, OAPI-09–10 | Dedicated decision, risk, planning and execution scopes; explicit machine authorship; human ownership and approval boundaries; versioned documentation writes | Model/migration checks, OpenAPI command contract, scope and exact-grant authorization, validation and concurrency regression |
 
-No stage enables irreversible deletion or anonymisation. Learning remains outside the general operational contract until its private exact-level policy has a separately reviewed API projection. Decision, risk, measure, planning, execution and report mutations are intentionally not implied by `work:write`; each future vertical slice must define machine authorship and retain human-only approvals.
+No stage enables irreversible deletion or anonymisation. Learning remains outside the general operational contract until its private exact-level policy has a separately reviewed API projection. Report mutations remain outside the operational API. Domain writes are never implied by `work:write`; every delivered slice uses its own scope and retains human-only approvals.

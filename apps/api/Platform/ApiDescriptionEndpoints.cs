@@ -47,9 +47,19 @@ public static class ApiDescriptionEndpoints
             ["/api/v1/work/items/{itemId}/transitions"] = Path(
                 Post("Perform a guarded non-approval transition", "work:transition plus an exact work grant", "TransitionWorkItem", "itemId", true)),
             ["/api/v1/work/items/{itemId}/planning"] = Path(Get("Read planning", "work:read plus an exact work grant", "itemId")),
+            ["/api/v1/work/items/{itemId}/planning/steps/{stepId}"] = Path(Put("Document an active planning step", "planning:write plus an exact work grant", "PlanningDocument", "itemId,stepId", true)),
             ["/api/v1/work/items/{itemId}/execution"] = Path(Get("Read execution", "work:read plus an exact work grant", "itemId")),
-            ["/api/v1/work/items/{itemId}/decisions"] = Path(Get("Read decisions", "work:read plus an exact work grant", "itemId")),
-            ["/api/v1/work/items/{itemId}/risks"] = Path(Get("Read risks and measures", "work:read plus an exact work grant", "itemId")),
+            ["/api/v1/work/items/{itemId}/execution/steps/{stepId}"] = Path(Put("Document an active execution step", "execution:write plus an exact work grant", "ExecutionDocument", "itemId,stepId", true)),
+            ["/api/v1/work/items/{itemId}/decisions"] = Path(
+                Get("Read decisions", "work:read plus an exact work grant", "itemId"),
+                Post("Create a decision draft", "decisions:write plus an exact work grant", "DecisionDraft", "itemId")),
+            ["/api/v1/work/items/{itemId}/decisions/{decisionId}"] = Path(Put("Revise a decision draft", "decisions:write plus an exact work grant", "DecisionDraftRevision", "itemId,decisionId", false, true)),
+            ["/api/v1/work/items/{itemId}/risks"] = Path(
+                Get("Read risks and measures", "work:read plus an exact work grant", "itemId"),
+                Post("Create an open risk", "risks:write plus an exact work grant", "Risk", "itemId")),
+            ["/api/v1/work/items/{itemId}/risks/{riskId}"] = Path(Put("Revise an open risk", "risks:write plus an exact work grant", "RiskRevision", "itemId,riskId", false, true)),
+            ["/api/v1/work/items/{itemId}/risks/{riskId}/measures"] = Path(Post("Create a risk measure", "risks:write plus an exact work grant", "Measure", "itemId,riskId")),
+            ["/api/v1/work/items/{itemId}/risks/{riskId}/measures/{measureId}"] = Path(Put("Revise a risk measure", "risks:write plus an exact work grant", "MeasureRevision", "itemId,riskId,measureId", false, true)),
             ["/api/v1/work/items/{itemId}/activity"] = Path(Get("Read object activity", "activity:read plus an exact work grant", "itemId"))
         };
         return new
@@ -105,6 +115,18 @@ public static class ApiDescriptionEndpoints
             ["status"] = Enum("under_review", "on_hold", "rejected"), ["decisionNote"] = Text(2_000),
             ["priority"] = Enum("low", "normal", "high", "critical")
         }, "status"),
+        ["DecisionDraft"] = ObjectSchema(new Dictionary<string, object>
+        { ["title"] = Text(200), ["decision"] = Text(10_000), ["rationale"] = Text(10_000),
+          ["decidedAt"] = DateTime(), ["decisionMakerIds"] = UuidArray(1, 20) }, "title", "decision", "rationale", "decisionMakerIds"),
+        ["DecisionDraftRevision"] = ObjectSchema(new Dictionary<string, object>
+        { ["title"] = Text(200), ["decision"] = Text(10_000), ["rationale"] = Text(10_000),
+          ["decidedAt"] = DateTime(), ["decisionMakerIds"] = UuidArray(1, 20), ["expectedRevision"] = PositiveInteger() }, "title", "decision", "rationale", "decisionMakerIds", "expectedRevision"),
+        ["Risk"] = RiskSchema(false), ["RiskRevision"] = RiskSchema(true),
+        ["Measure"] = MeasureSchema(false), ["MeasureRevision"] = MeasureSchema(true),
+        ["PlanningDocument"] = ObjectSchema(new Dictionary<string, object>
+        { ["content"] = Text(20_000), ["links"] = Array(ObjectSchema(new Dictionary<string, object> { ["label"] = Text(240), ["url"] = Text(2_048) }, "label", "url"), 30), ["timelineEvents"] = TimelineArray() }),
+        ["ExecutionDocument"] = ObjectSchema(new Dictionary<string, object>
+        { ["content"] = Text(20_000), ["timelineEvents"] = TimelineArray() }),
         ["Problem"] = ObjectSchema(new Dictionary<string, object>
         {
             ["type"] = Text(), ["title"] = Text(), ["status"] = new { type = "integer" }, ["detail"] = Text(), ["code"] = Text()
@@ -118,7 +140,7 @@ public static class ApiDescriptionEndpoints
     private static KeyValuePair<string, object> Post(string summary, string authorization, string? schema,
         string? id = null, bool version = false) => new("post", Operation(summary, authorization, id, schema, true, version));
     private static KeyValuePair<string, object> Put(string summary, string authorization, string schema,
-        string? id = null, bool version = false) => new("put", Operation(summary, authorization, id, schema, false, version));
+        string? id = null, bool version = false, bool idempotency = false) => new("put", Operation(summary, authorization, id, schema, idempotency, version));
     private static KeyValuePair<string, object> Delete(string summary, string authorization, string id,
         bool version) => new("delete", Operation(summary, authorization, id, null, false, version));
 
@@ -126,7 +148,8 @@ public static class ApiDescriptionEndpoints
         bool idempotency, bool version)
     {
         var parameters = new List<object>();
-        if (id is not null) parameters.Add(new { name = id, @in = "path", required = true, schema = Uuid() });
+        if (id is not null) foreach (var name in id.Split(','))
+            parameters.Add(new { name, @in = "path", required = true, schema = Uuid() });
         if (idempotency) parameters.Add(new { name = "Idempotency-Key", @in = "header", required = true,
             schema = new { type = "string", minLength = 8, maxLength = 128 } });
         if (version) parameters.Add(new { name = "If-Match", @in = "header", required = true,
@@ -157,4 +180,27 @@ public static class ApiDescriptionEndpoints
     private static object Text(int? maxLength = null) => maxLength is null ? new { type = "string" } : (object)new { type = "string", maxLength };
     private static object DateTime() => new { type = new[] { "string", "null" }, format = "date-time" };
     private static object Enum(params string[] values) => new { type = "string", @enum = values };
+    private static object PositiveInteger() => new { type = "integer", minimum = 1 };
+    private static object UuidArray(int minimum, int maximum) => new { type = "array", minItems = minimum, maxItems = maximum, uniqueItems = true, items = Uuid() };
+    private static object Array(object items, int maximum) => new { type = "array", maxItems = maximum, items };
+    private static object TimelineArray() => Array(ObjectSchema(new Dictionary<string, object>
+    { ["date"] = new { type = "string", format = "date" }, ["description"] = Text(1_000) }, "date", "description"), 100);
+    private static object RiskSchema(bool revision)
+    {
+        var properties = new Dictionary<string, object> { ["title"] = Text(200), ["description"] = Text(10_000),
+            ["probability"] = new { type = "integer", minimum = 1, maximum = 5 }, ["impact"] = new { type = "integer", minimum = 1, maximum = 5 },
+            ["ownerPersonId"] = Uuid(), ["status"] = Enum("identified", "active", "mitigating"),
+            ["dueDate"] = new { type = new[] { "string", "null" }, format = "date" },
+            ["residualProbability"] = new { type = new[] { "integer", "null" }, minimum = 1, maximum = 5 },
+            ["residualImpact"] = new { type = new[] { "integer", "null" }, minimum = 1, maximum = 5 } };
+        if (revision) properties["expectedVersion"] = PositiveInteger();
+        return ObjectSchema(properties, revision ? ["title", "description", "probability", "impact", "ownerPersonId", "status", "expectedVersion"] : ["title", "description", "probability", "impact", "ownerPersonId", "status"]);
+    }
+    private static object MeasureSchema(bool revision)
+    {
+        var properties = new Dictionary<string, object> { ["action"] = Text(4_000), ["ownerPersonId"] = Uuid(),
+            ["status"] = Enum("planned", "in_progress"), ["dueDate"] = new { type = new[] { "string", "null" }, format = "date" } };
+        if (revision) properties["expectedVersion"] = PositiveInteger();
+        return ObjectSchema(properties, revision ? ["action", "ownerPersonId", "status", "expectedVersion"] : ["action", "ownerPersonId", "status"]);
+    }
 }

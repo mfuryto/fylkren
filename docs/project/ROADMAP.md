@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 2026-10-06 after delivering the versioned operational API foundation and coherent WorkItem command slice.
+Updated 2026-10-08 after delivering the governed decision, risk, planning and execution API write slices.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -12,7 +12,7 @@ The additive event/activity foundation and coherent WorkItem slice are delivered
 
 API-first and AI-ready are continuing architecture requirements. New capabilities must expose stable, versioned and machine-readable contracts with explicit schemas, bounded inputs, structured errors, correlation, idempotency where needed and least-privilege machine identities. Automation and future AI capabilities must use the same authorized, audited domain APIs as other clients; UI scraping, hidden privileged bypasses and separate business-rule implementations are not supported foundations.
 
-The operational API foundation is delivered under `/api/v1/work`: signed-v2 clients receive exact Site/work-level grants, separate read/write/transition/activity scopes, bounded reads across the current operational context, an OpenAPI 3.1 contract, and a coherent work-item create/update/comment/transition slice. Machine actions retain machine authorship in both common activity and the existing machine audit. Human approvals and private learning remain outside this contract. See [Operational API foundation](../architecture/OPERATIONAL_API.md) and [Work API](../api/WORK_API.md).
+The operational API foundation is delivered under `/api/v1/work`: signed-v2 clients receive exact Site/work-level grants, bounded operational reads, an OpenAPI 3.1 contract and separate least-privilege scopes. The API now covers the coherent work-item slice, decision drafts, open risk and measure revisions, and documentation in active planning and execution runs. Machine actions retain machine authorship in common activity, portability data and the existing machine audit. Human responsibility, formal approvals, terminal risk decisions, private learning and report mutations remain outside the contract. See [Operational API foundation](../architecture/OPERATIONAL_API.md) and [Work API](../api/WORK_API.md).
 
 ## Next delivery order
 

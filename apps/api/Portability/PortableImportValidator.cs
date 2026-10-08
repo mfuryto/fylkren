@@ -225,6 +225,12 @@ internal static class PortableImportValidator
         Reference(values, errors, "work-item-comments", "author_machine_id", "api-machine-references");
         Reference(values, errors, "machine-audit-events", "machine_identity_id", "api-machine-references");
         Reference(values, errors, "domain-events", "actor_machine_id", "api-machine-references");
+        Reference(values, errors, "decisions", "created_by_machine_id", "api-machine-references");
+        Reference(values, errors, "decision-revisions", "recorded_by_machine_id", "api-machine-references");
+        Reference(values, errors, "risks", "created_by_machine_id", "api-machine-references");
+        Reference(values, errors, "risk-revisions", "recorded_by_machine_id", "api-machine-references");
+        Reference(values, errors, "risk-mitigations", "created_by_machine_id", "api-machine-references");
+        Reference(values, errors, "risk-mitigation-revisions", "recorded_by_machine_id", "api-machine-references");
         Reference(values, errors, "work-item-history", "work_item_id", "work-items");
         Reference(values, errors, "workflow-steps", "definition_id", "workflow-definitions");
         Reference(values, errors, "workflow-steps", "template_id", "workflow-step-templates");

@@ -1012,7 +1012,7 @@ const authorizationBoundaries = await testAuthorizationBoundaries({
 });
 
 const administrationReportApis = await testAdministrationReportApis({
-  platform, leader: leader.account, siteId, childSiteId, sectionId, teamId,
+  platform, leader: leader.account, leaderPersonId: leader.personId, siteId, childSiteId, sectionId, teamId,
   topReportId: mainTask.body.id, sectionReportId: sectionTask.id, teamReportId: teamTask.id,
   incompleteReportId: transitionChains.approvedReportTaskId, suffix, executeDefault,
 });

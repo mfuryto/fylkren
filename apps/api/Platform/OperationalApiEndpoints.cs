@@ -23,6 +23,7 @@ public static class OperationalApiEndpoints
         api.MapGet("/items/{itemId:guid}/activity", GetActivity).RequireScope("activity:read");
         api.MapGet("/items/{itemId:guid}/comments", GetComments).RequireScope("work:read");
         OperationalApiCommandEndpoints.Map(api);
+        OperationalDomainCommandEndpoints.Map(api);
         return endpoints;
     }
 
@@ -113,7 +114,7 @@ public static class OperationalApiEndpoints
     }
 
     private static async Task<IResult> GetPlanning(Guid itemId, ClaimsPrincipal user,
-        FylkrenDbContext db, CancellationToken ct)
+        HttpContext context, FylkrenDbContext db, CancellationToken ct)
     {
         var access = await LoadAccess(itemId, user, db, ct);
         if (access.Error is not null) return access.Error;
@@ -121,7 +122,7 @@ public static class OperationalApiEndpoints
             .Select(x => new { x.Id, x.DefinitionId, definition = x.Definition.Name, x.Status,
                 x.CurrentStep, x.StartedAt, x.TimelineStartedOn, x.ProposedUnitId,
                 proposedUnit = x.ProposedUnit == null ? null : x.ProposedUnit.Name,
-                x.ProposedPriority, x.ProposedDueAt, x.ResultNote }).SingleOrDefaultAsync(ct);
+                x.ProposedPriority, x.ProposedDueAt, x.ResultNote, version = EF.Property<uint>(x, "xmin") }).SingleOrDefaultAsync(ct);
         if (run is null) return Results.NotFound();
         var steps = await db.WorkflowSteps.AsNoTracking().Where(x => x.DefinitionId == run.DefinitionId)
             .OrderBy(x => x.SortOrder).Select(x => new { x.Id, x.Name, x.SortOrder, x.IsOptional,
@@ -131,17 +132,19 @@ public static class OperationalApiEndpoints
         var timeline = await db.WorkflowTimelineEvents.AsNoTracking().Where(x => x.RunId == run.Id)
             .OrderBy(x => x.Date).ThenBy(x => x.SortOrder)
             .Select(x => new { x.Id, x.StepId, x.Date, x.Description, x.SortOrder }).ToListAsync(ct);
+        context.Response.Headers.ETag = $"\"{run.version}\"";
         return Results.Ok(new { run, steps, documents, timeline });
     }
 
     private static async Task<IResult> GetExecution(Guid itemId, ClaimsPrincipal user,
-        FylkrenDbContext db, CancellationToken ct)
+        HttpContext context, FylkrenDbContext db, CancellationToken ct)
     {
         var access = await LoadAccess(itemId, user, db, ct);
         if (access.Error is not null) return access.Error;
         var run = await db.ExecutionRuns.AsNoTracking().Where(x => x.WorkItemId == itemId)
             .Select(x => new { x.Id, x.DefinitionId, definition = x.Definition == null ? null : x.Definition.Name,
-                x.Status, x.CurrentStep, x.TimelineStartedOn, x.ClaimedAt, x.UpdatedAt }).SingleOrDefaultAsync(ct);
+                x.Status, x.CurrentStep, x.TimelineStartedOn, x.ClaimedAt, x.UpdatedAt,
+                version = EF.Property<uint>(x, "xmin") }).SingleOrDefaultAsync(ct);
         if (run is null) return Results.NotFound();
         var steps = run.DefinitionId is null ? [] : await db.WorkflowSteps.AsNoTracking()
             .Where(x => x.DefinitionId == run.DefinitionId).OrderBy(x => x.SortOrder)
@@ -154,6 +157,7 @@ public static class OperationalApiEndpoints
         var timeline = await db.ExecutionTimelineEvents.AsNoTracking().Where(x => x.RunId == run.Id)
             .OrderBy(x => x.Date).ThenBy(x => x.SortOrder)
             .Select(x => new { x.Id, x.StepId, x.Date, x.Description, x.SortOrder }).ToListAsync(ct);
+        context.Response.Headers.ETag = $"\"{run.version}\"";
         return Results.Ok(new { run, steps, documents, requests, timeline });
     }
 
@@ -162,12 +166,12 @@ public static class OperationalApiEndpoints
     {
         var access = await LoadAccess(itemId, user, db, ct);
         if (access.Error is not null) return access.Error;
-        var ids = await db.DecisionReferences.AsNoTracking().Where(x => x.ObjectType == "task" && x.ObjectId == itemId)
+        var ids = await db.DecisionReferences.AsNoTracking().Where(x => x.ObjectType == "work_item" && x.ObjectId == itemId)
             .Select(x => x.Revision.DecisionId).Distinct().Take(200).ToListAsync(ct);
         var revisions = await db.DecisionRevisions.AsNoTracking().Where(x => ids.Contains(x.DecisionId))
             .OrderBy(x => x.DecisionId).ThenByDescending(x => x.RevisionNumber)
             .Select(x => new { x.Id, x.DecisionId, x.RevisionNumber, x.Title, x.DecisionText, x.Rationale,
-                x.Status, x.DecidedAt, x.RecordedAt,
+                x.Status, x.DecidedAt, x.RecordedAt, x.RecordedByPersonId, x.RecordedByMachineId,
                 makers = x.Makers.OrderBy(m => m.DisplayNameSnapshot).Select(m => new { m.PersonId, m.DisplayNameSnapshot }) })
             .ToListAsync(ct);
         return Results.Ok(new { items = revisions.GroupBy(x => x.DecisionId).Select(x => x.First()) });
@@ -185,10 +189,11 @@ public static class OperationalApiEndpoints
                 revisions = x.Revisions.OrderByDescending(v => v.Version).Select(v => new { v.Id, v.Version,
                     v.Title, v.Description, v.Probability, v.Impact, v.Score, v.Level, v.OwnerPersonId,
                     v.OwnerNameSnapshot, v.Status, v.DueDate, v.ResidualProbability, v.ResidualImpact,
-                    v.ResidualScore, v.ResidualLevel, v.RecordedAt }),
+                    v.ResidualScore, v.ResidualLevel, v.RecordedAt, v.RecordedByPersonId, v.RecordedByMachineId }),
                 mitigations = x.Mitigations.OrderBy(m => m.CreatedAt).Select(m => new { m.Id, m.CreatedAt,
                     revisions = m.Revisions.OrderByDescending(v => v.Version).Select(v => new { v.Id, v.Version,
-                        v.Action, v.OwnerPersonId, v.OwnerNameSnapshot, v.Status, v.DueDate, v.RecordedAt }) })
+                        v.Action, v.OwnerPersonId, v.OwnerNameSnapshot, v.Status, v.DueDate, v.RecordedAt,
+                        v.RecordedByPersonId, v.RecordedByMachineId }) })
             }).ToListAsync(ct);
         return Results.Ok(new { items = risks.Select(x => new { x.Id, x.CreatedAt,
             current = x.revisions.FirstOrDefault(), mitigations = x.mitigations.Select(m => new

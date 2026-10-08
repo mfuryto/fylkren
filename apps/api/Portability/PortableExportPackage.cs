@@ -87,15 +87,17 @@ internal static class PortableExportPackage
             .Concat(comments.Where(value => value.AuthorMachineId != null).Select(value => value.AuthorMachineId!.Value))
             .Concat(machineAudit.Select(value => value.MachineIdentityId))
             .Concat(domainEvents.Where(value => value.ActorMachineId != null).Select(value => value.ActorMachineId!.Value))
-            .Distinct().ToArray();
+            .ToHashSet();
         var personIds = webhookSubscriptions.Select(s => s.CreatedByPersonId).ToHashSet(); personIds.Add(actorPersonId);
         var datasets = new List<(string Name, byte[] Content)>();
         void Entities<T>(string name, IEnumerable<T> rows) where T : class
         {
             var values = rows.ToArray();
-            var properties = db.Model.FindEntityType(typeof(T))!.GetProperties().Where(p => (p.Name.EndsWith("PersonId", StringComparison.Ordinal) || p.Name == "UpdatedBy") && p.PropertyInfo is not null);
+            var properties = db.Model.FindEntityType(typeof(T))!.GetProperties().Where(p =>
+                (p.Name.EndsWith("PersonId", StringComparison.Ordinal) || p.Name.EndsWith("MachineId", StringComparison.Ordinal) || p.Name == "UpdatedBy") && p.PropertyInfo is not null);
             foreach (var row in values) foreach (var property in properties)
-                if (property.PropertyInfo!.GetValue(row) is Guid personId) personIds.Add(personId);
+                if (property.PropertyInfo!.GetValue(row) is Guid id)
+                { if (property.Name.EndsWith("MachineId", StringComparison.Ordinal)) machineIds.Add(id); else personIds.Add(id); }
             AddEntities(datasets, db, name, values, maximumBytes);
         }
 

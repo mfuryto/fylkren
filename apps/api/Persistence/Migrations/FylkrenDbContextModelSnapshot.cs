@@ -235,7 +235,11 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<Guid>("CreatedByPersonId")
+                    b.Property<Guid?>("CreatedByMachineId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_machine_id");
+
+                    b.Property<Guid?>("CreatedByPersonId")
                         .HasColumnType("uuid")
                         .HasColumnName("created_by_person_id");
 
@@ -245,11 +249,16 @@ namespace Fylkren.Api.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedByMachineId");
+
                     b.HasIndex("CreatedByPersonId");
 
                     b.HasIndex("SiteId", "CreatedAt");
 
-                    b.ToTable("decisions", (string)null);
+                    b.ToTable("decisions", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_decisions_actor", "(created_by_person_id IS NOT NULL) <> (created_by_machine_id IS NOT NULL)");
+                        });
                 });
 
             modelBuilder.Entity("Fylkren.Api.Decisions.DecisionMaker", b =>
@@ -335,7 +344,11 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("recorded_at");
 
-                    b.Property<Guid>("RecordedByPersonId")
+                    b.Property<Guid?>("RecordedByMachineId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("recorded_by_machine_id");
+
+                    b.Property<Guid?>("RecordedByPersonId")
                         .HasColumnType("uuid")
                         .HasColumnName("recorded_by_person_id");
 
@@ -357,12 +370,17 @@ namespace Fylkren.Api.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("RecordedByMachineId");
+
                     b.HasIndex("RecordedByPersonId");
 
                     b.HasIndex("DecisionId", "RevisionNumber")
                         .IsUnique();
 
-                    b.ToTable("decision_revisions", (string)null);
+                    b.ToTable("decision_revisions", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_decision_revisions_actor", "(recorded_by_person_id IS NOT NULL) <> (recorded_by_machine_id IS NOT NULL)");
+                        });
                 });
 
             modelBuilder.Entity("Fylkren.Api.DomainEvents.DomainEvent", b =>
@@ -3159,8 +3177,9 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.HasIndex("SiteId");
 
                     b.HasIndex("MachineIdentityId", "SiteId", "OrganizationUnitId")
-                        .IsUnique()
-                        .HasAnnotation("Npgsql:NullsDistinct", false);
+                        .IsUnique();
+
+                    NpgsqlIndexBuilderExtensions.AreNullsDistinct(b.HasIndex("MachineIdentityId", "SiteId", "OrganizationUnitId"), false);
 
                     b.ToTable("api_work_grants", (string)null);
                 });
@@ -3617,7 +3636,11 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<Guid>("CreatedByPersonId")
+                    b.Property<Guid?>("CreatedByMachineId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_machine_id");
+
+                    b.Property<Guid?>("CreatedByPersonId")
                         .HasColumnType("uuid")
                         .HasColumnName("created_by_person_id");
 
@@ -3637,9 +3660,14 @@ namespace Fylkren.Api.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedByMachineId");
+
                     b.HasIndex("SiteId", "ObjectType", "ObjectId");
 
-                    b.ToTable("risks", (string)null);
+                    b.ToTable("risks", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_risks_actor", "(created_by_person_id IS NOT NULL) <> (created_by_machine_id IS NOT NULL)");
+                        });
                 });
 
             modelBuilder.Entity("Fylkren.Api.Risks.RiskMitigation", b =>
@@ -3653,7 +3681,11 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<Guid>("CreatedByPersonId")
+                    b.Property<Guid?>("CreatedByMachineId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_machine_id");
+
+                    b.Property<Guid?>("CreatedByPersonId")
                         .HasColumnType("uuid")
                         .HasColumnName("created_by_person_id");
 
@@ -3663,9 +3695,14 @@ namespace Fylkren.Api.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedByMachineId");
+
                     b.HasIndex("RiskId");
 
-                    b.ToTable("risk_mitigations", (string)null);
+                    b.ToTable("risk_mitigations", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_risk_mitigations_actor", "(created_by_person_id IS NOT NULL) <> (created_by_machine_id IS NOT NULL)");
+                        });
                 });
 
             modelBuilder.Entity("Fylkren.Api.Risks.RiskMitigationRevision", b =>
@@ -3703,7 +3740,11 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("recorded_at");
 
-                    b.Property<Guid>("RecordedByPersonId")
+                    b.Property<Guid?>("RecordedByMachineId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("recorded_by_machine_id");
+
+                    b.Property<Guid?>("RecordedByPersonId")
                         .HasColumnType("uuid")
                         .HasColumnName("recorded_by_person_id");
 
@@ -3719,10 +3760,15 @@ namespace Fylkren.Api.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("RecordedByMachineId");
+
                     b.HasIndex("MitigationId", "Version")
                         .IsUnique();
 
-                    b.ToTable("risk_mitigation_revisions", (string)null);
+                    b.ToTable("risk_mitigation_revisions", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_risk_mitigation_revisions_actor", "(recorded_by_person_id IS NOT NULL) <> (recorded_by_machine_id IS NOT NULL)");
+                        });
                 });
 
             modelBuilder.Entity("Fylkren.Api.Risks.RiskRevision", b =>
@@ -3770,7 +3816,11 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("recorded_at");
 
-                    b.Property<Guid>("RecordedByPersonId")
+                    b.Property<Guid?>("RecordedByMachineId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("recorded_by_machine_id");
+
+                    b.Property<Guid?>("RecordedByPersonId")
                         .HasColumnType("uuid")
                         .HasColumnName("recorded_by_person_id");
 
@@ -3817,10 +3867,15 @@ namespace Fylkren.Api.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("RecordedByMachineId");
+
                     b.HasIndex("RiskId", "Version")
                         .IsUnique();
 
-                    b.ToTable("risk_revisions", (string)null);
+                    b.ToTable("risk_revisions", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_risk_revisions_actor", "(recorded_by_person_id IS NOT NULL) <> (recorded_by_machine_id IS NOT NULL)");
+                        });
                 });
 
             modelBuilder.Entity("Fylkren.Api.WorkManagement.ExecutionExternalRequest", b =>
@@ -5060,17 +5115,23 @@ namespace Fylkren.Api.Persistence.Migrations
 
             modelBuilder.Entity("Fylkren.Api.Decisions.Decision", b =>
                 {
+                    b.HasOne("Fylkren.Api.Platform.ApiMachineIdentity", "CreatedByMachine")
+                        .WithMany()
+                        .HasForeignKey("CreatedByMachineId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Fylkren.Api.Identity.Person", "CreatedByPerson")
                         .WithMany()
                         .HasForeignKey("CreatedByPersonId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Fylkren.Api.Organization.Site", "Site")
                         .WithMany()
                         .HasForeignKey("SiteId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("CreatedByMachine");
 
                     b.Navigation("CreatedByPerson");
 
@@ -5107,13 +5168,19 @@ namespace Fylkren.Api.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Fylkren.Api.Platform.ApiMachineIdentity", "RecordedByMachine")
+                        .WithMany()
+                        .HasForeignKey("RecordedByMachineId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Fylkren.Api.Identity.Person", "RecordedByPerson")
                         .WithMany()
                         .HasForeignKey("RecordedByPersonId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Decision");
+
+                    b.Navigation("RecordedByMachine");
 
                     b.Navigation("RecordedByPerson");
                 });
@@ -5655,13 +5722,30 @@ namespace Fylkren.Api.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Fylkren.Api.Risks.Risk", b =>
+                {
+                    b.HasOne("Fylkren.Api.Platform.ApiMachineIdentity", "CreatedByMachine")
+                        .WithMany()
+                        .HasForeignKey("CreatedByMachineId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByMachine");
+                });
+
             modelBuilder.Entity("Fylkren.Api.Risks.RiskMitigation", b =>
                 {
+                    b.HasOne("Fylkren.Api.Platform.ApiMachineIdentity", "CreatedByMachine")
+                        .WithMany()
+                        .HasForeignKey("CreatedByMachineId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Fylkren.Api.Risks.Risk", "Risk")
                         .WithMany("Mitigations")
                         .HasForeignKey("RiskId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("CreatedByMachine");
 
                     b.Navigation("Risk");
                 });
@@ -5673,15 +5757,29 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasForeignKey("MitigationId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("Fylkren.Api.Platform.ApiMachineIdentity", "RecordedByMachine")
+                        .WithMany()
+                        .HasForeignKey("RecordedByMachineId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("RecordedByMachine");
                 });
 
             modelBuilder.Entity("Fylkren.Api.Risks.RiskRevision", b =>
                 {
+                    b.HasOne("Fylkren.Api.Platform.ApiMachineIdentity", "RecordedByMachine")
+                        .WithMany()
+                        .HasForeignKey("RecordedByMachineId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Fylkren.Api.Risks.Risk", null)
                         .WithMany("Revisions")
                         .HasForeignKey("RiskId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("RecordedByMachine");
                 });
 
             modelBuilder.Entity("Fylkren.Api.WorkManagement.ExecutionExternalRequest", b =>

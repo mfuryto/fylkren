@@ -33,6 +33,7 @@ public static class DecisionEndpoints
             .Include(value => value.Revisions).ThenInclude(value => value.Makers)
             .Include(value => value.Revisions).ThenInclude(value => value.References)
             .Include(value => value.Revisions).ThenInclude(value => value.RecordedByPerson)
+            .Include(value => value.Revisions).ThenInclude(value => value.RecordedByMachine)
             .OrderByDescending(value => value.CreatedAt)
             .ToListAsync(ct);
         return Results.Ok(decisions.Select(ToResponse));
@@ -145,7 +146,8 @@ public static class DecisionEndpoints
         var revisions = decision.Revisions.OrderByDescending(value => value.RevisionNumber).Select(value => new
         {
             value.Id, value.RevisionNumber, value.Title, decision = value.DecisionText, value.Rationale, value.Status,
-            value.DecidedAt, value.RecordedAt, recordedBy = value.RecordedByPerson.DisplayName,
+            value.DecidedAt, value.RecordedAt,
+            recordedBy = value.RecordedByPerson?.DisplayName ?? value.RecordedByMachine?.Name ?? "System",
             decisionMakers = value.Makers.OrderBy(maker => maker.DisplayNameSnapshot).Select(maker => new { maker.PersonId, displayName = maker.DisplayNameSnapshot }),
             references = value.References.Select(reference => new { reference.Id, reference.ObjectType, reference.ObjectId })
         }).ToList();

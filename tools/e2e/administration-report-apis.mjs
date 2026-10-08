@@ -13,7 +13,7 @@ async function machineRequest(credential, path, options = {}) {
   return { status: response.status, body: parsed, etag: response.headers.get('etag') };
 }
 
-export async function testAdministrationReportApis({ platform, leader, siteId, childSiteId, sectionId, teamId, topReportId, sectionReportId, teamReportId, incompleteReportId, suffix, executeDefault }) {
+export async function testAdministrationReportApis({ platform, leader, leaderPersonId, siteId, childSiteId, sectionId, teamId, topReportId, sectionReportId, teamReportId, incompleteReportId, suffix, executeDefault }) {
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
   async function createClient(name, scopes) {
     const result = await platform.post('/api/platform/api-clients/', { name, scopes, expiresAt });
@@ -26,6 +26,7 @@ export async function testAdministrationReportApis({ platform, leader, siteId, c
     'users:read', 'users:assign', 'users:move', 'users:deactivate',
     'classifications:read', 'classifications:write', 'reports:read',
     'work:read', 'work:write', 'work:transition', 'activity:read',
+    'decisions:write', 'risks:write', 'planning:write', 'execution:write',
   ]);
   const limited = await createClient(`Synthetic limited API ${suffix}`, ['sites:read']);
   const admin = '/api/v1/administration';
@@ -310,6 +311,95 @@ export async function testAdministrationReportApis({ platform, leader, siteId, c
   });
   assert.equal(accepted.status, 200, `API transition: ${JSON.stringify(accepted.body)}`);
   assert.equal(accepted.body.status, 'under_review');
+  const decisionBody = { title: 'Synthetic API decision', decision: 'Prepare the governed integration.',
+    rationale: 'Exercise machine authorship without granting formal approval.', decidedAt: null,
+    decisionMakerIds: [leaderPersonId] };
+  const decision = await machineRequest(full.token, `${work}/items/${apiWork.body.id}/decisions`, {
+    method: 'POST', body: decisionBody, headers: { 'Idempotency-Key': `decision-create-${suffix}` },
+  });
+  assert.equal(decision.status, 201, `API decision: ${JSON.stringify(decision.body)}`);
+  const revisedDecision = await machineRequest(full.token, `${work}/items/${apiWork.body.id}/decisions/${decision.body.id}`, {
+    method: 'PUT', body: { ...decisionBody, rationale: 'Revised synthetic rationale.', expectedRevision: 1 },
+    headers: { 'Idempotency-Key': `decision-revise-${suffix}` },
+  });
+  assert.equal(revisedDecision.status, 200, `API decision revision: ${JSON.stringify(revisedDecision.body)}`);
+  assert.equal(revisedDecision.body.revision, 2);
+  const decisions = await machineRequest(full.token, `${work}/items/${apiWork.body.id}/decisions`);
+  assert.ok(decisions.body.items.some(value => value.decisionId === decision.body.id &&
+    value.recordedByMachineId === full.id && value.status === 'draft'), 'Decision draft lost machine authorship');
+
+  const riskBody = { title: 'Synthetic API risk', description: 'Integration delivery can be delayed.',
+    probability: 3, impact: 4, ownerPersonId: leaderPersonId, status: 'active', dueDate: null,
+    residualProbability: 2, residualImpact: 2 };
+  const risk = await machineRequest(full.token, `${work}/items/${apiWork.body.id}/risks`, {
+    method: 'POST', body: riskBody, headers: { 'Idempotency-Key': `risk-create-${suffix}` },
+  });
+  assert.equal(risk.status, 201, `API risk: ${JSON.stringify(risk.body)}`);
+  const measure = await machineRequest(full.token, `${work}/items/${apiWork.body.id}/risks/${risk.body.id}/measures`, {
+    method: 'POST', body: { action: 'Use a staged integration.', ownerPersonId: leaderPersonId,
+      status: 'planned', dueDate: null }, headers: { 'Idempotency-Key': `measure-create-${suffix}` },
+  });
+  assert.equal(measure.status, 201, `API measure: ${JSON.stringify(measure.body)}`);
+  const revisedMeasure = await machineRequest(full.token,
+    `${work}/items/${apiWork.body.id}/risks/${risk.body.id}/measures/${measure.body.id}`, {
+      method: 'PUT', body: { action: 'Use a staged and monitored integration.', ownerPersonId: leaderPersonId,
+        status: 'in_progress', dueDate: null, expectedVersion: 1 },
+      headers: { 'Idempotency-Key': `measure-revise-${suffix}` },
+    });
+  assert.equal(revisedMeasure.status, 200, `API measure revision: ${JSON.stringify(revisedMeasure.body)}`);
+  const risks = await machineRequest(full.token, `${work}/items/${apiWork.body.id}/risks`);
+  assert.ok(risks.body.items.some(value => value.id === risk.body.id && value.current.recordedByMachineId === full.id &&
+    value.mitigations.some(entry => entry.id === measure.body.id && entry.current.recordedByMachineId === full.id)),
+  'Risk or measure lost machine authorship');
+
+  async function createAcceptedApiWork(label) {
+    const slug = label.toLowerCase().replaceAll(' ', '-');
+    const createdWork = await machineRequest(full.token, `${work}/items`, { method: 'POST',
+      body: { ...apiWorkBody, title: `${label} ${suffix}` },
+      headers: { 'Idempotency-Key': `${slug}-${suffix}` } });
+    assert.equal(createdWork.status, 201, `${label} creation: ${JSON.stringify(createdWork.body)}`);
+    const transitioned = await machineRequest(full.token, `${work}/items/${createdWork.body.id}/transitions`, {
+      method: 'POST', body: { status: 'under_review', decisionNote: null, priority: 'normal' },
+      headers: { 'If-Match': createdWork.etag, 'Idempotency-Key': `${slug}-accept-${suffix}` },
+    });
+    assert.equal(transitioned.status, 200, `${label} acceptance: ${JSON.stringify(transitioned.body)}`);
+    return createdWork.body.id;
+  }
+  const planningItemId = await createAcceptedApiWork('API planning');
+  assert.equal((await leader.put(`/api/work/sites/${siteId}/items/${planningItemId}/status`, {
+    status: 'planning', assignedUnitId: null, decisionNote: null, priority: null })).status, 204);
+  const planningQueue = await leader.request(`/api/workflows/planning/sites/${siteId}`);
+  const planningRun = planningQueue.body.items.find(value => value.item.id === planningItemId);
+  assert.ok(planningRun?.id && planningRun.steps.length > 0, 'API planning fixture has no run or steps');
+  assert.equal((await leader.post(`/api/workflows/planning/${planningRun.id}/claim`, {})).status, 204);
+  const planningRead = await machineRequest(full.token, `${work}/items/${planningItemId}/planning`);
+  assert.equal(planningRead.status, 200); assert.ok(planningRead.etag);
+  const planningDocument = await machineRequest(full.token,
+    `${work}/items/${planningItemId}/planning/steps/${planningRead.body.steps[0].id}`, {
+      method: 'PUT', body: { content: 'Synthetic machine planning documentation.', links: [], timelineEvents: [] },
+      headers: { 'If-Match': planningRead.etag },
+    });
+  assert.equal(planningDocument.status, 200, `API planning document: ${JSON.stringify(planningDocument.body)}`);
+
+  const executionItemId = await createAcceptedApiWork('API execution');
+  assert.equal((await leader.put(`/api/work/sites/${siteId}/items/${executionItemId}/status`, {
+    status: 'execution', assignedUnitId: null, decisionNote: null, priority: null })).status, 204);
+  const executionQueue = await leader.request(`/api/execution/sites/${siteId}`);
+  const definition = executionQueue.body.definitions.find(value => value.name === 'Standard');
+  assert.ok(definition, 'API execution fixture has no Standard workflow');
+  assert.equal((await leader.post(`/api/execution/items/${executionItemId}/claim`, {})).status, 204);
+  const claimedExecution = await leader.request(`/api/execution/sites/${siteId}`);
+  const executionRun = claimedExecution.body.items.find(value => value.id === executionItemId)?.run;
+  assert.ok(executionRun?.id, 'API execution fixture has no run');
+  assert.equal((await leader.post(`/api/execution/${executionRun.id}/start`, { definitionId: definition.id })).status, 204);
+  const executionRead = await machineRequest(full.token, `${work}/items/${executionItemId}/execution`);
+  assert.equal(executionRead.status, 200); assert.ok(executionRead.etag && executionRead.body.steps.length > 0);
+  const executionDocument = await machineRequest(full.token,
+    `${work}/items/${executionItemId}/execution/steps/${executionRead.body.steps[0].id}`, {
+      method: 'PUT', body: { content: 'Synthetic machine execution documentation.', timelineEvents: [] },
+      headers: { 'If-Match': executionRead.etag },
+    });
+  assert.equal(executionDocument.status, 200, `API execution document: ${JSON.stringify(executionDocument.body)}`);
   const apiActivity = await machineRequest(full.token, `${work}/items/${apiWork.body.id}/activity`);
   assert.equal(apiActivity.status, 200);
   assert.ok(apiActivity.body.items.some(value => value.eventType === 'assignment.accepted' && value.actorMachineId === full.id),

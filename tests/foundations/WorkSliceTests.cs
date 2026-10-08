@@ -115,6 +115,10 @@ internal static class WorkSliceTests
         await Blocked(db, $"UPDATE domain_events SET payload_json = '{{}}'::jsonb WHERE id = '{fact.Id}'", "domain_activity_immutable");
         try { await db.GetService<Microsoft.EntityFrameworkCore.Migrations.IMigrator>().MigrateAsync("20261002211913_AddActivityLifecycleFoundation"); throw new Exception("Downgrade after cutover was accepted."); }
         catch (Npgsql.PostgresException error) when (error.ConstraintName == "activity_cutover_forward_fix_required") { }
+        // EF applies each down migration in its own transaction. The expected cutover rejection can
+        // therefore leave later additive migrations temporarily removed; restore the current model
+        // before the remaining foundation tests reuse this disposable database.
+        await db.Database.MigrateAsync();
         Console.WriteLine("Work slice database tests passed: one v1/canonical fact, audit correlation, frozen eligibility, lifecycle separation, old-writer rejection, content guards, restore and history preservation.");
     }
     private static void Require(bool value, string message) { if (!value) throw new Exception(message); }

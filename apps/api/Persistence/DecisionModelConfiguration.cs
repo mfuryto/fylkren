@@ -13,10 +13,13 @@ internal static class DecisionModelConfiguration
         decision.Property(value => value.Id).HasColumnName("id");
         decision.Property(value => value.SiteId).HasColumnName("site_id");
         decision.Property(value => value.CreatedByPersonId).HasColumnName("created_by_person_id");
+        decision.Property(value => value.CreatedByMachineId).HasColumnName("created_by_machine_id");
         decision.Property(value => value.CreatedAt).HasColumnName("created_at");
         decision.HasIndex(value => new { value.SiteId, value.CreatedAt });
         decision.HasOne(value => value.Site).WithMany().HasForeignKey(value => value.SiteId).OnDelete(DeleteBehavior.Restrict);
         decision.HasOne(value => value.CreatedByPerson).WithMany().HasForeignKey(value => value.CreatedByPersonId).OnDelete(DeleteBehavior.Restrict);
+        decision.HasOne(value => value.CreatedByMachine).WithMany().HasForeignKey(value => value.CreatedByMachineId).OnDelete(DeleteBehavior.Restrict);
+        decision.ToTable(table => table.HasCheckConstraint("CK_decisions_actor", "(created_by_person_id IS NOT NULL) <> (created_by_machine_id IS NOT NULL)"));
 
         var revision = modelBuilder.Entity<DecisionRevision>();
         revision.ToTable("decision_revisions");
@@ -30,10 +33,13 @@ internal static class DecisionModelConfiguration
         revision.Property(value => value.Status).HasColumnName("status").HasMaxLength(30);
         revision.Property(value => value.DecidedAt).HasColumnName("decided_at");
         revision.Property(value => value.RecordedByPersonId).HasColumnName("recorded_by_person_id");
+        revision.Property(value => value.RecordedByMachineId).HasColumnName("recorded_by_machine_id");
         revision.Property(value => value.RecordedAt).HasColumnName("recorded_at");
         revision.HasIndex(value => new { value.DecisionId, value.RevisionNumber }).IsUnique();
         revision.HasOne(value => value.Decision).WithMany(value => value.Revisions).HasForeignKey(value => value.DecisionId).OnDelete(DeleteBehavior.Restrict);
         revision.HasOne(value => value.RecordedByPerson).WithMany().HasForeignKey(value => value.RecordedByPersonId).OnDelete(DeleteBehavior.Restrict);
+        revision.HasOne(value => value.RecordedByMachine).WithMany().HasForeignKey(value => value.RecordedByMachineId).OnDelete(DeleteBehavior.Restrict);
+        revision.ToTable(table => table.HasCheckConstraint("CK_decision_revisions_actor", "(recorded_by_person_id IS NOT NULL) <> (recorded_by_machine_id IS NOT NULL)"));
 
         var maker = modelBuilder.Entity<DecisionMaker>();
         maker.ToTable("decision_makers");

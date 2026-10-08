@@ -31,7 +31,11 @@ internal static class WorkApiManagementEndpoints
             .Where(x => x.IsActive && ((" " + x.Scopes + " ").Contains(" work:read ") ||
                 (" " + x.Scopes + " ").Contains(" work:write ") ||
                 (" " + x.Scopes + " ").Contains(" work:transition ") ||
-                (" " + x.Scopes + " ").Contains(" activity:read ")))
+                (" " + x.Scopes + " ").Contains(" activity:read ") ||
+                (" " + x.Scopes + " ").Contains(" decisions:write ") ||
+                (" " + x.Scopes + " ").Contains(" risks:write ") ||
+                (" " + x.Scopes + " ").Contains(" planning:write ") ||
+                (" " + x.Scopes + " ").Contains(" execution:write ")))
             .OrderBy(x => x.Name).Select(x => new { x.Id, x.Name, x.KeyId }).ToListAsync(ct);
         var units = await db.OrganizationUnits.AsNoTracking()
             .Where(x => x.SiteId == siteId && x.IsActive && !x.IsSiteRoot && !x.IsSiteLeadership)
@@ -56,7 +60,11 @@ internal static class WorkApiManagementEndpoints
                 ((" " + x.Scopes + " ").Contains(" work:read ") ||
                  (" " + x.Scopes + " ").Contains(" work:write ") ||
                  (" " + x.Scopes + " ").Contains(" work:transition ") ||
-                 (" " + x.Scopes + " ").Contains(" activity:read ")), ct))
+                 (" " + x.Scopes + " ").Contains(" activity:read ") ||
+                (" " + x.Scopes + " ").Contains(" decisions:write ") ||
+                (" " + x.Scopes + " ").Contains(" risks:write ") ||
+                (" " + x.Scopes + " ").Contains(" planning:write ") ||
+                (" " + x.Scopes + " ").Contains(" execution:write ")), ct))
             return Validation("machineIdentityId", "The API client does not exist or lacks an operational scope.");
         if (request.OrganizationUnitId is Guid unitId && !await db.OrganizationUnits.AnyAsync(x =>
                 x.Id == unitId && x.SiteId == siteId && x.IsActive && !x.IsSiteRoot && !x.IsSiteLeadership, ct))

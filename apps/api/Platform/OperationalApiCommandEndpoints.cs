@@ -215,7 +215,7 @@ internal static class OperationalApiCommandEndpoints
         FylkrenDbContext db, CancellationToken ct) => id is null || await db.WorkItemLookups
         .AnyAsync(x => x.Id == id && x.SiteId == siteId && x.Kind == kind && x.IsActive, ct);
 
-    private static async Task<IResult?> Replay(Guid machineId, string hash, HttpContext context,
+    internal static async Task<IResult?> Replay(Guid machineId, string hash, HttpContext context,
         FylkrenDbContext db, CancellationToken ct)
     {
         var key = context.Request.Headers["Idempotency-Key"].ToString().Trim();
@@ -229,7 +229,7 @@ internal static class OperationalApiCommandEndpoints
             : Problem(context, 409, "idempotency_key_reused", "Idempotency-Key has already been used with different content.");
     }
 
-    private static void AddIdempotency(FylkrenDbContext db, Guid machineId, HttpContext context,
+    internal static void AddIdempotency(FylkrenDbContext db, Guid machineId, HttpContext context,
         string hash, Guid resourceId, DateTimeOffset now) => db.ApiIdempotencyRecords.Add(
         new ApiIdempotencyRecord(Guid.NewGuid(), machineId,
             context.Request.Headers["Idempotency-Key"].ToString().Trim(), hash, resourceId, now));
@@ -246,18 +246,18 @@ internal static class OperationalApiCommandEndpoints
 
     private static bool ValidIdempotencyKey(string key) => key.Length is >= 8 and <= 128 &&
         key.All(character => char.IsAsciiLetterOrDigit(character) || "._:-".Contains(character));
-    private static bool IsIdempotencyConflict(DbUpdateException exception) =>
+    internal static bool IsIdempotencyConflict(DbUpdateException exception) =>
         exception.InnerException is Npgsql.PostgresException { SqlState: Npgsql.PostgresErrorCodes.UniqueViolation,
             ConstraintName: "IX_api_idempotency_records_machine_identity_id_key" };
-    private static string Hash(string operation, object request) => Convert.ToHexString(SHA256.HashData(
+    internal static string Hash(string operation, object request) => Convert.ToHexString(SHA256.HashData(
         Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new { operation, request })))).ToLowerInvariant();
     private static string? Normalize(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
     private static string ETag(uint version) => $"\"{version}\"";
-    private static IResult Validation(string field, string message) => Results.ValidationProblem(
+    internal static IResult Validation(string field, string message) => Results.ValidationProblem(
         new Dictionary<string, string[]> { [field] = [message] });
     private static IResult Forbidden(string title) => Results.Problem(statusCode: 403, title: title);
     private static IResult Conflict(string title) => Results.Conflict(new { error = title });
-    private static IResult Problem(HttpContext context, int status, string code, string detail) =>
+    internal static IResult Problem(HttpContext context, int status, string code, string detail) =>
         Results.Problem(statusCode: status, title: detail, extensions: new Dictionary<string, object?>
         { ["code"] = code, ["traceId"] = context.TraceIdentifier });
     private sealed record WritableAccess(Guid MachineId, WorkItem? Item, IResult? Error);

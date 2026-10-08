@@ -15,7 +15,7 @@ const sources = files('apps/api').map(path => ({
 const methods = ['Get', 'Post', 'Put', 'Patch', 'Delete'];
 const operationCount = sources.reduce((total, file) => total + methods.reduce((count, method) =>
   count + [...file.source.matchAll(new RegExp(`\\.Map${method}\\(`, 'g'))].length, 0), 0);
-assert.equal(operationCount, 314, 'Route inventory changed; reconcile function authorization before accepting it');
+assert.equal(operationCount, 322, 'Route inventory changed; reconcile function authorization before accepting it');
 
 const anonymousByFile = Object.fromEntries(sources.map(file => [file.path,
   [...file.source.matchAll(/\.AllowAnonymous\(/g)].length]).filter(([, count]) => count > 0));
@@ -75,10 +75,12 @@ const machine = readFileSync('apps/api/Platform/AdministrationApiEndpoints.cs', 
   readFileSync('apps/api/Platform/AdministrationClassificationEndpoints.cs', 'utf8') +
   readFileSync('apps/api/Platform/ReportApiEndpoints.cs', 'utf8') +
   readFileSync('apps/api/Platform/OperationalApiEndpoints.cs', 'utf8') +
-  readFileSync('apps/api/Platform/OperationalApiCommandEndpoints.cs', 'utf8');
+  readFileSync('apps/api/Platform/OperationalApiCommandEndpoints.cs', 'utf8') +
+  readFileSync('apps/api/Platform/OperationalDomainCommandEndpoints.cs', 'utf8');
 for (const scope of ['sites:read', 'sites:write', 'sites:move', 'sites:deactivate', 'users:read',
   'users:assign', 'users:move', 'users:deactivate', 'classifications:read', 'classifications:write', 'reports:read',
-  'work:read', 'work:write', 'work:transition', 'activity:read'])
+  'work:read', 'work:write', 'work:transition', 'activity:read', 'decisions:write', 'risks:write',
+  'planning:write', 'execution:write'])
   assert.ok(machine.includes(`RequireClaim("scope", "${scope}")`) || machine.includes(`RequireScope("${scope}")`),
     `Missing machine scope enforcement: ${scope}`);
 

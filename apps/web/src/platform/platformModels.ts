@@ -121,6 +121,10 @@ export const apiClientScopes = [
   { key: "work:write", labelKey: "scopeWorkWrite" },
   { key: "work:transition", labelKey: "scopeWorkTransition" },
   { key: "activity:read", labelKey: "scopeActivityRead" },
+  { key: "decisions:write", labelKey: "scopeDecisionsWrite" },
+  { key: "risks:write", labelKey: "scopeRisksWrite" },
+  { key: "planning:write", labelKey: "scopePlanningWrite" },
+  { key: "execution:write", labelKey: "scopeExecutionWrite" },
 ] as const;
 
 export function filterApiClients(clients: ApiClient[], filter: ApiClientStatusFilter) {

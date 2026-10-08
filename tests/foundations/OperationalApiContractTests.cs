@@ -1,6 +1,8 @@
 using System.Text.Json;
 using Fylkren.Api.DomainEvents;
+using Fylkren.Api.Decisions;
 using Fylkren.Api.Platform;
+using Fylkren.Api.Risks;
 
 internal static class OperationalApiContractTests
 {
@@ -15,6 +17,17 @@ internal static class OperationalApiContractTests
         Require(top.OrganizationUnitId is null && level.OrganizationUnitId == unit &&
             top.MachineIdentityId == machine && top.SiteId == site,
             "Operational grant lost its exact Site/level boundary.");
+        var decision = Decision.FromMachine(Guid.NewGuid(), site, machine, now);
+        var decisionRevision = DecisionRevision.FromMachine(Guid.NewGuid(), decision.Id, 1, "Draft",
+            "Synthetic decision", "Synthetic rationale", now, machine, now);
+        var risk = Risk.FromMachine(Guid.NewGuid(), site, "task", Guid.NewGuid(), machine, now);
+        var riskRevision = RiskRevision.FromMachine(Guid.NewGuid(), risk.Id, 1, "Risk", "Synthetic risk",
+            2, 3, Guid.NewGuid(), "Synthetic owner", "active", null, 1, 2, machine, now);
+        Require(decision.CreatedByMachineId == machine && decision.CreatedByPersonId is null &&
+            decisionRevision.RecordedByMachineId == machine && decisionRevision.RecordedByPersonId is null &&
+            decisionRevision.Status == "draft" && risk.CreatedByMachineId == machine &&
+            riskRevision.RecordedByMachineId == machine && riskRevision.Score == 6 && riskRevision.ResidualScore == 2,
+            "Machine domain authorship or risk scoring was lost.");
 
         using var json = JsonDocument.Parse(JsonSerializer.Serialize(ApiDescriptionEndpoints.Document()));
         var root = json.RootElement;
@@ -28,6 +41,27 @@ internal static class OperationalApiContractTests
             "/api/v1/work/items/{itemId}/activity", "/api/v1/work/items/{itemId}/comments",
             "/api/v1/work/items/{itemId}/transitions"
         }) Require(paths.TryGetProperty(path, out _), $"OpenAPI omitted {path}.");
+        foreach (var path in new[]
+        {
+            "/api/v1/work/items/{itemId}/decisions/{decisionId}",
+            "/api/v1/work/items/{itemId}/risks/{riskId}",
+            "/api/v1/work/items/{itemId}/risks/{riskId}/measures",
+            "/api/v1/work/items/{itemId}/risks/{riskId}/measures/{measureId}",
+            "/api/v1/work/items/{itemId}/planning/steps/{stepId}",
+            "/api/v1/work/items/{itemId}/execution/steps/{stepId}"
+        }) Require(paths.TryGetProperty(path, out _), $"OpenAPI omitted command path {path}.");
+        Require(paths.GetProperty("/api/v1/work/items/{itemId}/decisions").TryGetProperty("post", out _),
+            "OpenAPI omitted decision draft creation.");
+        Require(paths.GetProperty("/api/v1/work/items/{itemId}/risks").TryGetProperty("post", out _),
+            "OpenAPI omitted risk creation.");
+        foreach (var path in new[]
+        {
+            "/api/v1/work/items/{itemId}/decisions/{decisionId}",
+            "/api/v1/work/items/{itemId}/risks/{riskId}",
+            "/api/v1/work/items/{itemId}/risks/{riskId}/measures/{measureId}"
+        }) Require(paths.GetProperty(path).GetProperty("put").GetProperty("parameters").EnumerateArray()
+            .Any(parameter => parameter.GetProperty("name").GetString() == "Idempotency-Key"),
+            $"Revision command lacks idempotency in {path}.");
         Require(paths.GetProperty("/api/v1/work/items").TryGetProperty("post", out _),
             "OpenAPI omitted work-item creation.");
         Require(paths.GetProperty("/api/v1/work/items/{itemId}").TryGetProperty("put", out _),

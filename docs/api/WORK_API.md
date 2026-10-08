@@ -14,6 +14,10 @@ Every request requires both a scope and an exact Platform Manager grant for one 
 | `work:write` | Create and edit work items and add comments |
 | `work:transition` | Perform the explicitly supported non-approval status transitions |
 | `activity:read` | Read the bounded activity projection for a granted work item |
+| `decisions:write` | Create and revise decision drafts; recording or withdrawal remains human-only |
+| `risks:write` | Create and revise open risks and measures; acceptance, closure, completion and cancellation remain human-only |
+| `planning:write` | Document a step in an existing active planning run |
+| `execution:write` | Document a step in an existing active execution run |
 
 Platform Manager creates the client under **API**, then assigns its exact Site/work-level access in **Operational API access by Site**. Removing either the scope or grant stops access immediately.
 
@@ -45,7 +49,13 @@ Platform Manager creates the client under **API**, then assigns its exact Site/w
 
 Planning and execution return the current authoritative run, step structure, documents and timeline. Execution also returns external request state. Decision and risk responses return the latest retained revision for each stable object; risk measures include their latest revision. Activity returns identifiers and provenance but omits domain payloads and private metadata.
 
-Private learning, identity/security administration, human approvals, lifecycle disposition and unrestricted reports are outside this contract. Decisions, risks, measures, planning and execution are read projections in this first coherent operational slice; adding machine commands for them requires an explicit actor and approval policy rather than impersonating a person.
+Decision drafts can be created with `POST /items/{itemId}/decisions` and revised with `PUT /items/{itemId}/decisions/{decisionId}`. Every draft names one or more active human decision-makers. The machine is retained as the author; it cannot record or withdraw the decision. Creation and revision require `Idempotency-Key`; revisions also carry the latest numbered revision in the request.
+
+Open risks can be created and revised under `/items/{itemId}/risks`; measures use the nested `/measures` resource. A human Site member remains owner. Creation and revision require `Idempotency-Key`, and revisions carry the latest numbered version. Machine status is limited to `identified`, `active` and `mitigating` for risks and `planned` and `in_progress` for measures.
+
+`PUT /items/{itemId}/planning/steps/{stepId}` and `PUT /items/{itemId}/execution/steps/{stepId}` replace bounded documentation and timeline content in an existing `in_progress` run. Planning also accepts bounded document links. Read planning or execution first and send its `ETag` in `If-Match`. These routes do not claim responsibility, change the current step, submit, approve, return or complete the run.
+
+Private learning, identity/security administration, human approvals, lifecycle disposition and unrestricted reports are outside this contract.
 
 ## OpenAPI
 
