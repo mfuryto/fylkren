@@ -1,5 +1,5 @@
-using System.Net.Http.Headers;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.DataProtection;
@@ -19,7 +19,11 @@ internal sealed class AiProviderClient(IHttpClientFactory clients, IDataProtecti
         request.Content = new StringContent(JsonSerializer.Serialize(new
         {
             model = settings.Model, temperature = 0.2, max_tokens = 1400, stream = false,
-            messages = new[] { new { role = "system", content = systemPrompt }, new { role = "user", content = userPrompt } }
+            messages = new[]
+            {
+                new { role = "system", content = systemPrompt },
+                new { role = "user", content = $"{userPrompt}\n\n/no_think" }
+            }
         }), Encoding.UTF8, "application/json");
         using var response = await clients.CreateClient("ai-provider").SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
         if (response.StatusCode == HttpStatusCode.TooManyRequests)

@@ -23,11 +23,13 @@ internal static class AiAssistanceTests
             "System/user prompt separation or provider-secret non-disclosure failed.");
         Require(handler.Body.Contains("\"max_tokens\":1400") && handler.Body.Contains("\"stream\":false") && !handler.Body.Contains("\"tools\""),
             "The provider request did not retain the bounded non-streaming, no-tools contract.");
+        Require(handler.Body.Contains("/no_think"),
+            "The provider request did not disable provider reasoning to preserve the bounded token budget for visible output.");
         Require(handler.Uri == new Uri("https://ai.example.invalid/v1/chat/completions"), "Saved provider endpoint was changed.");
         handler.StatusCode = HttpStatusCode.TooManyRequests; handler.RetryAfterSeconds = 37;
         try { _ = await client.Complete(settings, "System boundary", "Rate limit test", default); throw new Exception("Provider 429 was accepted."); }
         catch (AiProviderRateLimitException error) { Require(error.RetryAfterSeconds == 37, "Provider Retry-After was not preserved."); }
-        Console.WriteLine("AI assistance tests passed: default-off settings, protected provider authentication, fixed role separation, bounded non-streaming request, secret non-disclosure, compatible response parsing and Retry-After preservation.");
+        Console.WriteLine("AI assistance tests passed: default-off settings, protected provider authentication, fixed role separation, bounded non-streaming no-reasoning request, secret non-disclosure, compatible response parsing and Retry-After preservation.");
     }
 
     private sealed class Factory(HttpClient client) : IHttpClientFactory
