@@ -322,8 +322,8 @@ export function PlanningPage({
         targetId={aiDraft.stepId}
         language={language}
         timeZone={timeZone}
-        onUseDraft={content => {
-          setStepDrafts(current => ({ ...current, [aiDraft.stepId]: content }));
+        onUsePlanningDrafts={drafts => {
+          setStepDrafts(current => ({ ...current, ...Object.fromEntries(drafts.map(draft => [aiDraft.run.steps[draft.stepNumber - 1].id, draft.content])) }));
           setAiDraft(null);
         }}
         onClose={() => setAiDraft(null)}

@@ -14,13 +14,22 @@ internal static class AiAssistanceTests
             "A supported display locale with Unicode formatting extensions was rejected.");
         Require(AiEndpoints.NormalizeFeature("drafts") == "planning" && AiEndpoints.NormalizeFeature("risks") == "risks" && AiEndpoints.NormalizeFeature("decisions") == "decisions",
             "The broad draft function was not split into bounded compatible functions.");
-        Require(AiEndpoints.Instruction("planning", null).Contains("authoritative template", StringComparison.Ordinal) &&
-            AiEndpoints.Instruction("planning", null).Contains("current editor", StringComparison.Ordinal) &&
+        Require(AiEndpoints.Instruction("planning", null).Contains("template headings", StringComparison.Ordinal) &&
+            AiEndpoints.Instruction("planning", null).Contains("every supplied planning step", StringComparison.Ordinal) &&
             AiEndpoints.Instruction("risks", null).Contains("five", StringComparison.Ordinal) &&
             AiEndpoints.Instruction("risks", null).Contains("valid JSON", StringComparison.Ordinal) &&
             AiEndpoints.Instruction("decisions", null).Contains("three", StringComparison.Ordinal) &&
             AiEndpoints.Instruction("decisions", null).Contains("valid JSON", StringComparison.Ordinal),
             "The contextual planning template or bounded draft instructions were lost.");
+        var planningDrafts = AiEndpoints.ParsePlanningDrafts("{\"steps\":[{\"stepNumber\":2,\"content\":\"# Task\\n- Allocate owner\"},{\"stepNumber\":1,\"content\":\"# Analysis\\nKnown facts\"}]}", ["# Analysis", "# Task"]);
+        Require(planningDrafts.Length == 2 && planningDrafts[0].StepNumber == 1 && planningDrafts[1].Content.Contains("Allocate owner", StringComparison.Ordinal),
+            "Planning drafts were not distributed to the ordered template steps.");
+        try
+        {
+            _ = AiEndpoints.ParsePlanningDrafts("{\"steps\":[{\"stepNumber\":1,\"content\":\"A combined plan without template structure\"}]}", ["# Analysis", "# Task"]);
+            throw new Exception("A combined or structurally incompatible planning draft was accepted.");
+        }
+        catch (System.Text.Json.JsonException) { }
         var riskDrafts = System.Text.Json.JsonSerializer.Serialize(AiEndpoints.ParseDrafts("risks", "{\"risks\":[{\"title\":\"Loss of link\",\"cause\":\"Primary link fails\",\"consequence\":\"Coordination stops\",\"mitigation\":\"Prepare radio backup\",\"dueDate\":\"2026-11-15\"}]}"));
         Require(riskDrafts.Contains("Loss of link", StringComparison.Ordinal) && !riskDrafts.Contains("probability", StringComparison.OrdinalIgnoreCase),
             "Structured risk drafts lost their bounded fields or introduced AI scoring.");

@@ -47,15 +47,16 @@ export function RichTextContent({ value, empty }: { value: string | null | undef
 
 export function markdownToEditorHtml(value: string) {
   const escape = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const inline = (text: string) => escape(text).replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>");
   const lines = value.replace(/\r\n/g, "\n").split("\n");
   const blocks: string[] = [];
   for (let index = 0; index < lines.length;) {
     const line = lines[index];
     const heading = /^(#{1,4})\s+(.*)$/.exec(line);
-    if (heading) { blocks.push(`<h${heading[1].length}>${escape(heading[2]) || "<br>"}</h${heading[1].length}>`); index += 1; continue; }
-    if (/^[-*]\s+/.test(line)) { const items: string[] = []; while (index < lines.length) { const match = /^[-*]\s+(.*)$/.exec(lines[index]); if (!match) break; items.push(`<li>${escape(match[1]) || "<br>"}</li>`); index += 1; } blocks.push(`<ul>${items.join("")}</ul>`); continue; }
-    if (/^\d+[.)]\s+/.test(line)) { const items: string[] = []; while (index < lines.length) { const match = /^\d+[.)]\s+(.*)$/.exec(lines[index]); if (!match) break; items.push(`<li>${escape(match[1]) || "<br>"}</li>`); index += 1; } blocks.push(`<ol>${items.join("")}</ol>`); continue; }
-    blocks.push(line ? `<p>${escape(line)}</p>` : "<p><br></p>");
+    if (heading) { blocks.push(`<h${heading[1].length}>${inline(heading[2]) || "<br>"}</h${heading[1].length}>`); index += 1; continue; }
+    if (/^[-*]\s+/.test(line)) { const items: string[] = []; while (index < lines.length) { const match = /^[-*]\s+(.*)$/.exec(lines[index]); if (!match) break; items.push(`<li>${inline(match[1]) || "<br>"}</li>`); index += 1; } blocks.push(`<ul>${items.join("")}</ul>`); continue; }
+    if (/^\d+[.)]\s+/.test(line)) { const items: string[] = []; while (index < lines.length) { const match = /^\d+[.)]\s+(.*)$/.exec(lines[index]); if (!match) break; items.push(`<li>${inline(match[1]) || "<br>"}</li>`); index += 1; } blocks.push(`<ol>${items.join("")}</ol>`); continue; }
+    blocks.push(line ? `<p>${inline(line)}</p>` : "<p><br></p>");
     index += 1;
   }
   return blocks.join("");
@@ -63,17 +64,23 @@ export function markdownToEditorHtml(value: string) {
 
 export function editorHtmlToMarkdown(element: HTMLElement) {
   const text = (node: Node) => (node.textContent ?? "").replace(/\u00a0/g, " ").trimEnd();
+  const inlineText = (node: Node): string => {
+    if (node.nodeType === Node.TEXT_NODE) return (node.textContent ?? "").replace(/\u00a0/g, " ");
+    const item = node as HTMLElement;
+    const content = Array.from(item.childNodes).map(inlineText).join("");
+    return item.tagName?.toLowerCase() === "strong" || item.tagName?.toLowerCase() === "b" ? `**${content}**` : content;
+  };
   const blocks: string[] = [];
   const append = (node: Node) => {
     if (node.nodeType === Node.TEXT_NODE) { if (text(node)) blocks.push(text(node)); return; }
     const item = node as HTMLElement;
     const tag = item.tagName.toLowerCase();
-    if (/^h[1-4]$/.test(tag)) blocks.push(`${"#".repeat(Number(tag[1]))} ${text(item)}`.trimEnd());
-    else if (tag === "ul") blocks.push(Array.from(item.children).map((child) => `- ${text(child)}`).join("\n"));
-    else if (tag === "ol") blocks.push(Array.from(item.children).map((child, index) => `${index + 1}. ${text(child)}`).join("\n"));
+    if (/^h[1-4]$/.test(tag)) blocks.push(`${"#".repeat(Number(tag[1]))} ${inlineText(item)}`.trimEnd());
+    else if (tag === "ul") blocks.push(Array.from(item.children).map((child) => `- ${inlineText(child).trimEnd()}`).join("\n"));
+    else if (tag === "ol") blocks.push(Array.from(item.children).map((child, index) => `${index + 1}. ${inlineText(child).trimEnd()}`).join("\n"));
     else if (tag === "br") blocks.push("");
     else if (Array.from(item.children).some((child) => /^(div|p|h[1-4]|ul|ol)$/.test(child.tagName.toLowerCase()))) item.childNodes.forEach(append);
-    else blocks.push(text(item));
+    else blocks.push(inlineText(item).trimEnd());
   };
   element.childNodes.forEach(append);
   return blocks.join("\n").replace(/\n{3,}/g, "\n\n").trimEnd();

@@ -6,12 +6,13 @@ import { RichTextContent } from "../components/RichText";
 import { normalizeLanguage } from "../localization";
 import { useTranslation } from "../localization/LocalizationProvider";
 import type { WorkItem } from "../work/WorkItemModels";
+import { requestPlanningDrafts, type PlanningAiDraft } from "./aiDraftApi";
 
 export type AiFeature = "summary" | "planning" | "risks" | "decisions" | "learning" | "questions";
 type Result = { content: string; generatedAt: string; sourceUpdatedAt: string };
 type StreamEvent = { type: "start"; sourceUpdatedAt: string; correlationId?: string } | { type: "heartbeat" } | { type: "delta"; content: string } | { type: "done"; generatedAt: string } | { type: "error"; code: string; providerStatus?: number; correlationId?: string };
 
-export function TaskAiAssistant({ siteId, item, features, fixedFeature, contextId, targetId, onUseDraft, onClose, language, timeZone }: {
+export function TaskAiAssistant({ siteId, item, features, fixedFeature, contextId, targetId, onUseDraft, onUsePlanningDrafts, onClose, language, timeZone }: {
   siteId: string;
   item: Pick<WorkItem, "id" | "title">;
   features: AiFeature[];
@@ -19,6 +20,7 @@ export function TaskAiAssistant({ siteId, item, features, fixedFeature, contextI
   contextId?: string;
   targetId?: string;
   onUseDraft?: (content: string) => void;
+  onUsePlanningDrafts?: (drafts: PlanningAiDraft[]) => void;
   onClose: () => void;
   language: string;
   timeZone: string;
@@ -26,6 +28,7 @@ export function TaskAiAssistant({ siteId, item, features, fixedFeature, contextI
   const t = useTranslation();
   const [feature, setFeature] = useState<AiFeature>(fixedFeature ?? features[0] ?? "summary"), [question, setQuestion] = useState("");
   const [result, setResult] = useState<Result | null>(null), [busy, setBusy] = useState(false), [message, setMessage] = useState("");
+  const [planningDrafts, setPlanningDrafts] = useState<PlanningAiDraft[]>([]);
   const [elapsed, setElapsed] = useState(0);
   useEffect(() => {
     if (!busy) return;
@@ -34,9 +37,16 @@ export function TaskAiAssistant({ siteId, item, features, fixedFeature, contextI
     return () => window.clearInterval(timer);
   }, [busy]);
   async function run() {
-    setBusy(true); setMessage(""); setResult(null);
+    setBusy(true); setMessage(""); setResult(null); setPlanningDrafts([]);
     let correlationId = "";
     try {
+      if (feature === "planning") {
+        if (!contextId || !targetId) throw new Error(t("aiAssistFailed"));
+        const response = await requestPlanningDrafts(siteId, item.id, contextId, targetId, language);
+        setPlanningDrafts(response.drafts);
+        setResult({ content: response.drafts.map(draft => `## ${draft.stepNumber}. ${draft.stepName}\n\n${draft.content}`).join("\n\n---\n\n"), generatedAt: response.generatedAt, sourceUpdatedAt: response.sourceUpdatedAt });
+        return;
+      }
       const token = await getAntiforgeryToken();
       const response = await apiRequest(`/api/ai/sites/${siteId}/work-items/${item.id}/assist`, t("aiAssistFailed"), {
         method: "POST",
@@ -71,6 +81,6 @@ export function TaskAiAssistant({ siteId, item, features, fixedFeature, contextI
     <button className="primary-button" type="button" disabled={busy || feature === "questions" && question.trim().length < 2} onClick={() => void run()}>{busy ? t("aiWorking") : t("aiRun")}</button>
     {busy && <p className="status-message" role="status">{t(result?.content ? "aiReceiving" : "aiWaiting", { seconds: elapsed })}</p>}
     {message && <p className="status-message error-message" role="alert">{message}</p>}
-    <section className="site-detail-block" aria-live="polite"><h3>{t("aiResult")}</h3>{result ? <><div className="ai-result"><RichTextContent value={result.content} /></div><p className="muted">{t("aiGeneratedFromVersion", { date: new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short", timeZone }).format(new Date(result.sourceUpdatedAt)) })}</p>{onUseDraft && result.generatedAt && result.content.trim() && <button className="primary-button" type="button" onClick={() => onUseDraft(result.content)}>{t("aiUseDraft")}</button>}</> : <p className="muted">{t("aiNoResult")}</p>}</section>
+    <section className="site-detail-block" aria-live="polite"><h3>{t("aiResult")}</h3>{result ? <><div className="ai-result"><RichTextContent value={result.content} /></div><p className="muted">{t("aiGeneratedFromVersion", { date: new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short", timeZone }).format(new Date(result.sourceUpdatedAt)) })}</p>{onUsePlanningDrafts && planningDrafts.length > 0 && <button className="primary-button" type="button" onClick={() => onUsePlanningDrafts(planningDrafts)}>{t("aiUseDraft")}</button>}{onUseDraft && result.generatedAt && result.content.trim() && <button className="primary-button" type="button" onClick={() => onUseDraft(result.content)}>{t("aiUseDraft")}</button>}</> : <p className="muted">{t("aiNoResult")}</p>}</section>
   </div></Modal>;
 }

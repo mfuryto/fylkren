@@ -35,6 +35,11 @@ describe("markdownToEditorHtml", () => {
       .toBe("<ol><li>First</li><li>Second</li></ol><h2>New section</h2><ol><li>New first</li></ol>");
   });
 
+  it("renders and preserves bounded inline emphasis in the editor", () => {
+    expect(markdownToEditorHtml("## **Situation**\n- **Status:** Ready"))
+      .toBe("<h2><strong>Situation</strong></h2><ul><li><strong>Status:</strong> Ready</li></ul>");
+  });
+
   it("renders stored active-content payloads as inert text", () => {
     const payload = '# <img data-fylkren-xss src=x onerror="alert(1)">\n<script>alert(2)</script>\n- javascript:alert(3)';
     const html = renderToStaticMarkup(createElement(RichTextContent, { value: payload }));
