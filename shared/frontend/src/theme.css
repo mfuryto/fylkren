@@ -284,7 +284,6 @@ input, select, textarea { min-width: 0; max-width: 100%; }
 .status-message.error-message { border-color: color-mix(in srgb, #a4262c 32%, var(--border)); border-left-color: #a4262c; color: #721c22; background: color-mix(in srgb, #fde7e9 72%, var(--surface-subtle)); }
 .status-message.warning-message, .site-warning, .password-required { border-color: color-mix(in srgb, #c47f00 32%, var(--border)); border-left: 4px solid #c47f00; border-radius: 4px; background: color-mix(in srgb, #fff1cc 68%, var(--surface-subtle)); box-shadow: 0 1px 3px rgb(0 0 0 / 5%); }
 .status-message.status-active, .status-message.success { border-color: color-mix(in srgb, #107c10 30%, var(--border)); border-left-color: #107c10; color: #0b5a0b; background: color-mix(in srgb, #dff6dd 68%, var(--surface-subtle)); }
-.ai-result { white-space: pre-wrap; line-height: 1.45; }
 .enterprise-required-notice {
   display: flex;
   align-items: center;

@@ -1,6 +1,13 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { useTranslation } from "../localization/LocalizationProvider";
 
+function inlineMarkdown(value: string): ReactNode[] {
+  return value.split(/(\*\*[^*\n]+\*\*)/g).filter(Boolean).map((part, index) =>
+    part.startsWith("**") && part.endsWith("**")
+      ? <strong key={index}>{part.slice(2, -2)}</strong>
+      : <span key={index}>{part}</span>);
+}
+
 export function RichTextContent({ value, empty }: { value: string | null | undefined; empty?: string }) {
   const t = useTranslation();
   const source = value?.trim() ?? "";
@@ -10,29 +17,30 @@ export function RichTextContent({ value, empty }: { value: string | null | undef
   let index = 0;
   while (index < lines.length) {
     if (!lines[index].trim()) { index += 1; continue; }
+    if (/^(?:-{3,}|\*{3,}|_{3,})\s*$/.test(lines[index].trim())) { blocks.push(<hr key={`hr-${index}`} />); index += 1; continue; }
     const heading = /^(#{1,5})\s+(.*)$/.exec(lines[index]);
     if (heading) {
       const text = heading[2];
       const key = `heading-${index}`;
-      blocks.push(heading[1].length === 1 ? <h1 key={key}>{text}</h1> : heading[1].length === 2 ? <h2 key={key}>{text}</h2> : heading[1].length === 3 ? <h3 key={key}>{text}</h3> : heading[1].length === 4 ? <h4 key={key}>{text}</h4> : <h5 key={key}>{text}</h5>);
+      blocks.push(heading[1].length === 1 ? <h1 key={key}>{inlineMarkdown(text)}</h1> : heading[1].length === 2 ? <h2 key={key}>{inlineMarkdown(text)}</h2> : heading[1].length === 3 ? <h3 key={key}>{inlineMarkdown(text)}</h3> : heading[1].length === 4 ? <h4 key={key}>{inlineMarkdown(text)}</h4> : <h5 key={key}>{inlineMarkdown(text)}</h5>);
       index += 1;
       continue;
     }
     if (/^[-*]\s+/.test(lines[index])) {
       const items: string[] = [];
       while (index < lines.length) { const match = /^[-*]\s+(.*)$/.exec(lines[index]); if (!match) break; items.push(match[1]); index += 1; }
-      blocks.push(<ul key={`ul-${index}`}>{items.map((item, itemIndex) => <li key={itemIndex}>{item}</li>)}</ul>);
+      blocks.push(<ul key={`ul-${index}`}>{items.map((item, itemIndex) => <li key={itemIndex}>{inlineMarkdown(item)}</li>)}</ul>);
       continue;
     }
     if (/^\d+[.)]\s+/.test(lines[index])) {
       const items: string[] = [];
       while (index < lines.length) { const match = /^\d+[.)]\s+(.*)$/.exec(lines[index]); if (!match) break; items.push(match[1]); index += 1; }
-      blocks.push(<ol key={`ol-${index}`}>{items.map((item, itemIndex) => <li key={itemIndex}>{item}</li>)}</ol>);
+      blocks.push(<ol key={`ol-${index}`}>{items.map((item, itemIndex) => <li key={itemIndex}>{inlineMarkdown(item)}</li>)}</ol>);
       continue;
     }
     const paragraph: string[] = [];
-    while (index < lines.length && lines[index].trim() && !/^(#{1,5})\s+/.test(lines[index]) && !/^[-*]\s+/.test(lines[index]) && !/^\d+[.)]\s+/.test(lines[index])) { paragraph.push(lines[index]); index += 1; }
-    blocks.push(<p key={`p-${index}`}>{paragraph.map((line, lineIndex) => <span key={lineIndex}>{line}{lineIndex < paragraph.length - 1 && <br />}</span>)}</p>);
+    while (index < lines.length && lines[index].trim() && !/^(?:-{3,}|\*{3,}|_{3,})\s*$/.test(lines[index].trim()) && !/^(#{1,5})\s+/.test(lines[index]) && !/^[-*]\s+/.test(lines[index]) && !/^\d+[.)]\s+/.test(lines[index])) { paragraph.push(lines[index]); index += 1; }
+    blocks.push(<p key={`p-${index}`}>{paragraph.map((line, lineIndex) => <span key={lineIndex}>{inlineMarkdown(line)}{lineIndex < paragraph.length - 1 && <br />}</span>)}</p>);
   }
   return <div className="document-content rich-text-content">{blocks}</div>;
 }

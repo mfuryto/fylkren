@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { apiRequest, getAntiforgeryToken } from "../api/client";
 import { errorMessage } from "../api/errors";
 import { Modal } from "../components/Modal";
+import { RichTextContent } from "../components/RichText";
 import { normalizeLanguage } from "../localization";
 import { useTranslation } from "../localization/LocalizationProvider";
 import type { WorkItem } from "../work/WorkItemModels";
@@ -56,6 +57,6 @@ export function TaskAiAssistant({ siteId, item, features, onClose, language, tim
     <button className="primary-button" type="button" disabled={busy || feature === "questions" && question.trim().length < 2} onClick={() => void run()}>{busy ? t("aiWorking") : t("aiRun")}</button>
     {busy && <p className="status-message" role="status">{t(result?.content ? "aiReceiving" : "aiWaiting", { seconds: elapsed })}</p>}
     {message && <p className="status-message error-message" role="alert">{message}</p>}
-    <section className="site-detail-block" aria-live="polite"><h3>{t("aiResult")}</h3>{result ? <><div className="ai-result">{result.content}</div><p className="muted">{t("aiGeneratedFromVersion", { date: new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short", timeZone }).format(new Date(result.sourceUpdatedAt)) })}</p></> : <p className="muted">{t("aiNoResult")}</p>}</section>
+    <section className="site-detail-block" aria-live="polite"><h3>{t("aiResult")}</h3>{result ? <><div className="ai-result"><RichTextContent value={result.content} /></div><p className="muted">{t("aiGeneratedFromVersion", { date: new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short", timeZone }).format(new Date(result.sourceUpdatedAt)) })}</p></> : <p className="muted">{t("aiNoResult")}</p>}</section>
   </div></Modal>;
 }

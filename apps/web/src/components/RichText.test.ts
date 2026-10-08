@@ -44,4 +44,13 @@ describe("markdownToEditorHtml", () => {
     expect(html).not.toContain("<script>");
     expect(html).not.toContain("<img");
   });
+
+  it("renders the bounded assistant markdown subset without enabling links or HTML", () => {
+    const html = renderToStaticMarkup(createElement(RichTextContent, { value: "**Summary:**\n\n- **Status:** Registered\n\n---\n\n[unsafe](javascript:synthetic())" }));
+    expect(html).toContain("<strong>Summary:</strong>");
+    expect(html).toContain("<li><strong>Status:</strong><span> Registered</span></li>");
+    expect(html).toContain("<hr/>");
+    expect(html).toContain("[unsafe](javascript:synthetic())");
+    expect(html).not.toContain("<a");
+  });
 });
