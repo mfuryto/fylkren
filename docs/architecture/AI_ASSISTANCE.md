@@ -33,6 +33,16 @@ Open **Platform Manager → AI**. Enter the full provider endpoint and model nam
 
 For a private model, add its exact HTTPS origin (scheme, host and port, without a path) to `FYLKREN_OUTBOUND_PRIVATE_ORIGINS` in the deployment environment and restart the API after changing that deployment-owned outbound boundary. The full chat-completions path remains stored through Platform Manager.
 
+### Local Llama example
+
+Local Llama models are supported through a server that implements the OpenAI chat-completions contract. Ollama and vLLM both provide this interface. Fylkren does not install or operate the model runtime itself. Place the local endpoint behind customer-controlled HTTPS, make its name resolvable from the API container and approve only its exact origin. Example configuration:
+
+```dotenv
+FYLKREN_OUTBOUND_PRIVATE_ORIGINS=https://llama.internal:11443
+```
+
+Then configure Platform Manager with an endpoint such as `https://llama.internal:11443/v1/chat/completions`, the exact model name exposed by the runtime, and no API key when the protected local endpoint does not require one. The model and all disclosed task content can therefore remain inside the customer's own environment, including an air-gapped deployment.
+
 ## Requirement and verification traceability
 
 | Requirement | Implementation | Verification evidence |

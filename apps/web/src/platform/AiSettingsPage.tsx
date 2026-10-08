@@ -44,8 +44,8 @@ export function AiSettingsPage({ canManage }: { canManage: boolean }) {
     {!canManage && <EnterpriseRequiredNotice>{t("aiEnterpriseNotice")}</EnterpriseRequiredNotice>}
     {message && <p className="status-message" role="status">{message}</p>}
     {settings && <form className="panel stacked-form" onSubmit={save}>
-      <label className="checkbox-row"><input type="checkbox" checked={settings.enabled} disabled={!canManage} onChange={event => change({ enabled: event.target.checked })}/><span><strong>{t("aiMasterSwitch")}</strong><small>{t("aiMasterHelp")}</small></span></label>
-      <section className="site-detail-block"><h2>{t("aiProvider")}</h2>
+      <label className="checkbox-row ai-master-toggle"><input type="checkbox" checked={settings.enabled} disabled={!canManage} onChange={event => change({ enabled: event.target.checked })}/><span><strong>{t("aiMasterSwitch")}</strong><small>{t("aiMasterHelp")}</small></span></label>
+      <section className="site-detail-block"><h2>{t("aiProvider")}</h2><p className="muted">{t("aiProviderHelp")}</p>
         <div className="field"><label htmlFor="ai-endpoint">{t("aiEndpoint")}</label><input id="ai-endpoint" type="url" required maxLength={2000} disabled={!canManage} value={settings.endpointUrl} onChange={event => change({ endpointUrl: event.target.value })}/><small>{t("aiEndpointHelp")}</small></div>
         <div className="field"><label htmlFor="ai-model">{t("aiModel")}</label><input id="ai-model" required maxLength={200} disabled={!canManage} value={settings.model} onChange={event => change({ model: event.target.value })}/></div>
         <div className="field"><label htmlFor="ai-key">{t("aiApiKey")}</label><input id="ai-key" type="password" maxLength={4000} autoComplete="new-password" disabled={!canManage || clearApiKey} value={apiKey} onChange={event => setApiKey(event.target.value)} />{settings.hasApiKey && <small>{t("aiStoredSecret")}</small>}</div>

@@ -4,6 +4,10 @@
   .platform-admin-page .section-heading { gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
   .platform-admin-page .panel > :is(h2, h3) { margin: 0; font-size: 1.05rem; }
   .platform-admin-page .stacked-form > p { margin: 0; }
+  .platform-admin-page .ai-master-toggle { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: 8px; }
+  .platform-admin-page .ai-master-toggle > input { margin-top: 3px; }
+  .platform-admin-page .ai-master-toggle > span { display: grid; gap: 2px; }
+  .platform-admin-page .ai-master-toggle small { color: var(--text-muted); }
   .platform-admin-page :is(.stacked-form > button, .field > button) { width: fit-content; max-width: 100%; justify-self: start; }
   .platform-admin-page .summary-grid { display: flex; flex-wrap: wrap; gap: 6px; }
   .platform-admin-page .summary-card { display: flex; flex: 0 1 auto; align-items: baseline; gap: 8px; min-width: 0; padding: 6px 9px; box-shadow: none; }

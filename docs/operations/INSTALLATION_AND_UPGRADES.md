@@ -23,11 +23,11 @@ Installation backup/restore and customer-data export/import are separate capabil
 Outbound webhook, federation and identity-provider HTTP clients require HTTPS, disable redirects and validate DNS results before connecting to the checked address. System HTTP proxies are not used by these clients. An integration that resolves to loopback or RFC1918/IPv6 private addresses requires a deployment-owned exception in `.env`:
 
 ```dotenv
-FYLKREN_OUTBOUND_PRIVATE_ORIGINS=https://idp.internal:8443;https://peer.internal:443
+FYLKREN_OUTBOUND_PRIVATE_ORIGINS=https://idp.internal:8443;https://peer.internal:443;https://llama.internal:11443
 FYLKREN_OUTBOUND_IDENTITY_ORIGINS=https://keys.identity.example
 ```
 
-Use only the exact required HTTPS origins, including nondefault ports. Do not include paths, queries, credentials or wildcards. Private exceptions never permit link-local/cloud metadata, multicast or reserved addresses. Check existing internal IdP, webhook and federation destinations before upgrading; merge these settings deliberately and recreate the API container after changing them. Public integrations need no private exception.
+Use only the exact required HTTPS origins, including nondefault ports. Do not include paths, queries, credentials or wildcards. Private exceptions never permit link-local/cloud metadata, multicast or reserved addresses. Check existing internal IdP, webhook, federation and local AI destinations before upgrading; merge these settings deliberately and recreate the API container after changing them. Public integrations need no private exception.
 
 OIDC backchannel requests default to the configured authority's origin. Providers using separate token, userinfo or JWKS origins need those origins in `FYLKREN_OUTBOUND_IDENTITY_ORIGINS`; private destinations need both approvals. Metadata responses are bounded to 2,000,000 bytes, federation responses to 1,000,000 bytes with existing stricter operation limits retained. Webhook delivery accepts status headers and does not read response bodies. No database migration or event/API contract change is required.
 

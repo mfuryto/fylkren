@@ -5,6 +5,7 @@ export const aiEn = {
   aiMasterSwitch: "Enable AI",
   aiMasterHelp: "Default: off",
   aiProvider: "Provider",
+  aiProviderHelp: "OpenAI cloud or local Llama through an OpenAI-compatible Ollama or vLLM endpoint.",
   aiEndpoint: "AI endpoint",
   aiEndpointHelp: "Full HTTPS URL",
   aiModel: "Model",
@@ -43,7 +44,7 @@ const norwegian: AiMessages = {
   navAi: "AI", aiPageIntro: "Konfigurer avgrenset AI-støtte for valgte siter.",
   aiEnterpriseNotice: "AI-støtte krever Enterpriselisens. Konfigurasjonen er fortsatt synlig når tilgangen mangler.",
   aiMasterSwitch: "Aktiver AI-støtte", aiMasterHelp: "AI-funksjonene er skjult og utilgjengelige til denne bryteren aktiveres.",
-  aiProvider: "Leverandør", aiEndpoint: "OpenAI-kompatibelt endepunkt",
+  aiProvider: "Leverandør", aiProviderHelp: "Bruk OpenAI i skyen eller lokal Llama gjennom et OpenAI-kompatibelt endepunkt fra for eksempel Ollama eller vLLM.", aiEndpoint: "OpenAI-kompatibelt endepunkt",
   aiEndpointHelp: "Bruk hele HTTPS-adressen til chat completions. Private endepunkter må tillates i installasjonens konfigurasjon for utgående forbindelser.",
   aiModel: "Modell", aiApiKey: "API-nøkkel hos leverandør", aiStoredSecret: "En nøkkel er lagret. La feltet stå tomt for å beholde den.",
   aiRemoveKey: "Fjern lagret nøkkel", aiFunctions: "Funksjoner", aiSummaryFunction: "Oppsummering og kvalitetskontroll",
@@ -60,6 +61,25 @@ const norwegian: AiMessages = {
   entitlementAi: "AI-støtte",
 };
 
+const providerHelp: Record<string, string> = {
+  "cs-CZ": "OpenAI v cloudu nebo místní Llama přes kompatibilní rozhraní Ollama či vLLM.",
+  "da-DK": "OpenAI i skyen eller lokal Llama via et kompatibelt Ollama- eller vLLM-endepunkt.",
+  "de-DE": "OpenAI in der Cloud oder lokales Llama über einen kompatiblen Ollama- oder vLLM-Endpunkt.",
+  "es-ES": "OpenAI en la nube o Llama local mediante un endpoint compatible de Ollama o vLLM.",
+  "et-EE": "OpenAI pilves või kohalik Llama ühilduva Ollama või vLLM-i otspunkti kaudu.",
+  "fi-FI": "OpenAI pilvessä tai paikallinen Llama yhteensopivan Ollama- tai vLLM-päätepisteen kautta.",
+  "fr-FR": "OpenAI dans le cloud ou Llama local via un point de terminaison Ollama ou vLLM compatible.",
+  "it-IT": "OpenAI nel cloud o Llama locale tramite un endpoint Ollama o vLLM compatibile.",
+  "lt-LT": "OpenAI debesyje arba vietinis Llama per suderinamą Ollama ar vLLM galinį tašką.",
+  "lv-LV": "OpenAI mākonī vai lokāls Llama, izmantojot saderīgu Ollama vai vLLM galapunktu.",
+  "nl-NL": "OpenAI in de cloud of lokale Llama via een compatibel Ollama- of vLLM-eindpunt.",
+  "pl-PL": "OpenAI w chmurze lub lokalny Llama przez zgodny punkt końcowy Ollama albo vLLM.",
+  "pt-PT": "OpenAI na nuvem ou Llama local através de um endpoint Ollama ou vLLM compatível.",
+  "ro-RO": "OpenAI în cloud sau Llama local printr-un endpoint compatibil Ollama ori vLLM.",
+  "sv-SE": "OpenAI i molnet eller lokal Llama via en kompatibel Ollama- eller vLLM-slutpunkt.",
+  "uk-UA": "OpenAI у хмарі або локальна Llama через сумісну кінцеву точку Ollama чи vLLM.",
+};
+
 export const aiTranslations: Record<string, AiMessages> = new Proxy({ "nb-NO": norwegian } as Record<string, AiMessages>, {
-  get: (target, language: string) => target[language] ?? aiEn,
+  get: (target, language: string) => target[language] ?? { ...aiEn, aiProviderHelp: providerHelp[language] ?? aiEn.aiProviderHelp },
 });
