@@ -29,6 +29,9 @@ export const aiEn = {
   aiAssistant: "AI assistant",
   aiAssistantIntro: "Review before use",
   aiRun: "Create suggestion",
+  aiWorking: "AI is working…",
+  aiWaiting: "AI is working · {seconds} s. The answer will appear here as soon as the model starts writing.",
+  aiReceiving: "Receiving the answer · {seconds} s",
   aiQuestion: "Question",
   aiQuestionPlaceholder: "Ask about task",
   aiResult: "AI suggestion",
@@ -37,6 +40,7 @@ export const aiEn = {
   aiProviderRateLimited: "AI busy",
   aiProviderTimeout: "AI timed out",
   aiProviderUnavailable: "AI unavailable",
+  aiProviderHttpStatus: "The AI provider ended the request with HTTP {status}.",
   aiGeneratedFromVersion: "Source: {date}",
   entitlementAi: "AI assistance",
 } as const;
@@ -58,10 +62,11 @@ const norwegian: AiMessages = {
   aiTestSucceeded: "AI-tilkoblingen fungerer.", aiTestFailed: "Testen av AI-tilkoblingen feilet.",
   aiLoadFailed: "AI-oppsettet kunne ikke lastes.", aiSaveFailed: "AI-oppsettet kunne ikke lagres.",
   aiAssistant: "AI-assistent", aiAssistantIntro: "Assistenten bruker opplysninger du allerede har lesetilgang til. Svaret er et forslag og lagres ikke automatisk.",
-  aiRun: "Lag forslag", aiQuestion: "Spørsmål", aiQuestionPlaceholder: "Hva vil du vite om denne oppgaven?",
+  aiRun: "Lag forslag", aiWorking: "AI arbeider …", aiWaiting: "AI arbeider · {seconds} s. Svaret vises her så snart modellen begynner å skrive.", aiReceiving: "Mottar svaret · {seconds} s", aiQuestion: "Spørsmål", aiQuestionPlaceholder: "Hva vil du vite om denne oppgaven?",
   aiResult: "AI-forslag", aiNoResult: "Velg en funksjon og lag et forslag.", aiAssistFailed: "AI-assistenten kunne ikke fullføre forespørselen.",
   aiProviderRateLimited: "AI-leverandøren er opptatt. Vent før du prøver igjen.", aiProviderTimeout: "AI-leverandøren brukte for lang tid.",
   aiProviderUnavailable: "AI-leverandøren kunne ikke fullføre forespørselen.",
+  aiProviderHttpStatus: "AI-leverandøren avsluttet forespørselen med HTTP {status}.",
   aiGeneratedFromVersion: "Laget fra oppgaven slik den sist ble oppdatert {date}. Kontroller kilden før teksten brukes.",
   entitlementAi: "AI-støtte",
 };
@@ -85,6 +90,25 @@ const providerHelp: Record<string, string> = {
   "uk-UA": "OpenAI у хмарі або локальна Llama через сумісну кінцеву точку Ollama чи vLLM.",
 };
 
+const progressMessages: Record<string, Pick<AiMessages, "aiWaiting" | "aiReceiving" | "aiProviderHttpStatus">> = {
+  "cs-CZ": { aiWaiting: "AI pracuje · {seconds} s. Odpověď se zobrazí, jakmile model začne psát.", aiReceiving: "Přijímání odpovědi · {seconds} s", aiProviderHttpStatus: "Poskytovatel AI ukončil požadavek se stavem HTTP {status}." },
+  "da-DK": { aiWaiting: "AI arbejder · {seconds} s. Svaret vises, så snart modellen begynder at skrive.", aiReceiving: "Modtager svaret · {seconds} s", aiProviderHttpStatus: "AI-udbyderen afsluttede anmodningen med HTTP {status}." },
+  "de-DE": { aiWaiting: "Die KI arbeitet · {seconds} s. Die Antwort erscheint, sobald das Modell zu schreiben beginnt.", aiReceiving: "Antwort wird empfangen · {seconds} s", aiProviderHttpStatus: "Der KI-Anbieter beendete die Anfrage mit HTTP {status}." },
+  "es-ES": { aiWaiting: "La IA está trabajando · {seconds} s. La respuesta aparecerá cuando el modelo empiece a escribir.", aiReceiving: "Recibiendo la respuesta · {seconds} s", aiProviderHttpStatus: "El proveedor de IA finalizó la solicitud con HTTP {status}." },
+  "et-EE": { aiWaiting: "AI töötab · {seconds} s. Vastus ilmub kohe, kui mudel kirjutamist alustab.", aiReceiving: "Vastuse vastuvõtmine · {seconds} s", aiProviderHttpStatus: "AI teenusepakkuja lõpetas päringu HTTP olekuga {status}." },
+  "fi-FI": { aiWaiting: "Tekoäly työskentelee · {seconds} s. Vastaus näkyy, kun malli alkaa kirjoittaa.", aiReceiving: "Vastausta vastaanotetaan · {seconds} s", aiProviderHttpStatus: "Tekoälypalvelu päätti pyynnön HTTP-tilaan {status}." },
+  "fr-FR": { aiWaiting: "L’IA travaille · {seconds} s. La réponse apparaîtra dès que le modèle commencera à écrire.", aiReceiving: "Réception de la réponse · {seconds} s", aiProviderHttpStatus: "Le fournisseur d’IA a terminé la requête avec HTTP {status}." },
+  "it-IT": { aiWaiting: "L’IA sta lavorando · {seconds} s. La risposta apparirà quando il modello inizierà a scrivere.", aiReceiving: "Ricezione della risposta · {seconds} s", aiProviderHttpStatus: "Il fornitore di IA ha terminato la richiesta con HTTP {status}." },
+  "lt-LT": { aiWaiting: "DI dirba · {seconds} s. Atsakymas pasirodys, kai modelis pradės rašyti.", aiReceiving: "Gaunamas atsakymas · {seconds} s", aiProviderHttpStatus: "DI paslaugos teikėjas užbaigė užklausą su HTTP {status}." },
+  "lv-LV": { aiWaiting: "MI strādā · {seconds} s. Atbilde parādīsies, tiklīdz modelis sāks rakstīt.", aiReceiving: "Saņem atbildi · {seconds} s", aiProviderHttpStatus: "MI pakalpojuma sniedzējs pabeidza pieprasījumu ar HTTP {status}." },
+  "nl-NL": { aiWaiting: "AI werkt · {seconds} s. Het antwoord verschijnt zodra het model begint te schrijven.", aiReceiving: "Antwoord ontvangen · {seconds} s", aiProviderHttpStatus: "De AI-provider beëindigde de aanvraag met HTTP {status}." },
+  "pl-PL": { aiWaiting: "AI pracuje · {seconds} s. Odpowiedź pojawi się, gdy model zacznie pisać.", aiReceiving: "Odbieranie odpowiedzi · {seconds} s", aiProviderHttpStatus: "Dostawca AI zakończył żądanie ze statusem HTTP {status}." },
+  "pt-PT": { aiWaiting: "A IA está a trabalhar · {seconds} s. A resposta aparecerá quando o modelo começar a escrever.", aiReceiving: "A receber a resposta · {seconds} s", aiProviderHttpStatus: "O fornecedor de IA terminou o pedido com HTTP {status}." },
+  "ro-RO": { aiWaiting: "AI lucrează · {seconds} s. Răspunsul va apărea când modelul începe să scrie.", aiReceiving: "Se primește răspunsul · {seconds} s", aiProviderHttpStatus: "Furnizorul AI a încheiat cererea cu HTTP {status}." },
+  "sv-SE": { aiWaiting: "AI arbetar · {seconds} s. Svaret visas så snart modellen börjar skriva.", aiReceiving: "Tar emot svaret · {seconds} s", aiProviderHttpStatus: "AI-leverantören avslutade begäran med HTTP {status}." },
+  "uk-UA": { aiWaiting: "ШІ працює · {seconds} с. Відповідь з’явиться, щойно модель почне писати.", aiReceiving: "Отримання відповіді · {seconds} с", aiProviderHttpStatus: "Постачальник ШІ завершив запит зі статусом HTTP {status}." },
+};
+
 export const aiTranslations: Record<string, AiMessages> = new Proxy({ "nb-NO": norwegian } as Record<string, AiMessages>, {
-  get: (target, language: string) => target[language] ?? { ...aiEn, aiProviderHelp: providerHelp[language] ?? aiEn.aiProviderHelp },
+  get: (target, language: string) => target[language] ?? { ...aiEn, aiProviderHelp: providerHelp[language] ?? aiEn.aiProviderHelp, ...progressMessages[language] },
 });

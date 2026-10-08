@@ -27,6 +27,10 @@ for (const body of proxiedLocations.filter(body => !body.includes('proxy_pass ht
   assert.match(body, /proxy_set_header X-Forwarded-Host \$http_host;/,
     'An application proxy location did not replace X-Forwarded-Host');
 }
+const aiLocation = proxiedLocations.find(body => body.includes('proxy_read_timeout 330s'));
+assert.ok(aiLocation, 'The reviewed long-running AI proxy location is missing');
+assert.match(aiLocation, /proxy_buffering off;/,
+  'The AI proxy must not buffer incremental assistant output');
 const clientAddressLocations = proxiedLocations.filter(body =>
   body.includes('X-Fylkren-Gateway-Client-IP'));
 assert.equal(clientAddressLocations.length, 3,
