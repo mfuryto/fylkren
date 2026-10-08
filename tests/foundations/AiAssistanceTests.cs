@@ -18,6 +18,7 @@ internal static class AiAssistanceTests
             AiEndpoints.Instruction("planning", null).Contains("every supplied planning step", StringComparison.Ordinal) &&
             AiEndpoints.Instruction("risks", null).Contains("five", StringComparison.Ordinal) &&
             AiEndpoints.Instruction("risks", null).Contains("valid JSON", StringComparison.Ordinal) &&
+            AiEndpoints.Instruction("risks", null).Contains("existing risk register", StringComparison.Ordinal) &&
             AiEndpoints.Instruction("decisions", null).Contains("three", StringComparison.Ordinal) &&
             AiEndpoints.Instruction("decisions", null).Contains("valid JSON", StringComparison.Ordinal),
             "The contextual planning template or bounded draft instructions were lost.");

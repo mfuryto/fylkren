@@ -32,6 +32,12 @@ export const aiEn = {
   aiAssistant: "AI assistant",
   aiAssistantIntro: "Review before use",
   aiRun: "Create suggestion",
+  aiTaskAction: "Analyse task",
+  aiPlanningAction: "Suggest plan content",
+  aiRiskAction: "Identify risks and actions",
+  aiDecisionAction: "Suggest decision basis",
+  aiLearningAction: "Analyse learning points",
+  aiGenerateAction: "Generate suggestion",
   aiWorking: "AI is working…",
   aiWaiting: "AI is working · {seconds} s. The answer will appear here as soon as the model starts writing.",
   aiReceiving: "Receiving the answer · {seconds} s",
@@ -77,7 +83,8 @@ const norwegian: AiMessages = {
   aiTestSucceeded: "AI-tilkoblingen fungerer.", aiTestFailed: "Testen av AI-tilkoblingen feilet.",
   aiLoadFailed: "AI-oppsettet kunne ikke lastes.", aiSaveFailed: "AI-oppsettet kunne ikke lagres.",
   aiAssistant: "AI-assistent", aiAssistantIntro: "Assistenten bruker opplysninger du allerede har lesetilgang til. Svaret er et forslag og lagres ikke automatisk.",
-  aiRun: "Lag forslag", aiWorking: "AI arbeider …", aiWaiting: "AI arbeider · {seconds} s. Svaret vises her så snart modellen begynner å skrive.", aiReceiving: "Mottar svaret · {seconds} s", aiQuestion: "Spørsmål", aiQuestionPlaceholder: "Hva vil du vite om denne oppgaven?",
+  aiRun: "Lag forslag", aiTaskAction: "Analyser oppgaven", aiPlanningAction: "Foreslå planinnhold", aiRiskAction: "Finn risikoer og tiltak", aiDecisionAction: "Foreslå beslutningsgrunnlag", aiLearningAction: "Analyser læringspunkter", aiGenerateAction: "Generer forslag",
+  aiWorking: "AI arbeider …", aiWaiting: "AI arbeider · {seconds} s. Svaret vises her så snart modellen begynner å skrive.", aiReceiving: "Mottar svaret · {seconds} s", aiQuestion: "Spørsmål", aiQuestionPlaceholder: "Hva vil du vite om denne oppgaven?",
   aiResult: "AI-forslag", aiNoResult: "Velg en funksjon og lag et forslag.", aiUseDraft: "Bruk dette utkastet", aiRiskCause: "Årsak", aiRiskConsequence: "Konsekvens",
   decisionNewDraft: "Nytt beslutningsutkast", decisionEditDraft: "Endre beslutning", decisionSaveDraft: "Lagre utkast", decisionChangeAction: "Endre", decisionWithdrawAction: "Trekk tilbake", decisionDeleteDraft: "Slett utkast",
   decisionWithdrawnHistory: "Tilbaketrukne beslutninger og slettede utkast", decisionDraftRemovalHelp: "Når et utkast slettes eller en beslutning trekkes tilbake, fjernes den fra aktiv behandling. Versjonshistorikken beholdes.",
@@ -185,6 +192,26 @@ const decisionWorkflowMessages: Record<string, DecisionWorkflowMessages> = {
   "uk-UA": { decisionNewDraft: "Новий проєкт рішення", decisionEditDraft: "Змінити рішення", decisionSaveDraft: "Зберегти проєкт", decisionChangeAction: "Змінити", decisionWithdrawAction: "Відкликати", decisionDeleteDraft: "Видалити проєкт", decisionWithdrawnHistory: "Відкликані рішення та видалені проєкти", decisionDraftRemovalHelp: "Видалений проєкт або відкликане рішення вилучається з активної роботи. Історія версій зберігається.", decisionAiSuggestionIntro: "Виберіть пропозицію, щоб відкрити її у звичайному редакторі рішень. Нічого не зберігається автоматично." },
 };
 
+type AiActionMessages = Pick<AiMessages, "aiTaskAction" | "aiPlanningAction" | "aiRiskAction" | "aiDecisionAction" | "aiLearningAction" | "aiGenerateAction">;
+const aiActionMessages: Record<string, AiActionMessages> = {
+  "cs-CZ": { aiTaskAction: "Analyzovat úkol", aiPlanningAction: "Navrhnout obsah plánu", aiRiskAction: "Najít rizika a opatření", aiDecisionAction: "Navrhnout podklad pro rozhodnutí", aiLearningAction: "Analyzovat poznatky", aiGenerateAction: "Vytvořit návrh" },
+  "da-DK": { aiTaskAction: "Analysér opgaven", aiPlanningAction: "Foreslå planindhold", aiRiskAction: "Find risici og tiltag", aiDecisionAction: "Foreslå beslutningsgrundlag", aiLearningAction: "Analysér læringspunkter", aiGenerateAction: "Generér forslag" },
+  "de-DE": { aiTaskAction: "Aufgabe analysieren", aiPlanningAction: "Planinhalte vorschlagen", aiRiskAction: "Risiken und Maßnahmen ermitteln", aiDecisionAction: "Entscheidungsgrundlage vorschlagen", aiLearningAction: "Erkenntnisse analysieren", aiGenerateAction: "Vorschlag erstellen" },
+  "es-ES": { aiTaskAction: "Analizar la tarea", aiPlanningAction: "Proponer contenido del plan", aiRiskAction: "Identificar riesgos y medidas", aiDecisionAction: "Proponer base para la decisión", aiLearningAction: "Analizar aprendizajes", aiGenerateAction: "Generar propuesta" },
+  "et-EE": { aiTaskAction: "Analüüsi ülesannet", aiPlanningAction: "Paku plaani sisu", aiRiskAction: "Leia riskid ja meetmed", aiDecisionAction: "Paku otsustusalust", aiLearningAction: "Analüüsi õppetunde", aiGenerateAction: "Koosta ettepanek" },
+  "fi-FI": { aiTaskAction: "Analysoi tehtävä", aiPlanningAction: "Ehdota suunnitelman sisältöä", aiRiskAction: "Tunnista riskit ja toimenpiteet", aiDecisionAction: "Ehdota päätösperustaa", aiLearningAction: "Analysoi opit", aiGenerateAction: "Luo ehdotus" },
+  "fr-FR": { aiTaskAction: "Analyser la tâche", aiPlanningAction: "Proposer le contenu du plan", aiRiskAction: "Identifier les risques et mesures", aiDecisionAction: "Proposer une base de décision", aiLearningAction: "Analyser les enseignements", aiGenerateAction: "Générer une proposition" },
+  "it-IT": { aiTaskAction: "Analizza l’attività", aiPlanningAction: "Proponi contenuti per il piano", aiRiskAction: "Individua rischi e misure", aiDecisionAction: "Proponi una base decisionale", aiLearningAction: "Analizza gli insegnamenti", aiGenerateAction: "Genera proposta" },
+  "lt-LT": { aiTaskAction: "Analizuoti užduotį", aiPlanningAction: "Siūlyti plano turinį", aiRiskAction: "Nustatyti rizikas ir priemones", aiDecisionAction: "Siūlyti sprendimo pagrindą", aiLearningAction: "Analizuoti pamokas", aiGenerateAction: "Sukurti pasiūlymą" },
+  "lv-LV": { aiTaskAction: "Analizēt uzdevumu", aiPlanningAction: "Ieteikt plāna saturu", aiRiskAction: "Noteikt riskus un pasākumus", aiDecisionAction: "Ieteikt lēmuma pamatojumu", aiLearningAction: "Analizēt gūtās atziņas", aiGenerateAction: "Izveidot priekšlikumu" },
+  "nl-NL": { aiTaskAction: "Taak analyseren", aiPlanningAction: "Planinhoud voorstellen", aiRiskAction: "Risico’s en maatregelen bepalen", aiDecisionAction: "Besluitbasis voorstellen", aiLearningAction: "Leerpunten analyseren", aiGenerateAction: "Voorstel genereren" },
+  "pl-PL": { aiTaskAction: "Przeanalizuj zadanie", aiPlanningAction: "Zaproponuj treść planu", aiRiskAction: "Wskaż ryzyka i działania", aiDecisionAction: "Zaproponuj podstawę decyzji", aiLearningAction: "Przeanalizuj wnioski", aiGenerateAction: "Wygeneruj propozycję" },
+  "pt-PT": { aiTaskAction: "Analisar a tarefa", aiPlanningAction: "Sugerir conteúdo do plano", aiRiskAction: "Identificar riscos e medidas", aiDecisionAction: "Sugerir base de decisão", aiLearningAction: "Analisar aprendizagens", aiGenerateAction: "Gerar proposta" },
+  "ro-RO": { aiTaskAction: "Analizează sarcina", aiPlanningAction: "Propune conținutul planului", aiRiskAction: "Identifică riscuri și măsuri", aiDecisionAction: "Propune fundamentul deciziei", aiLearningAction: "Analizează lecțiile", aiGenerateAction: "Generează propunerea" },
+  "sv-SE": { aiTaskAction: "Analysera uppgiften", aiPlanningAction: "Föreslå planinnehåll", aiRiskAction: "Identifiera risker och åtgärder", aiDecisionAction: "Föreslå beslutsunderlag", aiLearningAction: "Analysera lärdomar", aiGenerateAction: "Generera förslag" },
+  "uk-UA": { aiTaskAction: "Проаналізувати завдання", aiPlanningAction: "Запропонувати зміст плану", aiRiskAction: "Визначити ризики та заходи", aiDecisionAction: "Запропонувати основу рішення", aiLearningAction: "Проаналізувати висновки", aiGenerateAction: "Створити пропозицію" },
+};
+
 export const aiTranslations: Record<string, AiMessages> = new Proxy({ "nb-NO": norwegian } as Record<string, AiMessages>, {
-  get: (target, language: string) => target[language] ?? { ...aiEn, aiProviderHelp: providerHelp[language] ?? aiEn.aiProviderHelp, aiEndpointHelp: endpointHelp[language] ?? aiEn.aiEndpointHelp, ...progressMessages[language], ...draftLabels[language], ...decisionWorkflowMessages[language] },
+  get: (target, language: string) => target[language] ?? { ...aiEn, aiProviderHelp: providerHelp[language] ?? aiEn.aiProviderHelp, aiEndpointHelp: endpointHelp[language] ?? aiEn.aiEndpointHelp, ...progressMessages[language], ...draftLabels[language], ...decisionWorkflowMessages[language], ...aiActionMessages[language] },
 });

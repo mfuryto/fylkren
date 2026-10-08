@@ -5,6 +5,7 @@ import type { DecisionRevision, DomainDecision, WorkItem } from "../work/WorkIte
 import { getTaskDecisions } from "./taskApi";
 import { requestAiDrafts, type DecisionAiDraft } from "./aiDraftApi";
 import { errorMessage } from "../api/errors";
+import { AiAssistButton } from "../components/AiAssistButton";
 
 const statusLabel = (status: string) => ({
   draft: translateActive("tasksTaskDomainDecisionDialogDraft"),
@@ -90,7 +91,7 @@ export function TaskDomainDecisionDialog({ siteId, item, personId, editable, bus
   </details>;
   return <Modal title={translateActive("tasksTaskCardPresentationDecisions")} onClose={onClose}>
     <p className="muted">{translateActive("tasksTaskDomainDecisionDialogFormalDecisionsLinkedTo")}{item.title}{translateActive("tasksTaskDomainDecisionDialogDecisionsAreHistoricalRecordsAndAre")}</p>
-    {editable && <div className="inline-actions"><button className="primary-button" type="button" disabled={busy} onClick={() => openEditor()}>+ {translateActive("decisionNewDraft")}</button>{aiEnabled && <button className="secondary-button" type="button" disabled={busy || aiBusy} onClick={() => void suggestDecisions()}>✦ {aiBusy ? translateActive("aiWorking") : translateActive("aiDecisionDraft")}</button>}</div>}
+    {editable && <div className="inline-actions"><button className="primary-button" type="button" disabled={busy} onClick={() => openEditor()}>+ {translateActive("decisionNewDraft")}</button>{aiEnabled && <AiAssistButton label={aiBusy ? translateActive("aiWorking") : translateActive("aiDecisionAction")} working={aiBusy} disabled={busy || aiBusy} onClick={() => void suggestDecisions()}/>}</div>}
     {editor && editable && <section className="site-detail-block"><form className="domain-decision-form" onSubmit={event => event.preventDefault()}>
       <div className="section-heading"><h3>{editor.decisionId ? translateActive("decisionEditDraft") : translateActive("decisionNewDraft")}</h3><button className="text-button" type="button" onClick={() => setEditor(null)}>{translateActive("cancelEditing")}</button></div>
       <div className="field"><label htmlFor="decision-title">{translateActive("approvalTitle")}</label><input id="decision-title" value={editor.value.title} maxLength={200} required onChange={event => setEditor(current => current ? { ...current, value: { ...current.value, title: event.target.value } } : current)} /></div>

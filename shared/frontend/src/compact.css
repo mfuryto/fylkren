@@ -10,7 +10,7 @@
   .field { gap: 4px; }
   .field :is(input, select):not(:where([type="checkbox"], [type="radio"])) { min-height: var(--compact-control-height); padding-block: 5px; }
   .field textarea { padding: 8px 10px; }
-  :is(.primary-button, .secondary-button, .danger-button, .help-button) { min-height: var(--compact-control-height); padding: 5px 10px; }
+  :is(.primary-button, .secondary-button, .danger-button, .help-button, .ai-assist-button) { min-height: var(--compact-control-height); padding: 5px 10px; }
   .checkbox-field:not(.compact-checkbox) { min-height: var(--compact-control-height); }
   :is(.inline-actions, .modal-actions) { gap: 6px; flex-wrap: wrap; }
   :is(.stacked-form, .smtp-settings-form, .login-form, .process-help, .task-detail-view) { gap: var(--compact-gap); }
@@ -89,7 +89,7 @@
 }
 @media screen and (pointer: coarse) {
   :is(.page, .modal-card, .login-panel) .field :is(input, select):not(:where([type="checkbox"], [type="radio"])) { min-height: 40px; }
-  :is(.primary-button, .secondary-button, .danger-button, .help-button) { min-height: 40px; }
+  :is(.primary-button, .secondary-button, .danger-button, .help-button, .ai-assist-button) { min-height: 40px; }
   .process-queue .process-card.minimized .process-card-toggle,
   .process-card .task-icon-action:not(.permalink-action) { min-height: 40px; }
 }

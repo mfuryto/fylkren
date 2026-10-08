@@ -5,6 +5,7 @@ import { RichTextEditor } from "../components/RichText";
 import type { TaskUnit } from "../work/WorkContextModels";
 import { PlanningAllocationEditor } from "./PlanningAllocationEditor";
 import { PlanningRfiLog } from "./PlanningRfiLog";
+import { AiAssistButton } from "../components/AiAssistButton";
 import type { PlanAllocation, PlanningDraft, PlanningRun } from "./PlanningModels";
 import { StepDocumentLinks, WorkflowTimeline, type StepLink, type TimelineEvent } from "./WorkflowFields";
 
@@ -82,7 +83,7 @@ export function PlanningStepEditor({
         ))}
       </nav>
       <section className="workflow-step-editor">
-        <div className="section-heading"><h3>{step.name}</h3>{aiEnabled && <button className="secondary-button" type="button" onClick={onAi}>✦ {translateActive("aiPlanningDraft")}</button>}</div>
+        <div className="section-heading"><h3>{step.name}</h3>{aiEnabled && <AiAssistButton label={translateActive("aiPlanningAction")} onClick={onAi}/>}</div>
         {step.isOptional && <span className="muted">{translateActive("workflowsPlanningStepEditorOptionalStep")}</span>}
         <PlanningRfiLog runId={run.id} entries={run.rfi ?? []} onReload={onReload} onError={onError} />
         {step.hasTimeline && run.timelineStartedOn && (

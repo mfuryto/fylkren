@@ -2,6 +2,17 @@
 .risk-workspace-heading, .risk-map-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
 .risk-workspace-heading { margin-bottom: 10px; }
 .risk-workspace-heading > strong { overflow-wrap: anywhere; }
+.ai-risk-suggestions .section-heading { align-items: start; }
+.ai-risk-suggestions .section-heading p { margin: 2px 0 0; }
+.ai-risk-suggestions .type-row > span { min-width: 0; }
+.ai-risk-suggestions .type-row small { white-space: pre-wrap; overflow-wrap: anywhere; }
+.ai-risk-flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin: 8px 0 12px; padding: 0; list-style: none; counter-reset: risk-ai-step; }
+.ai-risk-flow li { position: relative; padding: 7px 10px 7px 30px; border-block: 1px solid var(--border); color: var(--muted); font-size: .82rem; counter-increment: risk-ai-step; }
+.ai-risk-flow li:first-child { border-left: 1px solid var(--border); border-radius: 4px 0 0 4px; }
+.ai-risk-flow li:last-child { border-right: 1px solid var(--border); border-radius: 0 4px 4px 0; }
+.ai-risk-flow li::before { content: counter(risk-ai-step); position: absolute; left: 9px; font-weight: 700; }
+.ai-risk-flow li.current { color: var(--text); background: color-mix(in srgb, var(--accent) 10%, var(--surface)); box-shadow: inset 0 -2px var(--accent); }
+.ai-risk-flow li.complete { color: var(--text); background: var(--surface-subtle); }
 .risk-register-scroll { overflow-x: auto; margin-block: 8px 14px; }
 .risk-register { width: 100%; border-collapse: collapse; font-size: .85rem; min-width: 850px; }
 .risk-register :is(th, td) { text-align: left; vertical-align: top; padding: 6px 8px; border-bottom: 1px solid var(--border); }
@@ -52,7 +63,7 @@
 .risk-assessment-fields legend { font-size: .9rem; font-weight: 700; padding-inline: 4px; }
 .risk-editor-actions { margin: 0 0 6px; padding-left: 18px; }
 .risk-editor-actions small { display: block; color: var(--muted); }
-@media (max-width: 800px) { .risk-workspace-body.editing { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 800px) { .risk-workspace-body.editing { grid-template-columns: minmax(0, 1fr); } .ai-risk-flow { grid-template-columns: minmax(0, 1fr); } .ai-risk-flow li { border: 1px solid var(--border); border-bottom: 0; border-radius: 0; } .ai-risk-flow li:first-child { border-radius: 4px 4px 0 0; } .ai-risk-flow li:last-child { border-bottom: 1px solid var(--border); border-radius: 0 0 4px 4px; } }
 @media print { .risk-register-scroll { overflow: visible; } .risk-register { min-width: 0; } .risk-cell { print-color-adjust: exact; } }
 
 .risk-assessment-fields .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
