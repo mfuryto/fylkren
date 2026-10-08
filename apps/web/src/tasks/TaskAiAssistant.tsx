@@ -14,7 +14,7 @@ export function TaskAiAssistant({ siteId, item, features, onClose, language, tim
   const [result, setResult] = useState<Result | null>(null), [busy, setBusy] = useState(false), [message, setMessage] = useState("");
   async function run() {
     setBusy(true); setMessage(""); setResult(null);
-    try { setResult(await apiMutate<Result>(`/api/ai/sites/${siteId}/work-items/${item.id}/assist`, "POST", { feature, question: feature === "questions" ? question : null }, t("aiAssistFailed"))); }
+    try { setResult(await apiMutate<Result>(`/api/ai/sites/${siteId}/work-items/${item.id}/assist`, "POST", { feature, question: feature === "questions" ? question : null, language }, t("aiAssistFailed"))); }
     catch (problem) { setMessage(errorMessage(problem, t("aiAssistFailed"))); } finally { setBusy(false); }
   }
   return <Modal title={`${t("aiAssistant")}: ${item.title}`} onClose={onClose}><div className="stacked-form">
