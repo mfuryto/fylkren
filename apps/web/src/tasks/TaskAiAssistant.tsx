@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { apiRequest, getAntiforgeryToken } from "../api/client";
 import { errorMessage } from "../api/errors";
 import { Modal } from "../components/Modal";
+import { normalizeLanguage } from "../localization";
 import { useTranslation } from "../localization/LocalizationProvider";
 import type { WorkItem } from "../work/WorkItemModels";
 
@@ -27,7 +28,7 @@ export function TaskAiAssistant({ siteId, item, features, onClose, language, tim
       const response = await apiRequest(`/api/ai/sites/${siteId}/work-items/${item.id}/assist`, t("aiAssistFailed"), {
         method: "POST",
         headers: { "X-Fylkren-CSRF": token, "Content-Type": "application/json", Accept: "application/x-ndjson" },
-        body: JSON.stringify({ feature, question: feature === "questions" ? question : null, language, stream: true }),
+        body: JSON.stringify({ feature, question: feature === "questions" ? question : null, language: normalizeLanguage(language), stream: true }),
       });
       if (!response.body) throw new Error(t("aiAssistFailed"));
       const reader = response.body.getReader(), decoder = new TextDecoder(); let buffer = "", completed = false;

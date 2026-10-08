@@ -51,12 +51,21 @@ public sealed class RegionalSettings
 
     public static string NormalizeLanguage(string? value)
     {
-        var language = (value ?? "").Trim();
+        var language = BaseLanguage(value);
         return SupportedLanguages.GetValueOrDefault(language, "en-US");
     }
 
     public static bool IsSupportedLanguage(string? value) =>
-        SupportedLanguages.ContainsKey((value ?? "").Trim());
+        SupportedLanguages.ContainsKey(BaseLanguage(value));
+
+    private static string BaseLanguage(string? value)
+    {
+        var language = (value ?? "").Trim();
+        var unicodeExtension = language.IndexOf("-u-", StringComparison.OrdinalIgnoreCase);
+        var privateUseExtension = language.IndexOf("-x-", StringComparison.OrdinalIgnoreCase);
+        var boundary = new[] { unicodeExtension, privateUseExtension }.Where(index => index >= 0).DefaultIfEmpty(language.Length).Min();
+        return language[..boundary];
+    }
 
     private static string NormalizeTimeZone(string? value)
     {

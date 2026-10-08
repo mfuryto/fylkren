@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using Fylkren.Api.ArtificialIntelligence;
+using Fylkren.Api.Platform;
 using Microsoft.AspNetCore.DataProtection;
 
 internal static class AiAssistanceTests
@@ -8,6 +9,8 @@ internal static class AiAssistanceTests
     internal static async Task Run()
     {
         void Require(bool condition, string message) { if (!condition) throw new Exception(message); }
+        Require(RegionalSettings.IsSupportedLanguage("nb-NO-u-hc-h23") && RegionalSettings.NormalizeLanguage("nb-NO-u-hc-h23") == "nb-NO",
+            "A supported display locale with Unicode formatting extensions was rejected.");
         var handler = new RecordingHandler();
         var protection = new EphemeralDataProtectionProvider();
         var client = new AiProviderClient(new Factory(new HttpClient(handler)), protection);
