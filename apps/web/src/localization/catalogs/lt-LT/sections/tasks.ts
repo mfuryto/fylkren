@@ -88,7 +88,7 @@ export const tasksLtLT = {
   tasksTaskCreateDialogExternalTopLevelSite: "Išorinė viršutinio lygio vieta",
   tasksTaskCreateDialogHttpsSharepointOrFileServerFolder: "https: / / sharepoint... arba failas: / server / caption / file",
   tasksTaskCreateDialogInternalRequestTheCompleteTaskBasis: "Vidaus prašymas: visas užduočių pagrindas yra užduotis, vykdoma pagal įprastas prieigos taisykles.",
-  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Nuoroda į pirminį dokumentą arba užduočių tekstą (neprivaloma)",
+  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Nuoroda į originalų dokumentą (neprivaloma)",
   tasksTaskCreateDialogNoSourceType: "Šaltinio tipo nėra",
   tasksTaskCreateDialogNoneType: "Nr tipas",
   tasksTaskCreateDialogNoSender: "Siuntėjo nėra",

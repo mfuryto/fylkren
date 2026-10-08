@@ -88,7 +88,7 @@ export const tasksDeDE = {
   tasksTaskCreateDialogExternalTopLevelSite: "Externe Top-Level-Site",
   tasksTaskCreateDialogHttpsSharepointOrFileServerFolder: "https://sharepoint... oder file://server/folder/file",
   tasksTaskCreateDialogInternalRequestTheCompleteTaskBasis: "Interne Anfrage: Die komplette Task-Basis folgt der Aufgabe unter den gewöhnlichen Zugriffsregeln.",
-  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Link zum Primärdokument oder Aufgabentext (optional)",
+  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Link zum Originaldokument (optional)",
   tasksTaskCreateDialogNoSourceType: "Keine Quelle",
   tasksTaskCreateDialogNoneType: "Kein Typ",
   tasksTaskCreateDialogNoSender: "Kein Absender",

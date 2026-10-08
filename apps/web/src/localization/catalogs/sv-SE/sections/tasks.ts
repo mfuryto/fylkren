@@ -88,7 +88,7 @@ export const tasksSvSE = {
   tasksTaskCreateDialogExternalTopLevelSite: "Extern toppnivå webbplats",
   tasksTaskCreateDialogHttpsSharepointOrFileServerFolder: "https://sharepoint... eller file://server/folder/file",
   tasksTaskCreateDialogInternalRequestTheCompleteTaskBasis: "Intern begäran: Den fullständiga uppgiftsbasen följer uppgiften enligt regelbundna tillträdesregler.",
-  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Länk till primärdokument eller uppgiftstext (valfritt)",
+  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Länk till originaldokument (valfritt)",
   tasksTaskCreateDialogNoSourceType: "Ingen källtyp",
   tasksTaskCreateDialogNoneType: "Ingen typ",
   tasksTaskCreateDialogNoSender: "Ingen avsändare",

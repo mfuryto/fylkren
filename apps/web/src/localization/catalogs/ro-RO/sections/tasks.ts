@@ -88,7 +88,7 @@ export const tasksRoRO = {
   tasksTaskCreateDialogExternalTopLevelSite: "Site-ul extern de nivel superior",
   tasksTaskCreateDialogHttpsSharepointOrFileServerFolder: "https://sharepoint... sau fișier://server/folder/file",
   tasksTaskCreateDialogInternalRequestTheCompleteTaskBasis: "Cerere internă: baza completă de sarcini urmează sarcina în temeiul normelor de acces ordinare.",
-  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Link către documentul primar sau textul de sarcină (opțional)",
+  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Link către documentul original (opțional)",
   tasksTaskCreateDialogNoSourceType: "Niciun tip de sursă",
   tasksTaskCreateDialogNoneType: "Niciun tip",
   tasksTaskCreateDialogNoSender: "Niciun expeditor",

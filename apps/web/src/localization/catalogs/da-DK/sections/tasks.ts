@@ -88,7 +88,7 @@ export const tasksDaDK = {
   tasksTaskCreateDialogExternalTopLevelSite: "Ekstern Site på topniveau",
   tasksTaskCreateDialogHttpsSharepointOrFileServerFolder: "https: / / sharepoint... eller fil: / / server / mappefil",
   tasksTaskCreateDialogInternalRequestTheCompleteTaskBasis: "Intern anmodning: Hele opgavegrundlaget følger opgaven i henhold til almindelige adgangsregler.",
-  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Link til primært dokument eller opgavekode (valgfri)",
+  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Link til originaldokument (valgfrit)",
   tasksTaskCreateDialogNoSourceType: "Ingen kildetype",
   tasksTaskCreateDialogNoneType: "Ingen type",
   tasksTaskCreateDialogNoSender: "Ingen afsender",

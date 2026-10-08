@@ -88,7 +88,7 @@ export const tasksPlPL = {
   tasksTaskCreateDialogExternalTopLevelSite: "Zewnętrzne miejsce na poziomie górnym",
   tasksTaskCreateDialogHttpsSharepointOrFileServerFolder: "https: / / sharepoint... lub plik: / / server / folder / file",
   tasksTaskCreateDialogInternalRequestTheCompleteTaskBasis: "Wniosek wewnętrzny: pełna podstawa zadania jest zgodna z zadaniem określonym w zwykłych zasadach dostępu.",
-  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Link do dokumentu pierwotnego lub tekstu zadania (opcjonalnie)",
+  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Link do dokumentu oryginalnego (opcjonalnie)",
   tasksTaskCreateDialogNoSourceType: "Brak typu źródła",
   tasksTaskCreateDialogNoneType: "Brak typu",
   tasksTaskCreateDialogNoSender: "Brak nadawcy",

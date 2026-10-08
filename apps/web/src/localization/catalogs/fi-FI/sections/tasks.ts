@@ -88,7 +88,7 @@ export const tasksFiFI = {
   tasksTaskCreateDialogExternalTopLevelSite: "Ulkoinen huipputason sivusto",
   tasksTaskCreateDialogHttpsSharepointOrFileServerFolder: "https://sharepoint... tai tiedoston://server/folder/file",
   tasksTaskCreateDialogInternalRequestTheCompleteTaskBasis: "Sisäinen pyyntö: täydellinen tehtäväpohja noudattaa tehtävää tavanomaisen pääsyn sääntöjen mukaisesti.",
-  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Linkki perusasiakirjaan tai tehtävätekstiin (valinnainen)",
+  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Linkki alkuperäiseen asiakirjaan (valinnainen)",
   tasksTaskCreateDialogNoSourceType: "Ei lähdetyyppiä",
   tasksTaskCreateDialogNoneType: "Ei tyyppiä",
   tasksTaskCreateDialogNoSender: "Ei lähettäjää",

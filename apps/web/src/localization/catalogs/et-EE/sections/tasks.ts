@@ -88,7 +88,7 @@ export const tasksEtEE = {
   tasksTaskCreateDialogExternalTopLevelSite: "Väline tipptaseme lehekülg",
   tasksTaskCreateDialogHttpsSharepointOrFileServerFolder: "https://sharepoint... või file://server/folder/ file",
   tasksTaskCreateDialogInternalRequestTheCompleteTaskBasis: "Sisetaotlus: kogu ülesande alus järgib tavapärast juurdepääsu käsitlevate eeskirjade kohast ülesannet.",
-  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Link algdokumendile või ülesande tekstile (valikuline)",
+  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Link originaaldokumendile (valikuline)",
   tasksTaskCreateDialogNoSourceType: "Lähteallika tüüp puudub",
   tasksTaskCreateDialogNoneType: "Pole tüüpi",
   tasksTaskCreateDialogNoSender: "Saatjat pole",

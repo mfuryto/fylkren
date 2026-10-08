@@ -166,14 +166,14 @@ export function TaskCreateDialog({
           <textarea id="task-recommendation" rows={4} maxLength={4000} placeholder={translateActive("tasksTaskCreateDialogProposeFurtherActionForTheManager")} value={form.recommendation} onChange={(event) => update({ recommendation: event.target.value })} />
           <ClassificationControls markings={classificationMarkings} value={form.recommendation} onChange={(recommendation) => update({ recommendation })} />
         </div>
-        <div className="field">
-          <label htmlFor="task-reference">{translateActive("tasksTaskCreateDialogLinkToPrimaryDocumentOrTask")}</label>
-          <input id="task-reference" type="url" maxLength={2048} placeholder={translateActive("tasksTaskCreateDialogHttpsSharepointOrFileServerFolder")} value={form.referenceUrl} onChange={(event) => update({ referenceUrl: event.target.value })} />
-        </div>
-        {aiEnabled && <section className="site-detail-block primary-document-import"><h3>{translateActive("primaryDocumentImport")}</h3>
-          <div className="field"><label htmlFor="task-primary-document">{translateActive("tasksTaskClassifiersPrimaryDocument")}</label><input id="task-primary-document" type="file" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" onChange={event => update({ primaryDocument: event.target.files?.[0] ?? null })}/><small>{translateActive("primaryDocumentImportHelp")}</small></div>
-          {form.primaryDocument && <label className="checkbox-row"><input type="checkbox" checked={form.usePrimaryDocumentForAi} onChange={event => update({ usePrimaryDocumentForAi: event.target.checked })}/><span>{translateActive("primaryDocumentAiSource")}</span></label>}
-        </section>}
+        <section className="site-detail-block primary-document-import"><h3>{translateActive("tasksTaskClassifiersPrimaryDocument")}</h3>
+          <div className="field">
+            <label htmlFor="task-reference">{translateActive("tasksTaskCreateDialogLinkToPrimaryDocumentOrTask")}</label>
+            <input id="task-reference" type="url" maxLength={2048} placeholder={translateActive("tasksTaskCreateDialogHttpsSharepointOrFileServerFolder")} value={form.referenceUrl} onChange={(event) => update({ referenceUrl: event.target.value })} />
+          </div>
+          {aiEnabled && <><div className="field"><label htmlFor="task-primary-document">{translateActive("primaryDocumentImport")}</label><input id="task-primary-document" type="file" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" onChange={event => update({ primaryDocument: event.target.files?.[0] ?? null })}/><small>{translateActive("primaryDocumentImportHelp")}</small></div>
+            {form.primaryDocument && <label className="checkbox-row"><input type="checkbox" checked={form.usePrimaryDocumentForAi} onChange={event => update({ usePrimaryDocumentForAi: event.target.checked })}/><span>{translateActive("primaryDocumentAiSource")}</span></label>}</>}
+        </section>
         <div className="field">
           <label htmlFor="task-due">{translateActive("tasksTaskCreateDialogRequestedDueDate")}</label>
           <input id="task-due" type="date" value={form.dueAt} onChange={(event) => update({ dueAt: event.target.value })} />

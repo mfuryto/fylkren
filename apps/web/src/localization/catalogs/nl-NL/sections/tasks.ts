@@ -88,7 +88,7 @@ export const tasksNlNL = {
   tasksTaskCreateDialogExternalTopLevelSite: "Externe top-level site",
   tasksTaskCreateDialogHttpsSharepointOrFileServerFolder: "https://sharepoint... of bestand://server/folder/file",
   tasksTaskCreateDialogInternalRequestTheCompleteTaskBasis: "Intern verzoek: de volledige taakbasis volgt de taak volgens de gewone toegangsregels.",
-  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Verwijzing naar primaire document of taaktekst (facultatief)",
+  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Link naar het originele document (optioneel)",
   tasksTaskCreateDialogNoSourceType: "Geen brontype",
   tasksTaskCreateDialogNoneType: "Geen type",
   tasksTaskCreateDialogNoSender: "Geen afzender",

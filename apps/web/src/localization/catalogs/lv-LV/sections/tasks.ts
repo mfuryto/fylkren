@@ -88,7 +88,7 @@ export const tasksLvLV = {
   tasksTaskCreateDialogExternalTopLevelSite: "Ārējs augšējā līmeņa objekts",
   tasksTaskCreateDialogHttpsSharepointOrFileServerFolder: "E-pasts: emblēmas@ec.europa.eu",
   tasksTaskCreateDialogInternalRequestTheCompleteTaskBasis: "Iekšējais pieprasījums: pilnīga uzdevuma bāze seko uzdevumam saskaņā ar parastajiem piekļuves noteikumiem.",
-  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Saite uz primāro dokumentu vai uzdevuma tekstu (nav obligāti)",
+  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Saite uz oriģināldokumentu (nav obligāti)",
   tasksTaskCreateDialogNoSourceType: "Nav avota tipa",
   tasksTaskCreateDialogNoneType: "Nav tipa",
   tasksTaskCreateDialogNoSender: "Nav sūtītāja",

@@ -88,7 +88,7 @@ export const tasksCsCZ = {
   tasksTaskCreateDialogExternalTopLevelSite: "Externí Site nejvyšší úrovně",
   tasksTaskCreateDialogHttpsSharepointOrFileServerFolder: "http: / / sharepoint... nebo soubor: / / server / složka / soubor",
   tasksTaskCreateDialogInternalRequestTheCompleteTaskBasis: "Vnitřní žádost: úplný základ úkolu se řídí běžnými pravidly pro přístup.",
-  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Odkaz na primární dokument nebo text úkolu (nepovinné)",
+  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Odkaz na původní dokument (nepovinné)",
   tasksTaskCreateDialogNoSourceType: "Žádný typ zdroje",
   tasksTaskCreateDialogNoneType: "Žádný typ",
   tasksTaskCreateDialogNoSender: "Žádný odesílatel",

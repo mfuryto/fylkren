@@ -88,7 +88,7 @@ export const tasksUkUA = {
   tasksTaskCreateDialogExternalTopLevelSite: "Зовнішній поверховий сайт",
   tasksTaskCreateDialogHttpsSharepointOrFileServerFolder: "https://sharepoint... або файл:",
   tasksTaskCreateDialogInternalRequestTheCompleteTaskBasis: "Внутрішнє прохання: повне завдання, виходячи з завдань, що підлягають звичайному правилах доступу.",
-  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Посилання на основний документ або текст завдання (опційно)",
+  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Посилання на оригінальний документ (необов’язково)",
   tasksTaskCreateDialogNoSourceType: "Тип джерела",
   tasksTaskCreateDialogNoneType: "Тип не",
   tasksTaskCreateDialogNoSender: "Відправка",

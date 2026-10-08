@@ -88,7 +88,7 @@ export const tasksItIT = {
   tasksTaskCreateDialogExternalTopLevelSite: "Sito di alto livello esterno",
   tasksTaskCreateDialogHttpsSharepointOrFileServerFolder: "https://sharepoint... o file://server/folder/file",
   tasksTaskCreateDialogInternalRequestTheCompleteTaskBasis: "Richiesta interna: la base di attività completa segue l'attività secondo le regole di accesso ordinarie.",
-  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Link al documento primario o al testo dell'attività (opzionale)",
+  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Link al documento originale (opzionale)",
   tasksTaskCreateDialogNoSourceType: "Nessun tipo di sorgente",
   tasksTaskCreateDialogNoneType: "Nessun tipo",
   tasksTaskCreateDialogNoSender: "Nessun mittente",

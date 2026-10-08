@@ -86,7 +86,7 @@ export const tasksNbNO = {
   tasksTaskCreateDialogExternalTopLevelSite: "Ekstern toppnivå-site",
   tasksTaskCreateDialogHttpsSharepointOrFileServerFolder: "https://sharepoint… eller file://server/mappe/fil",
   tasksTaskCreateDialogInternalRequestTheCompleteTaskBasis: "Intern anmodning: hele oppdragsgrunnlaget følger saken etter ordinære tilgangsregler.",
-  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Lenke til hoveddokument eller oppdragstekst (valgfritt)",
+  tasksTaskCreateDialogLinkToPrimaryDocumentOrTask: "Lenke til originaldokument (valgfritt)",
   tasksTaskCreateDialogNoSourceType: "Ingen kildetype",
   tasksTaskCreateDialogNoneType: "Ingen type",
   tasksTaskCreateDialogNoSender: "Ingen avsender",
