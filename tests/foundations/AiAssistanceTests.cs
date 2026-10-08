@@ -11,6 +11,12 @@ internal static class AiAssistanceTests
         void Require(bool condition, string message) { if (!condition) throw new Exception(message); }
         Require(RegionalSettings.IsSupportedLanguage("nb-NO-u-hc-h23") && RegionalSettings.NormalizeLanguage("nb-NO-u-hc-h23") == "nb-NO",
             "A supported display locale with Unicode formatting extensions was rejected.");
+        Require(AiEndpoints.NormalizeFeature("drafts") == "planning" && AiEndpoints.NormalizeFeature("risks") == "risks" && AiEndpoints.NormalizeFeature("decisions") == "decisions",
+            "The broad draft function was not split into bounded compatible functions.");
+        Require(AiEndpoints.Instruction("planning", null).Contains("six", StringComparison.Ordinal) &&
+            AiEndpoints.Instruction("risks", null).Contains("five", StringComparison.Ordinal) &&
+            AiEndpoints.Instruction("decisions", null).Contains("three", StringComparison.Ordinal),
+            "The bounded draft instructions lost their item limits.");
         var handler = new RecordingHandler();
         var protection = new EphemeralDataProtectionProvider();
         var client = new AiProviderClient(new Factory(new HttpClient(handler)), protection);

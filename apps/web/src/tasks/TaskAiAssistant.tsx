@@ -7,7 +7,7 @@ import { normalizeLanguage } from "../localization";
 import { useTranslation } from "../localization/LocalizationProvider";
 import type { WorkItem } from "../work/WorkItemModels";
 
-type Feature = "summary" | "drafts" | "learning" | "questions";
+type Feature = "summary" | "planning" | "risks" | "decisions" | "learning" | "questions";
 type Result = { content: string; generatedAt: string; sourceUpdatedAt: string };
 type StreamEvent = { type: "start"; sourceUpdatedAt: string } | { type: "heartbeat" } | { type: "delta"; content: string } | { type: "done"; generatedAt: string } | { type: "error"; code: string; providerStatus?: number };
 
@@ -52,7 +52,7 @@ export function TaskAiAssistant({ siteId, item, features, onClose, language, tim
   }
   return <Modal title={`${t("aiAssistant")}: ${item.title}`} onClose={onClose}><div className="stacked-form">
     <p className="muted">{t("aiAssistantIntro")}</p>
-    <div className="field"><label htmlFor="ai-assistant-feature">{t("aiFunctions")}</label><select id="ai-assistant-feature" value={feature} onChange={event => setFeature(event.target.value as Feature)}>{features.includes("summary") && <option value="summary">{t("aiSummaryFunction")}</option>}{features.includes("drafts") && <option value="drafts">{t("aiDraftsFunction")}</option>}{features.includes("learning") && <option value="learning">{t("aiLearningFunction")}</option>}{features.includes("questions") && <option value="questions">{t("aiQuestionsFunction")}</option>}</select></div>
+    <div className="field"><label htmlFor="ai-assistant-feature">{t("aiFunctions")}</label><select id="ai-assistant-feature" value={feature} onChange={event => setFeature(event.target.value as Feature)}>{features.includes("summary") && <option value="summary">{t("aiSummaryFunction")}</option>}{features.includes("planning") && <option value="planning">{t("aiPlanningDraft")}</option>}{features.includes("risks") && <option value="risks">{t("aiRiskDraft")}</option>}{features.includes("decisions") && <option value="decisions">{t("aiDecisionDraft")}</option>}{features.includes("learning") && <option value="learning">{t("aiLearningFunction")}</option>}{features.includes("questions") && <option value="questions">{t("aiQuestionsFunction")}</option>}</select></div>
     {feature === "questions" && <div className="field"><label htmlFor="ai-assistant-question">{t("aiQuestion")}</label><textarea id="ai-assistant-question" rows={4} minLength={2} maxLength={1000} value={question} placeholder={t("aiQuestionPlaceholder")} onChange={event => setQuestion(event.target.value)}/></div>}
     <button className="primary-button" type="button" disabled={busy || feature === "questions" && question.trim().length < 2} onClick={() => void run()}>{busy ? t("aiWorking") : t("aiRun")}</button>
     {busy && <p className="status-message" role="status">{t(result?.content ? "aiReceiving" : "aiWaiting", { seconds: elapsed })}</p>}

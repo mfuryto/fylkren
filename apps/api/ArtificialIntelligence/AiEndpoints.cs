@@ -252,12 +252,22 @@ internal static class AiEndpoints
         await context.Response.Body.FlushAsync(ct);
     }
 
-    private static string? NormalizeFeature(string? value) => value?.Trim().ToLowerInvariant() switch { "summary" => "summary", "drafts" => "drafts", "learning" => "learning", "questions" => "questions", _ => null };
-    private static bool Enabled(AiSettings x, string feature) => feature switch { "summary" => x.SummaryEnabled, "drafts" => x.DraftsEnabled, "learning" => x.LearningEnabled, "questions" => x.QuestionsEnabled, _ => false };
-    private static string Instruction(string feature, string? question) => feature switch
+    internal static string? NormalizeFeature(string? value) => value?.Trim().ToLowerInvariant() switch
+    {
+        "summary" => "summary", "drafts" or "planning" => "planning", "risks" => "risks",
+        "decisions" => "decisions", "learning" => "learning", "questions" => "questions", _ => null
+    };
+    private static bool Enabled(AiSettings x, string feature) => feature switch
+    {
+        "summary" => x.SummaryEnabled, "planning" or "risks" or "decisions" => x.DraftsEnabled,
+        "learning" => x.LearningEnabled, "questions" => x.QuestionsEnabled, _ => false
+    };
+    internal static string Instruction(string feature, string? question) => feature switch
     {
         "summary" => "Summarize the work item, list missing or inconsistent information, deadlines, blockers and the next matters needing attention.",
-        "drafts" => "Produce clearly separated draft suggestions for planning, risks and mitigations, and a decision basis. Mark every unsupported assumption.",
+        "planning" => "Produce a concise planning draft with at most six ordered steps. Include purpose, responsibility, deadline and dependencies only when supported. Mark assumptions. Do not repeat the full task description. Stay below 350 words.",
+        "risks" => "Produce a concise draft of at most five relevant risks. For each, state cause, consequence, proposed mitigation, owner or deadline when supported, and identify missing probability or impact evidence. Mark assumptions. Stay below 400 words.",
+        "decisions" => "Produce a concise decision basis for at most three matters that require a decision. State the matter, supported options, consequences, recommendation and missing evidence. Mark assumptions. Stay below 350 words.",
         "learning" => "Analyze the learning points. Group themes, identify duplicates and propose priorities and concrete follow-up without closing or changing any point.",
         _ => $"Answer this question using only the supplied context: {question}"
     };

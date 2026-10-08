@@ -5,7 +5,7 @@
 Fylkren provides optional, bounded AI assistance as an Enterprise capability. It is disabled by default and the rest of Fylkren remains fully operational without a model or network connection. Platform Manager configures one OpenAI-compatible chat-completions endpoint, model and optional protected API key, selects the Sites allowed to use it, and enables any of four functions:
 
 - summary and quality checks;
-- planning, risk and decision drafts;
+- separate bounded planning, risk/mitigation and decision-basis drafts;
 - analysis of learning points;
 - questions about one work item.
 

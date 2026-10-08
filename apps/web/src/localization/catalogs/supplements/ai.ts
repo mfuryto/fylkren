@@ -15,6 +15,9 @@ export const aiEn = {
   aiFunctions: "Functions",
   aiSummaryFunction: "Summary & quality",
   aiDraftsFunction: "Draft suggestions",
+  aiPlanningDraft: "Plan draft",
+  aiRiskDraft: "Risk and mitigation draft",
+  aiDecisionDraft: "Decision basis draft",
   aiLearningFunction: "Learning analysis",
   aiQuestionsFunction: "Task questions",
   aiSites: "AI Sites",
@@ -55,7 +58,7 @@ const norwegian: AiMessages = {
   aiEndpointHelp: "Bruk hele HTTPS-adressen til chat completions. Private endepunkter må tillates i installasjonens konfigurasjon for utgående forbindelser.",
   aiModel: "Modell", aiApiKey: "API-nøkkel hos leverandør", aiStoredSecret: "En nøkkel er lagret. La feltet stå tomt for å beholde den.",
   aiRemoveKey: "Fjern lagret nøkkel", aiFunctions: "Funksjoner", aiSummaryFunction: "Oppsummering og kvalitetskontroll",
-  aiDraftsFunction: "Utkast til planlegging, risiko og beslutninger", aiLearningFunction: "Analyse av læring",
+  aiDraftsFunction: "Utkast til planlegging, risiko og beslutninger", aiPlanningDraft: "Planutkast", aiRiskDraft: "Risiko- og tiltaksutkast", aiDecisionDraft: "Utkast til beslutningsgrunnlag", aiLearningFunction: "Analyse av læring",
   aiQuestionsFunction: "Spørsmål om oppgaven", aiSites: "Siter med AI-tilgang",
   aiSitesHelp: "Bare valgte siter kan sende oppdragsinnhold til den konfigurerte leverandøren.",
   aiSave: "Lagre AI-oppsett", aiTest: "Test lagret tilkobling", aiSaved: "AI-oppsettet er lagret.",
@@ -109,6 +112,25 @@ const progressMessages: Record<string, Pick<AiMessages, "aiWaiting" | "aiReceivi
   "uk-UA": { aiWaiting: "ШІ працює · {seconds} с. Відповідь з’явиться, щойно модель почне писати.", aiReceiving: "Отримання відповіді · {seconds} с", aiProviderHttpStatus: "Постачальник ШІ завершив запит зі статусом HTTP {status}." },
 };
 
+const draftLabels: Record<string, Pick<AiMessages, "aiPlanningDraft" | "aiRiskDraft" | "aiDecisionDraft">> = {
+  "cs-CZ": { aiPlanningDraft: "Návrh plánu", aiRiskDraft: "Návrh rizik a opatření", aiDecisionDraft: "Návrh podkladu pro rozhodnutí" },
+  "da-DK": { aiPlanningDraft: "Planudkast", aiRiskDraft: "Risiko- og tiltagsudkast", aiDecisionDraft: "Udkast til beslutningsgrundlag" },
+  "de-DE": { aiPlanningDraft: "Planentwurf", aiRiskDraft: "Risiko- und Maßnahmenentwurf", aiDecisionDraft: "Entwurf der Entscheidungsgrundlage" },
+  "es-ES": { aiPlanningDraft: "Borrador del plan", aiRiskDraft: "Borrador de riesgos y medidas", aiDecisionDraft: "Borrador para la decisión" },
+  "et-EE": { aiPlanningDraft: "Plaani mustand", aiRiskDraft: "Riskide ja meetmete mustand", aiDecisionDraft: "Otsustusaluse mustand" },
+  "fi-FI": { aiPlanningDraft: "Suunnitelmaluonnos", aiRiskDraft: "Riski- ja toimenpideluonnos", aiDecisionDraft: "Päätösperustelun luonnos" },
+  "fr-FR": { aiPlanningDraft: "Projet de plan", aiRiskDraft: "Projet de risques et mesures", aiDecisionDraft: "Projet de base de décision" },
+  "it-IT": { aiPlanningDraft: "Bozza del piano", aiRiskDraft: "Bozza di rischi e misure", aiDecisionDraft: "Bozza della base decisionale" },
+  "lt-LT": { aiPlanningDraft: "Plano projektas", aiRiskDraft: "Rizikų ir priemonių projektas", aiDecisionDraft: "Sprendimo pagrindo projektas" },
+  "lv-LV": { aiPlanningDraft: "Plāna projekts", aiRiskDraft: "Risku un pasākumu projekts", aiDecisionDraft: "Lēmuma pamatojuma projekts" },
+  "nl-NL": { aiPlanningDraft: "Planconcept", aiRiskDraft: "Concept voor risico's en maatregelen", aiDecisionDraft: "Concept-besluitbasis" },
+  "pl-PL": { aiPlanningDraft: "Projekt planu", aiRiskDraft: "Projekt ryzyk i działań", aiDecisionDraft: "Projekt podstawy decyzji" },
+  "pt-PT": { aiPlanningDraft: "Rascunho do plano", aiRiskDraft: "Rascunho de riscos e medidas", aiDecisionDraft: "Rascunho da base de decisão" },
+  "ro-RO": { aiPlanningDraft: "Proiect de plan", aiRiskDraft: "Proiect de riscuri și măsuri", aiDecisionDraft: "Proiect de fundamentare a deciziei" },
+  "sv-SE": { aiPlanningDraft: "Planutkast", aiRiskDraft: "Risk- och åtgärdsutkast", aiDecisionDraft: "Utkast till beslutsunderlag" },
+  "uk-UA": { aiPlanningDraft: "Проєкт плану", aiRiskDraft: "Проєкт ризиків і заходів", aiDecisionDraft: "Проєкт обґрунтування рішення" },
+};
+
 export const aiTranslations: Record<string, AiMessages> = new Proxy({ "nb-NO": norwegian } as Record<string, AiMessages>, {
-  get: (target, language: string) => target[language] ?? { ...aiEn, aiProviderHelp: providerHelp[language] ?? aiEn.aiProviderHelp, ...progressMessages[language] },
+  get: (target, language: string) => target[language] ?? { ...aiEn, aiProviderHelp: providerHelp[language] ?? aiEn.aiProviderHelp, ...progressMessages[language], ...draftLabels[language] },
 });
