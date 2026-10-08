@@ -112,6 +112,7 @@ internal static class PortableExportPackage
         Entities("work-item-types", await db.WorkItemTypes.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken));
         Entities("work-item-lookups", await db.WorkItemLookups.AsNoTracking().Where(value => value.SiteId == siteId).ToListAsync(cancellationToken));
         Entities("work-items", workItems);
+        Entities("primary-document-snapshots", await db.PrimaryDocumentSnapshots.AsNoTracking().Where(value => value.SiteId == siteId).OrderBy(value => value.WorkItemId).ThenBy(value => value.Version).ToListAsync(cancellationToken));
         Entities("work-item-comments", comments);
         Entities("learning-lessons", lessons);
         Entities("learning-entries", learningEntries);

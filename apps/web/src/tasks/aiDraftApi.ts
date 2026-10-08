@@ -4,8 +4,9 @@ import { normalizeLanguage, translateActive } from "../localization";
 export type RiskAiDraft = { title: string; cause: string; consequence: string; mitigation: string; dueDate: string | null };
 export type DecisionAiDraft = { title: string; decision: string; rationale: string };
 export type PlanningAiDraft = { stepNumber: number; stepName: string; content: string };
+export type AiSource = { type: string; name: string; version: number; sha256: string; sourceUrl?: string | null };
 
-type DraftResponse<T> = { drafts: T[]; generatedAt: string; sourceUpdatedAt: string };
+type DraftResponse<T> = { drafts: T[]; generatedAt: string; sourceUpdatedAt: string; sources: AiSource[] };
 
 export function requestAiDrafts<T>(siteId: string, itemId: string, feature: "risks" | "decisions", language: string) {
   return apiMutate<DraftResponse<T>>(`/api/ai/sites/${siteId}/work-items/${itemId}/assist`, "POST", {

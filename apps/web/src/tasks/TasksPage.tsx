@@ -21,7 +21,7 @@ import { TaskDomainDecisionDialog, type DomainDecisionDraft } from "./TaskDomain
 import { TaskRiskDialog } from "./TaskRiskDialog";
 import { TaskVersionDialog } from "./TaskVersionDialog";
 import { TaskAiAssistant } from "./TaskAiAssistant";
-import { addHoldDependencies, approvedPlanRunId, getExecutionHistory, getFinalReportTemplate, getTaskDetails, taskCreatePayload, taskMutation } from "./taskApi";
+import { addHoldDependencies, approvedPlanRunId, getExecutionHistory, getFinalReportTemplate, getTaskDetails, importPrimaryDocument, taskCreatePayload, taskMutation } from "./taskApi";
 import { buildReportUnitPath, buildWorkContextTree } from "./taskHierarchy";
 import { canSendSideRequestAtStatus, effectiveTaskStatus as effectiveStatus, getTaskNextActions, hasActiveDirectChildren as hasActiveChildren, rootWorkTitle, workflowProgress } from "./taskPolicy";
 import { selectScopedItems } from "./taskQueue";
@@ -79,9 +79,7 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
   const { planDetails, clearPlanDetails } = useTaskPlanDetails(selectedSiteId, openItemId, items, setError);
   useEffect(() => { const timer = window.setTimeout(() => setAppliedSearch(search.trim()), 250); return () => window.clearTimeout(timer); }, [search]);
   useEffect(() => { if (itemPage !== queuePage) setQueuePage(itemPage); }, [itemPage, queuePage]);
-  useEffect(() => {
-    setSelectedUnitId("");
-  }, [selectedSiteId]);
+  useEffect(() => { setSelectedUnitId(""); }, [selectedSiteId]);
   useEffect(() => { setQueuePage(1); }, [sort]);
   const selectedSite = sites.find((site) => site.siteId === selectedSiteId);
   const requestTypeSelected = types.some((type) => type.id === form.workItemTypeId && type.isSystemManaged);
@@ -149,7 +147,6 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
     setSelectedUnitId(permalink.unitId ?? root.assignedUnitId ?? "");
     return undefined;
   }, [permalink.itemId, permalink.unitId, permalink.taskFilter, permalink.taskSearch, items, loadedQuery, selectedSiteId, selectedUnitId, filter, appliedSearch]);
-
   async function executeTaskCommand({ path, method, body, fallback, onSuccess, refresh }: {
     path: string;
     method: "POST" | "PUT" | "DELETE";
@@ -172,16 +169,18 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
       setBusy(false);
     }
   }
-
   async function createItem(event: React.FormEvent) {
     event.preventDefault();
     setBusy(true); setError(""); setPermalinkError("");
     try {
       const created = await taskMutation<{ id: string; referenceCode: string }>(
         `/api/work/sites/${selectedSiteId}/items`, "POST", taskCreatePayload(form, selectedUnitId), translateActive("tasksTasksPageTheTaskCouldNotBeRegistered"));
+      let importProblem: unknown; try { if (form.primaryDocument) await importPrimaryDocument(selectedSiteId, created.id, form.primaryDocument, form.usePrimaryDocumentForAi); }
+      catch (problem) { importProblem = problem; }
       setForm(emptyTaskCreateDraft()); setRequestRecipientQuery(""); setRequestRecipients([]); setCreatorOpen(false);
       setQueuePage(1);
       navigateToLocation({ page: "Tasks", siteId: selectedSiteId, unitId: selectedUnitId || undefined, itemId: created.id, taskFilter: filter, taskSearch: search || undefined }, true);
+      if (importProblem) setError(importProblem instanceof Error ? importProblem.message : translateActive("primaryDocumentImportFailed"));
     } catch (problem) {
       setError(problem instanceof Error ? problem.message : translateActive("tasksTasksPageTheTaskCouldNotBeRegistered"));
     } finally { setBusy(false); }
@@ -439,6 +438,7 @@ export function TasksPage({ personId, language: displayLanguage, timeZone: displ
           selectedUnitId={selectedUnitId}
           classificationMarkings={classificationMarkings}
           busy={busy}
+          aiEnabled={aiCapabilities.enabled}
           onClose={() => setCreatorOpen(false)}
           onSubmit={createItem}
         />

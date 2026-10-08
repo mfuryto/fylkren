@@ -132,6 +132,28 @@ internal static class WorkItemModelConfiguration
         workItem.HasOne(value => value.FinalReportWrittenByPerson).WithMany().HasForeignKey(value => value.FinalReportWrittenByPersonId).OnDelete(DeleteBehavior.Restrict);
         workItem.HasOne(value => value.FinalReportApprovedByPerson).WithMany().HasForeignKey(value => value.FinalReportApprovedByPersonId).OnDelete(DeleteBehavior.Restrict);
 
+        var primaryDocument = modelBuilder.Entity<PrimaryDocumentSnapshot>();
+        primaryDocument.ToTable("primary_document_snapshots", table => table.HasCheckConstraint("CK_primary_document_snapshot_version", "version > 0"));
+        primaryDocument.HasKey(value => value.Id);
+        primaryDocument.Property(value => value.Id).HasColumnName("id");
+        primaryDocument.Property(value => value.SiteId).HasColumnName("site_id");
+        primaryDocument.Property(value => value.WorkItemId).HasColumnName("work_item_id");
+        primaryDocument.Property(value => value.Version).HasColumnName("version");
+        primaryDocument.Property(value => value.Name).HasColumnName("name").HasMaxLength(200).IsRequired();
+        primaryDocument.Property(value => value.MediaType).HasColumnName("media_type").HasMaxLength(100).IsRequired();
+        primaryDocument.Property(value => value.Sha256).HasColumnName("sha256").HasMaxLength(64).IsRequired();
+        primaryDocument.Property(value => value.SourceUrl).HasColumnName("source_url").HasMaxLength(2048);
+        primaryDocument.Property(value => value.ExtractedText).HasColumnName("extracted_text").HasMaxLength(100000).IsRequired();
+        primaryDocument.Property(value => value.StructuredContent).HasColumnName("structured_content").HasColumnType("jsonb").IsRequired();
+        primaryDocument.Property(value => value.AvailableToAi).HasColumnName("available_to_ai");
+        primaryDocument.Property(value => value.CreatedByPersonId).HasColumnName("created_by_person_id");
+        primaryDocument.Property(value => value.CreatedAt).HasColumnName("created_at");
+        primaryDocument.HasIndex(value => new { value.WorkItemId, value.Version }).IsUnique();
+        primaryDocument.HasIndex(value => new { value.SiteId, value.AvailableToAi });
+        primaryDocument.HasOne(value => value.WorkItem).WithMany().HasForeignKey(value => value.WorkItemId).OnDelete(DeleteBehavior.Restrict);
+        primaryDocument.HasOne(value => value.Site).WithMany().HasForeignKey(value => value.SiteId).OnDelete(DeleteBehavior.Restrict);
+        primaryDocument.HasOne(value => value.CreatedByPerson).WithMany().HasForeignKey(value => value.CreatedByPersonId).OnDelete(DeleteBehavior.Restrict);
+
         var dependency = modelBuilder.Entity<WorkItemDependency>();
         dependency.ToTable("work_item_dependencies", table =>
             table.HasCheckConstraint("CK_work_item_dependencies_distinct_items", "predecessor_work_item_id <> dependent_work_item_id"));

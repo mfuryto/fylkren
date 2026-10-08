@@ -6,12 +6,12 @@ import { RichTextContent } from "../components/RichText";
 import { normalizeLanguage } from "../localization";
 import { useTranslation } from "../localization/LocalizationProvider";
 import type { WorkItem } from "../work/WorkItemModels";
-import { requestPlanningDrafts, type PlanningAiDraft } from "./aiDraftApi";
+import { requestPlanningDrafts, type AiSource, type PlanningAiDraft } from "./aiDraftApi";
 import { AiAssistButton } from "../components/AiAssistButton";
 
 export type AiFeature = "summary" | "planning" | "risks" | "decisions" | "learning" | "questions";
-type Result = { content: string; generatedAt: string; sourceUpdatedAt: string };
-type StreamEvent = { type: "start"; sourceUpdatedAt: string; correlationId?: string } | { type: "heartbeat" } | { type: "delta"; content: string } | { type: "done"; generatedAt: string } | { type: "error"; code: string; providerStatus?: number; correlationId?: string };
+type Result = { content: string; generatedAt: string; sourceUpdatedAt: string; sources: AiSource[] };
+type StreamEvent = { type: "start"; sourceUpdatedAt: string; sources?: AiSource[]; correlationId?: string } | { type: "heartbeat" } | { type: "delta"; content: string } | { type: "done"; generatedAt: string } | { type: "error"; code: string; providerStatus?: number; correlationId?: string };
 
 export function TaskAiAssistant({ siteId, item, features, fixedFeature, contextId, targetId, onUseDraft, onUsePlanningDrafts, onClose, language, timeZone }: {
   siteId: string;
@@ -45,7 +45,7 @@ export function TaskAiAssistant({ siteId, item, features, fixedFeature, contextI
         if (!contextId || !targetId) throw new Error(t("aiAssistFailed"));
         const response = await requestPlanningDrafts(siteId, item.id, contextId, targetId, language);
         setPlanningDrafts(response.drafts);
-        setResult({ content: response.drafts.map(draft => `## ${draft.stepNumber}. ${draft.stepName}\n\n${draft.content}`).join("\n\n---\n\n"), generatedAt: response.generatedAt, sourceUpdatedAt: response.sourceUpdatedAt });
+        setResult({ content: response.drafts.map(draft => `## ${draft.stepNumber}. ${draft.stepName}\n\n${draft.content}`).join("\n\n---\n\n"), generatedAt: response.generatedAt, sourceUpdatedAt: response.sourceUpdatedAt, sources: response.sources ?? [] });
         return;
       }
       const token = await getAntiforgeryToken();
@@ -60,7 +60,7 @@ export function TaskAiAssistant({ siteId, item, features, fixedFeature, contextI
       const consume = (line: string) => {
         if (!line.trim()) return;
         const event = JSON.parse(line) as StreamEvent;
-        if (event.type === "start") { correlationId = event.correlationId ?? correlationId; setResult({ content: "", generatedAt: "", sourceUpdatedAt: event.sourceUpdatedAt }); }
+        if (event.type === "start") { correlationId = event.correlationId ?? correlationId; setResult({ content: "", generatedAt: "", sourceUpdatedAt: event.sourceUpdatedAt, sources: event.sources ?? [] }); }
         if (event.type === "delta") setResult(current => current ? { ...current, content: current.content + event.content } : current);
         if (event.type === "done") { completed = true; setResult(current => current ? { ...current, generatedAt: event.generatedAt } : current); }
         if (event.type === "error") { correlationId = event.correlationId ?? correlationId; const text = event.code === "ai_provider_timeout" ? t("aiProviderTimeout") : event.code === "ai_provider_rate_limited" ? t("aiProviderRateLimited") : event.providerStatus ? t("aiProviderHttpStatus", { status: event.providerStatus }) : t("aiProviderUnavailable"); throw new Error(correlationId ? `${text} ${t("correlation", { id: correlationId })}.` : text); }
@@ -82,6 +82,6 @@ export function TaskAiAssistant({ siteId, item, features, fixedFeature, contextI
     <AiAssistButton label={busy ? t("aiWorking") : t("aiGenerateAction")} working={busy} disabled={busy || feature === "questions" && question.trim().length < 2} onClick={() => void run()}/>
     {busy && <p className="status-message" role="status">{t(result?.content ? "aiReceiving" : "aiWaiting", { seconds: elapsed })}</p>}
     {message && <p className="status-message error-message" role="alert">{message}</p>}
-    <section className="site-detail-block" aria-live="polite"><h3>{t("aiResult")}</h3>{result ? <><div className="ai-result"><RichTextContent value={result.content} /></div><p className="muted">{t("aiGeneratedFromVersion", { date: new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short", timeZone }).format(new Date(result.sourceUpdatedAt)) })}</p>{onUsePlanningDrafts && planningDrafts.length > 0 && <button className="primary-button" type="button" onClick={() => onUsePlanningDrafts(planningDrafts)}>{t("aiUseDraft")}</button>}{onUseDraft && result.generatedAt && result.content.trim() && <button className="primary-button" type="button" onClick={() => onUseDraft(result.content)}>{t("aiUseDraft")}</button>}</> : <p className="muted">{t("aiNoResult")}</p>}</section>
+    <section className="site-detail-block" aria-live="polite"><h3>{t("aiResult")}</h3>{result ? <><div className="ai-result"><RichTextContent value={result.content} /></div>{result.sources.map(source => <p className="muted" key={`${source.sha256}-${source.version}`}>{t("tasksTaskClassifiersPrimaryDocument")}: {source.sourceUrl ? <a href={source.sourceUrl} target="_blank" rel="noopener noreferrer">{source.name}</a> : source.name} (v{source.version})</p>)}<p className="muted">{t("aiGeneratedFromVersion", { date: new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short", timeZone }).format(new Date(result.sourceUpdatedAt)) })}</p>{onUsePlanningDrafts && planningDrafts.length > 0 && <button className="primary-button" type="button" onClick={() => onUsePlanningDrafts(planningDrafts)}>{t("aiUseDraft")}</button>}{onUseDraft && result.generatedAt && result.content.trim() && <button className="primary-button" type="button" onClick={() => onUseDraft(result.content)}>{t("aiUseDraft")}</button>}</> : <p className="muted">{t("aiNoResult")}</p>}</section>
   </div></Modal>;
 }

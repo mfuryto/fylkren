@@ -14,5 +14,6 @@
     <PackageVersion Include="Fido2.AspNet" Version="4.0.1" />
     <PackageVersion Include="SkiaSharp" Version="4.153.1" />
     <PackageVersion Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="4.153.1" />
+    <PackageVersion Include="PdfPig" Version="0.1.16" />
   </ItemGroup>
 </Project>

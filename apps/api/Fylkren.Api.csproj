@@ -22,5 +22,6 @@
     <PackageReference Include="Fido2.AspNet" />
     <PackageReference Include="SkiaSharp" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" />
+    <PackageReference Include="PdfPig" />
   </ItemGroup>
 </Project>

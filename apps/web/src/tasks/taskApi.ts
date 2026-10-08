@@ -1,5 +1,5 @@
 import { translateActive } from "../localization";
-import { apiGet, apiGetCached, apiMutate } from "../api/client";
+import { apiFormMutate, apiGet, apiGetCached, apiMutate } from "../api/client";
 import type { TaskSite, TaskUnit } from "../work/WorkContextModels";
 import type { DomainDecision, WorkItem, WorkItemDependency, WorkItemDependencyCandidate, WorkItemDetails, WorkItemType } from "../work/WorkItemModels";
 import type { TaskCreateDraft } from "./TaskCreateDialog";
@@ -50,8 +50,9 @@ export async function getTaskDetails(siteId: string, itemId: string) {
 }
 
 export function taskCreatePayload(form: TaskCreateDraft, assignedUnitId: string) {
+  const { primaryDocument: _primaryDocument, usePrimaryDocumentForAi: _usePrimaryDocumentForAi, ...fields } = form;
   return {
-    ...form,
+    ...fields,
     workItemTypeId: form.workItemTypeId || null,
     sourceTypeId: form.sourceTypeId || null,
     senderId: form.senderId || null,
@@ -62,6 +63,11 @@ export function taskCreatePayload(form: TaskCreateDraft, assignedUnitId: string)
     referenceUrl: form.referenceUrl || null,
     dueAt: form.dueAt ? new Date(`${form.dueAt}T23:59:59`).toISOString() : null,
   };
+}
+
+export async function importPrimaryDocument(siteId: string, itemId: string, document: File, availableToAi: boolean) {
+  const body = new FormData(); body.set("document", document); body.set("availableToAi", String(availableToAi));
+  return apiFormMutate<{ id: string; name: string; mediaType: string; sha256: string; sourceUrl: string | null; version: number; availableToAi: boolean; createdAt: string; blocks: number; characters: number }>(`/api/work/sites/${siteId}/items/${itemId}/primary-document`, "POST", body, translateActive("primaryDocumentImportFailed"));
 }
 
 export async function approvedPlanRunId(siteId: string, itemId: string) {

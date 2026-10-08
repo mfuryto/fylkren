@@ -4257,6 +4257,28 @@ namespace Fylkren.Api.Persistence.Migrations
                     b.ToTable("site_reference_settings", (string)null);
                 });
 
+            modelBuilder.Entity("Fylkren.Api.WorkManagement.PrimaryDocumentSnapshot", b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid").HasColumnName("id");
+                    b.Property<bool>("AvailableToAi").HasColumnType("boolean").HasColumnName("available_to_ai");
+                    b.Property<DateTimeOffset>("CreatedAt").HasColumnType("timestamp with time zone").HasColumnName("created_at");
+                    b.Property<Guid>("CreatedByPersonId").HasColumnType("uuid").HasColumnName("created_by_person_id");
+                    b.Property<string>("ExtractedText").IsRequired().HasMaxLength(100000).HasColumnType("character varying(100000)").HasColumnName("extracted_text");
+                    b.Property<string>("MediaType").IsRequired().HasMaxLength(100).HasColumnType("character varying(100)").HasColumnName("media_type");
+                    b.Property<string>("Name").IsRequired().HasMaxLength(200).HasColumnType("character varying(200)").HasColumnName("name");
+                    b.Property<string>("Sha256").IsRequired().HasMaxLength(64).HasColumnType("character varying(64)").HasColumnName("sha256");
+                    b.Property<string>("SourceUrl").HasMaxLength(2048).HasColumnType("character varying(2048)").HasColumnName("source_url");
+                    b.Property<Guid>("SiteId").HasColumnType("uuid").HasColumnName("site_id");
+                    b.Property<string>("StructuredContent").IsRequired().HasColumnType("jsonb").HasColumnName("structured_content");
+                    b.Property<int>("Version").HasColumnType("integer").HasColumnName("version");
+                    b.Property<Guid>("WorkItemId").HasColumnType("uuid").HasColumnName("work_item_id");
+                    b.HasKey("Id");
+                    b.HasIndex("CreatedByPersonId");
+                    b.HasIndex("SiteId", "AvailableToAi");
+                    b.HasIndex("WorkItemId", "Version").IsUnique();
+                    b.ToTable("primary_document_snapshots", null, t => t.HasCheckConstraint("CK_primary_document_snapshot_version", "version > 0"));
+                });
+
             modelBuilder.Entity("Fylkren.Api.WorkManagement.WorkItem", b =>
                 {
                     b.Property<Guid>("Id")
@@ -5968,6 +5990,19 @@ namespace Fylkren.Api.Persistence.Migrations
                         .HasForeignKey("Fylkren.Api.WorkManagement.SiteReferenceSettings", "SiteId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Fylkren.Api.WorkManagement.PrimaryDocumentSnapshot", b =>
+                {
+                    b.HasOne("Fylkren.Api.Identity.Person", "CreatedByPerson")
+                        .WithMany().HasForeignKey("CreatedByPersonId").OnDelete(DeleteBehavior.Restrict).IsRequired();
+                    b.HasOne("Fylkren.Api.Organization.Site", "Site")
+                        .WithMany().HasForeignKey("SiteId").OnDelete(DeleteBehavior.Restrict).IsRequired();
+                    b.HasOne("Fylkren.Api.WorkManagement.WorkItem", "WorkItem")
+                        .WithMany().HasForeignKey("WorkItemId").OnDelete(DeleteBehavior.Restrict).IsRequired();
+                    b.Navigation("CreatedByPerson");
+                    b.Navigation("Site");
+                    b.Navigation("WorkItem");
                 });
 
             modelBuilder.Entity("Fylkren.Api.WorkManagement.WorkItem", b =>

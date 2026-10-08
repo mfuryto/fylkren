@@ -63,6 +63,10 @@ export const aiEn = {
   aiProviderUnavailable: "AI unavailable",
   aiProviderHttpStatus: "The AI provider ended the request with HTTP {status}.",
   aiGeneratedFromVersion: "Source: {date}",
+  primaryDocumentImport: "Import primary document",
+  primaryDocumentImportHelp: "PDF, DOCX or UTF-8 text, up to 8 MiB. Fylkren stores extracted structured text, not the original file.",
+  primaryDocumentAiSource: "Use the imported document as an AI source",
+  primaryDocumentImportFailed: "The primary document could not be imported",
   entitlementAi: "AI assistance",
 } as const;
 
@@ -93,6 +97,10 @@ const norwegian: AiMessages = {
   aiProviderUnavailable: "AI-leverandøren kunne ikke fullføre forespørselen.",
   aiProviderHttpStatus: "AI-leverandøren avsluttet forespørselen med HTTP {status}.",
   aiGeneratedFromVersion: "Laget fra oppgaven slik den sist ble oppdatert {date}. Kontroller kilden før teksten brukes.",
+  primaryDocumentImport: "Importer hoveddokument",
+  primaryDocumentImportHelp: "PDF, DOCX eller UTF-8-tekst, opptil 8 MiB. Fylkren lagrer strukturert tekstuttrekk, ikke originalfilen.",
+  primaryDocumentAiSource: "Bruk det importerte dokumentet som kilde for AI",
+  primaryDocumentImportFailed: "Hoveddokumentet kunne ikke importeres",
   entitlementAi: "AI-støtte",
 };
 
@@ -212,6 +220,26 @@ const aiActionMessages: Record<string, AiActionMessages> = {
   "uk-UA": { aiTaskAction: "Проаналізувати завдання", aiPlanningAction: "Запропонувати зміст плану", aiRiskAction: "Визначити ризики та заходи", aiDecisionAction: "Запропонувати основу рішення", aiLearningAction: "Проаналізувати висновки", aiGenerateAction: "Створити пропозицію" },
 };
 
+type DocumentImportMessages = Pick<AiMessages, "primaryDocumentImport" | "primaryDocumentImportHelp" | "primaryDocumentAiSource" | "primaryDocumentImportFailed">;
+const documentImportMessages: Record<string, DocumentImportMessages> = {
+  "cs-CZ": { primaryDocumentImport: "Importovat hlavní dokument", primaryDocumentImportHelp: "PDF, DOCX nebo text UTF-8 do 8 MiB. Fylkren ukládá strukturovaný textový výstup, nikoli původní soubor.", primaryDocumentAiSource: "Použít importovaný dokument jako zdroj pro AI", primaryDocumentImportFailed: "Hlavní dokument se nepodařilo importovat" },
+  "da-DK": { primaryDocumentImport: "Importér hoveddokument", primaryDocumentImportHelp: "PDF, DOCX eller UTF-8-tekst op til 8 MiB. Fylkren gemmer struktureret tekstudtræk, ikke originalfilen.", primaryDocumentAiSource: "Brug det importerede dokument som AI-kilde", primaryDocumentImportFailed: "Hoveddokumentet kunne ikke importeres" },
+  "de-DE": { primaryDocumentImport: "Hauptdokument importieren", primaryDocumentImportHelp: "PDF, DOCX oder UTF-8-Text bis 8 MiB. Fylkren speichert den strukturierten Textauszug, nicht die Originaldatei.", primaryDocumentAiSource: "Importiertes Dokument als KI-Quelle verwenden", primaryDocumentImportFailed: "Das Hauptdokument konnte nicht importiert werden" },
+  "es-ES": { primaryDocumentImport: "Importar documento principal", primaryDocumentImportHelp: "PDF, DOCX o texto UTF-8 de hasta 8 MiB. Fylkren guarda el texto estructurado extraído, no el archivo original.", primaryDocumentAiSource: "Usar el documento importado como fuente de IA", primaryDocumentImportFailed: "No se pudo importar el documento principal" },
+  "et-EE": { primaryDocumentImport: "Impordi põhidokument", primaryDocumentImportHelp: "PDF, DOCX või UTF-8 tekst kuni 8 MiB. Fylkren salvestab struktureeritud tekstiväljavõtte, mitte algfaili.", primaryDocumentAiSource: "Kasuta imporditud dokumenti AI allikana", primaryDocumentImportFailed: "Põhidokumenti ei saanud importida" },
+  "fi-FI": { primaryDocumentImport: "Tuo pääasiakirja", primaryDocumentImportHelp: "PDF, DOCX tai UTF-8-teksti, enintään 8 MiB. Fylkren tallentaa jäsennellyn tekstin, ei alkuperäistä tiedostoa.", primaryDocumentAiSource: "Käytä tuotua asiakirjaa tekoälyn lähteenä", primaryDocumentImportFailed: "Pääasiakirjaa ei voitu tuoda" },
+  "fr-FR": { primaryDocumentImport: "Importer le document principal", primaryDocumentImportHelp: "PDF, DOCX ou texte UTF-8 jusqu’à 8 Mio. Fylkren conserve le texte structuré extrait, pas le fichier original.", primaryDocumentAiSource: "Utiliser le document importé comme source pour l’IA", primaryDocumentImportFailed: "Le document principal n’a pas pu être importé" },
+  "it-IT": { primaryDocumentImport: "Importa documento principale", primaryDocumentImportHelp: "PDF, DOCX o testo UTF-8 fino a 8 MiB. Fylkren conserva il testo strutturato estratto, non il file originale.", primaryDocumentAiSource: "Usa il documento importato come fonte per l’IA", primaryDocumentImportFailed: "Impossibile importare il documento principale" },
+  "lt-LT": { primaryDocumentImport: "Importuoti pagrindinį dokumentą", primaryDocumentImportHelp: "PDF, DOCX arba UTF-8 tekstas iki 8 MiB. Fylkren saugo struktūruotą teksto išrašą, o ne pradinį failą.", primaryDocumentAiSource: "Naudoti importuotą dokumentą kaip DI šaltinį", primaryDocumentImportFailed: "Nepavyko importuoti pagrindinio dokumento" },
+  "lv-LV": { primaryDocumentImport: "Importēt galveno dokumentu", primaryDocumentImportHelp: "PDF, DOCX vai UTF-8 teksts līdz 8 MiB. Fylkren saglabā strukturētu teksta izvilkumu, nevis sākotnējo failu.", primaryDocumentAiSource: "Izmantot importēto dokumentu kā MI avotu", primaryDocumentImportFailed: "Galveno dokumentu neizdevās importēt" },
+  "nl-NL": { primaryDocumentImport: "Primair document importeren", primaryDocumentImportHelp: "PDF, DOCX of UTF-8-tekst tot 8 MiB. Fylkren bewaart de gestructureerde tekstextractie, niet het oorspronkelijke bestand.", primaryDocumentAiSource: "Geïmporteerd document als AI-bron gebruiken", primaryDocumentImportFailed: "Het primaire document kon niet worden geïmporteerd" },
+  "pl-PL": { primaryDocumentImport: "Importuj dokument główny", primaryDocumentImportHelp: "PDF, DOCX lub tekst UTF-8 do 8 MiB. Fylkren zapisuje ustrukturyzowany tekst, a nie plik źródłowy.", primaryDocumentAiSource: "Użyj zaimportowanego dokumentu jako źródła AI", primaryDocumentImportFailed: "Nie udało się zaimportować dokumentu głównego" },
+  "pt-PT": { primaryDocumentImport: "Importar documento principal", primaryDocumentImportHelp: "PDF, DOCX ou texto UTF-8 até 8 MiB. O Fylkren guarda o texto estruturado extraído, não o ficheiro original.", primaryDocumentAiSource: "Usar o documento importado como fonte de IA", primaryDocumentImportFailed: "Não foi possível importar o documento principal" },
+  "ro-RO": { primaryDocumentImport: "Importă documentul principal", primaryDocumentImportHelp: "PDF, DOCX sau text UTF-8 de până la 8 MiB. Fylkren păstrează textul structurat extras, nu fișierul original.", primaryDocumentAiSource: "Folosește documentul importat ca sursă AI", primaryDocumentImportFailed: "Documentul principal nu a putut fi importat" },
+  "sv-SE": { primaryDocumentImport: "Importera huvuddokument", primaryDocumentImportHelp: "PDF, DOCX eller UTF-8-text upp till 8 MiB. Fylkren lagrar strukturerat textutdrag, inte originalfilen.", primaryDocumentAiSource: "Använd det importerade dokumentet som AI-källa", primaryDocumentImportFailed: "Huvuddokumentet kunde inte importeras" },
+  "uk-UA": { primaryDocumentImport: "Імпортувати основний документ", primaryDocumentImportHelp: "PDF, DOCX або текст UTF-8 до 8 МіБ. Fylkren зберігає структурований текстовий витяг, а не початковий файл.", primaryDocumentAiSource: "Використовувати імпортований документ як джерело для ШІ", primaryDocumentImportFailed: "Не вдалося імпортувати основний документ" },
+};
+
 export const aiTranslations: Record<string, AiMessages> = new Proxy({ "nb-NO": norwegian } as Record<string, AiMessages>, {
-  get: (target, language: string) => target[language] ?? { ...aiEn, aiProviderHelp: providerHelp[language] ?? aiEn.aiProviderHelp, aiEndpointHelp: endpointHelp[language] ?? aiEn.aiEndpointHelp, ...progressMessages[language], ...draftLabels[language], ...decisionWorkflowMessages[language], ...aiActionMessages[language] },
+  get: (target, language: string) => target[language] ?? { ...aiEn, aiProviderHelp: providerHelp[language] ?? aiEn.aiProviderHelp, aiEndpointHelp: endpointHelp[language] ?? aiEn.aiEndpointHelp, ...progressMessages[language], ...draftLabels[language], ...decisionWorkflowMessages[language], ...aiActionMessages[language], ...documentImportMessages[language] },
 });

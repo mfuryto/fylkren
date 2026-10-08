@@ -69,6 +69,7 @@ public sealed class FylkrenDbContext(DbContextOptions<FylkrenDbContext> options,
     public DbSet<DomainObjectVersion> DomainObjectVersions => Set<DomainObjectVersion>();
     public DbSet<FormalApprovalSignoff> FormalApprovalSignoffs => Set<FormalApprovalSignoff>();
     public DbSet<WorkItem> WorkItems => Set<WorkItem>();
+    public DbSet<PrimaryDocumentSnapshot> PrimaryDocumentSnapshots => Set<PrimaryDocumentSnapshot>();
     public DbSet<PlatformReferenceSettings> PlatformReferenceSettings => Set<PlatformReferenceSettings>();
     public DbSet<SiteReferenceSettings> SiteReferenceSettings => Set<SiteReferenceSettings>();
     public DbSet<LearningLesson> LearningLessons => Set<LearningLesson>();

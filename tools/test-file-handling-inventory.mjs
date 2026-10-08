@@ -6,20 +6,23 @@ const sourceFiles = [
   'apps/api/Identity/IdentityProfileEndpoints.cs',
   'apps/api/Platform/BrandingEndpoints.cs',
   'apps/api/Portability/PortabilityEndpoints.cs',
+  'apps/api/WorkManagement/PrimaryDocumentEndpoints.cs',
 ];
 const formReaders = sourceFiles.flatMap(path =>
   [...readFileSync(path, 'utf8').matchAll(/ReadFormAsync\(/g)].map(() => path));
-assert.equal(formReaders.length, 3, 'Review and document every server multipart reader');
+assert.equal(formReaders.length, 4, 'Review and document every server multipart reader');
 
 for (const marker of [
   'PUT /api/profile/image',
   'PUT /api/platform/branding/logo',
   'POST /api/portability/sites/{siteId}/imports/validate',
+  'POST /api/work/sites/{siteId}/items/{itemId}/primary-document',
   'Enterprise licence selection',
   'Export custody confirmation',
   '16 MiB aggregate declared entry length; 250 entries',
   'fully decodes and re-encodes supported raster uploads',
   'Validation is not antivirus scanning',
+  '100,000 extracted characters',
 ]) assert.ok(documentation.includes(marker), `File inventory is missing: ${marker}`);
 
 const imagePolicy = readFileSync('apps/api/SafeImageUpload.cs', 'utf8');
@@ -45,4 +48,5 @@ process.stdout.write(`${JSON.stringify({ fileHandlingInventory: 'passed',
   serverMultipartFeatures: formReaders.length, browserOnlyFileSelections: 2,
   serverFileResponses: serverFileResults.length, imageMaximumMiB: 2,
   portabilityMaximumMiB: 16, portabilityMaximumEntries: 250,
+  primaryDocumentMaximumMiB: 8,
   knownMalwareScannerPresent: false })}\n`);

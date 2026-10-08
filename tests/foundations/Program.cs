@@ -17,6 +17,11 @@ if (args.Contains("--ai-assistance-only"))
     await AiAssistanceTests.Run();
     return;
 }
+if (args.Contains("--primary-document-only"))
+{
+    await PrimaryDocumentImportTests.Run();
+    return;
+}
 if (args.Contains("--operational-api-contract-only"))
 {
     OperationalApiContractTests.Run();
@@ -134,6 +139,16 @@ var connection = Environment.GetEnvironmentVariable("FYLKREN_FOUNDATION_TEST_DAT
 if (connection is null) throw new Exception("Run with the disposable database harness; integration coverage is mandatory.");
 if (!connection.Contains("Database=fylkren_foundation_test", StringComparison.Ordinal)) throw new Exception("Only the synthetic foundation database is allowed.");
 await using var db = new FylkrenDbContext(new DbContextOptionsBuilder<FylkrenDbContext>().UseNpgsql(connection).Options);
+if (args.Contains("--primary-document-migration-only"))
+{
+    await db.Database.MigrateAsync();
+    var migration = db.GetService<IMigrationsAssembly>().Migrations.Keys.Single(value => value.EndsWith("_AddPrimaryDocumentSnapshots"));
+    var applied = await db.Database.SqlQueryRaw<int>("SELECT COUNT(*)::int AS \"Value\" FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'primary_document_snapshots'").SingleAsync();
+    var sourceLink = await db.Database.SqlQueryRaw<int>("SELECT COUNT(*)::int AS \"Value\" FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'primary_document_snapshots' AND column_name = 'source_url'").SingleAsync();
+    if (applied != 1 || sourceLink != 1) throw new Exception("Primary-document snapshot migration did not create its table and source-link provenance.");
+    Console.WriteLine($"Primary-document migration applied: {migration}.");
+    return;
+}
 if (args.Contains("--model-diff-only"))
 {
     var differ = db.GetService<IMigrationsModelDiffer>();
