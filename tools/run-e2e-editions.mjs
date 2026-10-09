@@ -41,7 +41,17 @@ function run(command, args, options = {}) {
   const result = spawnSync(command, args, { env, stdio: 'inherit', ...options });
   if (result.error) throw result.error;
   if (result.status !== 0) {
-    spawnSync('docker', ['compose', '-p', project, 'logs', '--no-color', '--tail', '250', 'api'],
+    const eventUntil = new Date().toISOString();
+    spawnSync('docker', ['events', '--since', '2m', '--until', eventUntil,
+      '--filter', `container=${project}-api-1`, '--format',
+      'api-event={{.Time}} action={{.Action}} exitCode={{.Actor.Attributes.exitCode}}'],
+    { env, stdio: 'inherit' });
+    spawnSync('docker', ['inspect', '--format',
+      'api-state={{json .State}} restartCount={{.RestartCount}}', `${project}-api-1`],
+      { env, stdio: 'inherit' });
+    spawnSync('docker', ['compose', '-p', project, 'logs', '--no-color', '--since', '2m', 'web'],
+      { env, stdio: 'inherit' });
+    spawnSync('docker', ['compose', '-p', project, 'logs', '--no-color', '--tail', '80', 'api'],
       { env, stdio: 'inherit' });
     throw new Error(`${command} exited with ${result.status}`);
   }
@@ -189,6 +199,15 @@ try {
     }`]);
   run(process.execPath, ['-e', `const response=await fetch('http://localhost:18081/api/configuration/public');const body=await response.json();if(!response.ok||body.setupRequired!==true)throw new Error(JSON.stringify(body));`]);
   run(process.execPath, ['tools/test-e2e-local.mjs', ...['--asvs-input-only', '--workload-only'].filter(flag => process.argv.includes(flag))]);
+  if (process.argv.includes('--workload-only')) {
+    const restartResult = spawnSync('docker', ['inspect', '--format', '{{.RestartCount}}', `${project}-api-1`],
+      { env, encoding: 'utf8' });
+    if (restartResult.error) throw restartResult.error;
+    if (restartResult.status !== 0) throw new Error('Could not inspect the API restart count after workload qualification');
+    const restartCount = Number.parseInt(restartResult.stdout.trim(), 10);
+    if (restartCount !== 0) throw new Error(`API restarted ${restartCount} time(s) during workload qualification`);
+    console.log(JSON.stringify({ workloadApiRestarts: restartCount }));
+  }
   }
 } finally {
   try {

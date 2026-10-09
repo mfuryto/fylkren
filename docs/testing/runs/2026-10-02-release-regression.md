@@ -2208,3 +2208,21 @@ The Work API now has dedicated `decisions:write`, `risks:write`, `planning:write
 The EF snapshot matches the additive migration. The complete foundation database suite passed migration, rollback, actor constraints, common activity, lifecycle, portability and consumer reconciliation. API build passed without warnings; the OpenAPI contract test, the 322-operation/100-file authorization inventories, web typecheck, 164 frontend tests and documentation/ASVS traceability checks passed.
 
 The fresh Community/Enterprise candidate run passed the new live API chain before continuing into the unrelated workload stage: exact grants and scopes, decision creation/revision with a human maker, risk/measure creation and revision with a human owner, machine authorship in reads/activity, and versioned planning/execution documentation all succeeded against PostgreSQL. The later existing 25-concurrent workload read received one `502` and stopped that broad run; concurrency 1/10/25 is therefore not claimed as a clean rerun for this revision. The affected domain/API chain and all foundation checks were complete before that separate load assertion.
+
+### API runtime workload stability closure — 2026-10-09
+
+The workload failure above was isolated to the API process rather than the gateway or database. With the .NET 10 Alpine/musl runtime, repeated fresh 1,000-task runs produced an upstream 502 when the API exited natively with code 139 and restarted. Docker reported `OOMKilled=false`; gateway logs first recorded a prematurely closed upstream connection and then connection refusal. A control run with the same concurrency but no generated task volume passed. An Nginx connection-pool change did not remove the failure and was reverted. A glibc Ubuntu control completed the full load but had 14 current, unfixed Trivy operating-system findings and was not selected.
+
+The API runtime now uses Microsoft's .NET Azure Linux 3.0/glibc image and publishes `linux-x64` or `linux-arm64`. The resulting candidate image reports zero Low, Medium, High or Critical Trivy findings. Three consecutive fresh complete workload runs each created 1,000 tasks and completed the concurrency 1, 10 and 25 stages without a 502. Each run returned all 300 authorized reads and rejected all 300 unauthorized reads. At concurrency 25, the runs measured p95 110 ms, 98 ms and 102 ms, with respective maxima of 139 ms, 131 ms and 131 ms. The final run added an explicit post-load container assertion and recorded `workloadApiRestarts: 0`. This closes SV-110 and keeps ASVS 15.2.1 and 15.2.2 Passed.
+
+```sh
+node tools/test-api-runtime-image-boundary.mjs
+node tools/test-secure-development-inventory.mjs
+pnpm test:e2e:editions -- --workload-only
+pnpm test:e2e:editions -- --workload-only
+pnpm test:e2e:editions -- --workload-only
+trivy image --scanners vuln --severity LOW,MEDIUM,HIGH,CRITICAL \
+  --format json fylkren-edition-e2e-api:latest
+```
+
+The workload harness now accepts an optional bounded task-count override for diagnosis while retaining 1,000 as the release default. On failure, the edition runner captures recent container events, API state/restart count and bounded gateway/API logs so another native process termination remains distinguishable from an HTTP or domain error. Production was not changed.

@@ -26,8 +26,8 @@ assert.match(bounded, /rejectRedirects/);
 assert.match(bounded, /Outbound response exceeds the allowed size/);
 assert.match(program, /IsEnvironment\("FederationTest"\)/);
 assert.doesNotMatch(apiDockerfile + webDockerfile, /tools\/|tests\//);
-assert.match(apiDockerfile, /aspnet:10\.0-alpine/, 'qualified minimal API runtime image');
-assert.match(apiDockerfile, /DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false/, 'full globalization on Alpine');
+assert.match(apiDockerfile, /aspnet:10\.0-azurelinux3\.0/, 'qualified stable API runtime image');
+assert.match(apiDockerfile, /DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false/, 'full globalization on Azure Linux');
 
 const roots = ['apps/api', 'apps/web/src'];
 const files = [];

@@ -2,7 +2,10 @@ import assert from 'node:assert/strict';
 
 // Invoked only after functional assertions, before disposal of the synthetic edition topology.
 export async function measureWorkload({ leader, platform, siteId, unitId, workItemTypeId }) {
-  const count = 1000; let next = 0;
+  const count = Number.parseInt(process.env.FYLKREN_E2E_WORKLOAD_TASKS ?? '1000', 10);
+  assert.ok(Number.isSafeInteger(count) && count >= 0 && count <= 1000,
+    'FYLKREN_E2E_WORKLOAD_TASKS must be an integer from 0 through 1000');
+  let next = 0;
   await Promise.all(Array.from({ length: 8 }, async () => {
     while (next < count) {
       const index = next++;
@@ -27,7 +30,8 @@ export async function measureWorkload({ leader, platform, siteId, unitId, workIt
         const path = paths[index++ % paths.length], start = performance.now();
         const value = await leader.request(path); const duration = performance.now() - start; elapsed.push(duration);
         const samples = byPath.get(path) ?? []; samples.push(duration); byPath.set(path, samples);
-        assert.equal(value.status, 200, `Load read failed at concurrency ${concurrency}`);
+        assert.equal(value.status, 200,
+          `Load read failed at concurrency ${concurrency}; endpoint=${path.replace(siteId, '{siteId}')}; status=${value.status}; contentType=${value.contentType ?? 'none'}`);
         const denied = await platform.request(`/api/work/sites/${siteId}/items`);
         assert.equal(denied.status, 403, 'Administrative identity gained operational access under load');
       }
