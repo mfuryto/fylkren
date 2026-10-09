@@ -74,7 +74,7 @@ internal static class PrimaryDocumentEndpoints
         try
         {
             await using var transaction = await db.Database.BeginTransactionAsync(ct);
-            _ = await db.WorkItems.FromSqlInterpolated($"SELECT * FROM work_items WHERE id = {itemId} FOR UPDATE").SingleAsync(ct);
+            _ = await db.Database.ExecuteSqlInterpolatedAsync($"SELECT 1 FROM work_items WHERE id = {itemId} FOR UPDATE", ct);
             var version = await db.PrimaryDocumentSnapshots.Where(value => value.WorkItemId == itemId).Select(value => (int?)value.Version).MaxAsync(ct) ?? 0;
             var snapshot = new PrimaryDocumentSnapshot(Guid.NewGuid(), siteId, itemId, version + 1, extracted.Name,
                 extracted.MediaType, extracted.Sha256, item.ReferenceUrl, extracted.Text, extracted.StructuredContent, availableToAi, actor, DateTimeOffset.UtcNow);

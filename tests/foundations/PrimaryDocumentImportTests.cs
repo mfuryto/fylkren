@@ -6,6 +6,7 @@ using UglyToad.PdfPig.Content;
 using UglyToad.PdfPig.Core;
 using UglyToad.PdfPig.Fonts.Standard14Fonts;
 using UglyToad.PdfPig.Writer;
+using System.Reflection;
 
 internal static class PrimaryDocumentImportTests
 {
@@ -25,6 +26,10 @@ internal static class PrimaryDocumentImportTests
         await Reject(File("wrong.pdf", "text/plain", Encoding.UTF8.GetBytes("not a pdf")));
         await Reject(File("active.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", Docx(true)));
         await Reject(File("oversized.txt", "text/plain", new byte[PrimaryDocumentExtractor.MaximumBytes + 1]));
+        var endpointSource = await System.IO.File.ReadAllTextAsync(Path.Combine(RepositoryRoot(), "apps/api/WorkManagement/PrimaryDocumentEndpoints.cs"));
+        Require(endpointSource.Contains("ExecuteSqlInterpolatedAsync($\"SELECT 1 FROM work_items WHERE id = {itemId} FOR UPDATE\"", StringComparison.Ordinal) &&
+            !endpointSource.Contains("FromSqlInterpolated($\"SELECT * FROM work_items", StringComparison.Ordinal),
+            "Primary-document version locking materializes WorkItem without PostgreSQL xmin.");
         Console.WriteLine("Primary document import tests passed: strict type agreement, bounded text/DOCX/PDF extraction, database-safe normalization, digest/page provenance and active-content/size rejection.");
     }
 
@@ -53,6 +58,12 @@ internal static class PrimaryDocumentImportTests
         try { _ = await PrimaryDocumentExtractor.Extract(file, default); }
         catch (InvalidDataException) { return; }
         throw new Exception("Unsafe primary document was accepted.");
+    }
+    private static string RepositoryRoot()
+    {
+        var current = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+        while (!System.IO.File.Exists(Path.Combine(current, "Fylkren.slnx"))) current = Directory.GetParent(current)?.FullName ?? throw new DirectoryNotFoundException();
+        return current;
     }
     private static void Require(bool condition, string message) { if (!condition) throw new Exception(message); }
 }

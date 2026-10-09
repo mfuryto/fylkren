@@ -18,6 +18,7 @@ Focused verification of the additive primary-document snapshot, passive extracti
 | Green imported-version badge in the collapsed task header plus fixed imported/not-imported status rows in task and planning interfaces | Passed by web test and production build |
 | Authorized link opens the exact structured block JSON used as AI source | Passed by API compilation and response review |
 | Re-import for creator, current level manager or current claimed planner on an active task | Passed by authorization review and API compilation |
+| Concurrent version allocation locks the task row without EF entity materialization or an implicit `xmin` projection | Passed by focused source lock and API compilation |
 | EF migration snapshot versus current model, including source-link provenance | Passed against disposable PostgreSQL 18 |
 | API compilation | Passed with zero warnings/errors |
 | Web tests and production build | Passed |
