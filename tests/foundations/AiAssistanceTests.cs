@@ -40,14 +40,17 @@ internal static class AiAssistanceTests
         Require(orderedDrafts.Length == 3 && orderedDrafts[2].Content.Contains("Confirm contacts", StringComparison.Ordinal), "Ordered drafts for a varying three-step template were rejected.");
         var taggedDrafts = AiEndpoints.ParsePlanningDrafts("[[STEP:1]]\n# Analyse\nKjente fakta\n[[END-STEP]]\n[[STEP:2]]\n# Oppgaver\n- Fordel ansvar\n[[END-STEP]]",
             ["Analysis", "Task"], ["# Analysis", "# Task"]);
-        Require(taggedDrafts.Length == 2 && taggedDrafts[0].Content.StartsWith("# Analysis", StringComparison.Ordinal) && taggedDrafts[1].Content.StartsWith("# Task", StringComparison.Ordinal),
-            "Model-robust tagged planning output did not restore the supplied template headings.");
+        Require(taggedDrafts.Length == 2 && taggedDrafts[0].Content == "Kjente fakta" && taggedDrafts[1].Content == "- Fordel ansvar",
+            "Planning drafts repeated the step name already rendered by the plan UI.");
         var repeatedHeading = AiEndpoints.ParsePlanningDrafts("[[STEP:1]]\n# Analysis\n# Analysis\nKnown facts\n[[END-STEP]]", ["Analysis"], ["# Analysis"]);
-        Require(repeatedHeading[0].Content.Split('\n').Count(line => line == "# Analysis") == 1,
-            "A model-repeated template heading was retained in the editable plan draft.");
+        Require(repeatedHeading[0].Content == "Known facts",
+            "A model-repeated step heading was retained in the editable plan draft.");
         var addedStepHeading = AiEndpoints.ParsePlanningDrafts("[[STEP:1]]\n# Step 1\n# Analysis\nKnown facts\n[[END-STEP]]", ["Analysis"], ["# Analysis"]);
-        Require(!addedStepHeading[0].Content.Contains("# Step 1", StringComparison.Ordinal) && addedStepHeading[0].Content.StartsWith("# Analysis", StringComparison.Ordinal),
+        Require(addedStepHeading[0].Content == "Known facts",
             "A model-added step title duplicated the template heading hierarchy.");
+        var numberedStepHeading = AiEndpoints.ParsePlanningDrafts("[[STEP:1]]\n# 2. Oppdrag\n# Ressurser\nPersonell og materiell\n[[END-STEP]]", ["Oppdrag"], ["# Oppdrag\n# Ressurser"]);
+        Require(numberedStepHeading[0].Content == "# Ressurser\nPersonell og materiell",
+            "A numbered step heading was retained or a genuine template subheading was removed.");
         var riskDrafts = System.Text.Json.JsonSerializer.Serialize(AiEndpoints.ParseDrafts("risks", "{\"risks\":[{\"title\":\"Loss of link\",\"cause\":\"Primary link fails\",\"consequence\":\"Coordination stops\",\"mitigation\":\"Prepare radio backup\",\"dueDate\":\"2026-11-15\"}]}"));
         Require(riskDrafts.Contains("Loss of link", StringComparison.Ordinal) && !riskDrafts.Contains("probability", StringComparison.OrdinalIgnoreCase),
             "Structured risk drafts lost their bounded fields or introduced AI scoring.");

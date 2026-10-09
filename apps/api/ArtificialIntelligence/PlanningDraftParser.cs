@@ -26,7 +26,7 @@ internal static class PlanningDraftParser
             numbered = numbered.Select(value => value with { StepNumber = value.StepNumber + 1 }).ToArray();
         var drafts = numbered.OrderBy(value => value.StepNumber).ToArray();
         if (!drafts.Select(value => value.StepNumber).SequenceEqual(Enumerable.Range(1, templates.Count))) throw new JsonException();
-        return drafts.Select(draft => draft with { Content = NormalizeTemplateStructure(templates[draft.StepNumber - 1], draft.Content) }).ToArray();
+        return drafts.Select(draft => draft with { Content = NormalizeTemplateStructure(names[draft.StepNumber - 1], templates[draft.StepNumber - 1], draft.Content) }).ToArray();
     }
 
     private static PlanningDraft[] ReadTagged(string value, int expectedCount)
@@ -123,13 +123,14 @@ internal static class PlanningDraftParser
         throw new JsonException();
     }
 
-    private static string NormalizeTemplateStructure(string template, string draft)
+    private static string NormalizeTemplateStructure(string stepName, string template, string draft)
     {
         static (int Index, string Text, string Kind)[] Markers(string[] lines) => lines.Select((line, index) => new { line = Regex.Replace(line.Trim(), @"\s+", " "), index })
             .Where(value => Regex.IsMatch(value.line, @"^#{1,4}\s+\S") || Regex.IsMatch(value.line, @"^[-*]\s+\[[ xX]\]\s+\S"))
             .Select(value => (value.index, value.line, value.line.StartsWith('#') ? value.line[..value.line.IndexOf(' ')] : "check")).ToArray();
-        var required = Markers(template.Replace("\r\n", "\n").Split('\n'));
-        if (required.Length == 0) return draft;
+        static string HeadingText(string value) => Regex.Replace(value.Trim(), @"^#{1,4}\s+(?:\d+[.)]\s*)?", "").Trim();
+        bool IsStepHeading((int Index, string Text, string Kind) marker) => marker.Kind.StartsWith('#') && Same(HeadingText(marker.Text), stepName);
+        var required = Markers(template.Replace("\r\n", "\n").Split('\n')).Where(marker => !IsStepHeading(marker)).ToArray();
         var lines = draft.Replace("\r\n", "\n").Split('\n'); var actual = Markers(lines); var position = 0;
         var retained = new HashSet<int>();
         foreach (var marker in required)
