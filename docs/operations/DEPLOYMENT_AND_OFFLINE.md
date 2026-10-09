@@ -36,6 +36,8 @@ Forwarded headers are trusted only in the documented private-gateway topology. T
 
 HTTPS mode uses Secure `__Host-` cookies, HSTS and redirect behavior. Changing mode invalidates existing browser sessions but not accounts. The outer proxy must preserve or strengthen CSP, content-type, framing, referrer and permissions headers.
 
+The outer proxy must allow request bodies of at least 9 MiB so the supported 8 MiB primary-document import plus multipart overhead reaches Fylkren. In Nginx Proxy Manager, add `client_max_body_size 9m;` under the proxy host's advanced configuration. A smaller outer limit returns the proxy's error before Fylkren can validate the document or provide an application error.
+
 ## Configuration
 
 `deploy/compose/install.sh` creates `.env` once and never changes an existing environment. The supported Compose topology uses an installation-issued API client certificate for PostgreSQL authentication and stores no database password. An obsolete `FYLKREN_DB_PASSWORD` entry in an upgraded `.env` is ignored and may be removed after the upgraded installation and matched restore procedure pass.

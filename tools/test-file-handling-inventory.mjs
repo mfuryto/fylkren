@@ -39,6 +39,9 @@ const portability = readFileSync('apps/api/Portability/PortableExportPackage.cs'
 assert.match(portability, /MaximumPackageBytes = 16L \* 1024 \* 1024/);
 assert.match(portability, /MaximumImportRequestBytes = MaximumPackageBytes \+ 1024 \* 1024/);
 assert.match(portability, /MaximumEntries = 250/);
+const webGateway = readFileSync('apps/web/nginx.conf', 'utf8');
+assert.match(webGateway, /primary-document\$" \{\s*client_max_body_size 9m;/s,
+  'Primary-document gateway limit must include the documented 8 MiB file plus multipart overhead');
 
 const serverFileResults = sourceFiles.flatMap(path =>
   [...readFileSync(path, 'utf8').matchAll(/Results\.File\(/g)].map(() => path));

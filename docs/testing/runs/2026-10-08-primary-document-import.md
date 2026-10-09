@@ -9,6 +9,7 @@ Focused verification of the additive primary-document snapshot, passive extracti
 | Check | Result |
 | --- | --- |
 | Strict file extension/media agreement and 8 MiB boundary | Passed |
+| Bundled gateway permits 9 MiB request size for 8 MiB document plus multipart overhead | Passed by gateway source lock |
 | UTF-8 text paragraph extraction and SHA-256 provenance | Passed |
 | DOCX heading extraction, archive bounds and macro rejection | Passed |
 | PDF text extraction and page provenance | Passed |

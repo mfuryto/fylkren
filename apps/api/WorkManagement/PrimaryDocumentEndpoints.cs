@@ -23,6 +23,19 @@ internal static class PrimaryDocumentEndpoints
     private static async Task<IResult> Import(Guid siteId, Guid itemId, HttpRequest request, ClaimsPrincipal user,
         IAntiforgery antiforgery, HttpContext context, FylkrenDbContext db, ILoggerFactory loggerFactory, CancellationToken ct)
     {
+        try { return await ImportCore(siteId, itemId, request, user, antiforgery, context, db, loggerFactory, ct); }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            loggerFactory.CreateLogger("Fylkren.Api.WorkManagement.PrimaryDocumentEndpoints")
+                .LogError(exception, "Primary-document import failed; siteId={SiteId}; itemId={ItemId}; correlationId={CorrelationId}", siteId, itemId, context.TraceIdentifier);
+            return Results.Problem(statusCode: 500, title: "The primary document could not be imported.", extensions: new Dictionary<string, object?>
+                { ["code"] = "primary_document_store_failed", ["correlationId"] = context.TraceIdentifier });
+        }
+    }
+
+    private static async Task<IResult> ImportCore(Guid siteId, Guid itemId, HttpRequest request, ClaimsPrincipal user,
+        IAntiforgery antiforgery, HttpContext context, FylkrenDbContext db, ILoggerFactory loggerFactory, CancellationToken ct)
+    {
         if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest();
         if (!WorkItemPolicy.PersonId(user, out var actor)) return Results.Problem(statusCode: 403);
         var item = await db.WorkItems.SingleOrDefaultAsync(value => value.Id == itemId && value.SiteId == siteId, ct);
@@ -91,7 +104,7 @@ internal static class PrimaryDocumentEndpoints
         var canImport = canManage && !await IsLocked(item.Id, db, ct);
         var value = await db.PrimaryDocumentSnapshots.AsNoTracking().Where(snapshot => snapshot.WorkItemId == itemId)
             .OrderByDescending(snapshot => snapshot.Version).Select(snapshot => new { snapshot.Id, snapshot.Name, snapshot.MediaType, snapshot.Sha256, snapshot.SourceUrl, snapshot.Version, snapshot.AvailableToAi, snapshot.CreatedByPersonId, snapshot.CreatedAt }).FirstOrDefaultAsync(ct);
-        if (value is null) return Results.Ok(value);
+        if (value is null) return Results.Text("null", "application/json; charset=utf-8");
         return Results.Ok(new { value.Id, value.Name, value.MediaType, value.Sha256, value.SourceUrl, value.Version, value.AvailableToAi, value.CreatedAt, canImport, canInspect = canManage || value.CreatedByPersonId == actor });
     }
 
