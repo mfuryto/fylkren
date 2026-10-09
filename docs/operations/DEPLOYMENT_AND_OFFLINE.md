@@ -52,6 +52,44 @@ Core application, administration, authentication, localization, search, backup a
 
 Connected automatic updaters such as Watchtower are not part of the supported Fylkren lifecycle and must not indiscriminately restart the stack. Updates follow the controlled procedure in `INSTALLATION_AND_UPGRADES.md`.
 
+### Internal services for an air-gapped network
+
+Fylkren has no mandatory vendor, activation, telemetry, CDN, public DNS or cloud connection at runtime. An air-gapped installation must provide the infrastructure below inside its own security boundary. A service marked as feature-dependent is unnecessary when that feature is disabled.
+
+| Internal capability | When it is required | Air-gapped requirement |
+| --- | --- | --- |
+| Name resolution | Required unless every client and service uses controlled static host entries | Resolve the canonical Fylkren hostname and every enabled internal integration consistently. DNS must not forward unresolved names outside the security boundary. |
+| Trusted time | Required for qualified operation | Provide an approved internal NTP source. The host, reverse proxy, API, PostgreSQL, identity providers, federation peers and log collector must use correlated time. Fylkren treats an unavailable or excessive offset as unhealthy. |
+| Browser-trusted TLS identity | Required for HTTPS | Issue the public Fylkren origin certificate from an internal PKI trusted by every managed client, or import an approved certificate through the deployment's TLS terminator. The Compose stack creates its separate API/PostgreSQL transport identities locally. |
+| Backup storage and restore target | Required for production operation | Store matched database, environment, Data Protection key-ring and custody backups away from the active database disk. Provide a separate fenced target for restore rehearsals. Neither target needs internet access. |
+| Security-log collector | Required for the qualified production logging boundary | Run a logically separate collector inside the isolated network and accept the host journal through HTTPS with mutual TLS. A second container or volume on the Fylkren host does not satisfy this boundary. |
+| SMTP relay | Required only for email notifications | Use an internal relay with STARTTLS and an internally trusted certificate. Without SMTP, domain actions still complete and delivery obligations remain visible for operational handling. |
+| AD or LDAP directory | Required only when directory authentication or personnel import is enabled | Provide reachable internal AD/LDAP with stable identifiers, lifecycle data, DNS and trusted LDAPS or LDAP StartTLS. Local accounts remain available without a directory. |
+| OIDC or SAML provider | Required only when single sign-on is enabled | Host the provider, metadata, signing keys and browser endpoints inside the isolated network. Managed clients and the Fylkren API must reach the configured internal names. |
+| AI provider | Required only when Enterprise AI assistance is enabled | Operate an approved OpenAI-compatible endpoint internally. AI is disabled by default, and every ordinary Fylkren function remains available without it. |
+| Federation peer | Required only for cross-instance federation | Each trusted Fylkren peer and its HTTPS identity must be reachable inside the permitted network segment. Federation is not required for work between Sites in one installation. |
+| Internal artifact staging or registry | Required only for installation and updates | Transfer the approved source/images, hashes, SBOMs, license and release notes through the organization's controlled media process. A local container registry is optional; preloaded images are sufficient. Runtime operation never pulls images automatically. |
+
+Local passwords, TOTP, recovery codes and locally managed WebAuthn authenticators work without an identity provider. Enterprise entitlement uses an imported signed offline license and has no activation service. The user interface makes no runtime request for external fonts, scripts, language packs or documentation.
+
+### Network-flow baseline
+
+The firewall should deny general internet egress. Permit only the flows used by the selected internal services:
+
+| Source | Destination | Purpose |
+| --- | --- | --- |
+| Managed browser | Fylkren origin | HTTPS user interface and API |
+| Managed browser | Configured internal OIDC or SAML provider | Interactive single sign-on when enabled |
+| Fylkren host | Internal DNS and NTP | Name resolution and trusted time |
+| Fylkren API | Configured SMTP, directory, identity, AI and federation services | Enabled feature traffic only; exact destinations are administrator-controlled |
+| Fylkren host | Separate log collector | Journal forwarding over HTTPS with mutual TLS |
+| Backup process | Approved backup target | Matched backup transfer and recovery rehearsal |
+| Administrator-controlled staging host or media | Fylkren host | Deliberate installation, license and update import |
+
+Ports are deployment-owned because SMTP, directory, identity, AI, logging, backup and federation endpoints are configurable. Record exact source, destination, protocol, port, certificate authority and owner in the installation's firewall baseline. Do not add a default internet route merely to make an optional integration work.
+
+The current controlled update procedure supports offline transfer, but versioned signed air-gap release bundles with a dedicated offline verifier remain future distribution work. Until that is delivered, the operator must preserve hashes, SBOMs and transfer approval for every imported candidate and verify it before installation.
+
 ## Operational visibility
 
 Platform Manager sees API version, environment, uptime, process memory and database connectivity. The optional, maintained [host-status integration](HOST_STATUS.md) adds disk capacity, the last explicitly recorded complete backup set, container health and restart counts through a bounded read-only snapshot; the API never receives the Docker socket. A bounded in-memory window retains the latest 300 warnings/errors from the current process and supports safe filtering. It resets on restart and is not a durable log store.

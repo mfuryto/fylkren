@@ -47,6 +47,8 @@ Backups must use a separate storage target and follow the retention policy. A ba
 - TLS except in a strictly bounded trusted internal network;
 - separate capacity for reverse proxy, identity provider, SMTP and backup storage when they share the host.
 
+An isolated installation must also provide the applicable internal DNS, NTP, PKI, backup, security-log and optional integration services listed in the [air-gapped service matrix](DEPLOYMENT_AND_OFFLINE.md#internal-services-for-an-air-gapped-network). Core runtime operation requires no vendor cloud or internet route.
+
 ## Production capacity verification
 
 High availability, high expected concurrency or security-critical use requires a documented capacity test. The representative dataset must cover expected sites, organization depth, active and completed tasks, subtasks, workflow steps, report length and audit volume.
