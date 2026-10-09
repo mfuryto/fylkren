@@ -42,6 +42,12 @@ internal static class AiAssistanceTests
             ["Analysis", "Task"], ["# Analysis", "# Task"]);
         Require(taggedDrafts.Length == 2 && taggedDrafts[0].Content.StartsWith("# Analysis", StringComparison.Ordinal) && taggedDrafts[1].Content.StartsWith("# Task", StringComparison.Ordinal),
             "Model-robust tagged planning output did not restore the supplied template headings.");
+        var repeatedHeading = AiEndpoints.ParsePlanningDrafts("[[STEP:1]]\n# Analysis\n# Analysis\nKnown facts\n[[END-STEP]]", ["Analysis"], ["# Analysis"]);
+        Require(repeatedHeading[0].Content.Split('\n').Count(line => line == "# Analysis") == 1,
+            "A model-repeated template heading was retained in the editable plan draft.");
+        var addedStepHeading = AiEndpoints.ParsePlanningDrafts("[[STEP:1]]\n# Step 1\n# Analysis\nKnown facts\n[[END-STEP]]", ["Analysis"], ["# Analysis"]);
+        Require(!addedStepHeading[0].Content.Contains("# Step 1", StringComparison.Ordinal) && addedStepHeading[0].Content.StartsWith("# Analysis", StringComparison.Ordinal),
+            "A model-added step title duplicated the template heading hierarchy.");
         var riskDrafts = System.Text.Json.JsonSerializer.Serialize(AiEndpoints.ParseDrafts("risks", "{\"risks\":[{\"title\":\"Loss of link\",\"cause\":\"Primary link fails\",\"consequence\":\"Coordination stops\",\"mitigation\":\"Prepare radio backup\",\"dueDate\":\"2026-11-15\"}]}"));
         Require(riskDrafts.Contains("Loss of link", StringComparison.Ordinal) && !riskDrafts.Contains("probability", StringComparison.OrdinalIgnoreCase),
             "Structured risk drafts lost their bounded fields or introduced AI scoring.");

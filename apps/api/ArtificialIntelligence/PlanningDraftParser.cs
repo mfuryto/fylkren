@@ -131,13 +131,17 @@ internal static class PlanningDraftParser
         var required = Markers(template.Replace("\r\n", "\n").Split('\n'));
         if (required.Length == 0) return draft;
         var lines = draft.Replace("\r\n", "\n").Split('\n'); var actual = Markers(lines); var position = 0;
+        var retained = new HashSet<int>();
         foreach (var marker in required)
         {
-            while (position < actual.Length && actual[position].Kind != marker.Kind) position++;
-            if (position == actual.Length) throw new JsonException();
-            lines[actual[position].Index] = marker.Text;
-            position++;
+            var match = Array.FindIndex(actual, position, candidate => candidate.Kind == marker.Kind && Same(candidate.Text, marker.Text));
+            if (match < 0) match = Array.FindIndex(actual, position, candidate => candidate.Kind == marker.Kind);
+            if (match < 0) throw new JsonException();
+            lines[actual[match].Index] = marker.Text;
+            retained.Add(actual[match].Index);
+            position = match + 1;
         }
+        foreach (var marker in actual.Where(marker => marker.Kind.StartsWith('#') && !retained.Contains(marker.Index))) lines[marker.Index] = "";
         return string.Join('\n', lines).Trim();
     }
 
