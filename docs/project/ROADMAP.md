@@ -76,6 +76,8 @@ The local Community/Enterprise candidate suite passes on commit `4883db2` with t
 
 Repeat the maintained AD/LDAP, OIDC/SAML, SMTP and federation laboratories for affected integrations. Historical mixed-version federation needs an archived release artifact; current Production-boundary tests do not prove that compatibility. Qualify matched database/key-ring recovery and fencing before organizational federation activation. See [instance federation](../architecture/INSTANCE_FEDERATION.md).
 
+The current-source OpenLDAP, Samba AD, OIDC/SAML, SMTP/non-HTTP transport and two-instance Production federation laboratories pass after the runtime change. Customer-provider interoperability and historical mixed-version federation remain outside this synthetic result; the latter still requires an archived release artifact. Matched production database/key-ring/custody recovery and fencing also remain target-deployment gates.
+
 Qualify production issuer/private-key custody and offline key management separately from the synthetic edition fixtures. Preserve one common API/web build and customer-data access across entitlement transitions. See [edition architecture](../architecture/EDITION_ENTITLEMENTS.md).
 
 Do not describe the product as production-qualified until the required candidate verification and deployment gates are complete, even though the maintained ASVS rows have supported Passed or Not-applicable dispositions.
