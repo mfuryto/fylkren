@@ -10,14 +10,16 @@ Focused verification of AI plan generation against varying workflow templates an
 | --- | --- |
 | Exact numbered step objects | Passed |
 | Tagged step blocks with multiline Markdown | Passed |
+| Numbered Markdown sections matching every dynamic step name | Passed |
 | Step-name headings, repeated headings and model-added step-title headings removed | Passed |
 | Genuine template subheadings retained | Passed |
 | Numeric-string and name-based step identification | Passed |
 | Ordered arrays and objects keyed by dynamic template names | Passed |
 | Extra model metadata and fenced/surrounded JSON | Passed |
 | Different two- and three-step templates | Passed |
-| Missing steps or missing template markers | Rejected |
+| Localized tags, omitted closing tag and omitted internal headings | Accepted when every numbered step is present |
+| Missing, duplicate or empty steps | Rejected |
 | API compilation | Passed with zero warnings/errors |
 | Web tests and production build | Passed |
 
-The parser tolerates representation differences but does not weaken plan placement. Every active template step must occur exactly once. The interface renders the step name, so the generated content omits a matching heading while retaining the remaining template headings and checklist markers in order. The provider prompt also receives the actual step count and a dynamic output budget so a local model is less likely to truncate a multi-step response.
+The parser tolerates representation differences but does not weaken plan placement. Every active template step must occur exactly once and contain text. Internal headings are presentation structure and are therefore not used to decide which plan step owns the content. The interface renders the step name, so the generated content omits a matching heading while retaining genuine subheadings. The provider prompt also receives the actual step count and a dynamic output budget so a local model is less likely to truncate a multi-step response.

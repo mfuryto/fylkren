@@ -21,7 +21,11 @@ internal static class PlanningDraftParser
             if (candidates.Count != templates.Count) throw new JsonException();
             numbered = candidates.Select((candidate, index) => ReadCandidate(candidate, index, names)).ToArray();
         }
-        catch (JsonException) { numbered = ReadTagged(value, templates.Count); }
+        catch (JsonException)
+        {
+            try { numbered = ReadTagged(value, templates.Count); }
+            catch (JsonException) { numbered = ReadHeadingSections(value, names); }
+        }
         if (numbered.Select(value => value.StepNumber).Order().SequenceEqual(Enumerable.Range(0, templates.Count)))
             numbered = numbered.Select(value => value with { StepNumber = value.StepNumber + 1 }).ToArray();
         var drafts = numbered.OrderBy(value => value.StepNumber).ToArray();
@@ -31,11 +35,39 @@ internal static class PlanningDraftParser
 
     private static PlanningDraft[] ReadTagged(string value, int expectedCount)
     {
-        var matches = Regex.Matches(value, @"\[\[\s*STEP\s*:?\s*(\d+)\s*\]\](.*?)\[\[\s*(?:END[\s-]*STEP|/STEP)\s*\]\]",
-            RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant);
-        if (matches.Count != expectedCount) throw new JsonException();
-        return matches.Select(match => int.TryParse(match.Groups[1].Value, out var number)
-            ? new PlanningDraft(number, BoundedText(match.Groups[2].Value)) : throw new JsonException()).ToArray();
+        var options = RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant;
+        var openings = Regex.Matches(value, @"\[\[\s*(?:STEP|STEG|PLANSTEG)[\s_-]*:?\s*(\d+)\s*\]\]", options);
+        if (openings.Count != expectedCount) throw new JsonException();
+        return openings.Select((opening, index) =>
+        {
+            if (!int.TryParse(opening.Groups[1].Value, out var number)) throw new JsonException();
+            var end = index + 1 < openings.Count ? openings[index + 1].Index : value.Length;
+            var content = value[(opening.Index + opening.Length)..end];
+            var closing = Regex.Match(content, @"\[\[\s*(?:(?:END|SLUTT)[\s_-]*(?:STEP|STEG|PLANSTEG)|/(?:STEP|STEG|PLANSTEG))\s*\]\]", options);
+            if (closing.Success) content = content[..closing.Index];
+            return new PlanningDraft(number, BoundedText(content));
+        }).ToArray();
+    }
+
+    private static PlanningDraft[] ReadHeadingSections(string value, IReadOnlyList<string> names)
+    {
+        var lines = value.Replace("\r\n", "\n").Split('\n');
+        var sections = new List<(int Number, int Line)>();
+        for (var index = 0; index < lines.Length; index++)
+        {
+            var match = Regex.Match(lines[index], @"^\s*#{1,4}\s+(?:\d+[.)]\s*)?(.+?)\s*$", RegexOptions.CultureInvariant);
+            if (!match.Success) continue;
+            var matches = names.Select((name, number) => new { name, number }).Where(candidate => Same(candidate.name, match.Groups[1].Value)).ToArray();
+            if (matches.Length == 1) sections.Add((matches[0].number + 1, index));
+        }
+        if (sections.Count != names.Count || !sections.Select(section => section.Number).SequenceEqual(Enumerable.Range(1, names.Count))) throw new JsonException();
+        return sections.Select((section, index) =>
+        {
+            var end = index + 1 < sections.Count ? sections[index + 1].Line : lines.Length;
+            var content = string.Join('\n', lines[(section.Line + 1)..end]).Trim();
+            if (content.EndsWith("```", StringComparison.Ordinal)) content = content[..^3].TrimEnd();
+            return new PlanningDraft(section.Number, BoundedText(content));
+        }).ToArray();
     }
 
     private static IReadOnlyList<JsonElement> ReadCandidates(JsonElement root, IReadOnlyList<string> names)
@@ -130,19 +162,27 @@ internal static class PlanningDraftParser
             .Select(value => (value.index, value.line, value.line.StartsWith('#') ? value.line[..value.line.IndexOf(' ')] : "check")).ToArray();
         static string HeadingText(string value) => Regex.Replace(value.Trim(), @"^#{1,4}\s+(?:\d+[.)]\s*)?", "").Trim();
         bool IsStepHeading((int Index, string Text, string Kind) marker) => marker.Kind.StartsWith('#') && Same(HeadingText(marker.Text), stepName);
-        var required = Markers(template.Replace("\r\n", "\n").Split('\n')).Where(marker => !IsStepHeading(marker)).ToArray();
-        var lines = draft.Replace("\r\n", "\n").Split('\n'); var actual = Markers(lines); var position = 0;
-        var retained = new HashSet<int>();
-        foreach (var marker in required)
+        var templateMarkers = Markers(template.Replace("\r\n", "\n").Split('\n'));
+        var templateHasStepHeading = templateMarkers.Any(IsStepHeading);
+        var required = templateMarkers.Where(marker => !IsStepHeading(marker)).ToArray();
+        var lines = draft.Replace("\r\n", "\n").Split('\n'); var actual = Markers(lines);
+        var seenHeadings = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var firstHeadingIndex = actual.FirstOrDefault(marker => marker.Kind.StartsWith('#')).Index;
+        foreach (var marker in actual.Where(marker => marker.Kind.StartsWith('#')))
         {
-            var match = Array.FindIndex(actual, position, candidate => candidate.Kind == marker.Kind && Same(candidate.Text, marker.Text));
-            if (match < 0) match = Array.FindIndex(actual, position, candidate => candidate.Kind == marker.Kind);
-            if (match < 0) throw new JsonException();
-            lines[actual[match].Index] = marker.Text;
-            retained.Add(actual[match].Index);
-            position = match + 1;
+            var matchesSubheading = required.Any(candidate => candidate.Kind.StartsWith('#') && Same(HeadingText(candidate.Text), HeadingText(marker.Text)));
+            if (IsStepHeading(marker) || (templateHasStepHeading && marker.Index == firstHeadingIndex && !matchesSubheading) ||
+                (Regex.IsMatch(HeadingText(marker.Text), @"^(?:step|steg|plansteg)\s*\d+$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) &&
+                !required.Any(candidate => Same(HeadingText(candidate.Text), HeadingText(marker.Text)))))
+            {
+                lines[marker.Index] = "";
+                continue;
+            }
+            var canonical = required.FirstOrDefault(candidate => candidate.Kind.StartsWith('#') && Same(HeadingText(candidate.Text), HeadingText(marker.Text)));
+            if (!string.IsNullOrEmpty(canonical.Text)) lines[marker.Index] = canonical.Text;
+            var heading = HeadingText(lines[marker.Index]);
+            if (!seenHeadings.Add(heading)) lines[marker.Index] = "";
         }
-        foreach (var marker in actual.Where(marker => marker.Kind.StartsWith('#') && !retained.Contains(marker.Index))) lines[marker.Index] = "";
         return string.Join('\n', lines).Trim();
     }
 
