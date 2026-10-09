@@ -17,7 +17,7 @@ Focused verification of AI plan generation against varying workflow templates an
 | Ordered arrays and objects keyed by dynamic template names | Passed |
 | Extra model metadata and fenced/surrounded JSON | Passed |
 | Different two- and three-step templates | Passed |
-| Localized tags, omitted closing tag and omitted internal headings | Accepted when every numbered step is present |
+| Omitted final closing tag and omitted internal headings | Accepted when every numbered step is present |
 | Missing, duplicate or empty steps | Rejected |
 | API compilation | Passed with zero warnings/errors |
 | Web tests and production build | Passed |

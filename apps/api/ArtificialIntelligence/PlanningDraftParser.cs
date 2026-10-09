@@ -36,14 +36,14 @@ internal static class PlanningDraftParser
     private static PlanningDraft[] ReadTagged(string value, int expectedCount)
     {
         var options = RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant;
-        var openings = Regex.Matches(value, @"\[\[\s*(?:STEP|STEG|PLANSTEG)[\s_-]*:?\s*(\d+)\s*\]\]", options);
+        var openings = Regex.Matches(value, @"\[\[\s*STEP\s*:?\s*(\d+)\s*\]\]", options);
         if (openings.Count != expectedCount) throw new JsonException();
         return openings.Select((opening, index) =>
         {
             if (!int.TryParse(opening.Groups[1].Value, out var number)) throw new JsonException();
             var end = index + 1 < openings.Count ? openings[index + 1].Index : value.Length;
             var content = value[(opening.Index + opening.Length)..end];
-            var closing = Regex.Match(content, @"\[\[\s*(?:(?:END|SLUTT)[\s_-]*(?:STEP|STEG|PLANSTEG)|/(?:STEP|STEG|PLANSTEG))\s*\]\]", options);
+            var closing = Regex.Match(content, @"\[\[\s*(?:END[\s_-]*STEP|/STEP)\s*\]\]", options);
             if (closing.Success) content = content[..closing.Index];
             return new PlanningDraft(number, BoundedText(content));
         }).ToArray();
@@ -172,7 +172,7 @@ internal static class PlanningDraftParser
         {
             var matchesSubheading = required.Any(candidate => candidate.Kind.StartsWith('#') && Same(HeadingText(candidate.Text), HeadingText(marker.Text)));
             if (IsStepHeading(marker) || (templateHasStepHeading && marker.Index == firstHeadingIndex && !matchesSubheading) ||
-                (Regex.IsMatch(HeadingText(marker.Text), @"^(?:step|steg|plansteg)\s*\d+$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) &&
+                (Regex.IsMatch(HeadingText(marker.Text), @"^step\s*\d+$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) &&
                 !required.Any(candidate => Same(HeadingText(candidate.Text), HeadingText(marker.Text)))))
             {
                 lines[marker.Index] = "";

@@ -2,7 +2,7 @@ import { getLearning } from "../learning/learningApi";
 import { translateActive } from "../localization";
 import { useEffect, useMemo, useState } from "react";
 import type React from "react";
-import { ClassificationControls as ClassificationControlFields, type ClassificationMarking } from "../components/ClassificationControls";
+import type { ClassificationMarking } from "../components/ClassificationControls";
 import type { WorkItem, WorkItemDependencyCandidate, WorkItemDetails } from "../work/WorkItemModels";
 import { useRequestRecipientSearch } from "../work/useRequestRecipientSearch";
 import { TaskReportDocument } from "./TaskReportDocument";
@@ -34,9 +34,6 @@ import type { ListSort } from "../components/ListSortControl";
 import { isResolvedTaskPermalinkQuery, isUnavailableTaskPermalink } from "./taskPermalink";
 import { useAiCapabilities } from "./useAiCapabilities";
 export function TasksPage({ personId, language: displayLanguage, timeZone: displayTimeZone, classificationMarkings, permalink, aiAvailable = false }: { personId?: string; language: string; timeZone: string; classificationMarkings: ClassificationMarking[]; permalink: AppLocation; aiAvailable?: boolean }) {
-  function ClassificationControls({ value, onChange }: { value: string; onChange: (value: string) => void }) {
-    return <ClassificationControlFields value={value} onChange={onChange} markings={classificationMarkings} />;
-  }
   const [helpOpen, setHelpOpen] = useState(false);
   const [openItemId, setOpenItemId] = useState<string | null>(null);
   const [queuePage, setQueuePage] = useState(1);

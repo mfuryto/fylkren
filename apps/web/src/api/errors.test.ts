@@ -22,7 +22,7 @@ describe("API error meaning", () => {
     setActiveLanguage("nb-NO");
     const response = Response.json({ code: "ai_provider_invalid_draft", correlationId: "plan-42" }, { status: 502 });
     const message = await responseErrorMessage(response, "Failed");
-    expect(message).toContain("AI-svaret kunne ikke fordeles trygt i planmalen");
+    expect(message).toContain(translate("nb-NO", "aiProviderInvalidDraft"));
     expect(message).toContain("plan-42");
   });
 });

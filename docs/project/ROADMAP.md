@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated 2026-10-08 after placing the first contextual AI draft in planning with run-specific template context.
+Updated 2026-10-09 after completing contextual AI assistance, controlled primary-document context and robust distribution across dynamic planning templates.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -18,8 +18,8 @@ The first Enterprise AI-assistance slice is implemented as an optional, default-
 
 ## Next delivery order
 
-1. **Delivered locally:** controlled primary-document import described in [Enterprise AI assistance](../architecture/AI_ASSISTANCE.md#imported-primary-document-sources). An authorized creator can import PDF, DOCX or UTF-8 text at task creation; AI use is selected by default and can be cleared. Fylkren stores a versioned structured text snapshot with digest, original-document link and provenance, includes the newest opted-in version in AI context and exports the snapshots through Site portability. The original file is discarded while its link remains available. Direct retrieval from a linked internal source remains a later connector extension and may not be enabled before source-system user authorization, classification/disclosure and outbound controls are complete.
-2. Qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing, identity providers, authenticators, backup/key custody, time synchronization and remote logging at this gate.
+1. **Delivered:** controlled primary-document import described in [Enterprise AI assistance](../architecture/AI_ASSISTANCE.md#imported-primary-document-sources). An authorized creator can import PDF, DOCX or UTF-8 text at task creation or reimport a newer version from the task. AI use is selected by default and can be cleared. Fylkren shows import status and version, exposes the structured snapshot to an authorized user for verification, stores its digest, original-document link and provenance, includes the newest opted-in version in AI context and exports the snapshots through Site portability. The original file is discarded while its link remains available. Direct retrieval from a linked internal source remains a later connector extension and may not be enabled before source-system user authorization, classification/disclosure and outbound controls are complete.
+2. **Current:** qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing, identity providers, authenticators, backup/key custody, time synchronization and remote logging at this gate.
 
 No irreversible disposition is authorized by this order. Establish and verify its prerequisites before proposing activation; do not choose arbitrary retention periods.
 

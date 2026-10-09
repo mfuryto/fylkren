@@ -38,9 +38,9 @@ internal static class AiAssistanceTests
         var orderedDrafts = AiEndpoints.ParsePlanningDrafts("[\"# Analysis\\nKnown facts\",\"# Task\\n- Allocate owner\",\"# Coordination\\nConfirm contacts\"]",
             ["Analysis", "Task", "Coordination"], ["# Analysis", "# Task", "# Coordination"]);
         Require(orderedDrafts.Length == 3 && orderedDrafts[2].Content.Contains("Confirm contacts", StringComparison.Ordinal), "Ordered drafts for a varying three-step template were rejected.");
-        var taggedDrafts = AiEndpoints.ParsePlanningDrafts("[[STEP:1]]\n# Analyse\nKjente fakta\n[[END-STEP]]\n[[STEP:2]]\n# Oppgaver\n- Fordel ansvar\n[[END-STEP]]",
+        var taggedDrafts = AiEndpoints.ParsePlanningDrafts("[[STEP:1]]\n# Analysis\nKnown facts\n[[END-STEP]]\n[[STEP:2]]\n# Tasks\n- Assign responsibility\n[[END-STEP]]",
             ["Analysis", "Task"], ["# Analysis", "# Task"]);
-        Require(taggedDrafts.Length == 2 && taggedDrafts[0].Content == "Kjente fakta" && taggedDrafts[1].Content == "- Fordel ansvar",
+        Require(taggedDrafts.Length == 2 && taggedDrafts[0].Content == "Known facts" && taggedDrafts[1].Content == "- Assign responsibility",
             "Planning drafts repeated the step name already rendered by the plan UI.");
         var repeatedHeading = AiEndpoints.ParsePlanningDrafts("[[STEP:1]]\n# Analysis\n# Analysis\nKnown facts\n[[END-STEP]]", ["Analysis"], ["# Analysis"]);
         Require(repeatedHeading[0].Content == "Known facts",
@@ -48,16 +48,16 @@ internal static class AiAssistanceTests
         var addedStepHeading = AiEndpoints.ParsePlanningDrafts("[[STEP:1]]\n# Step 1\n# Analysis\nKnown facts\n[[END-STEP]]", ["Analysis"], ["# Analysis"]);
         Require(addedStepHeading[0].Content == "Known facts",
             "A model-added step title duplicated the template heading hierarchy.");
-        var numberedStepHeading = AiEndpoints.ParsePlanningDrafts("[[STEP:1]]\n# 2. Oppdrag\n# Ressurser\nPersonell og materiell\n[[END-STEP]]", ["Oppdrag"], ["# Oppdrag\n# Ressurser"]);
-        Require(numberedStepHeading[0].Content == "# Ressurser\nPersonell og materiell",
+        var numberedStepHeading = AiEndpoints.ParsePlanningDrafts("[[STEP:1]]\n# 2. Mission\n# Resources\nPersonnel and equipment\n[[END-STEP]]", ["Mission"], ["# Mission\n# Resources"]);
+        Require(numberedStepHeading[0].Content == "# Resources\nPersonnel and equipment",
             "A numbered step heading was retained or a genuine template subheading was removed.");
-        var imperfectLocalOutput = AiEndpoints.ParsePlanningDrafts("[[STEG:1]]\nKjente fakta uten gjentatt overskrift\n[[SLUTT-STEG]]\n[[STEG:2]]\n- Fordel ansvar",
-            ["Analyse", "Oppgaver"], ["# Analyse\n# Forutsetninger", "# Oppgaver\n# Ansvar"]);
-        Require(imperfectLocalOutput.Length == 2 && imperfectLocalOutput[0].Content.Contains("Kjente fakta", StringComparison.Ordinal) && imperfectLocalOutput[1].Content == "- Fordel ansvar",
+        var imperfectLocalOutput = AiEndpoints.ParsePlanningDrafts("[[STEP:1]]\nKnown facts without a repeated heading\n[[END-STEP]]\n[[STEP:2]]\n- Assign responsibility",
+            ["Analysis", "Tasks"], ["# Analysis\n# Assumptions", "# Tasks\n# Responsibility"]);
+        Require(imperfectLocalOutput.Length == 2 && imperfectLocalOutput[0].Content.Contains("Known facts", StringComparison.Ordinal) && imperfectLocalOutput[1].Content == "- Assign responsibility",
             "A safely numbered local-model response was rejected solely because closing tags or internal template headings were omitted.");
-        var headingSections = AiEndpoints.ParsePlanningDrafts("Forslag:\n# 1. Analyse\nKjente fakta\n# 2. Oppgaver\n- Fordel ansvar",
-            ["Analyse", "Oppgaver"], ["# Analyse\n# Forutsetninger", "# Oppgaver\n# Ansvar"]);
-        Require(headingSections.Length == 2 && headingSections[0].Content == "Kjente fakta" && headingSections[1].Content == "- Fordel ansvar",
+        var headingSections = AiEndpoints.ParsePlanningDrafts("Proposal:\n# 1. Analysis\nKnown facts\n# 2. Tasks\n- Assign responsibility",
+            ["Analysis", "Tasks"], ["# Analysis\n# Assumptions", "# Tasks\n# Responsibility"]);
+        Require(headingSections.Length == 2 && headingSections[0].Content == "Known facts" && headingSections[1].Content == "- Assign responsibility",
             "An otherwise safe local-model response using numbered plan headings could not be distributed.");
         var riskDrafts = System.Text.Json.JsonSerializer.Serialize(AiEndpoints.ParseDrafts("risks", "{\"risks\":[{\"title\":\"Loss of link\",\"cause\":\"Primary link fails\",\"consequence\":\"Coordination stops\",\"mitigation\":\"Prepare radio backup\",\"dueDate\":\"2026-11-15\"}]}"));
         Require(riskDrafts.Contains("Loss of link", StringComparison.Ordinal) && !riskDrafts.Contains("probability", StringComparison.OrdinalIgnoreCase),
