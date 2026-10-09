@@ -524,6 +524,15 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--brand); }
 .list-sort-control { min-width: 10.5rem; }
 .section-heading > .list-sort-control { flex: 0 0 min(15rem, 100%); }
 .task-detail-links { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.primary-document-indicator { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-left: 4px solid #8a6d3b; border-radius: 5px; background: var(--surface-subtle); }
+.primary-document-indicator > span { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.primary-document-indicator > span > i { display: grid; flex: 0 0 24px; place-items: center; width: 24px; height: 24px; border-radius: 50%; color: #69420f; background: #fae7cb; font-style: normal; font-weight: 800; }
+.primary-document-indicator > span > span { display: grid; min-width: 0; }
+.primary-document-indicator small { color: var(--text-muted); }
+.primary-document-indicator.imported { border-left-color: #107c10; }
+.primary-document-indicator.imported > span > i { color: #0b5a0b; background: #dff6dd; }
+.primary-document-indicator.failed { border-left-color: #a4262c; }
+.primary-document-indicator.failed > span > i { color: #721c22; background: #fde7e9; }
 .approval-version-viewer { display: grid; gap: 20px; }
 .approval-version-list { display: grid; border-top: 1px solid var(--border); }
 .approval-version-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; padding: 13px 0; border-bottom: 1px solid var(--border); }
@@ -557,6 +566,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--brand); }
 .task-info-badge.task-sender-badge { color: #5a367d; background: #eee3f7; }
 .task-info-badge.task-document-badge { color: #774410; background: #fae7cb; }
 .task-info-badge.task-document-badge:hover { background: #f5d7aa; }
+.task-info-badge.task-document-imported-badge { color: #0b5a0b; background: #dff6dd; }
 .task-icon-action { display: inline-flex; align-items: center; gap: 7px; width: fit-content; min-height: 34px; padding: 6px 11px; border: 1px solid transparent; border-radius: 6px; font: inherit; font-size: .82rem; font-weight: 700; cursor: pointer; }
 .task-icon-action i { display: inline-grid; place-items: center; width: 18px; height: 18px; font-size: 1rem; }
 .task-icon-action.ai-assist-button { border-color: #c6b8ef; color: #38236f; background: #eee8ff; }

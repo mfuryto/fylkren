@@ -84,7 +84,8 @@ export function PlanningStepEditor({
         ))}
       </nav>
       <section className="workflow-step-editor">
-        <div className="section-heading"><h3>{step.name}</h3>{aiEnabled && <div className="inline-actions"><PrimaryDocumentButton siteId={siteId} itemId={run.item.id} referenceUrl={run.item.referenceUrl} canImport/><AiAssistButton label={translateActive("aiPlanningAction")} onClick={onAi}/></div>}</div>
+        <div className="section-heading"><h3>{step.name}</h3>{aiEnabled && <AiAssistButton label={translateActive("aiPlanningAction")} onClick={onAi}/>}</div>
+        <PrimaryDocumentButton siteId={siteId} itemId={run.item.id} referenceUrl={run.item.referenceUrl} canImport/>
         {step.isOptional && <span className="muted">{translateActive("workflowsPlanningStepEditorOptionalStep")}</span>}
         <PlanningRfiLog runId={run.id} entries={run.rfi ?? []} onReload={onReload} onError={onError} />
         {step.hasTimeline && run.timelineStartedOn && (

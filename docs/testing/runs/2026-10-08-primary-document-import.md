@@ -13,8 +13,9 @@ Focused verification of the additive primary-document snapshot, passive extracti
 | DOCX heading extraction, archive bounds and macro rejection | Passed |
 | PDF text extraction and page provenance | Passed |
 | Original source bytes absent from storage/download paths | Passed by focused source lock |
-| Extracted text and structured JSON absent from end-user document responses | Passed by explicit response projection review |
-| Visible imported/not-imported status and retained version in task and planning interfaces | Passed by web test and production build |
+| Extracted plain text absent from end-user responses; structured JSON limited to the version-specific control endpoint and document managers | Passed by explicit response projection and authorization review |
+| Green imported-version badge in the collapsed task header plus fixed imported/not-imported status rows in task and planning interfaces | Passed by web test and production build |
+| Authorized link opens the exact structured block JSON used as AI source | Passed by API compilation and response review |
 | Re-import for creator, current level manager or current claimed planner on an active task | Passed by authorization review and API compilation |
 | EF migration snapshot versus current model, including source-link provenance | Passed against disposable PostgreSQL 18 |
 | API compilation | Passed with zero warnings/errors |

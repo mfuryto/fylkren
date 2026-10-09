@@ -27,6 +27,7 @@ export type WorkItem = {
   description: string;
   recommendation: string | null;
   referenceUrl: string | null;
+  primaryDocumentVersion?: number | null;
   priority: string;
   status: string;
   dueAt: string | null;

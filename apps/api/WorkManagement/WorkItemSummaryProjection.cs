@@ -122,5 +122,7 @@ internal static class WorkItemSummaryProjection
                         (child.SiteId != item.SiteId || child.AssignedUnitId != item.AssignedUnitId))
                     .Where(child => child.Status == "completed" && child.FinalReportApprovedAt != null)
                     .Select(child => child.FinalReport)
-                    .FirstOrDefault()));
+                    .FirstOrDefault(),
+                db.PrimaryDocumentSnapshots.Where(snapshot => snapshot.WorkItemId == item.Id)
+                    .Max(snapshot => (int?)snapshot.Version)));
 }

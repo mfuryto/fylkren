@@ -14,5 +14,6 @@ export function TaskClassifiers({ item, delegation = false }: { item: WorkItem; 
     {item.senderSiteName && <span className="task-info-badge task-source-badge"><i aria-hidden="true">◆</i>{delegation ? translateActive("tasksTaskClassifiersFrom") : receivedRequest ? translateActive("tasksTaskClassifiersSender") : translateActive("tasksTaskClassifiersFrom")}: {item.senderSiteName}</span>}
     {item.senderPersonName && (delegation || !receivedRequest) && <span className="task-info-badge task-sender-badge"><i aria-hidden="true">●</i>{translateActive("tasksTaskClassifiersSentBy")} {item.senderPersonName}</span>}
     {item.referenceUrl && <a className="task-info-badge task-document-badge" href={item.referenceUrl} target="_blank" rel="noopener noreferrer"><i aria-hidden="true">▤</i>{translateActive("tasksTaskClassifiersPrimaryDocument")}</a>}
+    {item.primaryDocumentVersion && <span className="task-info-badge task-document-imported-badge"><i aria-hidden="true">✓</i>{translateActive("primaryDocumentImported")} v{item.primaryDocumentVersion}</span>}
   </div>;
 }

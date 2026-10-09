@@ -3,7 +3,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { emptyTaskCreateDraft, TaskCreateDialog } from "./TaskCreateDialog";
 import { taskCreatePayload } from "./taskApi";
-import { primaryDocumentIndicator } from "./PrimaryDocumentButton";
+import { primaryDocumentIndicator, primaryDocumentStructuredUrl } from "./PrimaryDocumentButton";
 
 describe("primary document import", () => {
   it("defaults AI source use on without sending browser file state in task JSON", () => {
@@ -29,5 +29,6 @@ describe("primary document import", () => {
     expect(primaryDocumentIndicator(2, true, false, "Imported", "Not imported")).toBe("Imported v2");
     expect(primaryDocumentIndicator(null, true, false, "Imported", "Not imported")).toBe("Not imported");
     expect(primaryDocumentIndicator(null, true, true, "Imported", "Not imported")).toBe("?");
+    expect(primaryDocumentStructuredUrl("site", "task", "snapshot")).toBe("/api/work/sites/site/items/task/primary-document/snapshot/structured");
   });
 });

@@ -13,6 +13,8 @@ internal static class PrimaryDocumentImportTests
     {
         var text = await PrimaryDocumentExtractor.Extract(File("basis.txt", "text/plain", Encoding.UTF8.GetBytes("Purpose\n\n- Establish reserve communication\n- Test before approval")), default);
         Require(text.Text.Contains("reserve communication") && text.BlockCount == 2 && text.Sha256.Length == 64, "Plain-text extraction lost bounded structure or digest provenance.");
+        var controlled = await PrimaryDocumentExtractor.Extract(File("controlled.txt", "text/plain", Encoding.UTF8.GetBytes("Purpose\0\n\nSafe content")), default);
+        Require(!controlled.Text.Contains('\0') && !controlled.StructuredContent.Contains("\\u0000", StringComparison.OrdinalIgnoreCase), "Database-incompatible document control characters were retained.");
 
         var docx = await PrimaryDocumentExtractor.Extract(File("basis.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", Docx(false)), default);
         Require(docx.Text.Contains("Operational purpose") && docx.StructuredContent.Contains("heading"), "DOCX headings were not retained as structured content.");
@@ -23,7 +25,7 @@ internal static class PrimaryDocumentImportTests
         await Reject(File("wrong.pdf", "text/plain", Encoding.UTF8.GetBytes("not a pdf")));
         await Reject(File("active.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", Docx(true)));
         await Reject(File("oversized.txt", "text/plain", new byte[PrimaryDocumentExtractor.MaximumBytes + 1]));
-        Console.WriteLine("Primary document import tests passed: strict type agreement, bounded text/DOCX/PDF extraction, digest/page provenance and active-content/size rejection.");
+        Console.WriteLine("Primary document import tests passed: strict type agreement, bounded text/DOCX/PDF extraction, database-safe normalization, digest/page provenance and active-content/size rejection.");
     }
 
     private static FormFile File(string name, string contentType, byte[] bytes) => new(new MemoryStream(bytes), 0, bytes.Length, "document", name) { Headers = new HeaderDictionary(), ContentType = contentType };

@@ -70,6 +70,9 @@ export const aiEn = {
   primaryDocumentImportFailed: "The primary document could not be imported",
   primaryDocumentImported: "Imported",
   primaryDocumentNotImported: "Not imported",
+  primaryDocumentStatusUnavailable: "Status unavailable",
+  primaryDocumentDetails: "Document status",
+  primaryDocumentOpenStructured: "Open structured data",
   entitlementAi: "AI assistance",
 } as const;
 
@@ -107,6 +110,9 @@ const norwegian: AiMessages = {
   primaryDocumentImportFailed: "Hoveddokumentet kunne ikke importeres",
   primaryDocumentImported: "Importert",
   primaryDocumentNotImported: "Ikke importert",
+  primaryDocumentStatusUnavailable: "Status kunne ikke hentes",
+  primaryDocumentDetails: "Dokumentstatus",
+  primaryDocumentOpenStructured: "Åpne strukturerte data",
   entitlementAi: "AI-støtte",
 };
 
@@ -246,6 +252,26 @@ const documentImportMessages: Record<string, DocumentImportMessages> = {
   "uk-UA": { primaryDocumentImport: "Імпортувати основний документ", primaryDocumentImportHelp: "PDF, DOCX або текст UTF-8 до 8 МіБ. Fylkren зберігає структурований текстовий витяг, а не початковий файл.", primaryDocumentAiSource: "Використовувати імпортований документ як джерело для ШІ", primaryDocumentImportFailed: "Не вдалося імпортувати основний документ" },
 };
 
+type DocumentStatusMessages = Pick<AiMessages, "primaryDocumentStatusUnavailable" | "primaryDocumentDetails" | "primaryDocumentOpenStructured">;
+const documentStatusMessages: Record<string, DocumentStatusMessages> = {
+  "cs-CZ": { primaryDocumentStatusUnavailable: "Stav není dostupný", primaryDocumentDetails: "Stav dokumentu", primaryDocumentOpenStructured: "Otevřít strukturovaná data" },
+  "da-DK": { primaryDocumentStatusUnavailable: "Status kunne ikke hentes", primaryDocumentDetails: "Dokumentstatus", primaryDocumentOpenStructured: "Åbn strukturerede data" },
+  "de-DE": { primaryDocumentStatusUnavailable: "Status nicht verfügbar", primaryDocumentDetails: "Dokumentstatus", primaryDocumentOpenStructured: "Strukturierte Daten öffnen" },
+  "es-ES": { primaryDocumentStatusUnavailable: "Estado no disponible", primaryDocumentDetails: "Estado del documento", primaryDocumentOpenStructured: "Abrir datos estructurados" },
+  "et-EE": { primaryDocumentStatusUnavailable: "Olek pole saadaval", primaryDocumentDetails: "Dokumendi olek", primaryDocumentOpenStructured: "Ava struktureeritud andmed" },
+  "fi-FI": { primaryDocumentStatusUnavailable: "Tila ei ole saatavilla", primaryDocumentDetails: "Asiakirjan tila", primaryDocumentOpenStructured: "Avaa jäsennellyt tiedot" },
+  "fr-FR": { primaryDocumentStatusUnavailable: "État indisponible", primaryDocumentDetails: "État du document", primaryDocumentOpenStructured: "Ouvrir les données structurées" },
+  "it-IT": { primaryDocumentStatusUnavailable: "Stato non disponibile", primaryDocumentDetails: "Stato del documento", primaryDocumentOpenStructured: "Apri dati strutturati" },
+  "lt-LT": { primaryDocumentStatusUnavailable: "Būsena nepasiekiama", primaryDocumentDetails: "Dokumento būsena", primaryDocumentOpenStructured: "Atverti struktūrinius duomenis" },
+  "lv-LV": { primaryDocumentStatusUnavailable: "Statuss nav pieejams", primaryDocumentDetails: "Dokumenta statuss", primaryDocumentOpenStructured: "Atvērt strukturētos datus" },
+  "nl-NL": { primaryDocumentStatusUnavailable: "Status niet beschikbaar", primaryDocumentDetails: "Documentstatus", primaryDocumentOpenStructured: "Gestructureerde gegevens openen" },
+  "pl-PL": { primaryDocumentStatusUnavailable: "Stan niedostępny", primaryDocumentDetails: "Stan dokumentu", primaryDocumentOpenStructured: "Otwórz dane strukturalne" },
+  "pt-PT": { primaryDocumentStatusUnavailable: "Estado indisponível", primaryDocumentDetails: "Estado do documento", primaryDocumentOpenStructured: "Abrir dados estruturados" },
+  "ro-RO": { primaryDocumentStatusUnavailable: "Stare indisponibilă", primaryDocumentDetails: "Starea documentului", primaryDocumentOpenStructured: "Deschide datele structurate" },
+  "sv-SE": { primaryDocumentStatusUnavailable: "Status kunde inte hämtas", primaryDocumentDetails: "Dokumentstatus", primaryDocumentOpenStructured: "Öppna strukturerade data" },
+  "uk-UA": { primaryDocumentStatusUnavailable: "Стан недоступний", primaryDocumentDetails: "Стан документа", primaryDocumentOpenStructured: "Відкрити структуровані дані" },
+};
+
 type AiErrorMessages = Pick<AiMessages, "aiProviderInvalidDraft">;
 const aiErrorMessages: Record<string, AiErrorMessages> = {
   "cs-CZ": { aiProviderInvalidDraft: "Odpověď AI nebylo možné bezpečně rozdělit do šablony plánu. Zkuste návrh vytvořit znovu." },
@@ -267,5 +293,5 @@ const aiErrorMessages: Record<string, AiErrorMessages> = {
 };
 
 export const aiTranslations: Record<string, AiMessages> = new Proxy({ "nb-NO": norwegian } as Record<string, AiMessages>, {
-  get: (target, language: string) => target[language] ?? { ...aiEn, aiProviderHelp: providerHelp[language] ?? aiEn.aiProviderHelp, aiEndpointHelp: endpointHelp[language] ?? aiEn.aiEndpointHelp, ...progressMessages[language], ...draftLabels[language], ...decisionWorkflowMessages[language], ...aiActionMessages[language], ...documentImportMessages[language], ...aiErrorMessages[language] },
+  get: (target, language: string) => target[language] ?? { ...aiEn, aiProviderHelp: providerHelp[language] ?? aiEn.aiProviderHelp, aiEndpointHelp: endpointHelp[language] ?? aiEn.aiEndpointHelp, ...progressMessages[language], ...draftLabels[language], ...decisionWorkflowMessages[language], ...aiActionMessages[language], ...documentImportMessages[language], ...documentStatusMessages[language], ...aiErrorMessages[language] },
 });

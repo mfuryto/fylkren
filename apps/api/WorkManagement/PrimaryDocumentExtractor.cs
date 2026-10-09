@@ -109,7 +109,12 @@ internal static class PrimaryDocumentExtractor
         _ => false
     };
     private static string CanonicalMediaType(string extension) => extension switch { ".txt" => "text/plain", ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document", _ => "application/pdf" };
-    private static string Normalize(string value) => string.Join('\n', value.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n').Select(line => string.Join(' ', line.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)))).Trim();
+    private static string Normalize(string value)
+    {
+        var passiveText = new string(value.Where(character => character is '\n' or '\r' or '\t' || !char.IsControl(character)).ToArray());
+        return string.Join('\n', passiveText.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n')
+            .Select(line => string.Join(' ', line.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)))).Trim();
+    }
     private static bool UnsafePath(string path) => path.StartsWith('/') || path.Contains("..", StringComparison.Ordinal) || path.Contains('\\');
     private static string SafeName(string value, string extension)
     {

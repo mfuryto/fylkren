@@ -67,7 +67,7 @@ export function taskCreatePayload(form: TaskCreateDraft, assignedUnitId: string)
 
 export async function importPrimaryDocument(siteId: string, itemId: string, document: File, availableToAi: boolean) {
   const body = new FormData(); body.set("document", document); body.set("availableToAi", String(availableToAi));
-  return apiFormMutate<{ id: string; name: string; mediaType: string; sha256: string; sourceUrl: string | null; version: number; availableToAi: boolean; createdAt: string; blocks: number; characters: number; canImport: boolean }>(`/api/work/sites/${siteId}/items/${itemId}/primary-document`, "POST", body, translateActive("primaryDocumentImportFailed"));
+  return apiFormMutate<{ id: string; name: string; mediaType: string; sha256: string; sourceUrl: string | null; version: number; availableToAi: boolean; createdAt: string; blocks: number; characters: number; canImport: boolean; canInspect: boolean }>(`/api/work/sites/${siteId}/items/${itemId}/primary-document`, "POST", body, translateActive("primaryDocumentImportFailed"));
 }
 
 export async function approvedPlanRunId(siteId: string, itemId: string) {

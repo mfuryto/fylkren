@@ -20,6 +20,7 @@ export async function responseErrorMessage(response: Response, fallback: string)
     if (problem.code === "ai_provider_invalid_draft") return correlated(translateActive("aiProviderInvalidDraft"));
     if (problem.code === "ai_provider_timeout") return correlated(translateActive("aiProviderTimeout"));
     if (problem.code === "ai_provider_unavailable") return correlated(problem.providerStatus ? translateActive("aiProviderHttpStatus", { status: problem.providerStatus }) : translateActive("aiProviderUnavailable"));
+    if (problem.code === "primary_document_store_failed") return correlated(translateActive("primaryDocumentImportFailed"));
     const validationMessage = Object.values(problem.errors ?? {}).flat().find(Boolean);
     return problem.error || validationMessage || problem.detail || problem.title || fallback;
   } catch {
