@@ -68,6 +68,8 @@ export const aiEn = {
   primaryDocumentImportHelp: "The link above opens the original document for users. Select a file copy for AI: PDF, DOCX or UTF-8 text, up to 8 MiB. Fylkren stores the text extract, not the file.",
   primaryDocumentAiSource: "Use the imported document as an AI source",
   primaryDocumentImportFailed: "The primary document could not be imported",
+  primaryDocumentImported: "Imported",
+  primaryDocumentNotImported: "Not imported",
   entitlementAi: "AI assistance",
 } as const;
 
@@ -103,6 +105,8 @@ const norwegian: AiMessages = {
   primaryDocumentImportHelp: "Lenken over åpner originaldokumentet for brukerne. Velg en filkopi som grunnlag for AI: PDF, DOCX eller UTF-8-tekst, opptil 8 MiB. Fylkren lagrer tekstuttrekket, ikke filen.",
   primaryDocumentAiSource: "Bruk det importerte dokumentet som kilde for AI",
   primaryDocumentImportFailed: "Hoveddokumentet kunne ikke importeres",
+  primaryDocumentImported: "Importert",
+  primaryDocumentNotImported: "Ikke importert",
   entitlementAi: "AI-støtte",
 };
 

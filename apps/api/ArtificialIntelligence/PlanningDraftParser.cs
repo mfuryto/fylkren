@@ -14,16 +14,28 @@ internal static class PlanningDraftParser
     internal static PlanningDraft[] Parse(string value, IReadOnlyList<string> names, IReadOnlyList<string> templates)
     {
         if (templates.Count is < 1 or > 50 || names.Count != templates.Count) throw new JsonException();
-        var root = ParseFirstJsonValue(value);
-        var candidates = ReadCandidates(root, names);
-        if (candidates.Count != templates.Count) throw new JsonException();
-        var numbered = candidates.Select((candidate, index) => ReadCandidate(candidate, index, names)).ToArray();
+        PlanningDraft[] numbered;
+        try
+        {
+            var candidates = ReadCandidates(ParseFirstJsonValue(value), names);
+            if (candidates.Count != templates.Count) throw new JsonException();
+            numbered = candidates.Select((candidate, index) => ReadCandidate(candidate, index, names)).ToArray();
+        }
+        catch (JsonException) { numbered = ReadTagged(value, templates.Count); }
         if (numbered.Select(value => value.StepNumber).Order().SequenceEqual(Enumerable.Range(0, templates.Count)))
             numbered = numbered.Select(value => value with { StepNumber = value.StepNumber + 1 }).ToArray();
         var drafts = numbered.OrderBy(value => value.StepNumber).ToArray();
         if (!drafts.Select(value => value.StepNumber).SequenceEqual(Enumerable.Range(1, templates.Count))) throw new JsonException();
-        foreach (var draft in drafts) EnsureTemplateStructure(templates[draft.StepNumber - 1], draft.Content);
-        return drafts;
+        return drafts.Select(draft => draft with { Content = NormalizeTemplateStructure(templates[draft.StepNumber - 1], draft.Content) }).ToArray();
+    }
+
+    private static PlanningDraft[] ReadTagged(string value, int expectedCount)
+    {
+        var matches = Regex.Matches(value, @"\[\[\s*STEP\s*:?\s*(\d+)\s*\]\](.*?)\[\[\s*(?:END[\s-]*STEP|/STEP)\s*\]\]",
+            RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant);
+        if (matches.Count != expectedCount) throw new JsonException();
+        return matches.Select(match => int.TryParse(match.Groups[1].Value, out var number)
+            ? new PlanningDraft(number, BoundedText(match.Groups[2].Value)) : throw new JsonException()).ToArray();
     }
 
     private static IReadOnlyList<JsonElement> ReadCandidates(JsonElement root, IReadOnlyList<string> names)
@@ -82,9 +94,10 @@ internal static class PlanningDraftParser
 
     private static string ReadText(JsonElement value)
     {
-        var text = value.GetString()?.Trim() ?? "";
-        return text.Length is >= 1 and <= 20_000 ? text : throw new JsonException();
+        return BoundedText(value.GetString() ?? "");
     }
+
+    private static string BoundedText(string value) => value.Trim() is { Length: >= 1 and <= 20_000 } text ? text : throw new JsonException();
 
     private static JsonElement ParseFirstJsonValue(string value)
     {
@@ -110,17 +123,22 @@ internal static class PlanningDraftParser
         throw new JsonException();
     }
 
-    private static void EnsureTemplateStructure(string template, string draft)
+    private static string NormalizeTemplateStructure(string template, string draft)
     {
-        static string[] Markers(string content) => content.Replace("\r\n", "\n").Split('\n').Select(line => Regex.Replace(line.Trim(), @"\s+", " "))
-            .Where(line => Regex.IsMatch(line, @"^#{1,4}\s+\S") || Regex.IsMatch(line, @"^[-*]\s+\[[ xX]\]\s+\S")).ToArray();
-        var actual = Markers(draft); var position = 0;
-        foreach (var marker in Markers(template))
+        static (int Index, string Text, string Kind)[] Markers(string[] lines) => lines.Select((line, index) => new { line = Regex.Replace(line.Trim(), @"\s+", " "), index })
+            .Where(value => Regex.IsMatch(value.line, @"^#{1,4}\s+\S") || Regex.IsMatch(value.line, @"^[-*]\s+\[[ xX]\]\s+\S"))
+            .Select(value => (value.index, value.line, value.line.StartsWith('#') ? value.line[..value.line.IndexOf(' ')] : "check")).ToArray();
+        var required = Markers(template.Replace("\r\n", "\n").Split('\n'));
+        if (required.Length == 0) return draft;
+        var lines = draft.Replace("\r\n", "\n").Split('\n'); var actual = Markers(lines); var position = 0;
+        foreach (var marker in required)
         {
-            while (position < actual.Length && !Same(actual[position], marker)) position++;
+            while (position < actual.Length && actual[position].Kind != marker.Kind) position++;
             if (position == actual.Length) throw new JsonException();
+            lines[actual[position].Index] = marker.Text;
             position++;
         }
+        return string.Join('\n', lines).Trim();
     }
 
     private static bool TryProperty(JsonElement value, string name, out JsonElement result)

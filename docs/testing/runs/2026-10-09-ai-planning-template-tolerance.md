@@ -9,6 +9,7 @@ Focused verification of AI plan generation against varying workflow templates an
 | Check | Result |
 | --- | --- |
 | Exact numbered step objects | Passed |
+| Tagged step blocks with multiline Markdown | Passed |
 | Numeric-string and name-based step identification | Passed |
 | Ordered arrays and objects keyed by dynamic template names | Passed |
 | Extra model metadata and fenced/surrounded JSON | Passed |

@@ -38,6 +38,10 @@ internal static class AiAssistanceTests
         var orderedDrafts = AiEndpoints.ParsePlanningDrafts("[\"# Analysis\\nKnown facts\",\"# Task\\n- Allocate owner\",\"# Coordination\\nConfirm contacts\"]",
             ["Analysis", "Task", "Coordination"], ["# Analysis", "# Task", "# Coordination"]);
         Require(orderedDrafts.Length == 3 && orderedDrafts[2].Content.Contains("Confirm contacts", StringComparison.Ordinal), "Ordered drafts for a varying three-step template were rejected.");
+        var taggedDrafts = AiEndpoints.ParsePlanningDrafts("[[STEP:1]]\n# Analyse\nKjente fakta\n[[END-STEP]]\n[[STEP:2]]\n# Oppgaver\n- Fordel ansvar\n[[END-STEP]]",
+            ["Analysis", "Task"], ["# Analysis", "# Task"]);
+        Require(taggedDrafts.Length == 2 && taggedDrafts[0].Content.StartsWith("# Analysis", StringComparison.Ordinal) && taggedDrafts[1].Content.StartsWith("# Task", StringComparison.Ordinal),
+            "Model-robust tagged planning output did not restore the supplied template headings.");
         var riskDrafts = System.Text.Json.JsonSerializer.Serialize(AiEndpoints.ParseDrafts("risks", "{\"risks\":[{\"title\":\"Loss of link\",\"cause\":\"Primary link fails\",\"consequence\":\"Coordination stops\",\"mitigation\":\"Prepare radio backup\",\"dueDate\":\"2026-11-15\"}]}"));
         Require(riskDrafts.Contains("Loss of link", StringComparison.Ordinal) && !riskDrafts.Contains("probability", StringComparison.OrdinalIgnoreCase),
             "Structured risk drafts lost their bounded fields or introduced AI scoring.");

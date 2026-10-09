@@ -14,6 +14,8 @@ Focused verification of the additive primary-document snapshot, passive extracti
 | PDF text extraction and page provenance | Passed |
 | Original source bytes absent from storage/download paths | Passed by focused source lock |
 | Extracted text and structured JSON absent from end-user document responses | Passed by explicit response projection review |
+| Visible imported/not-imported status and retained version in task and planning interfaces | Passed by web test and production build |
+| Re-import for creator, current level manager or current claimed planner on an active task | Passed by authorization review and API compilation |
 | EF migration snapshot versus current model, including source-link provenance | Passed against disposable PostgreSQL 18 |
 | API compilation | Passed with zero warnings/errors |
 | Web tests and production build | Passed |

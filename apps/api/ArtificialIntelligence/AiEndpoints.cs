@@ -199,7 +199,9 @@ internal static class AiEndpoints
                         { revision.Action, revision.Status, revision.DueDate }).First())
                 }).ToListAsync(ct)
             : null;
-        var outputFormat = feature is "planning" or "risks" or "decisions"
+        var outputFormat = feature == "planning"
+            ? "Return only the exact tagged step blocks requested by the task, without commentary or code fences."
+            : feature is "risks" or "decisions"
             ? "Return only the exact JSON structure requested by the task, without markdown fences, commentary or additional properties."
             : "Return readable plain text with short headings and bullet points where useful. Never return JSON, XML, source code or fenced code blocks unless the user explicitly asks for that format.";
         var templateLanguageRule = feature == "planning" ? "Keep supplied template headings and checklist labels exactly as written even when their language differs. " : "";
@@ -371,7 +373,7 @@ internal static class AiEndpoints
     internal static string Instruction(string feature, string? question) => feature switch
     {
         "summary" => "Summarize the work item, list missing or inconsistent information, deadlines, blockers and the next matters needing attention.",
-        "planning" => "Return only valid JSON with this exact shape: {\"steps\":[{\"stepNumber\":1,\"content\":\"...\"}]}. Return every supplied planning step exactly once, in stepNumber order. Put information only in the step where the supplied planning template places it. Preserve each step's template headings, checklist items, placeholders and order exactly, and fill them only from supported facts. Mark missing information visibly instead of inventing it. Content uses the editor's Markdown subset: # headings, - lists, numbered lists and plain paragraphs; do not use inline emphasis such as **. Do not combine the complete plan into one step.",
+        "planning" => "Return every supplied planning step exactly once, in stepNumber order, using this exact plain-text structure: [[STEP:1]] followed by that step's content followed by [[END-STEP]], then the next step. Put information only in the step where the supplied planning template places it. Preserve each step's template headings, checklist items, placeholders and order exactly, and fill them only from supported facts. Mark missing information visibly instead of inventing it. Content uses the editor's Markdown subset: # headings, - lists, numbered lists and plain paragraphs; do not use inline emphasis such as **. Do not combine the complete plan into one step.",
         "risks" => "Return only valid JSON with this exact shape: {\"risks\":[{\"title\":\"...\",\"cause\":\"...\",\"consequence\":\"...\",\"mitigation\":\"...\",\"dueDate\":null}]}. Include at most five distinct relevant risks that are not already covered by the supplied existing risk register. Consider current and closed risks and their mitigations before proposing anything. dueDate must be null or YYYY-MM-DD and only when supported. Do not assign probability or impact; the user must assess both. Mark unsupported details inside the relevant text as assumptions.",
         "decisions" => "Return only valid JSON with this exact shape: {\"decisions\":[{\"title\":\"...\",\"decision\":\"...\",\"rationale\":\"...\"}]}. Include at most three distinct matters requiring a decision. decision is the supported recommendation or an explicit unresolved choice. rationale contains supported options, consequences and missing evidence. Mark assumptions and do not claim that a decision was made.",
         "learning" => "Analyze the learning points. Group themes, identify duplicates and propose priorities and concrete follow-up without closing or changing any point.",

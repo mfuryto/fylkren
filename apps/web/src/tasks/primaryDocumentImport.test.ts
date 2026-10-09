@@ -3,6 +3,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { emptyTaskCreateDraft, TaskCreateDialog } from "./TaskCreateDialog";
 import { taskCreatePayload } from "./taskApi";
+import { primaryDocumentIndicator } from "./PrimaryDocumentButton";
 
 describe("primary document import", () => {
   it("defaults AI source use on without sending browser file state in task JSON", () => {
@@ -23,5 +24,10 @@ describe("primary document import", () => {
     expect(html.indexOf("Link to original document")).toBeGreaterThan(-1);
     expect(html.indexOf("Import primary document")).toBeGreaterThan(html.indexOf("Link to original document"));
     expect(html).toContain("The link above opens the original document for users");
+  });
+  it("makes import state and version explicit without exposing extracted content", () => {
+    expect(primaryDocumentIndicator(2, true, false, "Imported", "Not imported")).toBe("Imported v2");
+    expect(primaryDocumentIndicator(null, true, false, "Imported", "Not imported")).toBe("Not imported");
+    expect(primaryDocumentIndicator(null, true, true, "Imported", "Not imported")).toBe("?");
   });
 });
