@@ -72,6 +72,8 @@ Relevant Level 3 controls, WSTG techniques and API Security Top 10 coverage supp
 
 Run the maintained [end-to-end acceptance suite](../testing/END_TO_END_TEST_MATRIX.md) from reset synthetic fixtures against the exact API/web images and schema intended for release, in both Community and Enterprise states. Cover operational workflows, hierarchy/routing, notifications, learning privacy, authorization, machine APIs, activity/archive behavior and workload sizing. Repeat the affected complete chain after corrections; do not treat historical runs as evidence for untested candidate changes.
 
+The local Community/Enterprise candidate suite passes on commit `4883db2` with the Azure Linux API runtime, current schema and reset synthetic fixtures. The same run completes the full functional/security chain and 1,000-task workload; concurrency-25 p95 is 105 ms with a 123 ms maximum. Target-deployment gates below remain required before production qualification.
+
 Repeat the maintained AD/LDAP, OIDC/SAML, SMTP and federation laboratories for affected integrations. Historical mixed-version federation needs an archived release artifact; current Production-boundary tests do not prove that compatibility. Qualify matched database/key-ring recovery and fencing before organizational federation activation. See [instance federation](../architecture/INSTANCE_FEDERATION.md).
 
 Qualify production issuer/private-key custody and offline key management separately from the synthetic edition fixtures. Preserve one common API/web build and customer-data access across entitlement transitions. See [edition architecture](../architecture/EDITION_ENTITLEMENTS.md).
