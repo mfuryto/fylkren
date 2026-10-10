@@ -1,5 +1,5 @@
 export const learning = {
-  "learningReadOnlyHint": "Puoi leggere e commentare questo punto. Solo i responsabili del suo livello di lavoro possono modificare stato, priorità e gestione.",
+  "learningReadOnlyHint": "Puoi leggere e commentare questo punto. Solo i responsabili del suo livello operativo possono modificare stato, priorità e gestione.",
   "learningKind": "Categoria",
   "navLearning": "Apprendimento",
   "learningIntro": "Fai clic sul testo per aprire un punto alla volta. I responsabili possono anche selezionare lo stato, sceglierne uno nuovo e salvare.",

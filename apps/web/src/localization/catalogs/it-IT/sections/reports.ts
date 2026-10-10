@@ -1,32 +1,4 @@
 import type { MessageKey } from "../../en-US";
 
 export const reportsItIT = {
-  reportsTitle: "Relazioni",
-  reportsIntro: "Rapporti finali approvati per il livello di lavoro selezionato e i livelli subordinati.",
-  reportContextLoadFailed: "Il contesto del rapporto non potrebbe essere caricato.",
-  reportsLoadFailed: "I rapporti non potevano essere caricati.",
-  reportUnavailable: "Il rapporto non esiste, o non ha accesso a livello selezionato.",
-  noReportAccessTitle: "Nessun accesso al report",
-  noReportAccessIntro: "Non hai livelli di lavoro disponibili.",
-  reportLinkCopied: "Il link del rapporto è stato copiato.",
-  reportLinkCopyFailed: "Il link non può essere copiato.",
-  reportSearchPlaceholder: "Titolo, contenuto o nome",
-  reportArchive: "Archivio di relazione",
-  oneReport: "1 relazione",
-  reportCount: "{count} relazioni",
-  noReportsMatch: "Nessun rapporto corrisponde al filtro.",
-  reportApprovedBySummary: "Approvato da {name}",
-  viewReport: "Visualizza relazione",
-  reportPages: "Pagine di report",
-  reportModalTitle: "Relazione",
-  workItemLabel: "Articolo di lavoro",
-  dateLabel: "Data",
-  workReceived: "Lavoro ricevuto",
-  workCompleted: "Lavoro completato",
-  reportWrittenBy: "Relazione scritta",
-  reportApprovedBy: "Relazione approvata",
-  copyReportLink: "Copia link per segnalare",
-  print: "Stampa",
-  exportPdf: "Esportazione in PDF",
-  reportPrintView: "Visualizzazione della stampa",
-} satisfies Partial<Record<MessageKey, string>>;
+  reportsTitle: "Relazioni",  reportsIntro: "Rapporti finali approvati per il livello operativo selezionato e i livelli subordinati.",  reportContextLoadFailed: "Il contesto del rapporto non può essere caricato.",  reportsLoadFailed: "I rapporti non hanno potuto essere caricati.",  reportUnavailable: "Il rapporto non esiste, o non ha accesso a livello selezionato.",  noReportAccessTitle: "Nessun accesso al report",  noReportAccessIntro: "Non hai livelli operativi disponibili.",  reportLinkCopied: "Il link del rapporto è stato copiato.",  reportLinkCopyFailed: "Il link non può essere copiato.",  reportSearchPlaceholder: "Titolo, contenuto o nome",  reportArchive: "Archivio dei rapporti",  oneReport: "1 rapporto",  reportCount: "{count} relazioni",  noReportsMatch: "Nessun rapporto corrisponde al filtro.",  reportApprovedBySummary: "Approvato da {name}",  viewReport: "Visualizza relazione",  reportPages: "Pagine di report",  reportModalTitle: "Rapporto",  workItemLabel: "Attività",  dateLabel: "Data",  workReceived: "Lavoro ricevuto",  workCompleted: "Lavoro completato",  reportWrittenBy: "Rapporto redatto da",  reportApprovedBy: "Rapporto approvato da",  copyReportLink: "Copia link per segnalare",  print: "Stampa",  exportPdf: "Esportazione in PDF",  reportPrintView: "Visualizzazione della stampa",} satisfies Partial<Record<MessageKey, string>>;
