@@ -31,6 +31,15 @@ try {
   const sourceKeys = Object.keys(en).sort();
   const sourceCatalogSha256 = digest(en);
 
+  const exportLocale = option('--export-locale');
+  if (exportLocale) {
+    const output = option('--output');
+    assert.ok(locales.includes(exportLocale), `${exportLocale} is not a registered locale`);
+    assert.ok(output, 'Provide --output for the review inventory');
+    const inventory = sourceKeys.map(key => ({ key, source: en[key], target: languageCatalogs[exportLocale][key] }));
+    writeFileSync(path.resolve(root, output), `${JSON.stringify(inventory, null, 2)}\n`);
+  }
+
   if (process.argv.includes('--initialize')) {
     const manifest = {
       schema: 'fylkren-linguistic-review/v1',

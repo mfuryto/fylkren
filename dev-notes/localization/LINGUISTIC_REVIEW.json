@@ -40,9 +40,14 @@
       "catalogSha256": "73bc56d11a48dc716cced60faad320d874d913e971c9240828a101b52219a15f"
     },
     "nb-NO": {
-      "status": "pending",
-      "reviewedKeyCount": 0,
-      "catalogSha256": "c13730bddcd094f89e2cba0452a86faf77b87990cb9cbeca470e531cd9b1d4f9"
+      "status": "verified",
+      "reviewedKeyCount": 2244,
+      "catalogSha256": "88251af60b4784681c4173011a54364471d74055511a6b87ce6ae87c56a1aea1",
+      "verifiedSourceCatalogSha256": "4f8d4ddac684c6e2924bd13c1f5f9421cbd1474b7401278c5eec4e34f0429faa",
+      "verifiedAt": "2026-10-10",
+      "evidence": [
+        "dev-notes/testing/runs/2026-10-10-linguistic-review.md"
+      ]
     },
     "sv-SE": {
       "status": "pending",

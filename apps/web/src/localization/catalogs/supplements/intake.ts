@@ -9,7 +9,7 @@ type IntakeMessages = Record<IntakeMessageKey, string>;
 export const intakeTranslations: Record<string, IntakeMessages> = {
   "en-US": intakeEn,
   "en-GB": intakeEn,
-  "nb-NO": { navIntakeSettings: "Mottak", intakeSettingsIntro: "Administrer kildetyper og avsendere som kan velges ved manuell registrering. Avsendere som mottas utenfra, bevares som snapshots og legges ikke automatisk i listen." },
+  "nb-NO": { navIntakeSettings: "Mottak", intakeSettingsIntro: "Administrer kildetyper og avsendere som kan velges ved manuell registrering. Avsendere som mottas utenfra, bevares som øyeblikksbilder og legges ikke automatisk i listen." },
   "sv-SE": { navIntakeSettings: "Intag", intakeSettingsIntro: "Hantera källtyper och avsändare för manuell registrering. Externt mottagna avsändare bevaras som ögonblicksbilder och läggs inte till i listan." },
   "da-DK": { navIntakeSettings: "Modtagelse", intakeSettingsIntro: "Administrer kildetyper og afsendere til manuel registrering. Eksternt modtagne afsendere bevares som snapshots og føjes ikke til listen." },
   "fi-FI": { navIntakeSettings: "Vastaanotto", intakeSettingsIntro: "Hallitse manuaalisen rekisteröinnin lähdetyyppejä ja lähettäjiä. Ulkoa vastaanotetut lähettäjät säilyvät tilannekuvina eikä niitä lisätä luetteloon." },

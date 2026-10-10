@@ -26,7 +26,7 @@ function markerCounts() {
   for (const absolutePath of allFiles(root)) {
     const path = relative(root, absolutePath);
     if (path === checkerPath || path === 'tools/repository-language-baseline.json') continue;
-    if (path.startsWith(`${localizationCatalogs}/`) && !path.startsWith(`${localizationCatalogs}/en-US/`) && !path.startsWith(`${localizationCatalogs}/en-GB/`)) continue;
+    if (path.startsWith(`${localizationCatalogs}/`) && !path.startsWith(`${localizationCatalogs}/en-US/`)) continue;
     const content = readFileSync(absolutePath, 'utf8').replaceAll('Norsk bokmål', '');
     const count = (content.match(norwegianCharacters)?.length ?? 0) +
       (content.match(norwegianWords)?.length ?? 0);

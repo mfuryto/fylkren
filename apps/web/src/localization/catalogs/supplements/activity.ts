@@ -68,7 +68,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
     "lifecycleTitle": "Lås/Arkiver",
     "lifecycleClosed": "Lås innhold",
     "lifecycleArchived": "Arkiver",
-    "lifecycleRestore": "Tilbakefør til låst",
+    "lifecycleRestore": "Gjenopprett som låst",
     "lifecycleReopen": "Gjenåpne for redigering",
     "lifecycleReason": "Begrunnelse",
     "activityUnknown": "Aktivitet registrert"

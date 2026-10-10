@@ -80,7 +80,7 @@ export type AiMessageKey = keyof typeof aiEn;
 type AiMessages = Record<AiMessageKey, string>;
 const norwegian: AiMessages = {
   navAi: "AI", aiPageIntro: "Konfigurer avgrenset AI-støtte for valgte siter.",
-  aiEnterpriseNotice: "AI-støtte krever Enterpriselisens. Konfigurasjonen er fortsatt synlig når tilgangen mangler.",
+  aiEnterpriseNotice: "AI-støtte krever Enterprise-lisens. Konfigurasjonen er fortsatt synlig når tilgangen mangler.",
   aiMasterSwitch: "Aktiver AI-støtte", aiMasterHelp: "AI-funksjonene er skjult og utilgjengelige til denne bryteren aktiveres.",
   aiProvider: "Leverandør", aiProviderHelp: "Bruk OpenAI i skyen eller lokal Llama gjennom et OpenAI-kompatibelt endepunkt fra for eksempel Ollama eller vLLM.", aiEndpoint: "OpenAI-kompatibelt endepunkt",
   aiEndpointHelp: "Bruk hele HTTPS-adressen. Et internt HTTP-endepunkt må tillates med eksakt adresse i installasjonens konfigurasjon for utgående forbindelser.",

@@ -25,9 +25,9 @@ export const preservationTranslations: Record<string, Record<keyof typeof preser
     "preservationHandoffRecorded": "Export custody confirmed."
   },
   "nb-NO": {
-    "preservationRelease": "Opphev bevaringsstopp",
+    "preservationRelease": "Opphev bevaringssperre",
     "preservationTitle": "Bevaring",
-    "preservationHold": "Bevaringsstopp",
+    "preservationHold": "Bevaringssperre",
     "preservationPolicy": "Bevaringsregel",
     "preservationReviewDays": "Dager til ny vurdering (valgfritt)",
     "preservationNoExecution": "Reglene dokumenterer bevaring. Automatisk sletting er deaktivert.",

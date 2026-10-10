@@ -8,7 +8,7 @@ export const workNbNO = {
   latestDecisionBasis: "Siste beslutningsgrunnlag:",
   cancellationBasis: "Kanselleringsgrunnlag:",
   responsibilityClaimed: "Ansvar tatt",
-  configurePlanningWorkflow: "Konfigurer planleggerflyt",
+  configurePlanningWorkflow: "Konfigurer planleggingsflyt",
   templateNameLabel: "Mal: {name}",
   completeCorrectly: "Avslutt riktig.",
   createType: "Opprett type",

@@ -42,6 +42,14 @@ describe("localization catalogs", () => {
     expect(translate("nb-NO", "regionalTitle")).not.toBe("Language and regional settings");
   });
 
+  it("does not leave ordinary English interface wording in the Norwegian catalog", () => {
+    const englishInterfaceWords = /\b(?:child|children|task|work|request|review|execution|planning|draft|unknown|failed|delete|save|open|close|selected|current|source|target|reason|description|title|owner|before|after|snapshots?|passkeys?|audit|entity|subject|authority|callback|module)\b/i;
+    for (const [key, message] of Object.entries(languageCatalogs["nb-NO"])) {
+      const withoutPlaceholders = message.replace(/\{\{?[A-Za-z][A-Za-z0-9]*\}?\}/g, "");
+      expect(withoutPlaceholders, `nb-NO.${key} contains untranslated interface wording`).not.toMatch(englishInterfaceWords);
+    }
+  });
+
   it("normalizes every bundled language and its bare language code", () => {
     const expected = {
       sv: "sv-SE", da: "da-DK", fi: "fi-FI", de: "de-DE", fr: "fr-FR", pl: "pl-PL", es: "es-ES", it: "it-IT",

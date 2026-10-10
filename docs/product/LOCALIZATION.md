@@ -10,7 +10,7 @@ The [localization terminology](LOCALIZATION_TERMINOLOGY.md) is authoritative for
 | --- | --- | --- |
 | `en-US` | English (United States) | Source catalog and mandatory fallback |
 | `en-GB` | English (United Kingdom) | Linguistically verified against the current source catalog |
-| `nb-NO` | Norwegian Bokmal | Technically complete; linguistic review pending |
+| `nb-NO` | Norwegian Bokmal | Linguistically verified against the current source catalog |
 | `sv-SE` | Swedish | Technically complete; linguistic review pending |
 | `da-DK` | Danish | Technically complete; linguistic review pending |
 | `fi-FI` | Finnish | Technically complete; linguistic review pending |
