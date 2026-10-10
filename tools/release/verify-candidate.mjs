@@ -42,6 +42,7 @@ const common = [
   ...dotnetProjects.map(project => ['dotnet', ['build', project, '--configuration', 'Release', '--no-restore']]),
 ];
 const candidateOnly = [
+  ['pnpm', ['check:language:release']],
   [process.execPath, ['tools/run-foundation-tests.mjs']],
   ['pnpm', ['test:e2e:editions']],
   ['pnpm', ['test:e2e:browser']],

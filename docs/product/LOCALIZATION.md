@@ -9,30 +9,30 @@ The [localization terminology](LOCALIZATION_TERMINOLOGY.md) is authoritative for
 | Locale | Language | Status |
 | --- | --- | --- |
 | `en-US` | English (United States) | Source catalog and mandatory fallback |
-| `en-GB` | English (United Kingdom) | Complete derived regional catalog |
-| `nb-NO` | Norwegian Bokmal | Complete derived catalog |
-| `sv-SE` | Swedish | Complete derived catalog |
-| `da-DK` | Danish | Complete derived catalog |
-| `fi-FI` | Finnish | Complete derived catalog |
-| `de-DE` | German | Complete derived catalog |
-| `fr-FR` | French | Complete derived catalog |
-| `pl-PL` | Polish | Complete derived catalog |
-| `es-ES` | Spanish (Spain) | Complete derived catalog |
-| `it-IT` | Italian | Complete derived catalog |
-| `uk-UA` | Ukrainian | Complete derived catalog |
-| `nl-NL` | Dutch | Complete derived catalog |
-| `pt-PT` | Portuguese (Portugal) | Complete derived catalog |
-| `cs-CZ` | Czech | Complete derived catalog |
-| `ro-RO` | Romanian | Complete derived catalog |
-| `et-EE` | Estonian | Complete derived catalog |
-| `lv-LV` | Latvian | Complete derived catalog |
-| `lt-LT` | Lithuanian | Complete derived catalog |
+| `en-GB` | English (United Kingdom) | Linguistically verified against the current source catalog |
+| `nb-NO` | Norwegian Bokmal | Technically complete; linguistic review pending |
+| `sv-SE` | Swedish | Technically complete; linguistic review pending |
+| `da-DK` | Danish | Technically complete; linguistic review pending |
+| `fi-FI` | Finnish | Technically complete; linguistic review pending |
+| `de-DE` | German | Technically complete; linguistic review pending |
+| `fr-FR` | French | Technically complete; linguistic review pending |
+| `pl-PL` | Polish | Technically complete; linguistic review pending |
+| `es-ES` | Spanish (Spain) | Technically complete; linguistic review pending |
+| `it-IT` | Italian | Technically complete; linguistic review pending |
+| `uk-UA` | Ukrainian | Technically complete; linguistic review pending |
+| `nl-NL` | Dutch | Technically complete; linguistic review pending |
+| `pt-PT` | Portuguese (Portugal) | Technically complete; linguistic review pending |
+| `cs-CZ` | Czech | Technically complete; linguistic review pending |
+| `ro-RO` | Romanian | Technically complete; linguistic review pending |
+| `et-EE` | Estonian | Technically complete; linguistic review pending |
+| `lv-LV` | Latvian | Technically complete; linguistic review pending |
+| `lt-LT` | Lithuanian | Technically complete; linguistic review pending |
 
 The legacy locale value `en` is treated as `en-US` and upgraded to that explicit value. No additional locale is considered supported until its complete bundled catalog, locale behavior, documentation and automated tests are delivered together.
 
 ## Language model
 
-American English (`en-US`) is the authoritative semantic source for interface text, catalog keys and fallback behavior. Every other locale in the roster is a complete derived language pack and is technically complete and selectable. Linguistic assurance follows the automated quality gate below rather than a requirement to recruit a reviewer for every language.
+American English (`en-US`) is the authoritative semantic source for interface text, catalog keys and fallback behavior. Every other locale in the roster is a complete derived language pack and is technically complete and selectable. Linguistic verification remains pending until every catalog entry has completed the maintained semantic and editorial review.
 
 Locales outside the maintained roster are unsupported. Regional variants such as Brazilian Portuguese, Canadian French or Latin American Spanish require an explicit product decision and a complete catalog rather than silently reusing another region's pack.
 
@@ -54,7 +54,7 @@ Catalog completeness is not evidence that a translation is correct. Before a loc
 6. browser rendering at maintained desktop and mobile widths, including clipped controls, overflow, dialogs, email, reports and PDF output;
 7. the existing locale behavior, catalog parity, typecheck, build and automated regression suites.
 
-The report records catalog hashes, provider/model versions, date, findings and resolved exceptions. Translation provider credentials are never committed. Only fixed Fylkren interface text may be submitted; customer content, deployment configuration and operational data are out of scope. A provider suggestion is evidence for review, not an automatic overwrite. Material disagreement between engines blocks the locale until the term base or translation is corrected.
+The report records source and catalog hashes, review method, date, findings and resolved exceptions. Translation provider credentials are never committed. Only fixed Fylkren interface text may be submitted; customer content, deployment configuration and operational data are out of scope. A provider suggestion is evidence for review, not an automatic overwrite. Material disagreement or unresolved semantic doubt blocks the locale until the term base or translation is corrected. The internal [linguistic review status](../../dev-notes/localization/LINGUISTIC_REVIEW.md) is the canonical release record.
 
 English and Norwegian may additionally be owner-reviewed, but public support for the remaining roster does not depend on recruiting individual native-language reviewers. Release notes state the automated assurance method without implying human certification that did not occur.
 

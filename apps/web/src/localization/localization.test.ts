@@ -27,6 +27,16 @@ describe("localization catalogs", () => {
     expect(translate("en-GB", "taskStatusCancelled")).toBe("Cancelled");
   });
 
+  it("uses British spelling throughout the United Kingdom catalog", () => {
+    const americanForms = /\b(?:organization(?:al|s)?|authorization|authorized|authorize|synchroniz(?:e|ed|es|ing|ation)|catalog(?:s)?|colors?|colored|canceled|canceling|behavior(?:s)?|analyz(?:e|ed|es|ing)|prioritiz(?:e|ed|es|ing)|recogniz(?:able|e|ed|es|ing)|center(?:ed|s)?|artifacts?|enrollment|labeling|labeled|gray|defense|license)\b/i;
+    for (const [key, message] of Object.entries(languageCatalogs["en-GB"])) {
+      expect(message, `en-GB.${key} contains an American form`).not.toMatch(americanForms);
+    }
+    expect(translate("en-GB", "enterpriseRequired")).toBe("Requires an Enterprise licence");
+    expect(translate("en-GB", "parentLeadershipUpdateFailed")).toBe("The authorisation could not be updated.");
+    expect(translate("en-GB", "directorySyncFailed")).toBe("The directory users could not be synchronised.");
+  });
+
   it("keeps Norwegian in its dedicated language pack", () => {
     expect(normalizeLanguage("nb-NO")).toBe("nb-NO");
     expect(translate("nb-NO", "regionalTitle")).not.toBe("Language and regional settings");

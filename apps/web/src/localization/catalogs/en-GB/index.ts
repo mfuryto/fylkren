@@ -1,9 +1,43 @@
 import { en, type MessageKey } from "../en-US";
 
-// The existing English catalogue is the complete US source/fallback wording.
-// This catalogue records the terms that differ in British English.
+function toBritishEnglish(message: string) {
+  const replacements = [
+    ["Organization", "Organisation"], ["organization", "organisation"],
+    ["Authorization", "Authorisation"], ["authorization", "authorisation"],
+    ["Authorized", "Authorised"], ["authorized", "authorised"],
+    ["Authorize", "Authorise"], ["authorize", "authorise"],
+    ["Synchroniz", "Synchronis"], ["synchroniz", "synchronis"],
+    ["Catalog", "Catalogue"], ["catalog", "catalogue"],
+    ["Colors", "Colours"], ["colors", "colours"],
+    ["Colored", "Coloured"], ["colored", "coloured"],
+    ["Color", "Colour"], ["color", "colour"],
+    ["Canceled", "Cancelled"], ["canceled", "cancelled"],
+    ["Canceling", "Cancelling"], ["canceling", "cancelling"],
+    ["Behavior", "Behaviour"], ["behavior", "behaviour"],
+    ["Analyze", "Analyse"], ["analyze", "analyse"],
+    ["Analyzed", "Analysed"], ["analyzed", "analysed"],
+    ["Analyzing", "Analysing"], ["analyzing", "analysing"],
+    ["Prioritiz", "Prioritis"], ["prioritiz", "prioritis"],
+    ["Recogniz", "Recognis"], ["recogniz", "recognis"],
+    ["Centered", "Centred"], ["centered", "centred"],
+    ["Center", "Centre"], ["center", "centre"],
+    ["Artifacts", "Artefacts"], ["artifacts", "artefacts"],
+    ["Artifact", "Artefact"], ["artifact", "artefact"],
+    ["Enrollment", "Enrolment"], ["enrollment", "enrolment"],
+    ["Labeling", "Labelling"], ["labeling", "labelling"],
+    ["Labeled", "Labelled"], ["labeled", "labelled"],
+    ["Gray", "Grey"], ["gray", "grey"],
+    ["Defense", "Defence"], ["defense", "defence"],
+  ] as const;
+  let result = message;
+  for (const [source, target] of replacements) result = result.replaceAll(source, target);
+  return result.replace(/\blicense\b/g, "licence").replace(/\bLicense\b/g, "Licence");
+}
+
+const britishSource = Object.fromEntries(Object.entries(en).map(([key, value]) => [key, toBritishEnglish(value)])) as Record<MessageKey, string>;
+
 export const enGB = {
-  ...en,
+  ...britishSource,
   navOrganization: "Organisation",
   redirectingToOrganization: "Redirecting to your organisation's sign-in…",
   passwordSignInDisabled: "Password-based sign-in is disabled for this installation. Use one of your organisation's sign-in methods below.",

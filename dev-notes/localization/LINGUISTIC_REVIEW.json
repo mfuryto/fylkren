@@ -1,0 +1,128 @@
+{
+  "schema": "fylkren-linguistic-review/v1",
+  "sourceLocale": "en-US",
+  "sourceKeyCount": 2244,
+  "sourceCatalogSha256": "4f8d4ddac684c6e2924bd13c1f5f9421cbd1474b7401278c5eec4e34f0429faa",
+  "reviewOrder": [
+    "en-GB",
+    "nb-NO",
+    "sv-SE",
+    "da-DK",
+    "fi-FI",
+    "de-DE",
+    "fr-FR",
+    "pl-PL",
+    "es-ES",
+    "it-IT",
+    "uk-UA",
+    "nl-NL",
+    "pt-PT",
+    "cs-CZ",
+    "ro-RO",
+    "et-EE",
+    "lv-LV",
+    "lt-LT"
+  ],
+  "locales": {
+    "en-GB": {
+      "status": "verified",
+      "reviewedKeyCount": 2244,
+      "catalogSha256": "a02235b10bf3cd0b7863c1d29613fbe348ecd65afaf53908317ac7c46b2fcdd5",
+      "verifiedSourceCatalogSha256": "4f8d4ddac684c6e2924bd13c1f5f9421cbd1474b7401278c5eec4e34f0429faa",
+      "verifiedAt": "2026-10-10",
+      "evidence": [
+        "dev-notes/testing/runs/2026-10-10-linguistic-review.md"
+      ]
+    },
+    "en-US": {
+      "status": "source",
+      "reviewedKeyCount": 0,
+      "catalogSha256": "73bc56d11a48dc716cced60faad320d874d913e971c9240828a101b52219a15f"
+    },
+    "nb-NO": {
+      "status": "pending",
+      "reviewedKeyCount": 0,
+      "catalogSha256": "c13730bddcd094f89e2cba0452a86faf77b87990cb9cbeca470e531cd9b1d4f9"
+    },
+    "sv-SE": {
+      "status": "pending",
+      "reviewedKeyCount": 0,
+      "catalogSha256": "52f6565e5e8fa8d96305617138ef9ba92a944204c0a0168382392e04e72700c0"
+    },
+    "da-DK": {
+      "status": "pending",
+      "reviewedKeyCount": 0,
+      "catalogSha256": "0d4304508ef42599a86af484d2c824985db7a37ade34bba35e681d7e52dea3b1"
+    },
+    "fi-FI": {
+      "status": "pending",
+      "reviewedKeyCount": 0,
+      "catalogSha256": "5ea04b1c52a65f9d6dfdc3600e878f39bfae2eb55c650b8bbea985f7d3e10854"
+    },
+    "de-DE": {
+      "status": "pending",
+      "reviewedKeyCount": 0,
+      "catalogSha256": "1b538b74810681a32f6e18c02381ac0b0a4160f8d844a96f7f7695a3fa6c5db3"
+    },
+    "fr-FR": {
+      "status": "pending",
+      "reviewedKeyCount": 0,
+      "catalogSha256": "290702d6ae9f4f938bc76f188f968e229d81dd1c8107809688b857ba5c1ff04a"
+    },
+    "pl-PL": {
+      "status": "pending",
+      "reviewedKeyCount": 0,
+      "catalogSha256": "739e93affacfc27c6876fad01e4e87d1f73896551fd536785ca02a67f3e5569d"
+    },
+    "es-ES": {
+      "status": "pending",
+      "reviewedKeyCount": 0,
+      "catalogSha256": "086d8829517929f2949e7590656fd5b18895c53c04e809e6cd689ca29e3a5679"
+    },
+    "it-IT": {
+      "status": "pending",
+      "reviewedKeyCount": 0,
+      "catalogSha256": "49c63e63f85f15dbf95c453d2ef345e17c239f0f6b9712f468ba6b55261ec0fd"
+    },
+    "uk-UA": {
+      "status": "pending",
+      "reviewedKeyCount": 0,
+      "catalogSha256": "9938880698467134085c72864217eb3a594a1fbbfe7ddd1aba41e4d496e8b08c"
+    },
+    "nl-NL": {
+      "status": "pending",
+      "reviewedKeyCount": 0,
+      "catalogSha256": "f5ad37dd77ab5d7cd335eec2de3f91c9ba150b6c270b32428841a1fde4032615"
+    },
+    "pt-PT": {
+      "status": "pending",
+      "reviewedKeyCount": 0,
+      "catalogSha256": "ab9e9db54572ae1028f91667a53fa6e634ade7db019a0290842b3be22db712bc"
+    },
+    "cs-CZ": {
+      "status": "pending",
+      "reviewedKeyCount": 0,
+      "catalogSha256": "74d570f4e9485ec95c8c890beb4aad36c2b94dbbdde2d5651929665f4e920b35"
+    },
+    "ro-RO": {
+      "status": "pending",
+      "reviewedKeyCount": 0,
+      "catalogSha256": "3f0270e3cd85a0ac872735b1d90d2fd11dec518e34bbaab43822dd96a9b098af"
+    },
+    "et-EE": {
+      "status": "pending",
+      "reviewedKeyCount": 0,
+      "catalogSha256": "a56e6ba594bb2865accc77f8cf0a6533e05f12e3eadb02e427d5a22f3b75456a"
+    },
+    "lv-LV": {
+      "status": "pending",
+      "reviewedKeyCount": 0,
+      "catalogSha256": "a4846e3664deb6d0726559ab19810d6a25f8583fc04e0567e3b1b1df6e1437e2"
+    },
+    "lt-LT": {
+      "status": "pending",
+      "reviewedKeyCount": 0,
+      "catalogSha256": "4fe5a275b6b0e4bb6ac8a6f1d05a4329aa7545f5e44dca3367ac06a9b8634252"
+    }
+  }
+}
