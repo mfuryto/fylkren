@@ -15,4 +15,4 @@ A derived locale may be marked `verified` only when all source keys have been re
 
 The review record binds approval to the complete English-source hash and locale-catalog hash. Any later change invalidates that approval until the affected locale is reviewed again. Automated translation or a passing structural test cannot by itself produce `verified` status.
 
-Current audit work began after a full-catalog sample found material semantic errors in several derived locales. Until the recorded review is complete, documentation must describe those catalogs as technically complete with linguistic review pending.
+The current audit began after a full-catalog sample found material semantic errors in several derived locales. The complete roster has now passed the recorded review; any later source or catalog change invalidates the affected hash-bound approval until that locale is reviewed again.

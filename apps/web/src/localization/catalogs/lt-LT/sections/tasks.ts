@@ -26,7 +26,7 @@ export const tasksLtLT = {
   tasksTaskActionPanelsReject: "Pašalinti",
   tasksTaskActionPanelsReopen: "iš naujo atverti",
   tasksTaskActionPanelsReturnWithCorrections: "Grąžinti su pataisymais",
-  tasksTaskActionPanelsRouteOnward: "Maršrutas",
+  tasksTaskActionPanelsRouteOnward: "Perduoti toliau",
   tasksTaskActionPanelsSendRequest: "Siųsti užklausą",
   tasksTaskActionPanelsWriteFinalReport: "Rašyti galutinę ataskaitą",
   tasksTaskApiExecutionHistoryCouldNotBeLoaded: "Nepavyko įkelti vykdymo istorijos.",

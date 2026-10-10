@@ -34,7 +34,7 @@ export const workTemplatesLtLT = {
   workTemplateHelpLinkText: "Nuoroda sukonfigūruota pagal atitinkamą darbo eigos etapą, ne, kai užduotis yra apdorojama.",
   workTemplateHelpManageTitle: "Tvarkyti vietos turinį.",
   workTemplateHelpManageText: "Vadovas ir įgaliotas vadovas gali sukurti ir redaguoti šablonus, priklausančius jų lygiui. Svetainės vadovas valdo visoje Site šablonus ir galutinės ataskaitos šabloną.",
-  workTemplateHelpNote: "Kiekvienas lygis gali peržiūrėti svetainės šablonus. tiktai savininko lygis gali juos pakeisti arba ištrinti.",
+  workTemplateHelpNote: "Kiekvienas lygis gali peržiūrėti Site šablonus. Juos keisti arba šalinti gali tik savininko lygis.",
   emptyStartingContent: "Pradinis turinys nepateiktas",
   finalReportTemplateIntro: "šablone pateikiamas pradinis turinys naujoms galutinėms ataskaitoms, teikiamoms visais svetainės lygmenimis.",
   noFinalReportTemplate: "Nnėra sukurtas galutinės ataskaitos šablonas.",

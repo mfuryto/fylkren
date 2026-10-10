@@ -19,7 +19,7 @@ export const reportsLtLT = {
   viewReport: "Rodyti ataskaitą",
   reportPages: "Punktai, iš kurių galima gauti informaciją",
   reportModalTitle: "Pranešimas",
-  workItemLabel: "Darbo punktas",
+  workItemLabel: "Darbo elementas",
   dateLabel: "Data",
   workReceived: "Gaunamas darbas",
   workCompleted: "Darbai baigti",
