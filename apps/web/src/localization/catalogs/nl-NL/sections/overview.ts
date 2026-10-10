@@ -31,7 +31,7 @@ export const overviewNlNL = {
   noActiveWork: "Geen actieve werkitems",
   followUpThroughReporting: "De follow-up wordt uitgevoerd door middel van governance en rapportage.",
   workStatistics: "Werkstatistieken",
-  workStatisticsIntro: "Werk dat op het geselecteerde werkniveau is verricht",
+  workStatisticsIntro: "Werk dat op het geselecteerde werkniveau is ontvangen",
   year: "Jaar",
   allYears: "Alle jaren",
   annualWorkStatistics: "Jaarstatistiek van de werkzaamheden",

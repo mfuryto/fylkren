@@ -58,7 +58,7 @@ export const siteAuditNlNL = {
   auditExecutionCreated: "Uitvoeren van workflow aangemaakt",
   auditWorkflowRevised: "Werkstroom herzien",
   auditWorkflowDeactivated: "Werkstroom gedeactiveerd",
-  auditWorkflowClaimed: "Geclaimd planning",
+  auditWorkflowClaimed: "Verantwoordelijkheid voor planning aanvaard",
   auditWorkflowReassigned: "Herbestemming van de planning",
   auditWorkflowReleased: "Planning vrijgegeven",
   auditWorkflowReleasedRemoval: "Planning vrijgegeven na het verwijderen van de gebruiker",

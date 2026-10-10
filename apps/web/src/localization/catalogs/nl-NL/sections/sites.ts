@@ -10,7 +10,7 @@ export const sitesNlNL = {
   total: "Totaal",
   withoutSiteManager: "Zonder Site Manager",
   topLevel: "Topniveau",
-  federated: "Federated",
+  federated: "Gefedereerd",
   noSites: "Er zijn geen sites aangemaakt",
   noSitesIntro: "Maak de eerste site om een administratief en organisatorisch niveau te bepalen.",
   findSite: "Zoek site",

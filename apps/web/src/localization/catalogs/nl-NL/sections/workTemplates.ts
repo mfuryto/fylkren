@@ -31,7 +31,7 @@ export const workTemplatesNlNL = {
   workTemplateHelpContentTitle: "Schrijf de startinhoud.",
   workTemplateHelpContentText: "Gebruik rubrieken, lijsten en normale tekst om een duidelijke structuur te bieden die de gebruiker kan aanvullen.",
   workTemplateHelpLinkTitle: "Koppel het sjabloon aan de workflow.",
-  workTemplateHelpLinkText: "De link is geconfigureerd op de relevante workflow stap, niet tijdens de taak wordt verwerkt.",
+  workTemplateHelpLinkText: "De koppeling wordt ingesteld bij de betreffende stap van de werkstroom, niet tijdens de verwerking van de taak.",
   workTemplateHelpManageTitle: "Beheer lokale inhoud.",
   workTemplateHelpManageText: "De leider en geautoriseerde leider kan templates maken en bewerken die eigendom zijn van hun niveau. De Site Manager beheert sjablonen op de site en het eindrapport template.",
   workTemplateHelpNote: "Elk niveau kan de sjablonen van de site bekijken. Alleen het niveau van de eigenaar kan ze wijzigen of verwijderen.",

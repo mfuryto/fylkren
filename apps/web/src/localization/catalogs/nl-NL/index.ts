@@ -144,7 +144,7 @@ export const nlNL: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   samlSignIn: "Aanmelden bij een organisatieaccount (SAML)",
   sessionLoadFailed: "De sessie kon niet geladen worden.",
   passwordUpdateFailed: "Het wachtwoord kon niet worden opgeslagen.",
-  passkeysLoadFailed: "Wachtwoorden konden niet geladen worden.",
+  passkeysLoadFailed: "Toegangssleutels konden niet worden geladen.",
   passkeyRegistrationStartFailed: "Wachtwoordregistratie kon niet gestart worden.",
   noPasskeySelected: "Er is geen wachtwoord of beveiligingssleutel geselecteerd.",
   passkeyVerificationFailed: "De sleutel kon niet worden geverifieerd.",
