@@ -60,7 +60,7 @@ export const lifecycleUiTranslations: Record<string, Record<keyof typeof lifecyc
     "lifecycleStateArchived": "Archiviert",
     "lifecycleLockedError": "Der Inhalt ist gesperrt oder archiviert. Öffnen Sie ihn vor der Bearbeitung erneut. Archivierter Inhalt muss zuerst als gesperrt wiederhergestellt werden.",
     "lifecycleUnfinishedError": "Schließen Sie zugehörige Arbeit und ausstehende Zustellung vor dem Sperren oder Archivieren ab.",
-    "lifecycleVersionError": "Der Zustand hat sich geändert. Laden Sie den Auftrag neu und versuchen Sie es erneut.",
+    "lifecycleVersionError": "Der Zustand hat sich geändert. Laden Sie die Aufgabe neu und versuchen Sie es erneut.",
     "lifecycleTransitionError": "Diese Aktion ist im aktuellen Zustand nicht verfügbar."
   },
   "fr-FR": {

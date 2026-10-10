@@ -104,6 +104,24 @@ describe("localization catalogs", () => {
     }
   });
 
+  it("does not leave English or translation artifacts in the reviewed German catalog", () => {
+    const allowedIdenticalKeys = new Set([
+      "approvalStatus", "approvalVersion", "dayShort", "entitlementWebhooks", "entitySite", "entitySiteManager", "federationStatus",
+      "filter", "hourShort", "imperial", "languageCzech", "languageDanish", "languageDutch", "languageEstonian",
+      "languageFinnish", "languageFrench", "languageGerman", "languageItalian", "languageLatvian", "languageLithuanian",
+      "languageNorwegian", "languagePolish", "languagePortuguese", "languageRomanian", "languageSpanish", "languageSwedish",
+      "languageUkrainian", "logo", "minimal", "minuteShort", "name", "navApi", "navSites", "normalText", "planLabel",
+      "port", "priorityNormal", "revision", "riskStatus", "site", "siteManagers", "sites", "sortNameAscending",
+      "sortNameDescending", "version", "webhooks",
+    ]);
+    const artifacts = /Schauspieler|Schauspiel|Rettung|Schaffung|Streichung|Zuschuss|Bahnsteig|Mutterleiter|Mutterpläne|Arbeitsniveau|Arbeitsstufe|Veranstaltung|Kundengeheimnis|Kunden-ID|Hafen|Erfrischen des|\b(?:read-only|workflow|managed values|task chain|active processing|cancel editing|show plan)\b|(?:…\s*){2,}|(\p{L}+)(?:\s+\1){2,}/iu;
+    for (const [key, message] of Object.entries(languageCatalogs["de-DE"])) {
+      const withoutPlaceholders = message.replace(/\{\{?[A-Za-z][A-Za-z0-9]*\}?\}/g, "");
+      expect(withoutPlaceholders, `de-DE.${key} contains a translation artifact`).not.toMatch(artifacts);
+      if (message === en[key as keyof typeof en]) expect(allowedIdenticalKeys.has(key), `de-DE.${key} is untranslated`).toBe(true);
+    }
+  });
+
   it("normalizes every bundled language and its bare language code", () => {
     const expected = {
       sv: "sv-SE", da: "da-DK", fi: "fi-FI", de: "de-DE", fr: "fr-FR", pl: "pl-PL", es: "es-ES", it: "it-IT",

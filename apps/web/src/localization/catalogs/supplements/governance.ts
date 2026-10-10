@@ -67,7 +67,7 @@ export const governanceTranslations: Record<string, Record<keyof typeof governan
     "archiveAllowExport": "Export erlauben",
     "lifecycleGovernanceHelp": "Zuerst deaktivieren und zugehörige Arbeit abschließen. Inhalt und historische Referenzen bleiben erhalten.",
     "lifecycleBlocked": "Vor dem Sperren klären:",
-    "lifecycleInheritedLock": "Ein übergeordneter Auftrag oder Site sperrt den Inhalt. Die zuständige Person muss ihn zuerst erneut öffnen.",
+    "lifecycleInheritedLock": "Eine übergeordnete Aufgabe oder Site sperrt den Inhalt. Die zuständige Person muss sie zuerst erneut öffnen.",
     "archiveNoSites": "Keine zugänglichen Archive."
   },
   "fr-FR": {

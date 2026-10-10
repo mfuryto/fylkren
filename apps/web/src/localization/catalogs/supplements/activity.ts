@@ -146,7 +146,7 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
 
     "lifecycleAction": "Aktion",
     "lifecycleActiveDescription": "Aktiv: Der Inhalt kann bearbeitet werden. Das Schließen sperrt abgeschlossene Arbeit. Offene zugehörige Arbeit oder ausstehende Zustellung muss zuerst erledigt werden. Nach Abschluss, Ablehnung oder Abbruch verwenden, wenn die Nachverfolgung beendet ist. Abgeschlossene Aufträge benötigen einen genehmigten Abschlussbericht. Dies ersetzt keine normalen Statusaktionen.",
-    "lifecycleClosedDescription": "Geschlossen: Der Inhalt ist gesperrt und bleibt erhalten. Archivieren oder zur Bearbeitung erneut öffnen. Der Auftragsstatus bleibt unverändert.",
+    "lifecycleClosedDescription": "Geschlossen: Der Inhalt ist gesperrt und bleibt erhalten. Archivieren oder zur Bearbeitung erneut öffnen. Der Aufgabenstatus bleibt unverändert.",
     "lifecycleArchivedDescription": "Archiviert: Inhalt und Verlauf bleiben gesperrt erhalten. Als geschlossen wiederherstellen und anschließend erneut öffnen. Nichts wird gelöscht.",
     "lifecycleReasonHelp": "Begründen Sie die Zustandsänderung. Beispiel: Abschlussbericht genehmigt und Nachverfolgung abgeschlossen. Jede Änderung benötigt eine Begründung.",
     "lifecycleHeldNotice": "Eine Aufbewahrungssperre verhindert die Zustandsänderung.",

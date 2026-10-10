@@ -14,7 +14,7 @@ The [localization terminology](LOCALIZATION_TERMINOLOGY.md) is authoritative for
 | `sv-SE` | Swedish | Linguistically verified against the current source catalog |
 | `da-DK` | Danish | Linguistically verified against the current source catalog |
 | `fi-FI` | Finnish | Linguistically verified against the current source catalog |
-| `de-DE` | German | Technically complete; linguistic review pending |
+| `de-DE` | German | Linguistically verified against the current source catalog |
 | `fr-FR` | French | Technically complete; linguistic review pending |
 | `pl-PL` | Polish | Technically complete; linguistic review pending |
 | `es-ES` | Spanish (Spain) | Technically complete; linguistic review pending |
