@@ -4,6 +4,8 @@
 
 Updated 2026-10-10 after separating customer documentation from development records and adding the sanitized runtime inventory to Platform Manager.
 
+The active private-development version is `0.99.0-dev.1`. It identifies final preparation before the first formal `1.0.0-rc.1` candidate and is not a percentage-complete indicator.
+
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
 ## Current baseline

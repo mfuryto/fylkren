@@ -7,7 +7,7 @@
 <p align="center"><strong>Operational task and mission management—from assignment to documented result.</strong></p>
 
 <p align="center">
-  <code>VERSION 0.70.0-dev.1</code> · <code>SELF-HOSTED</code> · <code>OFFLINE-FIRST</code> · <code>AIR-GAPPED READY</code> · <code>WINDOWS-FAMILIAR WEB UI</code>
+  <code>VERSION 0.99.0-dev.1</code> · <code>SELF-HOSTED</code> · <code>OFFLINE-FIRST</code> · <code>AIR-GAPPED READY</code> · <code>WINDOWS-FAMILIAR WEB UI</code>
 </p>
 
 <p align="center">

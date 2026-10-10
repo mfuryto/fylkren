@@ -4,6 +4,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Advance the private development line to `0.99.0-dev.1` for final release-candidate preparation; the next promoted version will be `1.0.0-rc.1`, followed by `1.0.0` only after acceptance of the same immutable candidate.
 - Separate customer documentation in `docs/` from developer, test and release working records in `dev-notes/`; bundle only the explicit customer set with the application.
 - Show Platform Managers a sanitized runtime inventory between System status and Technical logs, including the full product, framework, database, operating-system and container-engine names and reported versions.
 
