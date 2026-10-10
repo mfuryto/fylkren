@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+## 1.0.0 - 2026-10-10
+
 - Advance the private development line to `0.99.0-dev.1` for final release-candidate preparation. Candidate labels such as `1.0.0-rc.1` identify immutable manifests and image tags; the embedded product version is already the intended `1.0.0`, allowing an accepted image to be promoted without rebuilding it.
 - Add one fail-closed release path for controlled version changes, locked pnpm/NuGet dependency restoration, source and integration gates, commit-labelled immutable runtime images, CycloneDX evidence and no-rebuild promotion of verified image IDs.
 - Separate customer documentation in `docs/` from developer, test and release working records in `dev-notes/`; bundle only the explicit customer set with the application.

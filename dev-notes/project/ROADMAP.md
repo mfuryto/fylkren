@@ -4,7 +4,7 @@
 
 Updated 2026-10-10 after completing the hash-bound linguistic review of every supported interface locale and moving active release preparation to `staging`.
 
-The active private-development version is `0.99.0-dev.1`. It identifies final preparation before the first formal `rc.1` candidate and is not a percentage-complete indicator. Candidate construction sets the embedded product version to the intended stable `1.0.0`; `rc.N` identifies the immutable candidate manifest and image tags so an accepted image can become `1.0.0` without rebuilding.
+The `staging` source now carries the intended stable product version `1.0.0`. Candidate identity remains separate: `rc.N` identifies each immutable candidate manifest and image set so an accepted image can become the public `1.0.0` release without rebuilding.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -29,7 +29,7 @@ The first Enterprise AI-assistance slice is implemented as an optional, default-
 
 The systematic, hash-bound linguistic review is complete. All 18 derived locales are `verified` against the same 2,244-key American-English source catalog in the single [linguistic review status](../localization/LINGUISTIC_REVIEW.md), and the release-language gate passes. Any later source or catalog change invalidates the affected recorded hash and must be reviewed again before candidate qualification.
 
-The local candidate mechanism is delivered: one command enforces the stable embedded product version plus separate `rc.N` identity, clean `staging` source, prepared changelog, locked pnpm/NuGet restoration, source and integration checks, one-time construction of all five runtime images, OCI version/commit labels, CycloneDX evidence and a candidate manifest. Promotion verifies the signed stable tag, accepted commit and every exact image ID and cannot build or publish. The `0.99.0-dev.1` source portion passes the complete maintained source gate, including locked restoration and Release builds for every .NET project. The `staging` branch now exists and starts from the verified release-foundation commit. Branch protection, the full candidate laboratories on the future `1.0.0` commit, target-deployment qualification, signed tag and external publication remain release-gate work.
+The local candidate mechanism is delivered: one command enforces the stable embedded product version plus separate `rc.N` identity, clean `staging` source, prepared changelog, locked pnpm/NuGet restoration, source and integration checks, one-time construction of all five runtime images, OCI version/commit labels, CycloneDX evidence and a candidate manifest. Promotion verifies the signed stable tag, accepted commit and every exact image ID and cannot build or publish. The earlier `0.99.0-dev.1` source portion passed the complete maintained source gate, including locked restoration and Release builds for every .NET project. The full `1.0.0-rc.1` candidate run and target-deployment qualification are current work; branch protection, signed tag and external publication remain separate release gates.
 
 No irreversible disposition is authorized by this order. Establish and verify its prerequisites before proposing activation; do not choose arbitrary retention periods.
 
