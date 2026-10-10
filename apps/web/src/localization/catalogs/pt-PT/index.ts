@@ -76,6 +76,7 @@ export const ptPT: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   openUserMenu: "Abrir o menu do utilizador",
   userMenu: "Menu do usuário",
   profile: "Perfil",
+  documentation: "Documentação",
   signOut: "Sair",
   visitedViews: "Visões principais visitadas",
   previousView: "Vista principal anterior",

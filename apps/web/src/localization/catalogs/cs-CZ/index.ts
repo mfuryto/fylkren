@@ -76,6 +76,7 @@ export const csCZ: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   openUserMenu: "Otevřít menu uživatele",
   userMenu: "Uživatelské menu",
   profile: "Profil",
+  documentation: "Dokumentace",
   signOut: "Odhlásit se",
   visitedViews: "Návštěva hlavních názorů",
   previousView: "Předchozí hlavní pohled",

@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Bundle the version-matched English documentation with the web image for offline access, and expose it from the user menu between Profile and Sign out.
+
 - Add default-off Enterprise AI assistance with centrally protected OpenAI-compatible provider settings, explicit Site and function selection, connection testing, ordinary work and exact-level learning authorization, audited requests, and a read-only task assistant for summaries, quality checks, drafts, learning analysis and bounded questions.
 
 - Add a signed, versioned operational Work API with exact Site/work-level grants, least-privilege scopes, OpenAPI 3.1 discovery and bounded operational views. The API includes idempotent, concurrency-protected WorkItem commands, decision drafts, open risks and measures, and versioned documentation of active planning and execution runs. Machine actions retain machine authorship in domain revisions, common activity, portability data and the existing machine audit, while responsibility, approval and terminal decisions remain human-controlled.

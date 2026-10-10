@@ -76,6 +76,7 @@ export const nbNO: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   openUserMenu: "Åpne brukermeny",
   userMenu: "Brukermeny",
   profile: "Profil",
+  documentation: "Dokumentasjon",
   signOut: "Logg ut",
   visitedViews: "Besøkte hovedbilder",
   previousView: "Forrige hovedbilde",

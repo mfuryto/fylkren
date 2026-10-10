@@ -80,6 +80,7 @@ export const en = {
   openUserMenu: "Open user menu",
   userMenu: "User menu",
   profile: "Profile",
+  documentation: "Documentation",
   signOut: "Sign out",
   visitedViews: "Visited main views",
   previousView: "Previous main view",

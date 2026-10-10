@@ -307,7 +307,7 @@ Both delivery stages passed their relevant checks before completion. The final W
 
 Final API: `sha256:aa664f1d79e1edcf6a226f971f284879bef9e377f53cd0aab03a2a0c6563e13e`; final web: `sha256:22e8e9e1fc71f7556c0b38d1eca050990b0d50941c07593d16e409cdbc0913a5`. The safe manifest records exact targets and the unchanged gateway/identity-code scope of earlier supplementary runs.
 
-The 1,000-task workload passed every read and authorization assertion, but sizing remains open: navigation counts took multiple seconds under concurrency in both the additive checkpoint and the WorkItem fixture. Other measured reads stayed below 300 ms in the final run. The maintained harness now reports each endpoint separately; the [roadmap](../project/ROADMAP.md#navigation-count-performance) records this existing query bottleneck. No performance-equivalence or production sizing approval is claimed.
+The 1,000-task workload passed every read and authorization assertion, but sizing remains open: navigation counts took multiple seconds under concurrency in both the additive checkpoint and the WorkItem fixture. Other measured reads stayed below 300 ms in the final run. The maintained harness now reports each endpoint separately; the [roadmap](../project/ROADMAP.md#navigation-counters--delivered-production-sizing-remains) records the delivered optimization and remaining production sizing. No performance-equivalence or production sizing approval is claimed.
 
 ### Lifecycle dialog clarification — 2026-10-03
 

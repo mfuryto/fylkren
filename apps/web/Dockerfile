@@ -10,6 +10,9 @@ RUN pnpm install --frozen-lockfile --filter @fylkren/web... --ignore-scripts
 
 COPY apps/web apps/web
 COPY shared/frontend shared/frontend
+COPY docs docs
+COPY assets assets
+COPY VERSION README.md CHANGELOG.md SECURITY.md NOTICE.md TRADEMARKS.md ./
 RUN pnpm rebuild esbuild && pnpm --filter @fylkren/web build
 
 FROM nginx:1.29-alpine

@@ -76,6 +76,7 @@ export const deDE: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   openUserMenu: "Benutzermenü öffnen",
   userMenu: "Benutzermenü",
   profile: "Profil",
+  documentation: "Dokumentation",
   signOut: "Abmelden",
   visitedViews: "Besichtigte Hauptansichten",
   previousView: "Vorherige Hauptansicht",

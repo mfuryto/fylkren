@@ -7,7 +7,7 @@
   },
   "scripts": {
     "build": "pnpm -r build",
-    "check:docs": "node tools/check-documentation-links.mjs && node tools/check-security-evidence.mjs",
+    "check:docs": "node tools/check-documentation-links.mjs && node tools/check-security-evidence.mjs && node tools/test-local-documentation.mjs",
     "check:security-evidence": "node tools/check-security-evidence.mjs",
     "check:language": "node tools/check-repository-language.mjs",
     "check:language:full": "node tools/check-repository-language.mjs --full",

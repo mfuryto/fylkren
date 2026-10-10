@@ -76,6 +76,7 @@ export const etEE: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   openUserMenu: "Ava kasutajamenüü",
   userMenu: "Kasutajate menüü",
   profile: "Profiili",
+  documentation: "Dokumentatsioon",
   signOut: "Logi välja",
   visitedViews: "Külastatud peamised vaated",
   previousView: "Eelmine peavaade",

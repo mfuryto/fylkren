@@ -9,6 +9,7 @@ type ProductShellProps = PropsWithChildren<{
   userLabel?: string;
   profileImageUrl?: string;
   onProfile?: () => void;
+  documentationHref?: string;
   onSignOut?: () => void | Promise<void>;
   onPrevious?: () => void;
   onNext?: () => void;
@@ -31,6 +32,7 @@ type ProductShellLabels = {
   openUserMenu: string;
   userMenu: string;
   profile: string;
+  documentation: string;
   signOut: string;
   closeMainMenu: string;
   mainNavigation: string;
@@ -47,6 +49,7 @@ const defaultLabels: ProductShellLabels = {
   openUserMenu: 'Open user menu',
   userMenu: 'User menu',
   profile: 'Profile',
+  documentation: 'Documentation',
   signOut: 'Sign out',
   closeMainMenu: 'Close main menu',
   mainNavigation: 'Main navigation',
@@ -64,7 +67,7 @@ export function userInitials(userLabel: string) {
   return `${firstInitial}${lastInitial}`.toLocaleUpperCase();
 }
 
-export function ProductShell({ children, mode = 'application', activeItem = 'Overview', onNavigate, navigationItems = defaultNavigationItems, navigationDividerBefore, userLabel = 'MK', profileImageUrl, onProfile, onSignOut, onPrevious, onNext, canPrevious = false, canNext = false, productName = 'Fylkren', logoUrl, version = '0.14.0', edition = 'community', navigationLabel = item => item, labels: labelOverrides }: ProductShellProps) {
+export function ProductShell({ children, mode = 'application', activeItem = 'Overview', onNavigate, navigationItems = defaultNavigationItems, navigationDividerBefore, userLabel = 'MK', profileImageUrl, onProfile, documentationHref, onSignOut, onPrevious, onNext, canPrevious = false, canNext = false, productName = 'Fylkren', logoUrl, version = '0.14.0', edition = 'community', navigationLabel = item => item, labels: labelOverrides }: ProductShellProps) {
   const labels = { ...defaultLabels, ...labelOverrides };
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
@@ -138,11 +141,12 @@ export function ProductShell({ children, mode = 'application', activeItem = 'Ove
           <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
         </button>
         <div className="account-menu-container" ref={accountMenuRef}>
-          <button className="profile-button" type="button" aria-label={labels.openUserMenu} aria-haspopup="menu" aria-expanded={accountMenuOpen} disabled={!onProfile && !onSignOut} onClick={() => setAccountMenuOpen(open => !open)}>
+          <button className="profile-button" type="button" aria-label={labels.openUserMenu} aria-haspopup="menu" aria-expanded={accountMenuOpen} disabled={!onProfile && !documentationHref && !onSignOut} onClick={() => setAccountMenuOpen(open => !open)}>
             {profileImageUrl ? <img alt="" src={profileImageUrl} /> : userInitials(userLabel)}
           </button>
           {accountMenuOpen && <div className="account-menu" role="menu" aria-label={labels.userMenu}>
             {onProfile && <button type="button" role="menuitem" onClick={() => { setAccountMenuOpen(false); onProfile(); }}>{labels.profile}</button>}
+            {documentationHref && <a role="menuitem" href={documentationHref} onClick={() => setAccountMenuOpen(false)}>{labels.documentation}</a>}
             {onSignOut && <button type="button" role="menuitem" onClick={() => { setAccountMenuOpen(false); void onSignOut(); }}>{labels.signOut}</button>}
           </div>}
         </div>

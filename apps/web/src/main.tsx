@@ -256,6 +256,7 @@ function App() {
           openUserMenu: translate(baseLanguage, "openUserMenu"),
           userMenu: translate(baseLanguage, "userMenu"),
           profile: translate(baseLanguage, "profile"),
+          documentation: translate(baseLanguage, "documentation"),
           signOut: translate(baseLanguage, "signOut"),
           closeMainMenu: translate(baseLanguage, "closeMainMenu"),
           mainNavigation: translate(baseLanguage, "mainNavigation"),
@@ -266,6 +267,7 @@ function App() {
           session.hasProfileImage ? "/api/profile/image" : undefined
         }
         onProfile={() => navigateTo("Profile")}
+        documentationHref="/documentation/"
         onSignOut={signOut}
         onPrevious={() => navigateInHistory(-1)}
         onNext={() => navigateInHistory(1)}

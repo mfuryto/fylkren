@@ -76,6 +76,7 @@ export const plPL: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   openUserMenu: "Otwórz menu użytkownika",
   userMenu: "Menu użytkownika",
   profile: "Profil",
+  documentation: "Dokumentacja",
   signOut: "Wyloguj się",
   visitedViews: "Główne widoki odwiedzane",
   previousView: "Poprzedni widok główny",

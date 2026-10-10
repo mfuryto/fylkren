@@ -76,6 +76,7 @@ export const daDK: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   openUserMenu: "Åbn brugermenu",
   userMenu: "Brugermenu",
   profile: "Profil",
+  documentation: "Dokumentation",
   signOut: "Log ud",
   visitedViews: "Besøgte hovedsynspunkter",
   previousView: "Forrige hovedvisning",

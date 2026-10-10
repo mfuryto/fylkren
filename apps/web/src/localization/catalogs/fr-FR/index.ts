@@ -76,6 +76,7 @@ export const frFR: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   openUserMenu: "Ouvrir le menu utilisateur",
   userMenu: "Menu utilisateur",
   profile: "Profil",
+  documentation: "Documentation",
   signOut: "Se déconnecter",
   visitedViews: "Vues principales visitées",
   previousView: "Vue principale précédente",

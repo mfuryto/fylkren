@@ -50,6 +50,8 @@ Local authentication stays enabled until an external provider has been configure
 
 Core application, administration, authentication, localization, search, backup and operation work without internet, telemetry or cloud services. Runtime assets, fonts, scripts and language files ship with the installation. External identity, SMTP and integrations are optional adapters to operator-provided services.
 
+The web image also contains the English documentation from the same source revision and displays its Fylkren version. An authenticated user opens it from the profile menu: **Profile** remains first, **Documentation** appears directly above **Sign out**, and **Sign out** remains last. The documentation is served locally at `/documentation/`; viewing it does not contact GitHub or another external service.
+
 Connected automatic updaters such as Watchtower are not part of the supported Fylkren lifecycle and must not indiscriminately restart the stack. Updates follow the controlled procedure in `INSTALLATION_AND_UPGRADES.md`.
 
 ### Internal services for an air-gapped network

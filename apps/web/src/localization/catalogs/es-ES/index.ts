@@ -76,6 +76,7 @@ export const esES: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   openUserMenu: "Abrir menú de usuario",
   userMenu: "Menú de usuario",
   profile: "Perfil",
+  documentation: "Documentación",
   signOut: "Cerrar sesión",
   visitedViews: "Visitas principales",
   previousView: "Vista principal anterior",

@@ -1,12 +1,14 @@
 # Roadmap
 
-Updated 2026-10-09 after completing contextual AI assistance, controlled primary-document context and robust distribution across dynamic planning templates.
+Updated 2026-10-10 after completing version-matched offline documentation access from the profile menu.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
 ## Current baseline
 
 Repository/documentation consolidation, the common Community/Enterprise entitlement implementation, internationalization, human-readable work references and operational federation are implemented. Maintained end-to-end and identity laboratories have executed successfully within their documented scopes. These are no longer future implementation milestones; candidate-specific reruns and deployment qualification remain release work.
+
+The web image now bundles the English documentation from the same source revision for offline use, displays its Fylkren version and exposes it in the profile menu between Profile and Sign out. Documentation generation and internal page/heading links are part of the maintained documentation check.
 
 The additive event/activity foundation and coherent WorkItem slice are delivered, including shared notification/webhook integration, authorized object/Site timelines and guarded closure, archive and restoration. Work-owned decisions, risks, measures, comments, learning and remaining planning/follow-up edits now use this same activity path, with exact-level learning privacy. Site/global-user archive custody, preservation controls, consistent exports and compatibility consumer reconciliation are also delivered and verified. WorkItem locking/archive now follow final operational decisions and resolved delivery, with explicit editing pauses, independent learning treatment and an Archived task view. Pending navigation counts now use a verified database aggregate; same-fixture role/hierarchy tests and before/after query plans are recorded in the [navigation continuation](../testing/runs/2026-10-02-release-regression.md#navigation-count-query-performance--2026-10-04). Permanent deletion, anonymisation and retention-policy execution remain disabled. See the [architecture and requirement/test traceability](../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md) and [staged execution evidence](../testing/runs/2026-10-02-release-regression.md#work-owned-domain-activity-coverage--2026-10-03). Successful regression runs do not mean ASVS is complete.
 

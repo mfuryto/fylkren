@@ -76,6 +76,7 @@ export const fiFI: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   openUserMenu: "Avaa käyttäjän valikko",
   userMenu: "Käyttäjävalikko",
   profile: "Profiili",
+  documentation: "Dokumentaatio",
   signOut: "Kirjaudu ulos",
   visitedViews: "Käydään läpi tärkeimmät näkemykset",
   previousView: "Edellinen päänäkymä",

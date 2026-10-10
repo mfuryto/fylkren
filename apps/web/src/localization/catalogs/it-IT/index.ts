@@ -76,6 +76,7 @@ export const itIT: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   openUserMenu: "Menu utente aperto",
   userMenu: "Menu utente",
   profile: "Profilo",
+  documentation: "Documentazione",
   signOut: "Esci",
   visitedViews: "Visite principali",
   previousView: "Precedente vista principale",

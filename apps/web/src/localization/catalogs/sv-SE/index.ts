@@ -76,6 +76,7 @@ export const svSE: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   openUserMenu: "Öppna användarmenyn",
   userMenu: "Användarmeny",
   profile: "Profil",
+  documentation: "Dokumentation",
   signOut: "Logga ut",
   visitedViews: "Besökta huvudvyer",
   previousView: "Föregående huvudvy",

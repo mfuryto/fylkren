@@ -76,6 +76,7 @@ export const ukUA: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   openUserMenu: "Меню користувача",
   userMenu: "Меню користувача",
   profile: "Профілактика",
+  documentation: "Документація",
   signOut: "Вийти",
   visitedViews: "Відвідати основні види",
   previousView: "Попередній головний вигляд",

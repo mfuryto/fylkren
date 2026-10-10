@@ -76,6 +76,7 @@ export const ltLT: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   openUserMenu: "Atsiverti naudotojo meniu",
   userMenu: "Vartotojo meniu",
   profile: "Profilis",
+  documentation: "Dokumentacija",
   signOut: "Atsijungti",
   visitedViews: "Lankytasi su pagrindiniais vaizdais",
   previousView: "Ankstesnis pagrindinis požiūris",

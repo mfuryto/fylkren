@@ -76,6 +76,7 @@ export const roRO: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   openUserMenu: "Deschide meniul utilizatorului",
   userMenu: "Meniu utilizator",
   profile: "Profil",
+  documentation: "Documentație",
   signOut: "Deconectare",
   visitedViews: "Principalele puncte de vedere vizitate",
   previousView: "Vedere principală anterioară",

@@ -76,6 +76,7 @@ export const nlNL: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   openUserMenu: "Gebruikersmenu openen",
   userMenu: "Gebruikersmenu",
   profile: "Profiel",
+  documentation: "Documentatie",
   signOut: "Uitloggen",
   visitedViews: "Bezochte hoofdgezichten",
   previousView: "Vorige hoofdweergave",

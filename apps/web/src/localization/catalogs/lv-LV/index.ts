@@ -76,6 +76,7 @@ export const lvLV: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   openUserMenu: "Atvērt lietotāja izvēlni",
   userMenu: "Lietotāja izvēlne",
   profile: "Profils",
+  documentation: "Dokumentācija",
   signOut: "Izrakstīties",
   visitedViews: "Apmeklētie galvenie viedokļi",
   previousView: "Iepriekšējais galvenais skats",

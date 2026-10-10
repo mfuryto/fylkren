@@ -5,6 +5,7 @@
 # Node
 node_modules/
 dist/
+.generated-public/
 .vite/
 .pnpm-store/
 .pnpm-global/
