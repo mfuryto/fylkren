@@ -36,25 +36,34 @@ internal static class ExternalKeyStrength
             var reader = new CborReader(coseKey.ToArray(), CborConformanceMode.Strict);
             reader.ReadStartMap();
             int? keyType = null;
+            int? algorithm = null;
+            int? curve = null;
             byte[]? modulus = null;
             while (reader.PeekState() != CborReaderState.EndMap)
             {
                 var label = reader.ReadInt32();
                 if (label == 1) keyType = reader.ReadInt32();
-                else if (label == -1) modulus = reader.ReadByteString();
+                else if (label == 3) algorithm = reader.ReadInt32();
+                else if (label == -1 && reader.PeekState() == CborReaderState.ByteString)
+                    modulus = reader.ReadByteString();
+                else if (label == -1) curve = reader.ReadInt32();
                 else reader.SkipValue();
             }
             reader.ReadEndMap();
-            if (reader.BytesRemaining != 0 || keyType is null) return false;
-            if (keyType is 1 or 2) return true; // OKP and EC2 keys offered by Fylkren meet the 128-bit target.
+            if (reader.BytesRemaining != 0 || keyType is null || algorithm is null) return false;
+            if (keyType == 1)
+                return algorithm == -8 && curve is 6 or 7; // Ed25519 or Ed448.
+            if (keyType == 2)
+                return (algorithm, curve) is (-7, 1) or (-35, 2) or (-36, 3); // P-256, P-384 or P-521.
             if (keyType != 3) return false;
+            if (algorithm is not (-257 or -258 or -259 or -37 or -38 or -39)) return false;
             if (modulus is null) return false;
             var first = Array.FindIndex(modulus, value => value != 0);
             if (first < 0) return false;
             var bits = (modulus.Length - first - 1) * 8 + BitOperations.Log2(modulus[first]) + 1;
             return bits >= MinimumRsaBits;
         }
-        catch (Exception error) when (error is CborContentException or InvalidOperationException)
+        catch (Exception error) when (error is CborContentException or InvalidOperationException or OverflowException)
         {
             return false;
         }

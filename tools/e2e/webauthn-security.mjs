@@ -59,10 +59,11 @@ try {
       'Content-Type': 'application/json', 'X-Fylkren-CSRF': registrationCsrf,
       Cookie: initialCookies.map(value => `${value.name}=${value.value}`).join('; '),
     }, body: JSON.stringify(freshRegisterBody) });
-    return { status: response.status, cookies: response.headers.getSetCookie() };
+    return { status: response.status, body: await response.text(), cookies: response.headers.getSetCookie() };
   }
   const parallelRegistration = await Promise.all([registerInSeparateSession(), registerInSeparateSession()]);
-  assert.deepEqual(parallelRegistration.map(value => value.status).sort(), [204, 400]);
+  assert.deepEqual(parallelRegistration.map(value => value.status).sort(), [204, 400],
+    JSON.stringify(parallelRegistration.map(({ status, body }) => ({ status, body }))));
   for (const header of parallelRegistration.find(value => value.status === 204).cookies) {
     const pair = header.split(';')[0], separator = pair.indexOf('=');
     await call('Network.setCookie', { name: pair.slice(0, separator), value: pair.slice(separator + 1), url: base });
