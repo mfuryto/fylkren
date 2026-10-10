@@ -83,7 +83,7 @@ export function AppContent({
   if (effectiveItem === "Archives" && session.hasArchiveAccess) return <ArchivePage timeZone={timeZone} />;
   if (effectiveItem === "Profile")
     return <ProfilePage session={session} configuration={configuration} onSessionChanged={onSessionChanged} onSignOut={onSignOut} />;
-  if (effectiveItem === "Platform" && session.isPlatformManager) return <PlatformPage />;
+  if (effectiveItem === "Platform" && session.isPlatformManager) return <PlatformPage edition={configuration.edition} />;
   if (effectiveItem === "Planning")
     return <PlanningPage session={session} language={language} timeZone={timeZone} classificationMarkings={classificationMarkings} permalink={location} aiAvailable={configuration.aiEnabled && configuration.entitlements.includes("ai-assistance")} />;
   if (effectiveItem === "Execution") return <ExecutionPage session={session} language={language} classificationMarkings={classificationMarkings} permalink={location} />;

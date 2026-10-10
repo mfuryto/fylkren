@@ -1,6 +1,6 @@
 # Security and retention model
 
-This document defines the current security and retention behavior. Requirement-level test status and outstanding evidence belong only in the [ASVS matrix](ASVS_5.0.0_L2_MATRIX.md); the [security test plan](SECURITY_TEST_PLAN.md) defines the workflow and [verification record](SECURITY_VERIFICATION.md) holds findings.
+This document defines the current security and retention behavior. Requirement-level test status and outstanding evidence belong only in the [ASVS matrix](../../dev-notes/security/ASVS_5.0.0_L2_MATRIX.md); the [security test plan](../../dev-notes/security/SECURITY_TEST_PLAN.md) defines the workflow and [verification record](../../dev-notes/security/SECURITY_VERIFICATION.md) holds findings.
 
 ## Identity and authentication
 
@@ -85,7 +85,7 @@ The operating organization determines legal basis and retention policy. Fylkren 
 
 Active and completed tasks are not normally deleted. Completed work becomes historical and read-only and leaves operational queues.
 
-The [common lifecycle architecture](../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md) separates access deactivation from reversible information closure/archive. Platform Managers administer versioned, reasoned holds and immutable named preservation policy versions. Multiple holds remain independent; releasing one does not release another. Optional review days are customer-configured metadata with no default duration or automatic expiry. Content, activity, security audit, delivery, replay and backup are distinct policy categories; binding a content rule does not create an audit or transport purge policy. Irreversible deletion/anonymisation and automatic retention execution remain disabled.
+The [common lifecycle architecture](../../dev-notes/architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md) separates access deactivation from reversible information closure/archive. Platform Managers administer versioned, reasoned holds and immutable named preservation policy versions. Multiple holds remain independent; releasing one does not release another. Optional review days are customer-configured metadata with no default duration or automatic expiry. Content, activity, security audit, delivery, replay and backup are distinct policy categories; binding a content rule does not create an audit or transport purge policy. Irreversible deletion/anonymisation and automatic retention execution remain disabled.
 
 Existing federation transport cleanup now excludes work protected by a Site/root/owning-ancestor hold or information lock/archive, serializing housekeeping with hold/archive administration. Protocol receipts and delivered payloads can still be cleaned under their existing configured horizon for unprotected terminal work. Security audit records are never removed by federation transport maintenance. Legacy held roots are reconciled into durable hold records with explicitly unknown original actor and migration-time provenance.
 

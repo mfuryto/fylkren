@@ -29,10 +29,16 @@ function filesBelow(directory) {
   });
 }
 
-const sourceDocuments = filesBelow('docs').filter(file => file.endsWith('.md'));
+const sourceDocuments = JSON.parse(readFileSync('apps/web/customer-documentation.json', 'utf8'));
+const documentedCustomerSources = sourceDocuments.filter(file => file.startsWith('docs/')).sort();
+const maintainedCustomerDocuments = filesBelow('docs').filter(file => file.endsWith('.md')).sort();
+assert.deepEqual(documentedCustomerSources, maintainedCustomerDocuments,
+  'Every Markdown file under docs must be customer-facing and included in the application');
 const outputDocuments = filesBelow(outputRoot).filter(file => file.endsWith('.html'));
 const outputDocumentPaths = new Set(outputDocuments.map(file => path.resolve(file)));
-assert.equal(outputDocuments.length, sourceDocuments.length + 5, 'Every maintained document plus five repository documents must be bundled');
+assert.equal(outputDocuments.length, sourceDocuments.length, 'Only the explicit customer documentation manifest must be bundled');
+for (const relative of ['project/ROADMAP.html', 'security/ASVS_5.0.0_L2_MATRIX.html', 'testing/END_TO_END_TEST_MATRIX.html', 'architecture/DEVELOPMENT_STACK.html'])
+  assert.ok(!outputDocumentPaths.has(path.resolve(outputRoot, relative)), `${relative} is a development record and must not be bundled`);
 for (const output of outputDocuments) {
   const html = readFileSync(output, 'utf8');
   assert.doesNotMatch(html, /href="[^"]+\.md(?:#[^"]*)?"/i, `${output} contains an unconverted Markdown link`);

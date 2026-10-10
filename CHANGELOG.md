@@ -4,6 +4,9 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Separate customer documentation in `docs/` from developer, test and release working records in `dev-notes/`; bundle only the explicit customer set with the application.
+- Show Platform Managers a sanitized runtime inventory between System status and Technical logs, including the full product, framework, database, operating-system and container-engine names and reported versions.
+
 - Bundle the version-matched English documentation with the web image for offline access, and expose it from the user menu between Profile and Sign out.
 
 - Add default-off Enterprise AI assistance with centrally protected OpenAI-compatible provider settings, explicit Site and function selection, connection testing, ordinary work and exact-level learning authorization, audited requests, and a read-only task assistant for summaries, quality checks, drafts, learning analysis and bounded questions.

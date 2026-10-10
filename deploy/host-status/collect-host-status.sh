@@ -14,6 +14,18 @@ trap 'rm -f "$temporary_file"' EXIT HUP INT TERM
 collected_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 hostname_value=$(hostname 2>/dev/null | tr -cd 'A-Za-z0-9._-' | cut -c1-255)
 platform_value=$(uname -srm 2>/dev/null | tr -cd 'A-Za-z0-9._ /()-' | cut -c1-80)
+operating_system_name=unknown
+operating_system_version=unknown
+if [ -r /etc/os-release ]; then
+    operating_system_name=$(sed -n 's/^NAME=//p' /etc/os-release | head -n 1 | tr -d '"' | tr -cd 'A-Za-z0-9._ +()/:-' | cut -c1-100)
+    operating_system_version=$(sed -n 's/^VERSION_ID=//p' /etc/os-release | head -n 1 | tr -d '"' | tr -cd 'A-Za-z0-9._+()-' | cut -c1-50)
+fi
+kernel_version=$(uname -r 2>/dev/null | tr -cd 'A-Za-z0-9._+()-' | cut -c1-80)
+architecture=$(uname -m 2>/dev/null | tr -cd 'A-Za-z0-9._- ' | cut -c1-40)
+[ -n "$operating_system_name" ] || operating_system_name=unknown
+[ -n "$operating_system_version" ] || operating_system_version=unknown
+[ -n "$kernel_version" ] || kernel_version=unknown
+[ -n "$architecture" ] || architecture=unknown
 [ -n "$hostname_value" ] || hostname_value=unknown
 [ -n "$platform_value" ] || platform_value=unknown
 
@@ -99,14 +111,19 @@ compose_ps_id() {
 collect_service() {
     service_key=$1
     service_name=$2
+    runtime_name=$3
+    version_variable=$4
     container_id=$(compose_ps_id "$service_key" 2>/dev/null || true)
     status=down
     detail="The container is not running."
     restarts=0
+    runtime_version=unknown
     if [ -n "$container_id" ]; then
         state=$(docker inspect --format '{{.State.Status}}' "$container_id" 2>/dev/null || printf unknown)
         health=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$container_id" 2>/dev/null || printf unknown)
         restarts=$(docker inspect --format '{{.RestartCount}}' "$container_id" 2>/dev/null || printf 0)
+        runtime_version=$(docker inspect --format '{{range .Config.Env}}{{println .}}{{end}}' "$container_id" 2>/dev/null | awk -F= -v key="$version_variable" '$1 == key { sub(/^[^=]*=/, ""); print; exit }' | tr -cd 'A-Za-z0-9._+()-' | cut -c1-50)
+        [ -n "$runtime_version" ] || runtime_version=unknown
         case "$restarts" in *[!0-9]*|'') restarts=0 ;; esac
         if [ "$state" = running ] && { [ "$health" = healthy ] || [ "$health" = none ]; }; then
             status=healthy
@@ -121,20 +138,23 @@ collect_service() {
         detail="Container status: $state."
         fi
     fi
-    item="{\"key\":\"$service_key\",\"name\":\"$service_name\",\"status\":\"$status\",\"detail\":\"$detail\",\"restartCount\":$restarts}"
+    item="{\"key\":\"$service_key\",\"name\":\"$service_name\",\"status\":\"$status\",\"detail\":\"$detail\",\"restartCount\":$restarts,\"runtime\":{\"name\":\"$runtime_name\",\"version\":\"$runtime_version\"}}"
     if [ -n "$service_json" ]; then service_json="$service_json,$item"; else service_json=$item; fi
 }
 
 if command -v docker >/dev/null 2>&1; then
-    collect_service web "Web-container"
-    collect_service api "API-container"
-    collect_service postgres "PostgreSQL-container"
+    container_engine_version=$(docker version --format '{{.Server.Version}}' 2>/dev/null | tr -cd 'A-Za-z0-9._+()-' | cut -c1-50 || true)
+    [ -n "$container_engine_version" ] || container_engine_version=unknown
+    collect_service web "Web-container" nginx NGINX_VERSION
+    collect_service api "API-container" "ASP.NET Core" ASPNET_VERSION
+    collect_service postgres "PostgreSQL-container" PostgreSQL PG_VERSION
 else
+    container_engine_version=unknown
     service_json='{"key":"docker","name":"Docker","status":"down","detail":"The Docker command is unavailable.","restartCount":0}'
 fi
 
 cat >"$temporary_file" <<EOF
-{"schemaVersion":1,"collectedAt":"$collected_at","platform":"$platform_value","hostname":"$hostname_value","disk":{"name":"Fylkren-disk","totalBytes":$disk_total,"availableBytes":$disk_available},"backup":{"lastCompletedAt":$last_backup},"time":{"synchronized":$time_synchronized,"status":"$time_status","source":"$time_source","offsetMilliseconds":$time_offset_milliseconds,"maximumAllowedOffsetMilliseconds":$time_maximum_offset_milliseconds,"detail":"$time_detail"},"services":[$service_json]}
+{"schemaVersion":1,"collectedAt":"$collected_at","platform":"$platform_value","hostname":"$hostname_value","runtime":{"operatingSystemName":"$operating_system_name","operatingSystemVersion":"$operating_system_version","kernelVersion":"$kernel_version","architecture":"$architecture","containerEngineName":"Docker Engine","containerEngineVersion":"$container_engine_version"},"disk":{"name":"Fylkren-disk","totalBytes":$disk_total,"availableBytes":$disk_available},"backup":{"lastCompletedAt":$last_backup},"time":{"synchronized":$time_synchronized,"status":"$time_status","source":"$time_source","offsetMilliseconds":$time_offset_milliseconds,"maximumAllowedOffsetMilliseconds":$time_maximum_offset_milliseconds,"detail":"$time_detail"},"services":[$service_json]}
 EOF
 chmod 0644 "$temporary_file"
 mv -f "$temporary_file" "$status_file"

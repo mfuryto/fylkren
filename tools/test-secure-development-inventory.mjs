@@ -3,7 +3,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 const read = path => readFileSync(path, 'utf8');
-const policy = read('docs/security/SECURE_DEVELOPMENT_AND_DEPENDENCIES.md');
+const policy = read('dev-notes/security/SECURE_DEVELOPMENT_AND_DEPENDENCIES.md');
 const program = read('apps/api/Program.cs');
 const registration = read('apps/api/ServiceRegistration.cs');
 const bounded = read('apps/api/Networking/BoundedResponseHandler.cs');

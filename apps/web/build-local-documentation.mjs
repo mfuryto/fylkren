@@ -7,7 +7,9 @@ const webRoot = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(webRoot, '../..');
 const documentationRoot = path.join(repositoryRoot, 'docs');
 const outputRoot = path.join(webRoot, '.generated-public', 'documentation');
-const repositoryDocuments = ['README.md', 'CHANGELOG.md', 'SECURITY.md', 'NOTICE.md', 'TRADEMARKS.md'];
+const documentationManifest = JSON.parse(await readFile(path.join(webRoot, 'customer-documentation.json'), 'utf8'));
+const customerSources = documentationManifest.map(relative => path.resolve(repositoryRoot, relative));
+const customerSourceSet = new Set(customerSources);
 const version = (await readFile(path.join(repositoryRoot, 'VERSION'), 'utf8')).trim();
 
 const escapeHtml = value => value
@@ -29,7 +31,7 @@ function outputForSource(source) {
     if (relative === 'README.md') return path.join(outputRoot, 'index.html');
     return path.join(outputRoot, relative.replace(/\.md$/i, '.html'));
   }
-  if (path.dirname(source) === repositoryRoot && repositoryDocuments.includes(path.basename(source)))
+  if (path.dirname(source) === repositoryRoot && customerSourceSet.has(source))
     return path.join(outputRoot, 'repository', path.basename(source).replace(/\.md$/i, '.html'));
   return undefined;
 }
@@ -39,7 +41,7 @@ function localLink(source, output, href) {
   const [file, fragment] = href.split('#', 2);
   if (!file.toLocaleLowerCase().endsWith('.md')) return href;
   const target = outputForSource(path.resolve(path.dirname(source), decodeURIComponent(file)));
-  if (!target) return href;
+  if (!target || !customerSourceSet.has(path.resolve(path.dirname(source), decodeURIComponent(file)))) return null;
   const relative = path.relative(path.dirname(output), target).split(path.sep).join('/');
   return `${relative || path.basename(target)}${fragment ? `#${fragment}` : ''}`;
 }
@@ -59,16 +61,6 @@ function pageTemplate(title, body) {
   <main class="documentation-content">${body}</main>
 </body>
 </html>`;
-}
-
-async function markdownFiles(directory) {
-  const files = [];
-  for (const entry of await readdir(directory, { withFileTypes: true })) {
-    const fullPath = path.join(directory, entry.name);
-    if (entry.isDirectory()) files.push(...await markdownFiles(fullPath));
-    else if (entry.name.endsWith('.md')) files.push(fullPath);
-  }
-  return files;
 }
 
 async function renderDocument(source) {
@@ -91,12 +83,13 @@ async function renderDocument(source) {
       },
       link({ href, title, tokens }) {
         const target = localLink(source, output, href);
+        if (target === null) return this.parser.parseInline(tokens);
         const titleAttribute = title ? ` title="${escapeHtml(title)}"` : '';
         return `<a href="${escapeHtml(target)}"${titleAttribute}>${this.parser.parseInline(tokens)}</a>`;
       },
     },
   });
-  const body = (await marked.parse(markdown)).replace(/href="([^"]+\.md(?:#[^"]*)?)"/gi, (_match, href) => `href="${escapeHtml(localLink(source, output, href))}"`);
+  const body = await marked.parse(markdown);
   if (/<script\b|\son\w+\s*=/i.test(body))
     throw new Error(`Unsafe active content in ${path.relative(repositoryRoot, source)}`);
   await mkdir(path.dirname(output), { recursive: true });
@@ -106,7 +99,7 @@ async function renderDocument(source) {
 await rm(outputRoot, { recursive: true, force: true });
 await mkdir(outputRoot, { recursive: true });
 
-for (const source of [...await markdownFiles(documentationRoot), ...repositoryDocuments.map(name => path.join(repositoryRoot, name))])
+for (const source of customerSources)
   await renderDocument(source);
 
 for (const entry of await readdir(documentationRoot, { withFileTypes: true })) {

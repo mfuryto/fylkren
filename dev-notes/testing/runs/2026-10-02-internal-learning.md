@@ -1,6 +1,6 @@
 # Internal experience-based learning — 2026-10-02
 
-Based on `9aae8b8`. The final-report editor adds numbered positive/improvement points in separate internal storage. The new compact Learning page has exact-level access, priorities, action plans, deadlines, accountable treatment, retained comments/history and pending navigation counts. See [the learning guide](../../administration/LEARNING.md).
+Based on `9aae8b8`. The final-report editor adds numbered positive/improvement points in separate internal storage. The new compact Learning page has exact-level access, priorities, action plans, deadlines, accountable treatment, retained comments/history and pending navigation counts. See [the learning guide](../../../docs/administration/LEARNING.md).
 
 ## Evidence
 

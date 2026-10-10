@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 // This checks traceability, not whether security controls passed.
-const matrix = readFileSync('docs/security/ASVS_5.0.0_L2_MATRIX.md', 'utf8');
-const findingRegister = readFileSync('docs/security/SECURITY_VERIFICATION.md', 'utf8');
+const matrix = readFileSync('dev-notes/security/ASVS_5.0.0_L2_MATRIX.md', 'utf8');
+const findingRegister = readFileSync('dev-notes/security/SECURITY_VERIFICATION.md', 'utf8');
 const rows = matrix.split('\n').filter(line => line.startsWith('| v5.0.0-'));
 assert.equal(rows.length, 253, 'Pinned ASVS 5.0.0 Level 1/2 requirements must remain complete');
 const ids = new Set();

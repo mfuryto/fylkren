@@ -84,11 +84,11 @@ internal static class PublicConfigurationEndpoints
         webAuthnEnabled = options.Authentication.MfaEnabled && options.Authentication.WebAuthn.Enabled
     };
 
-    private static string ProductVersion()
+    internal static string ProductVersion()
     {
-        var version = Assembly.GetExecutingAssembly().GetName().Version;
-        return version is null
-            ? "0.0.0"
-            : $"{version.Major}.{version.Minor}.{version.Build}";
+        var informational = Assembly.GetExecutingAssembly()
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+        if (!string.IsNullOrWhiteSpace(informational)) return informational.Split('+', 2)[0];
+        return Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0";
     }
 }

@@ -75,7 +75,7 @@ issues.
 ## Publication gate
 
 Before opening the repository, complete the
-[publication-readiness review](PUBLICATION_READINESS.md), including legal
+[publication-readiness review](../../dev-notes/project/PUBLICATION_READINESS.md), including legal
 verification of the source license and matching customer terms, review of the
 previous MPL-2.0 history, copyright ownership, third-party attributions,
 history sanitization, security contact and final Community/Enterprise release

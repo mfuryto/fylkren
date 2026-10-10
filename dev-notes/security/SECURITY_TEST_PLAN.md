@@ -45,7 +45,7 @@ Generate the ASVS matrix from the pinned OWASP 5.0.0 source:
 
 ```bash
 node tools/generate-asvs-matrix.mjs /tmp/asvs-5.0.0.json \
-  docs/security/ASVS_5.0.0_L2_MATRIX.md
+  dev-notes/security/ASVS_5.0.0_L2_MATRIX.md
 ```
 
 Session cookie, sign-in, sign-out, and antiforgery using ignored local synthetic credentials:
@@ -119,7 +119,7 @@ preserved internal identity, Platform Manager lockout guards, direct-SSO
 presentation/cancellation, wrong issuer/state/nonce/audience, unsigned or
 tampered SAML and OIDC/SAML replay. Every rejected callback must return a
 controlled error and leave no authenticated Fylkren session. Dated evidence is
-retained under `docs/testing/runs/` without generated credentials or tokens.
+retained under `dev-notes/testing/runs/` without generated credentials or tokens.
 
 Run all applicable unit, integration, frontend, Compose, and image checks documented in the development and operations manuals before recording a release result.
 

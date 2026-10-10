@@ -1,6 +1,6 @@
 # Input validation rules
 
-This document defines Fylkren's application-level input validation rules. It is the design reference for ASVS 2.1.1–2.1.3; requirement status and executed evidence remain in the single [ASVS matrix](ASVS_5.0.0_L2_MATRIX.md).
+This document defines Fylkren's application-level input validation rules. It is the design reference for ASVS 2.1.1–2.1.3; requirement status and executed evidence remain in the single [ASVS matrix](../../dev-notes/security/ASVS_5.0.0_L2_MATRIX.md).
 
 ## Validation boundary and order
 

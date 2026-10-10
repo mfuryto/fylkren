@@ -60,7 +60,7 @@ Activity is the readable operational history. Audit records security, administra
 
 ### Notification delivery
 
-Selected audit events currently project eligible notifications into a durable, deduplicated delivery queue; webhooks consume domain events separately. The [event/activity and information lifecycle proposal](../architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md) defines convergence on the existing domain-event model without replacing authoritative domain state or security audit. Delivery attempts and failure reasons are retained independently of the successful business transaction.
+Selected audit events currently project eligible notifications into a durable, deduplicated delivery queue; webhooks consume domain events separately. The [event/activity and information lifecycle proposal](../../dev-notes/architecture/EVENT_ACTIVITY_AND_INFORMATION_LIFECYCLE.md) defines convergence on the existing domain-event model without replacing authoritative domain state or security audit. Delivery attempts and failure reasons are retained independently of the successful business transaction.
 
 ## Relationship overview
 

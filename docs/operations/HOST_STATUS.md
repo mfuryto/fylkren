@@ -7,6 +7,8 @@ snapshot supplies:
 - free and total capacity for the filesystem containing the Fylkren installation;
 - the latest explicitly recorded complete backup set;
 - Docker state, health and restart count for web, API and PostgreSQL;
+- the exact reported nginx, ASP.NET Core, .NET, PostgreSQL and Docker Engine versions;
+- the API and runtime-host operating systems, kernel/runtime identifier and architecture;
 - host NTP synchronization state, current reported offset and a 1,000 ms alert boundary;
 - collection time, runtime platform and hostname.
 
@@ -23,8 +25,10 @@ read-only into the API container. The API accepts schema version 1, limits the
 file to 64 KiB and validates timestamps, lengths, status values and numeric
 ranges before displaying it.
 
-The snapshot contains no environment variables, container logs, image
-configuration, addresses, credentials, volume paths or operational content.
+The snapshot reads only the allowlisted `NGINX_VERSION`, `ASPNET_VERSION` and
+`PG_VERSION` values and exposes them as component versions. It contains no other
+environment variables, container logs, image names or configuration, addresses,
+credentials, volume paths or operational content.
 Treat it as diagnostic information and restrict the Platform Manager role
 accordingly.
 

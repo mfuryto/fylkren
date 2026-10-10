@@ -1,4 +1,6 @@
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Data;
 using Fylkren.Api.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,19 +21,36 @@ public static class PlatformOperationsEndpoints
             var checkedAt = DateTimeOffset.UtcNow;
             var databaseHealthy = false;
             string? databaseError = null;
+            string? databaseVersion = null;
             try
             {
                 databaseHealthy = await database.Database.CanConnectAsync(cancellationToken);
+                if (databaseHealthy)
+                {
+                    var connection = database.Database.GetDbConnection();
+                    var closeAfterRead = connection.State != ConnectionState.Open;
+                    if (closeAfterRead) await connection.OpenAsync(cancellationToken);
+                    try
+                    {
+                        await using var command = connection.CreateCommand();
+                        command.CommandText = "SHOW server_version";
+                        databaseVersion = (await command.ExecuteScalarAsync(cancellationToken))?.ToString();
+                    }
+                    finally
+                    {
+                        if (closeAfterRead) await connection.CloseAsync();
+                    }
+                }
             }
             catch (Exception exception)
             {
                 databaseError = exception.GetType().Name;
             }
 
-            var version = Assembly.GetExecutingAssembly().GetName().Version;
             var hostStatus = hostStatusReader.Read(checkedAt);
             var snapshot = hostStatus.Snapshot;
             var stale = hostStatus.Problem == "stale";
+            var webRuntime = snapshot?.Services.FirstOrDefault(service => service.Key == "web")?.Runtime;
             var services = new List<OperationServiceStatus>
             {
                 new("api", "API", "healthy", "The application is responding.", null),
@@ -77,11 +96,42 @@ public static class PlatformOperationsEndpoints
             return Results.Ok(new
             {
                 checkedAt,
-                version = version is null ? "0.0.0" : $"{version.Major}.{version.Minor}.{version.Build}",
+                version = PublicConfigurationEndpoints.ProductVersion(),
                 environment = environment.EnvironmentName,
                 startedAt = StartedAt,
                 uptimeSeconds = Math.Max(0, (long)(checkedAt - StartedAt).TotalSeconds),
                 processMemoryBytes = Environment.WorkingSet,
+                runtime = new
+                {
+                    product = new { name = "Fylkren", version = PublicConfigurationEndpoints.ProductVersion() },
+                    webServer = webRuntime is null ? null : new { webRuntime.Name, webRuntime.Version },
+                    apiFramework = new
+                    {
+                        name = "ASP.NET Core",
+                        version = typeof(WebApplication).Assembly
+                            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion?.Split('+', 2)[0]
+                    },
+                    dotnetRuntime = new { name = ".NET", version = Environment.Version.ToString() },
+                    database = new { name = "PostgreSQL", version = databaseVersion },
+                    apiOperatingSystem = new
+                    {
+                        name = RuntimeInformation.OSDescription,
+                        runtimeIdentifier = RuntimeInformation.RuntimeIdentifier,
+                        architecture = RuntimeInformation.ProcessArchitecture.ToString()
+                    },
+                    hostOperatingSystem = snapshot?.Runtime is null ? null : new
+                    {
+                        name = snapshot.Runtime.OperatingSystemName,
+                        version = snapshot.Runtime.OperatingSystemVersion,
+                        kernelVersion = snapshot.Runtime.KernelVersion,
+                        architecture = snapshot.Runtime.Architecture
+                    },
+                    containerEngine = snapshot?.Runtime is null ? null : new
+                    {
+                        name = snapshot.Runtime.ContainerEngineName,
+                        version = snapshot.Runtime.ContainerEngineVersion
+                    }
+                },
                 services,
                 hostIntegration = new
                 {

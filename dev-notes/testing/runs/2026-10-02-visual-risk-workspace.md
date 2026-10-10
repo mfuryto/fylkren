@@ -1,6 +1,6 @@
 # Visual risk workspace — 2026-10-02
 
-Based on `aa17078`. The user selected the existing 1–5 assessment scale and score boundaries. The task dialog now combines a numbered register, initial/residual assessment map and mitigation editor. See [risk management](../../administration/RISK_MANAGEMENT.md) for the implemented behavior and a synthetic screenshot.
+Based on `aa17078`. The user selected the existing 1–5 assessment scale and score boundaries. The task dialog now combines a numbered register, initial/residual assessment map and mitigation editor. See [risk management](../../../docs/administration/RISK_MANAGEMENT.md) for the implemented behavior and a synthetic screenshot.
 
 ## Evidence and observations
 

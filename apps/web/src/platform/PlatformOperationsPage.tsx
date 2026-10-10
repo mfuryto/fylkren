@@ -14,6 +14,16 @@ type Operations = {
   startedAt: string;
   uptimeSeconds: number;
   processMemoryBytes: number;
+  runtime: {
+    product: { name: string; version: string };
+    webServer: { name: string; version: string } | null;
+    apiFramework: { name: string; version: string | null };
+    dotnetRuntime: { name: string; version: string };
+    database: { name: string; version: string | null };
+    apiOperatingSystem: { name: string; runtimeIdentifier: string; architecture: string };
+    hostOperatingSystem: { name: string; version: string; kernelVersion: string; architecture: string } | null;
+    containerEngine: { name: string; version: string } | null;
+  };
   services: Array<{ key: string; name: string; status: "healthy" | "degraded" | "down" | "unknown"; detail: string; restartCount: number | null }>;
   hostIntegration: {
     configured: boolean; available: boolean; stale: boolean; problem: string | null;
@@ -54,7 +64,12 @@ function hostStatusMessage(operations: Operations, t: Translator, language: stri
   return t("hostMeasurementFrom", { host: host.hostname ?? t("server"), time: host.collectedAt ? ` · ${new Date(host.collectedAt).toLocaleString(language)}` : "" });
 }
 
-export function PlatformPage() {
+function namedVersion(value: { name: string; version: string | null } | null, t: Translator) {
+  if (!value) return t("notReported");
+  return `${value.name} ${value.version || t("notReported")}`;
+}
+
+export function PlatformPage({ edition }: { edition: string }) {
   const t = useTranslation();
   const language = useLanguage();
   const [operations, setOperations] = useState<Operations | null>(null);
@@ -100,6 +115,19 @@ export function PlatformPage() {
       <div className="health-service-list">{operations?.services.map(service => <article className="health-service" key={service.key}><span className={`health-indicator ${service.status}`} aria-hidden="true"/><span><strong>{service.name}</strong><small>{service.detail}{service.restartCount !== null ? ` · ${t("restarts",{count:service.restartCount})}` : ""}</small></span><b>{service.status === "healthy" ? t("ready") : service.status === "degraded" ? t("degraded") : service.status === "unknown" ? t("unknown") : t("down")}</b></article>)}</div>
       {operations ? <p className={operations.hostIntegration.available && !operations.hostIntegration.stale ? "muted platform-signal-note" : "status-message warning-message platform-signal-note"}>{hostStatusMessage(operations,t,language)}</p> : null}
       {operations ? <p className="muted platform-signal-note">{t("backupStatusScope",{hours:operations.hostIntegration.backupWarningHours})}</p> : null}
+    </section>
+    <section className="panel platform-runtime">
+      <div className="section-heading"><div><h2>{t("runtimeEnvironmentTitle")}</h2><p className="muted">{t("runtimeEnvironmentIntro")}</p></div></div>
+      {operations ? <dl className="runtime-environment-grid">
+        <div><dt>{t("runtimeProduct")}</dt><dd>{operations.runtime.product.name} {operations.runtime.product.version} · {edition === "enterprise" ? "Enterprise" : "Community"}</dd></div>
+        <div><dt>{t("runtimeWebServer")}</dt><dd>{namedVersion(operations.runtime.webServer,t)}</dd></div>
+        <div><dt>{t("runtimeApiFramework")}</dt><dd>{namedVersion(operations.runtime.apiFramework,t)}</dd></div>
+        <div><dt>{t("runtimeDotnet")}</dt><dd>{namedVersion(operations.runtime.dotnetRuntime,t)}</dd></div>
+        <div><dt>{t("runtimeDatabase")}</dt><dd>{namedVersion(operations.runtime.database,t)}</dd></div>
+        <div><dt>{t("runtimeApiOperatingSystem")}</dt><dd>{operations.runtime.apiOperatingSystem.name} · {operations.runtime.apiOperatingSystem.runtimeIdentifier} · {operations.runtime.apiOperatingSystem.architecture}</dd></div>
+        <div><dt>{t("runtimeHostOperatingSystem")}</dt><dd>{operations.runtime.hostOperatingSystem ? `${operations.runtime.hostOperatingSystem.name} ${operations.runtime.hostOperatingSystem.version} · ${t("runtimeKernel")} ${operations.runtime.hostOperatingSystem.kernelVersion} · ${operations.runtime.hostOperatingSystem.architecture}` : t("notReported")}</dd></div>
+        <div><dt>{t("runtimeContainerEngine")}</dt><dd>{namedVersion(operations.runtime.containerEngine,t)}</dd></div>
+      </dl> : <p className="muted">{t("loading")}</p>}
     </section>
     <section className="panel platform-logs">
       <div className="section-heading"><div><h2>{t("technicalLogs")}</h2><p className="muted">{t("technicalLogsIntro")}</p></div></div>

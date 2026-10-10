@@ -103,4 +103,4 @@ Current implementation status must not be confused with security accreditation o
 
 ## Future product decisions
 
-The [roadmap](../project/ROADMAP.md) tracks final 1.0 testing, internationalization and the remaining independent review gate for implemented instance federation. The [Community/Enterprise architecture](../architecture/EDITION_ENTITLEMENTS.md) preserves one authoritative data model and upgrade path rather than forking the operational domain.
+The [roadmap](../project/ROADMAP.md) tracks final 1.0 testing, internationalization and the remaining independent review gate for implemented instance federation. The [Community/Enterprise architecture](../../docs/architecture/EDITION_ENTITLEMENTS.md) preserves one authoritative data model and upgrade path rather than forking the operational domain.

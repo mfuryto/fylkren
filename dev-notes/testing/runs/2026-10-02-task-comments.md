@@ -1,6 +1,6 @@
 # Task comments — 2026-10-02
 
-Implementation based on `62e2cd0`, adding persistent operational comments to task cards, Planning and Execution. The maintained behavior is described in the [user manual](../../administration/USER_MANUAL.md) and [domain model](../../product/DOMAIN_MODEL.md).
+Implementation based on `62e2cd0`, adding persistent operational comments to task cards, Planning and Execution. The maintained behavior is described in the [user manual](../../../docs/administration/USER_MANUAL.md) and [domain model](../../../docs/product/DOMAIN_MODEL.md).
 
 ## Environment and evidence
 

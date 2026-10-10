@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const documentation = readFileSync('docs/security/SECURITY_TEST_PLAN.md', 'utf8');
+const documentation = readFileSync('dev-notes/security/SECURITY_TEST_PLAN.md', 'utf8');
 const registration = readFileSync('apps/api/ServiceRegistration.cs', 'utf8');
 const identity = readFileSync('apps/api/Identity/LoginIdentity.cs', 'utf8');
 const endpoints = readFileSync('apps/api/Identity/IdentityEndpoints.cs', 'utf8');

@@ -284,7 +284,7 @@
         "tools/e2e/identity-session-lifecycle.mjs": "61a39140512b74db4c7aa9cb410b79dd43632876c9285b1f73b18acdf75d91d4",
         "tools/check-security-evidence.mjs": "b8183d7c10b55643e9bd4d413ce94b8af68f79611c2bcadf33d7b107777d0d1e",
         "tools/generate-asvs-matrix.mjs": "8a50b0ba9e4814ac01a4f1d0456344df680a9627d608874b06a9e9c97aa6fe7e",
-        "docs/security/ASVS_5.0.0_L2_MATRIX.md": "7dd6c363952be503205daf57c17499195c2e85d8564a6a32657c5adece3d65d5",
+        "dev-notes/security/ASVS_5.0.0_L2_MATRIX.md": "7dd6c363952be503205daf57c17499195c2e85d8564a6a32657c5adece3d65d5",
         "package.json": "39f2cd376e18e6ef507ecc3217cb3c0de10a53f3cd621367f64213361b522635"
       },
       "apiImages": {

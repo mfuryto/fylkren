@@ -10,7 +10,29 @@ const binaries = join(root, 'bin');
 mkdirSync(join(project, 'runtime'), { recursive: true });
 mkdirSync(binaries);
 writeFileSync(join(project, 'compose.yaml'), 'services: {}\n');
-writeFileSync(join(binaries, 'docker'), '#!/bin/sh\nexit 0\n');
+writeFileSync(join(binaries, 'docker'), `#!/bin/sh
+case "$1" in
+  version) printf '%s\n' '29.1.3' ;;
+  compose)
+    case "$*" in
+      *" ps -q web") printf '%s\n' 'web-id' ;;
+      *" ps -q api") printf '%s\n' 'api-id' ;;
+      *" ps -q postgres") printf '%s\n' 'postgres-id' ;;
+    esac ;;
+  inspect)
+    case "$3" in
+      *State.Status*) printf '%s\n' 'running' ;;
+      *State.Health*) printf '%s\n' 'healthy' ;;
+      *RestartCount*) printf '%s\n' '0' ;;
+      *Config.Env*)
+        case "$4" in
+          web-id) printf '%s\n' 'NGINX_VERSION=1.29.8' 'IGNORED_SECRET=must-not-appear' ;;
+          api-id) printf '%s\n' 'ASPNET_VERSION=10.0.12' ;;
+          postgres-id) printf '%s\n' 'PG_VERSION=18.6' ;;
+        esac ;;
+    esac ;;
+esac
+`);
 writeFileSync(join(binaries, 'chronyc'), `#!/bin/sh
 if [ "$FAKE_CHRONY" = yes ]; then
   printf '%s\\n' 'Reference ID    : 192.0.2.10' 'Last offset     : -0.000004000 seconds' 'Leap status     : Normal'
@@ -36,18 +58,27 @@ function collect(sync, offset, chrony = 'no') {
     env: { ...process.env, PATH: `${binaries}:${process.env.PATH}`, FAKE_SYNC: sync, FAKE_OFFSET: offset, FAKE_CHRONY: chrony },
   });
   assert.equal(result.status, 0, result.stderr);
-  return JSON.parse(readFileSync(join(project, 'runtime', 'host-status.json'), 'utf8')).time;
+  return JSON.parse(readFileSync(join(project, 'runtime', 'host-status.json'), 'utf8'));
 }
 
 try {
-  assert.deepEqual(collect('yes', '+2.500ms'), {
+  const snapshot = collect('yes', '+2.500ms');
+  assert.deepEqual(snapshot.time, {
     synchronized: true, status: 'healthy', source: 'ntp.example.invalid', offsetMilliseconds: 2.5,
     maximumAllowedOffsetMilliseconds: 1000,
     detail: 'Host clock is synchronized and within the configured offset boundary.',
   });
-  assert.equal(collect('yes', '-1500ms').status, 'down');
-  assert.equal(collect('no', '').status, 'down');
-  const chrony = collect('no', '', 'yes');
+  assert.equal(snapshot.runtime.containerEngineName, 'Docker Engine');
+  assert.equal(snapshot.runtime.containerEngineVersion, '29.1.3');
+  assert.deepEqual(snapshot.services.map(service => service.runtime), [
+    { name: 'nginx', version: '1.29.8' },
+    { name: 'ASP.NET Core', version: '10.0.12' },
+    { name: 'PostgreSQL', version: '18.6' },
+  ]);
+  assert.doesNotMatch(JSON.stringify(snapshot), /IGNORED_SECRET|must-not-appear/);
+  assert.equal(collect('yes', '-1500ms').time.status, 'down');
+  assert.equal(collect('no', '').time.status, 'down');
+  const chrony = collect('no', '', 'yes').time;
   assert.equal(chrony.status, 'healthy');
   assert.equal(chrony.offsetMilliseconds, -0.004);
   console.log(JSON.stringify({ hostTimeStatus: 'passed', maximumOffsetMilliseconds: 1000,

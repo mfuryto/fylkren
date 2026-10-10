@@ -43,10 +43,15 @@ public sealed class HostStatusReader(FylkrenOptions options, ILogger<HostStatusR
         value is not null && value.SchemaVersion == 1 &&
         value.CollectedAt > DateTimeOffset.UnixEpoch && value.CollectedAt <= now.AddMinutes(5) &&
         Safe(value.Platform, 80) && Safe(value.Hostname, 255) &&
+        (value.Runtime is null || Safe(value.Runtime.OperatingSystemName, 100) &&
+            Safe(value.Runtime.OperatingSystemVersion, 50) && Safe(value.Runtime.KernelVersion, 80) &&
+            Safe(value.Runtime.Architecture, 40) && Safe(value.Runtime.ContainerEngineName, 100) &&
+            Safe(value.Runtime.ContainerEngineVersion, 50)) &&
         value.Disk is not null && Safe(value.Disk.Name, 100) &&
         value.Disk.TotalBytes > 0 && value.Disk.AvailableBytes >= 0 && value.Disk.AvailableBytes <= value.Disk.TotalBytes &&
         value.Services is { Count: <= 20 } && value.Services.All(service =>
             Safe(service.Key, 40) && Safe(service.Name, 100) && Safe(service.Detail, 300) &&
+            (service.Runtime is null || Safe(service.Runtime.Name, 100) && Safe(service.Runtime.Version, 50)) &&
             AllowedStatuses.Contains(service.Status) && service.RestartCount is >= 0 and <= 1_000_000) &&
         (value.Backup is null || value.Backup.LastCompletedAt is null ||
             value.Backup.LastCompletedAt > DateTimeOffset.UnixEpoch && value.Backup.LastCompletedAt <= now.AddMinutes(5)) &&
@@ -62,9 +67,14 @@ public sealed class HostStatusReader(FylkrenOptions options, ILogger<HostStatusR
 
 public sealed record HostStatusReadResult(bool Configured, HostStatusSnapshot? Snapshot, string? Problem);
 public sealed record HostStatusSnapshot(int SchemaVersion, DateTimeOffset CollectedAt, string Platform,
-    string Hostname, HostDiskStatus? Disk, HostBackupStatus? Backup, HostTimeStatus? Time, List<HostServiceStatus> Services);
+    string Hostname, HostRuntimeStatus? Runtime, HostDiskStatus? Disk, HostBackupStatus? Backup, HostTimeStatus? Time,
+    List<HostServiceStatus> Services);
+public sealed record HostRuntimeStatus(string OperatingSystemName, string OperatingSystemVersion,
+    string KernelVersion, string Architecture, string ContainerEngineName, string ContainerEngineVersion);
 public sealed record HostDiskStatus(string Name, long TotalBytes, long AvailableBytes);
 public sealed record HostBackupStatus(DateTimeOffset? LastCompletedAt);
 public sealed record HostTimeStatus(bool Synchronized, string Status, string Source,
     double? OffsetMilliseconds, double MaximumAllowedOffsetMilliseconds, string Detail);
-public sealed record HostServiceStatus(string Key, string Name, string Status, string Detail, int RestartCount);
+public sealed record HostServiceStatus(string Key, string Name, string Status, string Detail, int RestartCount,
+    HostServiceRuntimeStatus? Runtime);
+public sealed record HostServiceRuntimeStatus(string Name, string Version);

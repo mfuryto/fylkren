@@ -324,7 +324,7 @@ Excluded setup attempts were corrected to respect one leader role per unit, boun
 
 Continuation of ASVS 1.3.3/1.3.6 and affected 1.5.1, based on `f1251f9` plus the changes committed with this record, version `0.70.0-dev.1`. This is scoped integration verification, not final release qualification. All data, keys and credentials were synthetic; disposable local laboratories were removed afterwards. No production deployment or scan was performed.
 
-The shared `OutboundHttpPolicy`/`BoundedResponseHandler` now govern webhook, federation, identity connection tests and OIDC runtime HTTP clients. SAML prepares metadata through the bounded client before initializing Sustainsys, retaining response/assertion signature checks and renewing metadata on demand. Domain/API/federation payloads remain unchanged; internal integrations now require explicit deployment-owned exact origin approvals. Artifact-resolution downloads, automatic HTTP redirects and system proxy routing are disabled. Read the [upgrade/configuration notes](../../operations/INSTALLATION_AND_UPGRADES.md#outbound-integration-configuration).
+The shared `OutboundHttpPolicy`/`BoundedResponseHandler` now govern webhook, federation, identity connection tests and OIDC runtime HTTP clients. SAML prepares metadata through the bounded client before initializing Sustainsys, retaining response/assertion signature checks and renewing metadata on demand. Domain/API/federation payloads remain unchanged; internal integrations now require explicit deployment-owned exact origin approvals. Artifact-resolution downloads, automatic HTTP redirects and system proxy routing are disabled. Read the [upgrade/configuration notes](../../../docs/operations/INSTALLATION_AND_UPGRADES.md#outbound-integration-configuration).
 
 Executed commands, with `FYLKREN_E2E_API_IMAGE=fylkren-asvs-outbound-api:latest` and `FYLKREN_E2E_WEB_IMAGE=fylkren-automatic-lifecycle-web:latest` for the maintained container laboratories:
 
@@ -485,7 +485,7 @@ The [existing evidence manifest](2026-10-02-release-regression-evidence.json) re
 
 ## Input-validation documentation — 2026-10-04
 
-Completes ASVS 2.1.1. The new [authoritative rule document](../../security/INPUT_VALIDATION.md) records the API as the trusted boundary, the decode/normalize/structure/relationship/authorization/transaction order, safe failure semantics and expected structures for every major input class. It links rules to their shared or domain production validators and maintained tests. It is a design reference, not a second ASVS matrix or status list.
+Completes ASVS 2.1.1. The new [authoritative rule document](../../../docs/security/INPUT_VALIDATION.md) records the API as the trusted boundary, the decode/normalize/structure/relationship/authorization/transaction order, safe failure semantics and expected structures for every major input class. It links rules to their shared or domain production validators and maintained tests. It is a design reference, not a second ASVS matrix or status list.
 
 The existing API runner received a targeted `--asvs-input-only` path that skips legacy-upgrade and backup/restore chains while retaining normal actor/Site/role bootstrap. Against `fylkren-asvs-pagination-api:latest`, it passed 57 rejected numeric cases across ten paged APIs, nine rejected links, nine rejected CSS values without saved mutation, seven literal stored payloads, two single-JSON-decode cases, three literal portable metadata cases, 20 malformed manifest cases and ignored client `$type` metadata. Valid pagination limits and four allowed link schemes still pass. Documentation links, ASVS traceability, source structure and repository language checks pass.
 
@@ -505,7 +505,7 @@ The API image is unchanged from the completed arithmetic stage; only the focused
 
 ## Business-limit documentation — 2026-10-04
 
-Completes ASVS 2.1.3. The authoritative [input-validation rules](../../security/INPUT_VALIDATION.md#business-limits-and-scope) now separate per-command, local-account, client-address, machine-identity, federation-client, Site/edition and installation-wide limits. The documented values are tied to the production policies that enforce them. Areas without a current product quota are stated directly: Fylkren has no per-account creation quota for ordinary domain objects and no installation-wide total-data quota. Those are retained as incomplete anti-automation scope under ASVS 2.4.1 rather than presented as verified controls.
+Completes ASVS 2.1.3. The authoritative [input-validation rules](../../../docs/security/INPUT_VALIDATION.md#business-limits-and-scope) now separate per-command, local-account, client-address, machine-identity, federation-client, Site/edition and installation-wide limits. The documented values are tied to the production policies that enforce them. Areas without a current product quota are stated directly: Fylkren has no per-account creation quota for ordinary domain objects and no installation-wide total-data quota. Those are retained as incomplete anti-automation scope under ASVS 2.4.1 rather than presented as verified controls.
 
 The focused command passed against the unchanged arithmetic candidate:
 
@@ -614,7 +614,7 @@ ASVS 2.3.1 is Passed. Safe hashes and the unchanged candidate image IDs are reco
 
 ## Business-limit enforcement — 2026-10-04
 
-Completes ASVS 2.3.2 by comparing every row in the authoritative [business-limit table](../../security/INPUT_VALIDATION.md#business-limits-and-scope) with production enforcement and executed tests. Per-command text, collection, byte and package limits already passed in the completed 2.2.1 inventory, including atomic rejection. Existing focused runs verify 20 failed password checks with saturating lockout, one-time identity operations and the eight-per-minute authentication-client partition. The current federation evidence verifies its 20-request partitions plus body, response and retry ceilings.
+Completes ASVS 2.3.2 by comparing every row in the authoritative [business-limit table](../../../docs/security/INPUT_VALIDATION.md#business-limits-and-scope) with production enforcement and executed tests. Per-command text, collection, byte and package limits already passed in the completed 2.2.1 inventory, including atomic rejection. Existing focused runs verify 20 failed password checks with saturating lockout, one-time identity operations and the eight-per-minute authentication-client partition. The current federation evidence verifies its 20-request partitions plus body, response and retry ceilings.
 
 Two focused commands filled the remaining dynamic gaps:
 

@@ -15,7 +15,7 @@
   <a href="#capabilities">Capabilities</a> ·
   <a href="#community-and-enterprise">Editions</a> ·
   <a href="#deployment">Deployment</a> ·
-  <a href="docs/project/RELEASE_VERSIONING.md">Releases</a> ·
+  <a href="dev-notes/project/RELEASE_VERSIONING.md">Releases</a> ·
   <a href="docs/README.md">Documentation</a>
 </p>
 
@@ -166,9 +166,9 @@ and the [Enterprise license guide](docs/operations/GET_ENTERPRISE_LICENSE.md).
 - Customer-owned data export and documented backup/restore procedures.
 
 Security features reduce risk; they do not constitute accreditation. Review the
-[security policy](SECURITY.md), [security test plan](docs/security/SECURITY_TEST_PLAN.md),
-[OWASP ASVS matrix](docs/security/ASVS_5.0.0_L2_MATRIX.md) and
-[federation threat model](docs/security/FEDERATION_THREAT_MODEL.md) before any
+[security policy](SECURITY.md), [security test plan](dev-notes/security/SECURITY_TEST_PLAN.md),
+[OWASP ASVS matrix](dev-notes/security/ASVS_5.0.0_L2_MATRIX.md) and
+[federation threat model](dev-notes/security/FEDERATION_THREAT_MODEL.md) before any
 production decision.
 
 ## Deployment
@@ -225,14 +225,18 @@ The [documentation portal](docs/README.md) is the maintained entry point.
 | --- | --- | --- |
 | [User manual](docs/administration/USER_MANUAL.md) | [Installation and upgrades](docs/operations/INSTALLATION_AND_UPGRADES.md) | [Technical architecture](docs/architecture/TECHNICAL_ARCHITECTURE.md) |
 | [Task workflow](docs/administration/WORKFLOW_AND_TASKS.md) | [Federation administration](docs/administration/FEDERATION.md) | [Federation architecture](docs/architecture/INSTANCE_FEDERATION.md) |
-| [Get Enterprise](docs/operations/GET_ENTERPRISE_LICENSE.md) | [System requirements](docs/operations/SYSTEM_REQUIREMENTS.md) | [Roadmap](docs/project/ROADMAP.md) |
-| [API overview](docs/api/API.md) | [Backup and offline deployment](docs/operations/DEPLOYMENT_AND_OFFLINE.md) | [Security verification](docs/security/SECURITY_VERIFICATION.md) |
+| [Get Enterprise](docs/operations/GET_ENTERPRISE_LICENSE.md) | [System requirements](docs/operations/SYSTEM_REQUIREMENTS.md) | [Host status](docs/operations/HOST_STATUS.md) |
+| [API overview](docs/api/API.md) | [Backup and offline deployment](docs/operations/DEPLOYMENT_AND_OFFLINE.md) | [Security and retention](docs/security/SECURITY_AND_RETENTION.md) |
 
 Repository-facing documentation is English. American English (`en-US`) is the
 source and fallback interface language. All language resources are bundled for
 offline use; routes, API contracts, persistent identifiers and permalinks remain
 language-neutral. The maintained [localization policy](docs/product/LOCALIZATION.md)
 defines the automated technical and linguistic quality gates.
+
+Customer documentation lives in `docs/` and is the same set bundled with the
+application. Developer, test and release working records live in
+[`dev-notes/`](dev-notes/README.md).
 
 ### Interface languages
 
