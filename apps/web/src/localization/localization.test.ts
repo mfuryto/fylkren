@@ -122,6 +122,26 @@ describe("localization catalogs", () => {
     }
   });
 
+  it("does not leave English or translation artifacts in the reviewed French catalog", () => {
+    const allowedIdenticalKeys = new Set([
+      "actions", "aiQuestion", "aiRiskCause", "approvalDescription", "approvalDocument", "approvalVersion", "baseDn", "classifications",
+      "dateLabel", "dayShort", "documentation", "entitlementWebhooks", "entitySite", "entitySiteManager", "hourShort",
+      "languageCzech", "languageDanish", "languageDutch", "languageEstonian", "languageFinnish", "languageFrench",
+      "languageGerman", "languageItalian", "languageLatvian", "languageLithuanian", "languageNorwegian", "languagePolish",
+      "languagePortuguese", "languageRomanian", "languageSpanish", "languageSwedish", "languageUkrainian", "lifecycleAction",
+      "logo", "message", "minimal", "minuteShort", "navApi", "navArchives", "navAudit", "navClassification",
+      "navNotifications", "navPersonnel", "navSites", "navigationMenu", "normalText", "notifications", "organizationStructure",
+      "personnel", "placement", "planLabel", "port", "priorityNormal", "riskCoordinates", "riskImpact", "site",
+      "riskDescription", "siteManagers", "sites", "taskTypeLabel", "version", "versionLabel", "workflowsWorkflowsPageDirection",
+    ]);
+    const artifacts = /Commission|cessionnaire|réclamation|admissible|vers l'avenir|Exécution étroite|Nouvelle œuvre|subvention|ré-tér|Raccord d'essai|C'est fait|Site pour enfants|Désignation des marchandises|Réussi définitivement|\bfouillés\b|\bsnapshots?\b|\bworkflow\b|\bread-only\b|\bNo role\b|(?:…\s*){2,}/iu;
+    for (const [key, message] of Object.entries(languageCatalogs["fr-FR"])) {
+      const withoutPlaceholders = message.replace(/\{\{?[A-Za-z][A-Za-z0-9]*\}?\}/g, "");
+      expect(withoutPlaceholders, `fr-FR.${key} contains a translation artifact`).not.toMatch(artifacts);
+      if (message === en[key as keyof typeof en]) expect(allowedIdenticalKeys.has(key), `fr-FR.${key} is untranslated`).toBe(true);
+    }
+  });
+
   it("normalizes every bundled language and its bare language code", () => {
     const expected = {
       sv: "sv-SE", da: "da-DK", fi: "fi-FI", de: "de-DE", fr: "fr-FR", pl: "pl-PL", es: "es-ES", it: "it-IT",
