@@ -19,9 +19,9 @@ export const lifecycleGuidanceTranslations: Record<string, Record<keyof typeof l
     "lifecycleAdministration": "Arkivtilgang og bevaring"
   },
   "sv-SE": {
-    "lifecycleSiteGuide": "Använd när hela Site tas ur bruk. Inaktivera det under Sites, slutför återstående arbete och utse en arkivansvarig med exporträtt; lås sedan historiken och arkivera.",
-    "lifecyclePersonGuide": "Använd för en tidigare användare efter att aktiv åtkomst har tagits bort och arkivansvar har överförts. Historisk attribution bevaras; detta inaktiverar inte kontot.",
-    "lifecycleGovernanceLocked": "Innehållet är låst. Arkivera för bevarande eller öppna för redigering. Detta återaktiverar inte Site eller användarkontot.",
+    "lifecycleSiteGuide": "Använd när hela organisationsnivån tas ur bruk. Inaktivera den under Sites, slutför återstående arbete och utse en arkivansvarig med exporträtt. Lås sedan historiken och arkivera den.",
+    "lifecyclePersonGuide": "Använd för en tidigare användare när aktiv åtkomst har tagits bort och arkivansvaret har överförts. Historisk aktörskoppling bevaras; detta inaktiverar inte kontot.",
+    "lifecycleGovernanceLocked": "Innehållet är låst. Arkivera det för bevarande eller öppna det för redigering. Det återaktiverar inte aktuell Site eller användarkontot.",
     "lifecycleAdministration": "Arkivåtkomst och bevarande"
   },
   "da-DK": {

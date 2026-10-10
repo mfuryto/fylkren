@@ -116,6 +116,25 @@ const norwegian: AiMessages = {
   entitlementAi: "AI-støtte",
 };
 
+const swedish: AiMessages = {
+  navAi: "AI", aiPageIntro: "Konfigurera avgränsat AI-stöd för valda Sites.",
+  aiEnterpriseNotice: "AI-stöd kräver en Enterprise-licens. Konfigurationen visas även när behörigheten saknas.",
+  aiMasterSwitch: "Aktivera AI-stöd", aiMasterHelp: "AI-funktionerna är dolda och otillgängliga tills den här inställningen aktiveras.",
+  aiProvider: "Leverantör", aiProviderHelp: "Använd OpenAI i molnet eller en lokal Llama-modell via en OpenAI-kompatibel slutpunkt, till exempel Ollama eller vLLM.",
+  aiEndpoint: "OpenAI-kompatibel slutpunkt", aiEndpointHelp: "Ange hela HTTPS-adressen. En intern HTTP-slutpunkt måste uttryckligen tillåtas i installationens konfiguration för utgående anslutningar.",
+  aiModel: "Modell", aiApiKey: "API-nyckel hos leverantören", aiStoredSecret: "En nyckel är sparad. Lämna fältet tomt för att behålla den.", aiRemoveKey: "Ta bort sparad nyckel",
+  aiFunctions: "Funktioner", aiSummaryFunction: "Sammanfattning och kvalitetskontroll", aiDraftsFunction: "Förslag för planering, risker och beslut", aiPlanningDraft: "Planutkast", aiRiskDraft: "Risk- och åtgärdsutkast", aiDecisionDraft: "Utkast till beslutsunderlag", aiLearningFunction: "Analys av lärdomar", aiQuestionsFunction: "Frågor om uppdraget",
+  aiSites: "Sites med AI-åtkomst", aiSitesHelp: "Endast valda Sites kan skicka uppdragsinnehåll till den konfigurerade leverantören.",
+  aiSave: "Spara AI-konfiguration", aiTest: "Testa sparad anslutning", aiSaved: "AI-konfigurationen har sparats.", aiTestSucceeded: "AI-anslutningen fungerar.", aiTestFailed: "Testet av AI-anslutningen misslyckades.", aiLoadFailed: "AI-konfigurationen kunde inte läsas in.", aiSaveFailed: "AI-konfigurationen kunde inte sparas.",
+  aiAssistant: "AI-assistent", aiAssistantIntro: "Assistenten använder uppgifter som du redan har läsbehörighet till. Svaret är ett förslag och sparas inte automatiskt.", aiRun: "Skapa förslag",
+  aiTaskAction: "Analysera uppdraget", aiPlanningAction: "Föreslå planinnehåll", aiRiskAction: "Identifiera risker och åtgärder", aiDecisionAction: "Föreslå beslutsunderlag", aiLearningAction: "Analysera lärdomar", aiGenerateAction: "Generera förslag",
+  aiWorking: "AI arbetar…", aiWaiting: "AI arbetar · {seconds} s. Svaret visas här så snart modellen börjar skriva.", aiReceiving: "Tar emot svaret · {seconds} s",
+  aiQuestion: "Fråga", aiQuestionPlaceholder: "Vad vill du veta om det här uppdraget?", aiResult: "AI-förslag", aiNoResult: "Välj en funktion och skapa ett förslag.", aiUseDraft: "Använd det här utkastet", aiRiskCause: "Orsak", aiRiskConsequence: "Konsekvens",
+  decisionNewDraft: "Nytt beslutsutkast", decisionEditDraft: "Ändra beslut", decisionSaveDraft: "Spara utkast", decisionChangeAction: "Ändra", decisionWithdrawAction: "Dra tillbaka", decisionDeleteDraft: "Ta bort utkast", decisionWithdrawnHistory: "Tillbakadragna beslut och borttagna utkast", decisionDraftRemovalHelp: "När ett utkast tas bort eller ett beslut dras tillbaka försvinner det från aktiv hantering. Versionshistoriken bevaras.", decisionAiSuggestionIntro: "Välj ett förslag för att öppna det i det ordinarie beslutsformuläret. Inget sparas automatiskt.",
+  aiAssistFailed: "AI-assistenten kunde inte slutföra begäran.", aiProviderRateLimited: "AI-leverantören är upptagen. Vänta innan du försöker igen.", aiProviderTimeout: "AI-leverantören tog för lång tid.", aiProviderUnavailable: "AI-leverantören kunde inte slutföra begäran.", aiProviderInvalidDraft: "AI-svaret kunde inte fördelas säkert i planmallen. Försök generera förslaget igen.", aiProviderHttpStatus: "AI-leverantören avslutade begäran med HTTP {status}.", aiGeneratedFromVersion: "Skapat från uppdraget såsom det senast uppdaterades {date}. Kontrollera källan innan texten används.",
+  primaryDocumentImport: "Importera huvuddokument", primaryDocumentImportHelp: "Länken ovan öppnar originaldokumentet för användarna. Välj en filkopia som underlag för AI: PDF, DOCX eller UTF-8-text, högst 8 MiB. Fylkren lagrar textutdraget, inte filen.", primaryDocumentAiSource: "Använd det importerade dokumentet som källa för AI", primaryDocumentImportFailed: "Huvuddokumentet kunde inte importeras", primaryDocumentImported: "Importerat", primaryDocumentNotImported: "Inte importerat", primaryDocumentStatusUnavailable: "Dokumentstatusen kunde inte hämtas", primaryDocumentDetails: "Dokumentstatus", primaryDocumentOpenStructured: "Öppna strukturerade data", entitlementAi: "AI-stöd",
+};
+
 const providerHelp: Record<string, string> = {
   "cs-CZ": "OpenAI v cloudu nebo místní Llama přes kompatibilní rozhraní Ollama či vLLM.",
   "da-DK": "OpenAI i skyen eller lokal Llama via et kompatibelt Ollama- eller vLLM-endepunkt.",
@@ -292,6 +311,6 @@ const aiErrorMessages: Record<string, AiErrorMessages> = {
   "uk-UA": { aiProviderInvalidDraft: "Відповідь ШІ не вдалося безпечно розподілити в шаблоні плану. Створіть пропозицію ще раз." },
 };
 
-export const aiTranslations: Record<string, AiMessages> = new Proxy({ "nb-NO": norwegian } as Record<string, AiMessages>, {
+export const aiTranslations: Record<string, AiMessages> = new Proxy({ "nb-NO": norwegian, "sv-SE": swedish } as Record<string, AiMessages>, {
   get: (target, language: string) => target[language] ?? { ...aiEn, aiProviderHelp: providerHelp[language] ?? aiEn.aiProviderHelp, aiEndpointHelp: endpointHelp[language] ?? aiEn.aiEndpointHelp, ...progressMessages[language], ...draftLabels[language], ...decisionWorkflowMessages[language], ...aiActionMessages[language], ...documentImportMessages[language], ...documentStatusMessages[language], ...aiErrorMessages[language] },
 });

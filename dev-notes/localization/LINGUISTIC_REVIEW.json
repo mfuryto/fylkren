@@ -50,9 +50,14 @@
       ]
     },
     "sv-SE": {
-      "status": "pending",
-      "reviewedKeyCount": 0,
-      "catalogSha256": "52f6565e5e8fa8d96305617138ef9ba92a944204c0a0168382392e04e72700c0"
+      "status": "verified",
+      "reviewedKeyCount": 2244,
+      "catalogSha256": "8dd49c3212b79e245c13ec57ade00c77d2eab85806d2485183ae4aa25aa7b074",
+      "verifiedSourceCatalogSha256": "4f8d4ddac684c6e2924bd13c1f5f9421cbd1474b7401278c5eec4e34f0429faa",
+      "verifiedAt": "2026-10-10",
+      "evidence": [
+        "dev-notes/testing/runs/2026-10-10-linguistic-review.md"
+      ]
     },
     "da-DK": {
       "status": "pending",

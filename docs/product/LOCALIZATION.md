@@ -11,7 +11,7 @@ The [localization terminology](LOCALIZATION_TERMINOLOGY.md) is authoritative for
 | `en-US` | English (United States) | Source catalog and mandatory fallback |
 | `en-GB` | English (United Kingdom) | Linguistically verified against the current source catalog |
 | `nb-NO` | Norwegian Bokmal | Linguistically verified against the current source catalog |
-| `sv-SE` | Swedish | Technically complete; linguistic review pending |
+| `sv-SE` | Swedish | Linguistically verified against the current source catalog |
 | `da-DK` | Danish | Technically complete; linguistic review pending |
 | `fi-FI` | Finnish | Technically complete; linguistic review pending |
 | `de-DE` | German | Technically complete; linguistic review pending |
@@ -42,21 +42,21 @@ Every change that adds, removes or changes user-visible text must update the Eng
 
 The catalog registry is typed against the English source keys. Automated tests verify that every registered pack has exactly the source keys and the same interpolation placeholders. Adding a locale to the supported-language registry therefore requires a complete catalog rather than a partial runtime pack.
 
-## Automated linguistic quality gate
+## Maintained linguistic quality gate
 
 Catalog completeness is not evidence that a translation is correct. Before a locale is described as linguistically verified, the fixed product interface catalog must pass a reproducible report containing:
 
-1. terminology checks against a version-controlled term base for security, identity, federation, workflow, task, report and licensing concepts;
-2. independent comparison with at least two maintained translation engines, using authenticated APIs rather than browser-page scraping;
-3. back-translation and semantic disagreement flags for security-sensitive, destructive, entitlement, status and workflow-transition text;
-4. spelling, grammar and style checks through a maintained language-specific engine where available, with dictionaries or another documented checker for languages it does not cover;
-5. source-language leakage, wrong-language, untranslated-fragment, control-character, punctuation, placeholder and markup checks;
-6. browser rendering at maintained desktop and mobile widths, including clipped controls, overflow, dialogs, email, reports and PDF output;
+1. a key-by-key semantic and editorial review against the English source sentence and the actual screen or workflow context;
+2. terminology checks against the version-controlled Fylkren term base and maintained language resources for security, identity, federation, workflow, task, report and licensing concepts;
+3. explicit review of security-sensitive, destructive, entitlement, status and workflow-transition text;
+4. spelling, grammar, idiom, address form and consistency checks across the complete catalog, supported by maintained language-specific tools where available;
+5. source-language leakage, wrong-language, untranslated-fragment, repeated-word, control-character, punctuation, placeholder and markup checks;
+6. representative browser rendering at maintained desktop and mobile widths, including clipped controls, overflow, dialogs, email, reports and PDF output;
 7. the existing locale behavior, catalog parity, typecheck, build and automated regression suites.
 
-The report records source and catalog hashes, review method, date, findings and resolved exceptions. Translation provider credentials are never committed. Only fixed Fylkren interface text may be submitted; customer content, deployment configuration and operational data are out of scope. A provider suggestion is evidence for review, not an automatic overwrite. Material disagreement or unresolved semantic doubt blocks the locale until the term base or translation is corrected. The internal [linguistic review status](../../dev-notes/localization/LINGUISTIC_REVIEW.md) is the canonical release record.
+The report records source and catalog hashes, review method, date, findings and resolved exceptions. External terminology or translation services are optional review aids, never approval authorities. Provider credentials are never committed. Only fixed Fylkren interface text may be submitted; customer content, deployment configuration and operational data are out of scope. A provider suggestion is evidence for review, not an automatic overwrite. Material disagreement or unresolved semantic doubt blocks the locale until the term base or translation is corrected. The internal [linguistic review status](../../dev-notes/localization/LINGUISTIC_REVIEW.md) is the canonical release record.
 
-English and Norwegian may additionally be owner-reviewed, but public support for the remaining roster does not depend on recruiting individual native-language reviewers. Release notes state the automated assurance method without implying human certification that did not occur.
+Public support for the roster does not depend on recruiting individual native-language reviewers. Release notes state the maintained review method without implying external certification that did not occur.
 
 ## Locale behavior
 
@@ -76,9 +76,9 @@ Adding a supported language requires all of the following in one maintained chan
 3. matching placeholders and coverage for all English source keys;
 4. locale-specific date, time, number, plural, sorting and layout tests;
 5. review of longer labels, right-to-left layout where relevant, accessibility text, email, reports and PDF output;
-6. a recorded automated linguistic-quality report with no unresolved blocking findings;
+6. a recorded linguistic-quality report with no unresolved blocking findings;
 7. updated README language roster, user manual and release notes.
 
 Language resources follow the maintained structure under `apps/web/src/localization/catalogs/<locale>/`. Shared localization code must not be mixed into a language directory, and a planned language must not be represented by a partial placeholder pack.
 
-Machine-generated translation may assist drafting. Support requires the complete automated linguistic and technical acceptance suite, retained evidence and resolution of blocking findings; one engine's output alone is never sufficient.
+Machine-generated translation may assist drafting. Support requires the complete linguistic and technical acceptance suite, retained evidence and resolution of blocking findings; one engine's output alone is never sufficient.

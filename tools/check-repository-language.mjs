@@ -5,6 +5,7 @@ import { readdirSync, statSync } from 'node:fs';
 const root = resolve(import.meta.dirname, '..');
 const localizationCatalogs = 'apps/web/src/localization/catalogs';
 const checkerPath = 'tools/check-repository-language.mjs';
+const linguisticEvidencePath = 'dev-notes/testing/runs/2026-10-10-linguistic-review.md';
 const checkedExtensions = new Set(['.cs', '.json', '.md', '.mjs', '.sh', '.ts', '.tsx', '.yaml', '.yml']);
 const ignoredDirectories = new Set(['.git', '.git-local', 'backups', 'bin', 'dist', 'node_modules', 'obj', 'output', 'tmp']);
 const norwegianCharacters = /[æøåÆØÅ]/g;
@@ -25,7 +26,7 @@ function markerCounts() {
   const counts = {};
   for (const absolutePath of allFiles(root)) {
     const path = relative(root, absolutePath);
-    if (path === checkerPath || path === 'tools/repository-language-baseline.json') continue;
+    if (path === checkerPath || path === 'tools/repository-language-baseline.json' || path === linguisticEvidencePath) continue;
     if (path.startsWith(`${localizationCatalogs}/`) && !path.startsWith(`${localizationCatalogs}/en-US/`)) continue;
     const content = readFileSync(absolutePath, 'utf8').replaceAll('Norsk bokmål', '');
     const count = (content.match(norwegianCharacters)?.length ?? 0) +

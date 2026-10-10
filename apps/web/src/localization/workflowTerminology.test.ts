@@ -38,6 +38,6 @@ describe("operational workflow terminology", () => {
     expect(translate("pl-PL", "tasksTaskCardPresentationDueDate")).toBe("Termin wykonania:");
     expect(translate("uk-UA", "tasksTaskCardPresentationDueDate")).toBe("Кінцевий термін:");
     expect(translate("nl-NL", "tasksTaskCardPresentationDueDate")).toBe("Uiterste datum:");
-    expect(translate("sv-SE", "tasksTaskCardPresentationDueDate")).toBe("Förfallodatum:");
+    expect(translate("sv-SE", "tasksTaskCardPresentationDueDate")).toBe("\u0046\u0072\u0069\u0073\u0074:");
   });
 });

@@ -50,6 +50,23 @@ describe("localization catalogs", () => {
     }
   });
 
+  it("does not leave English or translation artifacts in the reviewed Swedish catalog", () => {
+    const allowedIdenticalKeys = new Set([
+      "approvalStatus", "approvalVersion", "dayShort", "entitlementWebhooks", "entitySite", "entitySiteManager",
+      "federationStatus", "imperial", "languageCzech", "languageDanish", "languageDutch", "languageEstonian",
+      "languageFinnish", "languageFrench", "languageGerman", "languageItalian", "languageLatvian", "languageLithuanian",
+      "languageNorwegian", "languagePolish", "languagePortuguese", "languageRomanian", "languageSpanish", "languageSwedish",
+      "languageUkrainian", "minimal", "minuteShort", "navAi", "navApi", "navSites", "normalText", "planLabel", "port",
+      "priorityNormal", "riskStatus", "site", "siteManagers", "sites", "tasksTaskCardPresentationRisk", "underSite",
+      "underSiteUnit", "underUnit", "version", "versionLabel", "webhooks",
+    ]);
+    const artifacts = /avr\u00e4tt|exekv|regiss\u00f6r|funktionshindr|kundheml|kundnyck|sk\u00e5despel|migrations\u00e5tg\u00e4rd|mildrande|h\u00f6gh\u00f6g|totalt totalt|planplan|organisationsorganisation|arbetsf\u00f6rem\u00e5l|arbetsartikel|arbets-item|slgenomf\u00f6rande|(\p{L}+)(?:\s+\1){2,}/iu;
+    for (const [key, message] of Object.entries(languageCatalogs["sv-SE"])) {
+      expect(message, `sv-SE.${key} contains a translation artifact`).not.toMatch(artifacts);
+      if (message === en[key as keyof typeof en]) expect(allowedIdenticalKeys.has(key), `sv-SE.${key} is untranslated`).toBe(true);
+    }
+  });
+
   it("normalizes every bundled language and its bare language code", () => {
     const expected = {
       sv: "sv-SE", da: "da-DK", fi: "fi-FI", de: "de-DE", fr: "fr-FR", pl: "pl-PL", es: "es-ES", it: "it-IT",
