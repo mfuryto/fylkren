@@ -211,6 +211,25 @@ const french: AiMessages = {
   primaryDocumentImport: "Importer le document principal", primaryDocumentImportHelp: "Le lien ci-dessus ouvre le document original pour les utilisateurs. Sélectionnez une copie de fichier comme source pour l’IA : PDF, DOCX ou texte UTF-8, jusqu’à 8 Mio. Fylkren conserve l’extrait de texte, pas le fichier.", primaryDocumentAiSource: "Utiliser le document importé comme source pour l’IA", primaryDocumentImportFailed: "Le document principal n’a pas pu être importé", primaryDocumentImported: "Importé", primaryDocumentNotImported: "Non importé", primaryDocumentStatusUnavailable: "L’état du document n’a pas pu être obtenu", primaryDocumentDetails: "État du document", primaryDocumentOpenStructured: "Ouvrir les données structurées", entitlementAi: "Assistance par IA",
 };
 
+const polish: AiMessages = {
+  navAi: "AI", aiPageIntro: "Skonfiguruj ograniczone wsparcie AI dla wybranych Sites.",
+  aiEnterpriseNotice: "Wsparcie AI wymaga licencji Enterprise. Konfiguracja pozostaje widoczna również bez uprawnienia.",
+  aiMasterSwitch: "Włącz wsparcie AI", aiMasterHelp: "Funkcje AI pozostają ukryte i niedostępne do czasu włączenia tego ustawienia.",
+  aiProvider: "Dostawca", aiProviderHelp: "Użyj OpenAI w chmurze albo lokalnego modelu Llama przez punkt końcowy zgodny z OpenAI, na przykład Ollama lub vLLM.",
+  aiEndpoint: "Punkt końcowy zgodny z OpenAI", aiEndpointHelp: "Wprowadź pełny adres HTTPS. Wewnętrzny punkt końcowy HTTP musi być jawnie dozwolony w konfiguracji połączeń wychodzących instalacji.",
+  aiModel: "Model", aiApiKey: "Klucz API dostawcy", aiStoredSecret: "Klucz jest zapisany. Pozostaw pole puste, aby go zachować.", aiRemoveKey: "Usuń zapisany klucz",
+  aiFunctions: "Funkcje", aiSummaryFunction: "Podsumowanie i kontrola jakości", aiDraftsFunction: "Propozycje planów, ryzyk i decyzji", aiPlanningDraft: "Projekt planu", aiRiskDraft: "Projekt ryzyk i działań", aiDecisionDraft: "Projekt podstawy decyzji", aiLearningFunction: "Analiza wniosków", aiQuestionsFunction: "Pytania dotyczące zadania",
+  aiSites: "Sites z dostępem do AI", aiSitesHelp: "Tylko wybrane Sites mogą wysyłać treść zadań do skonfigurowanego dostawcy.",
+  aiSave: "Zapisz konfigurację AI", aiTest: "Przetestuj zapisane połączenie", aiSaved: "Konfiguracja AI została zapisana.", aiTestSucceeded: "Połączenie z AI działa.", aiTestFailed: "Test połączenia z AI nie powiódł się.", aiLoadFailed: "Nie udało się wczytać konfiguracji AI.", aiSaveFailed: "Nie udało się zapisać konfiguracji AI.",
+  aiAssistant: "Asystent AI", aiAssistantIntro: "Asystent korzysta wyłącznie z informacji, do których masz już dostęp do odczytu. Odpowiedź jest propozycją i nie jest zapisywana automatycznie.", aiRun: "Utwórz propozycję",
+  aiTaskAction: "Przeanalizuj zadanie", aiPlanningAction: "Zaproponuj treść planu", aiRiskAction: "Wskaż ryzyka i działania", aiDecisionAction: "Zaproponuj podstawę decyzji", aiLearningAction: "Przeanalizuj wnioski", aiGenerateAction: "Wygeneruj propozycję",
+  aiWorking: "AI pracuje…", aiWaiting: "AI pracuje · {seconds} s. Odpowiedź pojawi się, gdy model zacznie pisać.", aiReceiving: "Odbieranie odpowiedzi · {seconds} s",
+  aiQuestion: "Pytanie", aiQuestionPlaceholder: "O co chcesz zapytać w związku z tym zadaniem?", aiResult: "Propozycja AI", aiNoResult: "Wybierz funkcję i utwórz propozycję.", aiUseDraft: "Użyj tego projektu", aiRiskCause: "Przyczyna", aiRiskConsequence: "Skutek",
+  decisionNewDraft: "Nowy projekt decyzji", decisionEditDraft: "Edytuj decyzję", decisionSaveDraft: "Zapisz projekt", decisionChangeAction: "Zmień", decisionWithdrawAction: "Wycofaj", decisionDeleteDraft: "Usuń projekt", decisionWithdrawnHistory: "Wycofane decyzje i usunięte projekty", decisionDraftRemovalHelp: "Usunięty projekt lub wycofana decyzja znika z aktywnej obsługi. Historia wersji zostaje zachowana.", decisionAiSuggestionIntro: "Wybierz propozycję, aby otworzyć ją w zwykłym edytorze decyzji. Nic nie zostanie zapisane automatycznie.",
+  aiAssistFailed: "Asystent AI nie mógł ukończyć żądania.", aiProviderRateLimited: "Dostawca AI jest zajęty. Zaczekaj przed ponowną próbą.", aiProviderTimeout: "Odpowiedź dostawcy AI trwała zbyt długo.", aiProviderUnavailable: "Dostawca AI nie mógł ukończyć żądania.", aiProviderInvalidDraft: "Odpowiedzi AI nie można było bezpiecznie rozdzielić w szablonie planu. Wygeneruj propozycję ponownie.", aiProviderHttpStatus: "Dostawca AI zakończył żądanie ze statusem HTTP {status}.", aiGeneratedFromVersion: "Utworzono na podstawie stanu zadania z {date}. Przed użyciem tekstu sprawdź źródło.",
+  primaryDocumentImport: "Importuj dokument główny", primaryDocumentImportHelp: "Powyższy link otwiera dokument oryginalny dla użytkowników. Wybierz kopię pliku jako źródło AI: PDF, DOCX lub tekst UTF-8 do 8 MiB. Fylkren przechowuje wyodrębniony tekst, a nie plik.", primaryDocumentAiSource: "Użyj zaimportowanego dokumentu jako źródła AI", primaryDocumentImportFailed: "Nie udało się zaimportować dokumentu głównego", primaryDocumentImported: "Zaimportowano", primaryDocumentNotImported: "Nie zaimportowano", primaryDocumentStatusUnavailable: "Nie udało się pobrać stanu dokumentu", primaryDocumentDetails: "Stan dokumentu", primaryDocumentOpenStructured: "Otwórz dane strukturalne", entitlementAi: "Wsparcie AI",
+};
+
 const providerHelp: Record<string, string> = {
   "cs-CZ": "OpenAI v cloudu nebo místní Llama přes kompatibilní rozhraní Ollama či vLLM.",
   "da-DK": "OpenAI i skyen eller lokal Llama via et kompatibelt Ollama- eller vLLM-endepunkt.",
@@ -387,6 +406,6 @@ const aiErrorMessages: Record<string, AiErrorMessages> = {
   "uk-UA": { aiProviderInvalidDraft: "Відповідь ШІ не вдалося безпечно розподілити в шаблоні плану. Створіть пропозицію ще раз." },
 };
 
-export const aiTranslations: Record<string, AiMessages> = new Proxy({ "nb-NO": norwegian, "sv-SE": swedish, "da-DK": danish, "fi-FI": finnish, "de-DE": german, "fr-FR": french } as Record<string, AiMessages>, {
+export const aiTranslations: Record<string, AiMessages> = new Proxy({ "nb-NO": norwegian, "sv-SE": swedish, "da-DK": danish, "fi-FI": finnish, "de-DE": german, "fr-FR": french, "pl-PL": polish } as Record<string, AiMessages>, {
   get: (target, language: string) => target[language] ?? { ...aiEn, aiProviderHelp: providerHelp[language] ?? aiEn.aiProviderHelp, aiEndpointHelp: endpointHelp[language] ?? aiEn.aiEndpointHelp, ...progressMessages[language], ...draftLabels[language], ...decisionWorkflowMessages[language], ...aiActionMessages[language], ...documentImportMessages[language], ...documentStatusMessages[language], ...aiErrorMessages[language] },
 });

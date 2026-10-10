@@ -246,6 +246,24 @@ describe("localization catalogs", () => {
     }
   });
 
+  it("locks reviewed Polish operational and security terminology", () => {
+    const expected = {
+      taskStatusExecution: "Wykonanie",
+      workItemLabel: "Zadanie",
+      riskImpact: "Konsekwencja",
+      riskOwner: "Osoba odpowiedzialna",
+      twoFactorAuthentication: "Uwierzytelnianie dwuskładnikowe",
+      passkeys: "Klucze dostępu i klucze bezpieczeństwa",
+      tasksTaskActionPanelsRouteOnward: "Przekaż dalej",
+      workflowsPlanningDialogsNewResponsiblePlanner: "Nowy odpowiedzialny planista",
+      auditLogLoadFailed: "Nie udało się wczytać dziennika audytu.",
+      peersAndConnection: "Instalacje partnerskie i połączenia",
+    } as const;
+    for (const [key, value] of Object.entries(expected)) {
+      expect(translate("pl-PL", key as keyof typeof en)).toBe(value);
+    }
+  });
+
   it("rejects translation-tool artifacts and control characters", () => {
     const artifact = /NAME OF TRANSLATORS|@\s*info|whatsthis|STARTLS|TIRPIK|\bNPI\b|Nelegalus|Toksiškumas|Locale locale|Nessun segnale locale|(?:\.\s*){8,}|(?:•\s*){12,}|[\u0000-\u0008\u000B\u000C\u000E-\u001F]/i;
     for (const language of supportedLanguages) {

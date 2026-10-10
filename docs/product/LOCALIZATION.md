@@ -16,7 +16,7 @@ The [localization terminology](LOCALIZATION_TERMINOLOGY.md) is authoritative for
 | `fi-FI` | Finnish | Linguistically verified against the current source catalog |
 | `de-DE` | German | Linguistically verified against the current source catalog |
 | `fr-FR` | French | Linguistically verified against the current source catalog |
-| `pl-PL` | Polish | Technically complete; linguistic review pending |
+| `pl-PL` | Polish | Linguistically verified against the current source catalog |
 | `es-ES` | Spanish (Spain) | Technically complete; linguistic review pending |
 | `it-IT` | Italian | Technically complete; linguistic review pending |
 | `uk-UA` | Ukrainian | Technically complete; linguistic review pending |
