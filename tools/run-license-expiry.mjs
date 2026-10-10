@@ -221,9 +221,22 @@ try {
 
   const domainEventId = randomUUID();
   const resourceId = randomUUID();
-  psql(`INSERT INTO domain_events (id,event_type,schema_version,occurred_at,site_id,actor_person_id,resource_type,resource_id,payload_json,webhooks_projected_at) VALUES ('${domainEventId}','task.created',1,NOW(),'${sites[0]}',NULL,'task','${resourceId}','{}'::jsonb,NULL)`);
+  const operationId = randomUUID();
+  psql(`BEGIN;
+    INSERT INTO domain_events
+      (id,event_type,schema_version,occurred_at,site_id,actor_person_id,resource_type,resource_id,payload_json,webhooks_projected_at,
+       activity_type,activity_metadata_json,source,actor_kind,recorded_at,origin_instance_id,origin_site_id,operation_id,effect_key,actor_system)
+    SELECT '${domainEventId}','task.created',1,NOW(),'${sites[0]}',NULL,'task','${resourceId}','{}'::jsonb,NULL,
+       'task.created','{}'::jsonb,'system','system',NOW(),instance_id,'${sites[0]}','${operationId}','license-expiry-webhook-projection','License expiry test'
+    FROM instance_identity WHERE key=1;
+    INSERT INTO event_projections
+      (consumer,domain_event_id,status,lease_owner,lease_expires_at,attempt_count,next_attempt_at,last_error,completed_at)
+    VALUES
+      ('notifications','${domainEventId}','skipped',NULL,NULL,0,NOW(),NULL,NOW()),
+      ('webhooks','${domainEventId}','pending',NULL,NULL,0,NOW(),NULL,NULL);
+    COMMIT;`);
   await new Promise(resolve => setTimeout(resolve, 12_000));
-  assert.equal(psql(`SELECT COALESCE(webhooks_projected_at::text,'NULL') FROM domain_events WHERE id='${domainEventId}'`), 'NULL',
+  assert.equal(psql(`SELECT status FROM event_projections WHERE consumer='webhooks' AND domain_event_id='${domainEventId}'`), 'pending',
     'Webhook projection worker must stop while the entitlement is expired');
 
   const renewal = await client.post('/api/platform/license', envelope(new Date(Date.now() + 600_000)));
@@ -234,12 +247,12 @@ try {
   const machineAfterRenewal = await signedMachineRequest(base, machineToken, '/api/v1/administration/sites');
   assert.equal(machineAfterRenewal.status, 200, 'Retained machine client must resume under a renewed entitlement');
 
-  let projected = 'NULL';
-  for (let attempt = 0; attempt < 30 && projected === 'NULL'; attempt++) {
+  let projected = 'pending';
+  for (let attempt = 0; attempt < 30 && projected === 'pending'; attempt++) {
     await new Promise(resolve => setTimeout(resolve, 500));
-    projected = psql(`SELECT COALESCE(webhooks_projected_at::text,'NULL') FROM domain_events WHERE id='${domainEventId}'`);
+    projected = psql(`SELECT status FROM event_projections WHERE consumer='webhooks' AND domain_event_id='${domainEventId}'`);
   }
-  assert.notEqual(projected, 'NULL', 'Webhook projection worker must resume after renewal');
+  assert.equal(projected, 'completed', 'Webhook projection worker must resume after renewal');
 
   const siteAfterRenewal = await client.post('/api/sites/', { name: `Renewed Site 5 ${suffix}`, overviewDesign: 'classic' });
   assert.equal(siteAfterRenewal.status, 201, JSON.stringify(siteAfterRenewal.body));
