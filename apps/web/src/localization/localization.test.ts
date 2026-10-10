@@ -87,6 +87,23 @@ describe("localization catalogs", () => {
     }
   });
 
+  it("does not leave English or translation artifacts in the reviewed Finnish catalog", () => {
+    const allowedIdenticalKeys = new Set([
+      "entitySite", "entitySiteManager", "executionStepNameSuffix", "fylkrenSpEntityId", "hourShort",
+      "languageCzech", "languageDanish", "languageDutch", "languageEstonian", "languageFinnish", "languageFrench",
+      "languageGerman", "languageItalian", "languageLatvian", "languageLithuanian", "languageNorwegian",
+      "languagePolish", "languagePortuguese", "languageRomanian", "languageSpanish", "languageSwedish",
+      "languageUkrainian", "logo", "minuteShort", "navApi", "navPlatform", "navSites", "oidcSubject", "site",
+      "siteManagers", "sites", "workflowNameSuffix",
+    ]);
+    const artifacts = /pelast|apurah|työmaa|liittoval|tuensaaj|ylivertai|työkappale|kansiotul|huipputaso|lapsipa|Läheinen tehtävä|ennätyksell|rationaalisuus|holdingin|Allocate-tehtävä|\bretries\b|\bAdd-\b|(?:\.\s*){6,}|(\p{L}+)(?:\s+\1){2,}/iu;
+    for (const [key, message] of Object.entries(languageCatalogs["fi-FI"])) {
+      const withoutPlaceholders = message.replace(/\{\{?[A-Za-z][A-Za-z0-9]*\}?\}/g, "");
+      expect(withoutPlaceholders, `fi-FI.${key} contains a translation artifact`).not.toMatch(artifacts);
+      if (message === en[key as keyof typeof en]) expect(allowedIdenticalKeys.has(key), `fi-FI.${key} is untranslated`).toBe(true);
+    }
+  });
+
   it("normalizes every bundled language and its bare language code", () => {
     const expected = {
       sv: "sv-SE", da: "da-DK", fi: "fi-FI", de: "de-DE", fr: "fr-FR", pl: "pl-PL", es: "es-ES", it: "it-IT",

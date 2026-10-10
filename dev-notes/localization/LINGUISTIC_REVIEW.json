@@ -70,9 +70,14 @@
       ]
     },
     "fi-FI": {
-      "status": "pending",
-      "reviewedKeyCount": 0,
-      "catalogSha256": "5ea04b1c52a65f9d6dfdc3600e878f39bfae2eb55c650b8bbea985f7d3e10854"
+      "status": "verified",
+      "reviewedKeyCount": 2244,
+      "catalogSha256": "ad993df7004f59d27b349daa8b5a22f3bb8ddaff19a20e1b4c4f11b0a05723bc",
+      "verifiedSourceCatalogSha256": "4f8d4ddac684c6e2924bd13c1f5f9421cbd1474b7401278c5eec4e34f0429faa",
+      "verifiedAt": "2026-10-10",
+      "evidence": [
+        "dev-notes/testing/runs/2026-10-10-linguistic-review.md"
+      ]
     },
     "de-DE": {
       "status": "pending",

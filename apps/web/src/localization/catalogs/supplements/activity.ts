@@ -124,20 +124,20 @@ export const activityTranslations: Record<string, Record<ActivityMessageKey, str
 
     "lifecycleAction": "Toiminto",
     "lifecycleActiveDescription": "Aktiivinen: Sisältöä voi muokata. Sulkeminen lukitsee valmiin työn. Keskeneräinen liittyvä työ tai odottava toimitus on käsiteltävä ensin. Käytä tätä valmistumisen, hylkäyksen tai peruutuksen jälkeen, kun seuranta on valmis. Valmis työ vaatii hyväksytyn loppuraportin. Tämä ei korvaa tavallisia tilatoimintoja.",
-    "lifecycleClosedDescription": "Suljettu: Sisältö on lukittu ja säilytetty. Arkistoi tai avaa uudelleen muokkausta varten. Tehtävän tila ei muutu.",
-    "lifecycleArchivedDescription": "Arkistoitu: Sisältö ja historia säilyvät lukittuina. Palauta suljetuksi ja avaa sitten uudelleen muokkausta varten. Mitään ei poisteta.",
+    "lifecycleClosedDescription": "Lukittu: Sisältö on lukittu ja säilytetty. Arkistoi se tai avaa uudelleen muokkausta varten. Tehtävän tila ei muutu.",
+    "lifecycleArchivedDescription": "Arkistoitu: Sisältö ja historia säilyvät lukittuina. Palauta sisältö lukituksi ja avaa se sitten uudelleen muokkausta varten. Mitään ei poisteta.",
     "lifecycleReasonHelp": "Kerro, miksi muutat tilaa. Esimerkki: Loppuraportti hyväksytty ja seuranta valmis. Jokainen muutos vaatii perustelun.",
     "lifecycleHeldNotice": "Säilytysesto estää tilan muuttamisen.",
-    "activityTitle": "Toiminta",
-    "activityLegacyNotice": "Tätä toimintoa edeltävä historia voi olla puutteellinen.",
-    "activityLoadFailed": "Toimintaa ei voitu ladata.",
+    "activityTitle": "Tapahtumat",
+    "activityLegacyNotice": "Tämän toiminnon käyttöönottoa edeltävä tapahtumahistoria voi olla puutteellinen.",
+    "activityLoadFailed": "Tapahtumia ei voitu ladata.",
     "lifecycleTitle": "Tietojen elinkaari",
-    "lifecycleClosed": "Sulje tiedot",
+    "lifecycleClosed": "Lukitse tiedot",
     "lifecycleArchived": "Arkistoi",
-    "lifecycleRestore": "Palauta suljetuksi",
+    "lifecycleRestore": "Palauta lukituksi",
     "lifecycleReopen": "Avaa tiedot uudelleen",
     "lifecycleReason": "Perustelu",
-    "activityUnknown": "Toiminta kirjattu"
+    "activityUnknown": "Tapahtuma kirjattu"
   },
   "de-DE": {
     ...domainActivityTranslations["de-DE"],

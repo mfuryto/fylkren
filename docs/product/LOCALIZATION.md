@@ -13,7 +13,7 @@ The [localization terminology](LOCALIZATION_TERMINOLOGY.md) is authoritative for
 | `nb-NO` | Norwegian Bokmal | Linguistically verified against the current source catalog |
 | `sv-SE` | Swedish | Linguistically verified against the current source catalog |
 | `da-DK` | Danish | Linguistically verified against the current source catalog |
-| `fi-FI` | Finnish | Technically complete; linguistic review pending |
+| `fi-FI` | Finnish | Linguistically verified against the current source catalog |
 | `de-DE` | German | Technically complete; linguistic review pending |
 | `fr-FR` | French | Technically complete; linguistic review pending |
 | `pl-PL` | Polish | Technically complete; linguistic review pending |
