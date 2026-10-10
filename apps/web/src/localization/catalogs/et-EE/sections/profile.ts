@@ -48,7 +48,7 @@ export const profileEtEE = {
   setupAuthenticator: "Autentija rakenduse seadistamine",
   recoveryCodesTitle: "Tagasimakse koodid – näidatud ainult praegu",
   recoveryCodesHelp: "Salvesta need turvaliselt. Iga koodi saab kasutada ühe korra.",
-  passkeys: "Passivõtmed ja turvavõtmed",
+  passkeys: "Pääsuvõtmed ja turvavõtmed",
   passkeysIntro: "WebAuthn nõuab HTTPS-i, välja arvatud kohaliku arengu jaoks lokaalses hostis.",
   defaultPasskeyName: "Minu parvkaart",
   passkeyName: "Võtmenimi",

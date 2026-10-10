@@ -19,7 +19,7 @@ export const reportsEtEE = {
   viewReport: "Vaatamisaruannet",
   reportPages: "Aruandelehed",
   reportModalTitle: "Raport",
-  workItemLabel: "Tööde käik",
+  workItemLabel: "Tööülesanne",
   dateLabel: "Kuupäev",
   workReceived: "Saadud töö",
   workCompleted: "Töö lõpetatud",

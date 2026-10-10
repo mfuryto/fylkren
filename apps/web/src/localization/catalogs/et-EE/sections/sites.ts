@@ -16,7 +16,7 @@ export const sitesEtEE = {
   findSite: "Otsi Site",
   siteSearchPlaceholder: "Nimi, juhataja või paigutus",
   standaloneTopLevel: "Varieerunud tipptase",
-  underSite: "Under {site}",
+  underSite: "Site {site} all",
   underSiteUnit: "Under {site} · · {unit}",
   childSites: "Alam-Sites: {sites}",
   deleted: "Kustutatud",

@@ -24,7 +24,7 @@ The [localization terminology](LOCALIZATION_TERMINOLOGY.md) is authoritative for
 | `pt-PT` | Portuguese (Portugal) | Linguistically verified against the current source catalog |
 | `cs-CZ` | Czech | Linguistically verified against the current source catalog |
 | `ro-RO` | Romanian | Linguistically verified against the current source catalog |
-| `et-EE` | Estonian | Technically complete; linguistic review pending |
+| `et-EE` | Estonian | Linguistically verified against the current source catalog |
 | `lv-LV` | Latvian | Technically complete; linguistic review pending |
 | `lt-LT` | Lithuanian | Technically complete; linguistic review pending |
 

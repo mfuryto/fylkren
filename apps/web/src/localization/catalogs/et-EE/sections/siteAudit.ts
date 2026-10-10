@@ -3,7 +3,7 @@ import type { MessageKey } from "../../en-US";
 export const siteAuditEtEE = {
   siteAudit: "Audit",
   siteAuditIntro: "Jälgitavad sündmused teie hallatavates saitides.",
-  auditArea: "Area",
+  auditArea: "Valdkond",
   allAreas: "Kõik piirkonnad",
   organizationArea: "Organisatsioon",
   personnelArea: "Personal ja rollid",

@@ -16,7 +16,7 @@ export const workTemplatesEtEE = {
   view: "Vaade",
   editTemplatePlain: "Malli muutmine",
   newTemplate: "Uus mall",
-  scope: "Scope",
+  scope: "Õigus",
   sharedSitePlanning: "Koos alaga ja planeerimine",
   startingContent: "Sisu käivitamine",
   selectTemplateInWorkflows: "Valige töövoogude lehel vajaliku sammu mall.",

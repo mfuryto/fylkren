@@ -180,9 +180,14 @@
       ]
     },
     "et-EE": {
-      "status": "pending",
-      "reviewedKeyCount": 0,
-      "catalogSha256": "a56e6ba594bb2865accc77f8cf0a6533e05f12e3eadb02e427d5a22f3b75456a"
+      "status": "verified",
+      "reviewedKeyCount": 2244,
+      "catalogSha256": "07df25dec2ec15bca1359853ee5e98256a05d0c1a38a53fc0eee1b96c4c2029a",
+      "verifiedSourceCatalogSha256": "4f8d4ddac684c6e2924bd13c1f5f9421cbd1474b7401278c5eec4e34f0429faa",
+      "verifiedAt": "2026-10-10",
+      "evidence": [
+        "dev-notes/testing/runs/2026-10-10-linguistic-review.md"
+      ]
     },
     "lv-LV": {
       "status": "pending",

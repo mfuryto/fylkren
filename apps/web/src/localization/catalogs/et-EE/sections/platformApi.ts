@@ -13,7 +13,7 @@ export const platformApiEtEE = {
   noApiClients: "API kliente ei ole loodud.",
   noApiClientMatches: "Ükski API klient ei sobi filtriga.",
   keyId: "Võtme ID",
-  scopes: "Scopes",
+  scopes: "Õigused",
   createdDate: "Loodud {date}",
   lastUsedDate: "Viimati kasutatud {date}",
   expiresDate: "Aegub {date}",
