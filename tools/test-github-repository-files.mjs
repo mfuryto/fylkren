@@ -26,6 +26,10 @@ assert.match(pages, /path: apps\/demo\/dist/, 'Pages must upload only the built 
 assert.match(pages, /pages: write/);
 assert.match(pages, /id-token: write/);
 
+const codeql = await read('.github/workflows/codeql.yml');
+const codeqlBeforeJobs = codeql.slice(0, codeql.indexOf('\njobs:'));
+assert.doesNotMatch(codeqlBeforeJobs, /\bmatrix\./, 'workflow-level CodeQL fields cannot use the job matrix context');
+
 const readme = await read('README.md');
 const normalizedReadme = readme.toLowerCase();
 for (const phrase of ['multilingual', 'ai-assisted', 'self-hosted', 'air-gapped', 'https://mfuryto.github.io/fylkren/']) assert.ok(normalizedReadme.includes(phrase), `README is missing ${phrase}`);
@@ -42,5 +46,6 @@ const hardening = await read('tools/security/harden-public-github-repository.sh'
 assert.doesNotMatch(hardening, /"visibility"\s*:/, 'the hardening script must never change repository visibility');
 for (const control of ['private-vulnerability-reporting', 'secret_scanning_push_protection', 'actions/permissions/workflow', 'repos/$repo/pages']) assert.ok(hardening.includes(control), `hardening script is missing ${control}`);
 assert.match(hardening, /"has_pull_requests": false/, 'the public repository must keep pull requests disabled');
+assert.doesNotMatch(hardening, /"advanced_security"\s*:/, 'public repositories must not PATCH the always-on Advanced Security setting');
 
 console.log(JSON.stringify({ githubRepositoryFiles: 'passed', workflows: workflowFiles.length, pinnedActionReferences: actionReferences, pullRequestAutomation: false, issueForms: 3, pagesSource: 'apps/demo' }));

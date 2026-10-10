@@ -71,7 +71,6 @@ if [[ "$mode" == "apply" ]]; then
   "delete_branch_on_merge": true,
   "web_commit_signoff_required": true,
   "security_and_analysis": {
-    "advanced_security": {"status": "enabled"},
     "secret_scanning": {"status": "enabled"},
     "secret_scanning_push_protection": {"status": "enabled"}
   }
