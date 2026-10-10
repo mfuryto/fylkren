@@ -17,7 +17,7 @@ The [localization terminology](LOCALIZATION_TERMINOLOGY.md) is authoritative for
 | `de-DE` | German | Linguistically verified against the current source catalog |
 | `fr-FR` | French | Linguistically verified against the current source catalog |
 | `pl-PL` | Polish | Linguistically verified against the current source catalog |
-| `es-ES` | Spanish (Spain) | Technically complete; linguistic review pending |
+| `es-ES` | Spanish (Spain) | Linguistically verified against the current source catalog |
 | `it-IT` | Italian | Technically complete; linguistic review pending |
 | `uk-UA` | Ukrainian | Technically complete; linguistic review pending |
 | `nl-NL` | Dutch | Technically complete; linguistic review pending |

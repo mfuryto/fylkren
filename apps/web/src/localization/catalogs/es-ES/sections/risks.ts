@@ -9,8 +9,8 @@ export const risksEsES = {
 
   risksLoadFailed: "Los riesgos no se pueden cargar.",
   riskUpdateFailed: "El riesgo no puede actualizarse.",
-  riskSaveFailed: "El riesgo no se puede salvar.",
-  mitigationSaveFailed: "La acción de mitigación no se puede salvar.",
+  riskSaveFailed: "No se pudo guardar el riesgo.",
+  mitigationSaveFailed: "No se pudo guardar la medida de mitigación.",
   mitigationCompleteFailed: "No se pudo completar la acción de mitigación.",
   riskAndMitigations: "Riesgos y medidas de mitigación",
   noRisks: "No se han registrado riesgos.",
@@ -19,8 +19,8 @@ export const risksEsES = {
   riskLevelHigh: "Alto",
   riskLevelCritical: "Crítica",
   riskProbability: "Probabilidad",
-  riskImpact: "Impacto",
-  riskOwner: "Propietario",
+  riskImpact: "Consecuencia",
+  riskOwner: "Responsable",
   riskStatus: "Situación",
   residualRisk: "Riesgo residual",
   mitigations: "Medidas de mitigación",
@@ -53,5 +53,5 @@ export const risksEsES = {
   registerMitigation: "Acta de reducción del riesgo",
   mitigationAction: "Medida",
   mitigationOwnerHelp: "Se le asignará como responsable. La acción puede ser rastreada hasta el estado completo.",
-  saveMitigation: "Salvar la acción",
+  saveMitigation: "Guardar medida",
 } satisfies Partial<Record<MessageKey, string>>;

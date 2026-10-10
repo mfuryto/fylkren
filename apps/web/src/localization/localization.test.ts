@@ -264,6 +264,24 @@ describe("localization catalogs", () => {
     }
   });
 
+  it("locks reviewed Spanish operational and security terminology", () => {
+    const expected = {
+      taskStatusExecution: "Ejecución",
+      workItemLabel: "Tarea",
+      riskImpact: "Consecuencia",
+      riskOwner: "Responsable",
+      twoFactorAuthentication: "Autenticación de dos factores",
+      passkeys: "Claves de acceso y llaves de seguridad",
+      tasksTaskActionPanelsRouteOnward: "Encaminar",
+      workflowsPlanningDialogsNewResponsiblePlanner: "Nuevo planificador responsable",
+      auditLogLoadFailed: "No se pudo cargar el registro de auditoría.",
+      peersAndConnection: "Instalaciones asociadas y conexión",
+    } as const;
+    for (const [key, value] of Object.entries(expected)) {
+      expect(translate("es-ES", key as keyof typeof en)).toBe(value);
+    }
+  });
+
   it("rejects translation-tool artifacts and control characters", () => {
     const artifact = /NAME OF TRANSLATORS|@\s*info|whatsthis|STARTLS|TIRPIK|\bNPI\b|Nelegalus|Toksiškumas|Locale locale|Nessun segnale locale|(?:\.\s*){8,}|(?:•\s*){12,}|[\u0000-\u0008\u000B\u000C\u000E-\u001F]/i;
     for (const language of supportedLanguages) {
