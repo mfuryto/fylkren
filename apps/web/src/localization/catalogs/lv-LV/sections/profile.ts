@@ -48,7 +48,7 @@ export const profileLvLV = {
   setupAuthenticator: "Iestatīt autentificētāja programmu",
   recoveryCodesTitle: "Atveseļošanas kodi – norādīti tikai tagad",
   recoveryCodesHelp: "Uzglabāt tos droši. Katru kodu var izmantot vienu reizi.",
-  passkeys: "Paskeši un drošības taustiņi",
+  passkeys: "Piekļuves atslēgas un drošības atslēgas",
   passkeysIntro: "WebAuthn prasa HTTPS izņemot vietējo attīstību par localhost.",
   defaultPasskeyName: "Mans caurlaidenis",
   passkeyName: "Atslēgas nosaukums",

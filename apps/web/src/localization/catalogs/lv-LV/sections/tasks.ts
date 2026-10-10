@@ -26,7 +26,7 @@ export const tasksLvLV = {
   tasksTaskActionPanelsReject: "Noraidīt",
   tasksTaskActionPanelsReopen: "Atkārtoti atvērt",
   tasksTaskActionPanelsReturnWithCorrections: "Atgriešanās ar korekcijām",
-  tasksTaskActionPanelsRouteOnward: "Tālākais maršruts",
+  tasksTaskActionPanelsRouteOnward: "Pārsūtīt tālāk",
   tasksTaskActionPanelsSendRequest: "Sūtīt pieprasījumu",
   tasksTaskActionPanelsWriteFinalReport: "Rakstīt nobeiguma ziņojumu",
   tasksTaskApiExecutionHistoryCouldNotBeLoaded: "Neizdevās ielādēt izpildes vēsturi.",

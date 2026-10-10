@@ -19,7 +19,7 @@ export const reportsLvLV = {
   viewReport: "Skata ziņojums",
   reportPages: "Ziņojuma lapas",
   reportModalTitle: "Ziņojums",
-  workItemLabel: "Darba postenis",
+  workItemLabel: "Darba vienība",
   dateLabel: "Datums",
   workReceived: "Saņemtie darbi",
   workCompleted: "Pabeigtie darbi",

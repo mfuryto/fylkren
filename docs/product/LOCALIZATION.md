@@ -25,7 +25,7 @@ The [localization terminology](LOCALIZATION_TERMINOLOGY.md) is authoritative for
 | `cs-CZ` | Czech | Linguistically verified against the current source catalog |
 | `ro-RO` | Romanian | Linguistically verified against the current source catalog |
 | `et-EE` | Estonian | Linguistically verified against the current source catalog |
-| `lv-LV` | Latvian | Technically complete; linguistic review pending |
+| `lv-LV` | Latvian | Linguistically verified against the current source catalog |
 | `lt-LT` | Lithuanian | Technically complete; linguistic review pending |
 
 The legacy locale value `en` is treated as `en-US` and upgraded to that explicit value. No additional locale is considered supported until its complete bundled catalog, locale behavior, documentation and automated tests are delivered together.

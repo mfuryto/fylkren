@@ -40,7 +40,7 @@ export const federationLvLV = {
   keyFingerprint: "Atslēgas pirkstu nospiedumi",
   fingerprintConfirmed: "Es salīdzināju pirkstu nospiedumus caur neatkarīgu kanālu.",
   approvePeer: "Apstiprināt dalībnieku šajā instancē",
-  peersAndConnection: "Dalībnieki un saikne",
+  peersAndConnection: "Saistītās instalācijas un savienojums",
   noPeers: "Nav reģistrēti neviens dalībnieks.",
   selectPeer: "Izvēlieties dalībnieku",
   federationStatus: "Statuss",

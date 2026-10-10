@@ -66,7 +66,7 @@ export const workflowsLvLV = {
   workflowsPlanningAllocationEditorSearchForReceivingSite: "Meklēt saņemošajā vietnē",
   workflowsPlanningAllocationEditorSelectUnit: "Izvēlieties vienību",
   workflowsPlanningAllocationEditorSubordinateUnitOrTeam: "Pakārtotā vienība vai komanda",
-  workflowsPlanningAllocationEditorSubtask: "Subtask ·",
+  workflowsPlanningAllocationEditorSubtask: "Apakšuzdevums ·",
   workflowsPlanningAllocationEditorSubtasksAreSavedAutomaticallyWhenYou: "Subtakss tiek saglabāts automātiski, kad jūs tos pievienojat vai maināt to tekstu.",
   workflowsPlanningAllocationEditorTaskAndInstructionsForTheUnit: "Vienības uzdevums un instrukcijas",
   workflowsPlanningAllocationEditorTaskForSubordinateUnitOrTeam: "Pakārtotās vienības vai grupas uzdevums",
