@@ -20,7 +20,7 @@ export const workPtPT = {
   noDescription: "Sem descrição",
   receivingSite: "Sítio de recepção",
   recipientFallback: "o destinatário",
-  managerFallback: "gerenciador",
+  managerFallback: "gestor",
   tasksForRecipientLabel: "Tarefas para {recipient}",
   approvedBySummary: "Aprovação pela Comissão {name}",
   approvedVersionsTitle: "Versões aprovadas — {title}",

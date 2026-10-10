@@ -336,6 +336,24 @@ describe("localization catalogs", () => {
     }
   });
 
+  it("locks reviewed European Portuguese operational and security terminology", () => {
+    const expected = {
+      taskStatusExecution: "Execução",
+      workItemLabel: "Item de trabalho",
+      riskImpact: "Impacto",
+      riskOwner: "Responsável",
+      twoFactorAuthentication: "Autenticação de dois fatores",
+      passkeys: "Chaves de acesso e chaves de segurança",
+      tasksTaskActionPanelsRouteOnward: "Reencaminhar",
+      workflowsPlanningDialogsNewResponsiblePlanner: "Novo responsável pelo planeamento",
+      auditLogLoadFailed: "O registo de auditoria não pôde ser carregado.",
+      peersAndConnection: "Instalações associadas e ligação",
+    } as const;
+    for (const [key, value] of Object.entries(expected)) {
+      expect(translate("pt-PT", key as keyof typeof en)).toBe(value);
+    }
+  });
+
   it("rejects translation-tool artifacts and control characters", () => {
     const artifact = /NAME OF TRANSLATORS|@\s*info|whatsthis|STARTLS|TIRPIK|\bNPI\b|Nelegalus|Toksiškumas|Locale locale|Nessun segnale locale|(?:\.\s*){8,}|(?:•\s*){12,}|[\u0000-\u0008\u000B\u000C\u000E-\u001F]/i;
     for (const language of supportedLanguages) {

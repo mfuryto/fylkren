@@ -21,7 +21,7 @@ The [localization terminology](LOCALIZATION_TERMINOLOGY.md) is authoritative for
 | `it-IT` | Italian | Linguistically verified against the current source catalog |
 | `uk-UA` | Ukrainian | Linguistically verified against the current source catalog |
 | `nl-NL` | Dutch | Linguistically verified against the current source catalog |
-| `pt-PT` | Portuguese (Portugal) | Technically complete; linguistic review pending |
+| `pt-PT` | Portuguese (Portugal) | Linguistically verified against the current source catalog |
 | `cs-CZ` | Czech | Technically complete; linguistic review pending |
 | `ro-RO` | Romanian | Technically complete; linguistic review pending |
 | `et-EE` | Estonian | Technically complete; linguistic review pending |
