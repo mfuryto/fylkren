@@ -135,6 +135,25 @@ const swedish: AiMessages = {
   primaryDocumentImport: "Importera huvuddokument", primaryDocumentImportHelp: "Länken ovan öppnar originaldokumentet för användarna. Välj en filkopia som underlag för AI: PDF, DOCX eller UTF-8-text, högst 8 MiB. Fylkren lagrar textutdraget, inte filen.", primaryDocumentAiSource: "Använd det importerade dokumentet som källa för AI", primaryDocumentImportFailed: "Huvuddokumentet kunde inte importeras", primaryDocumentImported: "Importerat", primaryDocumentNotImported: "Inte importerat", primaryDocumentStatusUnavailable: "Dokumentstatusen kunde inte hämtas", primaryDocumentDetails: "Dokumentstatus", primaryDocumentOpenStructured: "Öppna strukturerade data", entitlementAi: "AI-stöd",
 };
 
+const danish: AiMessages = {
+  navAi: "AI", aiPageIntro: "Konfigurer afgrænset AI-understøttelse for udvalgte Sites.",
+  aiEnterpriseNotice: "AI-understøttelse kræver en Enterprise-licens. Konfigurationen vises også, når rettigheden mangler.",
+  aiMasterSwitch: "Aktivér AI-understøttelse", aiMasterHelp: "AI-funktionerne er skjulte og utilgængelige, indtil denne indstilling aktiveres.",
+  aiProvider: "Udbyder", aiProviderHelp: "Brug OpenAI i skyen eller en lokal Llama-model via et OpenAI-kompatibelt slutpunkt, for eksempel Ollama eller vLLM.",
+  aiEndpoint: "OpenAI-kompatibelt slutpunkt", aiEndpointHelp: "Angiv hele HTTPS-adressen. Et internt HTTP-slutpunkt skal udtrykkeligt tillades i installationens konfiguration for udgående forbindelser.",
+  aiModel: "Model", aiApiKey: "API-nøgle hos udbyderen", aiStoredSecret: "Der er gemt en nøgle. Lad feltet stå tomt for at beholde den.", aiRemoveKey: "Fjern gemt nøgle",
+  aiFunctions: "Funktioner", aiSummaryFunction: "Opsummering og kvalitetskontrol", aiDraftsFunction: "Forslag til planlægning, risici og beslutninger", aiPlanningDraft: "Planudkast", aiRiskDraft: "Udkast til risici og tiltag", aiDecisionDraft: "Udkast til beslutningsgrundlag", aiLearningFunction: "Analyse af læringspunkter", aiQuestionsFunction: "Spørgsmål om opgaven",
+  aiSites: "Sites med AI-adgang", aiSitesHelp: "Kun udvalgte Sites kan sende opgaveindhold til den konfigurerede udbyder.",
+  aiSave: "Gem AI-konfiguration", aiTest: "Test den gemte forbindelse", aiSaved: "AI-konfigurationen er gemt.", aiTestSucceeded: "AI-forbindelsen virker.", aiTestFailed: "Testen af AI-forbindelsen mislykkedes.", aiLoadFailed: "AI-konfigurationen kunne ikke indlæses.", aiSaveFailed: "AI-konfigurationen kunne ikke gemmes.",
+  aiAssistant: "AI-assistent", aiAssistantIntro: "Assistenten bruger oplysninger, som du allerede har læseadgang til. Svaret er et forslag og gemmes ikke automatisk.", aiRun: "Opret forslag",
+  aiTaskAction: "Analysér opgaven", aiPlanningAction: "Foreslå planindhold", aiRiskAction: "Identificér risici og tiltag", aiDecisionAction: "Foreslå beslutningsgrundlag", aiLearningAction: "Analysér læringspunkter", aiGenerateAction: "Generér forslag",
+  aiWorking: "AI arbejder…", aiWaiting: "AI arbejder · {seconds} s. Svaret vises her, så snart modellen begynder at skrive.", aiReceiving: "Modtager svaret · {seconds} s",
+  aiQuestion: "Spørgsmål", aiQuestionPlaceholder: "Hvad vil du vide om denne opgave?", aiResult: "AI-forslag", aiNoResult: "Vælg en funktion, og opret et forslag.", aiUseDraft: "Brug dette udkast", aiRiskCause: "Årsag", aiRiskConsequence: "Konsekvens",
+  decisionNewDraft: "Nyt beslutningsudkast", decisionEditDraft: "Rediger beslutning", decisionSaveDraft: "Gem udkast", decisionChangeAction: "Rediger", decisionWithdrawAction: "Træk tilbage", decisionDeleteDraft: "Slet udkast", decisionWithdrawnHistory: "Tilbagetrukne beslutninger og slettede udkast", decisionDraftRemovalHelp: "Når et udkast slettes eller en beslutning trækkes tilbage, fjernes den fra aktiv behandling. Versionshistorikken bevares.", decisionAiSuggestionIntro: "Vælg et forslag for at åbne det i den almindelige beslutningseditor. Intet gemmes automatisk.",
+  aiAssistFailed: "AI-assistenten kunne ikke fuldføre forespørgslen.", aiProviderRateLimited: "AI-udbyderen er optaget. Vent, før du prøver igen.", aiProviderTimeout: "AI-udbyderen brugte for lang tid.", aiProviderUnavailable: "AI-udbyderen kunne ikke fuldføre forespørgslen.", aiProviderInvalidDraft: "AI-svaret kunne ikke fordeles sikkert i planskabelonen. Prøv at generere forslaget igen.", aiProviderHttpStatus: "AI-udbyderen afsluttede forespørgslen med HTTP {status}.", aiGeneratedFromVersion: "Oprettet fra opgaven, som den senest blev opdateret {date}. Kontrollér kilden, før teksten bruges.",
+  primaryDocumentImport: "Importér hoveddokument", primaryDocumentImportHelp: "Linket ovenfor åbner originaldokumentet for brugerne. Vælg en filkopi som grundlag for AI: PDF, DOCX eller UTF-8-tekst, højst 8 MiB. Fylkren gemmer tekstudtrækket, ikke filen.", primaryDocumentAiSource: "Brug det importerede dokument som kilde for AI", primaryDocumentImportFailed: "Hoveddokumentet kunne ikke importeres", primaryDocumentImported: "Importeret", primaryDocumentNotImported: "Ikke importeret", primaryDocumentStatusUnavailable: "Dokumentstatus kunne ikke hentes", primaryDocumentDetails: "Dokumentstatus", primaryDocumentOpenStructured: "Åbn strukturerede data", entitlementAi: "AI-understøttelse",
+};
+
 const providerHelp: Record<string, string> = {
   "cs-CZ": "OpenAI v cloudu nebo místní Llama přes kompatibilní rozhraní Ollama či vLLM.",
   "da-DK": "OpenAI i skyen eller lokal Llama via et kompatibelt Ollama- eller vLLM-endepunkt.",
@@ -311,6 +330,6 @@ const aiErrorMessages: Record<string, AiErrorMessages> = {
   "uk-UA": { aiProviderInvalidDraft: "Відповідь ШІ не вдалося безпечно розподілити в шаблоні плану. Створіть пропозицію ще раз." },
 };
 
-export const aiTranslations: Record<string, AiMessages> = new Proxy({ "nb-NO": norwegian, "sv-SE": swedish } as Record<string, AiMessages>, {
+export const aiTranslations: Record<string, AiMessages> = new Proxy({ "nb-NO": norwegian, "sv-SE": swedish, "da-DK": danish } as Record<string, AiMessages>, {
   get: (target, language: string) => target[language] ?? { ...aiEn, aiProviderHelp: providerHelp[language] ?? aiEn.aiProviderHelp, aiEndpointHelp: endpointHelp[language] ?? aiEn.aiEndpointHelp, ...progressMessages[language], ...draftLabels[language], ...decisionWorkflowMessages[language], ...aiActionMessages[language], ...documentImportMessages[language], ...documentStatusMessages[language], ...aiErrorMessages[language] },
 });

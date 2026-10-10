@@ -25,7 +25,7 @@ export const lifecycleGuidanceTranslations: Record<string, Record<keyof typeof l
     "lifecycleAdministration": "Arkivåtkomst och bevarande"
   },
   "da-DK": {
-    "lifecycleSiteGuide": "Bruges når hele Site tages ud af drift. Deaktiver det under Sites, afslut udestående arbejde og vælg en arkivansvarlig med eksportadgang; lås derefter historikken og arkivér.",
+    "lifecycleSiteGuide": "Bruges, når hele organisationen tages ud af drift. Deaktivér den under Sites, afslut udestående arbejde, og vælg en arkivansvarlig med eksportadgang. Lås derefter historikken, og arkivér.",
     "lifecyclePersonGuide": "Bruges til en tidligere bruger efter at aktiv adgang er fjernet og arkivansvar er overdraget. Historisk tilknytning bevares; dette deaktiverer ikke kontoen.",
     "lifecycleGovernanceLocked": "Indholdet er låst. Arkivér for bevaring eller genåbn for redigering. Genåbning genaktiverer ikke Site eller brugerkontoen.",
     "lifecycleAdministration": "Arkivadgang og bevaring"

@@ -12,7 +12,7 @@ The [localization terminology](LOCALIZATION_TERMINOLOGY.md) is authoritative for
 | `en-GB` | English (United Kingdom) | Linguistically verified against the current source catalog |
 | `nb-NO` | Norwegian Bokmal | Linguistically verified against the current source catalog |
 | `sv-SE` | Swedish | Linguistically verified against the current source catalog |
-| `da-DK` | Danish | Technically complete; linguistic review pending |
+| `da-DK` | Danish | Linguistically verified against the current source catalog |
 | `fi-FI` | Finnish | Technically complete; linguistic review pending |
 | `de-DE` | German | Technically complete; linguistic review pending |
 | `fr-FR` | French | Technically complete; linguistic review pending |

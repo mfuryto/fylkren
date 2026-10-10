@@ -40,7 +40,7 @@ export const lifecycleUiTranslations: Record<string, Record<keyof typeof lifecyc
     "lifecycleStateActive": "Aktiv",
     "lifecycleStateClosed": "Låst",
     "lifecycleStateArchived": "Arkiveret",
-    "lifecycleLockedError": "Indholdet er låst eller arkiveret. Genåbn det før ændringer. Arkiveret indhold skal først gendannes til låst.",
+    "lifecycleLockedError": "Indholdet er låst eller arkiveret. Genåbn det via Lås/arkivér før redigering. Arkiveret indhold skal først gendannes som låst.",
     "lifecycleUnfinishedError": "Afslut relateret arbejde og ventende levering før låsning eller arkivering.",
     "lifecycleVersionError": "Tilstanden er ændret. Genindlæs opgaven og prøv igen.",
     "lifecycleTransitionError": "Handlingen er ikke tilgængelig i denne tilstand."

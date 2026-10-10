@@ -35,7 +35,7 @@ export const lifecycleAutomationTranslations: Record<string, Record<keyof typeof
   "da-DK": {
     "lifecycleFinishEditing": "Afslut redigering",
     "lifecycleAutomaticHelp": "Låses automatisk efter endelig afslutning, afvisning eller annullering. Arkiveres når opfølgning og nødvendige leverancer er afklaret. Find arkiverede opgaver under Opgaver → Vis → Arkiverede. Læring fortsætter særskilt.",
-    "lifecycleAutomaticEditing": "Genåbnet til redigering. Automatisk låsning og arkivering er sat på pause, indtil redigeringen afsluttes eller opgaven får en ny endelig afgørelse.",
+    "lifecycleAutomaticEditing": "Genåbnet til redigering. Automatisk låsning og arkivering er sat på pause, indtil redigeringen afsluttes, eller opgaven får en ny endelig beslutning.",
     "lifecyclePendingLock": "Automatisk låsning afventer",
     "lifecyclePendingArchive": "Automatisk arkivering afventer",
     "lifecycleArchivedTasks": "Arkiverede"

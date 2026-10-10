@@ -60,9 +60,14 @@
       ]
     },
     "da-DK": {
-      "status": "pending",
-      "reviewedKeyCount": 0,
-      "catalogSha256": "0d4304508ef42599a86af484d2c824985db7a37ade34bba35e681d7e52dea3b1"
+      "status": "verified",
+      "reviewedKeyCount": 2244,
+      "catalogSha256": "e4551effc16ebceaf5b3fffeaf92118f1d8530b02f42ddf5222a510ca8522af2",
+      "verifiedSourceCatalogSha256": "4f8d4ddac684c6e2924bd13c1f5f9421cbd1474b7401278c5eec4e34f0429faa",
+      "verifiedAt": "2026-10-10",
+      "evidence": [
+        "dev-notes/testing/runs/2026-10-10-linguistic-review.md"
+      ]
     },
     "fi-FI": {
       "status": "pending",
