@@ -7,13 +7,13 @@ const inspectUrl = process.env.FYLKREN_BROWSER_SMTP_INSPECT_URL ??
 export async function configureTaskSmtp({ request, requestExpectingHttpError, enabled }) {
   if (!enabled) return;
   await requestExpectingHttpError('/api/platform/smtp/', 'PUT', {
-    enabled: true, host: smtpHost, port: 2525, security: 'none',
+    enabled: true, host: smtpHost, port: 2525, security: 'starttls',
     username: null, password: null, clearPassword: true,
     fromAddress: 'fylkren-browser@example.invalid',
     fromName: 'Synthetic Fylkren\r\nBcc: injected@example.invalid',
   }, 400);
   const configured = await request('/api/platform/smtp/', 'PUT', {
-    enabled: true, host: smtpHost, port: 2525, security: 'none',
+    enabled: true, host: smtpHost, port: 2525, security: 'starttls',
     username: null, password: null, clearPassword: true,
     fromAddress: 'fylkren-browser@example.invalid', fromName: 'Synthetic Fylkren',
   });

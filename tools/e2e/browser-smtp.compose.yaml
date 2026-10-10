@@ -1,9 +1,17 @@
 services:
+  api:
+    environment:
+      SSL_CERT_FILE: /run/fylkren-browser-smtp/ca.crt
+    volumes:
+      - ${FYLKREN_BROWSER_SMTP_CA:?Set FYLKREN_BROWSER_SMTP_CA}:/run/fylkren-browser-smtp/ca.crt:ro
+
   smtp-sink:
     image: node:24-alpine
     command: ["node", "tools/e2e/smtp-sink.mjs", "0.0.0.0", "2525", "2526", "0.0.0.0"]
     environment:
       FYLKREN_SMTP_TRANSIENT_FAILURES: "1"
+      FYLKREN_SMTP_CERTIFICATE: /run/fylkren-browser-smtp/smtp.crt
+      FYLKREN_SMTP_PRIVATE_KEY: /run/fylkren-browser-smtp/smtp.key
     read_only: true
     cap_drop:
       - ALL
@@ -11,6 +19,8 @@ services:
       - no-new-privileges:true
     volumes:
       - ./:/work:ro
+      - ${FYLKREN_BROWSER_SMTP_CERTIFICATE:?Set FYLKREN_BROWSER_SMTP_CERTIFICATE}:/run/fylkren-browser-smtp/smtp.crt:ro
+      - ${FYLKREN_BROWSER_SMTP_PRIVATE_KEY:?Set FYLKREN_BROWSER_SMTP_PRIVATE_KEY}:/run/fylkren-browser-smtp/smtp.key:ro
     working_dir: /work
     ports:
       - "127.0.0.1:19225:2526"

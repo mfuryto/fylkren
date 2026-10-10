@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -13,6 +13,8 @@ const env = { ...process.env, FYLKREN_DB_PASSWORD: 'synthetic-release-browser-on
   FYLKREN_HTTP_PORT: '127.0.0.1:18082', FYLKREN_PUBLIC_URL: 'http://localhost:18082', FYLKREN_MFA_ENABLED: 'false', FYLKREN_MFA_REQUIRED: 'false',
   FYLKREN_LICENSE_PUBLIC_KEY_SPKI: fixture.publicKeySpki, FYLKREN_BROWSER_TARGET_URL: 'http://localhost:18082/',
   FYLKREN_BROWSER_CDP_URL: 'http://127.0.0.1:19224', FYLKREN_BROWSER_REPORT_PDF: 'output/pdf/release-classified-report.pdf', FYLKREN_BROWSER_LICENSE_PATH: '/work/tools/e2e/license-upload-fixture.json',
+  FYLKREN_BROWSER_SMTP_CA: join(temporary, 'smtp-ca.crt'), FYLKREN_BROWSER_SMTP_CERTIFICATE: join(temporary, 'smtp.crt'),
+  FYLKREN_BROWSER_SMTP_PRIVATE_KEY: join(temporary, 'smtp.key'),
 };
 const files = ['-f', 'compose.yaml', '-f', 'tools/e2e/browser-smtp.compose.yaml'];
 if (process.argv.includes('--no-build')) files.push('-f', 'tools/e2e/reuse-images.compose.yaml');
@@ -28,6 +30,26 @@ function command(program, args) {
   if (result.status !== 0) throw new Error(`${program} failed with ${result.status}`);
 }
 function compose(args) { command('docker', ['compose', ...files, '-p', project, ...args]); }
+function createSmtpCertificates() {
+  const caKey = join(temporary, 'smtp-ca.key');
+  const request = join(temporary, 'smtp.csr');
+  const extensions = join(temporary, 'smtp.ext');
+  command('openssl', ['genpkey', '-algorithm', 'EC', '-pkeyopt', 'ec_paramgen_curve:P-256', '-out', caKey]);
+  command('openssl', ['req', '-x509', '-new', '-key', caKey, '-sha256', '-days', '2',
+    '-subj', '/CN=Fylkren browser SMTP CA', '-out', env.FYLKREN_BROWSER_SMTP_CA]);
+  command('openssl', ['genpkey', '-algorithm', 'EC', '-pkeyopt', 'ec_paramgen_curve:P-256',
+    '-out', env.FYLKREN_BROWSER_SMTP_PRIVATE_KEY]);
+  command('openssl', ['req', '-new', '-key', env.FYLKREN_BROWSER_SMTP_PRIVATE_KEY,
+    '-subj', '/CN=smtp-sink', '-out', request]);
+  writeFileSync(extensions,
+    'subjectAltName=DNS:smtp-sink\nextendedKeyUsage=serverAuth\nkeyUsage=digitalSignature,keyAgreement\n');
+  command('openssl', ['x509', '-req', '-in', request, '-CA', env.FYLKREN_BROWSER_SMTP_CA,
+    '-CAkey', caKey, '-CAcreateserial', '-days', '2', '-sha256', '-extfile', extensions,
+    '-out', env.FYLKREN_BROWSER_SMTP_CERTIFICATE]);
+  chmodSync(env.FYLKREN_BROWSER_SMTP_CA, 0o644);
+  chmodSync(env.FYLKREN_BROWSER_SMTP_CERTIFICATE, 0o644);
+  chmodSync(env.FYLKREN_BROWSER_SMTP_PRIVATE_KEY, 0o644);
+}
 async function start() {
   compose(['up', '-d', process.argv.includes('--no-build') ? '--no-build' : '--build', '--wait']);
   compose(['exec', '-T', 'postgres', 'psql', '-U', 'fylkren', '-d', 'fylkren', '-v', 'ON_ERROR_STOP=1', '-c',
@@ -46,6 +68,7 @@ function stop() {
   compose(['down', '-v', '--remove-orphans']);
 }
 try {
+  createSmtpCertificates();
   const authOnly = process.argv.includes('--totp-only') || process.argv.includes('--webauthn-only');
   if (authOnly) env.FYLKREN_MFA_ENABLED = 'true';
   env.FYLKREN_WEBAUTHN_ENABLED = 'true';
