@@ -130,9 +130,14 @@
       ]
     },
     "uk-UA": {
-      "status": "pending",
-      "reviewedKeyCount": 0,
-      "catalogSha256": "9938880698467134085c72864217eb3a594a1fbbfe7ddd1aba41e4d496e8b08c"
+      "status": "verified",
+      "reviewedKeyCount": 2244,
+      "catalogSha256": "42cf056079ce03e2ca0b6ca874b210d0153c48a8f16a62181085fa7f6bd1b36f",
+      "verifiedSourceCatalogSha256": "4f8d4ddac684c6e2924bd13c1f5f9421cbd1474b7401278c5eec4e34f0429faa",
+      "verifiedAt": "2026-10-10",
+      "evidence": [
+        "dev-notes/testing/runs/2026-10-10-linguistic-review.md"
+      ]
     },
     "nl-NL": {
       "status": "pending",

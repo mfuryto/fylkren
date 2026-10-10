@@ -16,7 +16,7 @@ export const notificationsUkUA = {
   notifyDecisionRequired: "Дія обов'язкова",
   notifyDecisionRequiredHelp: "Сповіщати керівника на один рівень вище, коли потрібне рішення.",
   notifyChildCompleted: "Робота дитини або фінальний звіт",
-  notifyChildCompletedHelp: "Повідомляти, коли рівень підлеглості повертається її роботу.",
+  notifyChildCompletedHelp: "Сповіщати, коли підпорядкований рівень повертає свою роботу.",
   notifyPlanningCompleted: "Планування завершено",
   notifyPlanningCompletedHelp: "Сповіщати, коли план подано на затвердження.",
   notifyExecutionCompleted: "Виконання",

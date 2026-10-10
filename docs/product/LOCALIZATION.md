@@ -19,7 +19,7 @@ The [localization terminology](LOCALIZATION_TERMINOLOGY.md) is authoritative for
 | `pl-PL` | Polish | Linguistically verified against the current source catalog |
 | `es-ES` | Spanish (Spain) | Linguistically verified against the current source catalog |
 | `it-IT` | Italian | Linguistically verified against the current source catalog |
-| `uk-UA` | Ukrainian | Technically complete; linguistic review pending |
+| `uk-UA` | Ukrainian | Linguistically verified against the current source catalog |
 | `nl-NL` | Dutch | Technically complete; linguistic review pending |
 | `pt-PT` | Portuguese (Portugal) | Technically complete; linguistic review pending |
 | `cs-CZ` | Czech | Technically complete; linguistic review pending |
