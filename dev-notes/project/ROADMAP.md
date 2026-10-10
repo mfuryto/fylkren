@@ -98,6 +98,6 @@ Versioned air-gapped package signing and verification remain future distribution
 
 ## Maintenance obligations
 
-Update canonical manuals, architecture, upgrade/recovery notes and requirement/test traceability with each delivered capability. Keep repository material English and UI text in maintained locale catalogs. Preserve automated localization checks and assess affected translated layouts when adding UI behavior; do not reopen completed internationalization as a new migration project.
+Update canonical manuals, architecture, upgrade/recovery notes and requirement/test traceability with each delivered capability. American English is the authoritative source and fallback for interface text; keep repository material English and all other UI languages in maintained derived locale catalogs. Preserve automated localization checks and assess affected translated layouts when adding UI behavior.
 
 Use the [documentation portal](../../docs/README.md), [installation and upgrade procedure](../../docs/operations/INSTALLATION_AND_UPGRADES.md), existing test harnesses and the single ASVS matrix. Do not create parallel manuals, security matrices or implementation diaries in this roadmap.

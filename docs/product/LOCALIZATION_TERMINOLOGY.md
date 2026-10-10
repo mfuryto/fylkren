@@ -37,7 +37,7 @@ Security-sensitive actions must preserve their force. Delete, deactivate, revoke
 
 ## Translate the workflow meaning
 
-Use the Norwegian catalog and the actual workflow behavior to resolve ambiguous source words. The English catalog remains the technical key and placeholder source; its individual words are not a sufficient translation specification.
+Use the American English source catalog, this term base and the actual workflow behavior to resolve ambiguous wording. English is the authoritative semantic source, but an isolated source word is not a sufficient translation specification without its product context.
 
 | Concept | Meaning to preserve | Misinterpretations to reject |
 | --- | --- | --- |

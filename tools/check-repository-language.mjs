@@ -40,10 +40,10 @@ const findings = Object.entries(current)
   .filter(([, count]) => count > 0)
   .map(([path, count]) => `${path}: ${count} marker(s)`);
 if (findings.length) {
-  console.error(`Repository contains Norwegian outside dedicated non-English language catalogs:`);
+  console.error(`Repository violates the English-source boundary; Norwegian-language markers were found outside derived locale catalogs:`);
   for (const finding of findings.slice(0, 100)) console.error(`- ${finding}`);
   if (findings.length > 100) console.error(`- ... ${findings.length - 100} additional findings`);
   process.exitCode = 1;
 } else {
-  console.log('Repository language check passed; Norwegian is confined to dedicated non-English language catalogs.');
+  console.log('Repository English-source boundary passed; Norwegian-language markers are confined to derived locale catalogs.');
 }

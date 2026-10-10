@@ -1,6 +1,6 @@
 # Localization context follow-up — 2026-10-02
 
-This follow-up revisits the linguistic conclusions in the [previous audit](2026-10-01-localization-quality-audit.md). Structural completeness alone did not prevent incorrect operational meanings. The Norwegian workflow context and actual state transitions are now explicit interpretation inputs in the [term base](../../../docs/product/LOCALIZATION_TERMINOLOGY.md).
+This follow-up revisits the linguistic conclusions in the [previous audit](2026-10-01-localization-quality-audit.md). Structural completeness alone did not prevent incorrect operational meanings. The American English source, product workflow context and actual state transitions are explicit interpretation inputs in the [term base](../../../docs/product/LOCALIZATION_TERMINOLOGY.md).
 
 ## Scope and observations
 

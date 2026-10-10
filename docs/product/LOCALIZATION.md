@@ -9,51 +9,32 @@ The [localization terminology](LOCALIZATION_TERMINOLOGY.md) is authoritative for
 | Locale | Language | Status |
 | --- | --- | --- |
 | `en-US` | English (United States) | Source catalog and mandatory fallback |
-| `en-GB` | English (United Kingdom) | Bundled regional catalog |
-| `nb-NO` | Norwegian Bokmal | Bundled catalog |
-| `sv-SE` | Swedish | Bundled catalog |
-| `da-DK` | Danish | Bundled catalog |
-| `fi-FI` | Finnish | Bundled catalog |
-| `de-DE` | German | Bundled catalog |
-| `fr-FR` | French | Bundled catalog |
-| `pl-PL` | Polish | Bundled catalog |
-| `es-ES` | Spanish (Spain) | Bundled catalog |
-| `it-IT` | Italian | Bundled catalog |
-| `uk-UA` | Ukrainian | Bundled catalog |
-| `nl-NL` | Dutch | Bundled catalog |
-| `pt-PT` | Portuguese (Portugal) | Bundled catalog |
-| `cs-CZ` | Czech | Bundled catalog |
-| `ro-RO` | Romanian | Bundled catalog |
-| `et-EE` | Estonian | Bundled catalog |
-| `lv-LV` | Latvian | Bundled catalog |
-| `lt-LT` | Lithuanian | Bundled catalog |
+| `en-GB` | English (United Kingdom) | Complete derived regional catalog |
+| `nb-NO` | Norwegian Bokmal | Complete derived catalog |
+| `sv-SE` | Swedish | Complete derived catalog |
+| `da-DK` | Danish | Complete derived catalog |
+| `fi-FI` | Finnish | Complete derived catalog |
+| `de-DE` | German | Complete derived catalog |
+| `fr-FR` | French | Complete derived catalog |
+| `pl-PL` | Polish | Complete derived catalog |
+| `es-ES` | Spanish (Spain) | Complete derived catalog |
+| `it-IT` | Italian | Complete derived catalog |
+| `uk-UA` | Ukrainian | Complete derived catalog |
+| `nl-NL` | Dutch | Complete derived catalog |
+| `pt-PT` | Portuguese (Portugal) | Complete derived catalog |
+| `cs-CZ` | Czech | Complete derived catalog |
+| `ro-RO` | Romanian | Complete derived catalog |
+| `et-EE` | Estonian | Complete derived catalog |
+| `lv-LV` | Latvian | Complete derived catalog |
+| `lt-LT` | Lithuanian | Complete derived catalog |
 
 The legacy locale value `en` is treated as `en-US` and upgraded to that explicit value. No additional locale is considered supported until its complete bundled catalog, locale behavior, documentation and automated tests are delivered together.
 
-## Translation phase after the English migration
+## Language model
 
-The English migration gate passed and the product owner approved the following translation order. Every listed catalog is technically complete and selectable. Linguistic assurance follows the automated quality gate below rather than a requirement to recruit a reviewer for every language.
+American English (`en-US`) is the authoritative semantic source for interface text, catalog keys and fallback behavior. Every other locale in the roster is a complete derived language pack and is technically complete and selectable. Linguistic assurance follows the automated quality gate below rather than a requirement to recruit a reviewer for every language.
 
-| Order | Locale | Language |
-| ---: | --- | --- |
-| 1 | `sv-SE` | Swedish |
-| 2 | `da-DK` | Danish |
-| 3 | `fi-FI` | Finnish |
-| 4 | `de-DE` | German |
-| 5 | `fr-FR` | French |
-| 6 | `pl-PL` | Polish |
-| 7 | `es-ES` | Spanish (Spain) |
-| 8 | `it-IT` | Italian |
-| 9 | `uk-UA` | Ukrainian |
-| 10 | `nl-NL` | Dutch |
-| 11 | `pt-PT` | Portuguese (Portugal) |
-| 12 | `cs-CZ` | Czech |
-| 13 | `ro-RO` | Romanian |
-| 14 | `et-EE` | Estonian |
-| 15 | `lv-LV` | Latvian |
-| 16 | `lt-LT` | Lithuanian |
-
-Icelandic was removed from the approved roster by the product owner. Regional variants such as Brazilian Portuguese, Canadian French or Latin American Spanish require an explicit product decision rather than silently reusing a region-specific pack.
+Locales outside the maintained roster are unsupported. Regional variants such as Brazilian Portuguese, Canadian French or Latin American Spanish require an explicit product decision and a complete catalog rather than silently reusing another region's pack.
 
 ## Mandatory change rule
 

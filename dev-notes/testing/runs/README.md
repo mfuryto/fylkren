@@ -22,9 +22,9 @@ The [production public security run](2026-09-28-production-public-security.md) r
 
 The [live Enterprise license-expiry run](2026-09-29-live-enterprise-license-expiry.md) records a real wall-clock transition to Community without restart, immediate closure of Enterprise boundaries, preservation of customer data and protected configuration, background-worker pause, and renewal/resumption. Production issuer custody and an exact release-candidate repeat remain separate gates.
 
-The [regional settings and repository language run](2026-09-30-regional-settings-and-language-boundary.md) records database-managed language, time zone, clock and measurement defaults, English fallback behavior, the first localized Platform Manager page, and the non-regression gate that prevents additional Norwegian prose outside the dedicated locale resource.
+The [regional settings and repository language run](2026-09-30-regional-settings-and-language-boundary.md) records database-managed language, time zone, clock and measurement defaults, English source/fallback behavior, localized Platform Manager rendering, and the non-regression gate that requires English repository prose while confining translated interface text to locale resources.
 
-The [complete language-pack run](2026-10-01-language-pack-previews.md) records the 16 selectable post-English catalogs, placeholder protection, locale behavior and terminology controls. The later localization quality audit records the maintained automated linguistic acceptance basis.
+The [complete language-pack run](2026-10-01-language-pack-previews.md) records the complete selectable catalogs derived from the English source, placeholder protection, locale behavior and terminology controls. The later localization quality audit records the maintained automated linguistic acceptance basis.
 
 The [references, sorting and locale-routing run](2026-10-02-references-sorting-and-locale-routing.md) records the complete task-reference chain, concurrent allocation, first-column presentation, sorting, backup/restore compatibility and the fix that keeps regional clock-format extensions on the selected translation catalog.
 
@@ -39,7 +39,7 @@ For each run, record:
 
 The test output and source assertions are evidence references, but neither replaces the observed-results table. Keep secrets, passwords, tokens, personal data and operational content out of records. Use synthetic identifiers where they materially help trace a chain. If raw logs were not retained, say so; do not imply they exist.
 
-The [localization context follow-up](2026-10-02-localization-context-follow-up.md) corrects operational meanings that structural catalog checks did not catch and records the Norwegian workflow context as a translation input.
+The [localization context follow-up](2026-10-02-localization-context-follow-up.md) corrects operational meanings that structural catalog checks did not catch and records product workflow behavior as a required translation input alongside the English source.
 
 The [task-comments run](2026-10-02-task-comments.md) records unassigned-reader contributions, task access boundaries, antiforgery, persistence, pagination, export and safe text rendering.
 

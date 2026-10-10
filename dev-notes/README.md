@@ -5,7 +5,7 @@ This file contains repository maintenance rules for developers and reviewers. It
 ## Documentation maintenance
 
 - Repository documentation, source comments, test descriptions and examples are written in English.
-- `pnpm check:language` rejects Norwegian added outside dedicated non-English catalogs. `pnpm check:language:full` is the final migration gate and must pass before the release candidate is frozen.
+- `pnpm check:language` enforces the English-source repository boundary with the maintained language-marker set while excluding derived locale catalogs. `pnpm check:language:full` is the complete release gate and must pass before the release candidate is frozen.
 - UI localization is separate from repository language. American English (`en-US`) is the source catalog and mandatory fallback; every language in the maintained roster is a complete bundled pack governed by the same automated acceptance rules.
 - Every user-visible text change must update every complete bundled language pack in the same commit; the maintained [language roster and pack requirements](../docs/product/LOCALIZATION.md) are authoritative.
 - Routes, API contracts, persistent identifiers and permalinks remain language-neutral.
