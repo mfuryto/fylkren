@@ -153,7 +153,7 @@ If the database is restored without its matching key ring and key-encryption cus
 
 Provider secrets are no longer read from the production Compose environment. Before upgrading an installation that has never started a GUI-managed identity-provider release, first upgrade to a prior compatible release once so its one-time import writes protected provider settings, then remove `FYLKREN_OIDC_CLIENT_SECRET`, `FYLKREN_AD_BIND_PASSWORD` and `FYLKREN_LDAP_BIND_PASSWORD` from `.env`. Current installations manage these values only under **Platform Manager → Identity**.
 
-Before production qualification, install and verify the separate HTTPS/mTLS log collector path described in [Remote security-log forwarding](LOG_FORWARDING.md). The supported Compose services use `journald`; an installation without an active, acknowledged remote uploader is operationally incomplete.
+The supported Compose services always use `journald`. During production qualification, choose whether to enable the separate HTTPS/mTLS collector path described in [Remote security-log forwarding](LOG_FORWARDING.md). If enabled, its acknowledgement verifier must pass. If omitted, record the accountable deployment owner's explicit risk exception and compensating controls; the installation remains operational but cannot claim ASVS 16.4.3.
 
 ## Test-environment upgrade
 

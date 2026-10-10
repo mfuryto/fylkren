@@ -1,6 +1,10 @@
 # Remote security-log forwarding
 
-Fylkren's supported production topology sends container stdout/stderr to the host system journal and forwards that journal to a logically separate collector. The collector must provide analysis, detection, alerting, escalation, access control and retention independently of the Fylkren host. Keeping a second container or volume on the same host does not satisfy this boundary.
+Fylkren sends container stdout/stderr to the host system journal. Forwarding that journal to a logically separate collector is an optional security enhancement. When enabled, the collector must provide analysis, detection, alerting, escalation, access control and retention independently of the Fylkren host. Keeping a second container or volume on the same host does not satisfy this boundary.
+
+An installation can operate and be approved for production without remote forwarding. The deployment owner must then record an explicit risk exception with scope, reason, accountable approver and review date. The decision must acknowledge that compromise or loss of the application host can also remove local technical logs and delay detection. Persistent sealed local journals, restricted host access, monitored local storage, protected backups and an incident-handling procedure are the minimum compensating controls.
+
+An installation without a separate collector cannot claim conformance with ASVS 16.4.3. This deployment choice does not change Fylkren's audit or activity stores and does not reopen the implementation finding: the forwarding capability and its verifier remain delivered and tested.
 
 ## Prerequisites
 
@@ -29,7 +33,7 @@ sudo ./deploy/host-status/verify-time-correlation.sh /data/docker/fylkren
 
 The first verifier checks HTTPS/mTLS configuration, key permissions, enabled and active upload service, the `journald` driver on web, API and PostgreSQL, and receiver-acknowledged journal cursor progress after a unique canary. The second requires healthy host NTP status and correlates host, gateway, API and database UTC clocks within two seconds. Save both JSON results in the deployment's security evidence.
 
-Run both verifiers after upgrades, credential or collector changes, and during release qualification. A failed verifier means the installation has lost its qualified ASVS 16.2.2 or 16.4.3 deployment boundary even if Fylkren remains available.
+Always run the time-correlation verifier during release qualification. Run the journal-upload verifier when remote forwarding is enabled and after credential or collector changes. A failed time verifier means the installation has lost its qualified ASVS 16.2.2 boundary. A failed upload verifier means it cannot claim ASVS 16.4.3, even though Fylkren remains available; either restore forwarding or approve and record the exception described above.
 
 ## Rotation and failure
 

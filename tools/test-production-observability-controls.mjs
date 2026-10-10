@@ -7,6 +7,7 @@ const collector = read('deploy/host-status/collect-host-status.sh');
 const correlation = read('deploy/host-status/verify-time-correlation.sh');
 const installer = read('deploy/log-forwarding/install-journal-upload.sh');
 const verifier = read('deploy/log-forwarding/verify-journal-upload.sh');
+const forwardingGuide = read('docs/operations/LOG_FORWARDING.md');
 
 for (const service of ['web', 'api', 'postgres']) {
   const block = compose.match(new RegExp(`\\n  ${service}:[\\s\\S]*?(?=\\n  [a-z][a-z-]+:|\\nvolumes:)`))?.[0] ?? '';
@@ -25,6 +26,9 @@ assert.match(collector, /time_maximum_offset_milliseconds=1000/);
 assert.match(correlation, /for service in web api postgres/);
 assert.match(correlation, /extract\(epoch from clock_timestamp\(\)\)/);
 assert.match(correlation, /maximum_skew_seconds/);
+assert.match(forwardingGuide, /optional security enhancement/);
+assert.match(forwardingGuide, /explicit risk exception/);
+assert.match(forwardingGuide, /cannot claim conformance with ASVS 16\.4\.3/);
 
 const localTimeCalls = /\bDateTime(?:Offset)?\.(?:Now|Today)\b/;
 const apiSources = read('apps/api/Program.cs') + read('apps/api/Platform/SecurityEventMiddleware.cs');
@@ -35,5 +39,6 @@ console.log(JSON.stringify({
   synchronizedHostBoundaryMilliseconds: 1000,
   correlatedComponents: ['host', 'gateway', 'api', 'database'],
   remoteTransport: 'https-mtls',
-  remoteAcknowledgementRequired: true,
+  remoteAcknowledgementRequiredWhenSelected: true,
+  remoteForwardingOptional: true,
 }));

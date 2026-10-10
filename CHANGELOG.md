@@ -10,7 +10,7 @@ This file records durable, user-visible release changes. Detailed implementation
 
 - Encrypt every ASP.NET Data Protection root-key XML value with a separate installation RSA-3072/AES-256-GCM custody envelope, migrate existing plaintext key rings before API startup, and back up/restore database, key ring and custody as one recovery point.
 
-- Route gateway, API and PostgreSQL logs through journald and add guarded HTTPS/mTLS forwarding and acknowledgement verification for a logically separate collector; add repeatable host/container/database UTC correlation checks.
+- Route gateway, API and PostgreSQL logs through journald and add optional guarded HTTPS/mTLS forwarding and acknowledgement verification for a logically separate collector. Deployments may instead record an approved risk exception, while forgoing an ASVS 16.4.3 claim. Add repeatable host/container/database UTC correlation checks.
 
 - Remove OIDC, AD and LDAP secret values from the steady-state production Compose environment; manage provider credentials only through protected Platform Manager settings.
 

@@ -62,7 +62,7 @@ Fylkren has no mandatory vendor, activation, telemetry, CDN, public DNS or cloud
 | Trusted time | Required for qualified operation | Provide an approved internal NTP source. The host, reverse proxy, API, PostgreSQL, identity providers, federation peers and log collector must use correlated time. Fylkren treats an unavailable or excessive offset as unhealthy. |
 | Browser-trusted TLS identity | Required for HTTPS | Issue the public Fylkren origin certificate from an internal PKI trusted by every managed client, or import an approved certificate through the deployment's TLS terminator. The Compose stack creates its separate API/PostgreSQL transport identities locally. |
 | Backup storage and restore target | Required for production operation | Store matched database, environment, Data Protection key-ring and custody backups away from the active database disk. Provide a separate fenced target for restore rehearsals. Neither target needs internet access. |
-| Security-log collector | Required for the qualified production logging boundary | Run a logically separate collector inside the isolated network and accept the host journal through HTTPS with mutual TLS. A second container or volume on the Fylkren host does not satisfy this boundary. |
+| Security-log collector | Optional; required only when the deployment claims ASVS 16.4.3 | Run a logically separate collector inside the isolated network and accept the host journal through HTTPS with mutual TLS. A second container or volume on the Fylkren host does not satisfy this boundary. When omitted, retain protected local journals and record the approved risk exception and compensating controls. |
 | SMTP relay | Required only for email notifications | Use an internal relay with STARTTLS and an internally trusted certificate. Without SMTP, domain actions still complete and delivery obligations remain visible for operational handling. |
 | AD or LDAP directory | Required only when directory authentication or personnel import is enabled | Provide reachable internal AD/LDAP with stable identifiers, lifecycle data, DNS and trusted LDAPS or LDAP StartTLS. Local accounts remain available without a directory. |
 | OIDC or SAML provider | Required only when single sign-on is enabled | Host the provider, metadata, signing keys and browser endpoints inside the isolated network. Managed clients and the Fylkren API must reach the configured internal names. |
@@ -82,7 +82,7 @@ The firewall should deny general internet egress. Permit only the flows used by 
 | Managed browser | Configured internal OIDC or SAML provider | Interactive single sign-on when enabled |
 | Fylkren host | Internal DNS and NTP | Name resolution and trusted time |
 | Fylkren API | Configured SMTP, directory, identity, AI and federation services | Enabled feature traffic only; exact destinations are administrator-controlled |
-| Fylkren host | Separate log collector | Journal forwarding over HTTPS with mutual TLS |
+| Fylkren host | Separate log collector | Optional journal forwarding over HTTPS with mutual TLS |
 | Backup process | Approved backup target | Matched backup transfer and recovery rehearsal |
 | Administrator-controlled staging host or media | Fylkren host | Deliberate installation, license and update import |
 
