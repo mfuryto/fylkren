@@ -11,7 +11,7 @@ failures=0
 fail() { printf 'FAIL  %s\n' "$1"; failures=$((failures + 1)); }
 pass() { printf 'PASS  %s\n' "$1"; }
 
-tracked_forbidden="$("${git_repo[@]}" ls-files --cached --others --exclude-standard | grep -E '(^|/)(\.env($|\.)|e2e-test-credentials\.local|node_modules|bin|obj|dist|TestResults|playwright-report|test-results)(/|$)' || true)"
+tracked_forbidden="$("${git_repo[@]}" ls-files --cached --others --exclude-standard | grep -E '(^|/)(\.env($|\.)|e2e-test-credentials\.local|node_modules|bin|obj|dist|output|TestResults|playwright-report|test-results)(/|$)' || true)"
 if [[ -n "$tracked_forbidden" ]]; then
   printf '%s\n' "$tracked_forbidden"
   fail "local, generated, credential, or test-output artifacts are tracked"
