@@ -6,13 +6,13 @@ const root = process.cwd();
 const read = relative => readFile(path.join(root, relative), 'utf8');
 const workflowDirectory = path.join(root, '.github', 'workflows');
 const workflowFiles = (await readdir(workflowDirectory)).filter(name => name.endsWith('.yml')).sort();
-assert.deepEqual(workflowFiles, ['codeql.yml', 'dependency-review.yml', 'pages.yml', 'quality.yml']);
+assert.deepEqual(workflowFiles, ['codeql.yml', 'pages.yml', 'quality.yml']);
 
 let actionReferences = 0;
 for (const name of workflowFiles) {
   const source = await read(path.join('.github', 'workflows', name));
   assert.match(source, /^permissions:/m, `${name} must declare top-level token permissions`);
-  assert.doesNotMatch(source, /pull_request_target|workflow_run|write-all|persist-credentials:\s*true/, `${name} contains a prohibited workflow capability`);
+  assert.doesNotMatch(source, /pull_request(?:_target)?|workflow_run|write-all|persist-credentials:\s*true/, `${name} contains a prohibited workflow or pull-request capability`);
   for (const match of source.matchAll(/^\s*uses:\s*([^@\s]+)@([^\s#]+)/gm)) {
     actionReferences += 1;
     assert.match(match[2], /^[0-9a-f]{40}$/, `${name}: ${match[1]} must be pinned to a complete commit SHA`);
@@ -25,9 +25,6 @@ assert.match(pages, /push:\n\s+branches: \[main\]/, 'Pages must deploy from main
 assert.match(pages, /path: apps\/demo\/dist/, 'Pages must upload only the built static demo');
 assert.match(pages, /pages: write/);
 assert.match(pages, /id-token: write/);
-
-const dependabot = await read('.github/dependabot.yml');
-for (const ecosystem of ['npm', 'nuget', 'docker', 'github-actions']) assert.match(dependabot, new RegExp(`package-ecosystem: ${ecosystem}`));
 
 const readme = await read('README.md');
 const normalizedReadme = readme.toLowerCase();
@@ -45,4 +42,4 @@ const hardening = await read('tools/security/harden-public-github-repository.sh'
 assert.doesNotMatch(hardening, /"visibility"\s*:/, 'the hardening script must never change repository visibility');
 for (const control of ['private-vulnerability-reporting', 'secret_scanning_push_protection', 'actions/permissions/workflow', 'repos/$repo/pages']) assert.ok(hardening.includes(control), `hardening script is missing ${control}`);
 
-console.log(JSON.stringify({ githubRepositoryFiles: 'passed', workflows: workflowFiles.length, pinnedActionReferences: actionReferences, issueForms: 3, pagesSource: 'apps/demo' }));
+console.log(JSON.stringify({ githubRepositoryFiles: 'passed', workflows: workflowFiles.length, pinnedActionReferences: actionReferences, pullRequestAutomation: false, issueForms: 3, pagesSource: 'apps/demo' }));

@@ -11,13 +11,9 @@ The repository carries the configuration that can be reviewed with source:
 - `.github/workflows/quality.yml` verifies source, documentation, localization,
   builds and maintained tests on `staging` and `main`;
 - `.github/workflows/codeql.yml` analyzes C# and JavaScript/TypeScript on pushes,
-  pull requests, a weekly schedule and manual dispatch;
-- `.github/workflows/dependency-review.yml` rejects pull requests that introduce
-  dependencies with moderate or higher known vulnerabilities;
+  a weekly schedule and manual dispatch;
 - `.github/workflows/pages.yml` builds the static demo and deploys it only from
   `main`;
-- `.github/dependabot.yml` proposes weekly npm, NuGet, container-image and Action
-  updates in bounded groups; and
 - issue forms, `SECURITY.md`, `SUPPORT.md`, `CONTRIBUTING.md` and `CODEOWNERS`
   define public intake and ownership.
 
@@ -47,8 +43,8 @@ and verifies:
 - the exact description, Pages homepage and twenty search topics;
 - Issues enabled, unused wiki/projects/discussions disabled and maintained issue
   labels;
-- Advanced Security, secret scanning, push protection, vulnerability alerts,
-  Dependabot security fixes and private vulnerability reporting;
+- Advanced Security, secret scanning, push protection, vulnerability alerts and
+  private vulnerability reporting, with PR-based automated fixes disabled;
 - GitHub-owned Actions only, restricted default token permissions and no
   workflow approval of pull requests;
 - workflow-based Pages with HTTPS;
@@ -57,9 +53,10 @@ and verifies:
 
 `staging` accepts owner-controlled integration pushes and runs all maintained
 checks. `main` accepts only an exact commit that already has the required checks,
-which supports the documented fast-forward promotion without rebuilding. Public
-pull requests can be reviewed or closed, but unsolicited external code is not an
-accepted contribution path.
+which supports the documented fast-forward promotion without rebuilding. No
+workflow, template or dependency automation creates or processes pull requests.
+GitHub does not provide a switch to remove the Pull requests tab from a public
+repository, so any unsolicited pull request is closed without review.
 
 ## Activation sequence
 
@@ -80,8 +77,9 @@ accepted contribution path.
 
 ## Ongoing operation
 
-- Review every Dependabot pull request through Quality, CodeQL and dependency
-  review. Never auto-merge major updates or security-sensitive runtime changes.
+- Review dependency and vulnerability alerts at least weekly. Apply updates on
+  `staging` through the ordinary owner-controlled release process; do not enable
+  automated update or remediation pull requests.
 - Treat secret scanning as detection rather than proof. Retain the local current-
   tree and reachable-history release scan.
 - Triage private vulnerability reports inside GitHub Security Advisories. Keep

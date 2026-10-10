@@ -8,9 +8,9 @@ This file records durable, user-visible release changes. Detailed implementation
 
 - Present Fylkren as self-hosted, multilingual and AI-assisted operational task and mission management with a live read-only demo, clear Community/Enterprise comparison, security reporting, product screenshots and search-oriented repository metadata.
 - Add a `main`-only GitHub Pages deployment for the synthetic demo with canonical, Open Graph, structured software, robots and sitemap metadata plus a dedicated social-preview image.
-- Add least-privilege, immutable-reference GitHub workflows for source quality, CodeQL, dependency review and Pages; add bounded weekly Dependabot review for npm, NuGet, container and Action dependencies.
+- Add least-privilege, immutable-reference GitHub workflows for source quality, scheduled CodeQL and Pages without introducing a pull-request workflow.
 - Add professional bug, feature and question intake forms, public support/contribution guidance, a supported-version policy and GitHub private vulnerability-reporting instructions.
-- Add one auditable GitHub activation tool for repository metadata, topics, Actions permissions, Advanced Security, secret scanning, push protection, vulnerability alerts, Dependabot security fixes, private reporting, Pages, labels and branch protection without changing visibility or publishing a release.
+- Add one auditable GitHub activation tool for repository metadata, topics, Actions permissions, Advanced Security, secret scanning, push protection, vulnerability alerts, private reporting, Pages, labels and branch protection without changing visibility or publishing a release. PR-based automated security fixes remain disabled.
 - Establish `1.0.0` as the stable product version. Candidate labels such as `1.0.0-rc.1` identify immutable manifests and image tags separately, allowing an accepted image to be promoted without rebuilding it.
 - Add one fail-closed release path for controlled version changes, locked pnpm/NuGet dependency restoration, source and integration gates, commit-labelled immutable runtime images, CycloneDX evidence and no-rebuild promotion of verified image IDs.
 - Separate customer documentation in `docs/` from developer, test and release working records in `dev-notes/`; bundle only the explicit customer set with the application.

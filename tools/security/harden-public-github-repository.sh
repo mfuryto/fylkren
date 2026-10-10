@@ -79,7 +79,7 @@ JSON
 
   printf '{"names":%s}\n' "$topics" | gh api "${api_version_header[@]}" --method PUT "repos/$repo/topics" --input -
   gh api --method PUT "repos/$repo/vulnerability-alerts"
-  gh api --method PUT "repos/$repo/automated-security-fixes"
+  gh api --method DELETE "repos/$repo/automated-security-fixes"
   gh api --method PUT "repos/$repo/private-vulnerability-reporting"
 
   gh api --method PUT "repos/$repo/actions/permissions" --input - <<'JSON'
@@ -207,6 +207,9 @@ if [[ "$mode" == "apply" ]]; then
     if .default_workflow_permissions == "read" and .can_approve_pull_request_reviews == false
     then "PASS  restricted workflow token"
     else error("workflow token permissions do not match the required state") end'
+  gh api "repos/$repo/automated-security-fixes" --jq '
+    if .enabled == false then "PASS  PR-based automated security fixes are disabled"
+    else error("automated security fixes could create pull requests") end'
   gh api "repos/$repo/private-vulnerability-reporting" --jq '
     if .enabled == true then "PASS  private vulnerability reporting"
     else error("private vulnerability reporting is not enabled") end'
