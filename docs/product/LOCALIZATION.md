@@ -23,7 +23,7 @@ The [localization terminology](LOCALIZATION_TERMINOLOGY.md) is authoritative for
 | `nl-NL` | Dutch | Linguistically verified against the current source catalog |
 | `pt-PT` | Portuguese (Portugal) | Linguistically verified against the current source catalog |
 | `cs-CZ` | Czech | Linguistically verified against the current source catalog |
-| `ro-RO` | Romanian | Technically complete; linguistic review pending |
+| `ro-RO` | Romanian | Linguistically verified against the current source catalog |
 | `et-EE` | Estonian | Technically complete; linguistic review pending |
 | `lv-LV` | Latvian | Technically complete; linguistic review pending |
 | `lt-LT` | Lithuanian | Technically complete; linguistic review pending |

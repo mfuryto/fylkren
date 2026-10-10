@@ -30,7 +30,7 @@ export const profileRoRO = {
   newPassword: "Parolă nouă",
   repeatNewPassword: "Repetă parola nouă",
   passwordRequirements: "Parola trebuie să fie de cel puțin 14 caractere și să difere de parola inițială.",
-  twoFactorAuthentication: "Autentificare din două motive",
+  twoFactorAuthentication: "Autentificare cu doi factori",
   twoFactorSetupFailed: "Nu s-a putut începe o înscenare a doi factori.",
   twoFactorEnabled: "Autentificare din doi factori este activată. Salvați codurile de recuperare acum.",
   twoFactorCodeFailed: "Codul nu a putut fi verificat.",

@@ -40,7 +40,7 @@ export const federationRoRO = {
   keyFingerprint: "Amprentă cheie",
   fingerprintConfirmed: "Am comparat amprenta cu cea de pe un canal independent.",
   approvePeer: "Aprobă interlocutorul în acest caz",
-  peersAndConnection: "Pereche și conexiune",
+  peersAndConnection: "Instalări asociate și conexiune",
   noPeers: "Nu sunt înregistraţi colegii.",
   selectPeer: "Selectează peer",
   federationStatus: "Stare",

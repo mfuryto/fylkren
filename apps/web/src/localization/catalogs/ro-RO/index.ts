@@ -379,7 +379,7 @@ export const roRO: Record<Exclude<MessageKey, ActivityMessageKey | ReferenceMess
   templateNewWork: "Sarcina nouă",
   templateWorkChanged: "S-a schimbat sarcina",
   templateDecisionRequired: "Măsuri necesare",
-  templateChildCompleted: "Subtask sau raport final finalizat",
+  templateChildCompleted: "Subsarcină sau raport final finalizat",
   templatePlanningCompleted: "Planificarea s-a încheiat",
   templateExecutionCompleted: "Execuția finalizată",
   fieldRecipientName: "Numele de afișare al destinatarului",

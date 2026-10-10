@@ -19,7 +19,7 @@ export const reportsRoRO = {
   viewReport: "Raport de vizualizare",
   reportPages: "Pagini de raportare",
   reportModalTitle: "Raport",
-  workItemLabel: "Post de lucru",
+  workItemLabel: "Element de lucru",
   dateLabel: "Dată",
   workReceived: "Lucrările primite",
   workCompleted: "Lucrările finalizate",

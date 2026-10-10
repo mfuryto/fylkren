@@ -372,6 +372,24 @@ describe("localization catalogs", () => {
     }
   });
 
+  it("locks reviewed Romanian operational and security terminology", () => {
+    const expected = {
+      taskStatusExecution: "Execuția",
+      workItemLabel: "Element de lucru",
+      riskImpact: "Impact",
+      riskOwner: "Responsabil",
+      twoFactorAuthentication: "Autentificare cu doi factori",
+      passkeys: "Chei de acces și chei de securitate",
+      tasksTaskActionPanelsRouteOnward: "Transmite mai departe",
+      workflowsPlanningDialogsNewResponsiblePlanner: "Noul planificator responsabil",
+      auditLogLoadFailed: "Jurnalul de audit nu a putut fi încărcat.",
+      peersAndConnection: "Instalări asociate și conexiune",
+    } as const;
+    for (const [key, value] of Object.entries(expected)) {
+      expect(translate("ro-RO", key as keyof typeof en)).toBe(value);
+    }
+  });
+
   it("rejects translation-tool artifacts and control characters", () => {
     const artifact = /NAME OF TRANSLATORS|@\s*info|whatsthis|STARTLS|TIRPIK|\bNPI\b|Nelegalus|Toksiškumas|Locale locale|Nessun segnale locale|(?:\.\s*){8,}|(?:•\s*){12,}|[\u0000-\u0008\u000B\u000C\u000E-\u001F]/i;
     for (const language of supportedLanguages) {
