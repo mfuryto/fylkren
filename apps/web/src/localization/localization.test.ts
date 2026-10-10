@@ -354,6 +354,24 @@ describe("localization catalogs", () => {
     }
   });
 
+  it("locks reviewed Czech operational and security terminology", () => {
+    const expected = {
+      taskStatusExecution: "Realizace",
+      workItemLabel: "Pracovní položka",
+      riskImpact: "Dopad",
+      riskOwner: "Odpovědná osoba",
+      twoFactorAuthentication: "Dvoufaktorové ověřování",
+      passkeys: "Přístupové klíče a bezpečnostní klíče",
+      tasksTaskActionPanelsRouteOnward: "Předat dál",
+      workflowsPlanningDialogsNewResponsiblePlanner: "Nový odpovědný plánovač",
+      auditLogLoadFailed: "Protokol auditu se nepodařilo načíst.",
+      peersAndConnection: "Propojené instalace a připojení",
+    } as const;
+    for (const [key, value] of Object.entries(expected)) {
+      expect(translate("cs-CZ", key as keyof typeof en)).toBe(value);
+    }
+  });
+
   it("rejects translation-tool artifacts and control characters", () => {
     const artifact = /NAME OF TRANSLATORS|@\s*info|whatsthis|STARTLS|TIRPIK|\bNPI\b|Nelegalus|Toksiškumas|Locale locale|Nessun segnale locale|(?:\.\s*){8,}|(?:•\s*){12,}|[\u0000-\u0008\u000B\u000C\u000E-\u001F]/i;
     for (const language of supportedLanguages) {

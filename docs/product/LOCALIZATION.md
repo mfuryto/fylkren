@@ -22,7 +22,7 @@ The [localization terminology](LOCALIZATION_TERMINOLOGY.md) is authoritative for
 | `uk-UA` | Ukrainian | Linguistically verified against the current source catalog |
 | `nl-NL` | Dutch | Linguistically verified against the current source catalog |
 | `pt-PT` | Portuguese (Portugal) | Linguistically verified against the current source catalog |
-| `cs-CZ` | Czech | Technically complete; linguistic review pending |
+| `cs-CZ` | Czech | Linguistically verified against the current source catalog |
 | `ro-RO` | Romanian | Technically complete; linguistic review pending |
 | `et-EE` | Estonian | Technically complete; linguistic review pending |
 | `lv-LV` | Latvian | Technically complete; linguistic review pending |

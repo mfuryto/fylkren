@@ -67,7 +67,7 @@ export const workCsCZ = {
   actionTakeUnderReview: "Přezkoumáno",
   actionSendToPlanning: "Poslat na plánování",
   actionSendToExecution: "Poslat k provedení",
-  actionStart: "Start",
+  actionStart: "Zahájit",
   actionSendForReview: "Poslat k přezkoumání",
   actionComplete: "Kompletní",
   actionReturn: "Návrat",

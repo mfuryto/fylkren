@@ -58,7 +58,7 @@ export const identityCsCZ = {
   providerSettingsSaveFailed: "Konfiguraci nelze uložit.",
   connectionTestSucceeded: "Test spojení se podařil.",
   connectionTestFailed: "Test spojení selhal.",
-  enableSignInProvider: "Povolit {provider} jako indikátor poskytovatele",
+  enableSignInProvider: "Povolit {provider} jako poskytovatele přihlášení",
   server: "Server",
   port: "Přístav",
   connectionSecurity: "Bezpečnost připojení",

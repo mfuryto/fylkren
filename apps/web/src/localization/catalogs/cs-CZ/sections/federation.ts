@@ -40,7 +40,7 @@ export const federationCsCZ = {
   keyFingerprint: "Klíčový otisk prstu",
   fingerprintConfirmed: "Porovnal jsem otisk prstu pomocí nezávislého kanálu.",
   approvePeer: "Schválit peer v tomto případě",
-  peersAndConnection: "Peers a spojení",
+  peersAndConnection: "Propojené instalace a připojení",
   noPeers: "Žádní vrstevníci nejsou registrováni.",
   selectPeer: "Vybrat protějšek",
   federationStatus: "Stav",
