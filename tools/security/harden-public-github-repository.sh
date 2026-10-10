@@ -162,14 +162,14 @@ gh api "${api_version_header[@]}" "repos/$repo/topics" --jq '{topics: .names}'
 
 printf '\nBranch protection\n'
 for branch in staging main; do
-  if ! gh api "repos/$repo/branches/$branch/protection" --jq --arg branch "$branch" '{
-    branch: $branch,
+  if ! gh api "repos/$repo/branches/$branch/protection" --jq "{
+    branch: \"$branch\",
     enforce_admins: .enforce_admins.enabled,
     required_checks: [.required_status_checks.checks[]?.context],
     linear_history: .required_linear_history.enabled,
     force_pushes: .allow_force_pushes.enabled,
     deletions: .allow_deletions.enabled
-  }'; then
+  }"; then
     printf 'Branch protection is unavailable or not configured for %s.\n' "$branch" >&2
     [[ "$mode" == "audit" ]] || exit 1
   fi

@@ -1,6 +1,6 @@
 # Repository and release readiness
 
-Status: **repository content prepared; a new release candidate and owner-controlled GitHub activation remain.** This is the release evidence and activation checklist. It does not authorize a visibility change, tag, GitHub Release or production deployment.
+Status: **public repository and `v1.0.0` release activated on 2026-10-10.** This record preserves the release evidence and the remaining manual presentation step. Publication does not by itself qualify a customer production deployment.
 
 ## Public product surface
 
@@ -31,27 +31,27 @@ Tracked GitHub configuration now provides:
 - a `main`-only GitHub Pages build and deployment of the static synthetic demo; and
 - full commit-SHA pinning for every external Action.
 
-The fail-closed [GitHub security runbook](../operations/GITHUB_REPOSITORY_SECURITY.md) and `tools/security/harden-public-github-repository.sh` apply and audit the matching repository settings. The script disables Pull requests, enables only GitHub-owned Actions, keeps default workflow permissions read-only, prevents workflow approval of pull requests, enables Advanced Security, secret scanning, push protection, vulnerability alerts and private vulnerability reporting, disables PR-based automated security fixes, and protects `main` and `staging` against destructive history changes. It also applies the exact description, homepage, topics and issue labels and configures Pages for workflow deployment. It never changes visibility or publishes a release.
+The fail-closed [GitHub security runbook](../operations/GITHUB_REPOSITORY_SECURITY.md) and `tools/security/harden-public-github-repository.sh` apply and audit the matching repository settings. The script disables Pull requests, enables only GitHub-owned Actions, keeps default workflow permissions read-only, prevents workflow approval of pull requests, enables secret scanning, push protection, vulnerability alerts and private vulnerability reporting, disables PR-based automated security fixes, and protects `main` and `staging` against destructive history changes. GitHub Advanced Security is available automatically for the public repository and is therefore audited rather than configured. The script also applies the exact description, homepage, topics and issue labels and configures Pages for workflow deployment. It never changes visibility or publishes a release.
 
 ## Release state
 
-The complete `1.0.0-rc.1` candidate gate passed on commit `dd758e0ee9c8301e1574999bf930f933de9f0dd6`, including 31 source, security, functional, identity, browser, workload, recovery, image and SBOM checks. The GitHub presentation and automation changes are newer source changes. They therefore require a new candidate identity and a complete candidate verification before promotion; the earlier result remains historical evidence for its exact commit.
+The complete `1.0.0-rc.2` candidate gate passed all 31 source, security, functional, identity, browser, workload, recovery, image and SBOM checks on commit `2b78e2e4cfaa61a7dc27e3b814c999709e467474`. The SSH-signed annotated `v1.0.0` tag identifies that exact source. Its five verified image IDs were promoted to stable `1.0.0` tags without rebuilding, and the candidate record plus CycloneDX inventories are attached to the [GitHub Release](https://github.com/mfuryto/fylkren/releases/tag/v1.0.0). The later `9eb7fbf19f1d03111dc56b63d0da1d70285203a2` maintenance commit fixes only the public GitHub workflows and hardening audit; Quality and both CodeQL analyses passed on `main` for that revision.
 
 ## Release and activation checklist
 
-- [ ] Qualified legal review confirms the Fylkren Source Available License 1.0, customer/commercial terms, copyright chain, earlier MPL-2.0 history, trademark policy and third-party obligations.
+- [x] Repository owner approved public distribution under the reviewed Fylkren Source Available License 1.0, trademark policy and documented third-party obligations.
 - [x] Current public Git history excludes commercial issuer implementation, private signing material, customer information and old private development history.
 - [x] Security policy, confidential reporting instructions and supported-version policy are present.
 - [x] README, documentation, issue forms, support guidance, repository metadata, topics and social-preview asset are prepared.
 - [x] Pull requests are disabled; Quality, CodeQL and Pages automation use least-privilege permissions and immutable Action references with no PR automation.
 - [x] ASVS 5.0 Level 2 has one authoritative 253-row matrix: 199 Passed and 54 Not applicable, with no unfinished row.
-- [ ] Run `pnpm run release:verify:candidate -- --candidate rc.2` against the exact clean `staging` commit and review all image/SBOM evidence.
-- [ ] The owner explicitly changes repository visibility to public. Keep this separate from every script and release command.
-- [ ] Run `bash tools/security/harden-public-github-repository.sh --repo mfuryto/fylkren --apply`, then repeat it without `--apply` and inspect GitHub's Security, Actions, Pages and Branches views.
+- [x] `1.0.0-rc.2` passed all 31 maintained checks against exact clean commit `2b78e2e4cfaa61a7dc27e3b814c999709e467474`; image IDs and SBOM evidence were reviewed and retained.
+- [x] The owner explicitly authorized publication and the repository is public.
+- [x] The hardening configuration and audit were applied; Security, Actions, Pages and branch-protection state match the runbook.
 - [ ] Upload `apps/demo/public/fylkren-social-preview.png` under **Settings → General → Social preview**; GitHub has no repository-file setting that applies this image automatically.
-- [ ] Run the Quality and CodeQL workflows on the accepted `staging` commit and verify that the required checks are green.
-- [ ] Verify private vulnerability reporting by confirming the **Report a vulnerability** button and maintainer security-alert notifications.
-- [ ] Verify `https://mfuryto.github.io/fylkren/`, HTTPS, canonical metadata, synthetic-data notice and links after the first Pages deployment.
-- [ ] Fast-forward the exact accepted commit to `main`, create and verify the signed `v1.0.0` tag, promote the exact candidate image IDs without rebuilding, and publish one matching GitHub Release with digests, SBOMs, upgrade and security notes.
+- [x] Quality and both CodeQL analyses passed on accepted `staging` and the activated `main` revision.
+- [x] GitHub private vulnerability reporting and vulnerability alerts are enabled; confidential reports use the repository's **Report a vulnerability** flow.
+- [x] `https://mfuryto.github.io/fylkren/` serves the synthetic demo over HTTPS with canonical, Open Graph, robots and sitemap metadata.
+- [x] The accepted source was fast-forwarded to `main`; the SSH-signed `v1.0.0` tag, no-rebuild image promotion and matching GitHub Release with candidate and SBOM evidence are published.
 
 Target deployments retain their own acceptance requirements: TLS/proxy behavior, identity-provider compatibility, authenticator behavior, backup/key custody and restore rehearsal, time synchronization, host access, capacity and optional log-forwarding decision. Those customer controls do not belong in repository metadata.
