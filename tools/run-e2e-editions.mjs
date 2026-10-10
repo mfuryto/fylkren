@@ -57,6 +57,11 @@ function run(command, args, options = {}) {
   }
 }
 try {
+  // Candidate verification can be interrupted while the disposable Compose
+  // project is running. Always remove that project's state before the next
+  // run so a previous setup cannot turn the fresh-install assertion into a
+  // false restore failure.
+  run('docker', ['compose', '-p', project, 'down', '-v', '--remove-orphans']);
   if (process.argv.includes('--no-build')) {
     if (!env.FYLKREN_E2E_API_IMAGE || !env.FYLKREN_E2E_WEB_IMAGE ||
         !env.FYLKREN_E2E_TLS_INIT_IMAGE || !env.FYLKREN_E2E_POSTGRES_IMAGE)
