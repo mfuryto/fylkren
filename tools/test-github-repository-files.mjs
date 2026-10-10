@@ -41,5 +41,6 @@ assert.match(await read('.github/ISSUE_TEMPLATE/config.yml'), /blank_issues_enab
 const hardening = await read('tools/security/harden-public-github-repository.sh');
 assert.doesNotMatch(hardening, /"visibility"\s*:/, 'the hardening script must never change repository visibility');
 for (const control of ['private-vulnerability-reporting', 'secret_scanning_push_protection', 'actions/permissions/workflow', 'repos/$repo/pages']) assert.ok(hardening.includes(control), `hardening script is missing ${control}`);
+assert.match(hardening, /"has_pull_requests": false/, 'the public repository must keep pull requests disabled');
 
 console.log(JSON.stringify({ githubRepositoryFiles: 'passed', workflows: workflowFiles.length, pinnedActionReferences: actionReferences, pullRequestAutomation: false, issueForms: 3, pagesSource: 'apps/demo' }));

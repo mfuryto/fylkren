@@ -25,7 +25,7 @@ Before the first `1.0.0` release candidate, repository development changes from 
 
 At this gate, GitHub rules protect both branches. `main` rejects deletion, force-push, direct development changes and promotion without the required checks; updates are restricted to the repository owner or narrowly scoped release automation. `staging` rejects deletion and force-push and requires the automated integration checks. Required workflows use only explicitly allowed actions pinned to full commit SHAs, and their default token remains read-only unless one documented release step requires narrower write access.
 
-This model does not accept public pull requests. GitHub does not provide a switch to remove that tab from a public repository, so no workflow or dependency automation creates or processes pull requests and unsolicited submissions are closed. Issues remain available for non-confidential reports. The protected promotion path is an owner-controlled release operation, not an open contribution workflow.
+This model does not accept public pull requests. Pull requests are disabled in the repository settings, and no workflow or dependency automation creates or processes them. Issues remain available for non-confidential reports. The protected promotion path is an owner-controlled release operation, not an open contribution workflow.
 
 ## Candidate identity and immutable promotion
 

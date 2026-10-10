@@ -63,6 +63,7 @@ if [[ "$mode" == "apply" ]]; then
   "has_projects": false,
   "has_wiki": false,
   "has_discussions": false,
+  "has_pull_requests": false,
   "allow_merge_commit": false,
   "allow_rebase_merge": false,
   "allow_squash_merge": true,
@@ -155,7 +156,7 @@ fi
 printf '\nRepository presentation and features\n'
 gh api "${api_version_header[@]}" "repos/$repo" --jq '{
   visibility, description, homepage, has_issues, has_projects, has_wiki,
-  has_discussions, allow_merge_commit, allow_rebase_merge, allow_squash_merge,
+  has_discussions, has_pull_requests, allow_merge_commit, allow_rebase_merge, allow_squash_merge,
   delete_branch_on_merge, web_commit_signoff_required, security_and_analysis
 }'
 gh api "${api_version_header[@]}" "repos/$repo/topics" --jq '{topics: .names}'
@@ -195,6 +196,7 @@ if [[ "$mode" == "apply" ]]; then
        and .description == $description
        and .homepage == $homepage
        and .has_issues == true
+       and .has_pull_requests == false
        and .allow_merge_commit == false
        and .allow_rebase_merge == false
        and .allow_squash_merge == true

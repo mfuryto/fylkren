@@ -31,7 +31,7 @@ Tracked GitHub configuration now provides:
 - a `main`-only GitHub Pages build and deployment of the static synthetic demo; and
 - full commit-SHA pinning for every external Action.
 
-The fail-closed [GitHub security runbook](../operations/GITHUB_REPOSITORY_SECURITY.md) and `tools/security/harden-public-github-repository.sh` apply and audit the matching repository settings. The script enables only GitHub-owned Actions, keeps default workflow permissions read-only, prevents workflow approval of pull requests, enables Advanced Security, secret scanning, push protection, vulnerability alerts and private vulnerability reporting, disables PR-based automated security fixes, and protects `main` and `staging` against destructive history changes. It also applies the exact description, homepage, topics and issue labels and configures Pages for workflow deployment. It never changes visibility or publishes a release.
+The fail-closed [GitHub security runbook](../operations/GITHUB_REPOSITORY_SECURITY.md) and `tools/security/harden-public-github-repository.sh` apply and audit the matching repository settings. The script disables Pull requests, enables only GitHub-owned Actions, keeps default workflow permissions read-only, prevents workflow approval of pull requests, enables Advanced Security, secret scanning, push protection, vulnerability alerts and private vulnerability reporting, disables PR-based automated security fixes, and protects `main` and `staging` against destructive history changes. It also applies the exact description, homepage, topics and issue labels and configures Pages for workflow deployment. It never changes visibility or publishes a release.
 
 ## Release state
 
@@ -43,7 +43,7 @@ The complete `1.0.0-rc.1` candidate gate passed on commit `dd758e0ee9c8301e15749
 - [x] Current public Git history excludes commercial issuer implementation, private signing material, customer information and old private development history.
 - [x] Security policy, confidential reporting instructions and supported-version policy are present.
 - [x] README, documentation, issue forms, support guidance, repository metadata, topics and social-preview asset are prepared.
-- [x] Quality, CodeQL and Pages automation are tracked with least-privilege permissions and immutable Action references; no PR automation is configured.
+- [x] Pull requests are disabled; Quality, CodeQL and Pages automation use least-privilege permissions and immutable Action references with no PR automation.
 - [x] ASVS 5.0 Level 2 has one authoritative 253-row matrix: 199 Passed and 54 Not applicable, with no unfinished row.
 - [ ] Run `pnpm run release:verify:candidate -- --candidate rc.2` against the exact clean `staging` commit and review all image/SBOM evidence.
 - [ ] The owner explicitly changes repository visibility to public. Keep this separate from every script and release command.

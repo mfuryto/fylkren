@@ -41,8 +41,8 @@ changes visibility, pushes code, creates a tag or publishes a release. It applie
 and verifies:
 
 - the exact description, Pages homepage and twenty search topics;
-- Issues enabled, unused wiki/projects/discussions disabled and maintained issue
-  labels;
+- Issues enabled, Pull requests and unused wiki/projects/discussions disabled,
+  and maintained issue labels;
 - Advanced Security, secret scanning, push protection, vulnerability alerts and
   private vulnerability reporting, with PR-based automated fixes disabled;
 - GitHub-owned Actions only, restricted default token permissions and no
@@ -53,10 +53,9 @@ and verifies:
 
 `staging` accepts owner-controlled integration pushes and runs all maintained
 checks. `main` accepts only an exact commit that already has the required checks,
-which supports the documented fast-forward promotion without rebuilding. No
-workflow, template or dependency automation creates or processes pull requests.
-GitHub does not provide a switch to remove the Pull requests tab from a public
-repository, so any unsolicited pull request is closed without review.
+which supports the documented fast-forward promotion without rebuilding. Pull
+requests are disabled in the repository settings, and no workflow, template or
+dependency automation creates or processes them.
 
 ## Activation sequence
 
