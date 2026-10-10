@@ -4,6 +4,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <InvariantGlobalization>false</InvariantGlobalization>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <Deterministic>true</Deterministic>
+    <RuntimeIdentifiers>linux-x64;linux-arm64;linux-musl-x64;linux-musl-arm64</RuntimeIdentifiers>
     <Version>0.99.0-dev.1</Version>
   </PropertyGroup>
 </Project>

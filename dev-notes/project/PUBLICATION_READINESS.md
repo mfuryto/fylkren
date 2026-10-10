@@ -38,11 +38,13 @@ The current personal private-repository plan does not provide branch protection,
 
 ## Release checklist
 
+The maintained `pnpm run release:verify:candidate -- --candidate rc.N` command is the single local candidate gate. It records locked dependency restoration, checks, image IDs, OCI source/version labels and CycloneDX evidence. Passing it does not satisfy the external, legal, GitHub-control or target-deployment items below.
+
 - [ ] Legal and copyright review verifies the Fylkren Source Available License 1.0, including permitted redistribution, Enterprise-circumvention restriction, attribution/product-identity rule, competitive-use boundary, prior history treatment, notice and trademark policy.
 - [ ] Enterprise customer/commercial terms define installation scope, term, transfer, renewal, entitlement bypass and modified-build treatment, and match the order flow and signed license payload.
 - [x] Final public Git history contains no commercial issuer implementation or sensitive material; private development provenance was retained separately and is not part of the publishable repository.
 - [ ] Security contact/private reporting and supported-version policy are published.
-- [ ] Third-party notices, dependency/license scan and the API/web CycloneDX SBOMs bound to the immutable release images are reviewed.
+- [ ] Third-party notices, dependency/license scan and the CycloneDX SBOMs for all five immutable runtime images are reviewed.
 - [ ] Repository safety, docs, builds and isolated E2E checks pass on the exact release candidate.
 - [ ] The `staging` branch, immutable staging deployment and recorded promotion gate in `RELEASE_VERSIONING.md` are operational; the accepted commit is promoted unchanged to `main`.
 - [ ] GitHub rules protect `staging` and `main`, require the maintained status checks, prevent deletion/force-push and restrict `main` updates to the owner or narrowly scoped release automation without enabling public pull requests.

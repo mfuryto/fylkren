@@ -21,6 +21,7 @@ assert.match(sbom, /pkg:npm/);
 assert.match(sbom, /pkg:nuget/);
 assert.match(sbom, /sourceCommit/);
 assert.match(sbom, /sha256/);
+assert.match(sbom, /--image/);
 assert.match(registration, /KnownProxies|KnownNetworks/);
 assert.match(bounded, /rejectRedirects/);
 assert.match(bounded, /Outbound response exceeds the allowed size/);

@@ -4,7 +4,7 @@
 
 Updated 2026-10-10 after separating customer documentation from development records and adding the sanitized runtime inventory to Platform Manager.
 
-The active private-development version is `0.99.0-dev.1`. It identifies final preparation before the first formal `1.0.0-rc.1` candidate and is not a percentage-complete indicator.
+The active private-development version is `0.99.0-dev.1`. It identifies final preparation before the first formal `rc.1` candidate and is not a percentage-complete indicator. Candidate construction sets the embedded product version to the intended stable `1.0.0`; `rc.N` identifies the immutable candidate manifest and image tags so an accepted image can become `1.0.0` without rebuilding.
 
 This roadmap contains remaining work and release gates. Delivered behavior belongs in the manuals and architecture documents; completed changes belong in [CHANGELOG.md](../../CHANGELOG.md). Requirement and test status remain in their canonical documents, not in a second checklist here.
 
@@ -26,6 +26,8 @@ The first Enterprise AI-assistance slice is implemented as an optional, default-
 
 1. **Delivered:** controlled primary-document import described in [Enterprise AI assistance](../../docs/architecture/AI_ASSISTANCE.md#imported-primary-document-sources). An authorized creator can import PDF, DOCX or UTF-8 text at task creation or reimport a newer version from the task. AI use is selected by default and can be cleared. Fylkren shows import status and version, exposes the structured snapshot to an authorized user for verification, stores its digest, original-document link and provenance, includes the newest opted-in version in AI context and exports the snapshots through Site portability. The original file is discarded while its link remains available. Direct retrieval from a linked internal source remains a later connector extension and may not be enabled before source-system user authorization, classification/disclosure and outbound controls are complete.
 2. **Current:** qualify the final release candidate through the functional, integration, security and deployment gates below. Reuse maintained test harnesses and evidence records; include production-equivalent HTTP/proxy/load sizing, identity providers, authenticators, backup/key custody, time synchronization and either verified remote logging or a documented deployment exception at this gate.
+
+The local candidate mechanism is delivered: one command enforces the stable embedded product version plus separate `rc.N` identity, clean `staging` source, prepared changelog, locked pnpm/NuGet restoration, source and integration checks, one-time construction of all five runtime images, OCI version/commit labels, CycloneDX evidence and a candidate manifest. Promotion verifies the signed stable tag, accepted commit and every exact image ID and cannot build or publish. The `0.99.0-dev.1` source portion passes the complete maintained source gate, including locked restoration and Release builds for every .NET project. Creating/protecting `staging`, running the full candidate laboratories on the future `1.0.0` commit, target-deployment qualification, signed tag and external publication remain release-gate work.
 
 No irreversible disposition is authorized by this order. Establish and verify its prerequisites before proposing activation; do not choose arbitrary retention periods.
 
@@ -76,7 +78,7 @@ Relevant Level 3 controls, WSTG techniques and API Security Top 10 coverage supp
 
 ## Final release-candidate qualification
 
-Run the maintained [end-to-end acceptance suite](../testing/END_TO_END_TEST_MATRIX.md) from reset synthetic fixtures against the exact API/web images and schema intended for release, in both Community and Enterprise states. Cover operational workflows, hierarchy/routing, notifications, learning privacy, authorization, machine APIs, activity/archive behavior and workload sizing. Repeat the affected complete chain after corrections; do not treat historical runs as evidence for untested candidate changes.
+Run the maintained [end-to-end acceptance suite](../testing/END_TO_END_TEST_MATRIX.md) from reset synthetic fixtures against the exact candidate runtime images and schema intended for release, in both Community and Enterprise states. Cover operational workflows, hierarchy/routing, notifications, learning privacy, authorization, machine APIs, activity/archive behavior and workload sizing. Repeat the affected complete chain after corrections; do not treat historical runs as evidence for untested candidate changes.
 
 The local Community/Enterprise candidate suite passes on commit `4883db2` with the Azure Linux API runtime, current schema and reset synthetic fixtures. The same run completes the full functional/security chain and 1,000-task workload; concurrency-25 p95 is 105 ms with a 123 ms maximum. Target-deployment gates below remain required before production qualification.
 

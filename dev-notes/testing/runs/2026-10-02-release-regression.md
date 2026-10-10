@@ -1998,7 +1998,7 @@ Scoped checks:
 
 ```sh
 sh -n deploy/host-status/collect-host-status.sh
-deploy/host-status/collect-host-status.sh /home/codex/fylkren
+deploy/host-status/collect-host-status.sh <repository-root>
 node tools/test-host-time-status.mjs
 dotnet build apps/api/Fylkren.Api.csproj --no-restore
 node tools/test-security-logging-inventory.mjs
