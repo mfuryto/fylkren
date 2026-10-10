@@ -1,13 +1,36 @@
-name: Question or discussion
-description: Ask a product or deployment question that is safe to discuss publicly.
+name: Product or deployment question
+description: Ask a Fylkren question that is safe to discuss publicly.
 title: "[Question] "
+labels: [question, needs-triage]
 body:
   - type: markdown
     attributes:
-      value: "Do not disclose private deployment details, secrets or vulnerabilities. See SECURITY.md for confidential reports."
-  - type: textarea
-    id: question
+      value: Do not disclose vulnerabilities, credentials, customer data, private addresses or full production logs. Use SECURITY.md for confidential reports.
+  - type: input
+    id: version
     attributes:
-      label: Question
+      label: Fylkren version
+      placeholder: "For example: 1.0.0"
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [Product use, Installation or upgrade, Identity and access, API or integration, AI assistance, Backup or recovery, Licensing, Other]
     validations:
       required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: What are you trying to achieve?
+    validations:
+      required: true
+  - type: textarea
+    id: tried
+    attributes:
+      label: What have you already tried?
+      description: Link the documentation you followed and include only sanitized messages.
+  - type: textarea
+    id: environment
+    attributes:
+      label: Relevant environment
+      description: Include edition and deployment type without private infrastructure details.

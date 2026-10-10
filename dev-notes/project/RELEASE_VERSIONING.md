@@ -9,7 +9,7 @@ Fylkren follows Semantic Versioning as `MAJOR.MINOR.PATCH`:
 - `PATCH` changes for compatible corrections and security updates.
 - Pre-release suffixes such as `-dev.1`, `-alpha.1` or `-rc.1` identify builds that are not stable public releases.
 
-The current `0.x` line is private pre-release development. The first public release will be `1.0.0`; durable public release history begins at the `v1.0.0` heading in `CHANGELOG.md`. Earlier engineering history remains available in Git and the dated test records, but it is not presented as a supported public release series.
+The stable release line begins with `1.0.0`; durable public release history begins at the `v1.0.0` heading in `CHANGELOG.md`. Earlier engineering history remains available in Git and dated test records, but it is not a supported release series.
 
 ## Version 1 staging and promotion gate
 

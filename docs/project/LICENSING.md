@@ -33,8 +33,8 @@ distribute a practical bypass. Controlled good-faith security and
 interoperability testing remain allowed within the stated boundary, and
 mandatory statutory rights are preserved.
 
-This is the intended commercial policy. Qualified counsel must still verify the
-exact license and matching customer terms before public release, including
+This is the intended commercial policy. Qualified counsel must verify the
+exact license and matching customer terms for distribution, including
 enforceability, mandatory software rights, copyright ownership and the effect
 of the earlier MPL-2.0 history. That review is a verification gate, not an
 unresolved product-policy choice.
@@ -67,17 +67,15 @@ installations and independent consulting, integration, deployment, training and
 support are welcome under that guidance; third parties must not imply
 endorsement, ownership, or original authorship.
 
-GitHub Issues may be used for bugs, ideas and discussion once the repository is
-public. There is no external code-contribution or pull-request program at this
-stage. Security reports must follow [SECURITY.md](../../SECURITY.md), not public
-issues.
+GitHub Issues are used for non-confidential bugs, ideas and product questions.
+There is no external code-contribution or pull-request program. Security reports
+must follow [SECURITY.md](../../SECURITY.md), not public issues.
 
-## Publication gate
+## Release gate
 
-Before opening the repository, complete the
-[publication-readiness review](../../dev-notes/project/PUBLICATION_READINESS.md), including legal
-verification of the source license and matching customer terms, review of the
-previous MPL-2.0 history, copyright ownership, third-party attributions,
-history sanitization, security contact and final Community/Enterprise release
-tests. Changing today's `LICENSE` does not itself erase earlier commits or
-settle rights attached to older distributions.
+Complete the [repository and release-readiness review](../../dev-notes/project/PUBLICATION_READINESS.md)
+for each stable release, including legal verification of the source license and
+matching customer terms, review of the previous MPL-2.0 history, copyright
+ownership, third-party attributions, history sanitization, security reporting
+and final Community/Enterprise release tests. Changing today's `LICENSE` does
+not itself erase earlier commits or settle rights attached to older distributions.

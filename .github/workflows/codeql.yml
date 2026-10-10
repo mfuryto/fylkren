@@ -1,0 +1,56 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+  schedule:
+    - cron: "17 3 * * 2"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: codeql-${{ github.workflow }}-${{ github.ref }}-${{ matrix.language }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: csharp
+            build-mode: manual
+          - language: javascript-typescript
+            build-mode: none
+    steps:
+      - name: Check out the exact revision
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@e34fc2711fb7964ca6850c8a8382121f34745f3b # v4.32.4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+      - name: Use .NET 10
+        if: matrix.language == 'csharp'
+        uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # v5.0.0
+        with:
+          dotnet-version: "10.0.x"
+      - name: Build C# for analysis
+        if: matrix.language == 'csharp'
+        run: |
+          find . -name '*.csproj' -not -path '*/obj/*' -print0 | xargs -0 -n1 dotnet restore --locked-mode
+          find . -name '*.csproj' -not -path '*/obj/*' -print0 | xargs -0 -n1 dotnet build --configuration Release --no-restore
+      - name: Analyze
+        uses: github/codeql-action/analyze@e34fc2711fb7964ca6850c8a8382121f34745f3b # v4.32.4
+        with:
+          category: /language:${{ matrix.language }}

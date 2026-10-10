@@ -1,0 +1,56 @@
+name: Quality
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-and-tests:
+    name: Source, documentation and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out the exact revision
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Use Node.js 24
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version: "24"
+      - name: Use .NET 10
+        uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # v5.0.0
+        with:
+          dotnet-version: "10.0.x"
+      - name: Install locked dependencies
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.19.0 --activate
+          pnpm install --frozen-lockfile
+          find . -name '*.csproj' -not -path '*/obj/*' -print0 | xargs -0 -n1 dotnet restore --locked-mode
+      - name: Verify repository source and public documentation
+        run: |
+          pnpm check:version
+          pnpm check:docs
+          pnpm check:language:full
+          pnpm check:structure
+          bash tools/security/verify-repository-safety.sh
+      - name: Build and test web applications
+        run: |
+          pnpm typecheck
+          pnpm test
+          pnpm build
+      - name: Build .NET projects
+        run: find . -name '*.csproj' -not -path '*/obj/*' -print0 | xargs -0 -n1 dotnet build --configuration Release --no-restore
+      - name: Run domain and security foundation tests
+        run: node tools/run-foundation-tests.mjs

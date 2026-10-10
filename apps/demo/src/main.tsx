@@ -13,8 +13,25 @@ function Demo() {
   ] as const;
 
   return (
-    <ProductShell mode="demo" logoUrl="/fylkren-logo.png">
+    <ProductShell mode="demo" logoUrl="./fylkren-logo.png">
       <div className="page">
+        <section className="demo-intro" aria-labelledby="demo-title">
+          <div>
+            <p className="demo-eyebrow">Read-only product demo</p>
+            <h1 id="demo-title">Operational work with ownership, traceability and local control</h1>
+            <p>This static preview uses fictional data. Fylkren supports controlled assignments, planning, execution, risk, reporting and continuous learning across organizational levels.</p>
+          </div>
+          <div className="demo-actions">
+            <a className="primary-button" href="https://github.com/mfuryto/fylkren">View source and editions</a>
+            <a className="secondary-button" href="https://github.com/mfuryto/fylkren/blob/main/docs/README.md">Read documentation</a>
+          </div>
+          <ul className="demo-capabilities" aria-label="Product characteristics">
+            <li><strong>19 languages</strong><span>Bundled for offline use</span></li>
+            <li><strong>Optional AI</strong><span>Local or hosted provider</span></li>
+            <li><strong>Air-gapped ready</strong><span>No vendor cloud dependency</span></li>
+            <li><strong>Community + Enterprise</strong><span>One upgrade path</span></li>
+          </ul>
+        </section>
         <header className="page-header">
           <div>
             <h1>Work overview</h1>
@@ -34,6 +51,9 @@ function Demo() {
             </article>
           ))}
         </div>
+        <footer className="demo-footer">
+          Fylkren · self-hosted operational task and mission management · synthetic demo data
+        </footer>
       </div>
     </ProductShell>
   );

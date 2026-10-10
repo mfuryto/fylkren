@@ -1,22 +1,53 @@
 name: Feature request
-description: Suggest an improvement or new Fylkren capability.
+description: Propose a Fylkren capability based on an operational need.
 title: "[Feature] "
-labels: [enhancement]
+labels: [enhancement, needs-triage]
 body:
-  - type: textarea
-    id: problem
+  - type: markdown
     attributes:
-      label: Problem or use case
-      description: Describe the operational need, not confidential case data.
+      value: Describe the operational outcome and affected users without including confidential case data.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and documentation for this capability.
+          required: true
+        - label: This request contains no confidential or security-sensitive information.
+          required: true
+  - type: textarea
+    id: need
+    attributes:
+      label: Operational need
+      description: Who needs this, in which workflow, and what problem does it solve?
     validations:
       required: true
   - type: textarea
-    id: proposal
+    id: outcome
     attributes:
-      label: Proposed behavior
+      label: Desired outcome
+      description: Describe observable behavior rather than an implementation.
     validations:
       required: true
+  - type: textarea
+    id: users
+    attributes:
+      label: Roles and information boundaries
+      description: Which roles, Sites or work levels should use or see it?
+    validations:
+      required: true
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Example workflow
+      description: Give a short fictional before-and-after example.
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Security, offline and integration constraints
+      description: Note air-gapped use, identity providers, APIs, federation, retention or audit needs.
   - type: textarea
     id: alternatives
     attributes:
-      label: Alternatives or constraints
+      label: Current workaround
+      description: Explain how the need is handled today and why that is insufficient.

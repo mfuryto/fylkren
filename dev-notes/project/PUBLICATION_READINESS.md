@@ -1,55 +1,59 @@
-# Public repository readiness — pre-1.0
+# Repository and release readiness
 
-Status: **not ready to make public**. This is a gate and evidence record, not permission to change GitHub visibility or rewrite history.
+Status: **repository content prepared; a new release candidate and owner-controlled GitHub activation remain.** This is the release evidence and activation checklist. It does not authorize a visibility change, tag, GitHub Release or production deployment.
 
-## Intended public surface
+## Public product surface
 
-- The main `mfuryto/fylkren` repository contains the complete distributable Community/Enterprise-capable product, tests and documentation. It is source-available under the Fylkren Source Available License 1.0 in `LICENSE`, which permits compliant redistribution while prohibiting Enterprise circumvention and misrepresentation of product authorship.
-- THUNOLD-OLSEN (Norwegian organization number 996871126) is identified in `NOTICE.md` and `TRADEMARKS.md`; legal ownership and trademark wording still require review.
-- One codebase, one schema, one upgrade path, and the same API/web images for both editions. The official runtime enforces Enterprise entitlements server-side; Community works offline with no entitlement file.
-- Only verification code and public keys belong in this repository. The bundled production public key is not a secret. Production license signing, private keys, customer/commercial records and payment logic belong in the separate private `thunold-olsen-licensing` repository. The documented signed JSON envelope is the trust boundary; compare the bundled key fingerprint with the issuer before public release.
-- The version and release process is defined in [Release versioning and update discovery](RELEASE_VERSIONING.md). Before publication, replace the pre-1.0 development identifier with `1.0.0`, create the signed `v1.0.0` tag only after acceptance, and publish one matching GitHub Release with artifact digests.
-- GitHub Issues may accept public bugs, feature requests and discussion after opening. There is no invitation for external patches or pull requests. Confidential vulnerability reports require a private channel first.
+- `mfuryto/fylkren` contains the complete Community/Enterprise-capable product, tests and documentation under the Fylkren Source Available License 1.0.
+- Community and Enterprise use one codebase, schema, container set and upgrade path. Enterprise entitlements are enforced by the API; Community operates offline without an entitlement file.
+- Production license signing, private keys, customer/commercial records and payment logic stay outside this repository. Only public verification material and synthetic signed fixtures are distributable here.
+- The maintained Git history was recreated from a reviewed clean root. Current-tree and reachable-history scans remain mandatory for every release candidate.
+- `docs/` is customer documentation and is bundled with the matching application. `dev-notes/` contains engineering, test and release evidence and is not bundled.
 
-## GitHub presentation
+## GitHub product presentation
 
-**Description:** Self-hosted operational task management for hierarchical assignments, planning, execution and reporting. Source-available; Community and offline-licensed Enterprise.
+**Description:** Self-hosted, multilingual and AI-assisted operational task and mission management for secure, offline and air-gapped organizations.
 
-**Topics:** `operational-task-management`, `mission-management`, `workflow-management`, `operations-management`, `preparedness`, `emergency-management`, `public-sector`, `self-hosted`, `offline-first`, `air-gapped`, `docker`, `dotnet`, `react`, `postgresql`, `source-available`, `enterprise-software`, `federation`, `identity-management`, `audit-log`, `reporting`.
+**Homepage:** `https://mfuryto.github.io/fylkren/`
 
-The description and topics above were applied to the private GitHub repository
-on 2026-09-27. They do not imply public visibility, enabled Discussions or a
-configured confidential-security channel. Confirm all presentation and security
-settings again at the release gate.
+**Topics:** `self-hosted`, `task-management`, `mission-management`, `operations-management`, `workflow-management`, `risk-management`, `emergency-management`, `preparedness`, `ai-assisted`, `multilingual`, `offline-first`, `air-gapped`, `enterprise-software`, `public-sector`, `docker`, `dotnet`, `react`, `postgresql`, `identity-management`, `federation`.
 
-## Current checks and findings
+The README presents multilingual operation, optional local or hosted AI assistance, air-gapped deployment, editions, security, documentation, the live demo and actual product screenshots near the top. The Pages demo has canonical metadata, Open Graph data, structured software metadata, robots and sitemap files. The prepared 1280×640 social image is `apps/demo/public/fylkren-social-preview.png`.
 
-GitHub security settings were verified and tightened on 2026-09-27 while the repository remained private. Only `mfuryto` has repository access. Pull requests are disabled at repository level. Dependency-graph vulnerability alerts remain enabled; Dependabot version-update configuration and PR-based automated security fixes are disabled. GitHub Actions is disabled because no maintained workflows exist; if workflows are introduced, re-enable only selected actions pinned to complete commit SHAs and keep the default workflow token read-only. Merge commits and rebase merges are disabled, squash is the only configured merge method if pull requests are ever re-enabled, completed branches are deleted automatically, and web-created commits require sign-off.
+## Repository automation and security
 
-The current personal private-repository plan does not provide branch protection, repository rulesets, GitHub secret scanning or push protection. `main` therefore remains technically writable without a protected pull request. The [GitHub repository security runbook](../operations/GITHUB_REPOSITORY_SECURITY.md) contains a fail-closed audit/apply command for enabling and verifying those controls immediately after a separately approved visibility change; the command never makes the repository public. The personal-repository API also does not allow changing the reported private-fork setting. There are no repository webhooks, Actions secrets or deployment environments. One read-only deploy key is used for server checkout and one repository-scoped write deploy key is the current authenticated development push path; neither should be removed blindly. Rotate either key immediately if its host or custody is in doubt. The authenticated API could not confirm account-level two-factor authentication, and existing commits are not cryptographically signed; both remain owner-account controls to verify.
+Tracked GitHub configuration now provides:
 
-1. The current `LICENSE` implements the chosen policy directly: redistribution remains permitted, while Enterprise capabilities require a valid entitlement, practical Enterprise bypasses may not be created or distributed, and Fylkren may not be passed off as an independently created product. The text is project-specific and must not be described as a PolyForm license. Record its final legally reviewed hash at the public-release gate.
-2. Current-tree secret/history scanning uses `bash tools/security/verify-repository-safety.sh --history` and targeted filename/content review. A scanner result is evidence, not proof that all sensitive material is absent.
-3. **Resolved for the publishable repository on 2026-09-27:** the repository was recreated from one clean root containing the reviewed current tree. The former private development repository, including old Dependabot/PR refs and `tools/issue-offline-license.mjs`, was renamed and archived privately instead of being made public or hidden behind a force-pushed branch. A verified local bundle was also created before the transition. Production license issuance remains solely in the separate private `thunold-olsen-licensing` repository. The clean root removes the old source and prior license files from the publishable Git object graph; it does not retroactively alter legal grants made through any earlier distribution, which still requires legal review.
-4. Example configuration and security scripts were checked for deployment-specific defaults; public examples use `example.invalid` and explicit targets. Repeat a full current-tree and reachable-history review for credentials, customer information, real hostnames/addresses, databases, private keys, backups and build artifacts immediately before opening.
-5. **Blocker:** confidential security-reporting channel, supported-version policy and GitHub settings must be set before opening; `SECURITY.md` currently records this requirement without inventing an address.
-6. **Blocker:** the product-policy choice is now encoded in the [Fylkren license](../../LICENSE): compliant redistribution is permitted, while Enterprise circumvention and passing the product off as independently created are prohibited. Qualified counsel must verify that project-specific text and matching customer/commercial terms, plus copyright chain of title, the earlier MPL-2.0 history, all third-party notices and the final brand policy. Confirm no vendor-private material is embedded in distributable containers or tracked files. Public release is blocked until that verification confirms the repository, order flow and product claims are mutually consistent.
-7. **Blocker:** final 1.0 functional, integration, security and edition-transition acceptance is not complete. A synthetic pre-signed fixture is not a production issuer test. Test real license issuance/rotation in a private controlled environment, including live expiry and safe downgrade, without bringing signing material into this repository.
+- structured bug, feature and question forms with confidentiality guidance;
+- private-vulnerability-reporting instructions and a supported-version policy;
+- weekly Dependabot review for npm, NuGet, container and GitHub Actions dependencies;
+- a read-only-token quality workflow for source, docs, language, builds and tests;
+- CodeQL analysis for C# and JavaScript/TypeScript;
+- dependency review for pull requests;
+- a `main`-only GitHub Pages build and deployment of the static synthetic demo; and
+- full commit-SHA pinning for every external Action.
 
-## Release checklist
+The fail-closed [GitHub security runbook](../operations/GITHUB_REPOSITORY_SECURITY.md) and `tools/security/harden-public-github-repository.sh` apply and audit the matching repository settings. The script enables only GitHub-owned Actions, keeps default workflow permissions read-only, prevents workflow approval of pull requests, enables Advanced Security, secret scanning, push protection, vulnerability alerts, Dependabot security fixes and private vulnerability reporting, and protects `main` and `staging` against destructive history changes. It also applies the exact description, homepage, topics and issue labels and configures Pages for workflow deployment. It never changes visibility or publishes a release.
 
-The maintained `pnpm run release:verify:candidate -- --candidate rc.N` command is the single local candidate gate. It records locked dependency restoration, checks, image IDs, OCI source/version labels and CycloneDX evidence. Passing it does not satisfy the external, legal, GitHub-control or target-deployment items below.
+## Release state
 
-- [ ] Legal and copyright review verifies the Fylkren Source Available License 1.0, including permitted redistribution, Enterprise-circumvention restriction, attribution/product-identity rule, competitive-use boundary, prior history treatment, notice and trademark policy.
-- [ ] Enterprise customer/commercial terms define installation scope, term, transfer, renewal, entitlement bypass and modified-build treatment, and match the order flow and signed license payload.
-- [x] Final public Git history contains no commercial issuer implementation or sensitive material; private development provenance was retained separately and is not part of the publishable repository.
-- [ ] Security contact/private reporting and supported-version policy are published.
-- [ ] Third-party notices, dependency/license scan and the CycloneDX SBOMs for all five immutable runtime images are reviewed.
-- [ ] Repository safety, docs, builds and isolated E2E checks pass on the exact release candidate.
-- [ ] The `staging` branch, immutable staging deployment and recorded promotion gate in `RELEASE_VERSIONING.md` are operational; the accepted commit is promoted unchanged to `main`.
-- [ ] GitHub rules protect `staging` and `main`, require the maintained status checks, prevent deletion/force-push and restrict `main` updates to the owner or narrowly scoped release automation without enabling public pull requests.
-- [ ] `VERSION`, application version, `CHANGELOG.md`, signed `v1.0.0` tag, GitHub Release and published artifact digests identify the same accepted commit.
-- [ ] Final Community/Enterprise acceptance and independent security verification are evidenced.
-- [ ] GitHub description/topics, issue templates, branch protection and visibility are reviewed by the owner.
+The complete `1.0.0-rc.1` candidate gate passed on commit `dd758e0ee9c8301e1574999bf930f933de9f0dd6`, including 31 source, security, functional, identity, browser, workload, recovery, image and SBOM checks. The GitHub presentation and automation changes are newer source changes. They therefore require a new candidate identity and a complete candidate verification before promotion; the earlier result remains historical evidence for its exact commit.
 
-Publication must remain a separate, explicit action after these checks; a private push or passing test does not satisfy this gate.
+## Release and activation checklist
+
+- [ ] Qualified legal review confirms the Fylkren Source Available License 1.0, customer/commercial terms, copyright chain, earlier MPL-2.0 history, trademark policy and third-party obligations.
+- [x] Current public Git history excludes commercial issuer implementation, private signing material, customer information and old private development history.
+- [x] Security policy, confidential reporting instructions and supported-version policy are present.
+- [x] README, documentation, issue forms, support guidance, repository metadata, topics and social-preview asset are prepared.
+- [x] Quality, CodeQL, dependency-review, Dependabot and Pages automation are tracked with least-privilege permissions and immutable Action references.
+- [x] ASVS 5.0 Level 2 has one authoritative 253-row matrix: 199 Passed and 54 Not applicable, with no unfinished row.
+- [ ] Run `pnpm run release:verify:candidate -- --candidate rc.2` against the exact clean `staging` commit and review all image/SBOM evidence.
+- [ ] The owner explicitly changes repository visibility to public. Keep this separate from every script and release command.
+- [ ] Run `bash tools/security/harden-public-github-repository.sh --repo mfuryto/fylkren --apply`, then repeat it without `--apply` and inspect GitHub's Security, Actions, Pages and Branches views.
+- [ ] Upload `apps/demo/public/fylkren-social-preview.png` under **Settings → General → Social preview**; GitHub has no repository-file setting that applies this image automatically.
+- [ ] Run the Quality and CodeQL workflows on the accepted `staging` commit and verify that the required checks are green.
+- [ ] Verify private vulnerability reporting by confirming the **Report a vulnerability** button and maintainer security-alert notifications.
+- [ ] Verify `https://mfuryto.github.io/fylkren/`, HTTPS, canonical metadata, synthetic-data notice and links after the first Pages deployment.
+- [ ] Fast-forward the exact accepted commit to `main`, create and verify the signed `v1.0.0` tag, promote the exact candidate image IDs without rebuilding, and publish one matching GitHub Release with digests, SBOMs, upgrade and security notes.
+
+Target deployments retain their own acceptance requirements: TLS/proxy behavior, identity-provider compatibility, authenticator behavior, backup/key custody and restore rehearsal, time synchronization, host access, capacity and optional log-forwarding decision. Those customer controls do not belong in repository metadata.

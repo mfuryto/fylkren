@@ -12,7 +12,7 @@
     "check:language": "node tools/check-repository-language.mjs",
     "check:language:full": "node tools/check-repository-language.mjs --full && node tools/check-linguistic-review.mjs",
     "check:language:release": "node tools/check-linguistic-review.mjs --require-verified",
-    "check:structure": "node tools/check-source-structure.mjs && node tools/check-repository-language.mjs",
+    "check:structure": "node tools/check-source-structure.mjs && node tools/check-repository-language.mjs && node tools/test-github-repository-files.mjs",
     "check:version": "node tools/check-version-consistency.mjs && node tools/test-release-version-policy.mjs && node tools/test-release-candidate-policy.mjs",
     "dev:web": "pnpm --filter @fylkren/web dev",
     "dev:demo": "pnpm --filter @fylkren/demo dev",

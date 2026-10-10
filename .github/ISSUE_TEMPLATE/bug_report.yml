@@ -1,16 +1,59 @@
 name: Bug report
-description: Report a reproducible non-security problem in Fylkren.
+description: Report a reproducible, non-security problem in Fylkren.
 title: "[Bug] "
-labels: [bug]
+labels: [bug, needs-triage]
 body:
   - type: markdown
     attributes:
-      value: "Do not include credentials, customer data or security vulnerabilities. Follow SECURITY.md for confidential reports."
+      value: |
+        Thank you for helping improve Fylkren. Do not include credentials, customer data, private infrastructure details or vulnerabilities. Use the private security-reporting link instead.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues for the same problem.
+          required: true
+        - label: This report contains no vulnerability or confidential data.
+          required: true
+        - label: I can reproduce this on a supported Fylkren version.
+          required: true
   - type: input
     id: version
     attributes:
       label: Fylkren version
-      placeholder: "For example, 1.0.0"
+      description: Copy the complete version shown in the application.
+      placeholder: "For example: 1.0.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: edition
+    attributes:
+      label: Edition
+      options: [Community, Enterprise, Unknown]
+    validations:
+      required: true
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: Deployment
+      options: [Docker Compose on Linux, Hyper-V Linux VM on Windows Server, Development environment, Other documented deployment]
+    validations:
+      required: true
+  - type: input
+    id: client
+    attributes:
+      label: Browser or API client
+      placeholder: "For example: Edge 142 on Windows 11, or API client name and version"
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: Give the shortest safe sequence that consistently produces the problem.
+      placeholder: |
+        1. Open …
+        2. Select …
+        3. Observe …
     validations:
       required: true
   - type: textarea
@@ -22,11 +65,22 @@ body:
   - type: textarea
     id: actual
     attributes:
-      label: Actual behavior and safe reproduction steps
+      label: Actual behavior
+      description: Include the exact user-visible message and a correlation ID when available.
     validations:
       required: true
   - type: textarea
-    id: environment
+    id: regression
     attributes:
-      label: Environment
-      description: Include browser, deployment type and relevant non-sensitive configuration.
+      label: Regression and frequency
+      description: State whether this worked in an earlier version and whether it happens always or intermittently.
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized evidence
+      description: Add screenshots or short sanitized log excerpts. Remove tokens, people, tasks, hostnames, addresses and customer data.
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Note relevant identity provider, reverse proxy, language, time zone or feature configuration without disclosing secrets.

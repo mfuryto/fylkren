@@ -1,83 +1,98 @@
-# GitHub repository security
+# GitHub repository security and operations
 
-This runbook defines the repository controls required when `mfuryto/fylkren`
-is eventually made public. It does not authorize publication. Legal review,
-release acceptance, security reporting and every other gate in
-[publication readiness](../project/PUBLICATION_READINESS.md) must first be
-complete.
+This runbook defines the GitHub controls for `mfuryto/fylkren`. It complements
+the [release-readiness gate](../project/PUBLICATION_READINESS.md) and does not
+authorize visibility changes, release publication or production deployment.
 
-## Current private state
+## Tracked controls
 
-The publishable repository is private. Pull requests are disabled at repository
-level. Dependency-graph vulnerability alerts remain enabled, while Dependabot
-version updates and automated security fixes are disabled because both create
-pull requests. Dependency updates must therefore be reviewed and committed by
-the owner. Squash is the only configured merge method if pull requests are ever
-re-enabled, merged branches are deleted, web commits require sign-off, and
-GitHub Actions is disabled because there are no reviewed workflows.
+The repository carries the configuration that can be reviewed with source:
 
-The current personal private-repository plan does not expose branch protection,
-GitHub secret scanning or push protection. These are therefore publication
-controls, not controls that can be truthfully claimed today. The audit command
-shows their actual API state:
+- `.github/workflows/quality.yml` verifies source, documentation, localization,
+  builds and maintained tests on `staging` and `main`;
+- `.github/workflows/codeql.yml` analyzes C# and JavaScript/TypeScript on pushes,
+  pull requests, a weekly schedule and manual dispatch;
+- `.github/workflows/dependency-review.yml` rejects pull requests that introduce
+  dependencies with moderate or higher known vulnerabilities;
+- `.github/workflows/pages.yml` builds the static demo and deploys it only from
+  `main`;
+- `.github/dependabot.yml` proposes weekly npm, NuGet, container-image and Action
+  updates in bounded groups; and
+- issue forms, `SECURITY.md`, `SUPPORT.md`, `CONTRIBUTING.md` and `CODEOWNERS`
+  define public intake and ownership.
+
+Every external Action reference is pinned to a complete commit SHA. Workflow
+tokens default to read-only, checkout credentials are not persisted, concurrent
+obsolete quality runs are cancelled, and only the Pages deployment job receives
+the two write permissions it needs.
+
+## Apply and audit GitHub settings
+
+Work from the exact, clean release commit. The repository owner changes
+visibility as a separate deliberate GitHub action. Then run:
 
 ```bash
-bash tools/security/harden-public-github-repository.sh --repo mfuryto/fylkren
+bash tools/security/harden-public-github-repository.sh \
+  --repo mfuryto/fylkren \
+  --apply
+
+bash tools/security/harden-public-github-repository.sh \
+  --repo mfuryto/fylkren
 ```
 
-An audit can report unavailable controls while the repository is private. It
-does not change settings or visibility.
+The apply command first scans the current tree and reachable history. It never
+changes visibility, pushes code, creates a tag or publishes a release. It applies
+and verifies:
 
-## Publication-day sequence
+- the exact description, Pages homepage and twenty search topics;
+- Issues enabled, unused wiki/projects/discussions disabled and maintained issue
+  labels;
+- Advanced Security, secret scanning, push protection, vulnerability alerts,
+  Dependabot security fixes and private vulnerability reporting;
+- GitHub-owned Actions only, restricted default token permissions and no
+  workflow approval of pull requests;
+- workflow-based Pages with HTTPS;
+- linear `staging` and `main` history with deletion and force-push disabled; and
+- required Quality and CodeQL checks on `main`.
 
-1. Complete and record every publication-readiness gate. Work from the exact,
-   clean release commit and run:
+`staging` accepts owner-controlled integration pushes and runs all maintained
+checks. `main` accepts only an exact commit that already has the required checks,
+which supports the documented fast-forward promotion without rebuilding. Public
+pull requests can be reviewed or closed, but unsolicited external code is not an
+accepted contribution path.
 
-   ```bash
-   bash tools/security/verify-repository-safety.sh --history
-   ```
-2. Have the repository owner make the repository public as a separate,
-   deliberate GitHub action. Do not combine visibility changes with automation.
-3. Immediately apply and verify the public-repository controls:
+## Activation sequence
 
-   ```bash
-   bash tools/security/harden-public-github-repository.sh \
-     --repo mfuryto/fylkren \
-     --apply
-   ```
+1. Complete the release-readiness checklist and pass a new full candidate on the
+   exact `staging` commit.
+2. Change visibility through GitHub and immediately apply and audit the settings
+   above.
+3. Run **Quality** and **CodeQL** manually on `staging` once Actions is enabled;
+   inspect the exact commit, permissions and logs.
+4. Confirm **Security → Report a vulnerability** is visible and subscribe the
+   maintainer account to security-alert notifications.
+5. Upload `apps/demo/public/fylkren-social-preview.png` under **Settings →
+   General → Social preview**.
+6. Promote the already checked commit to `main`. The Pages workflow then builds
+   and deploys `apps/demo`; inspect the deployment environment and live site.
+7. Create the signed version tag and matching GitHub Release only after commit,
+   image IDs, digests and SBOMs match the accepted candidate manifest.
 
-4. Run the same command without `--apply` and inspect GitHub's Security and
-   Branches settings. Do not announce the repository until the verification is
-   clean.
+## Ongoing operation
 
-The apply command deliberately refuses to operate while the repository is
-private and never changes visibility. It enables GitHub Advanced Security,
-secret scanning, push protection, dependency/vulnerability alerts and private
-vulnerability reporting. It disables pull requests and PR-based automated
-security fixes. It protects `main` against force pushes and deletion while
-retaining direct owner pushes, because requiring pull requests would contradict
-the repository's contribution policy.
-
-## GitHub Actions and status checks
-
-Actions remain disabled until maintained workflows exist. Before enabling
-Actions, review every workflow, pin each third-party action to a complete commit
-SHA, set the default workflow token to read-only, prevent Actions from creating
-or approving pull requests, and explicitly grant only the permissions each job
-needs. Stable security and test jobs may then become required status checks on
-`main`; never require a check that cannot run for direct owner pushes.
-
-## Operational cautions
-
-- Keep the production license issuer, signing keys, customer records and
-  commercial data exclusively in the separate private
-  `thunold-olsen-licensing` repository.
-- Treat secret scanning as detection, not proof that history is safe. Retain the
-  local and independent review gates.
-- Verify account-level two-factor authentication, recovery methods, deploy-key
-  custody and signing-key custody separately; repository APIs do not prove all
-  account controls.
-- Rotate a deploy key immediately if its host or custody is in doubt. The
-  production checkout key should remain read-only.
-- Re-run the audit after ownership, plan, visibility, branch rules, Actions or
-  deploy keys change.
+- Review every Dependabot pull request through Quality, CodeQL and dependency
+  review. Never auto-merge major updates or security-sensitive runtime changes.
+- Treat secret scanning as detection rather than proof. Retain the local current-
+  tree and reachable-history release scan.
+- Triage private vulnerability reports inside GitHub Security Advisories. Keep
+  proof, remediation discussion and disclosure timing private until a correction
+  and operator guidance are ready.
+- Review CodeQL and Dependabot alerts at least weekly and before every release.
+- Re-run the audit after ownership, account plan, Actions, Pages, branch rules,
+  deploy keys or visibility changes.
+- Keep production license issuance, signing keys, customer records and commercial
+  data outside this repository.
+- Verify account MFA, recovery methods, deploy-key custody and tag-signing-key
+  custody separately; repository APIs cannot establish those account controls.
+- Keep server checkout keys read-only. Rotate a deploy key immediately when its
+  host or custody is in doubt.

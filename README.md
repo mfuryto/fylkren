@@ -4,37 +4,37 @@
 
 <h1 align="center">Fylkren</h1>
 
-<p align="center"><strong>Operational task and mission management—from assignment to documented result.</strong></p>
+<p align="center"><strong>Self-hosted, multilingual and AI-assisted operational task and mission management.</strong></p>
 
 <p align="center">
-  <code>VERSION 1.0.0</code> · <code>SELF-HOSTED</code> · <code>OFFLINE-FIRST</code> · <code>AIR-GAPPED READY</code> · <code>WINDOWS-FAMILIAR WEB UI</code>
+  <code>VERSION 1.0.0</code> · <code>SELF-HOSTED</code> · <code>19 LANGUAGES</code> · <code>OPTIONAL AI</code> · <code>AIR-GAPPED READY</code>
 </p>
 
 <p align="center">
+  <a href="https://mfuryto.github.io/fylkren/"><strong>Live demo</strong></a> ·
   <a href="#why-fylkren">Why Fylkren</a> ·
   <a href="#capabilities">Capabilities</a> ·
+  <a href="#multilingual-and-ai-assisted">Languages and AI</a> ·
   <a href="#community-and-enterprise">Editions</a> ·
   <a href="#deployment">Deployment</a> ·
-  <a href="dev-notes/project/RELEASE_VERSIONING.md">Releases</a> ·
   <a href="docs/README.md">Documentation</a>
 </p>
 
-Fylkren gives organizations one controlled chain for receiving, assessing,
-planning, delegating, executing and reporting formal assignments. It is designed
-for operational and preparedness work with clear responsibility, durable
-history and strict boundaries between organizational levels.
+Fylkren gives organizations one secure operational chain for receiving,
+assessing, planning, delegating, executing and reporting formal assignments.
+It combines operational task management, mission management, risk management,
+continuous learning and decision support in a Windows-familiar web interface.
+Organizations retain their own data, identity, AI provider and infrastructure.
 
-| **Direct the work** | **Retain local control** | **Document the result** |
+| **Direct the work** | **Retain local control** | **Improve the next operation** |
 |:---|:---|:---|
 | Route tasks, requests and decisions through the right level | Keep each site, role and work level within its authorization boundary | Preserve execution history, approvals, audit events and final reports |
-| Delegate without taking over subordinate processing | Run locally, offline or in an isolated network | Print or export reports with customer-defined classification markings |
+| Delegate without taking over subordinate processing | Run locally, offline or in an isolated network | Turn risks, outcomes and internal learning into structured follow-up |
 
-> [!IMPORTANT]
-> **Pre-1.0:** Fylkren is being prepared for public release. Final release
-> acceptance and independent security verification are not complete. The
-> repository must not be treated as a certified, accredited or production-
-> approved system. The current development version is read from [`VERSION`](VERSION).
-> Public release history begins with `v1.0.0`.
+Explore the read-only [Fylkren demo](https://mfuryto.github.io/fylkren/) with
+synthetic data, or go directly to the [user manual](docs/administration/USER_MANUAL.md),
+[installation guide](docs/operations/INSTALLATION_AND_UPGRADES.md) or
+[security policy](SECURITY.md).
 
 ## Why Fylkren
 
@@ -51,6 +51,10 @@ responsibility and reporting chain** around operational work.
   reports remain understandable over time.
 - **Offline independence** — core operation, authentication, documentation and
   licensing do not require a vendor cloud or continuous Internet access.
+- **Multilingual operation** — 19 complete interface locales ship with the
+  product and remain available on isolated networks.
+- **Controlled AI assistance** — Enterprise can connect an approved local or
+  hosted OpenAI-compatible provider and enable individual functions per Site.
 - **One product, not two forks** — Community and Enterprise use the same
   database, containers, schema, migrations and upgrade path.
 
@@ -89,6 +93,32 @@ internal processing.
 | **Administration** | Platform and site administration, customer-defined classifications, appearance, notifications, audit, health and technical status |
 | **Integration** | Versioned administration/report APIs, bounded Enterprise AI assistance, signed webhooks, portable customer-data export and trusted Fylkren-to-Fylkren federation |
 | **Deployment** | Docker Compose, PostgreSQL, persistent cryptographic keys, offline operation, backup/restore and documented upgrades |
+
+## Multilingual and AI-assisted
+
+Fylkren is multilingual by design. It includes 19 complete interface locales:
+English (United States and United Kingdom), Norwegian Bokmal, Swedish, Danish,
+Finnish, German, French, Polish, Spanish, Italian, Ukrainian, Dutch, Portuguese,
+Czech, Romanian, Estonian, Latvian and Lithuanian. Language resources are
+bundled, so changing language never depends on an external translation service.
+
+Enterprise AI assistance is optional, centrally controlled and provider
+independent. An installation can use an approved cloud service or a local
+OpenAI-compatible model inside the customer's own network. Administrators can
+enable AI per Site and per function. Fylkren uses it to help users:
+
+- summarize and quality-check an assignment;
+- generate editable planning suggestions from the active workflow template;
+- propose risks and mitigations for human assessment;
+- prepare editable decision-support drafts;
+- group and prioritize internal learning points; and
+- ask bounded questions about the current assignment.
+
+AI output is presented as assistance or a draft. The responsible user reviews
+and confirms the result before it becomes operational data. Imported primary
+documents can provide structured AI context while the original document link
+remains the user's authoritative reference. See the
+[AI architecture and security boundaries](docs/architecture/AI_ASSISTANCE.md).
 
 ### The workspace
 
@@ -136,7 +166,7 @@ use the name `Enterprise`; there is no separate “Pro” build.
 | Machine administration and report APIs | — | ◈ |
 | Signed webhook subscriptions and delivery | — | ◈ |
 | Trusted independent-instance federation | — | ◈ |
-| Centrally controlled AI assistance per Site | — | ◈ |
+| Local or hosted OpenAI-compatible AI, controlled per Site and function | — | ◈ |
 
 ### Safe edition transitions
 
@@ -175,8 +205,7 @@ production decision.
 
 ### Self-hosted installation
 
-Once the repository is public, a test installation can use Docker Engine,
-Docker Compose v2 and Git:
+A test installation uses Docker Engine, Docker Compose v2 and Git:
 
 ```bash
 git clone https://github.com/mfuryto/fylkren.git
@@ -214,8 +243,9 @@ pnpm dev:demo
 dotnet run --project apps/api/Fylkren.Api.csproj
 ```
 
-The read-only demo has no production API or persistence. The production web
-client supports modern browsers on Windows, Linux and macOS.
+The [read-only GitHub Pages demo](https://mfuryto.github.io/fylkren/) has no
+production API, persistence or customer data. The production web client supports
+modern browsers on Windows, Linux and macOS.
 
 ## Documentation
 
@@ -238,22 +268,15 @@ Customer documentation lives in `docs/` and is the same set bundled with the
 application. Developer, test and release working records live in
 [`dev-notes/`](dev-notes/README.md).
 
-### Interface languages
-
-Fylkren includes English (United States and United Kingdom), Norwegian Bokmal,
-Swedish, Danish, Finnish, German, French, Polish, Spanish (Spain), Italian,
-Ukrainian, Dutch, Portuguese (Portugal), Czech, Romanian, Estonian, Latvian and
-Lithuanian. Every bundled catalog passes the same coverage, placeholder, locale
-behavior and build checks. Linguistic verification is recorded separately so the
-README remains a product overview rather than a translation-status report.
-
 ## Issues, contributions, license and brand
 
-GitHub Issues may be used for non-confidential bug reports, feature requests and
-product discussion once the repository opens. Never post credentials, customer
-information or vulnerabilities in a public issue; follow [SECURITY.md](SECURITY.md).
-Pull requests are disabled, and Fylkren does not accept external code
-contributions through GitHub.
+Use [GitHub Issues](https://github.com/mfuryto/fylkren/issues) for
+non-confidential bug reports, feature requests and product questions. Never post
+credentials, customer information or vulnerabilities in a public issue. Report
+suspected vulnerabilities privately through
+[GitHub Security Advisories](https://github.com/mfuryto/fylkren/security/advisories/new)
+and follow [SECURITY.md](SECURITY.md). Fylkren does not accept unsolicited
+external code contributions; see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Fylkren is **source-available under the Fylkren Source Available License 1.0**.
 The complete [LICENSE](LICENSE) permits compliant redistribution while

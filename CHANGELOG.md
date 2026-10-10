@@ -6,7 +6,12 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## 1.0.0 - 2026-10-10
 
-- Advance the private development line to `0.99.0-dev.1` for final release-candidate preparation. Candidate labels such as `1.0.0-rc.1` identify immutable manifests and image tags; the embedded product version is already the intended `1.0.0`, allowing an accepted image to be promoted without rebuilding it.
+- Present Fylkren as self-hosted, multilingual and AI-assisted operational task and mission management with a live read-only demo, clear Community/Enterprise comparison, security reporting, product screenshots and search-oriented repository metadata.
+- Add a `main`-only GitHub Pages deployment for the synthetic demo with canonical, Open Graph, structured software, robots and sitemap metadata plus a dedicated social-preview image.
+- Add least-privilege, immutable-reference GitHub workflows for source quality, CodeQL, dependency review and Pages; add bounded weekly Dependabot review for npm, NuGet, container and Action dependencies.
+- Add professional bug, feature and question intake forms, public support/contribution guidance, a supported-version policy and GitHub private vulnerability-reporting instructions.
+- Add one auditable GitHub activation tool for repository metadata, topics, Actions permissions, Advanced Security, secret scanning, push protection, vulnerability alerts, Dependabot security fixes, private reporting, Pages, labels and branch protection without changing visibility or publishing a release.
+- Establish `1.0.0` as the stable product version. Candidate labels such as `1.0.0-rc.1` identify immutable manifests and image tags separately, allowing an accepted image to be promoted without rebuilding it.
 - Add one fail-closed release path for controlled version changes, locked pnpm/NuGet dependency restoration, source and integration gates, commit-labelled immutable runtime images, CycloneDX evidence and no-rebuild promotion of verified image IDs.
 - Separate customer documentation in `docs/` from developer, test and release working records in `dev-notes/`; bundle only the explicit customer set with the application.
 - Show Platform Managers a sanitized runtime inventory between System status and Technical logs, including the full product, framework, database, operating-system and container-engine names and reported versions.
@@ -173,8 +178,8 @@ This file records durable, user-visible release changes. Detailed implementation
 - Added a maintained isolated real-time license-expiry test that proves immediate Enterprise-to-Community downgrade, server-side entitlement closure, retained customer state, paused webhook processing and renewal without restart.
 - Completed GUI-managed AD/LDAP/OIDC/SAML identity hardening and maintained live laboratories. External links are bound to the exact OIDC issuer or SAML IdP Entity ID and can be safely removed/relinked. Tests now cover trusted TLS, one-time environment import, protected secrets, LDAP injection, scheduled/manual deprovisioning, disabled/expired/missing accounts, malformed or ambiguous directory data, invalid binds, preserved people/access history, direct-SSO emergency presentation and cancellation, wrong OIDC nonce/audience, forged state, unsigned or tampered SAML, replay rejection and atomic callback failure without a retained session.
 
-These changes target the first public `v1.0.0` release. Pre-1.0 development
-build identifiers are not public releases.
+The `v1.0.0` release establishes the supported public release line. Earlier
+development build identifiers are retained only as historical engineering evidence.
 
 - Redesigned Platform Manager's License page as a branded, responsive digital certificate with explicit signature, instance-binding, customer, validity and entitlement presentation. Added the THUNOLD-OLSEN Licensing mark shared with the issuer portal.
 - Established one authoritative development version file and a documented Semantic Versioning/GitHub Releases process. Public release history and supported update notifications begin with `v1.0.0`.
