@@ -21,7 +21,7 @@ if [ -r /etc/os-release ]; then
     operating_system_version=$(sed -n 's/^VERSION_ID=//p' /etc/os-release | head -n 1 | tr -d '"' | tr -cd 'A-Za-z0-9._+()-' | cut -c1-50)
 fi
 kernel_version=$(uname -r 2>/dev/null | tr -cd 'A-Za-z0-9._+()-' | cut -c1-80)
-architecture=$(uname -m 2>/dev/null | tr -cd 'A-Za-z0-9._- ' | cut -c1-40)
+architecture=$(uname -m 2>/dev/null | tr -cd 'A-Za-z0-9._ -' | cut -c1-40)
 [ -n "$operating_system_name" ] || operating_system_name=unknown
 [ -n "$operating_system_version" ] || operating_system_version=unknown
 [ -n "$kernel_version" ] || kernel_version=unknown
