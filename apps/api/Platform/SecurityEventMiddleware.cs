@@ -30,11 +30,15 @@ public sealed class SecurityEventMiddleware(RequestDelegate next, ILogger<Securi
                 new EventId(4101, "AccessRejected"),
                 "Security event {SecurityEvent}; method={Method}; route={Route}; status={StatusCode}; actorPersonId={ActorPersonId}; traceId={TraceId}",
                 "access-rejected",
-                context.Request.Method,
-                route,
+                SafeLogValue(context.Request.Method),
+                SafeLogValue(route),
                 statusCode,
-                actorPersonId,
-                context.TraceIdentifier);
+                SafeLogValue(actorPersonId),
+                SafeLogValue(context.TraceIdentifier));
         }
     }
+
+    private static string SafeLogValue(string value) =>
+        value.Replace("\r", " ", StringComparison.Ordinal)
+            .Replace("\n", " ", StringComparison.Ordinal);
 }

@@ -30,5 +30,7 @@ describe("primary document import", () => {
     expect(primaryDocumentIndicator(null, true, false, "Imported", "Not imported")).toBe("Not imported");
     expect(primaryDocumentIndicator(null, true, true, "Imported", "Not imported")).toBe("?");
     expect(primaryDocumentStructuredUrl("site", "task", "snapshot")).toBe("/api/work/sites/site/items/task/primary-document/snapshot/structured");
+    expect(primaryDocumentStructuredUrl("site/one", "task?two", "javascript:alert(1)"))
+      .toBe("/api/work/sites/site%2Fone/items/task%3Ftwo/primary-document/javascript%3Aalert(1)/structured");
   });
 });

@@ -19,11 +19,9 @@ const escapeHtml = value => value
   .replaceAll('"', '&quot;');
 
 const slug = value => value
-  .replace(/<[^>]+>/g, '')
   .toLocaleLowerCase('en-US')
-  .replace(/[^\p{L}\p{N}\s_-]/gu, '')
-  .trim()
-  .replace(/\s/g, '-');
+  .replace(/[^\p{L}\p{N}_-]+/gu, '-')
+  .replace(/^-+|-+$/g, '');
 
 function outputForSource(source) {
   const relative = path.relative(documentationRoot, source);
@@ -72,6 +70,9 @@ async function renderDocument(source) {
   const marked = new Marked({
     gfm: true,
     renderer: {
+      html({ text }) {
+        return escapeHtml(text);
+      },
       heading({ tokens, depth }) {
         const content = this.parser.parseInline(tokens);
         if (depth === 1) documentTitle = tokens.map(token => token.raw).join('').trim() || documentTitle;
@@ -90,8 +91,6 @@ async function renderDocument(source) {
     },
   });
   const body = await marked.parse(markdown);
-  if (/<script\b|\son\w+\s*=/i.test(body))
-    throw new Error(`Unsafe active content in ${path.relative(repositoryRoot, source)}`);
   await mkdir(path.dirname(output), { recursive: true });
   await writeFile(output, pageTemplate(documentTitle, body));
 }

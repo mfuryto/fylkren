@@ -14,7 +14,7 @@ export function primaryDocumentIndicator(version: number | null, loaded: boolean
 }
 
 export const primaryDocumentStructuredUrl = (siteId: string, itemId: string, snapshotId: string) =>
-  `/api/work/sites/${siteId}/items/${itemId}/primary-document/${snapshotId}/structured`;
+  `/api/work/sites/${encodeURIComponent(siteId)}/items/${encodeURIComponent(itemId)}/primary-document/${encodeURIComponent(snapshotId)}/structured`;
 
 export function PrimaryDocumentButton({ siteId, itemId, referenceUrl, canImport }: { siteId: string; itemId: string; referenceUrl: string | null; canImport: boolean }) {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null), [open, setOpen] = useState(false);

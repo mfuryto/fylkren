@@ -21,6 +21,8 @@ const outputRoot = 'apps/web/.generated-public/documentation';
 const index = readFileSync(path.join(outputRoot, 'index.html'), 'utf8');
 assert.match(index, new RegExp(`Version ${version.replaceAll('.', '\\.').replaceAll('-', '\\-')}`));
 assert.match(index, /administration\/USER_MANUAL\.html/);
+assert.doesNotMatch(index, /<script\b|\son\w+\s*=/i,
+  'Bundled Markdown must not render active HTML');
 
 function filesBelow(directory) {
   return readdirSync(directory).flatMap(name => {

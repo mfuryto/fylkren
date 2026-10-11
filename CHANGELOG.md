@@ -4,6 +4,8 @@ This file records durable, user-visible release changes. Detailed implementation
 
 ## Unreleased
 
+- Harden structured-document links, offline Markdown rendering and request-derived security-log fields after the first public CodeQL review; record signed-federation and isolated browser-harness false positives with explicit rationale.
+
 ## 1.0.0 - 2026-10-10
 
 - Present Fylkren as self-hosted, multilingual and AI-assisted operational task and mission management with a live read-only demo, clear Community/Enterprise comparison, security reporting, product screenshots and search-oriented repository metadata.
