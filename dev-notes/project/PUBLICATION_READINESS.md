@@ -31,7 +31,7 @@ Tracked GitHub configuration now provides:
 - a `main`-only GitHub Pages build and deployment of the static synthetic demo; and
 - full commit-SHA pinning for every external Action.
 
-The fail-closed [GitHub security runbook](../operations/GITHUB_REPOSITORY_SECURITY.md) and `tools/security/harden-public-github-repository.sh` apply and audit the matching repository settings. The script disables Pull requests, enables only GitHub-owned Actions, keeps default workflow permissions read-only, prevents workflow approval of pull requests, enables secret scanning, push protection, vulnerability alerts and private vulnerability reporting, disables PR-based automated security fixes, and protects `main` and `staging` against destructive history changes. GitHub Advanced Security is available automatically for the public repository and is therefore audited rather than configured. The script also applies the exact description, homepage, topics and issue labels and configures Pages for workflow deployment. It never changes visibility or publishes a release.
+The fail-closed [GitHub security runbook](../operations/GITHUB_REPOSITORY_SECURITY.md) and `tools/security/harden-public-github-repository.sh` apply and audit the matching repository settings. The script disables Pull requests, enables only GitHub-owned Actions, keeps default workflow permissions read-only, prevents workflow approval of pull requests, enables secret scanning, push protection, vulnerability and malware alerts and private vulnerability reporting, disables PR-based automated security fixes, and protects `main` and `staging` against destructive history changes. GitHub Advanced Security is available automatically for the public repository and is therefore audited rather than configured. The script also applies the exact description, homepage, topics and issue labels and configures Pages for workflow deployment. It never changes visibility or publishes a release.
 
 ## Release state
 
@@ -50,7 +50,7 @@ The complete `1.0.0-rc.2` candidate gate passed all 31 source, security, functio
 - [x] The hardening configuration and audit were applied; Security, Actions, Pages and branch-protection state match the runbook.
 - [ ] Upload `apps/demo/public/fylkren-social-preview.png` under **Settings → General → Social preview**; GitHub has no repository-file setting that applies this image automatically.
 - [x] Quality and both CodeQL analyses passed on accepted `staging` and the activated `main` revision.
-- [x] GitHub private vulnerability reporting and vulnerability alerts are enabled; confidential reports use the repository's **Report a vulnerability** flow.
+- [x] GitHub private vulnerability reporting plus Dependabot vulnerability and malware alerts are enabled; confidential reports use the repository's **Report a vulnerability** flow.
 - [x] `https://mfuryto.github.io/fylkren/` serves the synthetic demo over HTTPS with canonical, Open Graph, robots and sitemap metadata.
 - [x] The accepted source was fast-forwarded to `main`; the SSH-signed `v1.0.0` tag, no-rebuild image promotion and matching GitHub Release with candidate and SBOM evidence are published.
 

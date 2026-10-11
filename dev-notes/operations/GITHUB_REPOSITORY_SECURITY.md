@@ -43,7 +43,7 @@ and verifies:
 - the exact description, Pages homepage and twenty search topics;
 - Issues enabled, Pull requests and unused wiki/projects/discussions disabled,
   and maintained issue labels;
-- Advanced Security, secret scanning, push protection, vulnerability alerts and
+- Advanced Security, secret scanning, push protection, vulnerability and malware alerts, and
   private vulnerability reporting, with PR-based automated fixes disabled;
 - GitHub-owned Actions only, restricted default token permissions and no
   workflow approval of pull requests;

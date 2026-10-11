@@ -72,7 +72,8 @@ if [[ "$mode" == "apply" ]]; then
   "web_commit_signoff_required": true,
   "security_and_analysis": {
     "secret_scanning": {"status": "enabled"},
-    "secret_scanning_push_protection": {"status": "enabled"}
+    "secret_scanning_push_protection": {"status": "enabled"},
+    "dependabot_malware_alerts": {"status": "enabled"}
   }
 }
 JSON

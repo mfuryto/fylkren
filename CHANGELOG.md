@@ -5,6 +5,7 @@ This file records durable, user-visible release changes. Detailed implementation
 ## Unreleased
 
 - Harden structured-document links, offline Markdown rendering and request-derived security-log fields after the first public CodeQL review; record signed-federation and isolated browser-harness false positives with explicit rationale.
+- Enable Dependabot malware alerts without enabling automated security-update pull requests, and retain the setting in the repository hardening tool.
 
 ## 1.0.0 - 2026-10-10
 
