@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://mfuryto.github.io/fylkren/sitemap.xml
+Sitemap: https://mfuryto.github.io/fylkren/sitemap.txt

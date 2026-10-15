@@ -2,7 +2,26 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://mfuryto.github.io/fylkren/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://mfuryto.github.io/fylkren/features/task-management/</loc>
+  </url>
+  <url>
+    <loc>https://mfuryto.github.io/fylkren/features/planning-and-templates/</loc>
+  </url>
+  <url>
+    <loc>https://mfuryto.github.io/fylkren/features/execution-and-reporting/</loc>
+  </url>
+  <url>
+    <loc>https://mfuryto.github.io/fylkren/features/risk-management/</loc>
+  </url>
+  <url>
+    <loc>https://mfuryto.github.io/fylkren/features/continuous-learning/</loc>
+  </url>
+  <url>
+    <loc>https://mfuryto.github.io/fylkren/features/multilingual-ai-assisted/</loc>
+  </url>
+  <url>
+    <loc>https://mfuryto.github.io/fylkren/features/self-hosted-air-gapped/</loc>
   </url>
 </urlset>

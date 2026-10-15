@@ -7,6 +7,16 @@ import './demo.css';
 const views = ['Overview', 'Tasks', 'Planning', 'Execution', 'Risk', 'Reports', 'Learning', 'Workflows'] as const;
 type View = typeof views[number];
 
+const featureLinks = [
+  ['Task management', './features/task-management/'],
+  ['Planning', './features/planning-and-templates/'],
+  ['Execution', './features/execution-and-reporting/'],
+  ['Risk', './features/risk-management/'],
+  ['Learning', './features/continuous-learning/'],
+  ['AI assistance', './features/multilingual-ai-assisted/'],
+  ['Air-gapped operation', './features/self-hosted-air-gapped/']
+] as const;
+
 const viewCopy: Record<View, { eyebrow: string; title: string; description: string }> = {
   Overview: { eyebrow: 'Operational picture', title: 'One shared view of work that must move', description: 'Bring assignments, deadlines, risk and follow-up into a controlled operational picture across organizational levels.' },
   Tasks: { eyebrow: 'Ownership and control', title: 'Every assignment has a responsible owner', description: 'Prioritize, assign and follow work with stable references, deadlines, lifecycle status and a complete activity history.' },
@@ -118,7 +128,7 @@ function Demo() {
 
   const pages: Record<View, ReactNode> = { Overview: <Overview navigate={setActiveView} />, Tasks: <Tasks />, Planning: <Planning />, Execution: <Execution />, Risk: <Risk />, Reports: <Reports />, Learning: <Learning />, Workflows: <Workflows /> };
 
-  return <ProductShell mode="demo" logoUrl="./fylkren-logo.png" version="1.0.0" activeItem={activeView} navigationItems={[...views]} navigationDividerBefore="Workflows" onNavigate={item => setActiveView(item as View)} documentationHref="https://github.com/mfuryto/fylkren/blob/main/docs/README.md" userLabel="Demo"><div className={`page demo-page demo-view-${activeView.toLowerCase()}`}>{pages[activeView]}<footer className="demo-footer"><span>Fylkren · self-hosted operational task and mission management</span><span>Fictional demo data · no information is saved</span></footer></div></ProductShell>;
+  return <ProductShell mode="demo" logoUrl="./fylkren-logo.png" version="1.0.0" activeItem={activeView} navigationItems={[...views]} navigationDividerBefore="Workflows" onNavigate={item => setActiveView(item as View)} documentationHref="https://github.com/mfuryto/fylkren/blob/main/docs/README.md" userLabel="Demo"><div className={`page demo-page demo-view-${activeView.toLowerCase()}`}>{pages[activeView]}<footer className="demo-footer"><nav aria-label="Product capabilities">{featureLinks.map(([label, href]) => <a href={href} key={href}>{label}</a>)}</nav><div><span>Fylkren · self-hosted operational task and mission management</span><span>Fictional demo data · no information is saved</span></div></footer></div></ProductShell>;
 }
 
 createRoot(document.getElementById('root')!).render(<StrictMode><Demo /></StrictMode>);
