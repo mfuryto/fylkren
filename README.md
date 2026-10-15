@@ -31,8 +31,9 @@ Organizations retain their own data, identity, AI provider and infrastructure.
 | Route tasks, requests and decisions through the right level | Keep each site, role and work level within its authorization boundary | Preserve execution history, approvals, audit events and final reports |
 | Delegate without taking over subordinate processing | Run locally, offline or in an isolated network | Turn risks, outcomes and internal learning into structured follow-up |
 
-Explore the read-only [Fylkren demo](https://mfuryto.github.io/fylkren/) with
-synthetic data, or go directly to the [user manual](docs/administration/USER_MANUAL.md),
+Explore the navigable, read-only [Fylkren demo](https://mfuryto.github.io/fylkren/)
+with synthetic views of tasks, planning, execution, risk, reporting, learning,
+workflows and reusable templates, or go directly to the [user manual](docs/administration/USER_MANUAL.md),
 [installation guide](docs/operations/INSTALLATION_AND_UPGRADES.md) or
 [security policy](SECURITY.md).
 

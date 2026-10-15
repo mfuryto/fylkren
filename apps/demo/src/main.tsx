@@ -1,62 +1,124 @@
-import { StrictMode } from 'react';
+import { StrictMode, useEffect, useState, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ProductShell } from '@fylkren/ui';
-import { exampleTasks } from './fixtures';
+import { exampleTasks, executionSteps, learningPoints, planningSteps, reports, risks, taskDomains, templates } from './fixtures';
 import './demo.css';
 
-function Demo() {
-  const summaries = [
-    ['Active', '8'],
-    ['Near deadline', '3'],
-    ['Blocked', '1'],
-    ['Requires attention', '2']
-  ] as const;
+const views = ['Overview', 'Tasks', 'Planning', 'Execution', 'Risk', 'Reports', 'Learning', 'Workflows'] as const;
+type View = typeof views[number];
 
-  return (
-    <ProductShell mode="demo" logoUrl="./fylkren-logo.png">
-      <div className="page">
-        <section className="demo-intro" aria-labelledby="demo-title">
-          <div>
-            <p className="demo-eyebrow">Read-only product demo</p>
-            <h1 id="demo-title">Operational work with ownership, traceability and local control</h1>
-            <p>This static preview uses fictional data. Fylkren supports controlled assignments, planning, execution, risk, reporting and continuous learning across organizational levels.</p>
-          </div>
-          <div className="demo-actions">
-            <a className="primary-button" href="https://github.com/mfuryto/fylkren">View source and editions</a>
-            <a className="secondary-button" href="https://github.com/mfuryto/fylkren/blob/main/docs/README.md">Read documentation</a>
-          </div>
-          <ul className="demo-capabilities" aria-label="Product characteristics">
-            <li><strong>19 languages</strong><span>Bundled for offline use</span></li>
-            <li><strong>Optional AI</strong><span>Local or hosted provider</span></li>
-            <li><strong>Air-gapped ready</strong><span>No vendor cloud dependency</span></li>
-            <li><strong>Community + Enterprise</strong><span>One upgrade path</span></li>
-          </ul>
-        </section>
-        <header className="page-header">
-          <div>
-            <h1>Work overview</h1>
-            <p className="muted">Synthetic sample data. Content cannot be changed.</p>
-          </div>
-        </header>
-        <div className="summary-grid" aria-label="Task summary">
-          {summaries.map(([label, value]) => (
-            <div className="summary-card" key={label}><span>{label}</span><strong>{value}</strong></div>
-          ))}
-        </div>
-        <div className="panel task-list">
-          <div className="section-heading"><h2>Prioritized tasks</h2><span className="muted">3 of 12</span></div>
-          {exampleTasks.map(task => (
-            <article className="task-row" key={task.id}>
-              <span>{task.id}</span><strong>{task.title}</strong><span>{task.owner}</span><span>{task.status}</span>
-            </article>
-          ))}
-        </div>
-        <footer className="demo-footer">
-          Fylkren · self-hosted operational task and mission management · synthetic demo data
-        </footer>
+const viewCopy: Record<View, { eyebrow: string; title: string; description: string }> = {
+  Overview: { eyebrow: 'Operational picture', title: 'One shared view of work that must move', description: 'Bring assignments, deadlines, risk and follow-up into a controlled operational picture across organizational levels.' },
+  Tasks: { eyebrow: 'Ownership and control', title: 'Every assignment has a responsible owner', description: 'Prioritize, assign and follow work with stable references, deadlines, lifecycle status and a complete activity history.' },
+  Planning: { eyebrow: 'Structured preparation', title: 'Turn intent into an executable plan', description: 'Use configurable planning templates, a visual timeline and optional AI assistance while keeping people in control of approval.' },
+  Execution: { eyebrow: 'Coordinated delivery', title: 'Follow execution without losing context', description: 'Connect documented steps, dependencies, decisions, risk and reporting to the assignment they support.' },
+  Risk: { eyebrow: 'Risk before and after measures', title: 'Make treatment effect visible', description: 'Register cause, consequence and measures, then show movement from initial risk to residual risk in a shared 5 × 5 matrix.' },
+  Reports: { eyebrow: 'Operational reporting', title: 'Create reports from controlled source data', description: 'Compile progress and outcomes into consistent reports while preserving references to the underlying assignments.' },
+  Learning: { eyebrow: 'Continuous improvement', title: 'Move lessons into accountable treatment', description: 'Capture what worked and what did not, prioritize each point and follow it until someone has considered and acted on it.' },
+  Workflows: { eyebrow: 'Configurable ways of working', title: 'Shape the workflow around the work', description: 'Use templates to define the stages, fields and outputs that different kinds of execution tasks require.' }
+};
+
+function Icon({ name }: { name: View }) {
+  const paths: Record<View, ReactNode> = {
+    Overview: <><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/></>,
+    Tasks: <><path d="m5 7 2 2 4-4"/><path d="M13 7h6"/><path d="m5 14 2 2 4-4"/><path d="M13 14h6"/></>,
+    Planning: <><path d="M4 18h16"/><path d="M6 15V9l4-3 4 3 4-4v10"/><circle cx="6" cy="15" r="1"/><circle cx="18" cy="15" r="1"/></>,
+    Execution: <><circle cx="12" cy="12" r="8"/><path d="m9 12 2 2 4-5"/></>,
+    Risk: <><path d="M12 3 3.5 20h17L12 3Z"/><path d="M12 9v5"/><path d="M12 17h.01"/></>,
+    Reports: <><path d="M6 3h9l3 3v15H6z"/><path d="M14 3v4h4M9 11h6M9 15h6"/></>,
+    Learning: <><path d="M9 18h6M10 21h4"/><path d="M8 15c-1.5-1.1-2.5-2.9-2.5-5a6.5 6.5 0 0 1 13 0c0 2.1-1 3.9-2.5 5-.7.5-1 1.1-1 2H9c0-.9-.3-1.5-1-2Z"/></>,
+    Workflows: <><circle cx="6" cy="6" r="2"/><circle cx="18" cy="12" r="2"/><circle cx="6" cy="18" r="2"/><path d="M8 6h3a4 4 0 0 1 4 4M8 18h3a4 4 0 0 0 4-4"/></>
+  };
+  return <svg className="demo-icon" viewBox="0 0 24 24" aria-hidden="true">{paths[name]}</svg>;
+}
+
+function PageHeading({ view }: { view: View }) {
+  const copy = viewCopy[view];
+  return <header className="demo-page-heading"><div className="demo-heading-icon"><Icon name={view} /></div><div><p className="demo-eyebrow">{copy.eyebrow}</p><h1>{copy.title}</h1><p>{copy.description}</p></div></header>;
+}
+
+function DemoNote({ children }: { children: ReactNode }) {
+  return <aside className="demo-note"><span>Illustrated capability</span><p>{children}</p></aside>;
+}
+
+function StatusPill({ children, tone = 'neutral' }: { children: ReactNode; tone?: 'neutral' | 'success' | 'warning' | 'accent' }) {
+  return <span className={`demo-status demo-status-${tone}`}>{children}</span>;
+}
+
+function Overview({ navigate }: { navigate: (view: View) => void }) {
+  return <>
+    <section className="demo-hero" aria-labelledby="demo-title">
+      <div className="demo-hero-copy">
+        <p className="demo-eyebrow">Read-only product demo · fictional data</p>
+        <h1 id="demo-title">Operational work with ownership, traceability and local control</h1>
+        <p>Fylkren connects assignment intake, planning, execution, risk, reporting and learning in one continuous operation chain. Explore the illustrative workspaces from the menu.</p>
+        <div className="demo-actions"><button className="primary-button" type="button" onClick={() => navigate('Tasks')}>Explore the workflow</button><a className="secondary-button" href="https://github.com/mfuryto/fylkren">View source and editions</a></div>
       </div>
-    </ProductShell>
-  );
+      <div className="operation-chain" aria-label="Fylkren operation chain">
+        {(['Tasks', 'Planning', 'Execution', 'Reports', 'Learning'] as View[]).map((view, index) => <button key={view} type="button" onClick={() => navigate(view)}><span>{String(index + 1).padStart(2, '0')}</span><Icon name={view} /><strong>{view}</strong></button>)}<span className="chain-continuation" aria-label="Learning continues into future operations">↗</span>
+      </div>
+    </section>
+    <ul className="demo-capabilities" aria-label="Product characteristics"><li><strong>19 languages</strong><span>Bundled for offline use</span></li><li><strong>Optional AI</strong><span>Local or hosted provider</span></li><li><strong>Air-gapped ready</strong><span>No vendor cloud dependency</span></li><li><strong>Community + Enterprise</strong><span>One upgrade path</span></li></ul>
+    <div className="demo-section-title"><div><p className="demo-eyebrow">Live operational picture</p><h2>What needs attention now</h2></div><button type="button" className="text-action" onClick={() => navigate('Tasks')}>Open tasks <span>→</span></button></div>
+    <div className="summary-grid demo-summary" aria-label="Assignment summary"><div className="summary-card"><span>Active assignments</span><strong>8</strong><small>Across three units</small></div><div className="summary-card"><span>Near deadline</span><strong>3</strong><small>Within the next 72 hours</small></div><div className="summary-card"><span>Open high risks</span><strong>2</strong><small>Measures require follow-up</small></div><div className="summary-card"><span>Learning queue</span><strong>4</strong><small>Awaiting treatment</small></div></div>
+    <div className="demo-two-column">
+      <section className="panel demo-list-panel"><div className="section-heading"><div><p className="demo-eyebrow">Priority</p><h2>Assignments in motion</h2></div><span className="muted">Updated 08:40</span></div>{exampleTasks.slice(0, 3).map(task => <button className="overview-task" type="button" key={task.reference} onClick={() => navigate('Tasks')}><span className="reference">{task.reference}</span><span><strong>{task.title}</strong><small>{task.owner}</small></span><StatusPill tone={task.status === 'Waiting' ? 'warning' : 'accent'}>{task.status}</StatusPill></button>)}</section>
+      <section className="panel activity-panel"><div className="section-heading"><div><p className="demo-eyebrow">Activity</p><h2>Recent operational events</h2></div></div><ol><li><span>08:40</span><div><strong>Measure completed</strong><p>Portable repeater tested · AMA-000026</p></div></li><li><span>08:12</span><div><strong>Plan sent for review</strong><p>Continuity plan update · AMA-000031</p></div></li><li><span>Yesterday</span><div><strong>Learning point assigned</strong><p>Contact information ownership · AMA-000021</p></div></li></ol></section>
+    </div>
+    <div className="demo-section-title domain-heading"><div><p className="demo-eyebrow">One platform · many operating contexts</p><h2>Built for execution work, regardless of domain</h2><p>These are illustrative uses, not customer claims. The same controlled foundation can support any task with ownership, a deadline, execution and follow-up.</p></div><button type="button" className="text-action" onClick={() => navigate('Workflows')}>Explore templates <span>→</span></button></div>
+    <section className="domain-grid">{taskDomains.map(domain => <article key={domain.title}><span className="domain-symbol" aria-hidden="true">{domain.icon.slice(0, 1).toUpperCase()}</span><h3>{domain.title}</h3><p>{domain.detail}</p></article>)}</section>
+  </>;
+}
+
+function Tasks() {
+  return <><PageHeading view="Tasks" /><DemoNote>The task list combines stable references with responsibility, deadline, priority, status and progress. In the working product, access and available actions follow the user’s site and role.</DemoNote><section className="panel demo-table-panel"><div className="demo-toolbar"><div className="demo-filter"><button className="active" type="button">Active <span>8</span></button><button type="button">Waiting <span>1</span></button><button type="button">Completed</button></div><label>Search <input value="" readOnly placeholder="Reference or title" /></label><label>Sort by <select defaultValue="Deadline"><option>Deadline</option></select></label></div><div className="task-table" role="table" aria-label="Illustrative task list"><div className="task-table-row task-table-head" role="row"><span>Reference</span><span>Title</span><span>Deadline</span><span>Owner</span><span>Status</span><span>Progress</span></div>{exampleTasks.map(task => <article className="task-table-row" role="row" key={task.reference}><span className="reference">{task.reference}</span><span><strong>{task.title}</strong><small>{task.priority} priority</small></span><span>{task.due}</span><span>{task.owner}</span><StatusPill tone={task.status === 'Waiting' ? 'warning' : task.status === 'In progress' ? 'accent' : 'neutral'}>{task.status}</StatusPill><span className="progress-cell"><span><i style={{ width: `${task.progress}%` }} /></span><small>{task.progress}%</small></span></article>)}</div></section><section className="demo-feature-strip"><div><strong>Complete context</strong><span>Dependencies, decisions, risk, versions, approvals and comments remain connected to the assignment.</span></div><div><strong>Lifecycle control</strong><span>Completed work can be locked and later archived without erasing its historical references.</span></div><div><strong>Traceable activity</strong><span>Meaningful changes form an object history while the security audit log remains separate.</span></div></section></>;
+}
+
+function Planning() {
+  return <><PageHeading view="Planning" /><DemoNote>Planning templates are configurable. Optional AI can propose content from the assignment and an imported primary document, but the result remains an editable draft until a person approves it.</DemoNote><section className="panel planning-workspace"><div className="section-heading"><div><span className="reference">AMA-000026</span><h2>Alternative communications capability</h2></div><button className="ai-action" type="button"><span>✦</span> Generate plan suggestions</button></div><div className="planning-timeline" aria-label="Planning timeline"><div className="timeline-line" />{planningSteps.map((step, index) => <div className={`planning-point ${index < 2 ? 'complete' : index === 2 ? 'current' : ''}`} key={step.number}><span>{step.number}</span><small>{step.title}</small></div>)}</div><div className="planning-layout"><nav className="planning-step-list" aria-label="Plan sections">{planningSteps.map((step, index) => <button type="button" className={index === 2 ? 'active' : ''} key={step.number}><span>{step.number}</span><span><strong>{step.title}</strong><small>{step.status}</small></span></button>)}</nav><article className="plan-document"><div className="document-heading"><div><span>Section 03</span><h3>Intent</h3></div><StatusPill tone="warning">In review</StatusPill></div><p><strong>Purpose.</strong> Maintain a predictable command channel when the primary network or telephony service is unavailable.</p><p><strong>Method.</strong> Prepare designated equipment, publish contact procedures and exercise the capability across all three operating locations.</p><p><strong>Desired outcome.</strong> The emergency management team can establish coordinated communications within 30 minutes without relying on external cloud services.</p><div className="document-callout"><span>Primary document</span><strong>Operational communications directive.pdf</strong><small>Imported and available as structured context for AI assistance</small></div></article></div></section></>;
+}
+
+function Execution() {
+  return <><PageHeading view="Execution" /><DemoNote>Execution stays anchored to the approved plan. The displayed three steps are the operational steps themselves; activity history records only meaningful events instead of repeating every static field.</DemoNote><section className="panel execution-panel"><div className="assignment-ribbon"><div><span className="reference">AMA-000026</span><h2>Alternative communications capability</h2></div><div><span>Overall progress</span><strong>64%</strong></div></div><div className="execution-list">{executionSteps.map((step, index) => <article key={step.title} className={step.status === 'In progress' ? 'current' : ''}><div className={`execution-marker execution-${step.status.toLowerCase().replaceAll(' ', '-')}`}>{step.status === 'Completed' ? '✓' : index + 1}</div><div><div className="execution-title"><h3>{step.title}</h3><StatusPill tone={step.status === 'Completed' ? 'success' : step.status === 'In progress' ? 'accent' : 'neutral'}>{step.status}</StatusPill></div><p>{step.detail}</p><small>Responsible: {step.owner}</small></div></article>)}</div></section><div className="demo-three-column"><section className="panel compact-info"><span>Open dependencies</span><strong>1</strong><p>Delivery of two additional battery sets.</p></section><section className="panel compact-info"><span>Decisions</span><strong>3</strong><p>Latest: exercise scope approved.</p></section><section className="panel compact-info"><span>Comments</span><strong>6</strong><p>Most recent contribution today at 08:32.</p></section></div></>;
+}
+
+function RiskMatrix() {
+  const cells = Array.from({ length: 25 }, (_, index) => { const row = 5 - Math.floor(index / 5); const column = index % 5 + 1; const score = row * column; return { row, column, tone: score <= 4 ? 'low' : score <= 12 ? 'medium' : 'high' }; });
+  const coordinate = (value: number) => `${(value - 0.5) * 20}%`;
+  const vertical = (value: number) => `${(5.5 - value) * 20}%`;
+  return <div className="risk-chart"><div className="risk-y-label">Likelihood</div><div className="risk-matrix"><div className="risk-cells">{cells.map(cell => <div className={`risk-cell risk-${cell.tone}`} key={`${cell.row}-${cell.column}`}><span>{cell.row * cell.column}</span></div>)}</div><svg className="risk-lines" aria-hidden="true">{risks.map(risk => <line key={risk.number} x1={coordinate(risk.before.consequence)} y1={vertical(risk.before.likelihood)} x2={coordinate(risk.after.consequence)} y2={vertical(risk.after.likelihood)} />)}</svg>{risks.flatMap(risk => [<span key={`${risk.number}-before`} className="risk-point risk-before" style={{ left: coordinate(risk.before.consequence), top: vertical(risk.before.likelihood) }}>{risk.number}</span>, <span key={`${risk.number}-after`} className="risk-point risk-after" style={{ left: coordinate(risk.after.consequence), top: vertical(risk.after.likelihood) }}>{risk.number}</span>])}</div><div className="risk-x-label">Consequence</div><div className="risk-legend"><span><i className="legend-before" />Initial risk</span><span><i className="legend-after" />Residual risk</span><span><i className="legend-line" />Treatment effect</span></div></div>;
+}
+
+function Risk() {
+  return <><PageHeading view="Risk" /><DemoNote>Each numbered pair shows the assessed risk before and after measures. Likelihood and consequence are deliberately confirmed by a person, including when AI has suggested possible risks or measures.</DemoNote><div className="risk-layout"><section className="panel risk-visual"><div className="section-heading"><div><p className="demo-eyebrow">5 × 5 assessment</p><h2>Risk treatment map</h2></div><button className="ai-action" type="button"><span>✦</span> Suggest risks and measures</button></div><RiskMatrix /></section><section className="panel risk-register-demo"><div className="section-heading"><div><p className="demo-eyebrow">Register</p><h2>Open risks</h2></div></div>{risks.map(risk => <article key={risk.number}><span className="risk-number">{risk.number}</span><div><h3>{risk.title}</h3><p>{risk.measure}</p><small>{risk.owner} · Due {risk.due}</small></div><div className="risk-score"><span>{risk.before.likelihood} × {risk.before.consequence}</span><i>→</i><strong>{risk.after.likelihood} × {risk.after.consequence}</strong></div></article>)}</section></div></>;
+}
+
+function Reports() {
+  return <><PageHeading view="Reports" /><DemoNote>Reports can use controlled data already present in Fylkren. Internal learning points remain in the learning workflow and are not automatically exposed in final reports sent outside the organization.</DemoNote><div className="report-overview"><section className="panel report-chart"><div className="section-heading"><div><p className="demo-eyebrow">Completion trend</p><h2>Assignments completed on time</h2></div><strong>91%</strong></div><div className="bars" aria-label="Illustrative completion rate by month">{[72, 78, 76, 84, 88, 91].map((value, index) => <div key={index}><span style={{ height: `${value}%` }} /><small>{['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'][index]}</small></div>)}</div></section><section className="report-stat-grid"><div className="panel"><span>Reports in 2026</span><strong>24</strong><small>18 approved · 6 published</small></div><div className="panel"><span>Average completion</span><strong>86%</strong><small>Up 7 points since Q2</small></div><div className="panel"><span>Open follow-up</span><strong>5</strong><small>Across four reports</small></div></section></div><section className="panel report-list"><div className="section-heading"><div><p className="demo-eyebrow">Archive</p><h2>2026 reports</h2></div><label>Year <select defaultValue="2026 (24)"><option>2026 (24)</option></select></label></div>{reports.map(report => <article key={report.reference}><span className="report-icon"><Icon name="Reports" /></span><span><span className="reference">{report.reference}</span><strong>{report.title}</strong><small>{report.type} · {report.period}</small></span><StatusPill tone="success">{report.state}</StatusPill><button type="button" aria-label={`Open ${report.title}`}>→</button></article>)}</section></>;
+}
+
+function Learning() {
+  return <><PageHeading view="Learning" /><DemoNote>Learning is a continuous operational process. Each point is treated separately, connected to its originating assignment and given an owner, priority, comment history and status.</DemoNote><div className="learning-summary"><section className="panel"><span>Awaiting treatment</span><strong>4</strong><small>Two high priority</small></section><section className="panel"><span>In treatment</span><strong>7</strong><small>Across three responsible units</small></section><section className="panel"><span>Closed this quarter</span><strong>12</strong><small>Five changes implemented</small></section></div><section className="panel learning-list-demo"><div className="section-heading"><div><p className="demo-eyebrow">Learning queue</p><h2>Individual learning points</h2></div><button className="ai-action" type="button"><span>✦</span> Analyze and group learning</button></div><div className="learning-head"><span>Signal</span><span>Assignment</span><span>Learning point</span><span>Priority</span><span>Status</span></div>{learningPoints.map(point => <article key={`${point.reference}-${point.text}`}><span className={`learning-signal learning-${point.signal}`} aria-label={point.signal === 'positive' ? 'Worked well' : 'Did not work well'}>{point.signal === 'positive' ? '↑' : '!'}</span><span className="reference">{point.reference}</span><strong>{point.text}</strong><span>{point.priority}</span><StatusPill tone={point.state === 'In treatment' ? 'accent' : point.state === 'New' ? 'warning' : 'neutral'}>{point.state}</StatusPill></article>)}</section><section className="learning-loop"><div><span>Capture</span><small>From final reporting</small></div><i>→</i><div><span>Prioritize</span><small>By impact and relevance</small></div><i>→</i><div><span>Assign</span><small>To a responsible owner</small></div><i>→</i><div><span>Implement</span><small>As a controlled change</small></div><i>↗</i></section></>;
+}
+
+function Workflows() {
+  return <><PageHeading view="Workflows" /><DemoNote>Platform administrators can establish reusable ways of working. Templates give similar assignments a consistent structure while leaving the responsible people in control of content and decisions.</DemoNote><section className="workflow-canvas panel"><div className="section-heading"><div><p className="demo-eyebrow">Example workflow</p><h2>Operational assignment</h2></div><StatusPill tone="success">Active template</StatusPill></div><div className="workflow-track"><div><span>01</span><strong>Receive</strong><small>Register and classify</small></div><i>→</i><div><span>02</span><strong>Plan</strong><small>Build an executable plan</small></div><i>→</i><div><span>03</span><strong>Approve</strong><small>Confirm authority</small></div><i>→</i><div><span>04</span><strong>Execute</strong><small>Document progress</small></div><i>→</i><div><span>05</span><strong>Report</strong><small>Record the outcome</small></div><i>→</i><div><span>06</span><strong>Learn</strong><small>Treat lessons</small></div><i>↗</i></div><div className="workflow-rules"><div><span>Required at intake</span><strong>Title · owner · deadline · priority</strong></div><div><span>Approval gate</span><strong>Plan owner or delegated leader</strong></div><div><span>Completion output</span><strong>Final report and learning points</strong></div><div><span>Lifecycle</span><strong>Complete → lock → archive</strong></div></div></section><div className="demo-section-title"><div><p className="demo-eyebrow">Reusable templates</p><h2>Different work can follow different paths</h2></div></div><section className="template-grid">{templates.map(template => <article className={`panel template-${template.color}`} key={template.title}><span className="template-mark"><Icon name="Workflows" /></span><h3>{template.title}</h3><p>{template.use}</p><ol>{template.steps.map((step, index) => <li key={step}><span>{index + 1}</span>{step}</li>)}</ol><button type="button">View illustrative template <span>→</span></button></article>)}</section><section className="template-explainer"><div><span>Fields</span><strong>Collect the information this work requires</strong><p>References, classifications, owners, deadlines, attachments and domain-specific details.</p></div><div><span>Stages</span><strong>Define how work advances</strong><p>Use simple completion or include planning, approval, execution, reporting and learning.</p></div><div><span>Controls</span><strong>Apply governance where it matters</strong><p>Permissions, decisions, versions, approval gates, activity history and lifecycle rules.</p></div></section></>;
+}
+
+function Demo() {
+  const fromHash = window.location.hash.slice(1).toLowerCase();
+  const initial = views.find(view => view.toLowerCase() === fromHash) ?? 'Overview';
+  const [activeView, setActiveView] = useState<View>(initial);
+
+  useEffect(() => {
+    document.title = activeView === 'Overview' ? 'Fylkren Demo | Operational task and mission management' : `${activeView} | Fylkren Demo`;
+    window.history.replaceState(null, '', `#${activeView.toLowerCase()}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [activeView]);
+
+  const pages: Record<View, ReactNode> = { Overview: <Overview navigate={setActiveView} />, Tasks: <Tasks />, Planning: <Planning />, Execution: <Execution />, Risk: <Risk />, Reports: <Reports />, Learning: <Learning />, Workflows: <Workflows /> };
+
+  return <ProductShell mode="demo" logoUrl="./fylkren-logo.png" version="1.0.0" activeItem={activeView} navigationItems={[...views]} navigationDividerBefore="Workflows" onNavigate={item => setActiveView(item as View)} documentationHref="https://github.com/mfuryto/fylkren/blob/main/docs/README.md" userLabel="Demo"><div className={`page demo-page demo-view-${activeView.toLowerCase()}`}>{pages[activeView]}<footer className="demo-footer"><span>Fylkren · self-hosted operational task and mission management</span><span>Fictional demo data · no information is saved</span></footer></div></ProductShell>;
 }
 
 createRoot(document.getElementById('root')!).render(<StrictMode><Demo /></StrictMode>);
